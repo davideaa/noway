@@ -64,10 +64,12 @@ input bool              InpS2Enabled          = true;     // Attiva S2
 input ENUM_TIMEFRAMES   InpS2TF               = PERIOD_H1;// [L] Timeframe
 input int               InpS2EmaPeriod        = 10;       // [L] Periodo EMA veloce
 input int               InpS2SlopeBars        = 1;        // [C] Barre per la pendenza EMA
-input double            InpS2SlopeMinATR      = 0.05;     // [C] Soglia minima pendenza (in ATR) <<< PARAMETRO CHIAVE
+input double            InpS2SlopeMinATR      = 0.05;     // [C] Soglia pendenza PER BARRA (in ATR) <<< PARAMETRO CHIAVE
 input int               InpS2AtrPeriod        = 14;       // [C] Periodo ATR
 input double            InpS2StopATR          = 2.0;      // [L] Stop loss in ATR (= 1R)
 input bool              InpS2ExitOnOpposite   = true;     // [L] Esci sul segnale opposto
+input bool              InpS2ExitNeedsSlope   = true;     // [C] L'uscita richiede la stessa conferma di pendenza
+input int               InpS2RegimeEmaPeriod  = 0;        // [C] EMA di regime (0 = filtro disattivato)
 input bool              InpS2AllowShort       = true;     // [D] Consenti short
 
 input group "=== S3: Donchian breakout + Volatilita (M30) ==="
@@ -91,7 +93,7 @@ input bool              InpS3AllowShort       = true;     // [D] Consenti short
 CTrade   trade;
 
 int      hS1Ema = INVALID_HANDLE, hS1Atr = INVALID_HANDLE;
-int      hS2Ema = INVALID_HANDLE, hS2Atr = INVALID_HANDLE;
+int      hS2Ema = INVALID_HANDLE, hS2Atr = INVALID_HANDLE, hS2Regime = INVALID_HANDLE;
 int      hS3AtrF = INVALID_HANDLE, hS3AtrS = INVALID_HANDLE;
 int      hRiskAtr = INVALID_HANDLE;
 
@@ -443,22 +445,39 @@ void RunS2()
    double emaS   = IndValue(hS2Ema, 1 + InpS2SlopeBars);
    if(close1 <= 0.0 || close2 <= 0.0 || ema1 <= 0.0 || ema2 <= 0.0 || emaS <= 0.0) return;
 
-   double slope    = ema1 - emaS;
+   // pendenza normalizzata PER BARRA: rende la soglia indipendente da SlopeBars
+   int    nBars    = MathMax(InpS2SlopeBars, 1);
+   double slope    = (ema1 - emaS) / nBars;
    double slopeMin = InpS2SlopeMinATR * atr;
 
    bool crossUp   = (close2 <= ema2) && (close1 > ema1);
    bool crossDown = (close2 >= ema2) && (close1 < ema1);
 
-   bool longSignal  = crossUp   && (slope >  slopeMin);
-   bool shortSignal = crossDown && (slope < -slopeMin) && InpS2AllowShort;
+   // filtro di regime opzionale (NON dichiarato nelle card: default disattivato)
+   bool regimeLong = true, regimeShort = true;
+   if(hS2Regime != INVALID_HANDLE)
+     {
+      double reg = IndValue(hS2Regime, 1);
+      if(reg <= 0.0) return;
+      regimeLong  = (close1 > reg);
+      regimeShort = (close1 < reg);
+     }
+
+   bool longSignal  = crossUp   && (slope >  slopeMin) && regimeLong;
+   bool shortSignal = crossDown && (slope < -slopeMin) && regimeShort && InpS2AllowShort;
 
    int dir = CurrentDirection(magic);
 
-   // uscita sul segnale opposto
+   // uscita sul segnale opposto.
+   // Se InpS2ExitNeedsSlope, l'uscita richiede un segnale *qualificato*: senza
+   // questa simmetria un incrocio debole chiude la posizione ben prima dello
+   // stop, generando churn (perdita media ~0.3R invece di 1R).
    if(InpS2ExitOnOpposite)
      {
-      if(dir > 0 && crossDown) CloseAllForMagic(magic);
-      if(dir < 0 && crossUp)   CloseAllForMagic(magic);
+      bool exitLong  = InpS2ExitNeedsSlope ? (crossDown && slope < -slopeMin) : crossDown;
+      bool exitShort = InpS2ExitNeedsSlope ? (crossUp   && slope >  slopeMin) : crossUp;
+      if(dir > 0 && exitLong)  CloseAllForMagic(magic);
+      if(dir < 0 && exitShort) CloseAllForMagic(magic);
       dir = CurrentDirection(magic);
      }
 
@@ -519,6 +538,8 @@ int OnInit()
    hS1Atr  = iATR(_Symbol, InpS1TF, InpS1AtrPeriod);
    hS2Ema  = iMA (_Symbol, InpS2TF, InpS2EmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
    hS2Atr  = iATR(_Symbol, InpS2TF, InpS2AtrPeriod);
+   if(InpS2RegimeEmaPeriod > 0)
+      hS2Regime = iMA(_Symbol, InpS2TF, InpS2RegimeEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
    hS3AtrF = iATR(_Symbol, InpS3TF, InpS3AtrFast);
    hS3AtrS = iATR(_Symbol, InpS3TF, InpS3AtrSlow);
    hRiskAtr= iATR(_Symbol, InpRiskTF, InpRiskAtrPeriod);
@@ -544,10 +565,63 @@ int OnInit()
    return(INIT_SUCCEEDED);
   }
 
+//------------------------------------------------------------------
+//  Riepilogo per strategia a fine test.
+//  Usa DEAL_MAGIC: attribuzione esatta, nessuna ricostruzione a posteriori.
+//------------------------------------------------------------------
+void PrintStrategySummary()
+  {
+   if(!HistorySelect(0, TimeCurrent())) return;
+
+   string names[3] = {"S1-TSMOM", "S2-EMA  ", "S3-DONCH"};
+   int    n[3]     = {0, 0, 0};
+   int    win[3]   = {0, 0, 0};
+   double gw[3]    = {0.0, 0.0, 0.0};
+   double gl[3]    = {0.0, 0.0, 0.0};
+
+   for(int i = 0; i < HistoryDealsTotal(); i++)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk == 0) continue;
+      if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+      if(HistoryDealGetInteger(tk, DEAL_ENTRY) != DEAL_ENTRY_OUT) continue;
+
+      long   magic = HistoryDealGetInteger(tk, DEAL_MAGIC);
+      int    idx   = (int)(magic - InpMagicBase) - 1;
+      if(idx < 0 || idx > 2) continue;
+
+      double net = HistoryDealGetDouble(tk, DEAL_PROFIT)
+                 + HistoryDealGetDouble(tk, DEAL_COMMISSION)
+                 + HistoryDealGetDouble(tk, DEAL_SWAP);
+
+      n[idx]++;
+      if(net > 0.0) { win[idx]++; gw[idx] += net; }
+      else          { gl[idx] += net; }
+     }
+
+   PrintFormat("=== RIEPILOGO PER STRATEGIA ===");
+   PrintFormat("%-9s %7s %7s %7s %11s %9s %9s", "strategia", "trade", "WR%", "PF", "P&L", "avgWin", "avgLoss");
+   int totN = 0;
+   for(int k = 0; k < 3; k++)
+     {
+      if(n[k] == 0) continue;
+      totN += n[k];
+      double wr = 100.0 * win[k] / n[k];
+      double pf = (gl[k] != 0.0) ? gw[k] / MathAbs(gl[k]) : 0.0;
+      double aw = (win[k] > 0) ? gw[k] / win[k] : 0.0;
+      double al = (n[k] - win[k] > 0) ? gl[k] / (n[k] - win[k]) : 0.0;
+      PrintFormat("%-9s %7d %7.1f %7.2f %11.2f %9.2f %9.2f",
+                  names[k], n[k], wr, pf, gw[k] + gl[k], aw, al);
+     }
+   PrintFormat("trade totali: %d  (target card: 3864 su 2019.06-2026.09)", totN);
+  }
+
 void OnDeinit(const int reason)
   {
+   PrintStrategySummary();
    IndicatorRelease(hS1Ema);  IndicatorRelease(hS1Atr);
    IndicatorRelease(hS2Ema);  IndicatorRelease(hS2Atr);
+   if(hS2Regime != INVALID_HANDLE) IndicatorRelease(hS2Regime);
    IndicatorRelease(hS3AtrF); IndicatorRelease(hS3AtrS);
    IndicatorRelease(hRiskAtr);
   }
