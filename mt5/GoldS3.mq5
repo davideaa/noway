@@ -66,6 +66,9 @@ CTrade   trade;
 int      hAtrFast = INVALID_HANDLE, hAtrSlow = INVALID_HANDLE, hRiskAtr = INVALID_HANDLE;
 datetime lastBar  = 0;
 
+double g_bestWin = 0.0;
+int    g_over2R = 0, g_over3R = 0, g_over4R = 0;
+
 #define RISK_SLOTS 64
 struct TradeRisk { ulong ticket; double riskDistance; };
 TradeRisk g_risk[RISK_SLOTS];
@@ -331,7 +334,8 @@ void PrintSummary()
                  + HistoryDealGetDouble(tk, DEAL_COMMISSION)
                  + HistoryDealGetDouble(tk, DEAL_SWAP);
       n++;
-      if(net > 0.0) { win++; gw += net; } else { gl += net; }
+      if(net > 0.0) { win++; gw += net; if(net > g_bestWin) g_bestWin = net; }
+      else          { gl += net; }
      }
    if(n == 0) { Print("=== S3: nessun trade ==="); return; }
 
@@ -341,10 +345,47 @@ void PrintSummary()
    double al = (n - win > 0) ? gl / (n - win) : 0.0;
    double expR = (al != 0.0) ? (gw + gl) / (MathAbs(al) * n) : 0.0;
 
+   // quanti vincenti superano 2R, 3R, 4R (R = perdita media)
+   g_over2R = 0; g_over3R = 0; g_over4R = 0;
+   if(al != 0.0)
+     {
+      double R = MathAbs(al);
+      for(int i = 0; i < HistoryDealsTotal(); i++)
+        {
+         ulong tk = HistoryDealGetTicket(i);
+         if(tk == 0) continue;
+         if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+         if(HistoryDealGetInteger(tk, DEAL_MAGIC) != InpMagic) continue;
+         if(HistoryDealGetInteger(tk, DEAL_ENTRY) != DEAL_ENTRY_OUT) continue;
+         double net = HistoryDealGetDouble(tk, DEAL_PROFIT)
+                    + HistoryDealGetDouble(tk, DEAL_COMMISSION)
+                    + HistoryDealGetDouble(tk, DEAL_SWAP);
+         if(net > 4.0 * R) g_over4R++;
+         if(net > 3.0 * R) g_over3R++;
+         if(net > 2.0 * R) g_over2R++;
+        }
+     }
+
    PrintFormat("=== S3 DONCHIAN - RIEPILOGO ===");
    PrintFormat("trade %d | WR %.1f%% | PF %.2f | P&L %.2f", n, wr, pf, gw + gl);
    PrintFormat("avgWin %.2f | avgLoss %.2f | expectancy %+.3f R/trade", aw, al, expR);
-   PrintFormat("riferimento test combinato: 709 trade, WR 52.8%%, PF 1.49, +0.491 R");
+   PrintFormat("--- coda destra (il punto del test) ---");
+   PrintFormat("trade migliore %.2f = %.2f R", g_bestWin, (al != 0.0) ? g_bestWin / MathAbs(al) : 0.0);
+   PrintFormat("vincenti oltre 2R: %d | oltre 3R: %d | oltre 4R: %d", g_over2R, g_over3R, g_over4R);
+   PrintFormat("riferimento test precedente: trade migliore 159.10 (3.05 R), nessuno oltre 4R");
+  }
+
+//------------------------------------------------------------------
+//  Criterio personalizzato per l'ottimizzazione.
+//  Restituisce il trade migliore in valuta: e' la misura della coda
+//  destra, che la tabella standard dell'ottimizzatore non mostra.
+//  Impostare "Custom max" come criterio per vederlo nella colonna
+//  Risultato, accanto a Profitto / PF / Trade.
+//------------------------------------------------------------------
+double OnTester()
+  {
+   PrintSummary();          // calcola anche g_bestWin
+   return(g_bestWin);
   }
 
 //==================================================================
@@ -366,7 +407,9 @@ int OnInit()
    trade.SetTypeFillingBySymbol(_Symbol);
 
    for(int i = 0; i < RISK_SLOTS; i++) { g_risk[i].ticket = 0; g_risk[i].riskDistance = 0.0; }
-   g_riskIdx = 0;
+   g_riskIdx  = 0;
+   g_bestWin  = 0.0;
+   g_over2R   = 0; g_over3R = 0; g_over4R = 0;
    return(INIT_SUCCEEDED);
   }
 
