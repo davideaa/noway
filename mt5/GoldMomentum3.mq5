@@ -27,6 +27,12 @@ input group "=== Generale ==="
 input long              InpMagicBase          = 990000;   // Magic base (S1=+1, S2=+2, S3=+3)
 input double            InpRiskPercent        = 0.6;      // [L] Rischio base per trade (% equity)
 input int               InpMaxPosPerStrategy  = 1;        // [C] Posizioni max per strategia
+input double            InpMaxTotalRiskPct    = 0.0;      // [C] Tetto al rischio aperto totale (%, 0 = off)
+
+input group "=== Pesi per strategia (moltiplicatori del rischio base) ==="
+input double            InpS1RiskMult         = 1.0;      // [C] Peso di S1
+input double            InpS2RiskMult         = 1.0;      // [C] Peso di S2
+input double            InpS3RiskMult         = 1.0;      // [C] Peso di S3
 input int               InpSlippagePoints     = 30;       // Deviazione massima (points)
 input int               InpMaxSpreadPoints    = 0;        // [C] Spread max in points (0 = filtro off)
 
@@ -195,6 +201,41 @@ int CurrentDirection(const long magic)
   }
 
 //------------------------------------------------------------------
+//  Rischio complessivo delle posizioni aperte, in % di equity.
+//  Serve a impedire che le tre strategie si accumulino sullo stesso
+//  movimento: sono correlate, quindi tre posizioni insieme non sono
+//  tre scommesse indipendenti ma una sola, tripla.
+//------------------------------------------------------------------
+double CurrentOpenRiskPercent()
+  {
+   double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+   if(equity <= 0.0) return(0.0);
+
+   double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+   double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   if(tickValue <= 0.0 || tickSize <= 0.0) return(0.0);
+
+   double risk = 0.0;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong tk = PositionGetTicket(i);
+      if(tk == 0) continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+
+      long magic = PositionGetInteger(POSITION_MAGIC);
+      if(magic < InpMagicBase + 1 || magic > InpMagicBase + 3) continue;
+
+      double sl = PositionGetDouble(POSITION_SL);
+      if(sl <= 0.0) continue;                     // senza stop non e' quantificabile
+
+      double dist = MathAbs(PositionGetDouble(POSITION_PRICE_CURRENT) - sl);
+      double lots = PositionGetDouble(POSITION_VOLUME);
+      risk += (dist / tickSize) * tickValue * lots;
+     }
+   return(100.0 * risk / equity);
+  }
+
+//------------------------------------------------------------------
 //  Adaptive Risk: rischio% effettivo per il trade corrente
 //------------------------------------------------------------------
 double EffectiveRiskPercent()
@@ -225,12 +266,12 @@ double EffectiveRiskPercent()
 //------------------------------------------------------------------
 //  Calcolo lotti dal rischio e dalla distanza di stop
 //------------------------------------------------------------------
-double LotsFromRisk(const double stopDistance)
+double LotsFromRisk(const double stopDistance, const double riskMult)
   {
-   if(stopDistance <= 0.0) return(0.0);
+   if(stopDistance <= 0.0 || riskMult <= 0.0) return(0.0);
 
    double equity    = AccountInfoDouble(ACCOUNT_EQUITY);
-   double riskMoney = equity * EffectiveRiskPercent() / 100.0;
+   double riskMoney = equity * EffectiveRiskPercent() * riskMult / 100.0;
 
    double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
    double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
@@ -305,9 +346,12 @@ void WeekendGuard()
 //  Apertura posizione
 //------------------------------------------------------------------
 bool OpenTrade(const long magic, const bool isLong, const double stopAtrDist,
-               const double targetR, const string tag)
+               const double targetR, const string tag, const double riskMult)
   {
-   if(stopAtrDist <= 0.0) return(false);
+   if(stopAtrDist <= 0.0 || riskMult <= 0.0) return(false);
+
+   if(InpMaxTotalRiskPct > 0.0 && CurrentOpenRiskPercent() >= InpMaxTotalRiskPct)
+      return(false);
 
    double price = isLong ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
                          : SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -325,7 +369,7 @@ bool OpenTrade(const long magic, const bool isLong, const double stopAtrDist,
    sl = NormalizeDouble(sl, digits);
    if(tp > 0.0) tp = NormalizeDouble(tp, digits);
 
-   double lots = LotsFromRisk(realRisk);
+   double lots = LotsFromRisk(realRisk, riskMult);
    if(lots <= 0.0) return(false);
 
    trade.SetExpertMagicNumber(magic);
@@ -427,8 +471,8 @@ void RunS1()
                       (emaNow < emaPrev) &&
                       (close1 < loN);
 
-   if(longSignal)  OpenTrade(magic, true,  InpS1StopATR * atr, 0.0, "S1-TSMOM");
-   else if(shortSignal) OpenTrade(magic, false, InpS1StopATR * atr, 0.0, "S1-TSMOM");
+   if(longSignal)  OpenTrade(magic, true,  InpS1StopATR * atr, 0.0, "S1-TSMOM", InpS1RiskMult);
+   else if(shortSignal) OpenTrade(magic, false, InpS1StopATR * atr, 0.0, "S1-TSMOM", InpS1RiskMult);
   }
 
 //==================================================================
@@ -488,8 +532,8 @@ void RunS2()
 
    if(CountPositions(magic) >= InpMaxPosPerStrategy) return;
 
-   if(longSignal  && dir <= 0) OpenTrade(magic, true,  InpS2StopATR * atr, 0.0, "S2-EMA");
-   else if(shortSignal && dir >= 0) OpenTrade(magic, false, InpS2StopATR * atr, 0.0, "S2-EMA");
+   if(longSignal  && dir <= 0) OpenTrade(magic, true,  InpS2StopATR * atr, 0.0, "S2-EMA", InpS2RiskMult);
+   else if(shortSignal && dir >= 0) OpenTrade(magic, false, InpS2StopATR * atr, 0.0, "S2-EMA", InpS2RiskMult);
   }
 
 //==================================================================
@@ -530,8 +574,8 @@ void RunS3()
    bool shortSignal = InpS3AllowShort &&
                       (pos <= (1.0 - InpS3EdgeThreshold)) && (close1 < breakLo);
 
-   if(longSignal)  OpenTrade(magic, true,  InpS3StopATR * atrF, InpS3TargetR, "S3-DONCH");
-   else if(shortSignal) OpenTrade(magic, false, InpS3StopATR * atrF, InpS3TargetR, "S3-DONCH");
+   if(longSignal)  OpenTrade(magic, true,  InpS3StopATR * atrF, InpS3TargetR, "S3-DONCH", InpS3RiskMult);
+   else if(shortSignal) OpenTrade(magic, false, InpS3StopATR * atrF, InpS3TargetR, "S3-DONCH", InpS3RiskMult);
   }
 
 //==================================================================
@@ -645,8 +689,8 @@ void OnTick()
 
    if(!TradingAllowed()) return;
 
-   if(InpS1Enabled && newS1) RunS1();
-   if(InpS2Enabled && newS2) RunS2();
-   if(InpS3Enabled && newS3) RunS3();
+   if(InpS1Enabled && InpS1RiskMult > 0.0 && newS1) RunS1();
+   if(InpS2Enabled && InpS2RiskMult > 0.0 && newS2) RunS2();
+   if(InpS3Enabled && InpS3RiskMult > 0.0 && newS3) RunS3();
   }
 //+------------------------------------------------------------------+
