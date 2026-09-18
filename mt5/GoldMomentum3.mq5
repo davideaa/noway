@@ -163,6 +163,11 @@ int CountPositions(const long magic)
 
 bool CloseAllForMagic(const long magic)
   {
+   // Indispensabile: l'ordine di chiusura eredita il magic impostato su CTrade,
+   // non quello della posizione. Senza questa riga le uscite di una strategia
+   // finiscono attribuite all'ultima che ha usato l'oggetto trade.
+   trade.SetExpertMagicNumber(magic);
+
    bool ok = true;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
      {
