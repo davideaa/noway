@@ -75,3 +75,51 @@ Pesi: S1 = 0, S2 = 1, S3 = 1, S4 = 1.
    compressione. Oggi abbiamo trend (S2, S3) e fade (S4); manca chi guadagna
    quando il prezzo oscilla senza andare da nessuna parte.
 3. Solo dopo: fuori campione 2024.01.01 → 2026.09.18, una volta sola.
+
+---
+
+# Test 4 — S1 a peso dimezzato
+
+| Peso S1 | Profitto | DD | Trade | R | **R/DD** | Sharpe | Corr. lineare |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1,0 | 28.599 | 35,49% | 2.074 | 226 | 6,36 | 1,45 | 0,80 |
+| 0,5 | 23.666 | 30,93% | 2.074 | 203 | 6,56 | 1,51 | 0,83 |
+| **0,0** | 19.750 | **27,48%** | 1.535 | 182 | **6,63** | **1,64** | **0,85** |
+
+Monotona su tutti e quattro gli indicatori: meno S1 c'e', meglio va. Non e'
+un punto isolato, e' una direzione. **S1 esce.**
+
+# Il problema che resta: S2 e S3 sono la stessa scommessa
+
+Tolta S1, restano tre gambe ma solo due famiglie:
+
+| | Cosa serve perche' si accenda | Famiglia |
+|---|---|---|
+| S2 | EMA10 inclinata: il prezzo sta andando da qualche parte | trend |
+| S3 | chiusura oltre il canale a 60 barre, volatilita' in espansione | trend |
+| S4 | chiusura oltre lo stesso canale, poi rientro | anti-trend |
+
+S2 e S3 chiedono la stessa cosa al mercato con parole diverse. Quando il
+gold parte, si accendono insieme; quando si ferma, si logorano insieme. E'
+questo che moltiplica il drawdown invece di dividerlo.
+
+S3 e' la migliore delle due: sul periodo completo faceva PF 1,50 con 545
+trade contro PF 1,23 con 687 trade di S2. **S2 e' la candidata a uscire.**
+
+# La terza famiglia: `GoldRangeMR.mq5`
+
+Guadagna quando il mercato **non rompe niente**. Decorrelata per
+costruzione, non per speranza:
+
+| | S3 / S4 | Range MR |
+|---|---|---|
+| Volatilita' | in espansione | **in compressione** (condizione opposta) |
+| Rottura del canale | obbligatoria | **vietata** nelle ultime N barre |
+| Direzione | via dal centro | **verso** il centro |
+| Target | nessuno, si cavalca | **fisso**, il centro del canale |
+| Durata | giorni | **ore** |
+
+Le prime due righe si escludono a vicenda: `ATRveloce/ATRlento` non puo'
+essere sopra e sotto la soglia nello stesso istante, e una rottura non puo'
+esserci e non esserci. Le due strategie non possono aprire sullo stesso
+evento.
