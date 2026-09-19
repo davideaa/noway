@@ -7,23 +7,24 @@
 //|  diversi solo nella formula. Misurato: si accendevano insieme     |
 //|  (Z-Score -3,53) e il drawdown si sommava invece di compensarsi.  |
 //|                                                                  |
-//|  Qui le tre gambe rispondono a tre stati di mercato diversi, e la |
-//|  differenza e' imposta dal codice, non sperata:                   |
+//|  Qui le tre gambe rispondono a momenti diversi, e la differenza   |
+//|  e' imposta dal codice, non sperata:                              |
 //|                                                                  |
 //|   S1 FADE   il prezzo rompe il canale a 60 barre e RIENTRA        |
 //|             -> chi ha comprato la rottura e' intrappolato         |
 //|             (ex S4; era la strategia 4 di GoldMomentum3)          |
 //|                                                                  |
-//|   S2 RANGE  volatilita' in CONTRAZIONE e NESSUNA rottura recente  |
-//|             -> compra il bordo basso, vende il bordo alto         |
+//|   S2 PULLB  ritracciamento dentro un trend gia' stabilito (H4)   |
+//|             -> entra dove S3 viene stoppata e resta dentro         |
 //|             (nuova)                                               |
 //|                                                                  |
 //|   S3 DONCH  il prezzo rompe il canale a 60 barre e CONTINUA       |
 //|             (invariata: e' l'unica delle tre originali che regge) |
 //|                                                                  |
 //|  S1 e S3 nascono dallo stesso evento e prendono lati opposti.     |
-//|  S2 richiede che quell'evento NON avvenga: quando S1 e S3 sono    |
-//|  ferme, S2 lavora. Le condizioni si escludono a vicenda.          |
+//|  S2 richiede che il prezzo NON sia sull'estremo, quindi non puo'  |
+//|  entrare sulla stessa candela di S3, e lavora su H4: tiene le     |
+//|  posizioni per settimane dove S3 le tiene per ore.                |
 //|                                                                  |
 //|  PROTOCOLLO: sviluppo solo su 2019.06.01-2023.12.31.              |
 //|  Il 2024.01.01-2026.09.18 resta congelato.                        |
@@ -45,7 +46,7 @@ input double            InpMaxTotalRiskPct    = 0.0;      // Tetto al rischio ap
 
 input group "=== Pesi per strategia (moltiplicatori del rischio base) ==="
 input double            InpS1RiskMult         = 1.0;      // Peso di S1 (FADE)
-input double            InpS2RiskMult         = 0.0;      // Peso di S2 (RANGE) - 0 finche' non e' validata
+input double            InpS2RiskMult         = 1.0;      // Peso di S2 (PULLBACK)
 input double            InpS3RiskMult         = 1.0;      // Peso di S3 (DONCH)
 input int               InpSlippagePoints     = 30;       // Deviazione massima (points)
 input int               InpMaxSpreadPoints    = 0;        // Spread max in points (0 = filtro off)
@@ -77,23 +78,20 @@ input int               InpS1MaxHoldBars      = 48;       // Uscita forzata dopo
 input bool              InpS1AllowLong        = true;     // Fade dei minimi rotti
 input bool              InpS1AllowShort       = true;     // Fade dei massimi rotti
 
-input group "=== S2: RANGE mean reversion in compressione (H1) ==="
+input group "=== S2: PULLBACK nel trend (H4) ==="
 input bool              InpS2Enabled          = true;     // Attiva S2
-input ENUM_TIMEFRAMES   InpS2TF               = PERIOD_H1;// Timeframe
-input int               InpS2RangeBars        = 48;       // Barre che definiscono il canale
-input double            InpS2TouchATR         = 0.25;     // Quanto vicino al bordo per dire "tocca"
-input int               InpS2AtrFast          = 14;       // ATR veloce
-input int               InpS2AtrSlow          = 100;      // ATR lento (volatilita normale)
-input double            InpS2MaxVolRatio      = 0.85;     // ATRveloce/ATRlento MASSIMO (opposto di S3)
-input double            InpS2MaxRangeATR      = 6.0;      // Larghezza max del canale in ATRlento
-input int               InpS2BreakBars        = 60;       // Canale sorvegliato (quello di S1/S3)
-input int               InpS2QuietBars        = 12;       // Barre senza rotture richieste
-input double            InpS2StopBufferATR    = 1.0;      // Stop oltre il bordo, in ATRveloce
-input double            InpS2TargetPct        = 0.50;     // Target: frazione del canale (0.5 = centro)
-input double            InpS2MinTargetR       = 0.0;      // Scarta se target < questo R (0 = off)
-input int               InpS2MaxHoldBars      = 24;       // Uscita forzata dopo N barre
-input bool              InpS2AllowLong        = true;     // Compra il bordo basso
-input bool              InpS2AllowShort       = true;     // Vendi il bordo alto
+input ENUM_TIMEFRAMES   InpS2TF               = PERIOD_H4;// Timeframe
+input int               InpS2TrendEma         = 30;       // [T] Periodo EMA di trend (collina 30-40)
+input int               InpS2EmaSlopeBars     = 3;        // Barre per la pendenza
+input int               InpS2AtrPeriod        = 14;       // Periodo ATR
+input int               InpS2SwingBars        = 20;       // Barre per il massimo/minimo recente
+input double            InpS2PullbackATR      = 1.0;      // Ritracciamento minimo in ATR (ininfluente: 1.0)
+input int               InpS2CooldownBars     = 3;        // Barre di attesa dopo un ingresso
+input double            InpS2StopBufferATR    = 0.10;     // [T] Stop oltre il minimo in ATR (vedi nota)
+input double            InpS2TrailStartR      = 1.0;      // Attiva trailing a +xR
+input double            InpS2TrailATR         = 1.5;      // [T] Distanza trailing in ATR (collina 1.5)
+input bool              InpS2AllowLong        = true;     // Consenti long
+input bool              InpS2AllowShort       = true;     // Consenti short
 
 input group "=== S3: DONCHIAN breakout + volatilita (M30) ==="
 input bool              InpS3Enabled          = true;     // Attiva S3
@@ -116,11 +114,12 @@ input bool              InpS3AllowShort       = true;     // Consenti short
 CTrade   trade;
 
 int      hS1Atr   = INVALID_HANDLE;
-int      hS2AtrF  = INVALID_HANDLE, hS2AtrS = INVALID_HANDLE;
+int      hS2Ema   = INVALID_HANDLE, hS2Atr  = INVALID_HANDLE;
 int      hS3AtrF  = INVALID_HANDLE, hS3AtrS = INVALID_HANDLE;
 int      hRiskAtr = INVALID_HANDLE;
 
 datetime lastBarS1 = 0, lastBarS2 = 0, lastBarS3 = 0;
+datetime s2LastEntryBar = 0;   // cooldown di S2
 
 // macchina a stati di S1 (fade): rottura in corso verso alto / basso
 bool     s1UpActive = false, s1DnActive = false;
@@ -562,110 +561,107 @@ void RunS1()
   }
 
 //==================================================================
-//  S2 — RANGE mean reversion in compressione (H1)
+//  S2 — PULLBACK nel trend (H4)
 //
-//  S1 e S3 hanno bisogno che una rottura AVVENGA. Quando il mercato
-//  si comprime e non rompe niente, restano ferme o si fanno logorare.
-//  Questa gamba guadagna esattamente li': canale stretto, volatilita'
-//  in contrazione, si compra il bordo basso e si vende il bordo alto
-//  con target al centro.
+//  Il range mean reversion e' stato bocciato: 174 configurazioni con
+//  almeno 100 trade, zero in utile. L'errore era cercare una gamba
+//  "laterale" perche' e' la terza casella di uno schema teorico.
+//  Qui si diversifica per DURATA, non per tipo di mercato.
 //
-//  Nessuna rottura del canale a InpS2BreakBars nelle ultime
-//  InpS2QuietBars barre: e' il filtro che la tiene fuori dal terreno
-//  di S1 e S3. Le condizioni si escludono a vicenda.
+//  L'oro tende, ma sporco: parte, ritraccia, riparte. S3 viene
+//  stoppata dal ritracciamento e perde il seguito del movimento;
+//  questa entra proprio li' e resta dentro.
+//
+//  DECORRELAZIONE DA S3, meccanica: S3 entra quando il prezzo fa un
+//  nuovo estremo a 60 barre M30. Qui serve che il prezzo NON sia
+//  sull'estremo - un ritracciamento di almeno N ATR dal massimo
+//  recente - quindi non possono comprare sulla stessa candela.
+//
+//  Nessun take profit: il target fisso amputa la coda destra.
 //==================================================================
-bool S2NoRecentBreak()
-  {
-   if(InpS2QuietBars <= 0) return(true);
-
-   for(int k = 1; k <= InpS2QuietBars; k++)
-     {
-      int ih = iHighest(_Symbol, InpS2TF, MODE_HIGH, InpS2BreakBars, k + 1);
-      int il = iLowest (_Symbol, InpS2TF, MODE_LOW,  InpS2BreakBars, k + 1);
-      if(ih < 0 || il < 0) return(false);
-
-      double c = iClose(_Symbol, InpS2TF, k);
-      if(c > iHigh(_Symbol, InpS2TF, ih)) return(false);
-      if(c < iLow (_Symbol, InpS2TF, il)) return(false);
-     }
-   return(true);
-  }
-
-//  Il target e' un PREZZO (il centro del canale), non un multiplo di R:
-//  e' il canale a decidere dove si torna, non la nostra distanza di stop.
-bool OpenRangeMR(const long magic, const bool isLong,
-                 const double stopPrice, const double targetPrice)
-  {
-   double price = isLong ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
-                         : SymbolInfoDouble(_Symbol, SYMBOL_BID);
-   if(price <= 0.0) return(false);
-
-   double sl   = EnforceStopsLevel(price, stopPrice, isLong);
-   double risk = MathAbs(price - sl);
-   if(risk <= 0.0) return(false);
-
-   double reward = isLong ? (targetPrice - price) : (price - targetPrice);
-   if(reward <= 0.0) return(false);
-   if(InpS2MinTargetR > 0.0 && reward / risk < InpS2MinTargetR) return(false);
-
-   // OpenTrade ragiona in R: convertiamo il prezzo obiettivo nel suo
-   // multiplo di R, cosi' passa dallo stesso sizing e dallo stesso
-   // registro delle altre due gambe.
-   return(OpenTrade(magic, isLong, risk, reward / risk, "S2-RANGE", InpS2RiskMult));
-  }
-
 void RunS2()
   {
    long magic = InpMagicBase + 2;
    if(CountPositions(magic) >= InpMaxPosPerStrategy) return;
 
-   double atrF = IndValue(hS2AtrF, 1);
-   double atrS = IndValue(hS2AtrS, 1);
-   if(atrF <= 0.0 || atrS <= 0.0) return;
-
-   // 1. compressione: l'opposto esatto del filtro di S3
-   if(atrF / atrS > InpS2MaxVolRatio) return;
-
-   // 2. il canale si misura a partire da DUE barre fa: il livello deve
-   //    esistere PRIMA che il prezzo lo venga a toccare, altrimenti la
-   //    barra del tocco definisce da sola il bordo e il segnale e' circolare.
-   int ih = iHighest(_Symbol, InpS2TF, MODE_HIGH, InpS2RangeBars, 2);
-   int il = iLowest (_Symbol, InpS2TF, MODE_LOW,  InpS2RangeBars, 2);
-   if(ih < 0 || il < 0) return;
-
-   double rh = iHigh(_Symbol, InpS2TF, ih);
-   double rl = iLow (_Symbol, InpS2TF, il);
-   double width = rh - rl;
-   if(width <= 0.0) return;
-   if(InpS2MaxRangeATR > 0.0 && width > InpS2MaxRangeATR * atrS) return;
-
-   // 3. niente rotture recenti: qui S1 e S3 sono ferme
-   if(!S2NoRecentBreak()) return;
-
-   // 4. il prezzo tocca un bordo e lo rifiuta
-   double c1 = iClose(_Symbol, InpS2TF, 1);
-   double l1 = iLow  (_Symbol, InpS2TF, 1);
-   double h1 = iHigh (_Symbol, InpS2TF, 1);
-   if(c1 <= 0.0) return;
-
-   double touch = InpS2TouchATR * atrF;
-
-   // bordo basso -> long. Lo stop va sotto il punto piu' basso realmente
-   // toccato, non sotto il bordo teorico: se la barra ha perforato il
-   // livello, il bordo e' gia' alle spalle del prezzo.
-   if(InpS2AllowLong && l1 <= rl + touch && c1 > rl)
+   // attesa dopo un ingresso: senza, dopo uno stop si rientrerebbe
+   // sulla barra successiva dello stesso ritracciamento
+   if(InpS2CooldownBars > 0 && s2LastEntryBar > 0)
      {
-      double stopPrice = MathMin(rl, l1) - InpS2StopBufferATR * atrF;
-      double target    = rl + InpS2TargetPct * width;
-      if(OpenRangeMR(magic, true, stopPrice, target)) return;
+      long elapsed = (long)(iTime(_Symbol, InpS2TF, 0) - s2LastEntryBar);
+      if(elapsed < (long)InpS2CooldownBars * PeriodSeconds(InpS2TF)) return;
      }
 
-   // bordo alto -> short
-   if(InpS2AllowShort && h1 >= rh - touch && c1 < rh)
+   double atr  = IndValue(hS2Atr, 1);
+   double ema1 = IndValue(hS2Ema, 1);
+   double emaN = IndValue(hS2Ema, 1 + InpS2EmaSlopeBars);
+   if(atr <= 0.0 || ema1 <= 0.0 || emaN <= 0.0) return;
+
+   double slope = (ema1 - emaN) / InpS2EmaSlopeBars;
+
+   double c1 = iClose(_Symbol, InpS2TF, 1);
+   double h2 = iHigh (_Symbol, InpS2TF, 2);
+   double l2 = iLow  (_Symbol, InpS2TF, 2);
+   if(c1 <= 0.0 || h2 <= 0.0) return;
+
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+   // ---------------- LONG ----------------
+   if(InpS2AllowLong && c1 > ema1 && slope > 0.0 && ask > 0.0)
      {
-      double stopPrice = MathMax(rh, h1) + InpS2StopBufferATR * atrF;
-      double target    = rh - InpS2TargetPct * width;
-      OpenRangeMR(magic, false, stopPrice, target);
+      // idxH >= 2: il massimo deve essere alle spalle. Se fosse la barra
+      // appena chiusa non ci sarebbe nessun ritracciamento da comprare,
+      // solo una candela grande - ed e' il terreno di S3.
+      int idxH = iHighest(_Symbol, InpS2TF, MODE_HIGH, InpS2SwingBars, 1);
+      if(idxH >= 2)
+        {
+         double swingHigh = iHigh(_Symbol, InpS2TF, idxH);
+         int idxL = iLowest(_Symbol, InpS2TF, MODE_LOW, idxH, 1);
+         if(idxL >= 1)
+           {
+            double pullLow = iLow(_Symbol, InpS2TF, idxL);
+            bool deepEnough = ((swingHigh - pullLow) >= InpS2PullbackATR * atr);
+            bool notAtHigh  = (c1 < swingHigh);
+            bool resuming   = (c1 > h2);
+
+            if(deepEnough && notAtHigh && resuming)
+              {
+               double stopPrice = pullLow - InpS2StopBufferATR * atr;
+               double dist      = ask - stopPrice;
+               if(dist > 0.0 &&
+                  OpenTrade(magic, true, dist, 0.0, "S2-PULLB", InpS2RiskMult))
+                 { s2LastEntryBar = iTime(_Symbol, InpS2TF, 0); return; }
+              }
+           }
+        }
+     }
+
+   // ---------------- SHORT ----------------
+   if(InpS2AllowShort && c1 < ema1 && slope < 0.0 && bid > 0.0)
+     {
+      int idxL = iLowest(_Symbol, InpS2TF, MODE_LOW, InpS2SwingBars, 1);
+      if(idxL >= 2)
+        {
+         double swingLow = iLow(_Symbol, InpS2TF, idxL);
+         int idxH = iHighest(_Symbol, InpS2TF, MODE_HIGH, idxL, 1);
+         if(idxH >= 1)
+           {
+            double pullHigh = iHigh(_Symbol, InpS2TF, idxH);
+            bool deepEnough = ((pullHigh - swingLow) >= InpS2PullbackATR * atr);
+            bool notAtLow   = (c1 > swingLow);
+            bool resuming   = (c1 < l2);
+
+            if(deepEnough && notAtLow && resuming)
+              {
+               double stopPrice = pullHigh + InpS2StopBufferATR * atr;
+               double dist      = stopPrice - bid;
+               if(dist > 0.0 &&
+                  OpenTrade(magic, false, dist, 0.0, "S2-PULLB", InpS2RiskMult))
+                  s2LastEntryBar = iTime(_Symbol, InpS2TF, 0);
+              }
+           }
+        }
      }
   }
 
@@ -721,7 +717,7 @@ void PrintStrategySummary()
   {
    if(!HistorySelect(0, TimeCurrent())) return;
 
-   string names[3] = {"S1-FADE ", "S2-RANGE", "S3-DONCH"};
+   string names[3] = {"S1-FADE ", "S2-PULLB", "S3-DONCH"};
    int    n[3]     = {0, 0, 0};
    int    w[3]     = {0, 0, 0};
    double gw[3]    = {0.0, 0.0, 0.0};
@@ -770,14 +766,14 @@ double OnTester()
 int OnInit()
   {
    hS1Atr   = iATR(_Symbol, InpS1TF, InpS1AtrPeriod);
-   hS2AtrF  = iATR(_Symbol, InpS2TF, InpS2AtrFast);
-   hS2AtrS  = iATR(_Symbol, InpS2TF, InpS2AtrSlow);
+   hS2Ema   = iMA (_Symbol, InpS2TF, InpS2TrendEma, 0, MODE_EMA, PRICE_CLOSE);
+   hS2Atr   = iATR(_Symbol, InpS2TF, InpS2AtrPeriod);
    hS3AtrF  = iATR(_Symbol, InpS3TF, InpS3AtrFast);
    hS3AtrS  = iATR(_Symbol, InpS3TF, InpS3AtrSlow);
    hRiskAtr = iATR(_Symbol, InpRiskTF, InpRiskAtrPeriod);
 
-   if(hS1Atr  == INVALID_HANDLE || hS2AtrF == INVALID_HANDLE ||
-      hS2AtrS == INVALID_HANDLE || hS3AtrF == INVALID_HANDLE ||
+   if(hS1Atr  == INVALID_HANDLE || hS2Ema  == INVALID_HANDLE ||
+      hS2Atr  == INVALID_HANDLE || hS3AtrF == INVALID_HANDLE ||
       hS3AtrS == INVALID_HANDLE || hRiskAtr == INVALID_HANDLE)
      { Print("handle indicatore non creato"); return(INIT_FAILED); }
 
@@ -786,7 +782,7 @@ int OnInit()
 
    for(int i = 0; i < RISK_SLOTS; i++) { g_risk[i].ticket = 0; g_risk[i].riskDistance = 0.0; }
    g_riskIdx  = 0;
-   lastBarS1  = 0; lastBarS2 = 0; lastBarS3 = 0;
+   lastBarS1  = 0; lastBarS2 = 0; lastBarS3 = 0; s2LastEntryBar = 0;
    s1UpActive = false; s1DnActive = false;
 
    return(INIT_SUCCEEDED);
@@ -796,8 +792,8 @@ void OnDeinit(const int reason)
   {
    PrintStrategySummary();
    IndicatorRelease(hS1Atr);
-   IndicatorRelease(hS2AtrF);
-   IndicatorRelease(hS2AtrS);
+   IndicatorRelease(hS2Ema);
+   IndicatorRelease(hS2Atr);
    IndicatorRelease(hS3AtrF);
    IndicatorRelease(hS3AtrS);
    IndicatorRelease(hRiskAtr);
@@ -807,12 +803,13 @@ void OnTick()
   {
    WeekendGuard();
 
-   // uscite per durata: valgono per le due gambe mean reverting
+   // uscita per durata: solo S1, l'unica con un target fisso da
+   // raggiungere entro poche barre
    CloseExpiredMagic(InpMagicBase + 1, InpS1TF, InpS1MaxHoldBars);
-   CloseExpiredMagic(InpMagicBase + 2, InpS2TF, InpS2MaxHoldBars);
 
-   // trailing: solo S3 cavalca. S1 e S2 hanno un target fisso e si
-   // chiudono da sole, un trailing le taglierebbe prima del bersaglio.
+   // trailing: S2 e S3 cavalcano, ciascuna con il proprio ATR e il
+   // proprio timeframe. S1 ha un target fisso e si chiude da sola.
+   ManageTrailing(InpMagicBase + 2, InpS2TrailStartR, InpS2TrailATR, hS2Atr,  1.0);
    ManageTrailing(InpMagicBase + 3, InpS3TrailStartR, InpS3TrailATR, hS3AtrF, InpS3StopATR);
 
    if(!TradingAllowed()) return;
