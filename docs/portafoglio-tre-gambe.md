@@ -164,3 +164,119 @@ report: la dipendenza fra trade vicini c'e' ma e' modesta, perche' le
 tre gambe si alternano. Nel vecchio portafoglio a tre gambe trend,
 dove lo Z-Score era −3,53, la stessa differenza era molto piu' grande.
 **La decorrelazione si vede anche qui.**
+
+---
+
+# Giudizio complessivo — misurato sui 1.437 trade veri
+
+## Qualita' del singolo trade
+
+| | |
+|---|---:|
+| Trade | 1.437 |
+| Vincenti | 603 (42,0%) |
+| Vincita media | +1,470 R |
+| Perdita media | −0,898 R |
+| Rapporto vinci/perdi | 1,64 |
+| **Expectancy** | **+0,0953 R per trade** |
+| Profit factor | 1,183 |
+| Miglior trade / peggiore | +8,8 R / −5,6 R |
+| Massimo perdite di fila | 11 |
+| **t** | **2,50** |
+
+42% di operazioni vincenti con un rapporto 1,64 fra vincita e perdita
+media: i due numeri stanno insieme, non c'e' niente di anomalo. Nessun
+trade singolo domina (il migliore vale 8,8 R su 137 totali).
+
+## Anno per anno
+
+| Anno | Trade | R | R per trade | PF |
+|---|---:|---:|---:|---:|
+| 2019 | 160 | 13,5 | 0,084 | 1,16 |
+| 2020 | 297 | **44,6** | 0,150 | 1,30 |
+| 2021 | 330 | 21,9 | 0,066 | 1,13 |
+| 2022 | 335 | **12,3** | 0,037 | **1,07** |
+| 2023 | 315 | **44,7** | 0,142 | 1,27 |
+
+**Cinque anni su cinque in utile, nove semestri su dieci.** Nessun anno
+in perdita e' un risultato solido.
+
+Ma **il 2020 e il 2023 da soli valgono 89 dei 137 punti R**, cioe' il
+65%. E il 2022, con 335 trade — il numero piu' alto di tutti — ha
+prodotto 12 punti a profit factor 1,07: praticamente un anno di lavoro
+per niente. Il sistema non perde quando il mercato non gli va a genio,
+ma nemmeno guadagna.
+
+## Resistenza ai costi
+
+| | |
+|---|---:|
+| Commissioni totali | −1.339,54 |
+| Swap totali | −2.365,90 |
+| Costo medio per trade | **0,0643 R** |
+| Expectancy lorda | +0,1596 R |
+| Expectancy netta | +0,0953 R |
+
+| Costi | Expectancy | Verdetto |
+|---:|---:|---|
+| 1x | +0,0953 | regge |
+| 2x | +0,0310 | regge |
+| **3x** | **−0,0332** | **muore** |
+
+**I costi si mangiano gia' il 40% dell'edge lordo, e a 3 volte il
+sistema muore.** Va corretto quello che avevo detto prima in questa
+conversazione: il "regge fino a 10-17 volte i costi" riguardava il
+vecchio portafoglio, non questo.
+
+Il grosso non sono le commissioni ma **lo swap**, quasi il doppio: e'
+il prezzo di tenere posizioni aperte per giorni, cioe' della gamba H4.
+Il costo mediano per trade e' 0,0268 R contro una media di 0,0643:
+poche posizioni lunghe pagano gran parte del conto.
+
+## A rischio 0,8%
+
+Sequenza reale: **+172%, drawdown 24,4%**, fattore di recupero 7,05.
+Un terzo del tempo passato sotto il picco precedente.
+
+Monte Carlo a blocchi, 20.000 percorsi:
+
+| Percentile | Profitto | Annuo | Drawdown |
+|---|---:|---:|---:|
+| 5° | +34% | 6,6% | 14,7% |
+| 25° | +103% | 16,7% | 18,4% |
+| **50°** | **+171%** | **24,3%** | **21,9%** |
+| 75° | +264% | 32,5% | 26,5% |
+| 95° | +455% | 45,4% | **35,0%** |
+| 99° | | | 42,2% |
+
+Percorsi che finiscono in perdita: **0,9%**.
+
+## Verdetto
+
+**Un edge reale ma sottile.** Le prove strutturali sono buone: positivo
+ogni anno, non dipendente da pochi trade, drawdown reale peggiore della
+mediana simulata, meno dell'1% di percorsi in perdita.
+
+Le prove statistiche no: **t 2,50**, sotto il 3,4 che servirebbe avendo
+provato 272 configurazioni. E la tenuta ai costi (3x) e' stretta.
+
+Non e' abbastanza per metterci sopra dei soldi. E' abbastanza per
+spendere l'unica cartuccia che resta.
+
+## Criteri del fuori campione, dichiarati adesso
+
+Periodo **2024.01.01 → 2026.09.18**, rischio **0,6%** (lo stesso con cui
+e' stato costruito tutto), nessuna ottimizzazione, una passata sola.
+Attesi circa 850 trade.
+
+| Esito | Condizione |
+|---|---|
+| **Promosso** | expectancy ≥ +0,05 R **e** PF ≥ 1,10 **e** drawdown ≤ 27,4% |
+| **Marginale** | expectancy fra +0,02 e +0,05 R |
+| **Bocciato** | expectancy < +0,02 R **oppure** PF < 1,05 |
+
+**Cosa il fuori campione puo' e non puo' fare.** Con 850 trade, anche
+centrando in pieno l'expectansy di oggi, la sua t sarebbe circa 1,9.
+Non e' una prova. Ma e' **una sola prova dichiarata prima**, non la
+migliore di 272: la soglia da superare e' 2, non 3,4. Puo' smentire il
+sistema in modo definitivo; puo' corroborarlo; non puo' dimostrarlo.
