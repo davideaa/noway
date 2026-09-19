@@ -52,7 +52,19 @@ def carica(path, rischio_test=0.008):
     return out, amb
 
 def equity(R, f):
+    """Interesse composto: ogni operazione rischia una percentuale del
+    capitale del momento, quindi la posizione cresce con il conto."""
     return np.cumprod(1.0 + np.asarray(R, float) * f)
+
+def equity_semplice(R, f):
+    """Lotto fisso: ogni operazione rischia sempre la stessa cifra,
+    calcolata sul deposito iniziale.
+
+    Serve per confrontare due periodi diversi. Con il composto il secondo
+    periodo parte da un conto piu' grande e sembra rendere di piu' anche
+    a parita' di bravura; senza, la pendenza della curva e' la bravura
+    e basta."""
+    return 1.0 + np.cumsum(np.asarray(R, float)) * f
 
 def dd_max(eq):
     return float((1.0 - eq / np.maximum.accumulate(eq)).max())
@@ -325,8 +337,8 @@ def pagina_risultato(pdf, dati, f, legs=None):
 #  pagina — dentro e fuori campione
 # ======================================================================
 def pagina_is_oos(pdf, dati, f, legs, pag=3):
-    """I due periodi separati: quello su cui sono stati scelti i
-    parametri e quello che non era mai stato guardato."""
+    """I due periodi separati, a lotto fisso: il composto gonfierebbe il
+    secondo solo perche' parte da un conto piu' grande."""
     fig = plt.figure(figsize=(8.27, 11.69))
     testata(fig, 'Dentro e fuori campione',
             'I cinque anni usati per costruire, e i tre mai guardati prima', pag)
@@ -336,54 +348,60 @@ def pagina_is_oos(pdf, dati, f, legs, pag=3):
     v_all  = np.array([x['R'] for x in dati])
     anni = _anni(dati)
     taglio = _anni(dentro)[-1]
-    eq = equity(v_all, f)
+    eq = equity_semplice(v_all, f)
+    ddp = lambda e: float((1.0 - e / np.maximum.accumulate(e)).max())
 
-    # --- curva con i due periodi distinti
-    ax = fig.add_axes([.085, .640, .865, .225])
+    fig.text(.055, .880, 'La stessa curva, spezzata in due', fontsize=12.5,
+             color=INK, weight='bold')
+    fig.text(.055, .862, 'Senza interesse composto: ogni operazione rischia sempre la stessa cifra, '
+                         'così la pendenza\nsi può confrontare fra i due periodi.',
+             fontsize=8.5, color=INK3, va='top', linespacing=1.55)
+
+    ax = fig.add_axes([.085, .618, .865, .208])
     m = anni <= taglio
     ax.fill_between(anni[~m], 1, eq[~m], color=VERDE, alpha=.10, lw=0)
     ax.plot(anni[m], eq[m], color=INK3, lw=2.0, label='2019-2023  usati per costruire')
     ax.plot(anni[~m], eq[~m], color=VERDE, lw=2.4, label='2024-2026  mai guardati prima')
     ax.axvline(taglio, color=INK2, lw=1.2, ls=(0, (4, 4)))
     ax.axhline(1, color=INK3, lw=.9, ls=(0, (2, 4)))
-    ax.text(taglio + .06, eq.max() * .96, 'da qui in poi\nnessuna scelta\nfatta guardandolo',
-            fontsize=7.6, color=INK2, va='top')
+    ax.text(taglio + .06, 1.12, 'da qui in poi\nnessuna scelta\nfatta guardandolo',
+            fontsize=7.6, color=INK2, va='bottom')
     ax.text(anni[-1], eq[-1], f"  +{it(100*(eq[-1]-1))}%", color=VERDE, fontsize=11,
             weight='bold', va='center')
-    ax.set_xlim(0, anni[-1] * 1.12); ax.set_ylim(.8, eq.max() * 1.12)
+    ax.set_xlim(0, anni[-1] * 1.12); ax.set_ylim(.85, eq.max() * 1.10)
     ax.set_xlabel('anni'); ax.set_ylabel('capitale (1 = deposito)')
     griglia_y(ax); ax.legend(frameon=False, loc='upper left', fontsize=8.5, labelcolor=INK2)
-    fig.text(.085, .880, 'La stessa curva, spezzata in due', fontsize=12.5,
-             color=INK, weight='bold')
 
-    # --- confronto fra i due periodi
     fig.text(.055, .578, 'I due periodi a confronto', fontsize=12.5, color=INK, weight='bold')
-    intest = ['', 'operazioni', 'punti R', 'guadagno medio', 'vincenti', 'profit factor', "all'anno"]
-    xs = [.065, .295, .400, .530, .625, .740, .875]
-    for c_i, t in enumerate(intest[1:]):
-        fig.text(xs[c_i+1], .551, t, fontsize=7.2, color=INK3, ha='right')
+    fig.text(.055, .560, 'a lotto fisso, rischio ' + it(100*f, 2) + '% del deposito per operazione',
+             fontsize=8, color=INK3)
+    intest = ['operazioni', 'punti R', 'guadagno medio', 'vincenti', 'profit factor',
+              'guadagno', "all'anno"]
+    xs = [.065, .288, .375, .492, .578, .678, .782, .878]
+    for c_i, t in enumerate(intest):
+        fig.text(xs[c_i+1], .534, t, fontsize=7.2, color=INK3, ha='right')
     for r_i, (lbl, sel, an, col) in enumerate([
             ('2019-2023  costruzione', dentro, 5.0, INK3),
             ('2024-2026  mai visto',   fuori,  2.71, VERDE),
             ('tutto il periodo',       dati,   7.71, INK)]):
-        yy = .524 - r_i * .026
+        yy = .507 - r_i * .026
         v = np.array([x['R'] for x in sel]); w = v[v > 0]; l = v[v <= 0]
-        e = equity(v, f)
+        tot = v.sum() * f
         if r_i == 1:
             fig.add_artist(Rectangle((.055, yy - .008), .89, .024, facecolor=CARD,
                                      edgecolor='none', transform=fig.transFigure))
         fig.text(xs[0], yy, lbl, fontsize=8.6, color=col,
                  weight='bold' if r_i == 1 else 'normal')
-        for c_i, val in enumerate([it(len(v)), it(v.sum(), 1), f"{v.mean():+.4f}".replace('.', ','),
+        for c_i, val in enumerate([it(len(v)), it(v.sum(), 1),
+                                   f"{v.mean():+.4f}".replace('.', ','),
                                    f"{it(100*len(w)/len(v),1)}%", it(sum(w)/abs(sum(l)), 2),
-                                   f"{it(100*(e[-1]**(1/an)-1),1)}%"]):
+                                   f"+{it(100*tot)}%", f"{it(100*tot/an,1)}%"]):
             fig.text(xs[c_i+1], yy, val, fontsize=8.6, ha='right',
                      color=INK if r_i == 1 else INK2,
                      weight='bold' if r_i == 1 else 'normal')
 
-    # --- per gamba
-    fig.text(.055, .420, 'Gamba per gamba', fontsize=12.5, color=INK, weight='bold')
-    y = .393
+    fig.text(.055, .408, 'Gamba per gamba', fontsize=12.5, color=INK, weight='bold')
+    y = .381
     for tag in legs:
         fig.text(.065, y, NOMI[tag], fontsize=9, color=COL[tag], weight='bold')
         for c_i, (lbl, sel) in enumerate([('2019-23', dentro), ('2024-26', fuori)]):
@@ -397,31 +415,34 @@ def pagina_is_oos(pdf, dati, f, legs, pag=3):
                      color=INK2, ha='right')
         y -= .026
 
-    # --- i criteri dichiarati prima
     v = np.array([x['R'] for x in fuori]); w = v[v > 0]; l = v[v <= 0]
     pf = sum(w) / abs(sum(l)); dd06 = 100 * dd_max(equity(v, .006))
-    fig.text(.055, .300, 'I criteri, dichiarati prima di guardare quegli anni', fontsize=12.5,
+    fig.text(.055, .288, 'I criteri, dichiarati prima di guardare quegli anni', fontsize=12.5,
              color=INK, weight='bold')
     for i, (nome, soglia, val, ok) in enumerate([
-            ('guadagno medio per operazione', '≥ +0,050 R', f"{v.mean():+.4f} R".replace('.', ','), v.mean() >= .05),
+            ('guadagno medio per operazione', '≥ +0,050 R',
+             f"{v.mean():+.4f} R".replace('.', ','), v.mean() >= .05),
             ('profit factor', '≥ 1,10', it(pf, 3), pf >= 1.10),
             ('perdita massima (a rischio 0,60%)', '≤ 27,4%', f"{it(dd06,2)}%", dd06 <= 27.4)]):
-        yy = .272 - i * .026
+        yy = .260 - i * .026
         fig.text(.075, yy, nome, fontsize=8.6, color=INK2)
         fig.text(.560, yy, soglia, fontsize=8.6, color=INK3, ha='right')
         fig.text(.700, yy, val, fontsize=8.6, color=INK, ha='right', weight='bold')
         fig.text(.760, yy, 'PASSA' if ok else 'NON PASSA', fontsize=8.6,
                  color=VERDE if ok else ARANCIO, weight='bold')
 
-    fig.text(.055, .168, 'Attenzione: qui va meglio fuori che dentro, e non è una buona notizia',
+    ec, es = equity(v_all, f), eq
+    fig.text(.055, .172, 'Attenzione: qui va meglio fuori che dentro, e non è una buona notizia',
              fontsize=11.5, color=GIALLO, weight='bold')
-    fig.text(.055, .147,
-        "Di solito il periodo di costruzione rende di più, perché i parametri sono stati scelti lì. Qui succede\n"
-        "il contrario: il guadagno medio per operazione passa da +0,12 a +0,26 R. Non vuol dire che il\n"
-        "sistema sia più bravo fuori — vuol dire che il 2024-2026 è stato un periodo eccezionale per l'oro,\n"
-        "e una strategia che segue il trend in un trend del genere non può che andare bene.\n\n"
-        "Il numero prudente da portarsi dietro è quello più basso dei due, non il più alto: quel +47% annuo\n"
-        "non è un'aspettativa, è quello che è successo in tre anni molto favorevoli.",
+    fig.text(.055, .151,
+        "Di solito il periodo di costruzione rende di più, perché i parametri sono stati scelti lì. Qui è il contrario:\n"
+        "il guadagno medio per operazione passa da +0,12 a +0,26 R, e la curva qui sopra cambia pendenza a\n"
+        "metà strada. Non vuol dire che il sistema sia più bravo fuori: il 2024-2026 è stato un periodo\n"
+        "eccezionale per l'oro, e una strategia di trend dentro un trend del genere non può che andare bene.\n\n"
+        f"Queste cifre sono a lotto fisso. Con l'interesse composto lo stesso sistema farebbe "
+        f"+{it(100*(ec[-1]-1))}% invece\ndi +{it(100*(es[-1]-1))}%: il di più non è bravura in più, è la "
+        "posizione che cresce insieme al conto.\n\n"
+        "Il numero prudente da portarsi dietro è il più basso dei due periodi, non il più alto.",
         fontsize=8.7, color=INK2, va='top', linespacing=1.65)
     pdf.savefig(fig); plt.close(fig)
 
