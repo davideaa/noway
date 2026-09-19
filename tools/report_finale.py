@@ -322,9 +322,113 @@ def pagina_risultato(pdf, dati, f, legs=None):
     pdf.savefig(fig); plt.close(fig)
 
 # ======================================================================
-#  pagina 3 — Monte Carlo
+#  pagina — dentro e fuori campione
 # ======================================================================
-def pagina_montecarlo(pdf, dati, f):
+def pagina_is_oos(pdf, dati, f, legs, pag=3):
+    """I due periodi separati: quello su cui sono stati scelti i
+    parametri e quello che non era mai stato guardato."""
+    fig = plt.figure(figsize=(8.27, 11.69))
+    testata(fig, 'Dentro e fuori campione',
+            'I cinque anni usati per costruire, e i tre mai guardati prima', pag)
+
+    dentro = [x for x in dati if x['data'][:4] <= '2023']
+    fuori  = [x for x in dati if x['data'][:4] >= '2024']
+    v_all  = np.array([x['R'] for x in dati])
+    anni = _anni(dati)
+    taglio = _anni(dentro)[-1]
+    eq = equity(v_all, f)
+
+    # --- curva con i due periodi distinti
+    ax = fig.add_axes([.085, .640, .865, .225])
+    m = anni <= taglio
+    ax.fill_between(anni[~m], 1, eq[~m], color=VERDE, alpha=.10, lw=0)
+    ax.plot(anni[m], eq[m], color=INK3, lw=2.0, label='2019-2023  usati per costruire')
+    ax.plot(anni[~m], eq[~m], color=VERDE, lw=2.4, label='2024-2026  mai guardati prima')
+    ax.axvline(taglio, color=INK2, lw=1.2, ls=(0, (4, 4)))
+    ax.axhline(1, color=INK3, lw=.9, ls=(0, (2, 4)))
+    ax.text(taglio + .06, eq.max() * .96, 'da qui in poi\nnessuna scelta\nfatta guardandolo',
+            fontsize=7.6, color=INK2, va='top')
+    ax.text(anni[-1], eq[-1], f"  +{it(100*(eq[-1]-1))}%", color=VERDE, fontsize=11,
+            weight='bold', va='center')
+    ax.set_xlim(0, anni[-1] * 1.12); ax.set_ylim(.8, eq.max() * 1.12)
+    ax.set_xlabel('anni'); ax.set_ylabel('capitale (1 = deposito)')
+    griglia_y(ax); ax.legend(frameon=False, loc='upper left', fontsize=8.5, labelcolor=INK2)
+    fig.text(.085, .880, 'La stessa curva, spezzata in due', fontsize=12.5,
+             color=INK, weight='bold')
+
+    # --- confronto fra i due periodi
+    fig.text(.055, .578, 'I due periodi a confronto', fontsize=12.5, color=INK, weight='bold')
+    intest = ['', 'operazioni', 'punti R', 'guadagno medio', 'vincenti', 'profit factor', "all'anno"]
+    xs = [.065, .295, .400, .530, .625, .740, .875]
+    for c_i, t in enumerate(intest[1:]):
+        fig.text(xs[c_i+1], .551, t, fontsize=7.2, color=INK3, ha='right')
+    for r_i, (lbl, sel, an, col) in enumerate([
+            ('2019-2023  costruzione', dentro, 5.0, INK3),
+            ('2024-2026  mai visto',   fuori,  2.71, VERDE),
+            ('tutto il periodo',       dati,   7.71, INK)]):
+        yy = .524 - r_i * .026
+        v = np.array([x['R'] for x in sel]); w = v[v > 0]; l = v[v <= 0]
+        e = equity(v, f)
+        if r_i == 1:
+            fig.add_artist(Rectangle((.055, yy - .008), .89, .024, facecolor=CARD,
+                                     edgecolor='none', transform=fig.transFigure))
+        fig.text(xs[0], yy, lbl, fontsize=8.6, color=col,
+                 weight='bold' if r_i == 1 else 'normal')
+        for c_i, val in enumerate([it(len(v)), it(v.sum(), 1), f"{v.mean():+.4f}".replace('.', ','),
+                                   f"{it(100*len(w)/len(v),1)}%", it(sum(w)/abs(sum(l)), 2),
+                                   f"{it(100*(e[-1]**(1/an)-1),1)}%"]):
+            fig.text(xs[c_i+1], yy, val, fontsize=8.6, ha='right',
+                     color=INK if r_i == 1 else INK2,
+                     weight='bold' if r_i == 1 else 'normal')
+
+    # --- per gamba
+    fig.text(.055, .420, 'Gamba per gamba', fontsize=12.5, color=INK, weight='bold')
+    y = .393
+    for tag in legs:
+        fig.text(.065, y, NOMI[tag], fontsize=9, color=COL[tag], weight='bold')
+        for c_i, (lbl, sel) in enumerate([('2019-23', dentro), ('2024-26', fuori)]):
+            v = np.array([x['R'] for x in sel if x['tag'] == tag])
+            w = v[v > 0]; l = v[v <= 0]
+            xx = .30 + c_i * .30
+            fig.text(xx, y, lbl, fontsize=7.2, color=INK3)
+            fig.text(xx + .16, y, f"{'+' if v.sum()>0 else ''}{it(v.sum(),1)} R", fontsize=9,
+                     color=VERDE if v.sum() > 0 else ARANCIO, weight='bold', ha='right')
+            fig.text(xx + .26, y, f"PF {it(sum(w)/abs(sum(l)),2)}", fontsize=8.2,
+                     color=INK2, ha='right')
+        y -= .026
+
+    # --- i criteri dichiarati prima
+    v = np.array([x['R'] for x in fuori]); w = v[v > 0]; l = v[v <= 0]
+    pf = sum(w) / abs(sum(l)); dd06 = 100 * dd_max(equity(v, .006))
+    fig.text(.055, .300, 'I criteri, dichiarati prima di guardare quegli anni', fontsize=12.5,
+             color=INK, weight='bold')
+    for i, (nome, soglia, val, ok) in enumerate([
+            ('guadagno medio per operazione', '≥ +0,050 R', f"{v.mean():+.4f} R".replace('.', ','), v.mean() >= .05),
+            ('profit factor', '≥ 1,10', it(pf, 3), pf >= 1.10),
+            ('perdita massima (a rischio 0,60%)', '≤ 27,4%', f"{it(dd06,2)}%", dd06 <= 27.4)]):
+        yy = .272 - i * .026
+        fig.text(.075, yy, nome, fontsize=8.6, color=INK2)
+        fig.text(.560, yy, soglia, fontsize=8.6, color=INK3, ha='right')
+        fig.text(.700, yy, val, fontsize=8.6, color=INK, ha='right', weight='bold')
+        fig.text(.760, yy, 'PASSA' if ok else 'NON PASSA', fontsize=8.6,
+                 color=VERDE if ok else ARANCIO, weight='bold')
+
+    fig.text(.055, .168, 'Attenzione: qui va meglio fuori che dentro, e non è una buona notizia',
+             fontsize=11.5, color=GIALLO, weight='bold')
+    fig.text(.055, .147,
+        "Di solito il periodo di costruzione rende di più, perché i parametri sono stati scelti lì. Qui succede\n"
+        "il contrario: il guadagno medio per operazione passa da +0,12 a +0,26 R. Non vuol dire che il\n"
+        "sistema sia più bravo fuori — vuol dire che il 2024-2026 è stato un periodo eccezionale per l'oro,\n"
+        "e una strategia che segue il trend in un trend del genere non può che andare bene.\n\n"
+        "Il numero prudente da portarsi dietro è quello più basso dei due, non il più alto: quel +47% annuo\n"
+        "non è un'aspettativa, è quello che è successo in tre anni molto favorevoli.",
+        fontsize=8.7, color=INK2, va='top', linespacing=1.65)
+    pdf.savefig(fig); plt.close(fig)
+
+# ======================================================================
+#  pagina 4 — Monte Carlo
+# ======================================================================
+def pagina_montecarlo(pdf, dati, f, pag=3):
     R = [x['R'] for x in dati]
     eq_cp, dd, cp = blocchi(R, f)
     fin = eq_cp[:, -1]
@@ -332,7 +436,7 @@ def pagina_montecarlo(pdf, dati, f):
 
     fig = plt.figure(figsize=(8.27, 11.69))
     testata(fig, 'Bravura o fortuna?',
-            f'20.000 storie alternative, stesse operazioni rimescolate · rischio {it(100*f,2)}%', 3)
+            f'20.000 storie alternative, stesse operazioni rimescolate · rischio {it(100*f,2)}%', pag)
 
     ax = fig.add_axes([.085, .615, .865, .255])
     x = cp / cp[-1] * tot
@@ -406,11 +510,11 @@ def pagina_montecarlo(pdf, dati, f):
 # ======================================================================
 #  pagina 4 — mesi, anni, distribuzione, correlazione
 # ======================================================================
-def pagina_dettaglio(pdf, dati, f, legs=None):
+def pagina_dettaglio(pdf, dati, f, legs=None, pag=4):
     legs = legs or ORD
     fig = plt.figure(figsize=(8.27, 11.69))
-    testata(fig, 'Mese per mese', 'Dove nasce il guadagno, e quanto le tre gambe '
-            'si muovono insieme', 4)
+    testata(fig, 'Mese per mese', 'Dove nasce il guadagno, e quanto le gambe '
+            'si muovono insieme', pag)
 
     # --- mappa mensile in punti R ------------------------------------
     m = defaultdict(float); a = defaultdict(float)
@@ -630,9 +734,9 @@ def pagina_trappola(pdf, dati, f):
 # ======================================================================
 #  pagina 6 — limiti e conclusione
 # ======================================================================
-def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False):
+def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False, pag=6):
     fig = plt.figure(figsize=(8.27, 11.69))
-    testata(fig, 'Prima di usare soldi veri', 'I limiti, e cosa resta da fare', 6)
+    testata(fig, 'Prima di usare soldi veri', 'I limiti, e cosa resta da fare', pag)
 
     v = np.array([x['R'] for x in dati]); w = v[v > 0]; l = v[v <= 0]
     pf = sum(w) / abs(sum(l))
@@ -687,23 +791,23 @@ def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False):
         scheda(fig, .055, .405, .43, .118, GIALLO)
         fig.text(.270, .485, f"{it(100*(e3[-1]**(1/2.71)-1))}% all'anno", fontsize=17,
                  color=GIALLO, ha='center', weight='bold')
-        fig.text(.270, .461, 'il numero PULITO', fontsize=8.5, color=INK, ha='center',
+        fig.text(.270, .461, 'con la gamba sbagliata dentro', fontsize=8.5, color=INK, ha='center',
                  weight='bold')
-        fig.text(.270, .441, "è il fuori campione della versione a tre\ngambe: nessuna scelta fatta guardandolo",
+        fig.text(.270, .441, "il fuori campione del sistema a tre gambe:\nnessuna scelta fatta dopo averlo visto",
                  fontsize=7.8, color=INK2, ha='center', va='top', linespacing=1.5)
         scheda(fig, .515, .405, .43, .118, INK3)
         fig.text(.730, .485, f"{it(100*(e2[-1]**(1/2.71)-1))}% all'anno", fontsize=17,
                  color=INK3, ha='center', weight='bold')
-        fig.text(.730, .461, 'il numero SPORCO', fontsize=8.5, color=INK2, ha='center',
+        fig.text(.730, .461, 'senza la gamba sbagliata', fontsize=8.5, color=INK2, ha='center',
                  weight='bold')
-        fig.text(.730, .441, "è questa versione, ma la terza gamba è\nstata tolta guardando proprio quegli anni",
+        fig.text(.730, .441, "questa versione, ma la gamba è stata\ntolta guardando proprio quegli anni",
                  fontsize=7.8, color=INK2, ha='center', va='top', linespacing=1.5)
         fig.text(.055, .375,
-                 f"Entrambi a rischio {it(100*f,2)}%. Il vero valore atteso sta fra i due, e più vicino a quello di sinistra:\n"
-                 "togliere una gamba perché ha perso proprio negli anni che dovevano restare puliti gonfia il\n"
-                 "risultato per costruzione. Usa il giallo per decidere, tratta l'altro come una speranza.\n\n"
-                 "In una riga: due strategie diverse, scelte su cinque anni e verificate su tre mai guardati prima,\n"
-                 "una terza gamba tolta a posteriori, e nessuna certezza — quella la danno solo i soldi veri, piano.",
+                 f"Entrambi a rischio {it(100*f,2)}%. Il vero valore atteso sta fra i due. La gamba tolta era sbagliata\n"
+                 "per ragioni che non dipendono dai risultati — fare mean reversion su un mercato che sale da\n"
+                 "anni — ma l'ho capito guardando quegli anni, quindi il numero di destra resta un po' gonfiato.\n\n"
+                 "E c'è un secondo motivo per non fidarsi del numero alto, a pagina 3: il 2024-2026 è stato un\n"
+                 "periodo eccezionale per l'oro. Porta con te il numero più basso dei due, non il più alto.",
                  fontsize=8.6, color=INK2, va='top', linespacing=1.6)
         y_next = .245
     else:
@@ -730,7 +834,7 @@ def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False):
          "assomigliano a quelli simulati? e si riesce a guardarlo fermo per mesi senza spegnerlo?"),
         ("Le scelte aperte si decidono lì",
          "Il demo è dato nuovo. Se la gamba tolta continua a perdere anche in avanti, esce senza dubbi e\n"
-         "senza aver consumato nessun test. È il modo pulito di chiudere la questione di pagina 5."),
+         f"senza aver consumato nessun test: è il modo pulito di chiudere la questione di pagina {pag-1}."),
     ]
     y = y_next - .032
     for i, (tit, txt) in enumerate(passi):
@@ -756,18 +860,19 @@ def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False):
 # ======================================================================
 #  pagina 5 (versione a due gambe) — perche' la terza e' uscita
 # ======================================================================
-def pagina_perche_due(pdf, tutti, f):
+def pagina_perche_due(pdf, tutti, f, pag=5):
     """Serve i dati COMPLETI, comprese le operazioni della gamba tolta."""
     fig = plt.figure(figsize=(8.27, 11.69))
     testata(fig, 'Perché la terza è uscita',
-            "La TRAPPOLA scommetteva contro la direzione dell'oro", 5)
+            "La TRAPPOLA scommetteva contro la direzione dell'oro", pag)
 
     fig.text(.055, .880, 'Vendere le rotture al rialzo, su un mercato che sale', fontsize=14,
              color=ARANCIO, weight='bold')
     fig.text(.055, .858,
              "La TRAPPOLA prende sempre il lato opposto dello sfondamento. Quando l'oro rompe verso l'alto\n"
              "e lei scommette che sia un inganno, vende. Dal 2019 l'oro è passato da 1.280 a oltre 4.300\n"
-             "dollari: quella scommessa è stata quasi sempre sbagliata.",
+             "dollari: quella scommessa è stata quasi sempre sbagliata. Non era una gamba della strategia\n"
+             "originale — è stata aggiunta in fase di ricerca, e l'oro non è mai stato il posto giusto.",
              fontsize=9, color=INK2, va='top', linespacing=1.6)
 
     # --- barre: lato long contro lato short, per ciascuna gamba
@@ -807,7 +912,7 @@ def pagina_perche_due(pdf, tutti, f):
     fig.text(.055, .525, 'Lo stesso effetto si vede su tutte e tre', fontsize=12.5,
              color=INK, weight='bold')
     xs = [.065, .34, .50, .66, .855]
-    y = .493
+    y = .505
     for c_i, t in enumerate(['al rialzo (R)', 'al ribasso (R)', 'differenza', 'operazioni']):
         fig.text(xs[c_i+1], y, t, fontsize=7.2, color=INK3, ha='right')
     for t in ORD:
@@ -821,30 +926,31 @@ def pagina_perche_due(pdf, tutti, f):
                      color=VERDE if v > 0 else ARANCIO)
         fig.text(xs[4], y, it(n), fontsize=8.6, ha='right', color=INK2)
 
-    fig.text(.055, .385, "Perché conta, e perché non è la risposta a tutto", fontsize=12,
+    fig.text(.055, .394, "Perché conta, e perché non è la risposta a tutto", fontsize=12,
              color=GIALLO, weight='bold')
-    fig.text(.055, .363,
-        "Tutte e tre le gambe rendono di più al rialzo che al ribasso, ma solo la TRAPPOLA va in perdita:\n"
-        "le altre due guadagnano da entrambi i lati, solo meno. È coerente con un mercato che in sette anni\n"
-        "è più che triplicato — e la TRAPPOLA è l'unica costruita per vendere proprio quando sfonda in su.\n\n"
-        "L'avvertenza però è seria: questo è un periodo in cui l'oro ha fatto una delle corse più forti della\n"
-        "sua storia. Dire «gli short non funzionano sull'oro» sulla base di questi sette anni significa\n"
-        "scommettere che il rialzo continui. Non è un vantaggio statistico, è una previsione sul mercato —\n"
-        "e nessuno dei test fatti qui la sostiene.\n\n"
-        "E resta il punto di metodo: la TRAPPOLA viene tolta dopo aver guardato il 2024-2026, cioè il test\n"
-        "che doveva restare pulito. La spiegazione qui sopra è buona, ma una buona spiegazione trovata dopo\n"
-        "resta una spiegazione trovata dopo. Il verdetto vero lo darà solo il tempo reale.",
+    fig.text(.055, .372,
+        "Tutte e tre le gambe rendono di più al rialzo che al ribasso, ma solo la TRAPPOLA va in perdita: le\n"
+        "altre due guadagnano da entrambi i lati, solo meno. È coerente con un mercato che in sette anni è\n"
+        "più che triplicato — e la TRAPPOLA è l'unica costruita per vendere proprio quando sfonda in su.\n\n"
+        "L'avvertenza però è seria: questo è un periodo in cui l'oro ha fatto una delle corse più forti della sua\n"
+        "storia. Dire «gli short non funzionano sull'oro» su sette anni significa scommettere che il rialzo\n"
+        "continui: è una previsione sul mercato, non un vantaggio statistico, e nessun test qui la sostiene.\n\n"
+        "Sul metodo: la TRAPPOLA viene tolta dopo aver guardato il 2024-2026, e di solito non si fa. Qui però\n"
+        "la ragione non è «ha reso poco»: un sistema che guadagna sui falsi segnali, cioè quando il prezzo\n"
+        "non va da nessuna parte, era la scelta sbagliata per un mercato che sale da anni. Quell'argomento\n"
+        "si poteva fare guardando un grafico mensile dell'oro, senza nessun backtest, e non riguarda un\n"
+        "parametro ottimizzato ma una gamba intera che non doveva esserci. Resta che l'ho capito tardi.",
         fontsize=8.7, color=INK2, va='top', linespacing=1.65)
 
-    fig.text(.055, .142, 'Una via di mezzo che non ho preso', fontsize=11.5,
+    fig.text(.055, .135, 'Una via di mezzo che non ho preso', fontsize=11.5,
              color=INK, weight='bold')
     vl = np.array([x['R'] for x in tutti if x['tag'] == 'S1-FADE' and x['tipo'] == 'long'])
-    fig.text(.055, .121,
+    fig.text(.055, .114,
         f"Il solo lato al rialzo della TRAPPOLA fa {'+' if vl.sum()>0 else ''}{it(vl.sum(),1)} punti R con profit factor "
-        f"{it(vl[vl>0].sum()/abs(vl[vl<=0].sum()),2)}: tenerla\n"
-        "solo long sarebbe la scelta più ovvia. Non l'ho fatta perché sarebbe il terzo aggiustamento\n"
-        "deciso guardando gli stessi dati, e ogni aggiustamento in più rende il risultato meno credibile,\n"
-        "non più credibile. Se la si vuole recuperare, la si prova in avanti — non all'indietro.",
+        f"{it(vl[vl>0].sum()/abs(vl[vl<=0].sum()),2)}: tenerla solo long sarebbe la scelta\n"
+        "più ovvia. Non l'ho fatta perché sarebbe il terzo aggiustamento deciso guardando gli stessi dati, e\n"
+        "ogni aggiustamento in più rende il risultato meno credibile. Se la si vuole recuperare, si prova in\n"
+        "avanti — non all'indietro.",
         fontsize=8.7, color=INK2, va='top', linespacing=1.65)
     pdf.savefig(fig); plt.close(fig)
 
@@ -859,13 +965,14 @@ def main(path, f=0.007, solo_due=False, out=None):
     with PdfPages(out) as pdf:
         pagina_strategie(pdf, sel, legs)
         pagina_risultato(pdf, sel, f, legs)
-        pagina_montecarlo(pdf, sel, f)
-        pagina_dettaglio(pdf, sel, f, legs)
+        pagina_is_oos(pdf, sel, f, legs, 3)
+        pagina_montecarlo(pdf, sel, f, 4)
+        pagina_dettaglio(pdf, sel, f, legs, 5)
         if solo_due:
-            pagina_perche_due(pdf, dati, f)      # serve anche la gamba tolta
+            pagina_perche_due(pdf, dati, f, 6)   # serve anche la gamba tolta
         else:
             pagina_trappola(pdf, dati, f)
-        pagina_limiti(pdf, sel, f, dati, solo_due)
+        pagina_limiti(pdf, sel, f, dati, solo_due, 7)
     print(f"scritto {out}")
 
 if __name__ == '__main__':
