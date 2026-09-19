@@ -79,3 +79,88 @@ rischio 0,6%.
    fortunato di questo campione.
 2. Solo dopo, e una volta sola: **2024.01.01 → 2026.09.18**.
 3. Il rischio si decide dopo il punto 2, mai prima.
+
+---
+
+# Monte Carlo sulla Prova B
+
+20.000 simulazioni per metodo, sui 1.437 trade veri estratti dal report.
+Ogni trade e' convertito in multipli di R usando la variazione di saldo
+(quindi commissioni e swap sono gia' dentro) normalizzata sul saldo del
+momento, perche' con il rischio percentuale un trade vale in euro sempre
+di piu' man mano che il conto cresce.
+
+## Prima cosa: la t vera
+
+| Somma dei multipli di R | 137,0 |
+|---|---|
+| Media per trade | **+0,0953 R** |
+| Deviazione standard per trade | **1,45 R** |
+| **t** | **2,50** |
+
+Avevo stimato 2,69 usando una deviazione standard di 1,26 R presa da
+misure precedenti. Quella vera su questi trade e' 1,45, quindi la t
+giusta e' **2,50**, non 2,69. Tutte le t calcolate prima in questo
+progetto con 1,26 sono ottimistiche dello stesso fattore (~15%).
+
+## I quattro metodi, a rischio 0,6%
+
+| Metodo | DD mediano | DD 95° | DD 99° | Profitto mediano | Path in perdita |
+|---|---:|---:|---:|---:|---:|
+| Permutazione | 16,8% | 25,0% | 29,7% | 116% | 0,0% |
+| Bootstrap IID | 16,9% | 28,0% | 34,0% | 116% | 0,9% |
+| **Blocchi da 20** | **16,9%** | **27,4%** | **33,6%** | **114%** | 0,8% |
+| Rimozione 10% | 17,2% | 22,3% | 24,6% | 100% | 0,0% |
+
+*Sequenza reale: +116%, drawdown 18,7%.*
+
+**Tre cose sane in questa tabella.**
+
+1. Il drawdown reale (18,7%) e' **peggiore** della mediana simulata
+   (16,9%). Se fosse il contrario vorrebbe dire che siamo capitati su un
+   ordine fortunato. Siamo capitati su uno leggermente sfortunato.
+
+2. Togliendo un trade su dieci il profitto scende da 116% a 100%, cioe'
+   in proporzione. **Il risultato non dipende da pochi trade enormi**:
+   se dipendesse, togliendone il 10% crollerebbe molto di piu'.
+
+3. Meno dell'1% dei percorsi finisce in perdita.
+
+## Quanto rischio regge il tuo tetto
+
+Tetto dichiarato: il Monte Carlo non deve superare il 35%. Si legge sul
+95° percentile del bootstrap a blocchi.
+
+| Rischio | DD mediano | **DD 95°** | DD 99° | Profitto mediano | %/anno | 7,3 anni |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0,6% | 16,8% | 27,4% | 33,6% | 114% | 18,1% | 237% |
+| 0,7% | 19,4% | 31,4% | 38,1% | 141% | 21,2% | 306% |
+| **0,8%** | 21,9% | **35,1%** | 42,4% | 170% | 24,2% | 387% |
+| 0,9% | 24,3% | 38,7% | 46,5% | 202% | 27,3% | 481% |
+| 1,0% | 26,7% | **42,1%** | 50,3% | 236% | 30,3% | 590% |
+| 1,2% | 31,4% | 48,6% | 57,3% | 314% | 36,3% | 861% |
+
+**L'1% sfonda il tetto**: 42% al 95° percentile, 50% al 99°. Il limite
+che hai posto cade a **0,8%**.
+
+## Perche' il Monte Carlo e' piu' severo del riscalamento
+
+Prima avevo scritto che a 0,91% di rischio si arriva a 27% di drawdown e
++537% in 7,3 anni. Quella era aritmetica su un solo percorso: prendeva
+il drawdown del backtest e lo riscalava.
+
+Il Monte Carlo guarda **ventimila percorsi** e legge il 95° percentile,
+cioe' il caso brutto che capita una volta su venti. Sono due domande
+diverse: "quanto ha perso questa volta" e "quanto puo' perdere". La
+seconda e' quella che conta quando i soldi sono veri, e da' numeri
+piu' bassi di profitto perche' guarda la mediana, non il percorso
+fortunato che il backtest ha prodotto.
+
+## Cosa dice il bootstrap a blocchi rispetto agli altri
+
+A 0,6% il blocco da' 27,4% al 95° contro il 25,0% della permutazione.
+La differenza e' piccola qui, e il motivo e' lo Z-Score −1,57 del
+report: la dipendenza fra trade vicini c'e' ma e' modesta, perche' le
+tre gambe si alternano. Nel vecchio portafoglio a tre gambe trend,
+dove lo Z-Score era −3,53, la stessa differenza era molto piu' grande.
+**La decorrelazione si vede anche qui.**
