@@ -38,7 +38,7 @@ input int               InpSlippagePoints     = 30;       // Deviazione massima 
 input int               InpMaxSpreadPoints    = 0;        // [C] Spread max in points (0 = filtro off)
 
 input group "=== Adaptive Risk (sizing) ==="
-input bool              InpUseAdaptiveRisk    = true;     // [L] Attiva Adaptive Risk
+input bool              InpUseAdaptiveRisk    = false;    // [T] Adaptive Risk: misurato peggiore, tenere spento
 input ENUM_TIMEFRAMES   InpRiskTF             = PERIOD_H1;// [C] TF per la misura di volatilita
 input int               InpRiskAtrPeriod      = 14;       // [C] Periodo ATR corrente
 input int               InpRiskBaselinePeriod = 200;      // [C] Finestra del "livello normale"
@@ -63,14 +63,14 @@ input int               InpS1BreakoutBars     = 24;       // [L] Barre del canal
 input int               InpS1AtrPeriod        = 14;       // [C] Periodo ATR
 input double            InpS1StopATR          = 2.5;      // [L] Stop loss in ATR (= 1R)
 input double            InpS1TrailStartR      = 1.0;      // [L] Attiva trailing a +xR
-input double            InpS1TrailATR         = 2.5;      // [C] Distanza trailing in ATR
+input double            InpS1TrailATR         = 4.25;     // [T] Distanza trailing in ATR (trovato: plateau 4.0-4.5)
 input bool              InpS1AllowShort       = true;     // [D] Consenti short
 
 input group "=== S2: Trend-Following EMA (H1) ==="
 input bool              InpS2Enabled          = true;     // Attiva S2
 input ENUM_TIMEFRAMES   InpS2TF               = PERIOD_H1;// [L] Timeframe
 input int               InpS2EmaPeriod        = 10;       // [L] Periodo EMA veloce
-input int               InpS2SlopeBars        = 1;        // [C] Barre per la pendenza EMA
+input int               InpS2SlopeBars        = 4;        // [T] Barre per la pendenza EMA (trovato)
 input double            InpS2SlopeMinATR      = 0.05;     // [C] Soglia pendenza PER BARRA (in ATR) <<< PARAMETRO CHIAVE
 input int               InpS2AtrPeriod        = 14;       // [C] Periodo ATR
 input double            InpS2StopATR          = 2.0;      // [L] Stop loss in ATR (= 1R)
@@ -96,14 +96,14 @@ input bool              InpS3Enabled          = true;     // Attiva S3
 input ENUM_TIMEFRAMES   InpS3TF               = PERIOD_M30;// [L] Timeframe
 input int               InpS3RangeBars        = 480;      // [L] Range di contesto (barre)
 input int               InpS3BreakBars        = 60;       // [L] Canale di rottura (barre)
-input double            InpS3EdgeThreshold    = 0.80;     // [C] Posizione nel range per dirsi "al bordo"
+input double            InpS3EdgeThreshold    = 0.91;     // [T] Posizione nel range (trovato: plateau 0.91-0.93)
 input int               InpS3AtrFast          = 14;       // [C] ATR veloce
 input int               InpS3AtrSlow          = 50;       // [C] ATR lento (riferimento)
-input double            InpS3VolExpandRatio   = 1.00;     // [C] ATRfast/ATRslow minimo (espansione)
+input double            InpS3VolExpandRatio   = 0.70;     // [T] Filtro espansione di fatto spento: non aggiunge nulla
 input double            InpS3StopATR          = 2.0;      // [L] Stop loss in ATR (= 1R)
-input double            InpS3TargetR          = 2.5;      // [L] Take profit in R
+input double            InpS3TargetR          = 0.0;      // [T] Take profit in R (0 = nessuno; il 2.5R della card peggiora)
 input double            InpS3TrailStartR      = 1.0;      // [C] Attiva trailing a +xR
-input double            InpS3TrailATR         = 2.0;      // [C] Distanza trailing in ATR
+input double            InpS3TrailATR         = 4.0;      // [T] Distanza trailing in ATR (trovato: plateau 3-6)
 input bool              InpS3AllowShort       = true;     // [D] Consenti short
 
 //==================================================================
