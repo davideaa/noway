@@ -140,14 +140,16 @@ SPIEGA = {
    "consuma senza vera domanda dietro, chi ha comprato resta intrappolato e deve uscire."),
 }
 
-def pagina_strategie(pdf, dati):
+def pagina_strategie(pdf, dati, legs=None):
     fig = plt.figure(figsize=(8.27, 11.69))
-    testata(fig, 'Le tre strategie', 'Cosa fa ciascuna e come opera', 1)
+    testata(fig, 'Le tre strategie' if len(legs or ORD) == 3 else 'Le due strategie',
+            'Cosa fa ciascuna e come opera', 1)
+    legs = legs or ORD
     g = defaultdict(list)
     for x in dati: g[x['tag']].append(x['R'])
 
-    y = .690
-    for tag in ORD:
+    y = .690 if len(legs) == 3 else .700
+    for tag in legs:
         nome, claim, testo = SPIEGA[tag]
         v = np.array(g[tag]); w = v[v > 0]; l = v[v <= 0]
         scheda(fig, .055, y, .89, .21, COL[tag])
@@ -169,15 +171,42 @@ def pagina_strategie(pdf, dati):
             fig.text(xx, y + .007, lab, fontsize=6.9, color=INK3, ha='center')
         y -= .225
 
-    fig.text(.055, .190, 'Perché tre e non una', fontsize=12.5, color=INK, weight='bold')
-    fig.text(.055, .172,
-        "ROTTURA e TRAPPOLA guardano lo stesso identico evento — il prezzo che sfonda il canale a 60 barre —\n"
-        "e ne prendono i due lati opposti. RITRACCIAMENTO richiede che il prezzo NON sia sull'estremo, quindi\n"
-        "non può mai entrare sulla stessa candela della ROTTURA, e lavora su 4 ore invece che su mezz'ora:\n"
-        "tiene le posizioni per settimane dove le altre le tengono per ore.\n\n"
-        "La differenza è imposta dal codice, non sperata. È questo che fa scendere il drawdown dell'insieme\n"
-        "sotto la somma dei drawdown delle singole — ed è misurato a pagina 4.",
-        fontsize=8.6, color=INK2, va='top', linespacing=1.65)
+    if len(legs) == 3:
+        fig.text(.055, .190, 'Perché tre e non una', fontsize=12.5, color=INK, weight='bold')
+        fig.text(.055, .172,
+            "ROTTURA e TRAPPOLA guardano lo stesso identico evento — il prezzo che sfonda il canale a 60 barre —\n"
+            "e ne prendono i due lati opposti. RITRACCIAMENTO richiede che il prezzo NON sia sull'estremo, quindi\n"
+            "non può mai entrare sulla stessa candela della ROTTURA, e lavora su 4 ore invece che su mezz'ora:\n"
+            "tiene le posizioni per settimane dove le altre le tengono per ore.\n\n"
+            "La differenza è imposta dal codice, non sperata. È questo che fa scendere il drawdown dell'insieme\n"
+            "sotto la somma dei drawdown delle singole — ed è misurato a pagina 4.",
+            fontsize=8.6, color=INK2, va='top', linespacing=1.65)
+    else:
+        fig.text(.055, .415, 'Perché due e non tre', fontsize=12.5, color=INK, weight='bold')
+        fig.text(.055, .395,
+            "C'era una terza gamba, la TRAPPOLA: scommetteva che lo sfondamento della ROTTURA fallisse e\n"
+            "prendeva il lato opposto. Nel periodo di costruzione funzionava; nei tre anni successivi ha\n"
+            "restituito tutto. Il perché è a pagina 5, e ha a che fare con la direzione dell'oro.\n\n"
+            "Le due che restano condividono la direzione ma non il momento: ROTTURA entra quando il prezzo\n"
+            "fa un nuovo estremo, RITRACCIAMENTO pretende che NON ci sia. Non possono entrare sulla stessa\n"
+            "candela, e lavorano su orizzonti diversi — ore contro settimane. Si muovono insieme a metà\n"
+            "(correlazione 0,53): meno di due copie della stessa idea, più di due scommesse indipendenti.",
+            fontsize=8.6, color=INK2, va='top', linespacing=1.65)
+
+        v = np.array([x['R'] for x in dati])
+        w = v[v > 0]; l = v[v <= 0]
+        fig.text(.055, .228, 'Le due insieme', fontsize=12.5, color=INK, weight='bold')
+        for i, (val, lab) in enumerate([
+                (it(len(v)), 'operazioni in 7,7 anni'),
+                (it(sum(v), 1), 'punti R guadagnati'),
+                (f"{it(100*len(w)/len(v),1)}%", 'operazioni vincenti'),
+                (it(sum(w)/abs(sum(l)), 2), 'profit factor'),
+                (f"+{it(v.mean(),4)}", 'guadagno medio, in R')]):
+            tessera(fig, .055 + i*.182, .158, .168, val, lab)
+        fig.text(.055, .124,
+                 "Il guadagno medio per operazione è il numero che conta: un'operazione su due e mezzo va bene,\n"
+                 "ma quando va bene porta più di quanto tolga quando va male. Il resto è pazienza e costanza.",
+                 fontsize=8.5, color=INK2, va='top', linespacing=1.6)
     pdf.savefig(fig); plt.close(fig)
 
 # ======================================================================
@@ -189,7 +218,9 @@ def _anni(dati):
     t0 = t[0]
     return np.array([(x - t0).total_seconds() / (365.25 * 86400) for x in t])
 
-def pagina_risultato(pdf, dati, f):
+def pagina_risultato(pdf, dati, f, legs=None):
+    legs = legs or ORD
+    nome_sist = {1: 'La strategia', 2: 'Le due strategie', 3: 'Le tre strategie'}[len(legs)]
     R = [x['R'] for x in dati]
     eq = equity(R, f)
     anni = _anni(dati)
@@ -214,7 +245,7 @@ def pagina_risultato(pdf, dati, f):
     ax.fill_between([0, tot], [1, 1], [np.percentile(fin0, 95)] * 2,
                     color=INK3, alpha=.10, lw=0)
     ax.plot(bh_t, bh, color=GIALLO, lw=1.8, label='comprare oro e tenerlo')
-    ax.plot(anni, eq, color=BLU, lw=2.2, label='le tre strategie')
+    ax.plot(anni, eq, color=BLU, lw=2.2, label=nome_sist.lower())
     ax.axhline(np.percentile(fin0, 95), color=INK3, lw=1.2, ls=(0, (5, 4)))
     ax.axhline(1, color=INK3, lw=.9, ls=(0, (2, 4)))
     ax.text(.15, np.percentile(fin0, 95) * 1.03,
@@ -243,7 +274,7 @@ def pagina_risultato(pdf, dati, f):
     fig.text(.055, .445, 'Contro le due alternative', fontsize=12.5, color=INK, weight='bold')
     righe = [
         ('', 'guadagno', "all'anno", 'perdita max', 'serve indovinare?'),
-        ('Le tre strategie', f"+{it(100*(eq[-1]-1))}%", f"{it(100*(eq[-1]**(1/tot)-1),1)}%",
+        (nome_sist, f"+{it(100*(eq[-1]-1))}%", f"{it(100*(eq[-1]**(1/tot)-1),1)}%",
          f"{it(100*dd,1)}%", 'no, opera anche al ribasso'),
         ('Comprare oro e tenerlo', f"+{it(100*(bh[-1]-1))}%", f"{it(100*(bh[-1]**(1/tot)-1),1)}%",
          f"{it(100*ddbh,1)}%", "sì, serve che l'oro salga"),
@@ -267,15 +298,26 @@ def pagina_risultato(pdf, dati, f):
 
     fig.text(.055, .285, 'Le tre cose che dice questa pagina', fontsize=12.5,
              color=INK, weight='bold')
+    vantaggio = eq[-1] / bh[-1]
+    if vantaggio < 1.35:
+        riga1 = (f"1.  Comprare oro e tenerlo, nello stesso periodo, avrebbe reso +{it(100*(bh[-1]-1))}%: quasi quanto il sistema.\n"
+                 "    L'oro è salito tantissimo dal 2019, e nessuna strategia su oro può ignorarlo. Il vantaggio del sistema\n"
+                 f"    non è il guadagno, è che lo ottiene con una perdita massima del {it(100*dd,1)}% invece del {it(100*ddbh,1)}%, e senza\n"
+                 "    dipendere dal fatto che l'oro salga: guadagna anche al ribasso.")
+    else:
+        riga1 = (f"1.  Comprare oro e tenerlo, nello stesso periodo, avrebbe reso +{it(100*(bh[-1]-1))}%. Il sistema fa "
+                 f"{it(vantaggio,1)} volte tanto,\n"
+                 f"    e con una perdita massima del {it(100*dd,1)}% invece del {it(100*ddbh,1)}%. Ma attenzione: parte di quel vantaggio\n"
+                 "    viene dal rischio più alto per operazione, non dalla strategia. A parità di perdita massima il\n"
+                 "    confronto si stringe — il valore vero è non dipendere dal fatto che l'oro salga.")
+    primo = 10000 * f
+    ultimo = 10000 * eq[-2] * f
     fig.text(.055, .265,
-        f"1.  Comprare oro e tenerlo, nello stesso periodo, avrebbe reso +{it(100*(bh[-1]-1))}%: quasi quanto il sistema.\n"
-        f"    L'oro è salito tantissimo dal 2019, e nessuna strategia su oro può ignorarlo. Il vantaggio del sistema\n"
-        f"    non è il guadagno, è che lo ottiene con una perdita massima del {it(100*dd,1)}% invece del {it(100*ddbh,1)}%, e senza\n"
-        "    dipendere dal fatto che l'oro salga: guadagna anche al ribasso.\n\n"
+        riga1 + "\n\n"
         f"2.  Contro il caso il sistema vince nettamente: batte il {it(batte,1)}% delle simulazioni in cui le stesse\n"
         "    operazioni vengono rimescolate dopo aver azzerato il guadagno medio. Non è rumore.\n\n"
         "3.  Il guadagno viene dall'interesse composto. Rischiando sempre la stessa percentuale, la posizione\n"
-        "    cresce con il conto: la prima operazione rischia 70 €, l'ultima ne rischia oltre 250.",
+        f"    cresce con il conto: la prima operazione rischia {it(primo)} €, l'ultima ne rischia circa {it(ultimo)}.",
         fontsize=8.6, color=INK2, va='top', linespacing=1.6)
     pdf.savefig(fig); plt.close(fig)
 
@@ -364,7 +406,8 @@ def pagina_montecarlo(pdf, dati, f):
 # ======================================================================
 #  pagina 4 — mesi, anni, distribuzione, correlazione
 # ======================================================================
-def pagina_dettaglio(pdf, dati, f):
+def pagina_dettaglio(pdf, dati, f, legs=None):
+    legs = legs or ORD
     fig = plt.figure(figsize=(8.27, 11.69))
     testata(fig, 'Mese per mese', 'Dove nasce il guadagno, e quanto le tre gambe '
             'si muovono insieme', 4)
@@ -432,33 +475,38 @@ def pagina_dettaglio(pdf, dati, f):
     mm = defaultdict(lambda: defaultdict(float))
     for x in dati: mm[x['data'][:7]][x['tag']] += x['R']
     mesi = sorted(mm)
-    S = {t: np.array([mm[k].get(t, 0.) for k in mesi]) for t in ORD}
-    C = np.array([[np.corrcoef(S[i], S[j])[0, 1] for j in ORD] for i in ORD])
+    S = {t: np.array([mm[k].get(t, 0.) for k in mesi]) for t in legs}
+    C = np.array([[np.corrcoef(S[i], S[j])[0, 1] for j in legs] for i in legs])
     ax3.imshow(C, cmap=cmap, norm=TwoSlopeNorm(0, -1, 1), aspect='auto')
-    for i in range(3):
-        for j in range(3):
+    n = len(legs)
+    for i in range(n):
+        for j in range(n):
             ax3.text(j, i, it(C[i, j], 2), ha='center', va='center', fontsize=9,
                      color=INK if abs(C[i, j]) > .35 else INK2,
                      weight='bold' if i != j else 'normal')
-    et = [NOMI[t][:9] for t in ORD]
-    ax3.set_xticks(range(3), et, fontsize=7, color=INK2)
-    ax3.set_yticks(range(3), et, fontsize=7, color=INK2)
+    et = [NOMI[t][:9] for t in legs]
+    ax3.set_xticks(range(n), et, fontsize=7, color=INK2)
+    ax3.set_yticks(range(n), et, fontsize=7, color=INK2)
     for s in ax3.spines.values(): s.set_visible(False)
     ax3.tick_params(length=0)
     fig.text(.615, .590, 'Quanto si muovono insieme', fontsize=11, color=INK, weight='bold')
     fig.text(.615, .352,
              "Rendimenti mensili. Zero = indipendenti,\n"
-             "1 = fanno la stessa cosa.\n\n"
-             "TRAPPOLA è negativa con entrambe:\n"
-             "guadagna quando le altre soffrono.\n"
-             "È il motivo per cui esiste.",
+             "1 = fanno la stessa cosa.\n\n" +
+             ("TRAPPOLA è negativa con entrambe:\n"
+              "guadagna quando le altre soffrono.\n"
+              "È il motivo per cui esiste." if len(legs) == 3 else
+              "0,53 fra le due: condividono la direzione\n"
+              "ma non il momento in cui entrano.\n"
+              "Metà di quello che fanno è indipendente."),
              fontsize=8.3, color=INK2, va='top', linespacing=1.6)
 
     # --- tabella per anno --------------------------------------------
     fig.text(.055, .238, 'Anno per anno, gamba per gamba', fontsize=12.5,
              color=INK, weight='bold')
-    intest = ['anno', 'operazioni'] + [NOMI[t] for t in ORD] + ['TOTALE', 'guadagno']
-    xs = [.065, .175, .31, .45, .59, .715, .855]
+    intest = ['anno', 'operazioni'] + [NOMI[t] for t in legs] + ['TOTALE', 'guadagno']
+    xs = ([.065, .175, .31, .45, .59, .715, .855] if len(legs) == 3
+          else [.065, .195, .37, .55, .715, .855])
     for c_i, t in enumerate(intest):
         fig.text(xs[c_i], .213, t, fontsize=7.4, color=INK3,
                  ha='left' if c_i < 2 else 'right')
@@ -470,15 +518,15 @@ def pagina_dettaglio(pdf, dati, f):
         sel = [x for x in dati if x['data'][:4] == an]
         fig.text(xs[0], yy, an, fontsize=8.4, color=INK)
         fig.text(xs[1], yy, it(len(sel)), fontsize=8.4, color=INK2)
-        for c_i, t in enumerate(ORD):
+        for c_i, t in enumerate(legs):
             v = sum(x['R'] for x in sel if x['tag'] == t)
             fig.text(xs[2 + c_i], yy, f"{'+' if v>0 else ''}{it(v,1)}", fontsize=8.4,
                      ha='right', color=VERDE if v > 0 else ARANCIO)
         tt = sum(x['R'] for x in sel)
-        fig.text(xs[5], yy, f"{'+' if tt>0 else ''}{it(tt,1)}", fontsize=8.4,
+        fig.text(xs[-2], yy, f"{'+' if tt>0 else ''}{it(tt,1)}", fontsize=8.4,
                  ha='right', color=INK, weight='bold')
         eqa = equity([x['R'] for x in sel], f)
-        fig.text(xs[6], yy, f"{'+' if eqa[-1]>1 else ''}{it(100*(eqa[-1]-1),1)}%",
+        fig.text(xs[-1], yy, f"{'+' if eqa[-1]>1 else ''}{it(100*(eqa[-1]-1),1)}%",
                  fontsize=8.4, ha='right', color=INK)
     pdf.savefig(fig); plt.close(fig)
 
@@ -582,50 +630,97 @@ def pagina_trappola(pdf, dati, f):
 # ======================================================================
 #  pagina 6 — limiti e conclusione
 # ======================================================================
-def pagina_limiti(pdf, dati, f):
+def pagina_limiti(pdf, dati, f, tutti=None, solo_due=False):
     fig = plt.figure(figsize=(8.27, 11.69))
-    testata(fig, 'Prima di usare soldi veri', 'Quattro limiti, e cosa resta da fare', 6)
+    testata(fig, 'Prima di usare soldi veri', 'I limiti, e cosa resta da fare', 6)
+
+    v = np.array([x['R'] for x in dati]); w = v[v > 0]; l = v[v <= 0]
+    pf = sum(w) / abs(sum(l))
+    fuori = [x['R'] for x in dati if x['data'][:4] >= '2024']
+    cal = 100 * (1 - np.mean(fuori) / v.mean())
+
+    # anni in cui il sistema ha lavorato senza produrre
+    piatti = []
+    for a in sorted({x['data'][:4] for x in dati}):
+        vv = np.array([x['R'] for x in dati if x['data'][:4] == a])
+        if vv.mean() < .03:
+            piatti.append((a, len(vv), vv.sum()))
+    if piatti:
+        n_op = sum(p[1] for p in piatti); somma = sum(p[2] for p in piatti)
+        esito = (f"hanno tolto {it(abs(somma),1)} punti R invece di aggiungerne" if somma < 0
+                 else f"hanno prodotto solo {it(somma,1)} punti R su {it(v.sum(),1)}")
+        txt_piatti = (f"{' e '.join(p[0] for p in piatti)}: {it(n_op)} operazioni che {esito}.\n"
+                      "Passerai un anno intero a pareggiare o a scendere, e chi spegne lì si perde l'anno dopo.")
+    else:
+        txt_piatti = ("Nessun anno completamente piatto in questo campione, ma con un vantaggio così sottile\n"
+                      "è una questione di tempo: mettilo in conto prima, non dopo.")
 
     limiti = [
         ("Il vantaggio è sottile",
-         "Profit factor 1,15: su 100 € rischiati ne restano 15. Funziona per accumulo lento, non per colpi.\n"
-         "Serve pazienza e serve che i costi restino bassi."),
+         f"Profit factor {it(pf,2)}: su 100 € rischiati ne restano {it(100*(pf-1)/pf)}. Funziona per accumulo lento, non\n"
+         "per colpi. Serve pazienza, e serve che i costi restino bassi."),
         ("Muore a 3 volte i costi",
-         "Commissioni, spread e swap si mangiano già il 40% del guadagno lordo, e lo swap da solo pesa il\n"
-         "doppio delle commissioni: è il prezzo delle posizioni tenute per giorni. Se gli spread veri sono\n"
-         "molto peggiori di quelli simulati il vantaggio sparisce, e nessun backtest può rispondere."),
-        ("Ci sono anni a vuoto",
-         "2022 e 2024: 675 operazioni per il 9% del risultato. Passerai un anno intero a pareggiare. Chi\n"
-         "spegne in quel momento si perde l'anno dopo — nel 2025 il sistema ha fatto +21%."),
+         "Commissioni, spread e swap si mangiano già il 40% del guadagno lordo, e lo swap pesa il doppio\n"
+         "delle commissioni. Se gli spread veri sono peggiori di quelli simulati il vantaggio sparisce."),
+        ("Ci sono anni a vuoto", txt_piatti),
         ("Cinque anni su otto servivano a costruire",
-         "Solo il 2024-2026 è un test vero. Ha superato tre criteri dichiarati prima di guardarlo, ma vale\n"
-         "t 1,4: corrobora, non dimostra. Per le previsioni va usato il rendimento di quel periodo, che è\n"
-         "un terzo più basso di quello delle pagine precedenti."),
+         "Solo il 2024-2026 è un test vero: ha superato tre criteri dichiarati prima, ma vale t 1,4. Cinque\n"
+         "degli otto anni servivano a scegliere i parametri, quindi le pagine 2 e 3 sono ottimistiche."),
     ]
-    y = .865
+    y = .880
     for i, (tit, txt) in enumerate(limiti):
         n = txt.count('\n') + 1
         h = .030 + n * .017
         scheda(fig, .055, y - h + .020, .89, h)
         fig.text(.075, y, f"{i+1}.   {tit}", fontsize=10, color=INK, weight='bold')
         fig.text(.075, y - .019, txt, fontsize=8.4, color=INK2, va='top', linespacing=1.6)
-        y -= h + .018
+        y -= h + .015
 
-    fuori = [x for x in dati if x['data'][:4] >= '2024']
-    ef = equity([x['R'] for x in fuori], f)
-    annuo_f = 100*(ef[-1]**(1/2.71) - 1)
-
-    fig.text(.055, .500, 'Il numero da usare per il futuro', fontsize=13,
+    # --- il numero da usare per il futuro
+    fig.text(.055, .545, 'Il numero da usare per il futuro', fontsize=13,
              color=INK, weight='bold')
-    scheda(fig, .055, .390, .89, .095, BLU)
-    fig.text(.50, .448, f"circa {it(annuo_f,0)}% all'anno", fontsize=22, color=BLU,
-             ha='center', weight='bold')
-    fig.text(.50, .418, f"a rischio {it(100*f,2)}% per operazione — è il rendimento del solo periodo "
-                        "mai visto prima,", fontsize=8.6, color=INK2, ha='center')
-    fig.text(.50, .403, "non quello delle pagine 2 e 3 che comprende gli anni di costruzione",
-             fontsize=8.6, color=INK2, ha='center')
+    if solo_due and tutti:
+        # configurazione scelta DOPO aver visto il fuori campione: il suo
+        # rendimento fuori campione non e' piu' una misura pulita
+        e2 = equity(fuori, f)
+        e3 = equity([x['R'] for x in tutti if x['data'][:4] >= '2024'], f)
+        scheda(fig, .055, .405, .43, .118, GIALLO)
+        fig.text(.270, .485, f"{it(100*(e3[-1]**(1/2.71)-1))}% all'anno", fontsize=17,
+                 color=GIALLO, ha='center', weight='bold')
+        fig.text(.270, .461, 'il numero PULITO', fontsize=8.5, color=INK, ha='center',
+                 weight='bold')
+        fig.text(.270, .441, "è il fuori campione della versione a tre\ngambe: nessuna scelta fatta guardandolo",
+                 fontsize=7.8, color=INK2, ha='center', va='top', linespacing=1.5)
+        scheda(fig, .515, .405, .43, .118, INK3)
+        fig.text(.730, .485, f"{it(100*(e2[-1]**(1/2.71)-1))}% all'anno", fontsize=17,
+                 color=INK3, ha='center', weight='bold')
+        fig.text(.730, .461, 'il numero SPORCO', fontsize=8.5, color=INK2, ha='center',
+                 weight='bold')
+        fig.text(.730, .441, "è questa versione, ma la terza gamba è\nstata tolta guardando proprio quegli anni",
+                 fontsize=7.8, color=INK2, ha='center', va='top', linespacing=1.5)
+        fig.text(.055, .375,
+                 f"Entrambi a rischio {it(100*f,2)}%. Il vero valore atteso sta fra i due, e più vicino a quello di sinistra:\n"
+                 "togliere una gamba perché ha perso proprio negli anni che dovevano restare puliti gonfia il\n"
+                 "risultato per costruzione. Usa il giallo per decidere, tratta l'altro come una speranza.\n\n"
+                 "In una riga: due strategie diverse, scelte su cinque anni e verificate su tre mai guardati prima,\n"
+                 "una terza gamba tolta a posteriori, e nessuna certezza — quella la danno solo i soldi veri, piano.",
+                 fontsize=8.6, color=INK2, va='top', linespacing=1.6)
+        y_next = .245
+    else:
+        ef = equity(fuori, f)
+        scheda(fig, .055, .432, .89, .095, BLU)
+        fig.text(.50, .490, f"circa {it(100*(ef[-1]**(1/2.71)-1))}% all'anno", fontsize=22,
+                 color=BLU, ha='center', weight='bold')
+        fig.text(.50, .460, f"a rischio {it(100*f,2)}% per operazione — è il rendimento del solo periodo "
+                            "mai visto prima,", fontsize=8.6, color=INK2, ha='center')
+        fig.text(.50, .445, "non quello delle pagine 2 e 3 che comprende gli anni di costruzione",
+                 fontsize=8.6, color=INK2, ha='center')
+        fig.text(.055, .409, f"Il vantaggio per operazione fuori campione è {it(cal)}% più basso di quello "
+                             "sull'intero periodo: è il costo\ndell'aver scelto i parametri guardando i primi cinque anni.",
+                 fontsize=8.6, color=INK2, va='top', linespacing=1.6)
+        y_next = .350
 
-    fig.text(.055, .355, 'Cosa resta da fare', fontsize=13, color=INK, weight='bold')
+    fig.text(.055, y_next, 'Cosa resta da fare', fontsize=13, color=INK, weight='bold')
     passi = [
         ("Niente più backtest",
          "I dati sono finiti. Ogni prova in più sugli stessi anni peggiora la statistica invece di migliorarla:\n"
@@ -633,41 +728,151 @@ def pagina_limiti(pdf, dati, f):
         ("Demo in tempo reale, tre-sei mesi",
          "Risponde alle due domande che nessun backtest può toccare: gli spread e gli slittamenti veri\n"
          "assomigliano a quelli simulati? e si riesce a guardarlo fermo per mesi senza spegnerlo?"),
-        ("La TRAPPOLA si decide lì",
-         "Il demo è dato nuovo: se continua a perdere anche lì, esce senza dubbi e senza aver consumato\n"
-         "nessun test. È il modo pulito di chiudere la questione aperta a pagina 5."),
+        ("Le scelte aperte si decidono lì",
+         "Il demo è dato nuovo. Se la gamba tolta continua a perdere anche in avanti, esce senza dubbi e\n"
+         "senza aver consumato nessun test. È il modo pulito di chiudere la questione di pagina 5."),
     ]
-    y = .318
+    y = y_next - .032
     for i, (tit, txt) in enumerate(passi):
-        h = .028 + 2 * .016
-        scheda(fig, .055, y - h + .019, .89, h)
+        h = .028 + 2 * .014
+        scheda(fig, .055, y - h + .018, .89, h)
         fig.text(.075, y, f"{i+1}.   {tit}", fontsize=10, color=VERDE, weight='bold')
-        fig.text(.075, y - .018, txt, fontsize=8.3, color=INK2, va='top', linespacing=1.55)
-        y -= h + .014
+        fig.text(.075, y - .017, txt, fontsize=8.2, color=INK2, va='top', linespacing=1.5)
+        y -= h + .012
 
-    fig.text(.055, .106, 'In una riga', fontsize=13, color=INK, weight='bold')
-    fig.text(.055, .086,
-             "Tre strategie con logiche diverse, parametri scelti su cinque anni e verificati su tre mai guardati prima,\n"
-             "che hanno superato criteri dichiarati in anticipo. Un vantaggio reale ma sottile, una gamba che va\n"
-             "probabilmente tolta, e nessuna certezza: quella la danno solo i soldi veri, piano.",
-             fontsize=8.8, color=INK2, va='top', linespacing=1.65)
-    fig.text(.055, .014,
+    if not solo_due:
+        fig.text(.055, y - .020, 'In una riga', fontsize=13, color=INK, weight='bold')
+        fig.text(.055, y - .040,
+                 "Tre strategie con logiche diverse, parametri scelti su cinque anni e verificati su tre mai guardati\n"
+                 "prima, che hanno superato criteri dichiarati in anticipo. Un vantaggio reale ma sottile, una gamba\n"
+                 "che va probabilmente tolta, e nessuna certezza: quella la danno solo i soldi veri, piano.",
+                 fontsize=8.7, color=INK2, va='top', linespacing=1.65)
+    fig.text(.055, .010,
              "Simulazione su dati storici, conto demo PUPrime, tick reali. Il passato non garantisce il futuro.",
              fontsize=7.5, color=INK3, style='italic')
     pdf.savefig(fig); plt.close(fig)
 
+
 # ======================================================================
-def main(path, f=0.007, out='report/portafoglio-oro.pdf'):
+#  pagina 5 (versione a due gambe) — perche' la terza e' uscita
+# ======================================================================
+def pagina_perche_due(pdf, tutti, f):
+    """Serve i dati COMPLETI, comprese le operazioni della gamba tolta."""
+    fig = plt.figure(figsize=(8.27, 11.69))
+    testata(fig, 'Perché la terza è uscita',
+            "La TRAPPOLA scommetteva contro la direzione dell'oro", 5)
+
+    fig.text(.055, .880, 'Vendere le rotture al rialzo, su un mercato che sale', fontsize=14,
+             color=ARANCIO, weight='bold')
+    fig.text(.055, .858,
+             "La TRAPPOLA prende sempre il lato opposto dello sfondamento. Quando l'oro rompe verso l'alto\n"
+             "e lei scommette che sia un inganno, vende. Dal 2019 l'oro è passato da 1.280 a oltre 4.300\n"
+             "dollari: quella scommessa è stata quasi sempre sbagliata.",
+             fontsize=9, color=INK2, va='top', linespacing=1.6)
+
+    # --- barre: lato long contro lato short, per ciascuna gamba
+    ax = fig.add_axes([.095, .565, .385, .180])
+    lati = ['long', 'short']
+    xpos = np.arange(3)
+    for k, lato in enumerate(lati):
+        vals = [sum(x['R'] for x in tutti if x['tag'] == t and x['tipo'] == lato) for t in ORD]
+        ax.bar(xpos + (k - .5) * .38, vals, width=.34,
+               color=[COL[t] for t in ORD], alpha=1.0 if lato == 'long' else .42,
+               edgecolor=BG, lw=1.5, label='al rialzo' if lato == 'long' else 'al ribasso')
+    ax.axhline(0, color=INK3, lw=1)
+    ax.set_xticks(xpos, [NOMI[t][:9] for t in ORD], fontsize=7.5)
+    ax.set_ylabel('punti R guadagnati'); griglia_y(ax)
+    ax.legend(frameon=False, fontsize=8, labelcolor=INK2, loc='upper right')
+    fig.text(.095, .762, 'Quanto rende ogni gamba, per lato', fontsize=11,
+             color=INK, weight='bold')
+
+    scheda(fig, .545, .553, .40, .192, ARANCIO)
+    fig.text(.567, .715, 'TRAPPOLA, lato per lato', fontsize=10.5, color=INK, weight='bold')
+    for i, (lato, etich) in enumerate([('long', 'compra le rotture al ribasso fallite'),
+                                       ('short', 'vende le rotture al rialzo fallite')]):
+        v = np.array([x['R'] for x in tutti if x['tag'] == 'S1-FADE' and x['tipo'] == lato])
+        w = v[v > 0]; l = v[v <= 0]
+        yy = .678 - i * .052
+        fig.text(.567, yy, etich, fontsize=7.8, color=INK3)
+        fig.text(.567, yy - .026, f"{'+' if v.sum()>0 else ''}{it(v.sum(),1)} R",
+                 fontsize=14, color=VERDE if v.sum() > 0 else ARANCIO, weight='bold')
+        fig.text(.700, yy - .022, f"{it(len(v))} operazioni", fontsize=7.8, color=INK3)
+        fig.text(.700, yy - .034, f"profit factor {it(sum(w)/abs(sum(l)),2)}",
+                 fontsize=7.8, color=INK3)
+    vs = np.array([x['R'] for x in tutti
+                   if x['tag'] == 'S1-FADE' and x['tipo'] == 'short' and x['data'][:4] >= '2024'])
+    fig.text(.567, .588, f"Nei tre anni mai visti il solo lato al ribasso\nha perso {it(abs(vs.sum()),1)} punti R su {it(len(vs))} operazioni.",
+             fontsize=8.3, color=INK2, va='top', linespacing=1.55)
+
+    fig.text(.055, .525, 'Lo stesso effetto si vede su tutte e tre', fontsize=12.5,
+             color=INK, weight='bold')
+    xs = [.065, .34, .50, .66, .855]
+    y = .493
+    for c_i, t in enumerate(['al rialzo (R)', 'al ribasso (R)', 'differenza', 'operazioni']):
+        fig.text(xs[c_i+1], y, t, fontsize=7.2, color=INK3, ha='right')
+    for t in ORD:
+        y -= .026
+        vl = sum(x['R'] for x in tutti if x['tag'] == t and x['tipo'] == 'long')
+        vs_ = sum(x['R'] for x in tutti if x['tag'] == t and x['tipo'] == 'short')
+        n = sum(1 for x in tutti if x['tag'] == t)
+        fig.text(xs[0], y, NOMI[t], fontsize=8.6, color=COL[t], weight='bold')
+        for c_i, v in enumerate([vl, vs_, vl - vs_]):
+            fig.text(xs[c_i+1], y, f"{'+' if v>0 else ''}{it(v,1)}", fontsize=8.6, ha='right',
+                     color=VERDE if v > 0 else ARANCIO)
+        fig.text(xs[4], y, it(n), fontsize=8.6, ha='right', color=INK2)
+
+    fig.text(.055, .385, "Perché conta, e perché non è la risposta a tutto", fontsize=12,
+             color=GIALLO, weight='bold')
+    fig.text(.055, .363,
+        "Tutte e tre le gambe rendono di più al rialzo che al ribasso, ma solo la TRAPPOLA va in perdita:\n"
+        "le altre due guadagnano da entrambi i lati, solo meno. È coerente con un mercato che in sette anni\n"
+        "è più che triplicato — e la TRAPPOLA è l'unica costruita per vendere proprio quando sfonda in su.\n\n"
+        "L'avvertenza però è seria: questo è un periodo in cui l'oro ha fatto una delle corse più forti della\n"
+        "sua storia. Dire «gli short non funzionano sull'oro» sulla base di questi sette anni significa\n"
+        "scommettere che il rialzo continui. Non è un vantaggio statistico, è una previsione sul mercato —\n"
+        "e nessuno dei test fatti qui la sostiene.\n\n"
+        "E resta il punto di metodo: la TRAPPOLA viene tolta dopo aver guardato il 2024-2026, cioè il test\n"
+        "che doveva restare pulito. La spiegazione qui sopra è buona, ma una buona spiegazione trovata dopo\n"
+        "resta una spiegazione trovata dopo. Il verdetto vero lo darà solo il tempo reale.",
+        fontsize=8.7, color=INK2, va='top', linespacing=1.65)
+
+    fig.text(.055, .142, 'Una via di mezzo che non ho preso', fontsize=11.5,
+             color=INK, weight='bold')
+    vl = np.array([x['R'] for x in tutti if x['tag'] == 'S1-FADE' and x['tipo'] == 'long'])
+    fig.text(.055, .121,
+        f"Il solo lato al rialzo della TRAPPOLA fa {'+' if vl.sum()>0 else ''}{it(vl.sum(),1)} punti R con profit factor "
+        f"{it(vl[vl>0].sum()/abs(vl[vl<=0].sum()),2)}: tenerla\n"
+        "solo long sarebbe la scelta più ovvia. Non l'ho fatta perché sarebbe il terzo aggiustamento\n"
+        "deciso guardando gli stessi dati, e ogni aggiustamento in più rende il risultato meno credibile,\n"
+        "non più credibile. Se la si vuole recuperare, la si prova in avanti — non all'indietro.",
+        fontsize=8.7, color=INK2, va='top', linespacing=1.65)
+    pdf.savefig(fig); plt.close(fig)
+
+# ======================================================================
+def main(path, f=0.007, solo_due=False, out=None):
     dati, amb = carica(path)
     print(f"{len(dati)} operazioni   abbinamenti ambigui {amb}")
+    legs = ['S3-DONCH', 'S2-PULLB'] if solo_due else ORD
+    sel = [x for x in dati if x['tag'] in legs]
+    out = out or ('report/portafoglio-oro-due-gambe.pdf' if solo_due
+                  else 'report/portafoglio-oro.pdf')
     with PdfPages(out) as pdf:
-        pagina_strategie(pdf, dati)
-        pagina_risultato(pdf, dati, f)
-        pagina_montecarlo(pdf, dati, f)
-        pagina_dettaglio(pdf, dati, f)
-        pagina_trappola(pdf, dati, f)
-        pagina_limiti(pdf, dati, f)
+        pagina_strategie(pdf, sel, legs)
+        pagina_risultato(pdf, sel, f, legs)
+        pagina_montecarlo(pdf, sel, f)
+        pagina_dettaglio(pdf, sel, f, legs)
+        if solo_due:
+            pagina_perche_due(pdf, dati, f)      # serve anche la gamba tolta
+        else:
+            pagina_trappola(pdf, dati, f)
+        pagina_limiti(pdf, sel, f, dati, solo_due)
     print(f"scritto {out}")
 
 if __name__ == '__main__':
-    main(sys.argv[1], float(sys.argv[2]) if len(sys.argv) > 2 else 0.007)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('report')
+    ap.add_argument('--rischio', type=float, default=0.7, help='in percento')
+    ap.add_argument('--due', action='store_true', help='solo ROTTURA e RITRACCIAMENTO')
+    a = ap.parse_args()
+    main(a.report, a.rischio / 100.0, a.due)
