@@ -33,6 +33,7 @@ input group "=== Pesi per strategia (moltiplicatori del rischio base) ==="
 input double            InpS1RiskMult         = 1.0;      // [C] Peso di S1
 input double            InpS2RiskMult         = 1.0;      // [C] Peso di S2
 input double            InpS3RiskMult         = 1.0;      // [C] Peso di S3
+input double            InpS4RiskMult         = 1.0;      // [C] Peso di S4
 input int               InpSlippagePoints     = 30;       // Deviazione massima (points)
 input int               InpMaxSpreadPoints    = 0;        // [C] Spread max in points (0 = filtro off)
 
@@ -78,6 +79,18 @@ input bool              InpS2ExitNeedsSlope   = true;     // [C] L'uscita richie
 input int               InpS2RegimeEmaPeriod  = 0;        // [C] EMA di regime (0 = filtro disattivato)
 input bool              InpS2AllowShort       = true;     // [D] Consenti short
 
+input group "=== S4: Fade del breakout fallito (M30) ==="
+input bool              InpS4Enabled          = true;     // Attiva S4
+input ENUM_TIMEFRAMES   InpS4TF               = PERIOD_M30;// Timeframe
+input int               InpS4BreakBars        = 60;       // Canale rotto (= trigger di S3)
+input int               InpS4ReentryBars      = 3;        // Barre entro cui deve rientrare
+input int               InpS4AtrPeriod        = 14;       // Periodo ATR
+input double            InpS4StopBufferATR    = 0.5;      // Buffer stop oltre l'estremo
+input double            InpS4TargetR          = 2.0;      // Take profit in R
+input int               InpS4MaxHoldBars      = 48;       // Uscita forzata dopo N barre
+input bool              InpS4AllowLong        = true;     // Fade dei minimi rotti
+input bool              InpS4AllowShort       = true;     // Fade dei massimi rotti
+
 input group "=== S3: Donchian breakout + Volatilita (M30) ==="
 input bool              InpS3Enabled          = true;     // Attiva S3
 input ENUM_TIMEFRAMES   InpS3TF               = PERIOD_M30;// [L] Timeframe
@@ -101,9 +114,15 @@ CTrade   trade;
 int      hS1Ema = INVALID_HANDLE, hS1Atr = INVALID_HANDLE;
 int      hS2Ema = INVALID_HANDLE, hS2Atr = INVALID_HANDLE, hS2Regime = INVALID_HANDLE;
 int      hS3AtrF = INVALID_HANDLE, hS3AtrS = INVALID_HANDLE;
+int      hS4Atr  = INVALID_HANDLE;
 int      hRiskAtr = INVALID_HANDLE;
 
-datetime lastBarS1 = 0, lastBarS2 = 0, lastBarS3 = 0;
+datetime lastBarS1 = 0, lastBarS2 = 0, lastBarS3 = 0, lastBarS4 = 0;
+
+// stato delle rotture in corso per S4
+bool     s4UpActive = false, s4DnActive = false;
+double   s4UpLevel = 0.0, s4UpExtreme = 0.0, s4DnLevel = 0.0, s4DnExtreme = 0.0;
+int      s4UpBars = 0, s4DnBars = 0;
 
 // memoria del rischio iniziale (1R) per ticket, per calcolare l'R corrente
 // ring buffer a dimensione fissa: le posizioni concorrenti sono al massimo 3,
@@ -389,6 +408,29 @@ bool OpenTrade(const long magic, const bool isLong, const double stopAtrDist,
   }
 
 //------------------------------------------------------------------
+//  S4: chiusura forzata per durata massima
+//------------------------------------------------------------------
+void CloseExpiredS4()
+  {
+   if(InpS4MaxHoldBars <= 0) return;
+   long   magic  = InpMagicBase + 4;
+   long   maxSec = (long)InpS4MaxHoldBars * PeriodSeconds(InpS4TF);
+
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong tk = PositionGetTicket(i);
+      if(tk == 0) continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != magic)   continue;
+      if(TimeCurrent() - (datetime)PositionGetInteger(POSITION_TIME) >= maxSec)
+        {
+         trade.SetExpertMagicNumber(magic);
+         trade.PositionClose(tk);
+        }
+     }
+  }
+
+//------------------------------------------------------------------
 //  Trailing stop (attivato dopo +xR, distanza in ATR dal prezzo)
 //------------------------------------------------------------------
 void ManageTrailing(const long magic, const double startR, const double trailAtr,
@@ -579,6 +621,84 @@ void RunS3()
   }
 
 //==================================================================
+//  STRATEGIA 4 - Fade del breakout fallito (M30)
+//  Prende il lato opposto della rottura che manda in stop S3:
+//  il prezzo esce dal canale a 60 barre e richiude dentro entro
+//  poche barre, quindi chi ha comprato la rottura e' intrappolato.
+//==================================================================
+void RunS4()
+  {
+   long   magic = InpMagicBase + 4;
+   double atr   = IndValue(hS4Atr, 1);
+   if(atr <= 0.0) return;
+
+   double c1 = iClose(_Symbol, InpS4TF, 1);
+   double h1 = iHigh (_Symbol, InpS4TF, 1);
+   double l1 = iLow  (_Symbol, InpS4TF, 1);
+   if(c1 <= 0.0) return;
+
+   bool canOpen = (CountPositions(magic) < InpMaxPosPerStrategy);
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+   // ---------------- rottura verso l'alto ----------------
+   if(s4UpActive)
+     {
+      if(h1 > s4UpExtreme) s4UpExtreme = h1;
+      s4UpBars++;
+      if(c1 < s4UpLevel)                       // rientro: rottura fallita -> short
+        {
+         if(InpS4AllowShort && canOpen && bid > 0.0)
+           {
+            double stopPrice = s4UpExtreme + InpS4StopBufferATR * atr;
+            double dist      = stopPrice - bid;
+            if(dist > 0.0)
+               OpenTrade(magic, false, dist, InpS4TargetR, "S4-FADE", InpS4RiskMult);
+           }
+         s4UpActive = false;
+        }
+      else if(s4UpBars >= InpS4ReentryBars) s4UpActive = false;
+     }
+   else
+     {
+      int ih = iHighest(_Symbol, InpS4TF, MODE_HIGH, InpS4BreakBars, 2);
+      if(ih >= 0)
+        {
+         double lvl = iHigh(_Symbol, InpS4TF, ih);
+         if(c1 > lvl) { s4UpActive = true; s4UpLevel = lvl; s4UpExtreme = h1; s4UpBars = 0; }
+        }
+     }
+
+   // ---------------- rottura verso il basso ----------------
+   if(s4DnActive)
+     {
+      if(l1 < s4DnExtreme) s4DnExtreme = l1;
+      s4DnBars++;
+      if(c1 > s4DnLevel)
+        {
+         if(InpS4AllowLong && canOpen && ask > 0.0)
+           {
+            double stopPrice = s4DnExtreme - InpS4StopBufferATR * atr;
+            double dist      = ask - stopPrice;
+            if(dist > 0.0)
+               OpenTrade(magic, true, dist, InpS4TargetR, "S4-FADE", InpS4RiskMult);
+           }
+         s4DnActive = false;
+        }
+      else if(s4DnBars >= InpS4ReentryBars) s4DnActive = false;
+     }
+   else
+     {
+      int il = iLowest(_Symbol, InpS4TF, MODE_LOW, InpS4BreakBars, 2);
+      if(il >= 0)
+        {
+         double lvl = iLow(_Symbol, InpS4TF, il);
+         if(c1 < lvl) { s4DnActive = true; s4DnLevel = lvl; s4DnExtreme = l1; s4DnBars = 0; }
+        }
+     }
+  }
+
+//==================================================================
 //  EVENTI
 //==================================================================
 int OnInit()
@@ -591,11 +711,12 @@ int OnInit()
       hS2Regime = iMA(_Symbol, InpS2TF, InpS2RegimeEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
    hS3AtrF = iATR(_Symbol, InpS3TF, InpS3AtrFast);
    hS3AtrS = iATR(_Symbol, InpS3TF, InpS3AtrSlow);
+   hS4Atr  = iATR(_Symbol, InpS4TF, InpS4AtrPeriod);
    hRiskAtr= iATR(_Symbol, InpRiskTF, InpRiskAtrPeriod);
 
    if(hS1Ema == INVALID_HANDLE || hS1Atr == INVALID_HANDLE ||
       hS2Ema == INVALID_HANDLE || hS2Atr == INVALID_HANDLE ||
-      hS3AtrF == INVALID_HANDLE || hS3AtrS == INVALID_HANDLE ||
+      hS3AtrF == INVALID_HANDLE || hS3AtrS == INVALID_HANDLE || hS4Atr == INVALID_HANDLE ||
       hRiskAtr == INVALID_HANDLE)
      {
       Print("Errore nella creazione degli handle indicatori");
@@ -622,11 +743,11 @@ void PrintStrategySummary()
   {
    if(!HistorySelect(0, TimeCurrent())) return;
 
-   string names[3] = {"S1-TSMOM", "S2-EMA  ", "S3-DONCH"};
-   int    n[3]     = {0, 0, 0};
-   int    win[3]   = {0, 0, 0};
-   double gw[3]    = {0.0, 0.0, 0.0};
-   double gl[3]    = {0.0, 0.0, 0.0};
+   string names[4] = {"S1-TSMOM", "S2-EMA  ", "S3-DONCH", "S4-FADE "};
+   int    n[4]     = {0, 0, 0, 0};
+   int    win[4]   = {0, 0, 0, 0};
+   double gw[4]    = {0.0, 0.0, 0.0, 0.0};
+   double gl[4]    = {0.0, 0.0, 0.0, 0.0};
 
    for(int i = 0; i < HistoryDealsTotal(); i++)
      {
@@ -637,7 +758,7 @@ void PrintStrategySummary()
 
       long   magic = HistoryDealGetInteger(tk, DEAL_MAGIC);
       int    idx   = (int)(magic - InpMagicBase) - 1;
-      if(idx < 0 || idx > 2) continue;
+      if(idx < 0 || idx > 3) continue;
 
       double net = HistoryDealGetDouble(tk, DEAL_PROFIT)
                  + HistoryDealGetDouble(tk, DEAL_COMMISSION)
@@ -651,7 +772,7 @@ void PrintStrategySummary()
    PrintFormat("=== RIEPILOGO PER STRATEGIA ===");
    PrintFormat("%-9s %7s %7s %7s %11s %9s %9s", "strategia", "trade", "WR%", "PF", "P&L", "avgWin", "avgLoss");
    int totN = 0;
-   for(int k = 0; k < 3; k++)
+   for(int k = 0; k < 4; k++)
      {
       if(n[k] == 0) continue;
       totN += n[k];
@@ -671,7 +792,7 @@ void OnDeinit(const int reason)
    IndicatorRelease(hS1Ema);  IndicatorRelease(hS1Atr);
    IndicatorRelease(hS2Ema);  IndicatorRelease(hS2Atr);
    if(hS2Regime != INVALID_HANDLE) IndicatorRelease(hS2Regime);
-   IndicatorRelease(hS3AtrF); IndicatorRelease(hS3AtrS);
+   IndicatorRelease(hS3AtrF); IndicatorRelease(hS3AtrS); IndicatorRelease(hS4Atr);
    IndicatorRelease(hRiskAtr);
   }
 
@@ -680,17 +801,20 @@ void OnTick()
    // 1) gestione posizioni aperte: ad ogni tick
    ManageTrailing(InpMagicBase + 1, InpS1TrailStartR, InpS1TrailATR, hS1Atr,  InpS1StopATR);
    ManageTrailing(InpMagicBase + 3, InpS3TrailStartR, InpS3TrailATR, hS3AtrF, InpS3StopATR);
+   CloseExpiredS4();
    WeekendGuard();
 
    // 2) segnali: solo alla chiusura di una barra del rispettivo TF
    bool newS1 = IsNewBar(InpS1TF, lastBarS1);
    bool newS2 = IsNewBar(InpS2TF, lastBarS2);
    bool newS3 = IsNewBar(InpS3TF, lastBarS3);
+   bool newS4 = IsNewBar(InpS4TF, lastBarS4);
 
    if(!TradingAllowed()) return;
 
    if(InpS1Enabled && InpS1RiskMult > 0.0 && newS1) RunS1();
    if(InpS2Enabled && InpS2RiskMult > 0.0 && newS2) RunS2();
    if(InpS3Enabled && InpS3RiskMult > 0.0 && newS3) RunS3();
+   if(InpS4Enabled && InpS4RiskMult > 0.0 && newS4) RunS4();
   }
 //+------------------------------------------------------------------+
