@@ -70,6 +70,9 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `mt5/GoldFadeBreak.mq5` | scartata — la TRAPPOLA, +50 R dentro e −44,9 R fuori |
 | `mt5/GoldRangeMR.mq5` | scartata — 174 configurazioni con ≥100 trade, zero in utile |
 | `mt5/GoldRandomNull.mq5` | benchmark a ingressi casuali, **mai eseguito** |
+| `mt5/NAS100_SessionOpenMomentum_v2_57.mq5` | **VIVO** — seconda strategia, Nasdaq M5 momentum sull'apertura di New York. Costruita da Davide con un'altra AI |
+| `mt5/NAS100_v2_57_valori.set` | i parametri testati, ottimizzazione spenta. **Il file di sicurezza** |
+| `mt5/NAS100_v2_57_plateau.set` | gli stessi, con le griglie del test del plateau gia' compilate |
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
 | `tools/montecarlo.py` | bootstrap a quattro metodi |
 | `tools/report_due_broker.py` | confronto a due broker: stessa strategia, due listini |
