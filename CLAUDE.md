@@ -62,7 +62,7 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 
 | File | Stato |
 |---|---|
-| `mt5/V1XAU_TrendFollowing.mq5` | **VIVO — è l'EA buono**: ROTTURA (M30) + RITRACCIAMENTO (H4) |
+| `mt5/V1XAU_TrendFollowing.mq5` | **VIVO — è l'EA buono**: ROTTURA (M30) + RITRACCIAMENTO (H4). Dalla 2026-09-20 ha il pannello live (spento nel tester) |
 | `mt5/GoldPortfolio.mq5` | **VIVO**: la versione a tre gambe. Tenuta perché è l'unica con la verifica fuori campione non contaminata (il 22% della sezione 5 di CONTINUA-QUI) |
 | `mt5/GoldTrendPullback.mq5` | **ANTENATO** del RITRACCIAMENTO. Bocciato da solo (t 1,61), promosso dopo l'estensione della griglia (t 2,61). Non è una candidata morta |
 | `mt5/GoldS3.mq5` | antenato della ROTTURA: il solo Donchian estratto per misurarlo isolato |
@@ -71,7 +71,7 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `mt5/GoldRangeMR.mq5` | scartata — 174 configurazioni con ≥100 trade, zero in utile |
 | `mt5/GoldRandomNull.mq5` | benchmark a ingressi casuali, **mai eseguito** |
 | `mt5/NAS100_SessionOpenMomentum_v2_57.mq5` | **VIVO** — seconda strategia, Nasdaq M5 momentum sull'apertura di New York. Costruita da Davide con un'altra AI |
-| `mt5/NAS100_SessionOpenMomentum_v2_57_MULTI.mq5` | **VIVO** — la stessa strategia che puo' condividere il conto con l'EA dell'oro (`BlockOnAnyAccountPosition=false`). Tre righe di differenza |
+| `mt5/NAS100_SessionOpenMomentum_v2_57_MULTI.mq5` | **VIVO** — la stessa strategia che puo' condividere il conto con l'EA dell'oro (`BlockOnAnyAccountPosition=false`). Stesso pannello live dell'oro |
 | `mt5/NAS100_v2_57_valori.set` | i parametri testati, ottimizzazione spenta. **Il file di sicurezza** |
 | `mt5/NAS100_v2_57_plateau.set` | gli stessi, con le griglie del test del plateau gia' compilate |
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
@@ -81,6 +81,8 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/montecarlo_validazione.py` | Monte Carlo a cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `tools/report_validazione.py` | il dossier di validazione a 22 pagine |
 | `tools/report_portafoglio.py` | oro + nasdaq su un conto solo, con e senza composto |
+| `tools/montecarlo_portafoglio.py` | Monte Carlo su piu' strategie insieme, in frazione di conto |
+| `tools/report_uno_o_due.py` | un conto o due? e con quale rischio. **Il report che corregge il 4572%** |
 | `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |

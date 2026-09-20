@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property strict
 // LIVE PANEL FINAL: strategy logic inherited unchanged from frozen v2.57
-#property version   "2.58"
+#property version   "2.59"
 #property description "MULTI: puo' condividere il conto con altri EA (BlockOnAnyAccountPosition)"
 #property description "Card-count adaptive risk: vol+directional quality, rolling centering, optional equity-health throttle"
 #property description "Entry-comparison replica: opening M5 vs first EMA12 cross; no forced close"
@@ -150,8 +150,6 @@ double g_marketRawHistory[];
 //-------------------------- LIVE PANEL ONLY -------------------------//
 // Completely disabled in Strategy Tester. These variables/functions do not
 // participate in signals, sizing, entries, exits, or trailing.
-bool g_livePanelEnabled=false;
-string PANEL_PREFIX="NAS57_LIVE_";
 
 //----------------------------- Helpers ------------------------------//
 datetime MakeDateTime(int y,int mon,int day,int hour=0,int minute=0,int sec=0)
@@ -1240,74 +1238,233 @@ void AuditEntry(const string direction,const double entry,const double stop,
 // VISUAL ONLY. Disabled in Strategy Tester/Optimization.
 // It does not trigger, block, size, open, close, or modify strategy trades.
 
-void PanelDelete()
-  {
-   for(int i=ObjectsTotal(0)-1;i>=0;i--)
-     {
-      string n=ObjectName(0,i);
-      if(StringFind(n,PANEL_PREFIX)==0) ObjectDelete(0,n);
-     }
-  }
+//==================================================================
+//  PANNELLO LIVE
+//  Solo disegno. Non apre, non chiude, non modifica e non dimensiona
+//  niente: legge il conto e lo scrive sul grafico. Si spegne da solo
+//  nel tester e in ottimizzazione, quindi non rallenta i backtest.
+//==================================================================
+#define PN_PRE "PN_"
+#define PN_OGNI 2          // secondi fra due riletture dello storico
 
-void PRect(string id,int x,int y,int w,int h,color bg,color border)
+// Dichiarate qui, definite piu' sotto nella parte specifica di questo
+// EA: sono le uniche cose che cambiano fra il pannello del nasdaq e
+// quello dell'oro. Il resto del blocco e' identico nei due file.
+bool   PnMio(const ulong deal);
+string PnTitolo();
+string PnSotto();
+double PnRischioPct();
+double PnRischioSoldi();
+int    PnDiagnostica(string &r[],color &c[]);
+string PnPosizione(color &col);
+
+bool     g_pnOn        = false;
+datetime g_pnLento     = 0;     // ultimo giro "pesante"
+datetime g_pnDeal      = 0;     // tempo dell'ultimo deal gia' contato
+double   g_pnSaldo     = 0.0;   // saldo ricostruito a quel punto
+double   g_pnCurva     = 1.0;   // rendimento composto del conto (1 = piatto)
+double   g_pnPicco     = 1.0;
+double   g_pnDDmax     = 0.0;   // massimo drawdown toccato, in %
+// PnL del periodo: [0]=mio  [1]=tutto il conto  [2]=saldo a inizio periodo
+double   g_pnG[3], g_pnS[3], g_pnM[3];
+double   g_pnMioTot    = 0.0;
+int      g_pnMioN      = 0, g_pnMioW = 0;
+
+//------------------------------------------------------------------
+//  Disegno
+//------------------------------------------------------------------
+void PnRect(const string id,const int x,const int y,const int w,const int h,
+            const color bg,const color bordo)
   {
-   string n=PANEL_PREFIX+id;
-   if(ObjectFind(0,n)<0) ObjectCreate(0,n,OBJ_RECTANGLE_LABEL,0,0,0);
+   string n = PN_PRE + id;
+   if(ObjectFind(0,n) < 0) ObjectCreate(0,n,OBJ_RECTANGLE_LABEL,0,0,0);
    ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);
    ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);
    ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
    ObjectSetInteger(0,n,OBJPROP_XSIZE,w);
    ObjectSetInteger(0,n,OBJPROP_YSIZE,h);
    ObjectSetInteger(0,n,OBJPROP_BGCOLOR,bg);
-   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,border);
+   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,bordo);
    ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
   }
 
-void PText(string id,int x,int y,string txt,int size,color c)
+void PnText(const string id,const int x,const int y,const string txt,
+            const int size,const color c)
   {
-   string n=PANEL_PREFIX+id;
-   if(ObjectFind(0,n)<0) ObjectCreate(0,n,OBJ_LABEL,0,0,0);
+   string n = PN_PRE + id;
+   if(ObjectFind(0,n) < 0) ObjectCreate(0,n,OBJ_LABEL,0,0,0);
    ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);
    ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);
    ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
    ObjectSetInteger(0,n,OBJPROP_FONTSIZE,size);
    ObjectSetInteger(0,n,OBJPROP_COLOR,c);
-   ObjectSetString(0,n,OBJPROP_FONT,"Arial");
+   ObjectSetString (0,n,OBJPROP_FONT,"Arial");
    ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
-   ObjectSetString(0,n,OBJPROP_TEXT,txt);
+   ObjectSetString (0,n,OBJPROP_TEXT,txt);
   }
 
-double PanelPeriodPnL(datetime fromTime)
+void PnPulisci()
   {
-   if(!HistorySelect(fromTime,TimeCurrent())) return 0.0;
-   double x=0.0;
-   for(int i=0;i<HistoryDealsTotal();i++)
+   for(int i = ObjectsTotal(0) - 1; i >= 0; i--)
      {
-      ulong t=HistoryDealGetTicket(i);
-      if(t==0) continue;
-      if((ulong)HistoryDealGetInteger(t,DEAL_MAGIC)!=MagicNumber) continue;
-      if(HistoryDealGetString(t,DEAL_SYMBOL)!=_Symbol) continue;
-      long e=HistoryDealGetInteger(t,DEAL_ENTRY);
-      if(e!=DEAL_ENTRY_OUT && e!=DEAL_ENTRY_OUT_BY) continue;
-      x+=HistoryDealGetDouble(t,DEAL_PROFIT)
-        +HistoryDealGetDouble(t,DEAL_SWAP)
-        +HistoryDealGetDouble(t,DEAL_COMMISSION);
+      string n = ObjectName(0,i);
+      if(StringFind(n,PN_PRE) == 0) ObjectDelete(0,n);
      }
-   return x;
   }
 
-void PanelPeriodStarts(datetime &day0,datetime &week0,datetime &month0)
+//------------------------------------------------------------------
+//  Inizio di giornata, settimana e mese in ora del server
+//------------------------------------------------------------------
+void PnInizioPeriodi(datetime &g,datetime &s,datetime &m)
   {
    MqlDateTime d; TimeToStruct(TimeCurrent(),d);
-   day0=MakeDateTime(d.year,d.mon,d.day,0,0,0);
-   month0=MakeDateTime(d.year,d.mon,1,0,0,0);
-   int back=(d.day_of_week==0 ? 6 : d.day_of_week-1);
-   week0=day0-back*86400;
+   MqlDateTime z; z = d;                 // copia esplicita: piu' sicura
+   z.hour = 0; z.min = 0; z.sec = 0;
+   g = StructToTime(z);
+   z.day = 1; m = StructToTime(z);
+   int indietro = (d.day_of_week == 0 ? 6 : d.day_of_week - 1);
+   s = g - indietro * 86400;
   }
 
+//------------------------------------------------------------------
+//  Curva del conto in frazione, immune ai versamenti
+//
+//  Per ogni deal:  f = (profitto + swap + commissione) / saldo_prima
+//  e il rendimento e' il prodotto dei (1+f). I versamenti e i prelievi
+//  spostano il saldo ma non entrano nel rendimento, che e' quello che
+//  serve: dice quanto ha reso il TRADING, non quanto e' stato messo.
+//  E' la stessa grandezza usata nelle analisi in Python.
+//
+//  Girata tutta una volta all'avvio, poi solo sui deal nuovi.
+//------------------------------------------------------------------
+void PnCurvaAggiorna(const bool daCapo)
+  {
+   if(daCapo)
+     {
+      if(!HistorySelect(0,TimeCurrent())) return;
+      // saldo a inizio storia = saldo di adesso meno tutto quello che e' passato
+      double somma = 0.0;
+      for(int i = 0; i < HistoryDealsTotal(); i++)
+        {
+         ulong t = HistoryDealGetTicket(i);
+         if(t == 0) continue;
+         somma += HistoryDealGetDouble(t,DEAL_PROFIT)
+                + HistoryDealGetDouble(t,DEAL_SWAP)
+                + HistoryDealGetDouble(t,DEAL_COMMISSION);
+        }
+      g_pnSaldo = AccountInfoDouble(ACCOUNT_BALANCE) - somma;
+      g_pnCurva = 1.0; g_pnPicco = 1.0; g_pnDDmax = 0.0; g_pnDeal = 0;
+     }
+   else
+     {
+      if(!HistorySelect(g_pnDeal,TimeCurrent())) return;
+     }
 
+   for(int i = 0; i < HistoryDealsTotal(); i++)
+     {
+      ulong t = HistoryDealGetTicket(i);
+      if(t == 0) continue;
+      datetime q = (datetime)HistoryDealGetInteger(t,DEAL_TIME);
+      if(!daCapo && q <= g_pnDeal) continue;       // gia' contato
+
+      double netto = HistoryDealGetDouble(t,DEAL_PROFIT)
+                   + HistoryDealGetDouble(t,DEAL_SWAP)
+                   + HistoryDealGetDouble(t,DEAL_COMMISSION);
+
+      if(HistoryDealGetInteger(t,DEAL_TYPE) == DEAL_TYPE_BALANCE)
+        { g_pnSaldo += netto; g_pnDeal = q; continue; }   // versamento: non e' rendimento
+
+      if(g_pnSaldo > 0.0) g_pnCurva *= (1.0 + netto / g_pnSaldo);
+      g_pnSaldo += netto;
+      g_pnDeal   = q;
+
+      if(g_pnCurva > g_pnPicco) g_pnPicco = g_pnCurva;
+      if(g_pnPicco > 0.0)
+        {
+         double dd = 100.0 * (g_pnPicco - g_pnCurva) / g_pnPicco;
+         if(dd > g_pnDDmax) g_pnDDmax = dd;
+        }
+     }
+  }
+
+//------------------------------------------------------------------
+//  PnL di un periodo: mio (per magic), di tutto il conto, e il saldo
+//  che c'era all'inizio del periodo.
+//
+//  Il saldo iniziale serve per la percentuale: su un conto che cresce,
+//  cento euro oggi non valgono la stessa percentuale di cento euro
+//  l'anno scorso. Si divide per quello che c'era ALL'INIZIO di quel
+//  periodo, non per il deposito di partenza.
+//
+//  Contati TUTTI i deal del magic, non solo quelli di chiusura: su
+//  molti broker la commissione sta sul deal di apertura, e contando
+//  solo le chiusure sparirebbe.
+//------------------------------------------------------------------
+void PnPeriodo(const datetime da,double &out[])
+  {
+   out[0] = 0.0; out[1] = 0.0; out[2] = 0.0;
+   if(!HistorySelect(da,TimeCurrent())) return;
+   for(int i = 0; i < HistoryDealsTotal(); i++)
+     {
+      ulong t = HistoryDealGetTicket(i);
+      if(t == 0) continue;
+      double netto = HistoryDealGetDouble(t,DEAL_PROFIT)
+                   + HistoryDealGetDouble(t,DEAL_SWAP)
+                   + HistoryDealGetDouble(t,DEAL_COMMISSION);
+      out[1] += netto;                              // tutto il conto, versamenti compresi
+      if(HistoryDealGetInteger(t,DEAL_TYPE) == DEAL_TYPE_BALANCE) continue;
+      if(PnMio(t)) out[0] += netto;                 // solo questa strategia
+     }
+   out[2] = AccountInfoDouble(ACCOUNT_BALANCE) - out[1];   // saldo a inizio periodo
+  }
+
+//------------------------------------------------------------------
+//  Totale di questa strategia, da sempre
+//------------------------------------------------------------------
+void PnTotaleMio()
+  {
+   g_pnMioTot = 0.0; g_pnMioN = 0; g_pnMioW = 0;
+   if(!HistorySelect(0,TimeCurrent())) return;
+   for(int i = 0; i < HistoryDealsTotal(); i++)
+     {
+      ulong t = HistoryDealGetTicket(i);
+      if(t == 0 || !PnMio(t)) continue;
+      double netto = HistoryDealGetDouble(t,DEAL_PROFIT)
+                   + HistoryDealGetDouble(t,DEAL_SWAP)
+                   + HistoryDealGetDouble(t,DEAL_COMMISSION);
+      g_pnMioTot += netto;
+      long e = HistoryDealGetInteger(t,DEAL_ENTRY);
+      if(e == DEAL_ENTRY_OUT || e == DEAL_ENTRY_OUT_BY)
+        {
+         g_pnMioN++;
+         if(HistoryDealGetDouble(t,DEAL_PROFIT) > 0.0) g_pnMioW++;
+        }
+     }
+  }
+
+//------------------------------------------------------------------
+//  Formattazione
+//------------------------------------------------------------------
+string PnSoldi(const double v)
+  {
+   return (v >= 0.0 ? "+" : "") + DoubleToString(v,2);
+  }
+
+string PnPerc(const double v,const double base)
+  {
+   if(base <= 0.0) return "n/d";
+   double p = 100.0 * v / base;
+   return (p >= 0.0 ? "+" : "") + DoubleToString(p,2) + "%";
+  }
+
+color PnCol(const double v,const color su,const color giu,const color pari)
+  {
+   if(v > 0.0) return su;
+   if(v < 0.0) return giu;
+   return pari;
+  }
 string LiveDiagnosticStatus()
   {
    // READ-ONLY diagnostics. Uses ONLY helpers/variables already present in v2.57.
@@ -1403,84 +1560,249 @@ string LiveDiagnosticStatus()
    return "NESSUN SEGNALE";
   }
 
-void UpdateLivePanel()
+//------------------------------------------------------------------
+//  Le parti che cambiano da un EA all'altro — qui il NASDAQ
+//------------------------------------------------------------------
+bool PnMio(const ulong deal)
   {
-   if(!g_livePanelEnabled) return;
+   return ((ulong)HistoryDealGetInteger(deal,DEAL_MAGIC) == MagicNumber
+           && HistoryDealGetString(deal,DEAL_SYMBOL) == _Symbol);
+  }
 
-   color bg=C'13,15,22', card=C'21,24,34', edge=C'80,61,115';
-   color white=C'235,238,245', muted=C'158,164,178';
-   color green=C'82,214,143', red=C'244,101,105', accent=C'190,102,255';
+string PnTitolo() { return "NASDAQ"; }
+string PnSotto()  { return "M5 MOMENTUM SULL'APERTURA DI NEW YORK"; }
 
-   MqlTick q; double spread=0.0;
-   if(SymbolInfoTick(_Symbol,q)) spread=q.ask-q.bid;
+//  Il rischio vero e' la base moltiplicata per l'adattivo del momento
+double PnRischioPct() { return RiskPercent * g_lastAdaptiveMult; }
+double PnRischioSoldi()
+  {
+   double baseVal = (RiskBase == RISK_ON_EQUITY
+                     ? AccountInfoDouble(ACCOUNT_EQUITY)
+                     : AccountInfoDouble(ACCOUNT_BALANCE));
+   return baseVal * PnRischioPct() / 100.0;
+  }
 
-   double bal=AccountInfoDouble(ACCOUNT_BALANCE);
-   double eq=AccountInfoDouble(ACCOUNT_EQUITY);
-   double floating=eq-bal;
-   double effPct=RiskPercent*g_lastAdaptiveMult;
-   double baseVal=(RiskBase==RISK_ON_EQUITY ? eq : bal);
-   double riskMoney=baseVal*effPct/100.0;
+//  La diagnostica vera e' gia' in LiveDiagnosticStatus(), che non e'
+//  stata toccata. Qui si aggiunge solo la riga sulla convivenza, che
+//  e' l'impostazione da controllare se le due strategie girano sullo
+//  stesso conto.
+int PnDiagnostica(string &r[],color &c[])
+  {
+   color verde=C'82,214,143', rosso=C'244,101,105', smorto=C'158,164,178',
+         bianco=C'235,238,245';
 
-   ulong pt=0; long typ=-1; double pe=0.0,ps=0.0;
-   bool hasPos=FindOurPosition(pt,typ,pe,ps);
-   string pos=hasPos ? (typ==POSITION_TYPE_BUY?"LONG":"SHORT") : "NESSUNA";
-   double curR=0.0;
-   if(hasPos && SymbolInfoTick(_Symbol,q) && initialRiskDistance>0.0)
+   string d = LiveDiagnosticStatus();
+   r[0] = d;
+   if(StringFind(d,"SETUP LONG") >= 0 || StringFind(d,"SETUP SHORT") >= 0)
+      c[0] = bianco;
+   else if(StringFind(d,"ATTESA") >= 0 || StringFind(d,"FORMAZIONE") >= 0)
+      c[0] = verde;
+   else if(StringFind(d,"FILTRATO") >= 0 || StringFind(d,"WEEKEND") >= 0 ||
+           StringFind(d,"POSIZIONE") >= 0)
+      c[0] = smorto;
+   else
+      c[0] = rosso;
+
+   if(BlockOnAnyAccountPosition)
      {
-      double px=(typ==POSITION_TYPE_BUY?q.bid:q.ask);
-      curR=(typ==POSITION_TYPE_BUY ? px-pe : pe-px)/initialRiskDistance;
+      r[1] = "CONVIVENZA: OFF - si ferma se c'e' QUALSIASI posizione";
+      c[1] = (PositionsTotal() > 0 && !HasOurPosition()) ? rosso : smorto;
      }
+   else
+     {
+      r[1] = "CONVIVENZA: ON - guarda solo le sue posizioni";
+      c[1] = verde;
+     }
+   return 2;
+  }
 
-   datetime d0,w0,m0; PanelPeriodStarts(d0,w0,m0);
-   double pd=PanelPeriodPnL(d0), pw=PanelPeriodPnL(w0), pm=PanelPeriodPnL(m0);
+string PnPosizione(color &col)
+  {
+   color verde=C'82,214,143', rosso=C'244,101,105', smorto=C'158,164,178';
+   ulong t=0; long tipo=-1; double apertura=0.0, stop=0.0;
+   if(!FindOurPosition(t,tipo,apertura,stop))
+     { col = smorto; return "nessuna posizione"; }
 
-   // Frame / title
-   PRect("BG",12,24,370,430,bg,accent);
-   PText("T1",38,42,"NAS100",20,white);
-   PText("T2",38,69,"M5 MOMENTUM  |  v2.57",10,accent);
-   string diag=LiveDiagnosticStatus();
-   bool healthy=(diag=="IN ATTESA OPEN NY 09:30" ||
-                 diag=="M5 09:30-09:35 IN FORMAZIONE" ||
-                 diag=="SETUP LONG VALIDO / VERIFICA ORDINE" ||
-                 diag=="SETUP SHORT VALIDO / VERIFICA ORDINE");
-   PText("BOT",38,98,"BOT: "+(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)?"ATTIVO":"BLOCCATO"),11,
-         TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)?green:red);
-   PText("SP",235,99,"Spread "+DoubleToString(spread,2)+" pt",9,muted);
+   bool lungo = (tipo == POSITION_TYPE_BUY);
+   MqlTick q;
+   string r = "";
+   if(SymbolInfoTick(_Symbol,q) && initialRiskDistance > 0.0)
+     {
+      double px = (lungo ? q.bid : q.ask);
+      double rr = (lungo ? px - apertura : apertura - px) / initialRiskDistance;
+      r = "  R " + (rr >= 0.0 ? "+" : "") + DoubleToString(rr,2);
+     }
+   double profitto = 0.0;
+   if(PositionSelectByTicket(t))
+      profitto = PositionGetDouble(POSITION_PROFIT) + PositionGetDouble(POSITION_SWAP);
+   col = PnCol(profitto,verde,rosso,smorto);
+   return (lungo ? "LONG" : "SHORT") + r + (trailActivated ? "  trail ON" : "");
+  }
 
-   PRect("DIAGBG",28,122,338,56,card,edge);
-   PText("DH",42,132,"DIAGNOSTICA LIVE",10,white);
-   PText("DS",42,153,diag,9,(healthy?green:((StringFind(diag,"FILTRATO")>=0 || StringFind(diag,"WEEKEND")>=0)?muted:red)));
+//------------------------------------------------------------------
+//  Il disegno vero e proprio. Le parti che cambiano da un EA
+//  all'altro stanno nelle funzioni PnMio, PnTitolo, PnSotto,
+//  PnDiagnostica, PnRischioPct e PnPosizione, definite piu' sotto.
+//------------------------------------------------------------------
+void PnDisegna()
+  {
+   color bg=C'13,15,22', card=C'21,24,34', bordo=C'80,61,115';
+   color bianco=C'235,238,245', smorto=C'158,164,178';
+   color verde=C'82,214,143', rosso=C'244,101,105', viola=C'190,102,255';
 
-   // Performance
-   PRect("C1",28,188,338,92,card,edge);
-   PText("H1",42,199,"PERFORMANCE",11,white);
-   PText("B1",42,224,"Balance  "+DoubleToString(bal,2),9,muted);
-   PText("E1",205,224,"Equity  "+DoubleToString(eq,2),9,muted);
-   PText("F1",42,246,"Floating  "+DoubleToString(floating,2),9,(floating>=0?green:red));
-   PText("D1",205,246,"Today  "+DoubleToString(pd,2),9,(pd>=0?green:red));
+   int X = InpPannelloX, Y = InpPannelloY, W = 360;
+   int cx = X + 16, cw = W - 32, tx = X + 28;
 
-   // Risk
-   PRect("C2",28,290,338,72,card,edge);
-   PText("H2",42,301,"RISK",11,white);
-   PText("R1",42,325,"Base "+DoubleToString(RiskPercent,2)+"%   Adaptive x"+DoubleToString(g_lastAdaptiveMult,3),9,muted);
-   PText("R2",42,343,"Effective "+DoubleToString(effPct,2)+"%   Risk $ "+DoubleToString(riskMoney,2),9,white);
+   string diag[8]; color dcol[8];
+   int nd = PnDiagnostica(diag,dcol);
+   if(nd > 8) nd = 8;
 
-   // Trade state
-   PRect("C3",28,372,338,58,card,edge);
-   PText("H3",42,383,"OPERAZIONE",11,white);
-   PText("P1",42,407,pos,10,(hasPos?green:muted));
-   PText("P2",150,407,"R "+DoubleToString(curR,2)+"   Trail "+(trailActivated?"ON":"OFF"),9,muted);
+   // altezza totale: quello che c'e' sopra + le righe di diagnostica
+   int hDiag = 30 + 18*nd;
+   int H = 96 + hDiag + 8 + 66 + 8 + 116 + 8 + 48 + 8 + 48 + 8 + 52 + 14;
 
-   PText("WPM",38,436,"Week "+DoubleToString(pw,2)+"   Month "+DoubleToString(pm,2),8,muted);
+   PnRect("BG",X,Y,W,H,bg,bordo);
+
+   PnText("T1",tx,Y+16,PnTitolo(),19,bianco);
+   PnText("T2",tx,Y+45,PnSotto(),9,viola);
+
+   bool algo = (bool)TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
+            && (bool)MQLInfoInteger(MQL_TRADE_ALLOWED)
+            && (bool)AccountInfoInteger(ACCOUNT_TRADE_ALLOWED);
+   PnText("BOT",tx,Y+72,"BOT: " + (algo ? "ATTIVO" : "BLOCCATO"),11,
+          algo ? verde : rosso);
+
+   MqlTick q; double spread = 0.0;
+   if(SymbolInfoTick(_Symbol,q)) spread = q.ask - q.bid;
+   PnText("SP",X+232,Y+73,"Spread " + DoubleToString(spread,2),9,smorto);
+
+   int y = Y + 96;
+
+   // ---------------- diagnostica ----------------
+   PnRect("C0",cx,y,cw,hDiag,card,bordo);
+   PnText("H0",tx,y+9,"DIAGNOSTICA",10,bianco);
+   for(int i = 0; i < nd; i++)
+      PnText("D"+IntegerToString(i),tx,y+30+18*i,diag[i],9,dcol[i]);
+   for(int i = nd; i < 8; i++) ObjectDelete(0,PN_PRE+"D"+IntegerToString(i));
+   y += hDiag + 8;
+
+   // ---------------- conto ----------------
+   double bal = AccountInfoDouble(ACCOUNT_BALANCE);
+   double eq  = AccountInfoDouble(ACCOUNT_EQUITY);
+   double flt = eq - bal;
+   double mrg = AccountInfoDouble(ACCOUNT_MARGIN);
+   PnRect("C1",cx,y,cw,66,card,bordo);
+   PnText("H1",tx,y+9,"CONTO",10,bianco);
+   PnText("A1",tx,y+28,"Saldo  " + DoubleToString(bal,2),9,smorto);
+   PnText("A2",X+204,y+28,"Equity  " + DoubleToString(eq,2),9,smorto);
+   PnText("A3",tx,y+46,"Flottante  " + PnSoldi(flt),9,PnCol(flt,verde,rosso,smorto));
+   PnText("A4",X+204,y+46,"Margine  " + (eq > 0.0 ? DoubleToString(100.0*mrg/eq,1) : "0,0") + "%",
+          9,smorto);
+   y += 66 + 8;
+
+   // ---------------- questa strategia ----------------
+   PnRect("C2",cx,y,cw,116,card,bordo);
+   PnText("H2",tx,y+9,"QUESTA STRATEGIA",10,bianco);
+   PnText("H2b",X+236,y+10,"(solo il suo magic)",7,smorto);
+   string et[3] = {"Oggi","Settimana","Mese"};
+   for(int i = 0; i < 3; i++)
+     {
+      double mio, base;
+      if(i == 0)      { mio = g_pnG[0]; base = g_pnG[2]; }
+      else if(i == 1) { mio = g_pnS[0]; base = g_pnS[2]; }
+      else            { mio = g_pnM[0]; base = g_pnM[2]; }
+      color c = PnCol(mio,verde,rosso,smorto);
+      PnText("P"+IntegerToString(i)+"a",tx,y+30+20*i,et[i],9,smorto);
+      PnText("P"+IntegerToString(i)+"b",X+212,y+30+20*i,PnSoldi(mio),9,c);
+      PnText("P"+IntegerToString(i)+"c",X+292,y+30+20*i,PnPerc(mio,base),9,c);
+     }
+   PnText("P3a",tx,y+92,"Da sempre",9,smorto);
+   PnText("P3b",X+212,y+92,PnSoldi(g_pnMioTot),9,PnCol(g_pnMioTot,verde,rosso,smorto));
+   PnText("P3c",X+292,y+92,IntegerToString(g_pnMioN) + " op" +
+          (g_pnMioN > 0 ? "  " + DoubleToString(100.0*g_pnMioW/g_pnMioN,0) + "%" : ""),
+          9,smorto);
+   y += 116 + 8;
+
+   // ---------------- drawdown ----------------
+   // curva in frazione + il flottante di adesso, cosi' il "sotto il
+   // massimo" tiene conto anche di quello che e' ancora aperto
+   double curvaOra = g_pnCurva;
+   if(bal > 0.0) curvaOra *= (1.0 + flt / bal);
+   double ddOra = (g_pnPicco > 0.0 ? 100.0*(g_pnPicco - curvaOra)/g_pnPicco : 0.0);
+   if(ddOra < 0.0) ddOra = 0.0;
+   double ddMax = MathMax(g_pnDDmax,ddOra);
+   PnRect("C3",cx,y,cw,48,card,bordo);
+   PnText("H3",tx,y+9,"DRAWDOWN",10,bianco);
+   PnText("W1",tx,y+28,"Adesso  -" + DoubleToString(ddOra,2) + "%",9,
+          ddOra > 0.01 ? rosso : smorto);
+   PnText("W2",X+196,y+28,"Massimo toccato  -" + DoubleToString(ddMax,2) + "%",9,
+          ddMax > 0.01 ? rosso : smorto);
+   y += 48 + 8;
+
+   // ---------------- rendimento del conto ----------------
+   PnRect("C4",cx,y,cw,48,card,bordo);
+   PnText("H4",tx,y+9,"RENDIMENTO DEL CONTO",10,bianco);
+   PnText("H4b",X+230,y+10,"(versamenti esclusi)",7,smorto);
+   double rc = 100.0*(curvaOra - 1.0);
+   PnText("R0",tx,y+28,(rc >= 0.0 ? "+" : "") + DoubleToString(rc,2) + "%  composto, da quando c'e' storico",
+          9,PnCol(rc,verde,rosso,smorto));
+   y += 48 + 8;
+
+   // ---------------- rischio e operazione ----------------
+   PnRect("C5",cx,y,cw,52,card,bordo);
+   PnText("H5",tx,y+9,"RISCHIO E OPERAZIONE",10,bianco);
+   PnText("K1",tx,y+30,DoubleToString(PnRischioPct(),2) + "% = " +
+          DoubleToString(PnRischioSoldi(),2) + " per operazione",9,bianco);
+   color pcol = smorto;
+   string ps = PnPosizione(pcol);
+   PnText("K2",X+196,y+30,ps,9,pcol);
 
    ChartRedraw(0);
   }
 
+//------------------------------------------------------------------
+//  Aggancio al ciclo di vita dell'EA
+//------------------------------------------------------------------
+void PannelloInit()
+  {
+   // spento nel tester e in ottimizzazione: il backtest non deve
+   // pagare un centesimo di tempo per una cosa che nessuno guarda
+   g_pnOn = InpPannello
+         && !(bool)MQLInfoInteger(MQL_TESTER)
+         && !(bool)MQLInfoInteger(MQL_OPTIMIZATION);
+   if(!g_pnOn) return;
+   PnPulisci();
+   PnCurvaAggiorna(true);
+   PnTotaleMio();
+   datetime g,s,m; PnInizioPeriodi(g,s,m);
+   PnPeriodo(g,g_pnG); PnPeriodo(s,g_pnS); PnPeriodo(m,g_pnM);
+   g_pnLento = TimeCurrent();
+   PnDisegna();
+  }
+
+void PannelloTick()
+  {
+   if(!g_pnOn) return;
+   // lo storico si rilegge ogni PN_OGNI secondi; equity, flottante e
+   // posizione aperta si ridisegnano a ogni tick perche' costano nulla
+   if(TimeCurrent() - g_pnLento >= PN_OGNI)
+     {
+      PnCurvaAggiorna(false);
+      PnTotaleMio();
+      datetime g,s,m; PnInizioPeriodi(g,s,m);
+      PnPeriodo(g,g_pnG); PnPeriodo(s,g_pnS); PnPeriodo(m,g_pnM);
+      g_pnLento = TimeCurrent();
+     }
+   PnDisegna();
+  }
+
+void PannelloDeinit()
+  {
+   if(g_pnOn) PnPulisci();
+  }
+
 int OnInit()
   {
-   g_livePanelEnabled = !(bool)MQLInfoInteger(MQL_TESTER) &&
-                        !(bool)MQLInfoInteger(MQL_OPTIMIZATION);
-   if(g_livePanelEnabled) PanelDelete();
    ArrayResize(g_marketRawHistory,0);
    g_lastRawMarketMult=1.0;
    g_lastMarketCenter=1.0;
@@ -1528,12 +1850,13 @@ int OnInit()
          " | equityThrottle=",UseEquityHealthThrottle,
          " | throttleK=",DoubleToString(EquityThrottleK,2),
          " | throttleFloor=",DoubleToString(EquityThrottleFloor,2));
+   PannelloInit();
    return INIT_SUCCEEDED;
   }
 
 void OnDeinit(const int reason)
   {
-   if(g_livePanelEnabled) PanelDelete();
+   PannelloDeinit();
    AuditClose();
    RegimeClose();
    if(hFastEMA!=INVALID_HANDLE) IndicatorRelease(hFastEMA);
@@ -1559,7 +1882,7 @@ void OnTick()
 
    ResetPositionTrackingIfFlat();
 
-   // Visual diagnostics only; disabled entirely in tester/optimization.
-   if(g_livePanelEnabled) UpdateLivePanel();
+   // Solo disegno, e solo fuori dal tester.
+   PannelloTick();
   }
 //+------------------------------------------------------------------+
