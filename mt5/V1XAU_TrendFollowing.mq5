@@ -103,6 +103,7 @@ input double            InpS3StopATR          = 2.0;      // Stop loss in ATR (=
 input double            InpS3TargetR          = 0.0;      // Take profit in R (0 = nessuno)
 input double            InpS3TrailStartR      = 1.0;      // Attiva trailing a +xR
 input double            InpS3TrailATR         = 4.0;      // Distanza trailing in ATR
+input bool              InpS3AllowLong        = true;     // Consenti long
 input bool              InpS3AllowShort       = true;     // Consenti short
 
 //==================================================================
@@ -119,8 +120,10 @@ datetime s2LastEntryBar = 0;   // cooldown di S2
 
 // Il trailing ha bisogno della distanza di stop iniziale (1R) di ogni
 // posizione: l'ATR al momento dell'apertura non e' recuperabile dopo.
+// retryAfter frena i tentativi di modifica dopo un rifiuto del broker.
 #define RISK_SLOTS 64
-struct TradeRisk { ulong ticket; double riskDistance; };
+#define TRAIL_RETRY_SECONDS 60
+struct TradeRisk { ulong ticket; double riskDistance; datetime retryAfter; };
 TradeRisk g_risk[RISK_SLOTS];
 int       g_riskIdx = 0;
 
@@ -150,14 +153,93 @@ void RememberRisk(const ulong ticket, const double dist)
       if(g_risk[i].ticket == ticket) { g_risk[i].riskDistance = dist; return; }
    g_risk[g_riskIdx].ticket       = ticket;
    g_risk[g_riskIdx].riskDistance = dist;
+   g_risk[g_riskIdx].retryAfter   = 0;
    g_riskIdx = (g_riskIdx + 1) % RISK_SLOTS;
+  }
+
+//------------------------------------------------------------------
+//  1R ricostruito dallo storico: |prezzo di apertura - stop iniziale|.
+//
+//  g_risk sta in memoria e OnInit la azzera, quindi dopo un riavvio del
+//  terminale una posizione ancora aperta non ha piu' il suo 1R. Prima
+//  si ripiegava sull'ATR corrente: per la ROTTURA era quasi esatto
+//  (lo stop E' un multiplo dell'ATR), per il RITRACCIAMENTO no, perche'
+//  li' 1R e' la profondita' del ritracciamento e non un multiplo fisso.
+//  Il trailing partiva quindi prima o dopo del dovuto, in silenzio.
+//
+//  Lo stop originale e' pero' sull'ordine che ha aperto la posizione,
+//  dove il trailing non arriva: da li' il valore e' esatto, non stimato.
+//  Nel tester non viene mai chiamata (l'EA non si riavvia mai a meta').
+//------------------------------------------------------------------
+double RiskFromHistory(const ulong ticket)
+  {
+   if(!PositionSelectByTicket(ticket)) return(0.0);
+
+   long   posId     = PositionGetInteger(POSITION_IDENTIFIER);
+   double openPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+   if(posId <= 0 || openPrice <= 0.0)  return(0.0);
+
+   if(!HistorySelectByPosition(posId)) return(0.0);
+
+   // il primo ordine eseguito della posizione e' quello di apertura:
+   // modificare SL/TP non lascia ordini nello storico, quindi non lo
+   // sovrascrive nessuno
+   for(int i = 0; i < HistoryOrdersTotal(); i++)
+     {
+      ulong ord = HistoryOrderGetTicket(i);
+      if(ord == 0) continue;
+      if(HistoryOrderGetInteger(ord, ORDER_POSITION_ID) != posId)      continue;
+      if(HistoryOrderGetInteger(ord, ORDER_STATE) != ORDER_STATE_FILLED) continue;
+
+      double sl = HistoryOrderGetDouble(ord, ORDER_SL);
+      if(sl <= 0.0) continue;
+
+      double dist = MathAbs(openPrice - sl);
+      if(dist > 0.0) return(dist);
+     }
+   return(0.0);
   }
 
 double RecallRisk(const ulong ticket, const double fallback)
   {
    for(int i = 0; i < RISK_SLOTS; i++)
       if(g_risk[i].ticket == ticket) return(g_risk[i].riskDistance);
-   return(fallback);   // non trovato: stima con l'ATR corrente
+
+   // non in tabella: siamo ripartiti con la posizione gia' aperta
+   double fromHist = RiskFromHistory(ticket);
+   if(fromHist > 0.0)
+     {
+      RememberRisk(ticket, fromHist);   // una volta sola, poi e' in tabella
+      return(fromHist);
+     }
+
+   return(fallback);   // ultima spiaggia: stima con l'ATR corrente
+  }
+
+//------------------------------------------------------------------
+//  Freno sui rifiuti del broker alla modifica dello stop: senza, una
+//  modifica rifiutata verrebbe ritentata a ogni tick e il diario si
+//  riempirebbe dello stesso errore. Nel tester non scatta: la distanza
+//  minima e' gia' rispettata da EnforceStopsLevel e lo stop non viene
+//  mai riproposto identico, quindi non ci sono rifiuti da frenare.
+//------------------------------------------------------------------
+bool TrailBlocked(const ulong ticket)
+  {
+   for(int i = 0; i < RISK_SLOTS; i++)
+      if(g_risk[i].ticket == ticket)
+         return(g_risk[i].retryAfter > 0 && TimeCurrent() < g_risk[i].retryAfter);
+   return(false);
+  }
+
+void TrailNote(const ulong ticket, const bool ok)
+  {
+   for(int i = 0; i < RISK_SLOTS; i++)
+      if(g_risk[i].ticket == ticket)
+        {
+         if(ok) g_risk[i].retryAfter = 0;
+         else   g_risk[i].retryAfter = TimeCurrent() + TRAIL_RETRY_SECONDS;
+         return;
+        }
   }
 
 int CountPositions(const long magic)
@@ -343,7 +425,7 @@ void WeekendGuard()
    TimeToStruct(TimeCurrent(), dt);
    if(dt.day_of_week == 5 && dt.hour >= InpFridayCloseHour)
      {
-      CloseAllForMagic(InpMagicBase + 1);
+      // niente base+1: era la terza gamba della versione a tre
       CloseAllForMagic(InpMagicBase + 2);
       CloseAllForMagic(InpMagicBase + 3);
      }
@@ -414,6 +496,7 @@ void ManageTrailing(const long magic, const double startR, const double trailAtr
       if(tk == 0) continue;
       if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
       if(PositionGetInteger(POSITION_MAGIC) != magic)   continue;
+      if(TrailBlocked(tk)) continue;      // rifiutata da poco: non insistere
 
       bool   isLong = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
       double entry  = PositionGetDouble(POSITION_PRICE_OPEN);
@@ -437,7 +520,14 @@ void ManageTrailing(const long magic, const double startR, const double trailAtr
       if(!isLong && (curSL > 0.0 && newSL >= curSL)) continue;
 
       trade.SetExpertMagicNumber(magic);
-      trade.PositionModify(tk, newSL, curTP);
+      if(trade.PositionModify(tk, newSL, curTP))
+         TrailNote(tk, true);
+      else
+        {
+         TrailNote(tk, false);
+         PrintFormat("trailing rifiutato su #%I64u (retcode %d): riprovo fra %d s",
+                     tk, (int)trade.ResultRetcode(), TRAIL_RETRY_SECONDS);
+        }
      }
   }
 
@@ -483,7 +573,10 @@ void RunS2()
    double c1 = iClose(_Symbol, InpS2TF, 1);
    double h2 = iHigh (_Symbol, InpS2TF, 2);
    double l2 = iLow  (_Symbol, InpS2TF, 2);
-   if(c1 <= 0.0 || h2 <= 0.0) return;
+   // h2 e l2 vengono dalla stessa barra: o sono validi tutti e due o
+   // nessuno dei due, quindi il controllo non puo' scartare una barra
+   // che prima passava
+   if(c1 <= 0.0 || h2 <= 0.0 || l2 <= 0.0) return;
 
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -583,7 +676,8 @@ void RunS3()
 
    double pos = (close1 - rangeLo) / (rangeHi - rangeLo);    // 0..1 nel range lungo
 
-   bool longSignal  = (pos >= InpS3EdgeThreshold) && (close1 > breakHi);
+   bool longSignal  = InpS3AllowLong &&
+                      (pos >= InpS3EdgeThreshold) && (close1 > breakHi);
    bool shortSignal = InpS3AllowShort &&
                       (pos <= (1.0 - InpS3EdgeThreshold)) && (close1 < breakLo);
 
@@ -604,7 +698,34 @@ void PrintStrategySummary()
    double gw[2]    = {0.0, 0.0};
    double gl[2]    = {0.0, 0.0};
 
-   for(int i = 0; i < HistoryDealsTotal(); i++)
+   // Commissione e swap dell'APERTURA stanno su un'operazione separata
+   // da quella di chiusura. Contando solo la chiusura andavano persi, e
+   // il diario risultava piu' generoso del conto vero: su .p la
+   // commissione e' 7,03 $ per lotto a giro completo, e se il broker la
+   // divide fra ingresso e uscita ne mancava meta'. tools/estrai.py li
+   // ha sempre sommati (`costo_in`), quindi i due non coincidevano.
+   // Stesso genere dell'errore n.2: contabilita', non profitto.
+   int    total = HistoryDealsTotal();
+   long   inPos[];
+   double inCost[];
+   ArrayResize(inPos,  total);
+   ArrayResize(inCost, total);
+   int    nIn = 0;
+
+   for(int i = 0; i < total; i++)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk == 0) continue;
+      if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+      if(HistoryDealGetInteger(tk, DEAL_ENTRY) != DEAL_ENTRY_IN) continue;
+
+      inPos[nIn]  = HistoryDealGetInteger(tk, DEAL_POSITION_ID);
+      inCost[nIn] = HistoryDealGetDouble(tk, DEAL_COMMISSION)
+                  + HistoryDealGetDouble(tk, DEAL_SWAP);
+      nIn++;
+     }
+
+   for(int i = 0; i < total; i++)
      {
       ulong tk = HistoryDealGetTicket(i);
       if(tk == 0) continue;
@@ -618,6 +739,11 @@ void PrintStrategySummary()
       double net = HistoryDealGetDouble(tk, DEAL_PROFIT)
                  + HistoryDealGetDouble(tk, DEAL_COMMISSION)
                  + HistoryDealGetDouble(tk, DEAL_SWAP);
+
+      long posId = HistoryDealGetInteger(tk, DEAL_POSITION_ID);
+      for(int k = 0; k < nIn; k++)
+         if(inPos[k] == posId) { net += inCost[k]; break; }
+
       n[idx]++;
       if(net > 0.0) { w[idx]++; gw[idx] += net; } else gl[idx] += net;
      }
@@ -660,7 +786,8 @@ int OnInit()
    trade.SetDeviationInPoints(InpSlippagePoints);
    trade.SetTypeFillingBySymbol(_Symbol);
 
-   for(int i = 0; i < RISK_SLOTS; i++) { g_risk[i].ticket = 0; g_risk[i].riskDistance = 0.0; }
+   for(int i = 0; i < RISK_SLOTS; i++)
+     { g_risk[i].ticket = 0; g_risk[i].riskDistance = 0.0; g_risk[i].retryAfter = 0; }
    g_riskIdx  = 0;
    lastBarS2 = 0; lastBarS3 = 0; s2LastEntryBar = 0;
 

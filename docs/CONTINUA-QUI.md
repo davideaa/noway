@@ -225,3 +225,110 @@ nuovi, non rianalizzando questi.**
 python3 tools/report_finale.py <report-mt5.html> --rischio 1.05 --due
 python3 tools/montecarlo.py   <report-mt5.html>
 ```
+
+---
+
+# 7. Correzioni al codice, settembre 2026
+
+Quattro difetti trovati rileggendo il codice contro questo documento.
+Nessuno di loro cambia una strategia: tre riguardano cose che il backtest
+non puo' vedere, uno riguarda la contabilita' del diario.
+
+**Il vincolo dichiarato prima di toccare il codice: nessuna di queste
+modifiche deve spostare i risultati gia' misurati.** Sotto, per ognuna,
+il motivo per cui non li sposta. Se la verifica li sposta lo stesso, il
+motivo era sbagliato e la modifica va rivista, non tenuta.
+
+### 1. 1R si recupera dallo storico, non si stima con l'ATR
+
+`g_risk` — la tabella che ricorda quanto valeva 1R per ogni posizione —
+sta in memoria, e `OnInit` la azzera. Dopo un riavvio del terminale con
+una posizione ancora aperta il trailing non trovava piu' il valore e
+ripiegava su una stima: `ATR × 2,0` per la ROTTURA, `ATR × 1,0` per il
+RITRACCIAMENTO.
+
+Per la ROTTURA la stima e' quasi esatta, perche' il suo stop **e'** due
+ATR. Per il RITRACCIAMENTO no: li' 1R e' la profondita' del
+ritracciamento, che non e' un multiplo fisso dell'ATR. Con un 1R
+sbagliato il trailing si attiva prima o dopo del dovuto, e la gamba si
+comporta diversamente da come e' stata misurata — **senza dare nessun
+errore.**
+
+Ora `RiskFromHistory` legge lo stop originale dall'ordine che ha aperto
+la posizione (`HistorySelectByPosition` → `ORDER_SL`), dove il trailing
+non arriva, e ricava 1R come `|prezzo di apertura − stop iniziale|`.
+Valore esatto, non stima.
+
+Perche' non tocca i backtest: nel tester l'EA non si riavvia mai a meta',
+quindi il ticket e' sempre in tabella e ne' il ripiego vecchio ne' il
+recupero nuovo vengono mai raggiunti.
+
+Perche' valeva la pena farlo adesso: la domanda del demo e' *«lo
+scivolamento vero assomiglia a quello simulato?»*. Se intanto cambia
+anche il comportamento del codice, si guardano due differenze
+sovrapposte e non si sa quale sia quale. In tre-sei mesi MetaTrader si
+riavvia di sicuro.
+
+### 2. Il diario contava i costi a meta'
+
+`PrintStrategySummary` sommava commissione e swap **solo della
+chiusura**. MT5 mette quelli dell'apertura su un'operazione separata, e
+`tools/estrai.py` li ha sempre contati (`costo_in`). I due non
+coincidevano, e il diario era il piu' generoso dei due.
+
+Non tocca nessuna cifra pubblicata, che viene da `estrai.py`. Tocca
+quello che si legge nel journal — cioe' proprio dove si guardera'
+durante il demo. E' lo stesso genere dell'errore n.2: contabilita', non
+profitto.
+
+Perche' non tocca i backtest: e' una stampa. Il profit factor e il numero
+di operazioni del report li calcola MT5, non questa funzione.
+
+### 3. `estrai.py` dichiara di essere LIFO
+
+`aperte.pop(cand[-1])` prende l'apertura piu' recente fra quelle
+compatibili. L'errore n.4 ha dimostrato che quella scelta sposta il P&L
+attribuito del 38%, ma la docstring non la nominava. Ora c'e' scritto,
+col rimando all'errore n.4. Solo commento: il codice e' identico.
+
+### 4. Le cose piccole
+
+- aggiunto `InpS3AllowLong` (c'era solo `InpS3AllowShort`, quindi la
+  ROTTURA non si poteva mettere solo-short — vedi errore n.7). Default
+  `true`: acceso si comporta come prima.
+- tolto `CloseAllForMagic(InpMagicBase + 1)` da `WeekendGuard`: residuo
+  della versione a tre gambe, in questo EA quel magic non esiste.
+- `l2` ora e' validato come gia' lo era `h2`. Vengono dalla stessa barra,
+  quindi sono validi o non validi insieme: il controllo non puo'
+  scartare una barra che prima passava.
+- `PositionModify` controlla l'esito e, se il broker rifiuta, aspetta 60
+  secondi invece di riprovare a ogni tick. Nel tester non ci sono
+  rifiuti da frenare: `EnforceStopsLevel` rispetta gia' la distanza
+  minima e lo stop non viene mai riproposto identico.
+
+## La verifica — dichiarata prima, NON ancora eseguita
+
+Serve MetaTrader: non e' stata fatta. **Finche' non passa, queste
+modifiche sono da considerare non verificate.**
+
+```
+V1XAU_TrendFollowing su XAUUSD.s (PUPrime-Demo)
+2019.01.01 – 2026.09.16, tick reali, rischio 0,70%, parametri di default
+```
+
+| Deve uscire | |
+|---|---:|
+| Operazioni | **1.123** |
+| Profit factor dal report MT5 | **1,36** |
+
+Se coincidono, le modifiche sono neutre come dichiarato. **Se cambia
+anche solo il numero di operazioni, non lo sono: si torna indietro e si
+cerca quale delle quattro ha mosso qualcosa** (la 1 e la 4 sono le uniche
+che toccano codice eseguito durante una passata).
+
+> **Attenzione a quale profit factor si guarda.** Il report di MT5 dice
+> **1,36**, col composto. L'**1,30** della sezione 2 e della tabella «I
+> numeri su .s» in `docs/v1xau-verifica.md` e' lo stesso test ricalcolato
+> **a lotto fisso** da `report_finale.py`. Sono due misure della stessa
+> passata, non due risultati diversi: per una verifica fatta leggendo il
+> report del tester il riferimento e' 1,36.
