@@ -332,3 +332,97 @@ che toccano codice eseguito durante una passata).
 > **a lotto fisso** da `report_finale.py`. Sono due misure della stessa
 > passata, non due risultati diversi: per una verifica fatta leggendo il
 > report del tester il riferimento e' 1,36.
+
+---
+
+# 8. V2XAU — capitale di rischio virtuale
+
+`mt5/V2XAU_TrendFollowing_VRC.mq5`. Nasce da un problema del broker
+nuovo, non della strategia: **rischio e margine non sono la stessa
+cosa.**
+
+Su XAUUSD Vantage chiede circa **19.060 di margine per un lotto**. Con
+due gambe aperte insieme si arriva a ~0,70 lotti, cioe' **~13.300 di
+margine**, su un conto da 10.000 che non ce li ha — anche se il rischio
+vero, quello fino allo stop, e' solo ~100.
+
+## L'idea
+
+Si versa capitale in piu' **per il margine**, e gli si impedisce di
+alzare il rischio. Due grandezze separate:
+
+| | a cosa serve |
+|---|---|
+| **Equity vera** (es. 20.000) | margine, margine libero, sicurezza del conto |
+| **Capitale virtuale** (es. 10.000) | **unica** base per calcolare i lotti |
+
+```
+capitale virtuale = InpInitialRiskCapital
+                  + P&L netto REALIZZATO dei magic base+2 e base+3
+```
+
+Il composto continua a funzionare, e in drawdown la size scende da sola:
+
+| Realizzato | Equity vera | Capitale virtuale | Rischia all'1% |
+|---:|---:|---:|---:|
+| 0 | 20.000 | 10.000 | 100 |
+| +2.000 | 22.000 | 12.000 | **120** (non 220) |
+| −2.000 | 18.000 | 8.000 | **80** |
+
+**Realizzato, non equity**, per tre motivi: l'equity contiene il
+deposito messo per il margine; contiene il P&L fluttuante, quindi un
+trade in corso gonfierebbe la size del successivo; e il realizzato si
+ricostruisce identico dopo un riavvio, il fluttuante no.
+
+## Cosa e' cambiato nel codice — e cosa no
+
+**Sette righe di V1 sono state toccate**, tutte dentro il calcolo del
+capitale. Segnali, stop, trailing, indicatori, timeframe, magic,
+cooldown, permessi long/short: **identici, riga per riga** (verificabile
+col diff fra i due file).
+
+| Funzione | Cosa cambia |
+|---|---|
+| `LotsFromRisk` | la base non e' `ACCOUNT_EQUITY` ma `RiskMoney()` |
+| `CurrentOpenRiskPercent` | denominatore: capitale virtuale invece di equity, perche' "rischio" deve voler dire la stessa cosa ovunque |
+| `OpenTrade` | dopo il calcolo dei lotti, controllo del margine e diario |
+| `OnInit` | ricostruisce il capitale dallo storico |
+| `OnTick` | si accorge se una posizione si e' chiusa |
+
+Funzioni nuove: `RealizedPnLForEA`, `StrategyRiskCapital`, `RiskMoney`,
+`RequiredMargin`, `MarginBudget`, `LotsMarginAllows`, `LogSizing`,
+`OnTradeTransaction`.
+
+Il margine si calcola con **`OrderCalcMargin()`**, cioe' col metodo vero
+del broker, mai con `notional / leva`: su XAUUSD il requisito puo'
+essere a scaglioni. Se non basta, l'ordine **viene rifiutato e scritto
+nel diario**, non falsato in silenzio — a meno di mettere
+`InpReduceLotsIfMargin = true`, che riduce il lotto e lo dichiara.
+
+## La conseguenza sul drawdown, che va capita
+
+Le percentuali del Monte Carlo (35% al 90° percentile a 1,05%) sono
+sempre riferite al **capitale virtuale**, non al conto. Con capitale
+virtuale 10.000 su un conto da 20.000, un 35% vale 3.500, cioe' il
+**17,5% del conto vero**. Il rischio in R non cambia: cambia solo
+quanto pesa sul deposito, perche' meta' del deposito e' li' per il
+margine e non per rischiare.
+
+## Tre cose non risolte, dichiarate
+
+1. **Non compilato.** Nessun MetaEditor nell'ambiente di lavoro. Va
+   compilato prima di qualunque test.
+2. **V2 non riprodurra' i backtest di V1**, nemmeno con deposito 10.000
+   e capitale virtuale 10.000. V1 dimensionava sull'equity, che si
+   muove col P&L fluttuante delle posizioni aperte; V2 sul realizzato,
+   che non si muove. La differenza e' piccola ma reale, e si vede solo
+   quando una gamba apre mentre l'altra e' gia' a mercato.
+3. **`InpMagicBase` e' rimasto 997000**, come chiesto. Se V1 e V2
+   girano sullo stesso conto si contano i trade a vicenda e il capitale
+   virtuale risulta sbagliato: **non tenerli accesi insieme**, oppure
+   cambiare il magic di uno dei due.
+
+`InpMinFreeMarginAfterPct` e' a 30% come primo valore ragionevole, non
+misurato. E' l'unico parametro di questa versione che vale la pena
+tarare, e si tara guardando quante volte compare "ORDINE RIFIUTATO"
+nel diario.
