@@ -156,41 +156,41 @@ def pag_risposta(C, T, pdf):
             (f"{it(b['d'][95], 1)}%", 'drawdown 95%, tutto il periodo', VERDE))):
         kpi(fig, .058 + i*.2235, .850, .2105, v, et, col, h=.058)
 
-    testo(fig, .058, .800,
+    testo(fig, .058, .830,
           "Sono le due uniche caselle da cambiare. Nell'EA dell'oro InpRiskPercent vale per tutte e\n"
-          "due le sue gambe (i moltiplicatori S2 e S3 sono a 1,0), quindi tre gambe, due caselle.", 8.8, INK)
+          "due le sue gambe (i moltiplicatori S2 e S3 sono a 1,0): tre gambe, due caselle.", 8.8, INK)
 
-    tit(fig, .748, 'Cosa aspettarsi, nei due scenari')
-    xs = [(.070, 'left'), (.360, 'right'), (.510, 'right'), (.640, 'right'),
-          (.785, 'right'), (.930, 'right')]
-    card(fig, .058, .586, .884, .152)
-    riga_tab(fig, .708, ['scenario', 'peggio (5%)', 'MEDIANA', "all'anno",
+    tit(fig, .784, 'Cosa aspettarsi, nei due scenari')
+    xs = [(.070, 'left'), (.430, 'right'), (.550, 'right'), (.660, 'right'),
+          (.795, 'right'), (.930, 'right')]
+    card(fig, .058, .622, .884, .152)
+    riga_tab(fig, .744, ['scenario', 'peggio (5%)', 'MEDIANA', "all'anno",
                          'DD 90%', 'DD 95%'], xs, 8.0, INK3, 'bold')
-    linea(fig, .698, .070, .930)
+    linea(fig, .734, .070, .930)
     for i, (et, k, col) in enumerate((
-            ('CALMO — come il 2019-2023', 'pre', CC),
-            ('TUTTO — col boom 2024-2026', 'tot', CT))):
+            ('CALMO  (come il 2019-2023)', 'pre', CC),
+            ('TUTTO  (col boom dentro)', 'tot', CT))):
         r = T[(SCELTO, k)]
-        riga_tab(fig, .674 - i*.030,
+        riga_tab(fig, .710 - i*.030,
                  [et, pc(r['t'][5], 0), pc(r['t'][50], 0),
                   pc(cagr(C, r['t'][50]), 1), f"{it(r['d'][90],1)}%",
                   f"{it(r['d'][95],1)}%"], xs, 8.6, col, 'bold')
-    testo(fig, .070, .618,
+    testo(fig, .070, .652,
           "Tutti e due simulati su SETTE anni, 12.000 storie, bootstrap a blocchi da 20.", 7.8, INK3)
 
-    tit(fig, .552, 'Sul tuo x0,80: non passa la tua stessa regola', ROSSO)
-    testo(fig, .058, .524,
+    tit(fig, .590, 'Sul tuo x0,80: non passa la tua stessa regola', ROSSO)
+    testo(fig, .058, .562,
           f"Avevi scelto oro 0,80% / nasdaq 1,20% guardando la tabella di tutto il periodo, dove il\n"
           f"drawdown al 95o percentile e' {it(T[(0.80,'tot')]['d'][95],1)}%. Ma nello scenario calmo, quello che mi hai detto\n"
-          f"di usare come riferimento, lo stesso rischio da' **{it(T[(0.80,'pre')]['d'][95],1)}%** al 95o e "
-          f"{it(T[(0.80,'pre')]['d'][99],1)}% al 99o.\n"
-          f"E' oltre il tetto che hai messo tu, e non di poco.\n\n"
-          f"Il massimo difendibile leggendo il tetto al 90o percentile (la lettura piu' permissiva che\n"
-          f"hai indicato) e' x{it(T['w90'],2)}, cioe' oro {it(R_ORO*T['w90'],2)}% e nasdaq {it(R_NAS*T['w90'],2)}%. Anche cosi' x0,80 resta appena fuori.",
+          f"di usare come riferimento, lo stesso rischio da' {it(T[(0.80,'pre')]['d'][95],1)}% al 95o percentile e "
+          f"{it(T[(0.80,'pre')]['d'][99],1)}% al 99o:\n"
+          f"oltre il tetto che hai messo tu, e non di poco.\n\n"
+          f"Il massimo difendibile leggendo il tetto al 90o percentile — la lettura piu' permissiva\n"
+          f"che hai indicato — e' x{it(T['w90'],2)}: oro {it(R_ORO*T['w90'],2)}% e nasdaq {it(R_NAS*T['w90'],2)}%. Anche cosi' x0,80 resta appena fuori.",
           8.8)
 
-    tit(fig, .388, 'Il confronto che conta')
-    ax = fig.add_axes([.098, .108, .844, .248])
+    tit(fig, .420, 'Il confronto che conta')
+    ax = fig.add_axes([.098, .112, .844, .272])
     ks = np.array(PESI)
     for k, et, col in (('pre', 'scenario calmo', CC), ('tot', 'tutto il periodo', CT)):
         ax.plot(ks, [T[(w, k)]['d'][95] for w in PESI], 'o-', color=col, lw=1.8,
@@ -218,7 +218,7 @@ def pag_risposta(C, T, pdf):
 # =============================================================== pag. 2
 def pag_scenari(C, pdf):
     fig = pagina('Perche\' due scenari',
-                 'il 2024-2026 e\' stato un boom, e fare la media con dentro un boom significa aspettarsene un altro')
+                 'il 2024-2026 e\' stato un boom, e farci dentro la media vuol dire aspettarsene un altro')
 
     PA = per_anno(C)
     testo(fig, .058, .888,
@@ -246,14 +246,14 @@ def pag_scenari(C, pdf):
     tit(fig, .620, 'La stessa cosa, misurata per operazione')
     mo_t, mn_t = C['G_tot']['oro'].mean()*1e4, C['G_tot']['nas'].mean()*1e4
     mo_p, mn_p = C['G_pre']['oro'].mean()*1e4, C['G_pre']['nas'].mean()*1e4
-    xs2 = [(.070, 'left'), (.430, 'right'), (.620, 'right'), (.930, 'right')]
+    xs2 = [(.070, 'left'), (.560, 'right'), (.720, 'right'), (.930, 'right')]
     card(fig, .058, .488, .884, .122)
     riga_tab(fig, .580, ['', 'oro', 'nasdaq', 'operazioni'], xs2, 8.0, INK3, 'bold')
     linea(fig, .570, .070, .930)
-    riga_tab(fig, .546, [f"TUTTO  {C['dal']} - {C['al']}  ({it(C['d_tot'],2)} anni)",
+    riga_tab(fig, .546, [f"TUTTO  2019-2026  ({it(C['d_tot'],2)} anni)",
                          f"{mo_t:+.1f} bp", f"{mn_t:+.1f} bp", it(len(C['op']))],
              xs2, 8.4, CT)
-    riga_tab(fig, .518, [f"CALMO  {C['dal']} - {C['al_pre']}  ({it(C['d_pre'],2)} anni)",
+    riga_tab(fig, .518, [f"CALMO  2019-2023  ({it(C['d_pre'],2)} anni)",
                          f"{mo_p:+.1f} bp", f"{mn_p:+.1f} bp", it(len(C['pre']))],
              xs2, 8.4, CC)
     testo(fig, .070, .506,
@@ -261,12 +261,12 @@ def pag_scenari(C, pdf):
           f"il nasdaq l'{it(100*mn_p/mn_t,0)}%.", 7.8, INK3)
 
     tit(fig, .452, 'Le due curve, alle impostazioni di prova')
-    ax = fig.add_axes([.098, .232, .844, .200])
+    ax = fig.add_axes([.098, .254, .844, .178])
     eq = [DEP]
     for _, x, _ in C['op']: eq.append(eq[-1]*(1 + x))
     eq = np.array(eq)
     n_pre = len(C['pre'])
-    ax.plot(np.arange(n_pre + 1), eq[:n_pre + 1], color=CC, lw=1.8,
+    ax.plot(np.arange(n_pre + 1), eq[:n_pre + 1], color=BLU, lw=1.8,
             label=f"2019-2023  {pc(100*(eq[n_pre]/DEP-1),0)} in {it(C['d_pre'],2)} anni")
     ax.plot(np.arange(n_pre, len(eq)), eq[n_pre:], color=ROSSO, lw=1.8,
             label=f"2024-2026  {pc(100*(eq[-1]/eq[n_pre]-1),0)} in {it(C['d_tot']-C['d_pre'],2)} anni")
@@ -277,15 +277,15 @@ def pag_scenari(C, pdf):
     ax.legend(fontsize=7.6, facecolor='#1c1c1a', edgecolor=GRIGLIA,
               labelcolor=INK2, loc='upper left')
 
-    testo(fig, .058, .196,
-          "Due anni e tre quarti hanno prodotto piu' di quanto abbiano prodotto i quattro e mezzo\n"
-          "precedenti. Non e' un difetto dei dati: e' successo davvero. Ma pianificare sulla media che\n"
-          "lo contiene vuol dire scommettere che si ripeta, e non c'e' niente che lo garantisca.\n\n"
-          "Da qui in poi il rischio si decide sul periodo CALMO, e il periodo intero resta come\n"
-          "secondo riferimento — il caso favorevole, non quello da mettere a bilancio.", 8.8)
+    testo(fig, .058, .220,
+          "Due anni e tre quarti hanno prodotto piu' dei quattro e mezzo precedenti. Non e' un difetto\n"
+          "dei dati: e' successo davvero. Ma pianificare sulla media che lo contiene vuol dire\n"
+          "scommettere che si ripeta, e non c'e' niente che lo garantisca.\n\n"
+          "Da qui in poi il rischio si decide sul periodo CALMO; il periodo intero resta come secondo\n"
+          "riferimento — il caso favorevole, non quello da mettere a bilancio.", 8.8)
 
-    tit(fig, .100, 'Una precisazione sul confronto', INK)
-    testo(fig, .058, .074,
+    tit(fig, .098, 'Una precisazione sul confronto', INK)
+    testo(fig, .058, .072,
           f"Il periodo calmo dura {it(C['d_pre'],2)} anni, tutto il periodo {it(C['d_tot'],2)}. Un drawdown misurato su quattro anni\n"
           f"e' per forza piu' piccolo: ha meno occasioni di incolonnare le perdite. Per questo nelle\n"
           f"simulazioni il periodo calmo viene allungato a sette anni (x{it(C['oriz'],3)}): 'e se questo regime durasse'.",
@@ -340,15 +340,15 @@ def pag_scelta(C, T, pdf):
                  'perche\' x0,70 e non x0,80, e perche\' nessuna formula puo\' deciderlo al posto tuo')
 
     tit(fig, .888, 'I tre candidati, tutti letti sullo scenario calmo')
-    xs = [(.070, 'left'), (.330, 'right'), (.470, 'right'), (.600, 'right'),
-          (.700, 'right'), (.800, 'right'), (.930, 'right')]
+    xs = [(.070, 'left'), (.410, 'right'), (.530, 'right'), (.638, 'right'),
+          (.735, 'right'), (.832, 'right'), (.930, 'right')]
     card(fig, .058, .724, .884, .142)
     riga_tab(fig, .836, ['', 'oro / nasdaq', 'MEDIANA', "all'anno",
                          'DD 90%', 'DD 95%', 'DD 99%'], xs, 8.0, INK3, 'bold')
     linea(fig, .826, .070, .930)
-    cand = [(SCELTO, 'dentro il tetto', VERDE),
+    cand = [(SCELTO, 'SCELTO — dentro il tetto', VERDE),
             (T['w90'], 'il massimo difendibile', GIALLO),
-            (0.80, 'il tuo: fuori', ROSSO)]
+            (0.80, 'il tuo x0,80 — fuori', ROSSO)]
     for i, (w, nota, col) in enumerate(cand):
         r = T[(w, 'pre')]
         riga_tab(fig, .800 - i*.030,
@@ -365,7 +365,7 @@ def pag_scelta(C, T, pdf):
           f"-{it(T[(0.80,'pre')]['d'][99],0)}%.", 8.8, INK)
 
     tit(fig, .620, 'Perche\' il "rapporto ottimale" non decide niente', ROSSO)
-    ax = fig.add_axes([.098, .408, .844, .180])
+    ax = fig.add_axes([.098, .432, .844, .156])
     ks = np.array(PESI)
     rap = [cagr(C, T[(w, 'pre')]['t'][50]) / T[(w, 'pre')]['d'][95] for w in PESI]
     ax.plot(ks, rap, 'o-', color=VIOLA, lw=1.8, ms=4)
@@ -374,28 +374,27 @@ def pag_scelta(C, T, pdf):
     ax.set_ylabel('rendimento annuo / drawdown 95%', fontsize=7.8)
     ax.tick_params(labelsize=7.2)
 
-    testo(fig, .058, .380,
+    testo(fig, .058, .394,
           "Il rapporto fra crescita e sofferenza non ha un massimo: sale sempre. Piu' rischi, piu'\n"
-          "rendimento per ogni punto di drawdown — e continua a salire ben oltre qualunque drawdown\n"
-          "sopportabile. Non e' un errore del calcolo: e' cosi' che funziona l'interesse composto,\n"
-          "finche' non si arriva al punto in cui il conto si azzera (e quel punto e' lontanissimo,\n"
-          "a un drawdown del 95% e passa).\n\n"
+          "rendimento per ogni punto di drawdown, e continua a salire ben oltre qualunque drawdown\n"
+          "sopportabile. Non e' un errore: e' cosi' che funziona l'interesse composto, finche' non si\n"
+          "arriva al punto in cui il conto si azzera — e quel punto e' lontanissimo.\n\n"
           "Conclusione: NESSUNA FORMULA TI DICE QUANTO RISCHIARE. Lo decide solo il drawdown che sei\n"
-          "disposto ad attraversare senza spegnere tutto. Tu hai detto 35%, e questo e' il numero che\n"
+          "disposto ad attraversare senza spegnere tutto. Tu hai detto 35%: e' quello il numero che\n"
           "comanda in tutto il report.", 8.8)
 
-    tit(fig, .238, 'I numeri sono stabili')
+    tit(fig, .246, 'I numeri sono stabili')
     xs2 = [(.070, 'left'), (.400, 'right'), (.560, 'right'), (.760, 'right'), (.930, 'right')]
-    card(fig, .058, .098, .884, .124)
-    riga_tab(fig, .192, ['', 'mediana', 'scarto', 'DD 95%', 'scarto'], xs2, 8.0, INK3, 'bold')
-    linea(fig, .182, .070, .930)
+    card(fig, .058, .074, .884, .146)
+    riga_tab(fig, .200, ['', 'mediana', 'scarto', 'DD 95%', 'scarto'], xs2, 8.0, INK3, 'bold')
+    linea(fig, .190, .070, .930)
     for i, w in enumerate((0.65, 0.70, 0.80)):
         s = T['stab'][w]
-        riga_tab(fig, .158 - i*.026,
+        riga_tab(fig, .166 - i*.026,
                  [f"x{it(w,2)}", pc(s['m'], 0), f"±{it(s['sm'],0)}",
                   f"{it(s['d'],2)}%", f"±{it(s['sd'],2)}"], xs2, 8.4,
                  VERDE if w == SCELTO else INK2)
-    testo(fig, .070, .112,
+    testo(fig, .070, .100,
           "Cinque semi diversi, 12.000 storie ciascuno. Il drawdown si muove di un decimo di punto.",
           7.8, INK3)
     pdf.savefig(fig); plt.close(fig)
@@ -419,8 +418,8 @@ def pag_distribuzioni(C, T, D, pdf):
     ax.legend(fontsize=7.6, facecolor='#1c1c1a', edgecolor=GRIGLIA,
               labelcolor=INK2, loc='upper right')
 
-    tit(fig, .636, 'Il drawdown')
-    ax = fig.add_axes([.098, .420, .844, .188])
+    tit(fig, .624, 'Il drawdown')
+    ax = fig.add_axes([.098, .412, .844, .180])
     for k, et, col in (('pre', 'scenario calmo', CC), ('tot', 'tutto il periodo', CT)):
         d = D[k]['dd_pct']
         ax.hist(d, bins=80, color=col, alpha=.55, edgecolor='none',
@@ -432,14 +431,14 @@ def pag_distribuzioni(C, T, D, pdf):
     ax.legend(fontsize=7.6, facecolor='#1c1c1a', edgecolor=GRIGLIA,
               labelcolor=INK2, loc='upper right')
 
-    tit(fig, .384, 'In numeri, a tutte le profondita\'')
-    xs = [(.070, 'left')] + [(.180 + .107*i, 'right') for i in range(7)]
-    card(fig, .058, .208, .884, .162)
-    riga_tab(fig, .352, ['percentile', '5%', '10%', '25%', '50%', '75%', '90%', '95%'],
+    tit(fig, .368, 'In numeri, a tutte le profondita\'')
+    xs = [(.070, 'left')] + [(.288 + .107*i, 'right') for i in range(7)]
+    card(fig, .058, .192, .884, .162)
+    riga_tab(fig, .336, ['percentile', '5%', '10%', '25%', '50%', '75%', '90%', '95%'],
              xs, 8.0, INK3, 'bold')
-    linea(fig, .342, .070, .930)
+    linea(fig, .326, .070, .930)
     P = (5, 10, 25, 50, 75, 90, 95)
-    yy = .318
+    yy = .302
     for k, et, col in (('pre', 'CALMO', CC), ('tot', 'TUTTO', CT)):
         riga_tab(fig, yy, [f'{et} · rendimento'] +
                  [pc(np.percentile(D[k]['rend'], p), 0) for p in P], xs, 8.2, col)
@@ -448,7 +447,7 @@ def pag_distribuzioni(C, T, D, pdf):
                  [f"{it(np.percentile(D[k]['dd_pct'], p), 1)}%" for p in P], xs, 8.2, col)
         yy -= .034
 
-    testo(fig, .058, .176,
+    testo(fig, .058, .160,
           f"Come si legge la riga del drawdown: nello scenario calmo, meta' delle storie non scende\n"
           f"mai sotto il {it(np.percentile(D['pre']['dd_pct'],50),1)}%, nove su dieci restano sopra il "
           f"-{it(np.percentile(D['pre']['dd_pct'],90),1)}%, diciannove su venti sopra il "
@@ -456,8 +455,8 @@ def pag_distribuzioni(C, T, D, pdf):
           f"Una storia su venti scende piu' di cosi'. Non e' un caso remoto: e' una probabilita' su\n"
           f"venti, e su sette anni va messa in conto come qualcosa che puo' capitare.", 8.8)
 
-    tit(fig, .092, 'Il numero sobrio, per chi non si fida del composto')
-    testo(fig, .058, .066,
+    tit(fig, .076, 'Il numero sobrio, per chi non si fida del composto')
+    testo(fig, .058, .050,
           f"A rischio fisso — lotto costante, niente reinvestimento — la stessa impostazione da' una\n"
           f"mediana di {pc(T['fisso_pre'][50],0)} nello scenario calmo e {pc(T['fisso_tot'][50],0)} su tutto il periodo, con drawdown\n"
           f"al 95o percentile del {it(T['fisso_pre_dd'][95],1)}% e {it(T['fisso_tot_dd'][95],1)}%. E' la lettura da usare per fare i piani.",
@@ -542,30 +541,31 @@ def pag_fare(C, T, pdf):
           "1. IL BOOTSTRAP NON SA SE IL VANTAGGIO E' VERO. Rimescola le stesse operazioni: misura\n"
           "   quanto puo' variare il percorso DATO che il vantaggio esista. Se nella realta' la\n"
           "   strategia vale il 70% di quanto misurato, il drawdown resta quello e il rendimento\n"
-          "   crolla. E' il motivo per cui il rischio e' stato scelto sul periodo piu' magro invece\n"
-          "   che sulla media, e per cui non si e' preso il massimo consentito.\n\n"
-          "2. LE DUE STRATEGIE NON SONO MAI GIRATE INSIEME DENTRO METATRADER. Il tester prende un\n"
-          "   simbolo alla volta. Questa e' la fusione esatta di due backtest separati: giusta sui\n"
-          "   rendimenti e sul drawdown, muta su esecuzioni in contesa e ordini rifiutati.\n\n"
-          "3. IL FUORI CAMPIONE DELL'ORO (2024.01-2026.09) E' GIA' STATO SPESO una volta sola, e ha\n"
-          "   passato i criteri. Non c'e' piu' dato vergine su quegli anni.\n\n"
-          "4. IL NASDAQ E' LA GAMBA MENO VERIFICATA. Il test del plateau non e' ancora stato fatto.\n"
-          "   Finche' non c'e', il suo contributo qui va letto come il piu' ottimistico dei due.\n\n"
+          "   crolla. E' il motivo per cui il rischio e' stato scelto sul periodo piu' magro, e per\n"
+          "   cui non si e' preso il massimo consentito.\n"
+          "2. LE DUE STRATEGIE NON SONO MAI GIRATE INSIEME DENTRO METATRADER: il tester prende un\n"
+          "   simbolo alla volta. Questa e' la fusione esatta di due backtest separati, giusta sui\n"
+          "   rendimenti e sul drawdown, muta su esecuzioni in contesa e ordini rifiutati.\n"
+          "3. IL FUORI CAMPIONE DELL'ORO (2024.01-2026.09) E' GIA' STATO SPESO, una volta sola, e ha\n"
+          "   passato i criteri. Non c'e' piu' dato vergine su quegli anni.\n"
+          "4. IL NASDAQ E' LA GAMBA MENO VERIFICATA: il test del plateau non e' ancora stato fatto.\n"
+          "   Finche' non c'e', il suo contributo qui va letto come il piu' ottimistico dei due.\n"
           "5. TUTTI I NUMERI VENGONO DA PU PRIME. Su Fusion i costi del nasdaq si equivalgono al\n"
-          "   netto, ma per composizione diversa: spread piu' largo, swap piu' basso.\n\n"
-          "6. L'ARROTONDAMENTO DEL LOTTO non e' simulato. Su 10.000 euro allo 0,70% il lotto viene\n"
-          "   piccolo e il broker lo arrotonda al passo minimo: il rischio vero puo' scostarsi di\n"
-          "   qualche punto percentuale da quello teorico, in su o in giu'. Si legge nel pannello.")
+          "   netto, ma per composizione diversa: spread piu' largo, swap piu' basso.\n"
+          "6. L'ARROTONDAMENTO DEL LOTTO non e' simulato. Su 10.000 allo 0,70% il lotto viene piccolo\n"
+          "   e il broker lo arrotonda al passo minimo: il rischio vero puo' scostarsi di qualche\n"
+          "   punto percentuale da quello teorico. Si legge nel pannello, riga RISCHIO.", 8.6)
 
-    tit(fig, .166, 'Come e\' stato calcolato')
-    testo(fig, .058, .140,
+    tit(fig, .128, 'Come e\' stato calcolato')
+    testo(fig, .058, .104,
           f"Bootstrap a blocchi mobili da 20 operazioni, che non spezza le serie di perdite\n"
-          f"consecutive; 12.000 storie per ogni riga; ogni gamba ricampionata per conto suo e poi\n"
-          f"rifusa, cosi' nessuna sincronia fortunata fra oro e nasdaq viene regalata. Orizzonte\n"
-          f"sempre di sette anni: il periodo calmo ({it(C['d_pre'],2)} anni) viene allungato x{it(C['oriz'],3)} perche' i\n"
-          f"drawdown siano confrontabili. Le operazioni si riscalano linearmente col rischio, perche'\n"
-          f"il lotto e' proporzionale alla percentuale scelta.\n\n"
-          f"Rigenerare: python3 tools/report_rischio_portafoglio.py <oro.html> <nasdaq.html>", 8.4)
+          f"consecutive; 12.000 storie per riga; ogni gamba ricampionata per conto suo e poi rifusa,\n"
+          f"cosi' nessuna sincronia fortunata fra oro e nasdaq viene regalata; orizzonte sempre di\n"
+          f"sette anni, col periodo calmo ({it(C['d_pre'],2)} anni) allungato x{it(C['oriz'],3)} perche' i drawdown siano\n"
+          f"confrontabili. Le operazioni si riscalano linearmente col rischio, perche' il lotto e'\n"
+          f"proporzionale alla percentuale scelta.\n\n"
+          f"python3 tools/report_rischio_portafoglio.py <oro.html> <nasdaq.html>", 8.4)
+
     pdf.savefig(fig); plt.close(fig)
 
 
