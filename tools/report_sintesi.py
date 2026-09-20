@@ -37,13 +37,61 @@ def pagina(titolo, sottotitolo, sezione=''):
     fig.text(.062, .960, titolo, fontsize=20, color=INK, weight='bold')
     fig.text(.062, .938, sottotitolo, fontsize=8.6, color=INK2)
     fig.text(.938, .962, sezione, fontsize=8.4, color=INK3, ha='right', weight='bold')
-    fig.text(.938, .945, f'V1XAU · pag. {PAG[0]} di 8', fontsize=7.4, color=INK3, ha='right')
+    fig.text(.938, .945, f'V1XAU · pag. {PAG[0]} di 9', fontsize=7.4, color=INK3, ha='right')
     fig.add_artist(Rectangle((.062, .928), .876, .0015, facecolor=GRIGLIA,
                              edgecolor='none', transform=fig.transFigure))
     return fig
 
 def titoletto(fig, y, s, col=None):
     fig.text(.062, y, s, fontsize=11.5, color=col or INK, weight='bold')
+
+# ======================================================================
+#  COMPRA E TIENI — serie XAUUSD ricavata dalle esecuzioni del backtest
+#
+#  Si prende la MEDIANA dei prezzi di ogni giorno: toglie il rimbalzo fra
+#  prezzo in acquisto e in vendita senza perdere risoluzione. Resta
+#  un'approssimazione ricavata dal backtest, non il listino ufficiale.
+# ======================================================================
+def oro_giornaliero(b):
+    from collections import defaultdict
+    g = defaultdict(list)
+    for o in b['ops']:
+        if o.prezzo_in > 0:  g[o.apertura[:10]].append(o.prezzo_in)
+        if o.prezzo_out > 0: g[o.chiusura[:10]].append(o.prezzo_out)
+    gg = sorted(g)
+    return gg, [st.median(g[k]) for k in gg]
+
+def _dd(v):
+    v = np.asarray(v, float); pk = np.maximum.accumulate(v)
+    return 100*float(((pk - v)/pk).max())
+
+def bh_stat(b):
+    gg, v = oro_giornaliero(b)
+    rend = 100*(v[-1]/v[0] - 1)
+    dd = _dd(v)
+    ann = {}
+    for a in sorted({k[:4] for k in gg}):
+        dentro = [i for i, k in enumerate(gg) if k[:4] == a]
+        i0 = dentro[0]-1 if dentro[0] > 0 else dentro[0]
+        ann[a] = 100*(v[dentro[-1]]/v[i0] - 1)
+    return {'date': gg, 'px': v, 'rend': rend, 'dd': dd,
+            'rd': rend/dd if dd else float('nan'), 'anni': ann,
+            'picco': max(v), 'minimo': min(v)}
+
+def strategia_a_rischio(b, f):
+    """Curva composta a un rischio qualunque, dalle stesse operazioni."""
+    eq = np.cumprod(1.0 + np.asarray(b['R'], float) * f)
+    return 100*(eq[-1] - 1), _dd(eq), eq
+
+def rischio_pari_dd(b, dd_bersaglio):
+    """A che rischio la strategia soffre quanto il compra-e-tieni."""
+    lo, hi = 0.0005, 0.030
+    for _ in range(40):
+        m = (lo + hi)/2
+        if strategia_a_rischio(b, m)[1] < dd_bersaglio: lo = m
+        else: hi = m
+    r, d, _e = strategia_a_rischio(b, lo)
+    return lo, r, d
 
 # ======================================================================
 def carica_tutto(percorsi, nomi, qualita, rt):
@@ -62,7 +110,7 @@ def carica_tutto(percorsi, nomi, qualita, rt):
         for o in ops: b['mesi'].setdefault(o.chiusura[:7], []).append(o)
         B.append(b)
     d0, d1 = B[0]['date'][0], B[0]['date'][-1]
-    C = {'b': B, 'nomi': nomi, 'qualita': qualita,
+    C = {'b': B, 'nomi': nomi, 'qualita': qualita, 'bh': bh_stat(B[0]),
          'dal': min(x['date'][0][:10] for x in B), 'al': max(x['date'][-1][:10] for x in B),
          'anni_tot': sorted(set().union(*[set(x['anni']) for x in B])),
          'durata': (int(d1[:4])+int(d1[5:7])/12) - (int(d0[:4])+int(d0[5:7])/12)}
@@ -160,8 +208,8 @@ def p2(pdf, C):
     for j, (chiave, tit, nota) in enumerate([
             ('eqF', 'A RISCHIO FISSO — ogni operazione rischia 100',
              'la pendenza e\' la bravura: nessun anno viene amplificato dalla dimensione del conto'),
-            ('eqC', 'A INTERESSE COMPOSTO — le posizioni crescono col conto',
-             'e\' il saldo vero della passata: il finale e\' piu\' alto, ma anche il drawdown')]):
+            ('eqC', 'A INTERESSE COMPOSTO — con il compra-e-tieni a confronto',
+             'e\' il saldo vero della passata, ed e\' l\'unico piano su cui il confronto col compra-e-tieni ha senso')]):
         alto = .650 - j*.255
         ax = fig.add_axes([.095, alto, .845, .190])
         for i, b in enumerate(C['b']):
@@ -169,6 +217,14 @@ def p2(pdf, C):
             ax.plot(range(len(e)), [100*(x-DEPOSITO)/DEPOSITO for x in e],
                     color=CB[i], lw=1.9,
                     label=f"{b['nome']}  {pc(b['tot' if j==0 else 'cmp']['rend'],0)}")
+        if j == 1:      # il confronto col compra-e-tieni ha senso solo a composto
+            bh = C['bh']
+            idx = []
+            for d in bh['date']:
+                k = [t for t, x in enumerate(A['date']) if x[:10] <= d]
+                idx.append(k[-1] if k else 0)
+            ax.plot(idx, [100*(x/bh['px'][0]-1) for x in bh['px']], color=INK3, lw=1.7,
+                    ls='--', label=f"compra e tieni XAUUSD  {pc(bh['rend'],0)}")
         ax.axhline(0, color=INK3, lw=.9)
         vis = anni_su(ax, A['date'], 0, 0)
         ax.set_xticks(list(vis.values())); ax.set_xticklabels(list(vis), fontsize=8.4)
@@ -214,7 +270,89 @@ def p2(pdf, C):
     pdf.savefig(fig); plt.close(fig)
 
 # ======================================================================
-#  3 — ANNO PER ANNO
+#  3 — CONVIENE, RISPETTO AL COMPRA-E-TIENI?
+# ======================================================================
+def p_conviene(pdf, C):
+    A, B = C['b']; bh = C['bh']
+    fig = pagina('Conviene, rispetto al compra-e-tieni?',
+                 'la domanda vera: valeva la pena costruire una strategia?', 'CONFRONTO')
+    testo(fig, .062, .905,
+          "Confrontare i rendimenti e basta non risponde: con piu' rischio si alza il rendimento di\n"
+          "qualunque strategia. La domanda giusta e' A PARITA' DI SOFFERENZA — cioe' con lo stesso\n"
+          "drawdown massimo del compra-e-tieni — chi porta a casa di piu'.")
+
+    # --- la risposta, grande ---
+    y = .830
+    for i, b in enumerate(C['b']):
+        f, rend, dd = rischio_pari_dd(b, bh['dd'])
+        card(fig, .062 + i*.452, y-.105, .424, .100, CB[i])
+        fig.text(.082 + i*.452, y-.024, b['nome'], fontsize=10, color=CB[i], weight='bold')
+        fig.text(.082 + i*.452, y-.052, pc(rend,0), fontsize=22, color=VERDE, weight='bold')
+        fig.text(.082 + i*.452, y-.072, f"contro {pc(bh['rend'],0)} del compra-e-tieni",
+                 fontsize=8.2, color=INK2)
+        fig.text(.082 + i*.452, y-.090,
+                 f"stesso drawdown ({it(bh['dd'],1)}%), rischio {it(100*f,2)}% per operazione",
+                 fontsize=7.6, color=INK3)
+    fig.text(.062, y-.130, f"Cioe' {it(rischio_pari_dd(A, bh['dd'])[1]/bh['rend'],1)}× e "
+             f"{it(rischio_pari_dd(B, bh['dd'])[1]/bh['rend'],1)}× il compra-e-tieni, "
+             "sopportando esattamente lo stesso calo massimo.", fontsize=9.6, color=INK, weight='bold')
+
+    # --- la scala del rischio ---
+    y = .655
+    titoletto(fig, y, 'La scala completa: rendimento e drawdown a ogni rischio'); y -= .030
+    xs = [(.062,'left'), (.30,'right'), (.44,'right'), (.575,'right'),
+          (.715,'right'), (.855,'right'), (.938,'right')]
+    riga_tab(fig, y, ['rischio', f"{A['nome']}\nrendimento", 'drawdown',
+                      f"{B['nome']}\nrendimento", 'drawdown', '', ''], xs, 7.4, INK3, 'bold')
+    linea(fig, y-.016, .062, .938); y -= .034
+    for f in (0.0025, 0.0050, 0.0070, 0.0100, 0.0150):
+        ra, da, _ = strategia_a_rischio(A, f)
+        rb, db, _ = strategia_a_rischio(B, f)
+        riga_tab(fig, y, [it(100*f,2)+'%', pc(ra,0), it(da,1)+'%', pc(rb,0), it(db,1)+'%', '', ''],
+                 xs, 8.5, INK)
+        y -= .0225
+    linea(fig, y+.012, .062, .938); y -= .014
+    riga_tab(fig, y, ['COMPRA E TIENI', pc(bh['rend'],0), it(bh['dd'],1)+'%',
+                      pc(bh['rend'],0), it(bh['dd'],1)+'%', '', ''], xs, 8.6, INK3, 'bold')
+    y -= .030
+    testo(fig, .062, y,
+          "Si legge cosi': si cerca la riga con lo stesso drawdown dell'ultima, e si confrontano i\n"
+          "rendimenti. A rischi piu' bassi la strategia rende meno del compra-e-tieni, ma soffre anche\n"
+          "molto meno: a 0,50% fa circa il rendimento dell'oro con meta' del suo drawdown.", 8.1, INK3)
+
+    # --- anno per anno contro l'oro ---
+    y -= .072
+    titoletto(fig, y, "Anno per anno contro l'oro, a composto all'1%"); y -= .030
+    xs2 = [(.062,'left'), (.34,'right'), (.56,'right'), (.80,'right')]
+    riga_tab(fig, y, ['anno', A['nome'], B['nome'], 'compra e tieni'], xs2, 7.8, INK3, 'bold')
+    linea(fig, y-.009, .062, .938); y -= .024
+    def comp_anno(b, a):
+        ops = b['anni'].get(a, [])
+        if not ops: return 0.0
+        i = b['ops'].index(ops[0])
+        inizio = DEPOSITO if i == 0 else b['ops'][i-1].saldo
+        return 100*(ops[-1].saldo/inizio - 1) if inizio > 0 else 0.0
+    meglio = 0
+    for a in C['anni_tot']:
+        va, vb, vo = comp_anno(A, a), comp_anno(B, a), bh['anni'].get(a, 0.0)
+        if va > vo: meglio += 1
+        riga_tab(fig, y, [a, None, None, None], xs2, 8.5, INK)
+        for k, v, col in ((1, va, CB[0]), (2, vb, CB[1]), (3, vo, INK3)):
+            fig.text(xs2[k][0], y, pc(v), fontsize=8.5, ha='right', weight='bold',
+                     color=(VERDE if v > 0 else ROSSO) if k < 3 else INK3)
+        y -= .0205
+    y -= .014
+    card(fig, .062, y-.112, .876, .104, VERDE)
+    fig.text(.082, y-.026, 'La risposta, per intero', fontsize=11, color=INK, weight='bold')
+    testo(fig, .082, y-.046,
+          f"Si, e' valsa la pena: a parita' di drawdown la strategia rende fra 2 e 3 volte il compra-e-\n"
+          f"tieni, e batte l'oro in {meglio} anni su {len(C['anni_tot'])}. Ma il vantaggio vero non e' solo il rendimento:\n"
+          f"e' che lo stop e' sempre a mercato e il rischio per operazione e' deciso da te, mentre chi\n"
+          f"tiene e basta si prende ogni discesa per intero — compreso il {it(bh['dd'],1)}% del 2026.", 8.3)
+    pdf.savefig(fig); plt.close(fig)
+
+# ======================================================================
+#  4 — ANNO PER ANNO
 # ======================================================================
 def p3(pdf, C):
     fig = pagina('Anno per anno', 'distribuito nel tempo, o concentrato di recente?', 'CONSISTENZA')
@@ -241,8 +379,8 @@ def p3(pdf, C):
     xs = [(.062,'left'), (.255,'right'), (.395,'right'), (.545,'right'),
           (.685,'right'), (.815,'right'), (.938,'right')]
     riga_tab(fig, y, ['anno', f"{A['nome']}\nfisso", f"{A['nome']}\ncomposto",
-                      f"{B['nome']}\nfisso", f"{B['nome']}\ncomposto", 'R / R', 'oper.'],
-             xs, 7.2, INK3, 'bold')
+                      f"{B['nome']}\nfisso", f"{B['nome']}\ncomposto",
+                      'compra\ne tieni', 'operazioni'], xs, 7.2, INK3, 'bold')
     linea(fig, y-.016, .062, .938); y -= .034
     # a composto il rendimento dell'anno va misurato sul saldo di INIZIO
     # anno, non sul deposito iniziale: altrimenti gli ultimi anni
@@ -258,17 +396,18 @@ def p3(pdf, C):
         oa, ob = A['anni'].get(a, []), B['anni'].get(a, [])
         ca, cb = comp_anno(A, a), comp_anno(B, a)
         riga_tab(fig, y, [a + (' *' if a in (anni[0], anni[-1]) else ''),
-                          None, None, None, None,
-                          f"{it(sum(o.R for o in oa),1)} / {it(sum(o.R for o in ob),1)}",
+                          None, None, None, None, None,
                           f"{len(oa)} / {len(ob)}"], xs, 8.4, INK)
         for k, v in ((1, rA.get(a,0)), (2, ca), (3, rB.get(a,0)), (4, cb)):
             fig.text(xs[k][0], y, pc(v), fontsize=8.4, ha='right',
                      color=VERDE if v > 0 else ROSSO, weight='bold')
+        fig.text(xs[5][0], y, pc(C['bh']['anni'].get(a, 0.0)), fontsize=8.4, ha='right',
+                 color=INK3, weight='bold')
         y -= .0215
     linea(fig, y+.012, .062, .938); y -= .014
     riga_tab(fig, y, ['TOTALE', pc(A['tot']['rend'],0), pc(A['cmp']['rend'],0),
                       pc(B['tot']['rend'],0), pc(B['cmp']['rend'],0),
-                      f"{it(A['tot']['R'],1)} / {it(B['tot']['R'],1)}",
+                      pc(C['bh']['rend'],0),
                       f"{A['tot']['n']} / {B['tot']['n']}"], xs, 8.6, INK, 'bold')
     y -= .030
     testo(fig, .062, y+.006,
@@ -705,7 +844,7 @@ def main(percorsi, nomi, qualita, rt, swap_b, out):
         mc.append(d); mcC.append(dC)
     print()
     with PdfPages(out) as pdf:
-        p1(pdf, C, mc); p2(pdf, C); p3(pdf, C); p4(pdf, C)
+        p1(pdf, C, mc); p2(pdf, C); p_conviene(pdf, C); p3(pdf, C); p4(pdf, C)
         p5(pdf, C); p6(pdf, C, mc, mcC); p7(pdf, C, mc, mcC, swap_b)
         p8(pdf, C, mc, mcC)
     print(f"scritto {out}  ({PAG[0]} pagine)")
