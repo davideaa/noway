@@ -335,7 +335,14 @@ che toccano codice eseguito durante una passata).
 
 ---
 
-# 8. V2XAU — capitale di rischio virtuale
+# 8. V2XAU — capitale di rischio virtuale (PARCHEGGIATA)
+
+> **Non in uso.** Scritta per il problema di margine del broker nuovo,
+> messa da parte da Davide prima di essere compilata o testata. Il file
+> c'e' e non e' mai stato usato. **L'EA in uso resta
+> `V1XAU_TrendFollowing.mq5`**, che questa versione non ha mai toccato.
+> Da riprendere solo se il margine tornera' a essere un problema.
+
 
 `mt5/V2XAU_TrendFollowing_VRC.mq5`. Nasce da un problema del broker
 nuovo, non della strategia: **rischio e margine non sono la stessa
