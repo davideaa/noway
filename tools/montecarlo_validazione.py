@@ -30,12 +30,21 @@ Verso dei percentili, da non confondere:
 """
 import numpy as np
 
-def _dd_e_finale(seq, deposito, per_R):
-    """seq: (m, n) di R. Torna (R finale, DD%, DD in R, striscia perdente)."""
+def _dd_e_finale(seq, deposito, per_R, composto=False, f=0.01):
+    """seq: (m, n) di R. Torna (R finale, DD%, DD in R, striscia perdente).
+
+    A rischio fisso l'equity e' deposito + 100 x somma(R): lineare.
+    A composto e' deposito x prodotto(1 + R x f): ogni operazione rischia
+    una percentuale del capitale del momento, quindi le perdite che
+    arrivano quando il conto e' grande costano di piu'."""
     c = np.cumsum(seq, axis=1)
     picco = np.maximum.accumulate(c, axis=1)
     dd_R = (picco - c).max(axis=1)
-    eq = deposito + per_R * c
+    if composto:
+        eq = deposito * np.cumprod(1.0 + seq * f, axis=1)
+        eq = np.maximum(eq, 1e-9)          # conto azzerato: niente valori negativi
+    else:
+        eq = deposito + per_R * c
     peq = np.maximum.accumulate(eq, axis=1)
     dd_pct = 100.0 * ((peq - eq) / peq).max(axis=1)
     perdente = (seq <= 0).astype(np.int16)
@@ -91,21 +100,28 @@ def _genera(metodo, R, m, rng, L=20, strati=None):
     raise ValueError(metodo)
 
 def simula(R, metodo, n_sim=20000, L=20, seed=7, deposito=10000.0,
-           rischio_fisso=0.01, strati=None, blocco=2000):
+           rischio_fisso=0.01, strati=None, blocco=2000, composto=False):
     """Torna un dizionario di array lunghi n_sim."""
     R = np.asarray(R, float)
     per_R = rischio_fisso * deposito
     rng = np.random.default_rng(seed)
-    fin, ddp, ddr, str_ = [], [], [], []
+    fin, ddp, ddr, str_, eqf = [], [], [], [], []
     for s in range(0, n_sim, blocco):
         m = min(blocco, n_sim - s)
         seq = _genera(metodo, R, m, rng, L, strati)
-        a, b, c, d = _dd_e_finale(seq, deposito, per_R)
+        a, b, c, d = _dd_e_finale(seq, deposito, per_R, composto, rischio_fisso)
         fin.append(a); ddp.append(b); ddr.append(c); str_.append(d)
+        if composto:
+            eqf.append(deposito * np.prod(1.0 + seq * rischio_fisso, axis=1))
     Rf = np.concatenate(fin)
+    if composto:
+        E = np.concatenate(eqf)
+        utile = E - deposito
+    else:
+        utile = per_R * Rf
     return {'R_finale': Rf,
-            'utile': per_R * Rf,
-            'rend': 100.0 * per_R * Rf / deposito,
+            'utile': utile,
+            'rend': 100.0 * utile / deposito,
             'dd_pct': np.concatenate(ddp),
             'dd_R': np.concatenate(ddr),
             'striscia': np.concatenate(str_)}

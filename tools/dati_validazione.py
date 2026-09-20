@@ -187,3 +187,42 @@ def regressione(y):
     return {'pendenza': b, 'intercetta': a, 'r2': r2,
             'res_sd': st.pstdev(res), 'res': res,
             'res_max': max(abs(r) for r in res)}
+
+# ----------------------------------------------------------------------
+#  la stessa passata letta a INTERESSE COMPOSTO
+# ----------------------------------------------------------------------
+def equity_composta(ops, deposito=DEPOSITO):
+    """Il saldo vero della passata: e' gia' composto, perche' il backtest
+    e' girato a percentuale del capitale corrente."""
+    return [deposito] + [o.saldo for o in ops]
+
+def stat_composto(ops, deposito=DEPOSITO):
+    """Stesse voci di stat(), ma sui valori in valuta VERI della passata.
+    Utile per dire quanto avrebbe fatto davvero il conto, con le
+    posizioni che crescono insieme a lui."""
+    if not ops: return None
+    U = [o.netto for o in ops]
+    vinc = [x for x in U if x > 0]; pers = [x for x in U if x <= 0]
+    lv, lp = sum(vinc), abs(sum(pers))
+    eq = equity_composta(ops, deposito)
+    vmax, pmax = strisce(ops)
+    dd = dd_serie(eq)
+    return {
+        'n': len(ops), 'utile': sum(U), 'rend': 100*sum(U)/deposito,
+        'finale': eq[-1],
+        'pf': lv/lp if lp > 0 else float('inf'),
+        'wr': 100*len(vinc)/len(ops),
+        'media_v': st.mean(vinc) if vinc else 0.0,
+        'media_p': st.mean(pers) if pers else 0.0,
+        'attesa': st.mean(U), 'lordo_v': lv, 'lordo_p': -lp,
+        'dd': 100*dd, 'v_max': vmax, 'p_max': pmax,
+        'recupero': (sum(U)/(dd*deposito)) if dd > 0 else float('nan'),
+        'comm': sum(o.comm for o in ops), 'swap': sum(o.swap for o in ops),
+    }
+
+def cagr(valore_finale, anni, deposito=DEPOSITO):
+    """Tasso annuo composto. Ha senso SOLO sulla serie composta: su
+    quella a rischio fisso il capitale non si reinveste, quindi li' si
+    usa la media annua aritmetica."""
+    if anni <= 0 or valore_finale <= 0: return float('nan')
+    return 100*((valore_finale/deposito)**(1/anni) - 1)

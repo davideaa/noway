@@ -76,6 +76,7 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/dati_validazione.py` | dal report MT5 alle operazioni e alle statistiche **a rischio fisso** |
 | `tools/montecarlo_validazione.py` | Monte Carlo a cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `tools/report_validazione.py` | il dossier di validazione a 22 pagine |
+| `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
