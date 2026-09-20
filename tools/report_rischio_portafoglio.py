@@ -490,7 +490,7 @@ def pag_curve(C, F, pdf):
         ax.tick_params(labelsize=7.2)
         ax.legend(fontsize=7.4, facecolor='#1c1c1a', edgecolor=GRIGLIA,
                   labelcolor=INK2, loc='upper left')
-        fig.text(.930, y0 - .318,
+        fig.text(.930, y0 - .338,
                  f"da 10.000 a {it(B[5][-1],0)} (5%)  ·  {it(B[50][-1],0)} (mediana)  ·  {it(B[95][-1],0)} (95%)",
                  fontsize=7.8, color=INK3, ha='right')
 
@@ -570,21 +570,33 @@ def pag_fare(C, T, pdf):
 
 
 # =============================================================== calcoli
-def fascia(C, scen, k, n=4000, punti=90):
-    """La fascia di percentili della curva, per il grafico dei percorsi."""
+def fascia(C, scen, k, n=SIM, punti=90):
+    """La fascia di percentili della curva, per il grafico dei percorsi.
+
+    Stesso numero di storie e stesso seme delle tabelle, altrimenti la
+    mediana disegnata qui non coincide con quella scritta a pagina 1 e
+    il lettore giustamente non si fida. Si lavora a blocchi tenendo solo
+    le colonne campionate: le storie intere non entrerebbero in memoria.
+    """
+    from montecarlo_portafoglio import _allunga, _intreccia
     G  = C['G_pre'] if scen == 'pre' else C['G_tot']
     oz = C['oriz']  if scen == 'pre' else 1.0
-    from montecarlo_portafoglio import _allunga, _intreccia
-    rng = np.random.default_rng(31)
+    rng = np.random.default_rng(7)
     nomi = list(G)
     lung = [max(1, int(round(len(G[x])*oz))) for x in nomi]
-    pezzi = [_allunga(G[x]*k, 'blocchi', n, rng, 20, lung[i])
-             for i, x in enumerate(nomi)]
-    seq = _intreccia(pezzi, lung, rng)
-    eq = DEP * np.cumprod(1.0 + seq, axis=1)
-    eq = np.concatenate([np.full((n, 1), DEP), eq], axis=1)
-    cp = np.linspace(0, eq.shape[1]-1, punti).astype(int)
-    E = eq[:, cp]
+    tot = sum(lung)
+    cp = np.linspace(0, tot, punti).astype(int)
+    pezzi_eq = []
+    for s0 in range(0, n, 2000):
+        m = min(2000, n - s0)
+        pz = [_allunga(G[x]*k, 'blocchi', m, rng, 20, lung[i])
+              for i, x in enumerate(nomi)]
+        seq = _intreccia(pz, lung, rng)
+        eq = DEP * np.cumprod(1.0 + seq, axis=1)
+        eq = np.concatenate([np.full((m, 1), DEP), eq], axis=1)
+        pezzi_eq.append(eq[:, cp])          # solo le colonne che servono
+        del seq, eq
+    E = np.concatenate(pezzi_eq, axis=0)
     return cp, {p: np.percentile(E, p, axis=0) for p in (5, 25, 50, 75, 95)}
 
 
