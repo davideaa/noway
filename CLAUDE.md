@@ -57,15 +57,27 @@ ottimizzazione. L'analisi si fa qui sui file che manda.
 
 ## I file
 
-| | |
+Gli `.mq5` non sono tutti uguali: **due sono vivi, uno è un antenato,
+gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
+
+| File | Stato |
 |---|---|
-| `mt5/V1XAU_TrendFollowing.mq5` | **l'EA buono**: ROTTURA (M30) + RITRACCIAMENTO (H4) |
-| `mt5/GoldPortfolio.mq5` | la versione a tre gambe, tenuta perché ha la verifica fuori campione non contaminata |
-| `mt5/Gold*.mq5` | candidate scartate, tenute per non ritentarle |
+| `mt5/V1XAU_TrendFollowing.mq5` | **VIVO — è l'EA buono**: ROTTURA (M30) + RITRACCIAMENTO (H4) |
+| `mt5/GoldPortfolio.mq5` | **VIVO**: la versione a tre gambe. Tenuta perché è l'unica con la verifica fuori campione non contaminata (il 22% della sezione 5 di CONTINUA-QUI) |
+| `mt5/GoldTrendPullback.mq5` | **ANTENATO** del RITRACCIAMENTO. Bocciato da solo (t 1,61), promosso dopo l'estensione della griglia (t 2,61). Non è una candidata morta |
+| `mt5/GoldS3.mq5` | antenato della ROTTURA: il solo Donchian estratto per misurarlo isolato |
+| `mt5/GoldMomentum3.mq5` | la ricostruzione dalle cinque foto. Superata: tre gambe tutte trend, Z-Score −3,53 |
+| `mt5/GoldFadeBreak.mq5` | scartata — la TRAPPOLA, +50 R dentro e −44,9 R fuori |
+| `mt5/GoldRangeMR.mq5` | scartata — 174 configurazioni con ≥100 trade, zero in utile |
+| `mt5/GoldRandomNull.mq5` | benchmark a ingressi casuali, **mai eseguito** |
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
 | `tools/montecarlo.py` | bootstrap a quattro metodi |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
+
+Ogni `.mq5` dichiara la propria ipotesi nel commento di testa, scritta
+prima del test. Non è decorazione: è il motivo per cui il fuori campione
+conta qualcosa.
 
 Rigenerare un report:
 `python3 tools/report_finale.py <report.html> --rischio 1.05 --due`
