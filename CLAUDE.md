@@ -1,0 +1,71 @@
+# Portafoglio oro — contesto del progetto
+
+Ricerca quantitativa su XAUUSD in MQL5. Punto di partenza: cinque foto
+pubblicitarie di un prodotto commerciale ("Gold Momentum" di QUANT_LAB,
++798% in 7,3 anni con 33% di drawdown). Da lì sono state ricostruite,
+misurate e in gran parte scartate le strategie dichiarate.
+
+**Il risultato attuale è `mt5/V1XAU_TrendFollowing.mq5`.** Chi riprende
+il lavoro parta da `docs/CONTINUA-QUI.md`, che ha lo stato completo.
+
+## Chi c'è dall'altra parte
+
+Davide (`davide.abbattista04@gmail.com`). Scrive in italiano colloquiale,
+spesso da vocale, con refusi: va letto per il senso. Ha chiesto
+esplicitamente spiegazioni semplici — «come se non sapessi niente di sto
+mondo». Non è un principiante nel ragionamento: più volte ha avuto
+ragione lui contro di me. Le sue intuizioni vanno prese sul serio e
+testate, non liquidate.
+
+Lui esegue i test in MetaTrader 5 (Mac con `XAUUSD.p`, PC Windows con
+`XAUUSD.s`, entrambi PUPrime-Demo) e manda i report HTML o gli XML di
+ottimizzazione. L'analisi si fa qui sui file che manda.
+
+## Le regole del lavoro, che non si negoziano
+
+1. **I criteri si dichiarano prima del test, e si rispettano anche
+   quando sono scomodi.** È stato fatto per tutte le decisioni prese.
+2. **Il fuori campione 2024.01–2026.09 è già stato speso**, una volta
+   sola, e ha passato i criteri dichiarati. Non c'è più nessun dato
+   vergine: qualunque nuova ottimizzazione sugli stessi anni peggiora la
+   statistica invece di migliorarla. Sono già state provate 272
+   configurazioni.
+3. **Si cerca un plateau, non un picco.** Se un valore rende e i suoi
+   vicini no, è fortuna. Un ottimo sul bordo della griglia significa che
+   la griglia era sbagliata: si estende (è successo tre volte, e tre
+   volte ha cambiato la conclusione).
+4. **Gli errori si dicono.** Ce ne sono stati diversi, sono elencati in
+   `docs/CONTINUA-QUI.md`, e correggerli ha prodotto i risultati
+   migliori. Non ammorbidire i numeri brutti.
+5. **Niente filtri su ore o giorni della settimana** — escluso da Davide.
+
+## Come si misura
+
+- Tutto in **multipli di R**: il risultato diviso il rischio corso in
+  quel momento. Indipendente dalla percentuale scelta.
+- `t = somma(R) / (deviazione standard × radice(n))`. La deviazione
+  standard vera misurata sui trade è **1,45 R**, non l'1,26 usato come
+  stima all'inizio: le t calcolate prima di quella misura sono
+  ottimistiche del 15% circa.
+- **Il drawdown vero non è quello del backtest.** Si usa il bootstrap a
+  blocchi da 20 (`tools/montecarlo.py`), che non spezza le serie di
+  perdite consecutive.
+- MT5 non mette il magic number nel report: `tools/estrai.py` attribuisce
+  ogni operazione alla sua strategia accoppiando per volume e direzione
+  opposta. Il totale attribuito va sempre confrontato con quello del
+  report (finora coincide al centesimo).
+
+## I file
+
+| | |
+|---|---|
+| `mt5/V1XAU_TrendFollowing.mq5` | **l'EA buono**: ROTTURA (M30) + RITRACCIAMENTO (H4) |
+| `mt5/GoldPortfolio.mq5` | la versione a tre gambe, tenuta perché ha la verifica fuori campione non contaminata |
+| `mt5/Gold*.mq5` | candidate scartate, tenute per non ritentarle |
+| `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
+| `tools/montecarlo.py` | bootstrap a quattro metodi |
+| `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
+| `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
+
+Rigenerare un report:
+`python3 tools/report_finale.py <report.html> --rischio 1.05 --due`
