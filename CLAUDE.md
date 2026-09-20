@@ -83,6 +83,9 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/report_portafoglio.py` | oro + nasdaq su un conto solo, con e senza composto |
 | `tools/montecarlo_portafoglio.py` | Monte Carlo su piu' strategie insieme, in frazione di conto |
 | `tools/report_uno_o_due.py` | un conto o due? e con quale rischio. **Il report che corregge il 4572%** |
+| `tools/report_rischio_portafoglio.py` | quanto rischiare: due scenari (col boom e senza), tetto sul drawdown |
+| `tools/report_scelta_finale.py` | la scelta a tetto 33%: oro 0,65% e nasdaq 0,98% |
+| `tools/report_curva_reale.py` | **la curva storica vera** ai rischi scelti, col composto. Non e' una simulazione |
 | `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |

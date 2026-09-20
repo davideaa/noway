@@ -90,3 +90,50 @@ quello che succede, non quello che si promette.
   ancora stato fatto.
 - L'arrotondamento del lotto non e' simulato: su 10.000 allo 0,70% il
   rischio vero puo' scostarsi di qualche punto percentuale.
+
+---
+
+## Aggiornamento: tetto stretto al 33%
+
+Davide ha poi stretto il vincolo da 35% a **33%** al 95o percentile,
+sempre sullo scenario magro. Risposta: **oro 0,65% e nasdaq 0,98%**
+(x0,65), che da' 32,9% nel periodo magro e 28,1% su tutto.
+
+Sperava che con quel drawdown venisse un rendimento intorno al
+1300-1400%. Le due cose non stanno insieme:
+
+| | oro / nasdaq | mediana magra | DD 95% magro |
+|---|---|---|---|
+| tenere il drawdown al 33% | 0,65% / 0,98% | +576% | 32,9% |
+| avere il +1.350% comunque | 0,93% / 1,40% | +1.350% | 44,0% |
+
+Il +1.222% che ricordava e' la mediana dello scenario **col boom
+dentro**, non quella prudente. Report: `report/la-scelta.pdf`.
+
+## La curva storica vera a quei rischi
+
+`report/curva-reale.pdf`, da `tools/report_curva_reale.py`. Non e' una
+simulazione: e' la sequenza delle 2.520 operazioni riscalate.
+
+| | |
+|---|---|
+| da 10.000 a | **132.328** in 7,03 anni |
+| rendimento | **+1.223,3%** (44,4% l'anno) |
+| drawdown massimo | **21,33%** |
+| tempo sotto il massimo | 90% |
+| mesi in utile | 68% su 85 |
+| operazioni in utile | 49,5% su 2.520 |
+
+**Il percorso e' stato fortunato.** Il Monte Carlo dice 28,1% di
+drawdown al 95o percentile; questa storia ne ha pescato uno del 21,3%.
+Il rendimento invece e' tipico: +1.223% contro la mediana simulata di
++1.222% sul periodo intero. Il drawdown da mettere a bilancio resta il
+28,1%, non il 21,3%.
+
+**Col composto i due rendimenti si moltiplicano, non si sommano.**
+Oro da solo +179% (fattore 2,7882), nasdaq da solo +375% (4,7459),
+insieme 2,7882 x 4,7459 = 13,2328 cioe' +1.223,3%. La generazione del
+report fallisce con un assert se quel prodotto non torna.
+
+Drawdown: oro da solo 17,79%, nasdaq 12,80%; sommati farebbero 30,59%,
+l'insieme e' 21,33%. Correlazione mensile +0,067 su 85 mesi.
