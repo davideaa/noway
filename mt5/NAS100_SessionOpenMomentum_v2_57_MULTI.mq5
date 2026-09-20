@@ -123,6 +123,11 @@ input bool             ForceCloseAtNYRTHClose    = false;  // positions can rema
 input bool             BlockOnAnyAccountPosition = true;
 input bool             AllowNewEntryIfPreviousPositionStillOpen = false; // kept false; v1.60 also blocks if ANY account position is open
 
+input group "=== Pannello live (non tocca le operazioni) ==="
+input bool             InpPannello               = true;   // Mostra il pannello sul grafico
+input int              InpPannelloX              = 12;     // Distanza dal bordo sinistro (px)
+input int              InpPannelloY              = 24;     // Distanza dal bordo alto (px)
+
 //-------------------------- Indicator handles -----------------------//
 int hFastEMA = INVALID_HANDLE;
 int hSlowEMA = INVALID_HANDLE;
