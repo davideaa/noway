@@ -86,6 +86,8 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/report_rischio_portafoglio.py` | quanto rischiare: due scenari (col boom e senza), tetto sul drawdown |
 | `tools/report_scelta_finale.py` | la scelta a tetto 33%: oro 0,65% e nasdaq 0,98% |
 | `tools/report_curva_reale.py` | **la curva storica vera** ai rischi scelti, col composto. Non e' una simulazione |
+| `tools/regimi.py` | misura il mercato PRIMA della strategia: 12 caratteristiche a ogni ingresso, niente sguardo in avanti |
+| `tools/report_regimi.py` | **l'analisi dei regimi a 8 pagine**: perche' ha funzionato, quando funziona, quando soffre |
 | `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
