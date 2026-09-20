@@ -72,6 +72,7 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `mt5/GoldRandomNull.mq5` | benchmark a ingressi casuali, **mai eseguito** |
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
 | `tools/montecarlo.py` | bootstrap a quattro metodi |
+| `tools/report_due_broker.py` | confronto a due broker: stessa strategia, due listini |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
