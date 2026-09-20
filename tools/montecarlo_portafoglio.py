@@ -43,7 +43,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from montecarlo_validazione import _genera
 
-PERCENTILI = (5, 10, 25, 50, 75, 90, 95)
+PERCENTILI = (5, 10, 25, 50, 75, 90, 95, 99)
 METODI = ('permutazione', 'iid', 'blocchi', 'stazionario')
 
 
@@ -60,28 +60,51 @@ def _valuta(seq, peso, composto, deposito):
     return 100.0 * (eq[:, -1] / deposito - 1.0), dd
 
 
+def _allunga(pool, metodo, m, rng, L, T):
+    """Ricampiona 'pool' fino a una lunghezza T scelta, non per forza la sua.
+
+    Serve per confrontare periodi di durata diversa: un tratto di quattro
+    anni e uno di sette non si possono paragonare sul drawdown, perche'
+    sette anni hanno piu' occasioni di incolonnare le perdite. Qui si
+    ricampiona SEMPRE un orizzonte di sette anni, anche quando il
+    serbatoio da cui si pesca ne copre quattro.
+    """
+    n = len(pool)
+    if T == n:
+        return _genera(metodo, pool, m, rng, L)
+    giri = int(np.ceil(T / n))
+    pezzi = [_genera(metodo, pool, m, rng, L) for _ in range(giri)]
+    return np.concatenate(pezzi, axis=1)[:, :T]
+
+
 def simula(gambe, metodo, peso=1.0, composto=False, n_sim=20000,
-           L=20, seed=7, deposito=10000.0, blocco=2000, per_gamba=False):
+           L=20, seed=7, deposito=10000.0, blocco=2000, per_gamba=False,
+           orizzonte=1.0):
     """gambe: dict {nome: array di frazioni} gia' in ordine di tempo.
 
     per_gamba=False -> metodo 'unito'  (rimescola il flusso fuso)
     per_gamba=True  -> metodo 'gambe'  (rimescola ogni gamba a parte)
+    orizzonte       -> quante volte la durata del serbatoio si vuole
+                       simulare. 1.0 = la sua; 1.62 = "e se questo
+                       regime durasse sette anni invece di quattro e
+                       mezzo?". Le gambe si allungano tutte insieme,
+                       cosi' le proporzioni fra loro non cambiano.
     """
     rng = np.random.default_rng(seed)
     nomi = list(gambe)
     F = np.concatenate([np.asarray(gambe[k], float) for k in nomi])
-    n = len(F)
+    lung = [max(1, int(round(len(gambe[k]) * orizzonte))) for k in nomi]
     rend, dd = [], []
     for s in range(0, n_sim, blocco):
         m = min(blocco, n_sim - s)
         if per_gamba:
             # ogni gamba ricampionata da sola, poi affiancate nello
             # stesso ordine temporale medio in cui si presentano
-            pezzi = [_genera(metodo, np.asarray(gambe[k], float), m, rng, L)
-                     for k in nomi]
-            seq = _intreccia(pezzi, [len(gambe[k]) for k in nomi], rng)
+            pezzi = [_allunga(np.asarray(gambe[k], float), metodo, m, rng, L, lung[i])
+                     for i, k in enumerate(nomi)]
+            seq = _intreccia(pezzi, lung, rng)
         else:
-            seq = _genera(metodo, F, m, rng, L)
+            seq = _allunga(F, metodo, m, rng, L, sum(lung))
         a, b = _valuta(seq, peso, composto, deposito)
         rend.append(a); dd.append(b)
     return {'rend': np.concatenate(rend), 'dd_pct': np.concatenate(dd)}
