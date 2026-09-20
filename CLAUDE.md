@@ -73,6 +73,9 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
 | `tools/montecarlo.py` | bootstrap a quattro metodi |
 | `tools/report_due_broker.py` | confronto a due broker: stessa strategia, due listini |
+| `tools/dati_validazione.py` | dal report MT5 alle operazioni e alle statistiche **a rischio fisso** |
+| `tools/montecarlo_validazione.py` | Monte Carlo a cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
+| `tools/report_validazione.py` | il dossier di validazione a 22 pagine |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
