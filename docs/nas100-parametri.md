@@ -110,3 +110,40 @@ puo' cambiare l'orario del server.
 trade: questo impedisce di misurare in multipli di R, che e' il metro
 del resto del progetto. La perdita peggiore misurata e' −2,95%, che
 conferma il moltiplicatore che arriva a 2.
+
+## I file pronti per l'ottimizzazione
+
+In `mt5/plateau/`. Hanno le caselle **gia' spuntate**: si caricano da
+*Strategy Tester → Input → Load*, si controlla che il numero di passate
+in basso coincida, e si preme Start. Nessun clic sulle caselle.
+
+**Piano A — preciso, 6 passate, 217 combinazioni in tutto**
+
+| File | Caselle accese | Passate attese |
+|---|---|---:|
+| `A1_FastEMAPeriod.set` | 1 | **9** |
+| `A2_SlowEMAPeriod.set` | 1 | **11** |
+| `A3_ATRPeriod.set` | 1 | **7** |
+| `A4_ATRStopMultiplier.set` | 1 | **12** |
+| `A5_TrailActivationR.set` | 1 | **9** |
+| `A6_filtri_2D.set` | 2 | **169** |
+
+**Piano B — comodo, 2 passate, 412 combinazioni in tutto**
+
+| File | Caselle accese | Passate attese |
+|---|---|---:|
+| `A6_filtri_2D.set` | 2 | **169** |
+| `B2_altri_cinque.set` | 5 | **243** |
+
+Il piano B accende cinque caselle insieme, quindi MT5 le moltiplica: e'
+voluto, ma proprio per questo ogni parametro ha solo **3 valori**
+(scelto, uno sotto, uno sopra) invece dell'intera fascia. Verifica i
+vicini immediati e le interazioni fra parametri, ma NON vede i bordi
+della fascia: il criterio 5 (l'ottimo non deve stare sul bordo) con il
+piano B non si puo' controllare.
+
+Se un parametro del piano B risulta sospetto, si rilancia solo quello
+col file A corrispondente.
+
+**Dopo ogni passata: tasto destro sui risultati → Esporta in XML.** MT5
+sovrascrive la scheda Ottimizzazione al lancio successivo.
