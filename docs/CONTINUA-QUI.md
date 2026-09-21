@@ -443,28 +443,72 @@ rileggere niente altro.
 
 ## I dati adesso sono NEL REPO
 
-`dati/` contiene i quattro report MT5 veri, compressi con gzip
-(5,3 MB → 0,6 MB). `leggi()` li apre direttamente, anche `.gz`.
-**Non serve piu' ricaricare niente a mano.**
+`dati/` contiene i report MT5 veri, compressi con gzip. `leggi()` li
+apre direttamente, anche `.gz`. **Non serve piu' ricaricare niente a
+mano.**
 
-| file | operazioni | periodo |
-|---|---|---|
-| `dati/oro_puprime_1pct.html.gz` | 1.036 | 2019.09.03 → 2026.09.15 |
-| `dati/nasdaq_puprime.html.gz` | 1.626 | 2019.01.02 → 2026.09.15 |
-| `dati/oro_fusion_1pct.html.gz` | 992 | 2019.09.30 → 2026.09.15 |
-| `dati/nasdaq_fusion.html.gz` | 1.158 | 2020.11.16 → 2026.09.15 |
+| file | operazioni | periodo | rischio |
+|---|---|---|---|
+| `dati/oro_puprime_065.html.gz` | **1.123** | 2019.01.02 → 2026.09.15 | 0,65% |
+| `dati/nasdaq_puprime_098.html.gz` | 1.626 | 2019.01.02 → 2026.09.15 | 0,98% |
+| `dati/oro_puprime_1pct.html.gz` | 1.036 | 2019.09.03 → 2026.09.15 | 1,00% |
+| `dati/nasdaq_puprime.html.gz` | 1.626 | 2019.01.02 → 2026.09.15 | 1,50% |
+| `dati/oro_fusion_1pct.html.gz` | 992 | 2019.09.30 → 2026.09.15 | 1,00% |
+| `dati/nasdaq_fusion.html.gz` | 1.158 | 2020.11.16 → 2026.09.15 | 1,50% |
 
-**Attenzione**: il test dell'oro parte da **settembre 2019**, non da
-gennaio. Le «1.123 operazioni» ricordate da Davide vengono da un test
-piu' lungo che non e' mai stato caricato qui. Se salta fuori, vale la
-pena aggiungerlo.
+I primi due sono del **2026-09-21**, girati ai rischi decisi. Il test
+dell'oro e' quello **lungo, da gennaio 2019**, che nella versione
+precedente di questa scheda risultava mancante: e' saltato fuori, ed e'
+stato aggiunto. Le altre quattro passate restano perche' sono quelle su
+cui sono state prese le decisioni, e perche' `oro_fusion` e
+`nasdaq_fusion` sono l'unico confronto fra due broker.
 
 Rigenerare qualunque report:
 ```
 python3 tools/report_curva_reale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
 python3 tools/report_regimi.py      dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
 python3 tools/report_scelta_finale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/fusione_conto_unico.py dati/oro_puprime_065.html.gz:0.65 dati/nasdaq_puprime_098.html.gz:0.98
 ```
+
+## La verifica del 2026-09-21 — scheda: `docs/verifica-conto-unico.md`
+
+Davide ha rifatto i due backtest ai rischi decisi e ha chiesto se i
+numeri del PDF fossero veri. Controllo scritto da zero, senza riusare
+il codice che aveva prodotto il PDF.
+
+**Il PDF era onesto.** Ricostruzione combaciante con MT5 al centesimo.
+Sul conto unico da 10.000, storia vera: **+1.374%** in 7,70 anni,
+drawdown di bilancio **21,0%**.
+
+| | il PDF | verificato |
+|---|---:|---:|
+| TUTTO, mediana | +1.222% | +1.414% |
+| TUTTO, DD 95% | 28,1% | 28,4% |
+| MAGRO, mediana | +576% | +628% |
+| MAGRO, DD 95% | 32,9% | **33,8%** |
+
+Tre cose nuove, e contano tutte e tre:
+
+1. **Il tetto del 33% non e' piu' rispettato.** 33,8% col metodo
+   `gambe` che usava il PDF, **36,8%** col metodo `unito`, che e' il
+   piu' prudente e per un tetto sul drawdown e' la riga giusta da
+   leggere. Non e' un peggioramento della strategia: e' piu' storia,
+   letta col metodo piu' severo. **Se scendere di rischio o alzare il
+   tetto lo decide Davide: non e' stato deciso qui.**
+2. **Correlazione mensile oro/nasdaq +0,052**, su 93 mesi. Quasi zero:
+   la diversificazione e' vera, non dichiarata. E' il motivo per cui il
+   portafoglio sta a DD 21,0%.
+3. **I drawdown di tutto il progetto sono di BILANCIO, non di equity.**
+   MT5 misura anche il flottante: oro 19,2% contro 17,0%, nasdaq 14,2%
+   contro 12,9%. Quello vissuto sul conto e' il primo. **Tutti i numeri
+   di drawdown del progetto sono un pavimento, non un soffitto.**
+
+**Ricaduta sulla sezione 7**: l'oro fa **1.123 operazioni**, esattamente
+quante ne chiedeva la verifica. Il criterio dichiarato era «se cambia
+anche solo il numero di operazioni, le modifiche non sono neutre»: non
+e' cambiato. Il profit factor resta da verificare, perche' la passata e'
+girata a 0,65% e la verifica era dichiarata a 0,70%.
 
 ## Il rischio deciso: oro 0,65% · nasdaq 0,98%
 
@@ -511,17 +555,31 @@ oro **+0,613**, nasdaq **−0,762** (= nessuna relazione).
 
 ## Cosa resta da fare, in ordine
 
-1. **Compilare** i due `.mq5` (F7). Nessun MetaEditor qui.
-2. **Mettere i rischi**: oro `InpRiskPercent` 0,65 · nasdaq
-   `RiskPercent` 0,98 · nasdaq `BlockOnAnyAccountPosition` = false.
-3. **Demo su Fusion, un conto solo, due grafici**, e lasciar girare.
-4. **Test del plateau sul nasdaq** — i `.set` sono pronti in
+1. ~~**Compilare** i due `.mq5`~~ — **fatto**: i report del 2026-09-21
+   sono girati con l'EA compilato, pannello e correzioni della sezione 7
+   compresi (`InpS3AllowLong` e' presente nei parametri del report).
+2. **I rischi sono messi nel tester, NON nel sorgente.** Le due passate
+   sono a oro 0,65% e nasdaq 0,98%, ma i default nei `.mq5` sono ancora
+   oro `InpRiskPercent` **0,70** e nasdaq `RiskPercent` **1,50**.
+   Vanno allineati, se no basta ricaricare i default per tornare ai
+   valori vecchi senza accorgersene.
+3. **`BlockOnAnyAccountPosition` e' ancora `true`** — nel report del
+   nasdaq si legge. Nel tester non si vede perche' gira da solo; su un
+   conto condiviso toglie al nasdaq il 65% dei suoi trade. **Tutti i
+   numeri di portafoglio presuppongono `false`.** E' il piu' urgente
+   dei tre: gli altri due cambiano quanto si rischia, questo cambia
+   quali operazioni esistono.
+4. **Demo su Fusion, un conto solo, due grafici**, e lasciar girare.
+5. **Test del plateau sul nasdaq** — i `.set` sono pronti in
    `mt5/plateau/`, mai lanciati. E' la gamba meno verificata.
-5. **La stessa logica dell'oro su un altro strumento** (argento,
+6. **La stessa logica dell'oro su un altro strumento** (argento,
    petrolio) senza toccare i parametri. Mezz'ora di lavoro, vale piu'
    di tutto il resto: se funziona anche li', il meccanismo e' generale
-   e non cucito addosso a XAUUSD.
-6. Eventuale strategia di **ritorno alla media** per coprire il punto
+   e non cucito addosso a XAUUSD. **Dichiarare prima su quali strumenti
+   deve funzionare e su quali no**, e perche': il trend esiste sulle
+   commodity e sugli indici, molto meno sui cambi. Senza quella
+   previsione scritta prima, un fallimento non insegna niente.
+7. Eventuale strategia di **ritorno alla media** per coprire il punto
    debole dell'oro. Prima MISURARE se in quelle 112 operazioni c'e'
    qualcosa, poi semmai costruire.
 

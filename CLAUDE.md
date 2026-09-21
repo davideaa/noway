@@ -89,8 +89,9 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/regimi.py` | misura il mercato PRIMA della strategia: 12 caratteristiche a ogni ingresso, niente sguardo in avanti |
 | `tools/report_regimi.py` | **l'analisi dei regimi a 8 pagine**: perche' ha funzionato, quando funziona, quando soffre |
 | `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
+| `tools/fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente di `montecarlo_portafoglio.py`, non come suo sostituto |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
-| `dati/` | **i report MT5 veri, compressi** — `leggi()` apre anche i `.gz`. Non serve ricaricarli |
+| `dati/` | **i report MT5 veri, compressi** — `leggi()` apre anche i `.gz`. Non serve ricaricarli. I due ai rischi decisi sono `oro_puprime_065` e `nasdaq_puprime_098` |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
 Ogni `.mq5` dichiara la propria ipotesi nel commento di testa, scritta
@@ -108,6 +109,18 @@ python3 tools/report_scelta_finale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_
 python3 tools/report_finale.py        dati/oro_puprime_1pct.html.gz --rischio 1.05 --due
 ```
 
-**Il rischio deciso e' oro 0,65% e nasdaq 0,98%** (tetto: drawdown 33% al
-95o percentile sullo scenario 2019-2023). Nel codice l'oro e' ancora a
-0,70% e il nasdaq a 1,50%: vanno cambiati. Vedi `docs/rischio-portafoglio.md`.
+**Il rischio deciso e' oro 0,65% e nasdaq 0,98%.** Nel codice l'oro e'
+ancora a 0,70% e il nasdaq a 1,50%: vanno cambiati, e con loro
+`BlockOnAnyAccountPosition` = `false`, che e' ancora `true`. Vedi
+`docs/rischio-portafoglio.md`.
+
+**Quel tetto pero' non e' piu' rispettato.** Rimisurato il 2026-09-21
+sui backtest veri ai rischi decisi, il drawdown al 95o percentile dello
+scenario prudente e' **33,8%** col metodo del PDF e **36,8%** col metodo
+piu' severo, contro il 33% posto da Davide. La scelta fra scendere di
+rischio e alzare il tetto e' sua e non e' stata fatta. Vedi
+`docs/verifica-conto-unico.md`.
+
+**Tutti i drawdown del progetto sono di BILANCIO, non di equity.**
+MT5 misura anche il flottante delle posizioni aperte, ed e' sempre piu'
+alto (oro 19,2% contro 17,0%). Sono un pavimento, non un soffitto.
