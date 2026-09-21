@@ -17,6 +17,7 @@ Il confine dentro/fuori campione e' quello gia' fissato nel progetto e
 non va indovinato: IS fino al 2023.12.31, OOS dal 2024.01.01.
 """
 import re, html, math, statistics as st
+import gzip
 from collections import defaultdict, namedtuple
 
 CONFINE_OOS = '2024.01.01'
@@ -40,6 +41,23 @@ def _ts(s):
     except Exception:
         return 0
 
+def _apri(path):
+    """Il report MT5, anche se archiviato con gzip.
+
+    I report veri stanno in dati/ compressi (5,3 MB -> 0,6 MB): cosi'
+    ogni analisi si rifa' senza dover ricaricare niente a mano. MT5
+    scrive in UTF-16, ma non sempre: si prova l'altro se il primo non
+    produce HTML.
+    """
+    apri = gzip.open if path.endswith('.gz') else open
+    for enc in ('utf-16', 'utf-8'):
+        with apri(path, 'rt', encoding=enc, errors='ignore') as f:
+            raw = f.read()
+        if '<html' in raw.lower():
+            return raw
+    return raw
+
+
 def leggi(path, rischio_test, rischio_fisso=0.01, deposito=DEPOSITO):
     """Operazioni chiuse, attribuite alla strategia che le ha aperte.
 
@@ -47,9 +65,7 @@ def leggi(path, rischio_test, rischio_fisso=0.01, deposito=DEPOSITO):
     si fa per volume e direzione opposta, LIFO (vedi tools/estrai.py e
     l'errore n.4 del progetto). `ambigui` conta quante volte la coppia
     non era unica; il totale attribuito va confrontato col report."""
-    raw = open(path, encoding='utf-16', errors='ignore').read()
-    if '<html' not in raw.lower():
-        raw = open(path, encoding='utf-8', errors='ignore').read()
+    raw = _apri(path)
     rows = re.findall(r'<tr[^>]*>(.*?)</tr>', raw, re.S)
     cl = lambda r: [html.unescape(re.sub(r'<[^>]+>', '', x)).strip()
                     for x in re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', r, re.S)]

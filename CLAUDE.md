@@ -90,11 +90,24 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/report_regimi.py` | **l'analisi dei regimi a 8 pagine**: perche' ha funzionato, quando funziona, quando soffre |
 | `tools/report_sintesi.py` | la versione breve a 8 pagine, con rischio fisso **e** composto affiancati |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
+| `dati/` | **i report MT5 veri, compressi** — `leggi()` apre anche i `.gz`. Non serve ricaricarli |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
 Ogni `.mq5` dichiara la propria ipotesi nel commento di testa, scritta
 prima del test. Non è decorazione: è il motivo per cui il fuori campione
 conta qualcosa.
 
-Rigenerare un report:
-`python3 tools/report_finale.py <report.html> --rischio 1.05 --due`
+## Rigenerare i report
+
+I dati stanno nel repo, quindi ogni analisi si rifa' senza caricare niente:
+
+```
+python3 tools/report_curva_reale.py   dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/report_regimi.py        dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/report_scelta_finale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/report_finale.py        dati/oro_puprime_1pct.html.gz --rischio 1.05 --due
+```
+
+**Il rischio deciso e' oro 0,65% e nasdaq 0,98%** (tetto: drawdown 33% al
+95o percentile sullo scenario 2019-2023). Nel codice l'oro e' ancora a
+0,70% e il nasdaq a 1,50%: vanno cambiati. Vedi `docs/rischio-portafoglio.md`.

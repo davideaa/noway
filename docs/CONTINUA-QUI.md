@@ -433,3 +433,108 @@ margine e non per rischiare.
 misurato. E' l'unico parametro di questa versione che vale la pena
 tarare, e si tara guardando quante volte compare "ORDINE RIFIUTATO"
 nel diario.
+
+---
+
+# 9. Settembre 2026 — il portafoglio a due strategie
+
+Sessione lunga. Qui sotto tutto quello che serve per riprendere senza
+rileggere niente altro.
+
+## I dati adesso sono NEL REPO
+
+`dati/` contiene i quattro report MT5 veri, compressi con gzip
+(5,3 MB → 0,6 MB). `leggi()` li apre direttamente, anche `.gz`.
+**Non serve piu' ricaricare niente a mano.**
+
+| file | operazioni | periodo |
+|---|---|---|
+| `dati/oro_puprime_1pct.html.gz` | 1.036 | 2019.09.03 → 2026.09.15 |
+| `dati/nasdaq_puprime.html.gz` | 1.626 | 2019.01.02 → 2026.09.15 |
+| `dati/oro_fusion_1pct.html.gz` | 992 | 2019.09.30 → 2026.09.15 |
+| `dati/nasdaq_fusion.html.gz` | 1.158 | 2020.11.16 → 2026.09.15 |
+
+**Attenzione**: il test dell'oro parte da **settembre 2019**, non da
+gennaio. Le «1.123 operazioni» ricordate da Davide vengono da un test
+piu' lungo che non e' mai stato caricato qui. Se salta fuori, vale la
+pena aggiungerlo.
+
+Rigenerare qualunque report:
+```
+python3 tools/report_curva_reale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/report_regimi.py      dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/report_scelta_finale.py dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+```
+
+## Il rischio deciso: oro 0,65% · nasdaq 0,98%
+
+Vincolo posto da Davide: drawdown al 95o percentile **entro il 33%**
+nello scenario prudente (solo 2019-2023, senza il boom).
+
+| | scenario MAGRO | TUTTO |
+|---|---|---|
+| DD 95% | **32,9%** | 28,1% |
+| mediana su 7 anni | **+576%** | +1.222% |
+
+Sperava +1.300/1.400% con quel drawdown: **non stanno insieme**. Per
+avere +1.350% nel magro servirebbe oro 0,93% / nasdaq 1,40%, con DD
+44,0%. Vedi `docs/rischio-portafoglio.md`.
+
+**Nel codice l'oro e' gia' a 0,70%: va portato a 0,65%. Il nasdaq da
+1,50% a 0,98%.** I backtest sono girati a oro 1,00% e nasdaq 1,50%,
+quindi le due gambe NON erano proporzionali (x0,70 e x1,00).
+
+## Cosa e' stato costruito
+
+- **Pannello live** su tutti e due gli EA: diagnostica, PnL giorno/
+  settimana/mese in denaro e in % sul saldo a inizio periodo, drawdown
+  massimo, rendimento composto al netto dei versamenti, rischio
+  effettivo, posizione aperta. **Si spegne da solo nel tester.**
+  Sull'EA dell'oro: 549 righe aggiunte, **zero tolte o modificate**.
+- **`NAS100_..._MULTI.mq5`**: `BlockOnAnyAccountPosition=false` toglie
+  il blocco su qualunque posizione del conto. Senza, l'oro acceso
+  mangia il 65% dei trade del nasdaq.
+- Sei report nuovi in `report/`, sei strumenti nuovi in `tools/`.
+
+## Il risultato dell'analisi dei regimi (`docs/analisi-regimi.md`)
+
+**Zero variabili significative su 25 provate.** L'edge non dipende dal
+regime. La differenza fra gli anni **non e' distinguibile dal caso**
+(oro p 0,37, nasdaq p 0,24): il timore che il boom 2024-2026 spieghi
+tutto **non e' confermato**.
+
+Unica eccezione, e regge il fuori campione: l'oro soffre nei mercati
+**laterali a volatilita' media** (−0,11 R, PF 0,82, n 112) e concentra
+i grandi vincitori nei periodi direzionali e calmi (p 0,013).
+Correlazione della classifica dei regimi dentro/fuori campione:
+oro **+0,613**, nasdaq **−0,762** (= nessuna relazione).
+
+## Cosa resta da fare, in ordine
+
+1. **Compilare** i due `.mq5` (F7). Nessun MetaEditor qui.
+2. **Mettere i rischi**: oro `InpRiskPercent` 0,65 · nasdaq
+   `RiskPercent` 0,98 · nasdaq `BlockOnAnyAccountPosition` = false.
+3. **Demo su Fusion, un conto solo, due grafici**, e lasciar girare.
+4. **Test del plateau sul nasdaq** — i `.set` sono pronti in
+   `mt5/plateau/`, mai lanciati. E' la gamba meno verificata.
+5. **La stessa logica dell'oro su un altro strumento** (argento,
+   petrolio) senza toccare i parametri. Mezz'ora di lavoro, vale piu'
+   di tutto il resto: se funziona anche li', il meccanismo e' generale
+   e non cucito addosso a XAUUSD.
+6. Eventuale strategia di **ritorno alla media** per coprire il punto
+   debole dell'oro. Prima MISURARE se in quelle 112 operazioni c'e'
+   qualcosa, poi semmai costruire.
+
+## Limiti dichiarati, da non dimenticare
+
+- Le due strategie **non sono mai girate insieme dentro MetaTrader**:
+  il tester prende un simbolo alla volta. Tutti i numeri di portafoglio
+  sono la fusione esatta di due backtest separati — giusti su
+  rendimenti e drawdown, **muti su esecuzioni in contesa**.
+- **Niente dati di mercato prima del 2019** e nessun accesso a fonti
+  esterne (bloccate dalla policy di rete). La domanda «le condizioni
+  favorevoli esistevano anche prima?» resta **senza risposta**.
+- Il campione effettivo non e' 2.520 operazioni: meta' degli utili
+  viene da 78 operazioni sull'oro e 136 sul nasdaq. E per la domanda
+  «funzionera' in un regime mai visto» il campione e' **3 o 4 regimi**,
+  non migliaia di trade.
