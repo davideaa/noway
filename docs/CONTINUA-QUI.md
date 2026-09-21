@@ -73,19 +73,42 @@ DD 21,0% invece della somma dei due.
 > aperte, sempre più alto (oro 19,2% contro 17,0%). Quello vissuto sul
 > conto è il secondo. **Sono un pavimento, non un soffitto.**
 
+## È overfittata? No — `docs/verdetto-robustezza.md`
+
+| | |
+|---|---|
+| fuori campione, speso una volta sola | **t 4,36**, p ≈ 6·10⁻⁶, non sgonfiabile |
+| dentro campione | t 3,00 (soglia del rumore 3,35 con 272 configurazioni) |
+| regge il taglio delle vincite a 3 R | +180 R, 7 anni su 8 |
+| analisi dei regimi | zero variabili significative su 25 |
+
+**Per i piani si usa +33,9 R all'anno** (dentro campione), non i +66,6
+del fuori campione. Composto, scenario prudente: **~29% annuo**.
+
+**La probabilità che l'edge continui non è calcolabile da un backtest.**
+
 ## I costi, e quanto reggono
 
 Lo swap è il costo maggiore, cinque volte le commissioni. È **già
 compreso in tutti i numeri**. Swap sui long −85 $/lotto, sugli short
 +45. Commissioni su `.p` −7,03, su `.s` zero (tutto nello spread).
 
-**Il sistema muore a 3 volte i costi attuali.**
+**Il sistema muore a 5,8 volte i costi attuali** (il «3 volte» dei
+documenti vecchi era del portafoglio a tre gambe). Ma le commissioni
+sono zero e **lo spread non è separabile dal report**: il costo vero è
+più alto e quel margine è ottimista.
 
 ## Dove soffre
 
 L'oro perde nei mercati **laterali a volatilità media** (−0,11 R, PF
 0,82, su 112 operazioni). Il nemico non è la direzione, è l'immobilità.
 Unica eccezione trovata su 25 variabili provate: `docs/analisi-regimi.md`.
+
+**I falsi breakout, osservati da Davide nel tester e confermati:** sulla
+ROTTURA le 279 operazioni che muoiono entro 12 ore costano **−232,6 R**,
+le altre 293 rendono **+353,1 R**. Quasi metà dei breakout sono falsi.
+**Non è ottimizzabile**: la durata si conosce solo a cose fatte, e quelle
+morte entro 4 ore hanno già colpito lo stop.
 
 # 4. Cosa resta da fare, in ordine
 
@@ -129,17 +152,58 @@ fine, o che i costi si mangiano.
 | Tiene i costi | ×3 ancora in utile | i broker cambiano |
 | Plateau | ±20% su ogni parametro | se no è un picco, cioè fortuna |
 | Parametri ottimizzati | ≤ n/50 | 200 trade = massimo 4 manopole |
-| Concentrazione | top 5% dei trade < 50% del profitto | se no sono biglietti della lotteria |
+| Concentrazione | col **tetto a 3 R** su ogni vincita resta in utile | vedi sotto |
+
+> **Come si misura la concentrazione, e come NON si misura.** «Metà del
+> profitto viene da N operazioni» è una trappola: il netto è la
+> differenza fra due numeri grandi e quasi uguali, quindi poche vincite
+> bastano sempre a coprirne metà. Il test onesto **azzoppa ogni vincita
+> sopra una soglia** invece di sceglierne alcune a mano. Vedi
+> `docs/verdetto-robustezza.md`.
 
 **Il `t` non si confronta con 2**, ma con quanto ne produrrebbe il caso
 viste quante configurazioni hai provato: `radice(2 × log(K))`. Con
 K=25 il rumore regala già 2,5; con K=272 regala 3,35.
 
-Il **t 2,61** dell'oro è stato trovato dopo 272 configurazioni: preso da
-solo **non dimostra niente**. Quello che tiene in piedi l'oro è il fuori
-campione speso una volta sola, non il `t`.
+Il t dell'oro sui dati attuali è **3,26** (non 2,61: quello veniva da
+una passata più corta), trovato dopo 272 configurazioni. Contro una
+soglia di 3,35 **preso da solo non basta**. Quello che tiene in piedi il
+portafoglio è il **fuori campione: t 4,36**, che non va sgonfiato perché
+lì non è stata provata nessuna configurazione. Vedi
+`docs/verdetto-robustezza.md`.
 
-# 6. Limiti dichiarati, da non dimenticare
+# 6. Dove vuole andare Davide
+
+Dichiarato il 2026-09-21, e definisce cosa conta come «fatto bene».
+
+**L'obiettivo non è trovare un edge, è averne di usabili e affidabili.**
+Questi modelli sostituiscono un investimento, non il trading: l'orizzonte
+in cui i risultati si vedono è di **3-4 anni** (2022 e 2024 sono stati
+anni a vuoto). Quindi nessun passaggio della validazione si salta per
+fretta — il costo di un modello fragile messo a mercato è più alto del
+costo di aspettare.
+
+**La diversificazione si fa su tre assi, non uno:**
+
+| asse | perché |
+|---|---|
+| **strumenti diversi** | oro e nasdaq sono a correlazione +0,05: funziona |
+| **tipi di strategia diversi** | uno che segue il trend, uno di ritorno alla media, altro ancora |
+| **orizzonti diversi** | M30 e H4 sull'oro, M5 sul nasdaq |
+
+Il secondo asse è quello **ancora scoperto**: entrambe le gambe attuali
+sono inseguitori di tendenza, e soffrono nello stesso momento — quando
+il mercato sta fermo. Una strategia di ritorno alla media coprirebbe
+proprio quel buco. **Ma prima si misura se in quelle 112 operazioni
+laterali c'è qualcosa** (punto 6 della sezione 4), poi semmai si
+costruisce. Il ritorno alla media sull'oro è già stato bocciato una
+volta: 174 configurazioni, zero in utile (`docs/storia.md` sez. 3).
+
+La regola che ne discende: **una gamba nuova entra solo se passa le
+soglie della sezione 5 e se è poco correlata con quelle che ci sono.**
+Il rendimento della singola conta meno della correlazione.
+
+# 7. Limiti dichiarati, da non dimenticare
 
 - Le due strategie **non sono mai girate insieme dentro MetaTrader**: il
   tester prende un simbolo alla volta. I numeri di portafoglio sono la
@@ -148,15 +212,19 @@ campione speso una volta sola, non il `t`.
 - **Niente dati di mercato prima del 2019** e nessun accesso a fonti
   esterne. «Le condizioni favorevoli esistevano anche prima?» resta
   **senza risposta**.
-- Il campione vero non è 2.749 operazioni: **metà degli utili viene da
-  78 operazioni sull'oro e 136 sul nasdaq**. E per «funzionerà in un
-  regime mai visto» il campione è **3 o 4 regimi**, non migliaia di trade.
+- **Il profitto non dipende da pochi colpi.** Regge cancellando ogni
+  vincita sopra 3 R (+180 R, 7 anni su 8 in utile): non sono 11
+  operazioni ma una **coda di circa 200**, sparsa su tutti gli anni.
+  Si rompe solo sotto i 2 R di tetto — per questo **non si tocca il
+  take profit né il trailing** per «incassare prima».
+- Il campione vero per «funzionerà in un regime mai visto» è **3 o 4
+  regimi**, non 2.749 operazioni.
 - **Il fuori campione 2024–2026 è già stato speso**, una volta sola.
   Non c'è più nessun dato vergine.
 - Resta aperto il punto della TRAPPOLA, tolta dopo aver guardato il
   fuori campione: `docs/storia.md` sezione 5. Si decide col demo.
 
-# 7. I dati e come rifare le analisi
+# 8. I dati e come rifare le analisi
 
 `dati/` ha i report MT5 veri, compressi. `leggi()` apre anche i `.gz`.
 
@@ -177,6 +245,7 @@ decisioni, e i due `fusion` sono l'unico confronto fra broker.
 python3 tools/fusione_conto_unico.py dati/oro_puprime_065.html.gz:0.65 dati/nasdaq_puprime_098.html.gz:0.98
 python3 tools/report_regimi.py       dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
 python3 tools/report_curva_reale.py  dati/oro_puprime_1pct.html.gz dati/nasdaq_puprime.html.gz
+python3 tools/robustezza.py          dati/oro_puprime_065.html.gz:0.65 dati/nasdaq_puprime_098.html.gz:0.98
 ```
 
 L'elenco completo degli strumenti e delle schede sta in

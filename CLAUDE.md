@@ -46,18 +46,43 @@ Lui esegue i test in MetaTrader 5 (Mac con `XAUUSD.p`, PC Windows con
 
 - Tutto in **multipli di R**: il risultato diviso il rischio corso in
   quel momento. Indipendente dalla percentuale scelta.
-- `t = somma(R) / (deviazione standard × radice(n))`, con deviazione
-  standard **1,45 R** misurata sui trade. Le t calcolate prima di
-  quella misura sono ottimistiche del 15%. **E il t non si confronta
-  con 2**: vedi la sezione 5 di `CONTINUA-QUI`.
+- `t = somma(R) / (deviazione standard × radice(n))`. Sui dati attuali
+  la deviazione standard è **1,620 R** sull'oro (l'1,45 dei documenti
+  vecchi veniva da una passata più corta).
+- **Il t non si confronta con 2.** Con K configurazioni provate il caso
+  regala `radice(2 × log(K))`: con 272 la soglia è 3,35. Vale **solo
+  dentro campione** — il fuori campione, guardato una volta sola, non si
+  sgonfia. Per il nasdaq **K non è noto**, quindi il suo t dentro
+  campione non è sgonfiabile.
 - **Il drawdown vero non è quello del backtest.** Bootstrap a blocchi
   da 20, che non spezza le serie di perdite consecutive. E tutti i
   drawdown del progetto sono **di bilancio, non di equity**: sono un
   pavimento, non un soffitto.
-- MT5 non mette il magic number nel report: l'attribuzione accoppia per
-  volume e direzione opposta, **LIFO**. Il totale attribuito va sempre
-  confrontato con quello del report, e le aperture orfane devono essere
-  zero.
+- L'accoppiamento apertura/chiusura si fa per volume e direzione
+  opposta, **LIFO**: le aperture orfane devono essere zero e il totale
+  va confrontato con quello del report. **Ma la strategia non va
+  indovinata**: il report porta l'etichetta nel commento dell'ordine
+  (`S3-DONCH`, `S2-PULLB`, `QL_SessionOpenMom`), quindi l'attribuzione
+  per gamba è esatta.
+
+## È vera o è overfittata — risposta, 2026-09-21
+
+**Non è overfittata.** Il fuori campione, speso una volta sola, dà
+**t 4,36** (p ≈ 6·10⁻⁶) e non va sgonfiato. Regge cancellando ogni
+vincita sopra 3 R (+180 R, 7 anni su 8 in utile). L'analisi dei regimi
+non trova nessuna delle 25 variabili significativa.
+
+**Per i piani si usa il numero basso**: +33,9 R all'anno (dentro
+campione), non +66,6 (fuori campione, gonfiato dal boom dell'oro).
+Circa **29% annuo composto** nello scenario prudente.
+
+**«Che probabilità c'è che continui a rendere?» non è calcolabile da un
+backtest.** Chi dà una percentuale se la inventa. Quello che è misurato
+è che l'edge **c'era** nei dati; che **resti** dipende da 3 o 4 regimi
+di mercato, non da 2.749 operazioni.
+
+Dettaglio e prove: `docs/verdetto-robustezza.md`, strumento
+`tools/robustezza.py`.
 
 ## Il rischio: **oro 0,65% · nasdaq 0,98%**
 

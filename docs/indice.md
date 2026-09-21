@@ -38,6 +38,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `montecarlo.py` | bootstrap a quattro metodi, una strategia |
 | `montecarlo_validazione.py` | cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `montecarlo_portafoglio.py` | più strategie insieme, in frazione di conto |
+| `robustezza.py` | le prove contro l'overfitting: t dentro/fuori campione, soglia del rumore, tetto sulle vincite, costi, falsi breakout |
 | `fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente del precedente, non come suo sostituto |
 
 ### I report PDF
@@ -62,6 +63,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `CONTINUA-QUI.md` | **lo stato corrente.** Si parte da qui |
 | `storia.md` | l'archivio: scartate, errori, V2XAU, i parametri con il motivo di ogni scelta |
 | `indice.md` | questo file |
+| `verdetto-robustezza.md` | **è vera o è overfittata**: le sei prove, i numeri corretti, i falsi breakout |
 | `verifica-conto-unico.md` | la verifica del 2026-09-21: il PDF era onesto, il tetto è sforato |
 | `analisi-regimi.md` | zero variabili significative su 25. L'edge non dipende dal regime |
 | `rischio-portafoglio.md` | come si è arrivati ai rischi scelti, due scenari |
