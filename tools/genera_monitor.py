@@ -21,14 +21,17 @@ from dati_validazione import leggi
 
 RADICE = os.path.join(QUI, '..')
 # (file, rischio %, id, nome, etichette, nota)
+# L'oro e' UN EA con due tecniche, che si spengono una per una dagli input.
 RIFERIMENTI = [
     ('dati/oro_puprime_065.html.gz', 0.65, 'oro', 'Oro · V1XAU',
-     {'S3-DONCH': 'ROTTURA', 'S2-PULLB': 'RITRACCIAMENTO'}, ''),
+     {'S3-DONCH': 'ROTTURA M30', 'S2-PULLB': 'RITRACCIAMENTO H4'}, ''),
     ('dati/nasdaq_puprime_098.html.gz', 0.98, 'nas', 'Nasdaq · NAS100',
      {'QL_SessionOpenMom': 'MOMENTUM'},
      'Il backtest del nasdaq è girato col rischio adattivo acceso: la R è nominale, '
      'e il confronto vale solo se anche il live gira con la stessa impostazione.'),
 ]
+# come si spegne una tecnica sola, se diventa rossa
+SPEGNI = {'S3-DONCH': 'InpS3Enabled = false', 'S2-PULLB': 'InpS2Enabled = false'}
 FINO = '2023.12.31'   # il confine dentro/fuori campione del progetto: riferimento prudente
 
 
@@ -50,6 +53,7 @@ def riferimenti():
         simbolo = h.unescape(m.group(1)).strip() if m else ''
         out.append({'id': id_, 'nome': nome, 'simbolo': simbolo, 'rischio': pct,
                     'tags': tags, 'nomiTag': nomi, 'nota': nota, 'fino': FINO,
+                    'spegni': {t: SPEGNI[t] for t in tags if t in SPEGNI},
                     't': [[o.apertura[:16], o.chiusura[:16], 'L' if o.tipo == 'long' else 'S',
                            round(o.R, 4), tags.index(o.tag)] for o in ops]})
     return out

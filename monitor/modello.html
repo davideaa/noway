@@ -698,6 +698,12 @@ function disegna(k){
   var v=S.vista; if(!v) return;
   verdetto(v, k); spie(v, k); disegnaCono(v, k);
 }
+function comeSpegnere(st){
+  // una tecnica sola dell'oro si spegne dagli input, senza togliere l'EA
+  if(!st.tags) return st.rif.length>1 ? " Guarda anche i pallini delle singole strategie: se ne è rossa una sola, spegni quella." : "";
+  var rf=st.rif[0], x=st.tags.map(function(t){ return (rf.spegni||{})[t]; }).filter(Boolean);
+  return x.length ? " È una tecnica sola dell'EA: negli input metti "+x.join(", ")+", e l'altra continua." : "";
+}
 function verdetto(v, k){
   var cal=v.cal, s=v.s, an=v.an, f=k?an.foto[k-1]:null, box=$("verdetto"), tit, txt;
   var ban=$("simbanner"); ban.hidden=!v.et; if(v.et) ban.textContent="Simulazione · "+v.et+(/vero/.test(v.et)?" · il backtest, non il tuo conto":" · una storia inventata, non il tuo conto");
@@ -717,7 +723,7 @@ function verdetto(v, k){
     txt = "È successo all'operazione "+an.stop.k+", con un risultato dall'inizio di "+fmt(an.stop.cum)+" R ("+fmt(an.stop.cum*s.rm,0)+"% circa). "+
       (m==="dd" && s.ddDaTetto ? "È il limite che ti eri dato: vale anche se la strategia fosse sana. " :
         "Con l'edge intatto succede meno di una volta su venti. Non vuol dire per forza che è morta: vuol dire che è diventato troppo raro per essere solo sfortuna. ")+
-      "Spegni, e fai quello che avevi scritto per il dopo-rosso.";
+      "Spegni, e fai quello che avevi scritto per il dopo-rosso."+comeSpegnere(S.strat);
   } else {
     var l=livello(f, cal, s), gialli=REGOLE.filter(function(r){ return l[r.k]==="gi"; }).map(function(r){ return NOMI_REGOLA[r.k]; });
     if(gialli.length){ box.className="verdetto ATTENZIONE"; tit="Periodo brutto, ma ancora normale";
