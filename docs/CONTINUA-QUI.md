@@ -144,7 +144,11 @@ morte entro 4 ore hanno già colpito lo stop.
    operazione per operazione; a ogni operazione il monitor dell'edge.
    Tutti e due in **`monitor/monitor.html`**, che si apre col doppio clic.
    **Il giallo nei primi mesi è normale.** Confermare l'edge dal live
-   richiede ~450 operazioni, cioè ~15 mesi.
+   richiede ~450 operazioni, cioè ~15 mesi. Per **smettere** non si
+   aspetta: il monitor ha cinque regole di stop tarate insieme (5% di
+   falsi allarmi) più **il tetto di perdita**, scritto prima. Le regole
+   statistiche da sole sono larghe (oro: 57 R ≈ 37%), quindi il tetto
+   va deciso da Davide prima del live. Vedi `docs/metodo.md`, passo 20.
 
 # 5. Le soglie, uguali per ogni strategia futura
 

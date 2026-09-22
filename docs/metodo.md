@@ -84,25 +84,45 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
 ## Fase 7 — Il mercato vero
 
 20. **Prima del live si scrivono tre cose**, e non si cambiano dopo:
-    - le soglie del monitor (`tools/monitor.py`, già calibrate)
-    - **cosa si fa dopo un ROSSO**
-    - il drawdown a cui si spegne comunque
+    - **la perdita massima che si accetta sul conto** (il tetto). È un
+      limite di soldi, non una prova: scatta anche se la strategia è sana
+    - le regole di stop statistiche — le calcola il monitor dal backtest
+    - **cosa si fa dopo uno stop**
 21. **Demo, poi live piccolo.**
 22. **Due controlli, per sempre:**
 
     | | cosa guarda | ogni quanto | cosa coglie |
     |---|---|---|---|
     | **esecuzione** | backtest sugli stessi giorni del live, confronto operazione per operazione (i cinque criteri del passo 13) | ogni mese | bug, broker, slittamenti — **in giorni** |
-    | **edge** | cono, caduta, CUSUM | a ogni operazione | strategia rotta — in **~200 operazioni** |
+    | **edge** | le regole di stop qui sotto | a ogni operazione | strategia rotta — in **~200 operazioni** |
 
     Tutti e due stanno in **`monitor/monitor.html`**: una pagina che si apre
     col doppio clic, anche senza internet. Si trascina il report del conto
     live, e per il controllo veloce il backtest sugli stessi giorni. Le
     soglie e l'orizzonte li calcola lei dal backtest della strategia
     scelta; altre strategie si aggiungono trascinando il loro report del
-    tester. `tools/monitor.py` fa lo stesso calcolo da riga di comando.
+    tester. Ha un simulatore: rigioca il fuori campione vero, o inventa
+    una storia con l'edge intatto, dimezzato, morto o rotto, per vedere
+    **prima** come reagirebbero le regole.
 
----
+### Le regole di stop (dal 2026-09-22)
+
+Sono quelle che Kevin Davey elenca per capire quando una strategia ha
+smesso di funzionare, con una differenza: le soglie sono tarate
+**insieme**, perché guardare più cose alla volta moltiplica i falsi
+allarmi. Tutte insieme scattano per sbaglio **il 5% delle volte**
+sull'orizzonte.
+
+| regola | cosa guarda |
+|---|---|
+| caduta dal massimo | il più stretto fra lo stop statistico e **il tetto** |
+| perdite di fila | più lunga del peggio simulato |
+| tempo senza nuovo massimo | idem |
+| posizione nel cono | la curva sotto la linea rossa |
+| calo lento | il CUSUM: il guadagno medio sta scendendo |
+
+Il giallo scatta dove arriva una storia normale su cinque: si guarda, non
+si spegne.
 
 ## Le verità scomode sul live, misurate
 
@@ -110,18 +130,29 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
 Track Record Length, al 95%), cioè **~15 mesi** su questo portafoglio.
 Prima di allora il live dice solo «non si è rotto», mai «funziona».
 
-**Il monitor dell'edge vede i guasti grossi, non i cali lenti:**
+**Gli stop statistici sono larghi, perché l'edge è sottile.** Sull'oro da
+solo lo stop statistico della caduta è a 57 R, circa il 37% del conto:
+più del tetto di Davide. Per questo il tetto è una regola a parte, e sul
+conto comanda lui. Nel backtest l'oro è stato **317 operazioni, circa
+2,2 anni, senza un nuovo massimo**: se succede dal vero sembra morta, e
+va saputo prima.
 
-| se succede questo | il ROSSO scatta | dopo |
-|---|---:|---:|
-| edge intatto (falso allarme) | 6% | — |
-| edge dimezzato | 18% | — |
-| edge morto | 40% | ~275 operazioni |
-| strategia rotta | **86%** | ~210 operazioni |
+**Cosa vedono le regole, col tetto al 33%** (dentro l'orizzonte; la
+perdita è il risultato dall'inizio del live al momento dello stop):
 
-Non è un limite dello strumento: con uno Sharpe di 0,07 per operazione
-**nessun** monitor fa meglio. Per questo il controllo di esecuzione è
-l'altro pilastro: è l'unico veloce.
+| se succede questo | portafoglio | | | nasdaq | | |
+|---|---:|---:|---:|---:|---:|---:|
+| | ti fermi | dopo | perdita | ti fermi | dopo | perdita |
+| edge intatto (falso allarme) | 5% | 292 op | −16% | 5% | 194 op | −14% |
+| edge dimezzato | 19% | 326 op | −16% | 15% | 241 op | −14% |
+| edge morto | 41% | 288 op | −22% | 44% | 257 op | −18% |
+| strategia rotta | **87%** | 213 op | −25% | **90%** | 169 op | −21% |
+
+**Un edge morto non svuota il conto**: guadagna in media zero, quindi
+oscilla. Chi porta via i soldi è una strategia rotta, e quella le regole
+la prendono quasi sempre. Non è un limite dello strumento: con uno Sharpe
+di 0,07 per operazione **nessun** monitor fa molto meglio. Per questo il
+controllo di esecuzione è l'altro pilastro: è l'unico veloce.
 
 **Il monitor si adatta a qualunque strategia.** Tranne il 5% di falsi
 allarmi — che è una scelta, come in ogni test statistico — tutto si
@@ -149,4 +180,5 @@ statistica concede, e chi promette di più se lo inventa.
 - Hsu, Kuan — [White's Reality Check e Hansen's SPA](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=685361)
 - Philips — [Monitoring Active Portfolios: The CUSUM Approach](https://www.northinfo.com/Documents/144.pdf)
 - Davey — [Monte Carlo e coni di probabilità](https://medium.com/data-science/improving-your-algo-trading-by-using-monte-carlo-simulation-and-probability-cones-abacde033adf)
+- Davey — [sei modi per capire quando una strategia è rotta](https://bettersystemtrader.com/)
 - LuxAlgo — [Live Decay Tracking](https://www.luxalgo.com/library/concept/live-decay-tracking/)

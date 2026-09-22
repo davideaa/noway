@@ -39,7 +39,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `montecarlo_validazione.py` | cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `montecarlo_portafoglio.py` | più strategie insieme, in frazione di conto |
 | `genera_monitor.py` | ricostruisce `monitor/monitor.html` coi backtest di riferimento dentro |
-| `monitor.py` | **monitoraggio live**, per qualunque strategia: cono, caduta e CUSUM a ogni operazione, soglie e orizzonte ricavati dal suo backtest |
+| `monitor.py` | monitoraggio live da riga di comando: cono, caduta e CUSUM. **Sono le regole della prima versione**: quelle in uso (cinque regole + tetto) stanno in `monitor/modello.html` |
 | `robustezza.py` | le prove contro l'overfitting: t dentro/fuori campione, soglia del rumore, tetto sulle vincite, costi, falsi breakout |
 | `fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente del precedente, non come suo sostituto |
 
@@ -62,7 +62,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 
 | | |
 |---|---|
-| `monitor/monitor.html` | **la pagina da usare**: doppio clic, trascini il report del conto. Controllo lento (l'edge) e veloce (l'esecuzione) |
+| `monitor/monitor.html` | **la pagina da usare**: doppio clic, trascini il report del conto. Cruscotto con le cinque regole di stop più il tetto, cono, simulatore, controllo veloce (l'esecuzione) |
 | `monitor/modello.html` | il sorgente della pagina, senza dati: si modifica questo e si rigenera |
 
 ## Le schede
