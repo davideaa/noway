@@ -1,124 +1,82 @@
 # Il reel
 
-Video verticale 1080×1920, 48 secondi, apertura e chiusura sul logo.
-Costruito sulla specifica misurata negli otto reel di riferimento: le misure
-stanno in `RIFERIMENTI.md`, questo file dice come si usa.
+Video verticale 1080×1920, 50 secondi, **un solo piano sequenza**.
 
     python3 video/reel.py                      # rende video/reel.mp4, muto
-    python3 video/reel.py --audio brano.mp3    # misura i battiti e monta l'audio
-    python3 video/reel.py --secondi 30         # altra durata
-    python3 video/battiti.py brano.mp3         # solo la misura, per controllarla
+    python3 video/reel.py --audio brano.mp3    # monta l'audio
+    python3 video/battiti.py brano.mp3         # misura BPM e battiti
 
-Niente maniglie, niente didascalie in fondo: lo schermo è tutto per il
-numero e per il grafico.
+## Non ci sono scene
 
-## Le otto scene
+Le versioni prima erano otto scene che si dissolvevano l'una nell'altra, e
+dentro ogni scena gli elementi *comparivano* con una dissolvenza e poi
+restavano fermi. Questa è una cosa diversa: una sola curva, una sola
+inquadratura, e tutto che si trasforma senza fermarsi mai.
 
-| Scena | Durata | Il meccanismo che si muove |
+| | |
+|---|---|
+| 0 – 4,5 | Il logo si forma, una lama di luce lo attraversa, si dissolve |
+| 4,5 – 15 | La curva si scrive dal vivo, la finestra si allarga da sola |
+| 15 – 23 | La curva si sdoppia in tre: oro, nasdaq, insieme |
+| 23 – 31 | L'insieme si ripiega sott'acqua — stessi 1.597 punti |
+| 31 – 38 | Il sott'acqua si spegne a onda mentre sale la distribuzione |
+| 38 – 45,5 | 150 tentativi a caso entrano con la scia, la curva vera li scavalca |
+| 45,5 – 50 | Il logo si richiude |
+
+## I quattro meccanismi (`fluido.py`)
+
+**`Vista` — la finestra che si allarga da sola.** La x occupa *sempre* tutta
+la larghezza e la y segue il minimo e il massimo cumulativi di quello che è
+già disegnato. Risultato: mentre la punta avanza, la parte già scritta si
+comprime a sinistra e si schiaccia. Ogni pixel della curva si muove a ogni
+fotogramma. È questo che dà la fluidità, non le dissolvenze.
+
+**`morph` — la fusione a onda.** Due serie della stessa lunghezza si fondono
+con un ritardo che cresce lungo la serie, così il cambio attraversa la curva
+invece di scattare tutto insieme. È come la curva del capitale diventa le
+tre gambe, e come le tre gambe si ripiegano sott'acqua: sono sempre gli
+stessi 1.597 punti, solo riletti.
+
+**`Camera` — una sola inquadratura.** Dieci tappe per tutti i 50 secondi, e
+lei sta sempre in viaggio fra due. Non si azzera mai. Sopra ci sta un respiro
+continuo (tre seni a periodi diversi) così anche quando la curva è ferma il
+fotogramma non lo è.
+
+**`Scia` — la traccia.** Accumula un pezzo del fotogramma prima. Serve sui
+150 tentativi a caso, che senza lascerebbero uno sfarfallio.
+
+## La testina che scorre
+
+Nei tratti in cui un'animazione era finita e non succedeva più niente,
+scorre una testina che ripassa i dati e il cruscotto la legge dal vivo:
+
+- **19,6 – 23,4 s** sulle tre gambe, con un puntino su ognuna
+- **24,6 – 30,6 s** sulla ripiegazione, e il cruscotto mostra il sott'acqua
+  in quel punto esatto
+- **34,2 – 37,6 s** sulla distribuzione, riempiendo la probabilità cumulata:
+  «81% degli anni sotto +65 R»
+
+## Come si misura se è fluido
+
+Lo stesso metro usato sui riferimenti: quanto cambia un fotogramma rispetto
+al precedente, su scala 0–255.
+
+| | movimento medio | minimo su 2 secondi |
 |---|---|---|
-| Logo | 3,4 s | Sale dal buio, una lama di luce lo attraversa, si assesta |
-| Sette anni, due mercati | 6,9 s | Il capitale si disegna in scala log, oro, con la staffa a +132.328 € |
-| Insieme non è una somma | 6,9 s | Le tre curve entrano sfalsate, poi 2,79 × 4,75 = 13,23 |
-| Metà del tempo, chiusa a chiave | 7,7 s | La barra si divide, il lucchetto scatta, i parametri si bloccano, poi si apre |
-| Batti la fortuna | 7,7 s | 150 tentativi a caso, la riga del loro massimo, la curva vera che la scavalca |
-| Quanto si sta sott'acqua | 6,0 s | Il profilo si riempie fino a −21,7%, poi le tre barre |
-| Diecimila anni simulati | 6,0 s | La distribuzione, la fascia 5–95, la staffa sulla mediana |
-| Logo | 3,4 s | Chiusura |
+| prima | 0,22 | **0,01** (due secondi immobili) |
+| ora | **0,26** | 0,05 |
+| riferimento r8 | 0,25 | — |
+| riferimento r1 | 0,47 | — |
+| riferimento r6 | 0,92 | — |
 
-**Il ritmo è lento apposta.** I riferimenti hanno un movimento medio fra 0,25
-e 0,9 su 255: le scene durano 6-8 secondi e dentro le cose si trasformano,
-non compaiono. Anche la dissolvenza fra scene è lunga (tre quarti di battito
-in entrata), e il respiro sul battito è dello 0,4% invece dello 0,7%.
+Il minimo conta più della media: era il punto in cui il video si fermava.
 
-## La curva del capitale: come è ricostruita, e perché è fedele
+## I numeri
 
-Il PDF e i report **non coprono la stessa finestra**, e all'inizio li avevo
-mescolati senza accorgermene:
+Tutti da `video/dati.json`, estratto dai report e dal PDF. I controlli sulla
+ricostruzione della curva del capitale, sul taglio del fuori campione e
+sulle due gambe stanno in `RIFERIMENTI.md` insieme alle misure prese dagli
+otto reel di riferimento.
 
-- i report: **2.749 operazioni, 7,7 anni**, dal 2019.01
-- il PDF: **2.520 operazioni, 7,03 anni**
-
-La differenza è 229 operazioni e 0,67 anni. Il 2019 ha 344 operazioni, e
-229 su 344 è il 67% dell'anno: il PDF non è un altro dataset, è lo stesso
-che **parte da fine agosto 2019**. Non è una contraddizione, è una finestra
-diversa.
-
-Da lì la ricostruzione: si prende la curva in R dal punto 140 (dove comincia
-la finestra del PDF) e si compone ogni operazione a un rischio unico,
-cercando quello che porta a 132.328 €. Viene **0,8249% per operazione** —
-che sta fra lo 0,65% dell'oro e lo 0,98% del nasdaq, esattamente dove deve
-stare per un mix delle due gambe.
-
-I controlli, che non sono stati calibrati e quindi valgono qualcosa:
-
-| | ricostruito | PDF |
-|---|---|---|
-| capitale finale | 132.328 € | 132.328 € (per costruzione) |
-| drawdown massimo | −21,71% | −21,33% |
-| tempo sotto il massimo | 87% | 90% |
-| sette anni su otto | entro 4 punti | — |
-
-Il drawdown cade a 0,4 punti da quello vero **senza essere stato usato per
-calibrare**: è quello che dice che la ricostruzione è buona. Lo scarto
-residuo viene dal fatto che la curva è sottocampionata (1.597 punti per
-2.749 operazioni), quindi qualche perdita consecutiva si fonde.
-
-**Il 2021 fa eccezione:** ricostruito +22%, il PDF dice +32%. Un rischio
-unico non coglie che il mix fra le due gambe cambia ogni anno. Ho provato un
-rischio per anno, ma sul 2019 parziale il conto esplode e rompe la catena:
-meglio il rischio unico e questa nota.
-
-## Gli altri numeri
-
-Tutti da `video/dati.json`, estratto dai due report e dal PDF. Niente è
-scritto a mano nel codice.
-
-**Il taglio del fuori campione è verificato.** 984 operazioni su 2.749
-significa tagliare la curva al punto 1.025 di 1.597: i due pezzi valgono
-+169,4 R e +180,6 R, cioè esattamente i due numeri del report. La nuvola del
-passo 2 e il "sei su un milione" parlano tutti e due di quelle 984
-operazioni — se non combaciassero, il confronto non vorrebbe dire niente.
-
-**Le due gambe tornano.** Dai rendimenti annuali del PDF: oro ×2,81,
-nasdaq ×4,75, prodotto ×13,32, insieme ×13,35. Il PDF dice 2,79 × 4,75 =
-13,23; lo scarto è l'arrotondamento delle percentuali annuali a numero
-intero. Le tre curve sono a risoluzione annuale, perché per le gambe
-separate ho solo i rendimenti anno per anno.
-
-**Una differenza trovata nel report:** dice che il sistema muore a **5,5×**
-i costi, ma il suo stesso grafico incrocia lo zero a **5,757×** (fra +55,7 R
-a 5× e −17,9 R a 6×). Quella scena non è più nel reel, ma il testo del
-report va corretto lo stesso.
-
-## Il logo
-
-`video/logo.png` è la foto che mi hai mandato, ripulita: sotto il valore 9
-è rumore di compressione JPEG, non logo, quindi viene tolto. Si compone in
-**somma** sul fotogramma: siccome il logo sta su fondo nero, il nero sparisce
-da solo e non si vede nessun riquadro. La lama di luce segue la luminosità
-del logo, così illumina il metallo e non il vuoto attorno.
-
-## I battiti, e come si arriva ai secondi esatti
-
-`battiti.py` misura il brano senza sentirlo: calcola l'energia ogni 256
-campioni, tiene solo dove sale (è lì che sta il colpo), e l'autocorrelazione
-di quel segnale ha un picco al periodo del battito. Poi prova tutte le fasi
-dentro un periodo e tiene quella che fa cadere i battiti sui colpi più forti.
-
-Il punto delicato è l'armonico: l'autocorrelazione dà spesso il doppio del
-tempo vero. Per questo si sommano i multipli (il battito vero ha un picco
-anche a 2×, 3×, 4×; una suddivisione no) e si scende di un'ottava finché il
-periodo doppio tiene almeno l'80% del punteggio. Sull'audio del reel di
-esempio senza questa correzione usciva 178 BPM, con la correzione 89.
-
-Le scene in `SCENE` non hanno una durata fissa ma un **peso**. `alloca()`
-converte i pesi in battiti interi che sommati fanno i secondi chiesti: così
-ogni cambio scena cade su un battito **e** il video dura quanto deve,
-qualunque sia il BPM del brano.
-
-## Cosa cambiare
-
-- `SCENE` in fondo a `reel.py`: la lista `(peso, funzione, disegna_sul_fotogramma)`.
-  Alzare un peso allunga quella scena e accorcia le altre.
-- I testi stanno dentro le funzioni `s_*`, una per scena.
-- `EYEBROW` in cima a `reel.py` è la scritta in alto a sinistra.
+Il logo è `video/logo.png`, ripulito dal rumore di compressione e composto
+in somma sul fotogramma: sta su fondo nero, quindi il nero sparisce da solo.
