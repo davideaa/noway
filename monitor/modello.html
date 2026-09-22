@@ -7,7 +7,7 @@
   --ink:#16150f; --ink-2:#4f4e4a; --ink-3:#85837b;
   --ok:#1b8f63; --ok-bg:#e1f2ea; --warn:#b67800; --warn-bg:#fbefd6; --neg:#b4472c; --neg-bg:#f8e3dc;
   --zv:#bfe3d2; --zg:#f3dca6; --zr:#eab3a3;
-  --acc:#2a78d6; --band:#2a78d6; --live:#16150f; --stopdd:#c96a1d;
+  --acc:#2a78d6; --band:#2a78d6; --bandA:.16; --bandB:.08; --live:#16150f; --stopdd:#c96a1d;
   --shadow:0 1px 2px rgba(20,18,10,.06), 0 8px 22px -16px rgba(20,18,10,.28);
   --sans:Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -18,7 +18,7 @@
   --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
   --ok:#35b585; --ok-bg:#142a20; --warn:#e0a52f; --warn-bg:#2d2311; --neg:#e7765a; --neg-bg:#301b15;
   --zv:#1f4a37; --zg:#5a4516; --zr:#62291c;
-  --acc:#4a92ea; --band:#4a92ea; --live:#f5f4ee; --stopdd:#e89148;
+  --acc:#4a92ea; --band:#4a92ea; --bandA:.3; --bandB:.15; --live:#f5f4ee; --stopdd:#e89148;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
 }}
 :root[data-theme="dark"]{
@@ -27,7 +27,7 @@
   --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
   --ok:#35b585; --ok-bg:#142a20; --warn:#e0a52f; --warn-bg:#2d2311; --neg:#e7765a; --neg-bg:#301b15;
   --zv:#1f4a37; --zg:#5a4516; --zr:#62291c;
-  --acc:#4a92ea; --band:#4a92ea; --live:#f5f4ee; --stopdd:#e89148;
+  --acc:#4a92ea; --band:#4a92ea; --bandA:.3; --bandB:.15; --live:#f5f4ee; --stopdd:#e89148;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
@@ -216,11 +216,11 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
       <button class="btn primo" type="button" id="torna" hidden>Torna al mio live</button>
     </div>
     <p style="margin:0">La fascia azzurra la calcola la pagina dal backtest che ha dentro: migliaia di storie possibili, tutte con l'edge
-      intatto. La linea nera è il tuo conto, e compare quando carichi il report ①. Finché la nera sta nella fascia, sei nella norma.</p>
+      intatto. La linea spessa è il tuo conto, e compare quando carichi il report ①. Finché sta nella fascia, sei nella norma. Oltre la fine dell'orizzonte la fascia è più chiara: è solo indicativa, e le regole vanno rifatte.</p>
     <div class="legend">
-      <span><i class="sw" style="background:var(--band);opacity:.16"></i>8 storie normali su 10 stanno qui</span>
+      <span><i class="sw" style="background:var(--band);opacity:var(--bandA)"></i>8 storie normali su 10 stanno qui</span>
       <span><i class="sw" style="background:var(--band);height:3px"></i>la storia tipica</span>
-      <span><i class="sw" style="background:var(--live);height:3px"></i>il live</span>
+      <span><i class="sw" style="background:var(--live);height:3px"></i>il tuo conto</span>
       <span><i class="sw" style="background:var(--stopdd);height:3px"></i>stop della caduta: se la curva la tocca, ti fermi</span>
       <span><i class="sw" style="background:var(--neg);height:2px"></i>sotto qui l'edge sembra crollato</span>
     </div>
@@ -788,12 +788,22 @@ function spie(v, k){
 var NS="http://www.w3.org/2000/svg", MONO="IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
 function tx(s,a){ var t=el("text",a); t.textContent=s; return t; }
+function bandeFino(cal, L){
+  // oltre l'orizzonte le regole non valgono più, ma la fascia si può ancora
+  // disegnare: 1500 storie lunghe quanto il live, solo per il grafico
+  cal.lunghe=cal.lunghe||{}; if(cal.lunghe[L]) return cal.lunghe[L];
+  var M=1500, rnd=mulberry(21), seq=new Float64Array(L), col=[], out={p10:cal.bande.p10.slice(), p50:cal.bande.p50.slice(), p90:cal.bande.p90.slice()};
+  for(var j=cal.n;j<L;j++) col.push(new Float32Array(M));
+  for(var i=0;i<M;i++){ percorso(cal.rif,L,rnd,seq); var c=0; for(var j2=0;j2<L;j2++){ c+=seq[j2]; if(j2>=cal.n) col[j2-cal.n][i]=c; } }
+  col.forEach(function(x){ x.sort(); out.p10.push(pct(x,10)); out.p50.push(pct(x,50)); out.p90.push(pct(x,90)); });
+  return (cal.lunghe[L]=out);
+}
 function disegnaCono(v, k){
-  var cal=v.cal, s=v.s, foto=v.an.foto.slice(0,k), b=cal.bande, n=cal.n, nx=Math.max(n, v.an.foto.length);
+  var cal=v.cal, s=v.s, foto=v.an.foto.slice(0,k), n=cal.n, nx=Math.max(n, v.an.foto.length), b=nx>n?bandeFino(cal,nx):cal.bande, rosso=cal.bande.rosso;
   var host=$("cono"); Array.prototype.slice.call(host.querySelectorAll("svg")).forEach(function(x){ x.remove(); });
-  var W=960,H=340,mL=52,mR=16,mT=14,mB=34;
+  var W=960,H=380,mL=52,mR=16,mT=14,mB=34;
   var lo=0, hi=0;
-  for(var i=0;i<n;i++){ if(b.rosso[i]!=null) lo=Math.min(lo,b.rosso[i]); hi=Math.max(hi,b.p90[i]); }
+  for(var i=0;i<nx;i++){ if(i<n && rosso[i]!=null) lo=Math.min(lo,rosso[i]); hi=Math.max(hi,b.p90[i]); }
   var pk=0; foto.forEach(function(r){ lo=Math.min(lo,r.cum); hi=Math.max(hi,r.cum); pk=r.picco; });
   lo=Math.min(lo, pk-s.dd);
   var pad=(hi-lo)*0.05; lo-=pad; hi+=pad;
@@ -806,14 +816,19 @@ function disegnaCono(v, k){
   var xs=Math.pow(10,Math.floor(Math.log10(nx/4))); var xst=[1,2,5,10].map(function(m){return m*xs;}).find(function(q){return nx/q<=7;})||xs*10;
   for(var j=0;j<=nx;j+=xst) svg.appendChild(tx(String(j),{x:X(j),y:H-mB+17,"text-anchor":"middle",fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
   svg.appendChild(tx("operazioni",{x:W-mR,y:H-mB+31,"text-anchor":"end",fill:"var(--ink-3)","font-size":10.5,"font-family":MONO}));
-  var area="M"+X(0)+" "+Y(0);
-  for(var i1=0;i1<n;i1++) area+="L"+X(i1+1).toFixed(1)+" "+Y(b.p90[i1]).toFixed(1);
-  for(var i2=n-1;i2>=0;i2--) area+="L"+X(i2+1).toFixed(1)+" "+Y(b.p10[i2]).toFixed(1);
-  svg.appendChild(el("path",{d:area+"Z",fill:"var(--band)",opacity:.14}));
+  function fascia(a, z, op){ var d="M"+X(a)+" "+Y(a?b.p90[a-1]:0);
+    for(var i1=a;i1<z;i1++) d+="L"+X(i1+1).toFixed(1)+" "+Y(b.p90[i1]).toFixed(1);
+    for(var i2=z-1;i2>=a;i2--) d+="L"+X(i2+1).toFixed(1)+" "+Y(b.p10[i2]).toFixed(1);
+    if(!a) d+="L"+X(0)+" "+Y(0);
+    svg.appendChild(el("path",{d:d+"Z",fill:"var(--band)",style:"opacity:var("+op+")"})); }
+  fascia(0, n, "--bandA"); if(nx>n) fascia(n, nx, "--bandB");
   function linea(pts,col,w,dash){ if(!pts.length) return; var d="M"+pts.map(function(p){ return p[0].toFixed(1)+" "+p[1].toFixed(1); }).join("L");
     svg.appendChild(el("path",{d:d,fill:"none",stroke:col,"stroke-width":w,"stroke-dasharray":dash||"","stroke-linejoin":"round"})); }
-  linea([[X(0),Y(0)]].concat(b.p50.map(function(y,i){ return [X(i+1),Y(y)]; })),"var(--band)",2);
-  var ro=[]; b.rosso.forEach(function(y,i){ if(y!=null) ro.push([X(i+1),Y(y)]); }); linea(ro,"var(--neg)",1.6,"5 4");
+  linea([[X(0),Y(0)]].concat(b.p50.slice(0,n).map(function(y,i){ return [X(i+1),Y(y)]; })),"var(--band)",2);
+  if(nx>n){ linea(b.p50.slice(n-1).map(function(y,i){ return [X(n+i),Y(y)]; }),"var(--band)",1.6,"6 5");
+    svg.appendChild(el("line",{x1:X(n),x2:X(n),y1:mT,y2:H-mB,stroke:"var(--ink-3)","stroke-width":1,"stroke-dasharray":"2 4"}));
+    svg.appendChild(tx("fine dell'orizzonte · "+n+" op",{x:X(n)+6,y:mT+12,fill:"var(--ink-3)","font-size":11,"font-family":MONO,stroke:"var(--surface)","stroke-width":4,"paint-order":"stroke"})); }
+  var ro=[]; rosso.forEach(function(y,i){ if(y!=null) ro.push([X(i+1),Y(y)]); }); linea(ro,"var(--neg)",1.6,"5 4");
   // lo stop della caduta: segue il massimo del live
   var sd=[[X(0),Y(-s.dd)]], pp=0; foto.forEach(function(r){ if(r.picco!==pp){ sd.push([X(r.k),Y(pp-s.dd)]); pp=r.picco; } sd.push([X(r.k),Y(pp-s.dd)]); });
   linea(sd,"var(--stopdd)",2); linea([sd[sd.length-1],[X(nx),sd[sd.length-1][1]]],"var(--stopdd)",1.4,"2 4");
@@ -838,9 +853,10 @@ function disegnaCono(v, k){
     var r=svg.getBoundingClientRect(), j=Math.round(((cx-r.left)/r.width*W-mL)/(W-mL-mR)*nx);
     if(j<1||j>nx){ tip.style.opacity=0; return; }
     var rr=foto[j-1], h='<div class="dim mono" style="font-size:11px;margin-bottom:4px">operazione '+j+'</div>';
-    if(j<=n) h+='<div class="row"><span>storia tipica</span><b>'+fmt(b.p50[j-1])+' R</b></div>'+
+    h+=(j>n?'<div class="dim" style="font-size:11px">oltre l\'orizzonte: la fascia è indicativa</div>':'')+
+      '<div class="row"><span>storia tipica</span><b>'+fmt(b.p50[j-1])+' R</b></div>'+
       '<div class="row"><span>8 su 10 fra</span><b>'+fmt(b.p10[j-1])+' e '+fmt(b.p90[j-1])+'</b></div>'+
-      (b.rosso[j-1]!=null?'<div class="row"><span>linea rossa</span><b>'+fmt(b.rosso[j-1])+' R</b></div>':'');
+      (j<=n && rosso[j-1]!=null?'<div class="row"><span>linea rossa</span><b>'+fmt(rosso[j-1])+' R</b></div>':'');
     if(rr) h+='<div class="row"><span>'+(v.et?"la simulazione":"il tuo live")+'</span><b>'+fmt(rr.cum)+' R</b></div>'+
       '<div class="row"><span>caduta</span><b>'+num(rr.dd)+' R</b></div>';
     tip.innerHTML=h; tip.style.opacity=1;
