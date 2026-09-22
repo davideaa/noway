@@ -150,7 +150,9 @@ morte entro 4 ore hanno già colpito lo stop.
    statistiche da sole sono larghe (oro: 57 R ≈ 37%), per questo serve
    il tetto: **35% del conto, deciso da Davide il 2026-09-22**, uno solo
    per il conto intero, perché le due strategie girano sullo stesso
-   conto. La pagina parte dalla vista «Portafoglio». Resta da scrivere
+   conto. Il tetto vale **sia sul conto intero sia su ogni strategia da
+   sola**: ognuna ha il suo pallino colorato in cima alla pagina, così
+   se una trascina l'altra si vede, e si spegne solo quella. Resta da scrivere
    cosa si fa dopo uno stop. Vedi `docs/metodo.md`, passo 20.
 
 # 5. Le soglie, uguali per ogni strategia futura

@@ -59,6 +59,9 @@ h1{font-size:clamp(24px,4.2vw,32px); font-weight:800; letter-spacing:-.02em; mar
 .scelta{display:flex; flex-wrap:wrap; gap:8px}
 .chip{font:inherit; font-size:13.5px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
   border-radius:4px; padding:7px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:flex-start; gap:1px; text-align:left}
+.chip .nome{display:inline-flex; align-items:center; gap:7px}
+.pal{display:none; width:10px; height:10px; border-radius:50%; flex:none}
+.pal.CONTINUA{display:inline-block; background:var(--ok)} .pal.ATTENZIONE{display:inline-block; background:var(--warn)} .pal.FERMATI{display:inline-block; background:var(--neg)}
 .chip small{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
 .chip[aria-pressed="true"]{border-color:var(--acc); color:var(--ink); box-shadow:inset 0 0 0 1px var(--acc)}
 :focus-visible{outline:2px solid var(--acc); outline-offset:2px}
@@ -171,7 +174,8 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
     <ol class="passi">
       <li><b>Una volta al mese</b> scarica da MetaTrader il report del conto, <i>dal primo giorno di live a oggi</i>.</li>
       <li>Trascinalo nel riquadro ①. La pagina non ricorda niente: ogni volta il report intero.</li>
-      <li>Guarda il colore qui sotto. <b>Verde</b> vai avanti, <b>giallo</b> guardi e basta, <b>rosso</b> ti fermi.</li>
+      <li>Guarda i pallini sulle strategie in alto: <b>verde</b> vai avanti, <b>giallo</b> guardi e basta, <b>rosso</b> ti fermi.
+        Il conto intero e ogni strategia hanno il loro: se una sola diventa rossa, spegni quella.</li>
     </ol>
     <div class="files">
       <label class="drop" id="dropLive" tabindex="0"><input type="file" id="fileLive" accept=".htm,.html,.gz" multiple>
@@ -602,10 +606,10 @@ function tradeDopo(st, fino){
   out.sort(function(a,b){ return a.ch<b.ch?-1:a.ch>b.ch?1:0; });
   return out;
 }
-function stopEff(cal){
+function stopEff(cal, st){
   // lo stop della caduta è il più stretto fra quello statistico e il tuo tetto
   var s={}; for(var k in cal.stop) s[k]=cal.stop[k];
-  var tetto=parseFloat($("tetto").value), rm=rischioMedio(S.strat);
+  var tetto=parseFloat($("tetto").value), rm=rischioMedio(st||S.strat);
   s.ddStat=cal.stop.dd; s.ddTetto = tetto>0 ? tetto/rm : Infinity;
   s.dd=Math.min(s.ddStat, s.ddTetto); s.ddDaTetto = s.ddTetto<s.ddStat; s.rm=rm;
   return s;
@@ -617,13 +621,25 @@ function scegli(id){
   var rf=S.strat.rif[0]; if(!$("fino").value && rf.fino) $("fino").value=rf.fino;
   ferma(); S.sim=null; aggiorna();
 }
-function chiaveCal(){ return S.strat.id+"|"+($("fino").value||""); }
+function chiaveCal(st){ return (st||S.strat).id+"|"+($("fino").value||"").trim(); }
+function rifDi(st){
+  var fino=($("fino").value||"").trim(), rif=tradeRif(st, fino||null), d0=null, d1=null;
+  st.rif.forEach(function(rf){ rf.t.forEach(function(x){ if(fino && x[1].slice(0,10)>fino) return;
+    var t=ts(x[1]); if(d0===null||t<d0) d0=t; if(d1===null||t>d1) d1=t; }); });
+  return {rif:rif, ritmo:rif.length/((d1-d0)/(365.25*86400))};
+}
+function calDi(st){
+  var k=chiaveCal(st);
+  if(!S.cal[k]){ var r=rifDi(st);
+    if(r.rif.length<BLOCCO*3) S.cal[k]={errore:"Troppe poche operazioni nel riferimento per calibrare."};
+    else { var t0=performance.now(), c=calibra(r.rif);
+      if(!c.errore){ c.secondi=(performance.now()-t0)/1000; c.ritmo=r.ritmo; c.rif=r.rif; c.potere={}; }
+      S.cal[k]=c; } }
+  return S.cal[k];
+}
 function aggiorna(){
   if(!S.strat) return;
-  var fino=($("fino").value||"").trim(), rif=tradeRif(S.strat, fino||null);
-  var d0=null, d1=null; S.strat.rif.forEach(function(rf){ rf.t.forEach(function(x){ if(fino && x[1].slice(0,10)>fino) return;
-      var t=ts(x[1]); if(d0===null||t<d0) d0=t; if(d1===null||t>d1) d1=t; }); });
-  var ritmo=rif.length/((d1-d0)/(365.25*86400));
+  var fino=($("fino").value||"").trim(), rr=rifDi(S.strat), rif=rr.rif, ritmo=rr.ritmo;
   $("rifinfo").textContent = "Riferimento: "+rif.length+" operazioni di backtest, circa "+Math.round(ritmo)+" all'anno, guadagno medio "+fmt(media(rif),3)+" R per operazione.";
   var dopo=tradeDopo(S.strat, fino), bo=$("btnOos");
   if(dopo.length>=BLOCCO){ bo.hidden=false; bo.textContent="Rigioca il "+dopo[0].ch.slice(0,4)+"–"+dopo[dopo.length-1].ch.slice(0,4)+" vero"; } else bo.hidden=true;
@@ -632,14 +648,34 @@ function aggiorna(){
   if(!S.cal[k]){
     $("vTit").textContent="Calcolo le regole di questa strategia…"; $("vTxt").textContent="Qualche secondo: rimescolo il backtest migliaia di volte.";
     $("verdetto").className="verdetto";
-    setTimeout(function(){ var t0=performance.now(), c=calibra(rif);
-      if(!c.errore){ c.secondi=(performance.now()-t0)/1000; c.ritmo=ritmo; c.rif=rif; c.potere={}; }
-      S.cal[k]=c; mostra(); }, 30);
+    setTimeout(function(){ calDi(S.strat); mostra(); semafori(); }, 30);
     return;
   }
   mostra();
 }
-function liveDellaStrategia(){ if(!S.live) return []; return S.live.filter(function(o){ return o.R!=null && appartiene(S.strat,o); }); }
+function liveDellaStrategia(st){ st=st||S.strat; if(!S.live) return []; return S.live.filter(function(o){ return o.R!=null && appartiene(st,o); }); }
+function statoDi(st, cal){
+  // il colore di una strategia, col suo live: per vedere a colpo d'occhio
+  // se una trascina l'altra
+  var R=liveDellaStrategia(st).map(function(o){return o.R;}); if(!R.length || cal.errore) return null;
+  var s=stopEff(cal, st), an=analizza(R, cal, s);
+  if(an.stop) return "FERMATI";
+  var l=livello(an.foto[an.foto.length-1], cal, s);
+  return REGOLE.some(function(r){ return l[r.k]==="gi"; }) ? "ATTENZIONE" : "CONTINUA";
+}
+var giroSemafori=0;
+function semafori(){
+  // un pallino su ogni strategia; le regole che mancano si calcolano una
+  // alla volta, senza bloccare la pagina
+  var giro=++giroSemafori, chips=$("scelta").children, i=0;
+  Array.prototype.forEach.call(chips,function(b){ var p=b.querySelector(".pal"); p.className="pal"; p.title=""; });
+  if(!S.live) return;
+  (function uno(){ if(giro!==giroSemafori || i>=STRAT.length) return;
+    var st=STRAT[i], b=chips[i]; i++;
+    var st8=statoDi(st, calDi(st)), p=b.querySelector(".pal");
+    if(st8){ p.className="pal "+st8; p.title={CONTINUA:"verde: nella norma",ATTENZIONE:"giallo: periodo brutto ma normale",FERMATI:"rosso: fermati"}[st8]; }
+    setTimeout(uno, 20); })();
+}
 
 /* ---------------- il cruscotto ---------------- */
 function mostra(){
@@ -949,7 +985,7 @@ function campiRischio(){
   var h=$("rischi"); h.innerHTML="";
   RIF.forEach(function(rf){ var lab=document.createElement("label"), inp=document.createElement("input");
     inp.type="number"; inp.step="0.01"; inp.min="0.01"; inp.value=rischioDi(rf); inp.setAttribute("aria-label","Rischio percentuale live di "+rf.nome);
-    inp.addEventListener("change",function(){ var x=parseFloat(inp.value); S.rischi[rf.id]= x>0?x:rf.rischio; ricalcolaLive(); ricalcolaBt(); aggiorna(); });
+    inp.addEventListener("change",function(){ var x=parseFloat(inp.value); S.rischi[rf.id]= x>0?x:rf.rischio; ricalcolaLive(); ricalcolaBt(); aggiorna(); semafori(); });
     lab.appendChild(document.createTextNode("Rischio live "+rf.nome.split(" · ")[0]+" ")); lab.appendChild(inp); lab.appendChild(document.createTextNode("%"));
     h.appendChild(lab); });
 }
@@ -959,14 +995,14 @@ function avvia(){
   var sc=$("scelta"); sc.innerHTML="";
   STRAT.forEach(function(s){ var b=document.createElement("button"); b.className="chip"; b.type="button"; b.dataset.id=s.id;
     var n=0; s.rif.forEach(function(rf){ n+=rf.t.filter(function(x){ return !s.tags || s.tags.indexOf(rf.tags[x[4]])>=0; }).length; });
-    b.innerHTML=esc(s.nome)+"<small>"+n+" operazioni di backtest</small>"; b.setAttribute("aria-pressed","false");
+    b.innerHTML='<span class="nome"><span class="pal" aria-hidden="true"></span>'+esc(s.nome)+"</span><small>"+n+" operazioni di backtest</small>"; b.setAttribute("aria-pressed","false");
     b.addEventListener("click",function(){ scegli(s.id); }); sc.appendChild(b); });
   // si parte dal conto intero: le due strategie girano sullo stesso conto
   if(STRAT.length) scegli((STRAT.find(function(s){ return s.id==="__tutte"; })||STRAT[0]).id);
   else { $("vTit").textContent="Nessuna strategia di riferimento"; $("vTxt").textContent="Trascina nel riquadro ③ il report del tester di una strategia."; }
 }
 zona($("dropLive"),$("fileLive"),async function(files){
-  try{ S.liveRep=S.liveRep.concat(await leggiTutti(files)); ricalcolaLive(); torna(); }
+  try{ S.liveRep=S.liveRep.concat(await leggiTutti(files)); ricalcolaLive(); torna(); semafori(); }
   catch(e){ $("statoLive").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
 zona($("dropBt"),$("fileBt"),async function(files){
   try{ S.btRep=S.btRep.concat(await leggiTutti(files)); ricalcolaBt(); if(!S.sim) mostraVeloce(); }
@@ -983,13 +1019,13 @@ zona($("dropRif"),$("fileRif"),async function(files){
     });
     $("fino").value=""; avvia(); scegli(RIF[RIF.length-1].id); ricalcolaLive();
   }catch(e){ $("statoRif").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
-$("fino").addEventListener("change",function(){ ferma(); S.sim=null; $("torna").hidden=true; aggiorna(); });
-$("tetto").addEventListener("change",function(){ if(S.anim){ ferma(); } mostra(); });
+$("fino").addEventListener("change",function(){ ferma(); S.sim=null; $("torna").hidden=true; aggiorna(); semafori(); });
+$("tetto").addEventListener("change",function(){ if(S.anim){ ferma(); } mostra(); semafori(); });
 Array.prototype.forEach.call(document.querySelectorAll("#sim button[data-sc]"),function(b){ b.addEventListener("click",function(){ simula(b.dataset.sc); }); });
 $("torna").addEventListener("click",torna);
 avvia();
 window.__monitor={S:S, calibra:calibra, orizzonte:orizzonte, leggiReport:leggiReport, operazioni:operazioni, tradeRif:tradeRif,
-  analizza:analizza, stopEff:stopEff, simula:simula, torna:torna, STRAT:function(){return STRAT;}};
+  analizza:analizza, stopEff:stopEff, statoDi:statoDi, calDi:calDi, simula:simula, torna:torna, STRAT:function(){return STRAT;}};
 
 })();
 </script>
