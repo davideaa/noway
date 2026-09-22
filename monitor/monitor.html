@@ -63,6 +63,9 @@ h1{font-size:clamp(24px,4.2vw,32px); font-weight:800; letter-spacing:-.02em; mar
 .chip[aria-pressed="true"]{border-color:var(--acc); color:var(--ink); box-shadow:inset 0 0 0 1px var(--acc)}
 :focus-visible{outline:2px solid var(--acc); outline-offset:2px}
 
+/* i tre passi */
+.passi{margin:0; padding:0 0 0 20px; display:flex; flex-direction:column; gap:3px; font-size:13.5px; color:var(--ink-2)}
+.passi b{color:var(--ink)}
 /* file */
 .files{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
 .drop{border:1.5px dashed var(--line); border-radius:4px; padding:11px 14px; background:var(--sunk); cursor:pointer;
@@ -165,6 +168,11 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 
 <section class="panel">
   <div class="pb" style="padding-top:16px">
+    <ol class="passi">
+      <li><b>Una volta al mese</b> scarica da MetaTrader il report del conto, <i>dal primo giorno di live a oggi</i>.</li>
+      <li>Trascinalo nel riquadro ①. La pagina non ricorda niente: ogni volta il report intero.</li>
+      <li>Guarda il colore qui sotto. <b>Verde</b> vai avanti, <b>giallo</b> guardi e basta, <b>rosso</b> ti fermi.</li>
+    </ol>
     <div class="files">
       <label class="drop" id="dropLive" tabindex="0"><input type="file" id="fileLive" accept=".htm,.html,.gz" multiple>
         <b>① Il report del conto live</b><span>MetaTrader → Storico → tasto destro → Report</span>
@@ -177,7 +185,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
         <span class="caricato" id="statoRif"></span></label>
     </div>
     <div class="riga">
-      <label>La perdita massima che accetti <input type="number" id="tetto" step="1" min="1" max="100" value="33" aria-label="Perdita massima accettata, percentuale del conto">% del conto</label>
+      <label>La perdita massima che accetti <input type="number" id="tetto" step="1" min="1" max="100" value="35" aria-label="Perdita massima accettata, percentuale del conto">% del conto</label>
       <span id="rischi" class="riga" style="gap:8px 14px"></span>
       <label>Backtest di riferimento fino al <input type="text" id="fino" placeholder="AAAA.MM.GG" aria-label="Data di fine del riferimento"></label>
     </div>
@@ -953,7 +961,8 @@ function avvia(){
     var n=0; s.rif.forEach(function(rf){ n+=rf.t.filter(function(x){ return !s.tags || s.tags.indexOf(rf.tags[x[4]])>=0; }).length; });
     b.innerHTML=esc(s.nome)+"<small>"+n+" operazioni di backtest</small>"; b.setAttribute("aria-pressed","false");
     b.addEventListener("click",function(){ scegli(s.id); }); sc.appendChild(b); });
-  if(STRAT.length) scegli(STRAT[0].id);
+  // si parte dal conto intero: le due strategie girano sullo stesso conto
+  if(STRAT.length) scegli((STRAT.find(function(s){ return s.id==="__tutte"; })||STRAT[0]).id);
   else { $("vTit").textContent="Nessuna strategia di riferimento"; $("vTxt").textContent="Trascina nel riquadro ③ il report del tester di una strategia."; }
 }
 zona($("dropLive"),$("fileLive"),async function(files){

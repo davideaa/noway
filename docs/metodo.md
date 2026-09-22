@@ -137,16 +137,17 @@ conto comanda lui. Nel backtest l'oro è stato **317 operazioni, circa
 2,2 anni, senza un nuovo massimo**: se succede dal vero sembra morta, e
 va saputo prima.
 
-**Cosa vedono le regole, col tetto al 33%** (dentro l'orizzonte; la
-perdita è il risultato dall'inizio del live al momento dello stop):
+**Cosa vedono le regole, col tetto al 35%** (quello scelto da Davide il
+2026-09-22; dentro l'orizzonte; la perdita è il risultato dall'inizio
+del live al momento dello stop):
 
 | se succede questo | portafoglio | | | nasdaq | | |
 |---|---:|---:|---:|---:|---:|---:|
 | | ti fermi | dopo | perdita | ti fermi | dopo | perdita |
-| edge intatto (falso allarme) | 5% | 292 op | −16% | 5% | 194 op | −14% |
-| edge dimezzato | 19% | 326 op | −16% | 15% | 241 op | −14% |
-| edge morto | 41% | 288 op | −22% | 44% | 257 op | −18% |
-| strategia rotta | **87%** | 213 op | −25% | **90%** | 169 op | −21% |
+| edge intatto (falso allarme) | 4% | 311 op | −18% | 5% | 194 op | −14% |
+| edge dimezzato | 17% | 338 op | −19% | 15% | 241 op | −14% |
+| edge morto | 38% | 293 op | −23% | 44% | 257 op | −18% |
+| strategia rotta | **85%** | 222 op | −27% | **90%** | 169 op | −21% |
 
 **Un edge morto non svuota il conto**: guadagna in media zero, quindi
 oscilla. Chi porta via i soldi è una strategia rotta, e quella le regole

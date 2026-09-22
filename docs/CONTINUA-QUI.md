@@ -147,8 +147,11 @@ morte entro 4 ore hanno già colpito lo stop.
    richiede ~450 operazioni, cioè ~15 mesi. Per **smettere** non si
    aspetta: il monitor ha cinque regole di stop tarate insieme (5% di
    falsi allarmi) più **il tetto di perdita**, scritto prima. Le regole
-   statistiche da sole sono larghe (oro: 57 R ≈ 37%), quindi il tetto
-   va deciso da Davide prima del live. Vedi `docs/metodo.md`, passo 20.
+   statistiche da sole sono larghe (oro: 57 R ≈ 37%), per questo serve
+   il tetto: **35% del conto, deciso da Davide il 2026-09-22**, uno solo
+   per il conto intero, perché le due strategie girano sullo stesso
+   conto. La pagina parte dalla vista «Portafoglio». Resta da scrivere
+   cosa si fa dopo uno stop. Vedi `docs/metodo.md`, passo 20.
 
 # 5. Le soglie, uguali per ogni strategia futura
 
