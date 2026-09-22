@@ -166,6 +166,7 @@ def glifo_ig(d, x, y, s=34, col=INK, alpha=1.0):
 # --- curve di animazione --------------------------------------------------
 def out_cubic(t):   return 1 - (1 - min(max(t, 0), 1)) ** 3
 def out_quint(t):   return 1 - (1 - min(max(t, 0), 1)) ** 5
+def lineare(t):     return min(max(t, 0), 1)
 def in_out(t):
     t = min(max(t, 0), 1)
     return 4 * t ** 3 if t < 0.5 else 1 - (-2 * t + 2) ** 3 / 2
@@ -181,3 +182,62 @@ def entra(t, ritardo=0.0, durata=0.30):
 def num(v0, v1, t, ritardo=0.0, durata=0.55):
     p = out_quint((t - ritardo) / durata)
     return v0 + (v1 - v0) * min(max(p, 0.0), 1.0)
+
+
+# --- primitive per le animazioni di meccanismo -----------------------------
+def lucchetto(d, x, y, s=30, col=WARN, chiuso=1.0, alpha=1.0):
+    """Il lucchetto che si chiude: chiuso va da 0 (aperto) a 1 (chiuso)."""
+    col = tuple(int(round(c * alpha + b * (1 - alpha))) for c, b in zip(col, BG_C))
+    w, h = s * 0.78, s * 0.58
+    by = y + s - h
+    d.rounded_rectangle([x, by, x + w, by + h], radius=s * 0.11, outline=col, width=2)
+    d.ellipse([x + w / 2 - s * 0.07, by + h * 0.34,
+               x + w / 2 + s * 0.07, by + h * 0.62], fill=col)
+    # l'archetto: aperto sta storto e alzato, chiuso e' centrato
+    sp = (1 - chiuso) * w * 0.34
+    cx = x + w / 2 + sp
+    r = w * 0.30
+    d.arc([cx - r, by - r * 1.5 - sp * 0.4, cx + r, by + r * 0.5 - sp * 0.4],
+          180, 360, fill=col, width=2)
+    d.line([(cx - r, by - r * 0.5 - sp * 0.4), (cx - r, by)], fill=col, width=2)
+    d.line([(cx + r, by - r * 0.5 - sp * 0.4), (cx + r, by - sp * 0.8)],
+           fill=col, width=2)
+
+
+def cursore(d, x0, x1, y, pos, col=ACC, etichetta=None, bloccato=0.0, alpha=1.0):
+    """Il cursore di un parametro. pos va da 0 a 1."""
+    linea_h(d, x0, x1, y, INK_4, 2, alpha)
+    cx = x0 + pos * (x1 - x0)
+    c = tuple(int(round(k * alpha + b * (1 - alpha))) for k, b in zip(col, BG_C))
+    d.line([(x0, y), (cx, y)], fill=c, width=3)
+    d.rounded_rectangle([cx - 7, y - 15, cx + 7, y + 15], radius=3, fill=c)
+    if etichetta:
+        testo(d, (x0 - 26, y + 8), etichetta, mono(20), INK_3, "ra", alpha=alpha)
+    if bloccato > 0.02:
+        lucchetto(d, x1 + 22, y - 16, 30, WARN, bloccato, alpha)
+
+
+def barra_tempo(d, box, taglio, chiuso=0.0, alpha=1.0, n=44):
+    """La barra del tempo divisa in due: a sinistra dove si studia, a destra
+    la parte chiusa a chiave. taglio e' la frazione a sinistra."""
+    x0, y0, x1, y1 = box
+    w = (x1 - x0) / n
+    for i in range(n):
+        dentro = (i + 0.5) / n < taglio
+        cx = x0 + i * w
+        if dentro:
+            c = tuple(int(round(k * alpha + b * (1 - alpha)))
+                      for k, b in zip(ACC, BG_C))
+            d.rectangle([cx + 1, y0, cx + w - 1, y1], fill=c)
+        else:
+            f = 1 - chiuso * 0.55
+            c = tuple(int(round(k * f * alpha + b * (1 - alpha * f)))
+                      for k, b in zip(INK_4, BG_C))
+            d.rectangle([cx + 1, y0 + 2, cx + w - 1, y1 - 2], outline=c, width=1)
+    xt = x0 + taglio * (x1 - x0)
+    if chiuso > 0.02:
+        d.rectangle([xt, y0 - 6, x1, y1 + 6],
+                    outline=tuple(int(round(k * chiuso * alpha + b * (1 - alpha * chiuso)))
+                                  for k, b in zip(WARN, BG_C)), width=2)
+    d.line([(xt, y0 - 14), (xt, y1 + 14)], fill=INK_3, width=2)
+    return xt
