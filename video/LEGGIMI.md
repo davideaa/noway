@@ -1,82 +1,76 @@
-# Il reel
+# Il reel — il mosaico
 
-Video verticale 1080×1920, 50 secondi, **un solo piano sequenza**.
+Video verticale 1080×1920, 50 secondi. Versione visivamente opposta a quella
+a linee: qui non si scrive niente, ci sono **tessere che migrano**.
 
     python3 video/reel.py                      # rende video/reel.mp4, muto
     python3 video/reel.py --audio brano.mp3    # monta l'audio
     python3 video/battiti.py brano.mp3         # misura BPM e battiti
 
-## Non ci sono scene
+## L'idea
 
-Le versioni prima erano otto scene che si dissolvevano l'una nell'altra, e
-dentro ogni scena gli elementi *comparivano* con una dissolvenza e poi
-restavano fermi. Questa è una cosa diversa: una sola curva, una sola
-inquadratura, e tutto che si trasforma senza fermarsi mai.
+Gli stessi 85 mesi del calendario si ridispongono da soli, e basta: una
+tessera non nasce e non muore mai, è sempre lo stesso mese in un posto
+diverso. Per questo si vede *dove va a finire* ogni mese quando il mosaico
+cambia forma.
 
 | | |
 |---|---|
-| 0 – 4,5 | Il logo si forma, una lama di luce lo attraversa, si dissolve |
-| 4,5 – 15 | La curva si scrive dal vivo, la finestra si allarga da sola |
-| 15 – 23 | La curva si sdoppia in tre: oro, nasdaq, insieme |
-| 23 – 31 | L'insieme si ripiega sott'acqua — stessi 1.597 punti |
-| 31 – 38 | Il sott'acqua si spegne a onda mentre sale la distribuzione |
-| 38 – 45,5 | 150 tentativi a caso entrano con la scia, la curva vera li scavalca |
-| 45,5 – 50 | Il logo si richiude |
+| 0 – 4,5 | Il logo |
+| 4,5 – 13,8 | Il calendario si riempie, un mese alla volta, in ordine di tempo |
+| 13,8 – 20,4 | I mesi escono dalla griglia e si ordinano dal peggiore al migliore |
+| 20,4 – 27,4 | Si impilano nella distribuzione |
+| 27,4 – 34 | Si dividono in due pile: 58 in utile, 27 in perdita |
+| 34 – 44 | 2.749 operazioni si ordinano: il 25% più grandi fa il 61% degli utili |
+| 44 – 50 | Il logo |
 
-## I quattro meccanismi (`fluido.py`)
+Ogni tessera parte con un ritardo suo, così il cambio attraversa il mosaico
+come un'onda invece di scattare tutto insieme (`mosaico.fondi`).
 
-**`Vista` — la finestra che si allarga da sola.** La x occupa *sempre* tutta
-la larghezza e la y segue il minimo e il massimo cumulativi di quello che è
-già disegnato. Risultato: mentre la punta avanza, la parte già scritta si
-comprime a sinistra e si schiaccia. Ogni pixel della curva si muove a ogni
-fotogramma. È questo che dà la fluidità, non le dissolvenze.
+## Dal pdf, le pagine che non avevo mai aperto
 
-**`morph` — la fusione a onda.** Due serie della stessa lunghezza si fondono
-con un ritardo che cresce lungo la serie, così il cambio attraversa la curva
-invece di scattare tutto insieme. È come la curva del capitale diventa le
-tre gambe, e come le tre gambe si ripiegano sott'acqua: sono sempre gli
-stessi 1.597 punti, solo riletti.
+**Pagina 3, il calendario.** 85 mesi, uno per tessera. I controlli tornano:
+68% in utile (il pdf dice 68%), migliore +19,5% a 2025.09, peggiore −10,5%
+a 2021.11, media +3,25% contro il +3,28% del pdf.
 
-**`Camera` — una sola inquadratura.** Dieci tappe per tutti i 50 secondi, e
-lei sta sempre in viaggio fra due. Non si azzera mai. Sopra ci sta un respiro
-continuo (tre seni a periodi diversi) così anche quando la curva è ferma il
-fotogramma non lo è.
+Una cosa che mi era sfuggita: il pdf stampa **«+0» e «−0»** per i mesi
+chiusi con un utile o una perdita minima. Schiacciandoli tutti a zero
+uscivano 65 mesi in utile su 85 invece di 68. Rimesso il segno, torna.
 
-**`Scia` — la traccia.** Accumula un pezzo del fotogramma prima. Serve sui
-150 tentativi a caso, che senza lascerebbero uno sfarfallio.
+**Pagina 5, le operazioni.** Il pdf dice che il 25% più grandi fa il 62%
+degli utili e il 50% ne fa l'85%. Ricalcolandolo dall'istogramma dei report
+— che è un'altra fonte, 2.749 operazioni invece di 2.520 — viene **61% e
+83%**. Due dataset diversi che danno la stessa risposta a un punto di
+distanza: nel video c'è il 61%, quello che so calcolare.
 
-## La testina che scorre
+## Le disposizioni (`mosaico.py`)
 
-Nei tratti in cui un'animazione era finita e non succedeva più niente,
-scorre una testina che ripassa i dati e il cruscotto la legge dal vivo:
+| | |
+|---|---|
+| `calendario` | Griglia 12 colonne × 8 righe |
+| `ordinate` | In fila per valore: l'altezza **è** il rendimento del mese |
+| `istogramma` | Impilate per fascia: la distribuzione |
+| `colonne` | Due pile, utile e perdita |
+| `campo` / `in_fila` | Il campo fitto delle 2.749 operazioni |
 
-- **19,6 – 23,4 s** sulle tre gambe, con un puntino su ognuna
-- **24,6 – 30,6 s** sulla ripiegazione, e il cruscotto mostra il sott'acqua
-  in quel punto esatto
-- **34,2 – 37,6 s** sulla distribuzione, riempiendo la probabilità cumulata:
-  «81% degli anni sotto +65 R»
+`dipingi` disegna le tessere direttamente nella matrice del fotogramma (con
+qualche migliaio di pezzi passare da PIL uno per uno è troppo lento: 55 ms
+contro secondi). `dipingi_varie` invece passa da PIL perché serve una misura
+diversa per ogni tessera — nel grafico a colonne l'altezza porta il dato, e
+schiacciarla a un quadrato lo buttava via.
 
-## Come si misura se è fluido
+## Quanto si muove
 
-Lo stesso metro usato sui riferimenti: quanto cambia un fotogramma rispetto
-al precedente, su scala 0–255.
+Stesso metro usato sui riferimenti: quanto cambia un fotogramma rispetto al
+precedente, scala 0–255.
 
-| | movimento medio | minimo su 2 secondi |
+| | medio | minimo su 2 s |
 |---|---|---|
-| prima | 0,22 | **0,01** (due secondi immobili) |
-| ora | **0,26** | 0,05 |
-| riferimento r8 | 0,25 | — |
-| riferimento r1 | 0,47 | — |
-| riferimento r6 | 0,92 | — |
+| versione a linee | 0,26 | 0,05 |
+| **questa** | **0,41** | 0,07 |
+| riferimenti | 0,25 – 0,92 | — |
 
-Il minimo conta più della media: era il punto in cui il video si fermava.
-
-## I numeri
-
-Tutti da `video/dati.json`, estratto dai report e dal PDF. I controlli sulla
-ricostruzione della curva del capitale, sul taglio del fuori campione e
-sulle due gambe stanno in `RIFERIMENTI.md` insieme alle misure prese dagli
-otto reel di riferimento.
-
-Il logo è `video/logo.png`, ripulito dal rumore di compressione e composto
-in somma sul fotogramma: sta su fondo nero, quindi il nero sparisce da solo.
+Due punti fermi trovati misurando e chiusi: l'ordinamento delle operazioni
+finiva due secondi prima del cambio, e il campo delle operazioni era
+calcolato su un riquadro fisso, quindi il respiro della camera non lo
+toccava e per due secondi non si muoveva un pixel.
