@@ -1,6 +1,8 @@
 # Il reel
 
-Video verticale 1080×1920, 42 secondi, apertura e chiusura sul logo.
+Video verticale 1080×1920, 48 secondi, apertura e chiusura sul logo.
+Costruito sulla specifica misurata negli otto reel di riferimento: le misure
+stanno in `RIFERIMENTI.md`, questo file dice come si usa.
 
     python3 video/reel.py                      # rende video/reel.mp4, muto
     python3 video/reel.py --audio brano.mp3    # misura i battiti e monta l'audio
@@ -10,20 +12,23 @@ Video verticale 1080×1920, 42 secondi, apertura e chiusura sul logo.
 Niente maniglie, niente didascalie in fondo: lo schermo è tutto per il
 numero e per il grafico.
 
-## Le dieci scene
+## Le otto scene
 
-| Scena | Il meccanismo che si muove |
-|---|---|
-| Logo | Sale dal buio, una lama di luce lo attraversa, pulsa |
-| Il gancio | Il capitale si disegna in scala logaritmica, il +1.223% sale |
-| Il problema | Tre manopole girano e la curva cambia forma sotto |
-| Passo 1 | Il tempo si taglia in due, il lucchetto si chiude, i parametri si bloccano |
-| Passo 2 | 150 tentativi a caso, il loro massimo segnato, la curva vera lo scavalca |
-| Passo 3 | Le barre degli otto anni crescono, blu dove si è studiato, verde dove no |
-| Il prezzo | Il profilo sott'acqua si riempie fino al punto più profondo |
-| Monte Carlo | La distribuzione di 10.000 anni, la fascia 5–95, la mediana |
-| Le due gambe | Oro, nasdaq e insieme in scala logaritmica: 2,79 × 4,75 = 13,23 |
-| Logo | Chiusura |
+| Scena | Durata | Il meccanismo che si muove |
+|---|---|---|
+| Logo | 3,4 s | Sale dal buio, una lama di luce lo attraversa, si assesta |
+| Sette anni, due mercati | 6,9 s | Il capitale si disegna in scala log, oro, con la staffa a +132.328 € |
+| Insieme non è una somma | 6,9 s | Le tre curve entrano sfalsate, poi 2,79 × 4,75 = 13,23 |
+| Metà del tempo, chiusa a chiave | 7,7 s | La barra si divide, il lucchetto scatta, i parametri si bloccano, poi si apre |
+| Batti la fortuna | 7,7 s | 150 tentativi a caso, la riga del loro massimo, la curva vera che la scavalca |
+| Quanto si sta sott'acqua | 6,0 s | Il profilo si riempie fino a −21,7%, poi le tre barre |
+| Diecimila anni simulati | 6,0 s | La distribuzione, la fascia 5–95, la staffa sulla mediana |
+| Logo | 3,4 s | Chiusura |
+
+**Il ritmo è lento apposta.** I riferimenti hanno un movimento medio fra 0,25
+e 0,9 su 255: le scene durano 6-8 secondi e dentro le cose si trasformano,
+non compaiono. Anche la dissolvenza fra scene è lunga (tre quarti di battito
+in entrata), e il respiro sul battito è dello 0,4% invece dello 0,7%.
 
 ## La curva del capitale: come è ricostruita, e perché è fedele
 
