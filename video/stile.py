@@ -241,3 +241,97 @@ def barra_tempo(d, box, taglio, chiuso=0.0, alpha=1.0, n=44):
                                   for k, b in zip(WARN, BG_C)), width=2)
     d.line([(xt, y0 - 14), (xt, y1 + 14)], fill=INK_3, width=2)
     return xt
+
+
+# ==========================================================================
+#  il logo, e le primitive per i grafici piu' grossi
+# ==========================================================================
+_logo = {}
+
+def _carica_logo():
+    if not _logo:
+        for k, f in (("base", "logo.png"), ("glow", "logo_glow.png")):
+            p = os.path.join(os.path.dirname(FDIR), f)
+            _logo[k] = Image.open(p).convert("RGB")
+    return _logo
+
+
+def logo(img, cx, cy, altezza, alpha=1.0, bagliore=0.0, sweep=None):
+    """Compone il logo in somma sul fotogramma. Il logo e' su fondo nero,
+    quindi sommandolo il nero sparisce da solo e non si vede nessun riquadro.
+
+    bagliore: quanto della versione sfocata aggiungere sopra.
+    sweep: 0..1, la posizione di una lama di luce che attraversa il logo.
+    """
+    if alpha <= 0.004:
+        return img
+    L = _carica_logo()
+    w = int(L["base"].width * altezza / L["base"].height)
+    if w < 2 or altezza < 2:
+        return img
+    base = np.asarray(L["base"].resize((w, int(altezza)), Image.LANCZOS), np.float32)
+    add = base * alpha
+    if bagliore > 0.004:
+        g = np.asarray(L["glow"].resize((w, int(altezza)), Image.LANCZOS), np.float32)
+        add = add + g * bagliore * alpha
+    if sweep is not None:
+        # la lama segue la luminosita' del logo: illumina il metallo, non il vuoto
+        xs = np.linspace(0, 1, w)[None, :]
+        ys = np.linspace(0, 1, int(altezza))[:, None]
+        dd = np.abs((xs * 0.75 + ys * 0.25) - sweep)
+        lama = np.exp(-(dd / 0.085) ** 2)[:, :, None]
+        add = add + base * lama * 1.5 * alpha
+
+    x0, y0 = int(cx - w / 2), int(cy - altezza / 2)
+    arr = np.asarray(img, np.float32)
+    X0, Y0 = max(x0, 0), max(y0, 0)
+    X1, Y1 = min(x0 + w, W), min(y0 + int(altezza), H)
+    if X1 <= X0 or Y1 <= Y0:
+        return img
+    sub = add[Y0 - y0:Y1 - y0, X0 - x0:X1 - x0]
+    arr[Y0:Y1, X0:X1] = np.clip(arr[Y0:Y1, X0:X1] + sub, 0, 255)
+    return Image.fromarray(arr.astype(np.uint8), "RGB")
+
+
+def barre(d, box, valori, colori, etichette=None, prog=1.0, lo=None, hi=None,
+          alpha=1.0, formato="%+.0f", larghezza=0.62, font_val=None):
+    """Barre verticali che crescono. prog<1 le fa salire."""
+    x0, y0, x1, y1 = box
+    lo = min(min(valori), 0) * 1.12 if lo is None else lo
+    hi = max(valori) * 1.16 if hi is None else hi
+    bw = (x1 - x0) / len(valori)
+    Y = lambda v: y1 - (v - lo) / (hi - lo) * (y1 - y0)
+    linea_h(d, x0, x1, Y(0), INK_4, 2, alpha)
+    fv = font_val or monob(22)
+    for i, v in enumerate(valori):
+        vv = v * min(max(prog * 1.0, 0.0), 1.0)
+        cx = x0 + i * bw + bw / 2
+        col = colori[i] if isinstance(colori, (list, tuple)) else colori
+        c = tuple(int(round(k * alpha + b * (1 - alpha))) for k, b in zip(col, BG_C))
+        yt, yb = min(Y(vv), Y(0)), max(Y(vv), Y(0))
+        d.rounded_rectangle([cx - bw * larghezza / 2, yt, cx + bw * larghezza / 2, yb],
+                            radius=4, fill=c)
+        # l'etichetta va SOPRA la barra, non dentro: l'ancora "ma" mette la y
+        # in cima al testo, quindi serve l'altezza del carattere di margine
+        testo(d, (cx, (yt - 34) if v >= 0 else (yb + 12)), formato % vv, fv,
+              INK_2 if v >= 0 else NEG, "ma", alpha=alpha)
+        if etichette:
+            testo(d, (cx, y1 + 30), etichette[i], mono(19), INK_3, "ma", alpha=alpha)
+    return Y
+
+
+def area_neg(d, v, box, lo, col=NEG, prog=1.0, alpha=1.0):
+    """Il profilo sott'acqua: area riempita che scende da zero."""
+    x0, y0, x1, y1 = box
+    n = max(int(len(v) * min(max(prog, 0.0), 1.0)), 2)
+    Y = lambda t: y0 + (0 - t) / (0 - lo) * (y1 - y0)
+    px = [(x0 + i / (len(v) - 1) * (x1 - x0), Y(v[i])) for i in range(n)]
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(ov).polygon(px + [(px[-1][0], y0), (x0, y0)],
+                               fill=(col[0], col[1], col[2], int(60 * alpha)))
+    d._image.paste(Image.alpha_composite(d._image.convert("RGBA"), ov).convert("RGB"),
+                   (0, 0))
+    c = tuple(int(round(k * alpha + b * (1 - alpha))) for k, b in zip(col, BG_C))
+    d.line(px, fill=c, width=2, joint="curve")
+    linea_h(d, x0, x1, y0, INK_4, 2, alpha)
+    return Y
