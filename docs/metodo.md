@@ -51,7 +51,8 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
     di pochi colpi. (**Mai** «metà del profitto da N operazioni»: è una
     trappola aritmetica.)
 12. **Via le 3 migliori di ogni anno**: la maggior parte degli anni regge.
-13. **Secondo broker.** Stesso codice, feed diverso. Cinque criteri:
+13. **Secondo broker.** Stesso codice, feed diverso — il caso concreto è
+    `docs/test-broker.md`. Cinque criteri:
 
     | | soglia |
     |---|---|
@@ -92,7 +93,7 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
     | | cosa guarda | ogni quanto | cosa coglie |
     |---|---|---|---|
     | **esecuzione** | backtest sugli stessi giorni del live, confronto operazione per operazione (i cinque criteri del passo 13) | ogni mese | bug, broker, slittamenti — **in giorni** |
-    | **edge** | `tools/monitor.py`: cono, caduta, CUSUM | ogni 25 operazioni | strategia rotta — in **~200 operazioni** |
+    | **edge** | `tools/monitor.py`: cono, caduta, CUSUM | a ogni operazione | strategia rotta — in **~200 operazioni** |
 
 ---
 
@@ -108,12 +109,18 @@ Prima di allora il live dice solo «non si è rotto», mai «funziona».
 |---|---:|---:|
 | edge intatto (falso allarme) | 6% | — |
 | edge dimezzato | 18% | — |
-| edge morto | 41% | ~275 operazioni |
-| strategia rotta | **88%** | ~200 operazioni |
+| edge morto | 40% | ~275 operazioni |
+| strategia rotta | **86%** | ~210 operazioni |
 
 Non è un limite dello strumento: con uno Sharpe di 0,07 per operazione
 **nessun** monitor fa meglio. Per questo il controllo di esecuzione è
 l'altro pilastro: è l'unico veloce.
+
+**Il monitor si adatta a qualunque strategia.** Tranne il 5% di falsi
+allarmi — che è una scelta, come in ogni test statistico — tutto si
+ricava dal backtest della strategia: le soglie, e l'orizzonte, che è la
+sua Minimum Track Record Length (451 operazioni sul portafoglio, 373
+sul solo nasdaq). Il controllo si fa a ogni operazione.
 
 **Il giallo all'inizio è normale.** Sul 2024-2026, trattato come se
 fosse il live, il monitor è rimasto giallo per 175 operazioni — ed è

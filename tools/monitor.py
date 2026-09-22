@@ -37,7 +37,7 @@ LA REGOLA, e il suo prezzo.
   ROSSO   uno dei tre controlli oltre la sua soglia. Le tre soglie NON
           sono scelte a occhio: `calibra()` le ricava INSIEME, simulando
           un edge intatto, perche' il ROSSO complessivo scatti per
-          sbaglio solo nel 5% dei casi su 500 operazioni. Scelte a mano
+          sbaglio solo nel 5% dei casi su tutto l'orizzonte. Scelte a mano
           (2,5° / 99° / CUSUM al 5%) davano il 15%, e sul 2024-2026 — il
           periodo migliore di sempre — sarebbero andate ROSSO dopo 50
           operazioni.
@@ -63,9 +63,18 @@ si rigira il backtest sugli stessi giorni del live e si confrontano le
 operazioni una per una, coi cinque criteri del test sui broker. Quello
 va fatto ogni mese dal primo giorno; questo monitor serve per l'edge.
 
-Uso:
-    python3 tools/monitor.py                     # calibrazione e prova
-    python3 tools/monitor.py live.html:0.65 ...  # controllo del live vero
+Uso — funziona con QUALUNQUE strategia: tutto si ricava dal suo backtest.
+
+    # calibrazione e prova: quanto sbaglia, quanto e' lento, e il periodo
+    # dopo --fino rigiocato come se fosse il live
+    python3 tools/monitor.py --rif backtest.html:0.65 --fino=2023.12.31
+
+    # controllo del live vero contro il suo backtest
+    python3 tools/monitor.py --rif backtest.html:0.65 --live live.html:0.65
+
+    Piu' file dopo --rif (o --live) si fondono in ordine di tempo: un
+    portafoglio si monitora come un'unica serie. Il numero dopo i due
+    punti e' il rischio % con cui e' girato il report.
 """
 import sys, os, math
 import statistics as st
@@ -73,24 +82,44 @@ import statistics as st
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dati_validazione import leggi, CONFINE_OOS
+from dati_validazione import leggi
 
 BLOCCO   = 20
 N_SIM    = 10000
-ORIZZ    = 500          # quante operazioni live copre la calibrazione
-PASSO    = 25           # un controllo ogni 25 operazioni: circa una volta al mese
 SEED     = 7
 
-# Dichiarato qui, una volta, prima di vedere il live: con l'edge INTATTO
-# il ROSSO deve scattare per sbaglio al massimo in questa frazione dei casi,
-# lungo tutte le ORIZZ operazioni e CONTANDO I TRE CONTROLLI INSIEME.
-# Le tre soglie del rosso si ricavano da qui, non si scelgono a mano:
-# scelte a mano davano il 15% di falsi allarmi invece del 5%.
+# L'UNICA scelta di questo file, dichiarata prima di vedere il live: con
+# l'edge INTATTO il ROSSO deve scattare per sbaglio al massimo in questa
+# frazione dei casi, lungo tutto l'orizzonte e contando i tre controlli
+# insieme. E' la stessa scelta del «5%» di qualunque test statistico.
+# Tutto il resto si ricava dalla strategia stessa:
+#   - le tre soglie del rosso: calibrate da `calibra()`
+#   - l'orizzonte: la Minimum Track Record Length della strategia, cioe'
+#     quante operazioni le servono per dimostrare l'edge al 95%
+#   - il controllo si fa a OGNI operazione: il CUSUM e il cono sono
+#     nati per il controllo continuo, e le soglie sono calibrate per
+#     quello, quindi guardare spesso non aumenta i falsi allarmi.
+#     (La prima versione controllava ogni 25 operazioni: un numero
+#     scelto da me a occhio, e non c'era motivo.)
 FALSO_ALLARME = 0.05
 GIALLO_CONO, GIALLO_CAD = 10.0, 90.0      # il giallo e' un avviso, non si calibra
+PASSO = 1
+ORIZZ_MIN, ORIZZ_MAX = 100, 2000          # sotto: troppo poco; sopra: anni di live
 
-RIFERIMENTO = [('dati/oro_puprime_065.html.gz', 0.65),
-               ('dati/nasdaq_puprime_098.html.gz', 0.98)]
+
+def orizzonte(rif, conf_z=1.6449):
+    """Minimum Track Record Length (Bailey, Lopez de Prado), in operazioni.
+
+    Quante operazioni servono per dire al 95% che la media non e' zero,
+    tenendo conto di asimmetria e code. E' anche l'orizzonte naturale del
+    monitor: prima di li' il live non puo' confermare niente."""
+    x = np.asarray(rif, float); m = x.mean(); sd = x.std(ddof=1)
+    sk = ((x - m) ** 3).mean() / sd ** 3; ku = ((x - m) ** 4).mean() / sd ** 4
+    sr = m / sd
+    if sr <= 0:
+        raise SystemExit('il riferimento non ha edge (media %.4f): niente da monitorare' % m)
+    n = 1 + (1 - sk * sr + (ku - 1) / 4 * sr ** 2) * (conf_z / sr) ** 2
+    return int(min(ORIZZ_MAX, max(ORIZZ_MIN, math.ceil(n))))
 
 
 def _blocchi(pool, m, n, rng, L=BLOCCO):
@@ -115,12 +144,13 @@ def _cusum(seq, mu0, sd):
     return out
 
 
-def calibra(rif, n=ORIZZ, n_sim=N_SIM, seed=SEED):
+def calibra(rif, n=None, n_sim=N_SIM, seed=SEED):
     """Cono, cadute e soglie del ROSSO, tutto supponendo l'edge INTATTO.
 
     Due insiemi di percorsi indipendenti: il primo disegna il cono, il
     secondo misura quante volte il ROSSO scatterebbe per sbaglio. Usare
     lo stesso insieme per entrambe le cose sottostimerebbe i falsi allarmi."""
+    n = n or orizzonte(rif)
     rng = np.random.default_rng(seed)
     mu, sd = float(np.mean(rif)), float(np.std(rif, ddof=1))
     P = _blocchi(rif, n_sim, n, rng)
@@ -193,7 +223,7 @@ def valuta(live, cal):
 def ritardo(rif, cal, calo, n_prove=3000, seed=11):
     """Se l'edge calasse di `calo` (1 = morto, 0,5 = dimezzato, 2 = rotto,
     cioe' perde quanto prima guadagnava), in quanti casi scatterebbe il
-    ROSSO entro ORIZZ operazioni, e dopo quante?"""
+    ROSSO entro l'orizzonte, e dopo quante operazioni?"""
     P = _blocchi(rif, n_prove, cal['n'], np.random.default_rng(seed)) - calo * cal['mu']
     rosso, _ = _luci(*_stati(P, cal), cal)
     preso = rosso.any(axis=1)
@@ -212,29 +242,56 @@ def carica(paths):
     return sorted(tr)
 
 
-def stampa(righe):
+def stampa(righe, righe_max=24):
+    """Il controllo si fa a ogni operazione; a schermo se ne mostra una
+    ogni tanto, piu' ogni cambio di colore."""
+    if not righe:
+        return
+    ogni = max(1, len(righe) // righe_max)
     print('  %5s %9s %8s %9s %8s %8s   %s' % ('oper.', 'R cumul.', 'cono', 'caduta R', 'caduta', 'CUSUM', ''))
-    for r in righe:
-        print('  %5d %+9.1f %7.1f° %9.1f %7.1f° %8.2f   %s'
-              % (r['k'], r['cum'], r['p_cono'], r['cad'], r['p_cad'], r['cusum'], r['luce']))
+    prima = None
+    for i, r in enumerate(righe):
+        if (i + 1) % ogni == 0 or r['luce'] != prima or i == len(righe) - 1:
+            print('  %5d %+9.1f %7.1f° %9.1f %7.1f° %8.2f   %s'
+                  % (r['k'], r['cum'], r['p_cono'], r['cad'], r['p_cad'], r['cusum'], r['luce']))
+        prima = r['luce']
+
+
+def _argomenti(argv):
+    rif, live, fino = [], [], None
+    chi = None
+    for a in argv:
+        if a in ('--rif', '--live'):
+            chi = rif if a == '--rif' else live; continue
+        if a.startswith('--fino='):
+            fino = a.split('=', 1)[1]; continue
+        if chi is None:
+            raise SystemExit(__doc__)
+        path, _, pct = a.partition(':')
+        chi.append((path, float(pct or 1)))
+    if not rif:
+        raise SystemExit(__doc__)
+    return rif, live, fino
 
 
 def main(argv):
-    tr = carica([(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', p), r)
-                 for p, r in RIFERIMENTO])
-    # riferimento PRUDENTE: il dentro campione. Si pianifica sul numero
-    # basso, quindi si controlla il live contro il numero basso.
-    rif = [r for t, r in tr if t[:10] <= CONFINE_OOS]
+    rif_f, live_f, fino = _argomenti(argv)
+    tr = carica(rif_f)
+    # riferimento PRUDENTE: se c'e' un confine dentro/fuori campione, il
+    # dentro campione. Si pianifica sul numero basso, quindi si controlla
+    # il live contro il numero basso.
+    rif = [r for t, r in tr if fino is None or t[:10] <= fino]
     cal = calibra(rif)
-    print('riferimento: %d operazioni 2019-2023, media %+.4f R, dev.st %.3f'
-          % (len(rif), cal['mu'], cal['sd']))
-    print('soglie del ROSSO, calibrate insieme: cono sotto il %.1f°, caduta sopra il %.1f°, CUSUM oltre %.2f'
+    print('riferimento: %d operazioni%s, media %+.4f R, dev.st %.3f'
+          % (len(rif), (' fino al %s' % fino) if fino else '', cal['mu'], cal['sd']))
+    print('orizzonte = Minimum Track Record Length della strategia: %d operazioni' % cal['n'])
+    print('  (prima di li\' il live puo\' dire «non si e\' rotto», non «funziona»)')
+    print('soglie del ROSSO, calibrate insieme: cono sotto il %.2f°, caduta sopra il %.2f°, CUSUM oltre %.2f'
           % (cal['rosso_cono'], cal['rosso_cad'], cal['h']))
-    print('falso allarme complessivo su %d operazioni: %.1f%%' % (cal['n'], 100 * cal['falso_allarme']))
+    print('falso allarme complessivo: %.1f%%' % (100 * cal['falso_allarme']))
 
-    if argv:
-        live = [r for _, r in carica([(a.partition(':')[0], float(a.partition(':')[2] or 1))
-                                      for a in argv])]
+    if live_f:
+        live = [r for _, r in carica(live_f)]
         print('\n=== IL LIVE: %d operazioni ===' % len(live))
         stampa(valuta(live, cal))
         return
@@ -248,9 +305,10 @@ def main(argv):
         q = ('dopo %d operazioni in mediana' % d['mediana']) if d['mediana'] else ''
         print('  %-42s ROSSO nel %4.0f%% dei casi  %s' % (et, 100 * d['presi'], q))
 
-    oos = [r for t, r in tr if t[:10] > CONFINE_OOS]
-    print('\n=== PROVA: il fuori campione 2024-26 trattato come se fosse il live ===')
-    stampa(valuta(oos, cal))
+    if fino:
+        dopo = [r for t, r in tr if t[:10] > fino]
+        print('\n=== PROVA: il periodo dopo il %s trattato come se fosse il live ===' % fino)
+        stampa(valuta(dopo, cal))
 
 
 if __name__ == '__main__':

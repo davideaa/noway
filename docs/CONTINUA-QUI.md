@@ -141,7 +141,7 @@ morte entro 4 ore hanno già colpito lo stop.
    sezione 3. Se sono peggiori, lo si sa prima e non dopo.
 8. **Dal primo giorno di live, due controlli** (`docs/metodo.md`, passo
    22): ogni mese il backtest sugli stessi giorni contro il live,
-   operazione per operazione; ogni 25 operazioni `tools/monitor.py`.
+   operazione per operazione; a ogni operazione `tools/monitor.py`.
    **Il giallo nei primi mesi è normale.** Confermare l'edge dal live
    richiede ~450 operazioni, cioè ~15 mesi.
 

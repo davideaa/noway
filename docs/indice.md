@@ -38,7 +38,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `montecarlo.py` | bootstrap a quattro metodi, una strategia |
 | `montecarlo_validazione.py` | cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `montecarlo_portafoglio.py` | più strategie insieme, in frazione di conto |
-| `monitor.py` | **monitoraggio live**: cono, caduta e CUSUM ogni 25 operazioni, soglie calibrate al 5% di falsi allarmi |
+| `monitor.py` | **monitoraggio live**, per qualunque strategia: cono, caduta e CUSUM a ogni operazione, soglie e orizzonte ricavati dal suo backtest |
 | `robustezza.py` | le prove contro l'overfitting: t dentro/fuori campione, soglia del rumore, tetto sulle vincite, costi, falsi breakout |
 | `fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente del precedente, non come suo sostituto |
 
@@ -65,6 +65,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `metodo.md` | **il metodo per ogni strategia nuova**: 22 passaggi in ordine, e il monitoraggio live |
 | `storia.md` | l'archivio: scartate, errori, V2XAU, i parametri con il motivo di ogni scelta |
 | `indice.md` | questo file |
+| `test-broker.md` | la stessa strategia su tre broker: PUPrime, FTMO, Fusion. Regge, e Fusion costa la metà |
 | `verdetto-robustezza.md` | **è vera o è overfittata**: le sei prove, i numeri corretti, i falsi breakout |
 | `verifica-conto-unico.md` | la verifica del 2026-09-21: il PDF era onesto, il tetto è sforato |
 | `analisi-regimi.md` | zero variabili significative su 25. L'edge non dipende dal regime |
