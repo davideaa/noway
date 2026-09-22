@@ -196,7 +196,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>Il cruscotto</h2><span class="tag">le regole di stop, decise prima</span></div>
+  <div class="ph"><h2>Il cruscotto</h2><span class="tag">controllo lento · la strategia funziona ancora?</span></div>
   <div class="pb">
     <div class="spie" id="spie"></div>
     <p class="calcolo" id="calcolo"></p>
@@ -204,7 +204,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>La curva, dentro le storie normali</h2><span class="tag">passa il mouse sul grafico</span></div>
+  <div class="ph"><h2>Il tuo live contro le storie normali</h2><span class="tag">controllo lento · passa il mouse sul grafico</span></div>
   <div class="pb">
     <div class="sim" id="sim">
       <span class="lab">Guarda come reagirebbe (ogni clic, una storia diversa):</span>
@@ -215,6 +215,8 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
       <button class="btn" type="button" data-sc="2">Strategia rotta</button>
       <button class="btn primo" type="button" id="torna" hidden>Torna al mio live</button>
     </div>
+    <p style="margin:0">La fascia azzurra la calcola la pagina dal backtest che ha dentro: migliaia di storie possibili, tutte con l'edge
+      intatto. La linea nera è il tuo conto, e compare quando carichi il report ①. Finché la nera sta nella fascia, sei nella norma.</p>
     <div class="legend">
       <span><i class="sw" style="background:var(--band);opacity:.16"></i>8 storie normali su 10 stanno qui</span>
       <span><i class="sw" style="background:var(--band);height:3px"></i>la storia tipica</span>
@@ -227,7 +229,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>Il conto esegue come il backtest?</h2><span class="tag">il controllo veloce</span></div>
+  <div class="ph"><h2>Il conto esegue come il backtest?</h2><span class="tag">controllo veloce · l'EA fa quello che deve?</span></div>
   <div class="pb">
     <p>Fai girare il tester sugli <b>stessi giorni</b> del live, stesso broker e stessi parametri, e trascinalo nel riquadro ②.
       Le due serie devono essere quasi identiche. Ogni operazione mancante o in più è un guasto da spiegare, e si vede
