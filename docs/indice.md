@@ -38,6 +38,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `montecarlo.py` | bootstrap a quattro metodi, una strategia |
 | `montecarlo_validazione.py` | cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `montecarlo_portafoglio.py` | più strategie insieme, in frazione di conto |
+| `monitor.py` | **monitoraggio live**: cono, caduta e CUSUM ogni 25 operazioni, soglie calibrate al 5% di falsi allarmi |
 | `robustezza.py` | le prove contro l'overfitting: t dentro/fuori campione, soglia del rumore, tetto sulle vincite, costi, falsi breakout |
 | `fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente del precedente, non come suo sostituto |
 
@@ -61,6 +62,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | | |
 |---|---|
 | `CONTINUA-QUI.md` | **lo stato corrente.** Si parte da qui |
+| `metodo.md` | **il metodo per ogni strategia nuova**: 22 passaggi in ordine, e il monitoraggio live |
 | `storia.md` | l'archivio: scartate, errori, V2XAU, i parametri con il motivo di ogni scelta |
 | `indice.md` | questo file |
 | `verdetto-robustezza.md` | **è vera o è overfittata**: le sei prove, i numeri corretti, i falsi breakout |

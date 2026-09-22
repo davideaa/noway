@@ -139,10 +139,16 @@ morte entro 4 ore hanno già colpito lo stop.
    di costruirci sopra una strategia di ritorno alla media.
 7. **Prima del live**, confrontare swap e spread veri con i numeri della
    sezione 3. Se sono peggiori, lo si sa prima e non dopo.
+8. **Dal primo giorno di live, due controlli** (`docs/metodo.md`, passo
+   22): ogni mese il backtest sugli stessi giorni contro il live,
+   operazione per operazione; ogni 25 operazioni `tools/monitor.py`.
+   **Il giallo nei primi mesi è normale.** Confermare l'edge dal live
+   richiede ~450 operazioni, cioè ~15 mesi.
 
 # 5. Le soglie, uguali per ogni strategia futura
 
-Nessuna strategia passa senza. Servono a non trovare un edge troppo
+Il metodo completo, 22 passaggi in ordine, sta in `docs/metodo.md`.
+Queste sono le soglie minime. Nessuna strategia passa senza. Servono a non trovare un edge troppo
 fine, o che i costi si mangiano.
 
 | Cosa | Soglia | Perché |

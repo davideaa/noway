@@ -6,7 +6,8 @@ con 33% di drawdown): da lì le strategie dichiarate sono state
 ricostruite, misurate e in gran parte scartate.
 
 **Chi riprende il lavoro legge `docs/CONTINUA-QUI.md`, che è corto
-apposta e contiene solo quello che è vero adesso.** Il resto si apre
+apposta e contiene solo quello che è vero adesso.** Ogni strategia
+**nuova** segue `docs/metodo.md`, passo per passo e in ordine. Il resto si apre
 solo se serve: `docs/storia.md` per il perché delle decisioni,
 `docs/indice.md` per trovare un file.
 
