@@ -38,6 +38,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `montecarlo.py` | bootstrap a quattro metodi, una strategia |
 | `montecarlo_validazione.py` | cinque metodi (permutazione, IID, blocchi, stazionario, per regime) |
 | `montecarlo_portafoglio.py` | più strategie insieme, in frazione di conto |
+| `genera_monitor.py` | ricostruisce `monitor/monitor.html` coi backtest di riferimento dentro |
 | `monitor.py` | **monitoraggio live**, per qualunque strategia: cono, caduta e CUSUM a ogni operazione, soglie e orizzonte ricavati dal suo backtest |
 | `robustezza.py` | le prove contro l'overfitting: t dentro/fuori campione, soglia del rumore, tetto sulle vincite, costi, falsi breakout |
 | `fusione_conto_unico.py` | **due gambe su un conto solo**: storia vera, correlazione, Monte Carlo. Scritto come controllo indipendente del precedente, non come suo sostituto |
@@ -56,6 +57,13 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `report_scelta_finale.py` | la scelta a tetto 33%: oro 0,65% e nasdaq 0,98% |
 | `report_due_broker.py` | stessa strategia, due listini |
 | `report_montecarlo.py` | il PDF del Monte Carlo |
+
+## Il monitor live
+
+| | |
+|---|---|
+| `monitor/monitor.html` | **la pagina da usare**: doppio clic, trascini il report del conto. Controllo lento (l'edge) e veloce (l'esecuzione) |
+| `monitor/modello.html` | il sorgente della pagina, senza dati: si modifica questo e si rigenera |
 
 ## Le schede
 

@@ -103,4 +103,7 @@ Vedi la sezione 4 di `docs/CONTINUA-QUI.md`.
 python3 tools/fusione_conto_unico.py dati/oro_puprime_065.html.gz:0.65 dati/nasdaq_puprime_098.html.gz:0.98
 ```
 
+**Il monitor live** è `monitor/monitor.html`: si rigenera con
+`python3 tools/genera_monitor.py` quando cambiano i backtest di riferimento.
+
 Gli altri strumenti sono elencati in `docs/indice.md`.

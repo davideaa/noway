@@ -93,7 +93,14 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
     | | cosa guarda | ogni quanto | cosa coglie |
     |---|---|---|---|
     | **esecuzione** | backtest sugli stessi giorni del live, confronto operazione per operazione (i cinque criteri del passo 13) | ogni mese | bug, broker, slittamenti — **in giorni** |
-    | **edge** | `tools/monitor.py`: cono, caduta, CUSUM | a ogni operazione | strategia rotta — in **~200 operazioni** |
+    | **edge** | cono, caduta, CUSUM | a ogni operazione | strategia rotta — in **~200 operazioni** |
+
+    Tutti e due stanno in **`monitor/monitor.html`**: una pagina che si apre
+    col doppio clic, anche senza internet. Si trascina il report del conto
+    live, e per il controllo veloce il backtest sugli stessi giorni. Le
+    soglie e l'orizzonte li calcola lei dal backtest della strategia
+    scelta; altre strategie si aggiungono trascinando il loro report del
+    tester. `tools/monitor.py` fa lo stesso calcolo da riga di comando.
 
 ---
 

@@ -1,0 +1,681 @@
+<title>Monitor live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f4f0; --surface:#fcfcfb; --sunk:#efede8; --line:#dfddd6; --line-soft:#ebe9e3;
+  --ink:#16150f; --ink-2:#4f4e4a; --ink-3:#85837b;
+  --ok:#1b8f63; --ok-bg:#e3f3ec; --warn:#b67800; --warn-bg:#fbf0d9; --neg:#b4472c; --neg-bg:#f8e5df;
+  --acc:#2a78d6; --band:#2a78d6; --live:#16150f;
+  --shadow:0 1px 2px rgba(20,18,10,.06), 0 8px 22px -16px rgba(20,18,10,.28);
+  --sans:Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme: dark;
+  --bg:#111110; --surface:#1a1a18; --sunk:#141413; --line:#34332f; --line-soft:#262623;
+  --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
+  --ok:#35b585; --ok-bg:#15291f; --warn:#e0a52f; --warn-bg:#2b2211; --neg:#e7765a; --neg-bg:#2e1a15;
+  --acc:#4a92ea; --band:#4a92ea; --live:#f5f4ee;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#111110; --surface:#1a1a18; --sunk:#141413; --line:#34332f; --line-soft:#262623;
+  --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
+  --ok:#35b585; --ok-bg:#15291f; --warn:#e0a52f; --warn-bg:#2b2211; --neg:#e7765a; --neg-bg:#2e1a15;
+  --acc:#4a92ea; --band:#4a92ea; --live:#f5f4ee;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.5;
+  padding-block:26px 56px; padding-left:16px; padding-right:16px; font-size:14.5px}
+.wrap{max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:20px}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+h1{font-size:clamp(26px,4.6vw,36px); font-weight:800; letter-spacing:-.02em; margin:0 0 6px; line-height:1.1}
+.sub{margin:0; color:var(--ink-2); max-width:70ch}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 8px}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow)}
+.ph{padding:18px 20px 4px; display:flex; flex-wrap:wrap; gap:10px 18px; align-items:baseline; justify-content:space-between}
+.ph h2{font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em}
+.ph .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.pb{padding:8px 20px 20px; display:flex; flex-direction:column; gap:14px}
+.pb p{margin:0; color:var(--ink-2); max-width:74ch}
+.pb p b{color:var(--ink)}
+
+/* scelta della strategia */
+.scelta{display:flex; flex-wrap:wrap; gap:8px}
+.chip{font:inherit; font-size:13.5px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+  border-radius:4px; padding:7px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:flex-start; gap:1px; text-align:left}
+.chip small{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
+.chip[aria-pressed="true"]{border-color:var(--acc); color:var(--ink); box-shadow:inset 0 0 0 1px var(--acc)}
+.chip:focus-visible, .drop:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--acc); outline-offset:2px}
+.riga{display:flex; flex-wrap:wrap; gap:8px 22px; align-items:center; font-size:13px; color:var(--ink-2)}
+.riga label{display:inline-flex; gap:8px; align-items:center}
+input[type=text], input[type=number]{font:inherit; font-family:var(--mono); font-size:13px; padding:5px 8px; border:1px solid var(--line);
+  border-radius:3px; background:var(--sunk); color:var(--ink); width:118px}
+input[type=number]{width:82px}
+
+/* zone di trascinamento */
+.drops{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px}
+.drop{border:1.5px dashed var(--line); border-radius:4px; padding:14px 16px; background:var(--sunk);
+  cursor:pointer; display:flex; flex-direction:column; gap:4px; min-height:84px; justify-content:center}
+.drop.su{border-color:var(--acc); background:var(--surface)}
+.drop b{font-size:14px}
+.drop span{font-size:12.5px; color:var(--ink-3)}
+.drop .caricato{color:var(--ink-2); font-family:var(--mono); font-size:12px}
+.drop input{display:none}
+.errore{color:var(--neg); font-size:13px}
+
+/* semaforo */
+.stato{display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center; padding:16px 18px;
+  border-radius:4px; border:1px solid var(--line); background:var(--sunk)}
+.stato .luce{width:54px; height:54px; border-radius:50%; background:var(--line); box-shadow:inset 0 0 0 4px rgba(0,0,0,.06)}
+.stato.VERDE{background:var(--ok-bg); border-color:var(--ok)} .stato.VERDE .luce{background:var(--ok)}
+.stato.GIALLO{background:var(--warn-bg); border-color:var(--warn)} .stato.GIALLO .luce{background:var(--warn)}
+.stato.ROSSO{background:var(--neg-bg); border-color:var(--neg)} .stato.ROSSO .luce{background:var(--neg)}
+.stato h3{margin:0 0 3px; font-size:19px; letter-spacing:-.01em}
+.stato p{margin:0; color:var(--ink-2); font-size:14px}
+
+.num{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.num div{background:var(--surface); padding:10px 13px; display:flex; flex-direction:column; gap:1px}
+.num .k{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3)}
+.num .v{font-family:var(--mono); font-size:19px; font-weight:600; letter-spacing:-.01em}
+.num .n{font-size:11.5px; color:var(--ink-3)}
+.barra{height:6px; background:var(--sunk); border-radius:3px; overflow:hidden; margin-top:5px}
+.barra i{display:block; height:100%; background:var(--acc)}
+
+.plot{position:relative}
+svg{display:block; width:100%; height:auto; overflow:visible}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.sw{width:14px; height:9px; border-radius:2px; flex:none}
+.tip{position:absolute; pointer-events:none; opacity:0; transition:opacity .1s; z-index:5; background:var(--surface);
+  border:1px solid var(--line); border-radius:3px; box-shadow:var(--shadow); padding:8px 10px; font-size:12px; min-width:150px}
+.tip .row{display:flex; justify-content:space-between; gap:12px}
+.tip b{font-family:var(--mono)}
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:480px}
+th,td{padding:7px 9px; text-align:right; border-bottom:1px solid var(--line-soft)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  font-weight:500; border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+.pill{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; padding:2px 7px; border-radius:2px; white-space:nowrap}
+.pill.si{background:var(--ok-bg); color:var(--ok)} .pill.no{background:var(--neg-bg); color:var(--neg)}
+.pill.attesa{background:var(--sunk); color:var(--ink-3)}
+.dim{color:var(--ink-3)} .cneg{color:var(--neg)} .cok{color:var(--ok)}
+details{border-top:1px solid var(--line-soft); padding-top:10px}
+summary{cursor:pointer; font-size:13px; color:var(--ink-2)}
+.vuoto{padding:18px; text-align:center; color:var(--ink-3); font-size:13.5px; border:1px dashed var(--line); border-radius:4px}
+.calcolo{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+@media (max-width:560px){ .ph{padding:16px 14px 4px} .pb{padding:8px 14px 18px} .stato{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Monitor live · funziona sul tuo computer, anche senza internet</p>
+  <h1>La strategia regge ancora?</h1>
+  <p class="sub">Due controlli, come fanno i professionisti. Quello <b>lento</b> guarda se l'edge è ancora vivo;
+    quello <b>veloce</b> guarda se il conto esegue come il backtest. Niente è fisso: soglie e tempi
+    si ricavano dal backtest della strategia che scegli. L'unica scelta è accettare il 5% di falsi allarmi.</p>
+</header>
+
+<section class="panel">
+  <div class="ph"><h2>1 · Quale strategia</h2><span class="tag">il riferimento</span></div>
+  <div class="pb">
+    <div class="scelta" id="scelta"></div>
+    <div class="riga">
+      <label>Riferimento fino al <input type="text" id="fino" placeholder="AAAA.MM.GG" aria-label="Data di fine del riferimento"></label>
+      <span class="dim" id="rifinfo"></span>
+    </div>
+    <p id="rifnota" class="dim" style="font-size:13px"></p>
+    <details>
+      <summary>Aggiungi il backtest di un'altra strategia</summary>
+      <div class="drops" style="margin-top:10px">
+        <label class="drop" id="dropRif" tabindex="0"><input type="file" id="fileRif" accept=".htm,.html,.gz" multiple>
+          <b>Trascina qui il report del tester</b><span>il file .html che esporta MetaTrader dal tester</span>
+          <span class="caricato" id="statoRif"></span></label>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>2 · Il live</h2><span class="tag">il report del conto</span></div>
+  <div class="pb">
+    <div class="drops">
+      <label class="drop" id="dropLive" tabindex="0"><input type="file" id="fileLive" accept=".htm,.html,.gz" multiple>
+        <b>Trascina qui il report del conto live</b>
+        <span>MetaTrader → Storico → tasto destro → Report. Anche più file: si uniscono.</span>
+        <span class="caricato" id="statoLive"></span></label>
+    </div>
+    <div class="riga">
+      <label>Rischio % del live <input type="number" id="rischioLive" step="0.01" min="0.01" aria-label="Rischio percentuale del live"></label>
+      <span class="dim">serve a misurare in R. Se il report viene dal tester lo leggo da solo.</span>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>3 · Il controllo lento — l'edge è ancora vivo?</h2><span class="tag">cono · caduta · cusum</span></div>
+  <div class="pb">
+    <div class="stato" id="statoLento"><div class="luce" aria-hidden="true"></div><div><h3 id="lentoTit">Carica il live</h3><p id="lentoTxt">Senza operazioni live qui c'è solo la fascia di quello che è normale aspettarsi.</p></div></div>
+    <div class="num" id="lentoNum"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--band);opacity:.14"></i>fra il 10% e il 90% delle storie simulate</span>
+      <span><i class="sw" style="background:var(--band);height:3px"></i>la storia tipica</span>
+      <span><i class="sw" style="background:var(--neg);height:3px"></i>linea rossa: sotto qui è raro, non sfortuna</span>
+      <span><i class="sw" style="background:var(--live);height:3px"></i>il tuo live</span>
+    </div>
+    <div class="plot" id="cono"><div class="tip" id="tipCono"></div></div>
+    <p class="calcolo" id="calcolo"></p>
+    <details>
+      <summary>Cosa sa vedere questo controllo, per questa strategia</summary>
+      <div class="scroll" style="margin-top:8px"><table>
+        <thead><tr><th>Se succedesse questo</th><th>Il rosso scatta</th><th>Dopo, in mediana</th></tr></thead>
+        <tbody id="potere"></tbody></table></div>
+      <p style="margin-top:10px">Un calo lento non si vede in fretta: non è un difetto del controllo, è la matematica.
+        Per questo esiste anche il controllo veloce qui sotto.</p>
+    </details>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>4 · Il controllo veloce — il conto esegue come il backtest?</h2><span class="tag">operazione per operazione</span></div>
+  <div class="pb">
+    <p>Fai girare il tester sugli <b>stessi giorni</b> del live, stesso broker e stessi parametri, e trascina qui il report.
+      Le due serie devono essere quasi identiche: ogni operazione mancante o in più è da spiegare. Si vede in giorni, non in mesi.</p>
+    <div class="drops">
+      <label class="drop" id="dropBt" tabindex="0"><input type="file" id="fileBt" accept=".htm,.html,.gz" multiple>
+        <b>Trascina qui il backtest sugli stessi giorni</b><span>report del tester, stesso periodo del live</span>
+        <span class="caricato" id="statoBt"></span></label>
+    </div>
+    <div id="veloce"><div class="vuoto">Servono il live (sezione 2) e il backtest sugli stessi giorni.</div></div>
+  </div>
+</section>
+
+<p class="dim" style="font-size:12.5px; max-width:80ch">Il <b>giallo</b> nei primi mesi è normale: rigiocando il 2024-2026 come se fosse il live,
+  il portafoglio è rimasto giallo per 175 operazioni prima di diventare il periodo migliore. Sul giallo non si spegne niente.
+  Il <b>rosso</b> non spegne niente da solo: vuol dire fermarsi e guardare, secondo la regola che hai scritto <b>prima</b> di andare live.</p>
+
+</div>
+
+<script>
+/*__RIFERIMENTI__*/
+</script>
+<script>
+(function(){
+"use strict";
+var RIF = (window.RIFERIMENTI || []).slice();
+var FALSO_ALLARME = 0.05, BLOCCO = 20, N_CONO = 5000, N_CAL = 2000, N_POTERE = 600;
+var GIALLO_CONO = 10, GIALLO_CAD = 90, ORIZZ_MIN = 100, ORIZZ_MAX = 2000, MIN_STAT = 30, TOLL_S = 7200;
+
+/* ---------------- utilità ---------------- */
+function $(id){ return document.getElementById(id); }
+function fmt(v,d){ if(v==null||isNaN(v)) return "—"; return (v>=0?"+":"−")+Math.abs(v).toFixed(d==null?1:d).replace(".",","); }
+function num(v,d){ if(v==null||isNaN(v)) return "—"; return v.toFixed(d==null?1:d).replace(".",","); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function ts(s){ var m=/^(\d{4})\.(\d{2})\.(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(s||""); if(!m) return NaN;
+  return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0))/1000; }
+function base(sim){ return String(sim||"").toUpperCase().split(".")[0]; }
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function media(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
+function devst(a){ var m=media(a),s=0; for(var i=0;i<a.length;i++) s+=(a[i]-m)*(a[i]-m); return Math.sqrt(s/(a.length-1)); }
+function pct(sorted,p){ if(!sorted.length) return NaN; var i=(sorted.length-1)*p/100, lo=Math.floor(i), hi=Math.ceil(i);
+  return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo); }
+function sotto(col,x){ var lo=0,hi=col.length; while(lo<hi){ var m=(lo+hi)>>1; if(col[m]<=x) lo=m+1; else hi=m; } return lo; }
+
+/* ---------------- lettura dei report MT5 ----------------
+   Le colonne si trovano per NOME, non per posizione: il report del tester e
+   quello del conto live non hanno le stesse colonne (il secondo ha anche la
+   tassa), e i nomi cambiano con la lingua. */
+var NOMI = {
+  ora:["ora","time","orario","tempo","data"], tipo:["tipo","type"], dir:["direzione","direction"],
+  vol:["volume","volumi"], prezzo:["prezzo","price"], simbolo:["simbolo","symbol"],
+  comm:["commissioni","commissione","commission","commissions"], tassa:["tassa","tariffa","fee","fees"],
+  swap:["swap"], profitto:["profitto","profit"], saldo:["bilancio","saldo","balance"], commento:["commento","comment"]
+};
+async function testo(file){
+  var buf = new Uint8Array(await file.arrayBuffer());
+  if(buf[0]===0x1f && buf[1]===0x8b){
+    var ds = new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip")));
+    buf = new Uint8Array(await ds.arrayBuffer());
+  }
+  if(buf[0]===0xFF && buf[1]===0xFE) return new TextDecoder("utf-16le").decode(buf);
+  if(buf[0]===0xFE && buf[1]===0xFF) return new TextDecoder("utf-16be").decode(buf);
+  var t = new TextDecoder("utf-8").decode(buf);
+  if(t.indexOf("<t")<0 && buf.length>1 && buf[1]===0) t = new TextDecoder("utf-16le").decode(buf);
+  return t;
+}
+function nr(s){ s=String(s||"").replace(/[\s  ]/g,""); if(!s) return 0;
+  if(s.indexOf(",")>=0 && s.indexOf(".")<0) s=s.replace(",","."); else s=s.replace(/,/g,"");
+  var v=parseFloat(s); return isNaN(v)?0:v; }
+function leggiReport(html, nome){
+  var doc = new DOMParser().parseFromString(html,"text/html");
+  var celle = function(tr){ return Array.prototype.map.call(tr.querySelectorAll("td,th"),function(c){ return c.textContent.replace(/ /g," ").trim(); }); };
+  var righe = doc.querySelectorAll("tr"), intest=-1, col={};
+  for(var i=0;i<righe.length;i++){
+    var c = celle(righe[i]).map(function(x){ return x.toLowerCase(); });
+    var trovato = {};
+    for(var k in NOMI){ for(var j=0;j<c.length;j++){ if(NOMI[k].indexOf(c[j])>=0){ trovato[k]=j; break; } } }
+    if(trovato.dir!=null && trovato.tipo!=null && trovato.profitto!=null && trovato.saldo!=null && trovato.ora!=null){ intest=i; col=trovato; break; }
+  }
+  if(intest<0) throw new Error(nome+": non trovo la tabella delle operazioni (serve la colonna «Direzione»/«Direction»).");
+  // parametri: nel report del tester ci sono gli input dell'EA
+  var par = {};
+  Array.prototype.forEach.call(doc.querySelectorAll("td"),function(td){
+    var m=/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(td.textContent.trim()); if(m) par[m[1]]=m[2].trim(); });
+  var rischio = parseFloat(par.InpRiskPercent||par.RiskPercent||par.Risk||"NaN");
+  var adattivo = /true/i.test(par.InpUseAdaptiveRisk||par.UseAdaptiveRisk||"");
+  var affari=[];
+  for(var r=intest+1;r<righe.length;r++){
+    var c2 = celle(righe[r]); if(c2.length < Object.keys(col).length) continue;
+    var ora=c2[col.ora]; if(!/^\d{4}\.\d{2}\.\d{2}/.test(ora)) continue;
+    affari.push({ora:ora, tipo:(c2[col.tipo]||"").toLowerCase(), dir:(c2[col.dir]||"").toLowerCase(),
+      vol:c2[col.vol], prezzo:nr(c2[col.prezzo]), simbolo:col.simbolo!=null?c2[col.simbolo]:"",
+      comm:nr(c2[col.comm])+(col.tassa!=null?nr(c2[col.tassa]):0), swap:nr(c2[col.swap]),
+      profitto:nr(c2[col.profitto]), saldo:nr(c2[col.saldo]), commento:col.commento!=null?c2[col.commento]:""});
+  }
+  return {nome:nome, affari:affari, rischio:isNaN(rischio)?null:rischio, adattivo:adattivo,
+          tester:Object.keys(par).length>3, simbolo:(affari.find(function(a){return a.simbolo;})||{}).simbolo||""};
+}
+/* apertura e chiusura si accoppiano per simbolo, volume e verso opposto,
+   prendendo l'apertura PIÙ RECENTE (LIFO): è il metodo del progetto. La
+   strategia la dice il commento dell'apertura. */
+function operazioni(rep, rischioPct){
+  var aperte=[], ops=[], orfane=0, saldo=null;
+  rep.affari.forEach(function(a){
+    var prima = saldo; saldo = a.saldo;
+    if(a.tipo!=="buy" && a.tipo!=="sell") return;
+    if(a.dir==="in"){ aperte.push(a); return; }
+    if(a.dir.indexOf("out")<0) return;
+    var opp = a.tipo==="buy"?"sell":"buy", k=-1;
+    for(var i=aperte.length-1;i>=0;i--){ var p=aperte[i];
+      if(p.tipo===opp && p.vol===a.vol && base(p.simbolo)===base(a.simbolo)){ k=i; break; } }
+    if(k<0){ orfane++; return; }
+    var ap = aperte.splice(k,1)[0];
+    var netto = a.profitto + a.comm + ap.comm + a.swap + ap.swap;
+    var saldoPrima = (prima!=null && prima>0) ? prima : (a.saldo - netto);
+    ops.push({ap:ap.ora, ch:a.ora, t:ts(ap.ora), tc:ts(a.ora), verso:ap.tipo==="buy"?"L":"S", tag:(ap.commento||"").trim(),
+      simbolo:ap.simbolo, R: rischioPct ? netto/(rischioPct/100*saldoPrima) : null, netto:netto});
+  });
+  // in ordine di CHIUSURA: e' quando il risultato entra nel conto. Con due
+  // tecniche aperte insieme (l'oro) l'ordine di apertura sarebbe un altro.
+  ops.sort(function(x,y){ return x.tc-y.tc; });
+  return {ops:ops, orfane:orfane, aperte:aperte.length};
+}
+
+/* ---------------- le strategie ---------------- */
+var STRAT = [];
+function costruisciStrategie(){
+  STRAT = [];
+  RIF.forEach(function(rf){
+    var tags = rf.tags;
+    STRAT.push({id:rf.id, nome:rf.nome, rif:[rf], tags:null, simboli:[base(rf.simbolo)]});
+    if(tags.length>1) tags.forEach(function(tg,i){
+      var n = rf.t.filter(function(x){return x[4]===i;}).length;
+      if(n>=100) STRAT.push({id:rf.id+"#"+i, nome:rf.nome+" · "+(rf.nomiTag[tg]||tg), rif:[rf], tags:[tg], simboli:[base(rf.simbolo)]});
+    });
+  });
+  if(RIF.length>1) STRAT.push({id:"__tutte", nome:"Portafoglio: tutte insieme", rif:RIF.slice(), tags:null,
+    simboli:RIF.map(function(r){return base(r.simbolo);})});
+}
+function tradeRif(st, fino){
+  var out=[]; st.rif.forEach(function(rf){ rf.t.forEach(function(x){
+    var tg=rf.tags[x[4]]; if(st.tags && st.tags.indexOf(tg)<0) return;
+    if(fino && x[1].slice(0,10)>fino) return;
+    out.push({ch:x[1], R:x[3]}); }); });
+  out.sort(function(a,b){ return a.ch<b.ch?-1:a.ch>b.ch?1:0; });
+  return out.map(function(x){return x.R;});
+}
+function appartiene(st, op){
+  // prima il commento (esatto), poi, se il commento manca, il simbolo
+  var tutteTag=[]; st.rif.forEach(function(rf){ (st.tags||rf.tags).forEach(function(t){ tutteTag.push(t); }); });
+  // un'etichetta vuota combacerebbe con qualunque commento: si salta
+  tutteTag = tutteTag.filter(function(t){ return t; });
+  if(op.tag && tutteTag.length){ for(var i=0;i<tutteTag.length;i++){ var t=tutteTag[i];
+      if(op.tag===t || op.tag.indexOf(t)===0 || t.indexOf(op.tag)===0) return true; }
+    return false; }
+  return st.simboli.indexOf(base(op.simbolo))>=0;
+}
+
+/* ---------------- il controllo lento ---------------- */
+function orizzonte(x){
+  var n=x.length, m=media(x), sd=devst(x), s3=0, s4=0;
+  for(var i=0;i<n;i++){ var d=x[i]-m; s3+=d*d*d; s4+=d*d*d*d; }
+  var sk=s3/n/Math.pow(sd,3), ku=s4/n/Math.pow(sd,4), sr=m/sd;
+  if(!(sr>0)) return {n:null, sr:sr};
+  var mt = 1 + (1 - sk*sr + (ku-1)/4*sr*sr) * Math.pow(1.6449/sr,2);
+  return {n:Math.min(ORIZZ_MAX, Math.max(ORIZZ_MIN, Math.ceil(mt))), grezzo:Math.ceil(mt), sr:sr};
+}
+function percorso(pool, n, rnd, out){
+  var k=0, L=Math.min(BLOCCO, pool.length-1), maxI=pool.length-L;
+  while(k<n){ var s=Math.floor(rnd()*maxI); for(var j=0;j<L && k<n;j++) out[k++]=pool[s+j]; }
+  return out;
+}
+function statoPercorso(seq, n, cal, cb){
+  // per ogni operazione: percentile nel cono, percentile della caduta, CUSUM massimo
+  var cum=0, picco=0, cad=0, s=0, smax=0, kk=cal.mu/2, w=cal.mu/(cal.sd*cal.sd);
+  for(var j=0;j<n;j++){
+    cum+=seq[j]; if(cum>picco) picco=cum; if(picco-cum>cad) cad=picco-cum;
+    s=Math.max(0, s + w*(kk-seq[j])); if(s>smax) smax=s;
+    var pc = sotto(cal.cum[j],cum)*100/N_CONO, pd = sotto(cal.cad[j],cad)*100/N_CONO;
+    if(cb(j,pc,pd,smax,cum,cad)===false) return;
+  }
+}
+function calibra(rif){
+  var o = orizzonte(rif); if(!o.n) return {errore:"Il riferimento non ha edge (media ≤ 0): non c'è niente da sorvegliare."};
+  var n=o.n, mu=media(rif), sd=devst(rif), rnd=mulberry(7);
+  var cum=[], cad=[]; for(var j=0;j<n;j++){ cum.push(new Float32Array(N_CONO)); cad.push(new Float32Array(N_CONO)); }
+  var seq=new Float64Array(n);
+  for(var i=0;i<N_CONO;i++){
+    percorso(rif,n,rnd,seq); var c=0,p=0,d=0;
+    for(var j2=0;j2<n;j2++){ c+=seq[j2]; if(c>p) p=c; if(p-c>d) d=p-c; cum[j2][i]=c; cad[j2][i]=d; }
+  }
+  for(var j3=0;j3<n;j3++){ cum[j3].sort(); cad[j3].sort(); }
+  var cal={n:n, mu:mu, sd:sd, cum:cum, cad:cad, mt:o};
+  // soglie del rosso: un solo livello di coda per i tre controlli, cercato
+  // finché il rosso complessivo scatta per sbaglio nel 5% dei casi
+  var rnd2=mulberry(8), wc=new Float64Array(N_CAL), wd=new Float64Array(N_CAL), ws=new Float64Array(N_CAL);
+  for(var q=0;q<N_CAL;q++){
+    percorso(rif,n,rnd2,seq); var mc=100, md=0, ms=0;
+    statoPercorso(seq,n,cal,function(j,pc,pd,smax){ if(pc<mc) mc=pc; if(pd>md) md=pd; ms=smax; });
+    wc[q]=mc; wd[q]=md; ws[q]=ms;
+  }
+  var sc=Array.from(wc).sort(function(a,b){return a-b;}), sdd=Array.from(wd).sort(function(a,b){return a-b;}),
+      ss=Array.from(ws).sort(function(a,b){return a-b;});
+  var lo=0, hi=FALSO_ALLARME, A,B,H,fa;
+  for(var it=0;it<40;it++){
+    var t=(lo+hi)/2; A=pct(sc,100*t); B=pct(sdd,100*(1-t)); H=pct(ss,100*(1-t)); fa=0;
+    for(var z=0;z<N_CAL;z++) if(wc[z]<A||wd[z]>B||ws[z]>H) fa++;
+    fa/=N_CAL; if(fa<FALSO_ALLARME) lo=t; else hi=t;
+  }
+  cal.A=A; cal.B=B; cal.H=H; cal.fa=fa;
+  // bande del cono per il disegno
+  cal.bande={p10:[],p50:[],p90:[],rosso:[]};
+  for(var j4=0;j4<n;j4++){ var col=cum[j4];
+    cal.bande.p10.push(pct(col,10)); cal.bande.p50.push(pct(col,50)); cal.bande.p90.push(pct(col,90));
+    cal.bande.rosso.push(pct(col,A)); }
+  return cal;
+}
+function luce(pc,pd,smax,cal){
+  if(pc<cal.A || pd>cal.B || smax>cal.H) return "ROSSO";
+  if(pc<GIALLO_CONO || pd>GIALLO_CAD) return "GIALLO"; return "VERDE";
+}
+function valuta(live, cal){
+  var n=Math.min(live.length, cal.n), righe=[], rosso=false;
+  statoPercorso(live, n, cal, function(j,pc,pd,smax,cum,cad){
+    var l=luce(pc,pd,smax,cal); if(l==="ROSSO") rosso=true; if(rosso) l="ROSSO";
+    righe.push({k:j+1, cum:cum, cad:cad, pc:pc, pd:pd, cs:smax, luce:l}); });
+  return righe;
+}
+function potere(rif, cal){
+  var out=[], seq=new Float64Array(cal.n);
+  [[0,"Tutto normale (falso allarme)"],[0.5,"L'edge si dimezza"],[1,"L'edge muore (media a zero)"],[2,"Si rompe: perde quanto guadagnava"]].forEach(function(sc,si){
+    var rnd=mulberry(11+si), presi=0, quando=[];
+    for(var i=0;i<N_POTERE;i++){
+      percorso(rif,cal.n,rnd,seq); for(var j=0;j<cal.n;j++) seq[j]-=sc[0]*cal.mu;
+      var primo=null;
+      statoPercorso(seq,cal.n,cal,function(j,pc,pd,smax){ if(pc<cal.A||pd>cal.B||smax>cal.H){ primo=j+1; return false; } });
+      if(primo){ presi++; quando.push(primo); }
+    }
+    quando.sort(function(a,b){return a-b;});
+    out.push({et:sc[1], presi:presi/N_POTERE, mediana:quando.length?quando[Math.floor(quando.length/2)]:null});
+  });
+  return out;
+}
+
+/* ---------------- disegno del cono ---------------- */
+var NS="http://www.w3.org/2000/svg", MONO="IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+function tx(s,a){ var t=el("text",a); t.textContent=s; return t; }
+function disegnaCono(cal, righe){
+  var host=$("cono"); Array.prototype.slice.call(host.querySelectorAll("svg")).forEach(function(s){ s.remove(); });
+  var W=960,H=330,mL=50,mR=16,mT=12,mB=34, n=cal.n, b=cal.bande;
+  var lo=Math.min.apply(null,b.rosso), hi=Math.max.apply(null,b.p90);
+  righe.forEach(function(r){ lo=Math.min(lo,r.cum); hi=Math.max(hi,r.cum); });
+  var pad=(hi-lo)*0.06; lo-=pad; hi+=pad;
+  var X=function(k){ return mL+k/n*(W-mL-mR); }, Y=function(v){ return mT+(hi-v)/(hi-lo)*(H-mT-mB); };
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":"Il live dentro la fascia delle storie simulate"});
+  var passo=Math.pow(10,Math.floor(Math.log10((hi-lo)/4))); var st=[1,2,2.5,5,10].map(function(m){return m*passo;}).find(function(s){return (hi-lo)/s<=6;})||passo*10;
+  for(var g=Math.ceil(lo/st)*st; g<=hi; g+=st){
+    svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:Y(g),y2:Y(g),stroke:Math.abs(g)<1e-9?"var(--line)":"var(--line-soft)","stroke-width":Math.abs(g)<1e-9?1.3:1}));
+    svg.appendChild(tx((g>0?"+":"")+(+g.toFixed(1))+" R",{x:mL-8,y:Y(g)+4,"text-anchor":"end",fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+  }
+  var xs=Math.pow(10,Math.floor(Math.log10(n/4))); var xst=[1,2,5,10].map(function(m){return m*xs;}).find(function(s){return n/s<=7;})||xs*10;
+  for(var k=0;k<=n;k+=xst){ svg.appendChild(tx(String(k),{x:X(k),y:H-mB+17,"text-anchor":"middle",fill:"var(--ink-3)","font-size":11,"font-family":MONO})); }
+  svg.appendChild(tx("operazioni live",{x:W-mR,y:H-mB+31,"text-anchor":"end",fill:"var(--ink-3)","font-size":10.5,"font-family":MONO}));
+  var area="M"+X(0)+" "+Y(0);
+  for(var i=0;i<n;i++) area+="L"+X(i+1).toFixed(1)+" "+Y(b.p90[i]).toFixed(1);
+  for(var i2=n-1;i2>=0;i2--) area+="L"+X(i2+1).toFixed(1)+" "+Y(b.p10[i2]).toFixed(1);
+  area+="L"+X(0)+" "+Y(0)+"Z";
+  svg.appendChild(el("path",{d:area,fill:"var(--band)",opacity:.14}));
+  function linea(arr,col,w,dash){ var d="M"+X(0)+" "+Y(0); for(var i=0;i<arr.length;i++) d+="L"+X(i+1).toFixed(1)+" "+Y(arr[i]).toFixed(1);
+    svg.appendChild(el("path",{d:d,fill:"none",stroke:col,"stroke-width":w,"stroke-dasharray":dash||"","stroke-linejoin":"round"})); }
+  linea(b.p50,"var(--band)",2);
+  linea(b.rosso,"var(--neg)",1.6,"5 4");
+  if(righe.length){ linea(righe.map(function(r){return r.cum;}),"var(--live)",2.4);
+    var u=righe[righe.length-1];
+    svg.appendChild(el("circle",{cx:X(u.k),cy:Y(u.cum),r:4.5,fill:"var(--live)",stroke:"var(--surface)","stroke-width":2}));
+  }
+  var hit=el("rect",{x:mL,y:mT,width:W-mL-mR,height:H-mT-mB,fill:"transparent"}); svg.appendChild(hit);
+  var tip=$("tipCono");
+  hit.addEventListener("mousemove",function(e){
+    var r=svg.getBoundingClientRect(), k=Math.round(((e.clientX-r.left)/r.width*W-mL)/(W-mL-mR)*n);
+    if(k<1||k>n){ tip.style.opacity=0; return; }
+    var rr=righe[k-1], h='<div class="dim mono" style="font-size:11px;margin-bottom:4px">operazione '+k+'</div>'+
+      '<div class="row"><span>storia tipica</span><b>'+fmt(b.p50[k-1])+' R</b></div>'+
+      '<div class="row"><span>fascia 10-90%</span><b>'+fmt(b.p10[k-1])+' / '+fmt(b.p90[k-1])+'</b></div>'+
+      '<div class="row"><span>linea rossa</span><b>'+fmt(b.rosso[k-1])+' R</b></div>';
+    if(rr) h+='<div class="row"><span>il tuo live</span><b>'+fmt(rr.cum)+' R</b></div>';
+    tip.innerHTML=h; tip.style.opacity=1;
+    var lx=X(k)/W*r.width, s=lx>r.width*0.6; tip.style.left=s?"":(lx+14)+"px"; tip.style.right=s?(r.width-lx+14)+"px":""; tip.style.top="8px";
+  });
+  hit.addEventListener("mouseleave",function(){ tip.style.opacity=0; });
+  host.appendChild(svg);
+}
+
+/* ---------------- il controllo veloce ---------------- */
+function confronta(bt, live){
+  // per ogni operazione del backtest, la live più vicina con lo stesso verso
+  // (e la stessa etichetta, se c'è) entro due ore
+  var usate={}, coppie=[];
+  bt.forEach(function(o){ var best=null;
+    live.forEach(function(q,j){ if(usate[j]||q.verso!==o.verso) return;
+      if(o.tag && q.tag && o.tag!==q.tag && q.tag.indexOf(o.tag)!==0 && o.tag.indexOf(q.tag)!==0) return;
+      var dt=Math.abs(q.t-o.t); if(dt<=TOLL_S && (!best||dt<best.dt)) best={dt:dt,j:j}; });
+    if(best){ usate[best.j]=1; coppie.push({b:o,l:live[best.j],dt:best.dt}); } });
+  var mancate=bt.filter(function(o){ return !coppie.some(function(c){return c.b===o;}); });
+  var inpiu=live.filter(function(q,j){ return !usate[j]; });
+  return {coppie:coppie, mancate:mancate, inpiu:inpiu};
+}
+function tStat(a,b){ var se=Math.sqrt(Math.pow(devst(a),2)/a.length+Math.pow(devst(b),2)/b.length); return (media(a)-media(b))/se; }
+function corr(x,y){ var mx=media(x),my=media(y),sxy=0,sx=0,sy=0; for(var i=0;i<x.length;i++){ var a=x[i]-mx,b=y[i]-my; sxy+=a*b; sx+=a*a; sy+=b*b; }
+  return sxy/Math.sqrt(sx*sy); }
+function pill(stato,testo){ return '<span class="pill '+stato+'">'+testo+'</span>'; }
+
+/* ---------------- stato della pagina ---------------- */
+var S = {strat:null, live:null, liveRep:[], bt:null, btRep:[], cal:{}, rischioLive:null};
+
+function scegli(id){
+  S.strat = STRAT.find(function(s){ return s.id===id; }) || STRAT[0];
+  Array.prototype.forEach.call($("scelta").children,function(b){ b.setAttribute("aria-pressed", b.dataset.id===S.strat.id?"true":"false"); });
+  var rf=S.strat.rif[0]; if(!$("fino").value && rf.fino) $("fino").value=rf.fino;
+  aggiorna();
+}
+function chiaveCal(){ return S.strat.id+"|"+($("fino").value||""); }
+function aggiorna(){
+  if(!S.strat) return;
+  var fino=($("fino").value||"").trim();
+  var rif=tradeRif(S.strat, fino||null);
+  var anni=(function(){ var d0=null,d1=null; S.strat.rif.forEach(function(rf){ rf.t.forEach(function(x){ if(fino && x[1].slice(0,10)>fino) return;
+      var t=ts(x[1]); if(d0===null||t<d0) d0=t; if(d1===null||t>d1) d1=t; }); }); return (d1-d0)/(365.25*86400); })();
+  var ritmo=rif.length/anni;
+  $("rifinfo").textContent = rif.length+" operazioni di backtest · media "+fmt(media(rif),3)+" R · circa "+Math.round(ritmo)+" operazioni all'anno";
+  var note=[]; S.strat.rif.forEach(function(rf){ if(rf.nota) note.push(rf.nota); });
+  note.push("Il riferimento è il backtest fino alla data scelta: se lì finisce il periodo di costruzione, il live si confronta col numero prudente.");
+  $("rifnota").textContent=note.join(" ");
+  if(rif.length<BLOCCO*3){ $("calcolo").textContent="Troppe poche operazioni nel riferimento per calibrare."; return; }
+  var k=chiaveCal();
+  if(!S.cal[k]){
+    $("calcolo").textContent="Calcolo le soglie di questa strategia…";
+    setTimeout(function(){ var t0=performance.now(); var c=calibra(rif);
+      if(!c.errore){ c.potere=potere(rif,c); c.secondi=(performance.now()-t0)/1000; c.ritmo=ritmo; }
+      S.cal[k]=c; mostraLento(); }, 30);
+    return;
+  }
+  mostraLento();
+}
+function liveDellaStrategia(){
+  if(!S.live) return [];
+  return S.live.filter(function(o){ return appartiene(S.strat,o); });
+}
+function mostraLento(){
+  var cal=S.cal[chiaveCal()]; if(!cal) return;
+  if(cal.errore){ $("calcolo").textContent=cal.errore; return; }
+  $("calcolo").textContent="Soglie calcolate su "+N_CONO+" storie simulate a blocchi di "+BLOCCO+" (in "+num(cal.secondi,1)+" s). "+
+    "Rosso se il live scende sotto il "+num(cal.A,2)+"° percentile, o la caduta supera il "+num(cal.B,2)+"°, o il CUSUM supera "+num(cal.H,2)+
+    ". Falso allarme complessivo: "+num(100*cal.fa,1)+"%.";
+  var ops=liveDellaStrategia(), R=ops.map(function(o){return o.R;}).filter(function(x){return x!=null;});
+  var righe=valuta(R,cal);
+  disegnaCono(cal,righe);
+  var ultima=righe[righe.length-1], box=$("statoLento");
+  box.className="stato "+(ultima?ultima.luce:"");
+  var mesi=cal.mt.grezzo/cal.ritmo*12;
+  var tempo = mesi<24 ? Math.round(mesi)+" mesi" : "circa "+num(mesi/12,0)+" anni";
+  if(!ultima){ $("lentoTit").textContent= S.live ? "Nessuna operazione live di questa strategia" : "Carica il live";
+    $("lentoTxt").textContent="Qui sotto c'è la fascia di quello che è normale aspettarsi. Per confermare l'edge dal live servono "+cal.mt.grezzo+" operazioni: al ritmo del backtest, "+tempo+"."; }
+  else if(ultima.luce==="VERDE"){ $("lentoTit").textContent="Verde — dentro la norma";
+    $("lentoTxt").textContent="Quello che vedi è compatibile con l'edge del backtest. Non vuol dire ancora che funziona: per dirlo servono "+cal.mt.grezzo+" operazioni ("+tempo+"), sei a "+ultima.k+"."; }
+  else if(ultima.luce==="GIALLO"){ $("lentoTit").textContent="Giallo — periodo debole, ma ancora normale";
+    $("lentoTxt").textContent="Sei nella parte bassa delle storie simulate, dove capita di stare anche con l'edge intatto. Si guarda, non si spegne."; }
+  else { $("lentoTit").textContent="Rosso — questo è raro se l'edge fosse vivo";
+    $("lentoTxt").textContent="Con l'edge intatto succederebbe in meno del 5% dei casi. Fermati e guarda, secondo la regola che hai scritto prima di andare live."; }
+  var u=ultima||{k:0,cum:0,cad:0,pc:null,pd:null,cs:0};
+  var perc=Math.min(100,100*u.k/cal.mt.grezzo);
+  $("lentoNum").innerHTML=
+    '<div><span class="k">Operazioni live</span><span class="v">'+u.k+'</span><span class="n">su '+cal.mt.grezzo+' per confermare</span><div class="barra"><i style="width:'+perc.toFixed(1)+'%"></i></div></div>'+
+    '<div><span class="k">Risultato</span><span class="v">'+fmt(u.cum)+' R</span><span class="n">'+(u.pc==null?"—":"meglio del "+num(u.pc,0)+"% delle simulate")+'</span></div>'+
+    '<div><span class="k">Caduta massima</span><span class="v">'+num(u.cad)+' R</span><span class="n">'+(u.pd==null?"—":"peggio del "+num(u.pd,0)+"% delle simulate")+'</span></div>'+
+    '<div><span class="k">CUSUM</span><span class="v">'+num(u.cs,2)+'</span><span class="n">rosso oltre '+num(cal.H,2)+' · vede i cali lenti</span></div>';
+  if(R.length>cal.n) $("lentoTxt").textContent += " Hai superato l'orizzonte ("+cal.n+" operazioni): da qui in poi conviene ricalibrare con il live dentro il riferimento.";
+  $("potere").innerHTML=cal.potere.map(function(p){ return "<tr><td>"+p.et+"</td><td class='mono'>"+num(100*p.presi,0)+"% dei casi</td><td class='mono'>"+(p.mediana?p.mediana+" operazioni":"—")+"</td></tr>"; }).join("");
+  mostraVeloce();
+}
+function mostraVeloce(){
+  var host=$("veloce");
+  if(!S.live || !S.bt){ host.innerHTML='<div class="vuoto">Servono il live (sezione 2) e il backtest sugli stessi giorni.</div>'; return; }
+  var live=liveDellaStrategia();
+  if(!live.length){ host.innerHTML='<div class="vuoto">Nel live non ci sono operazioni di questa strategia.</div>'; return; }
+  var t0=Math.min.apply(null,live.map(function(o){return o.t;})), t1=Math.max.apply(null,live.map(function(o){return o.tc;}));
+  var bt=S.bt.filter(function(o){ return appartiene(S.strat,o) && o.t>=t0-TOLL_S && o.t<=t1; });
+  if(!bt.length){ host.innerHTML='<div class="vuoto">Nel backtest non ci sono operazioni di questa strategia negli stessi giorni del live.</div>'; return; }
+  var c=confronta(bt,live), np=c.coppie.length;
+  var Rb=bt.map(function(o){return o.R;}), Rl=live.map(function(o){return o.R;});
+  var xb=c.coppie.map(function(p){return p.b.R;}), xl=c.coppie.map(function(p){return p.l.R;});
+  var diff=c.coppie.map(function(p){return p.l.R-p.b.R;}).sort(function(a,b){return a-b;});
+  var abbastanza = np>=MIN_STAT;
+  var tollN=Math.max(1, Math.round(0.15*bt.length));
+  var crit=[
+    ["Operazioni: stesso numero", Math.abs(live.length-bt.length)<=tollN, true, bt.length+" nel backtest, "+live.length+" nel live", "scarto al massimo del 15% (o di una)"],
+    ["Operazioni ritrovate", np/bt.length>=0.70, true, num(100*np/bt.length,0)+"% ("+np+" su "+bt.length+")", "almeno il 70%"],
+    ["Stesso segno del risultato", (media(Rb)>0)===(media(Rl)>0), abbastanza, fmt(Rb.reduce(function(a,b){return a+b;},0))+" R contro "+fmt(Rl.reduce(function(a,b){return a+b;},0))+" R", "con almeno "+MIN_STAT+" operazioni"],
+    ["Rendimento non diverso", abbastanza?Math.abs(tStat(Rb,Rl))<2:null, abbastanza, abbastanza?"t = "+num(tStat(Rb,Rl),2):"—", "|t| sotto 2: la soglia si adatta da sola al numero di operazioni"],
+    ["Stesso andamento trade per trade", abbastanza?corr(xb,xl)>=0.70:null, abbastanza, abbastanza?"correlazione "+num(corr(xb,xl),3):"—", "almeno 0,70"]
+  ];
+  var ok = crit.every(function(r){ return !r[2] || r[1]; }) && !c.mancate.length && !c.inpiu.length;
+  var h='<div class="stato '+(ok?"VERDE":(crit.some(function(r){return r[2]&&r[1]===false;})?"ROSSO":"GIALLO"))+'"><div class="luce" aria-hidden="true"></div><div>'+
+    '<h3>'+(ok?"Il conto esegue come il backtest":(c.mancate.length||c.inpiu.length?"Ci sono operazioni da spiegare":"Qualcosa non torna"))+'</h3>'+
+    '<p>'+np+' operazioni ritrovate su '+bt.length+'. Scarto di risultato per operazione, live meno backtest: mediana '+fmt(diff.length?diff[Math.floor(diff.length/2)]:NaN,3)+' R, media '+fmt(diff.length?media(diff):NaN,3)+' R.'+
+    (abbastanza?'':' Con meno di '+MIN_STAT+' operazioni appaiate i criteri statistici non dicono ancora niente: contano le operazioni mancanti o in più.')+'</p></div></div>';
+  h+='<div class="scroll"><table><thead><tr><th>Criterio</th><th>Valore</th><th>Soglia</th><th></th></tr></thead><tbody>'+
+    crit.map(function(r){ return "<tr><td>"+r[0]+"</td><td class='mono'>"+r[3]+"</td><td class='dim'>"+r[4]+"</td><td>"+
+      (!r[2]?pill("attesa","servono più dati"):(r[1]?pill("si","ok"):pill("no","no")))+"</td></tr>"; }).join("")+"</tbody></table></div>";
+  function lista(v,titolo,spieg){ if(!v.length) return "";
+    return '<details open><summary><b>'+v.length+' '+titolo+'</b> — '+spieg+'</summary><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Apertura</th><th>Verso</th><th>Strategia</th><th>Risultato</th></tr></thead><tbody>'+
+      v.slice(0,60).map(function(o){ return "<tr><td class='mono'>"+esc(o.ap)+"</td><td>"+(o.verso==="L"?"long":"short")+"</td><td class='dim'>"+esc(o.tag||o.simbolo)+"</td><td class='mono'>"+fmt(o.R,2)+" R</td></tr>"; }).join("")+
+      "</tbody></table></div></details>"; }
+  h+=lista(c.mancate,"operazioni che il backtest ha fatto e il live no","EA spento, connessione, margine, o un blocco sul conto?");
+  h+=lista(c.inpiu,"operazioni che il live ha fatto e il backtest no","un'altra strategia sullo stesso conto, un riavvio, un intervento a mano?");
+  var peggiori=c.coppie.slice().sort(function(a,b){ return (a.l.R-a.b.R)-(b.l.R-b.b.R); }).slice(0,8);
+  if(peggiori.length) h+='<details><summary>Le appaiate più diverse</summary><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Apertura</th><th>Backtest</th><th>Live</th><th>Differenza</th></tr></thead><tbody>'+
+    peggiori.map(function(p){ return "<tr><td class='mono'>"+esc(p.b.ap)+"</td><td class='mono'>"+fmt(p.b.R,2)+"</td><td class='mono'>"+fmt(p.l.R,2)+"</td><td class='mono "+((p.l.R-p.b.R)<0?"cneg":"")+"'>"+fmt(p.l.R-p.b.R,2)+"</td></tr>"; }).join("")+
+    "</tbody></table></div></details>";
+  host.innerHTML=h;
+}
+
+/* ---------------- file trascinati ---------------- */
+function zona(drop, input, cb){
+  drop.addEventListener("dragover",function(e){ e.preventDefault(); drop.classList.add("su"); });
+  drop.addEventListener("dragleave",function(){ drop.classList.remove("su"); });
+  // i file si copiano subito in una lista: la FileList dell'input si svuota
+  // appena la si azzera, e la lettura e' asincrona
+  drop.addEventListener("drop",function(e){ e.preventDefault(); drop.classList.remove("su"); cb(Array.from(e.dataTransfer.files)); });
+  drop.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); input.click(); } });
+  input.addEventListener("change",function(){ var f=Array.from(input.files); input.value=""; cb(f); });
+}
+async function leggiTutti(files){ var out=[]; for(var i=0;i<files.length;i++){ out.push(leggiReport(await testo(files[i]), files[i].name)); } return out; }
+function unisci(reps, rischio){
+  var tutte=[], orfane=0;
+  reps.forEach(function(rp){ var r=rp.rischio||rischio; var o=operazioni(rp, r); orfane+=o.orfane; tutte=tutte.concat(o.ops); });
+  // lo stesso report caricato due volte non conta doppio
+  var visti={}; tutte=tutte.filter(function(o){ var k=o.ap+"|"+o.ch+"|"+o.verso+"|"+o.netto.toFixed(2); if(visti[k]) return false; visti[k]=1; return true; });
+  tutte.sort(function(a,b){ return a.tc-b.tc; });
+  return {ops:tutte, orfane:orfane};
+}
+function ricalcolaLive(){
+  if(!S.liveRep.length){ S.live=null; return; }
+  var r=parseFloat($("rischioLive").value);
+  var serve = S.liveRep.some(function(rp){ return !rp.rischio; });
+  if(serve && !(r>0)){ $("statoLive").innerHTML='<span class="errore">Scrivi il rischio % del live qui sotto: il report del conto non lo contiene.</span>'; S.live=null; return; }
+  var u=unisci(S.liveRep, r); S.live=u.ops;
+  $("statoLive").textContent=S.liveRep.map(function(x){return x.nome;}).join(", ")+" · "+u.ops.length+" operazioni chiuse"+(u.orfane?(" · "+u.orfane+" chiusure senza apertura"):"");
+}
+function ricalcolaBt(){
+  if(!S.btRep.length){ S.bt=null; return; }
+  var u=unisci(S.btRep, null); S.bt=u.ops;
+  $("statoBt").textContent=S.btRep.map(function(x){return x.nome;}).join(", ")+" · "+u.ops.length+" operazioni";
+}
+
+function avvia(){
+  costruisciStrategie();
+  var sc=$("scelta"); sc.innerHTML="";
+  STRAT.forEach(function(s){ var b=document.createElement("button"); b.className="chip"; b.type="button"; b.dataset.id=s.id;
+    var n=0; s.rif.forEach(function(rf){ n+=rf.t.filter(function(x){ return !s.tags || s.tags.indexOf(rf.tags[x[4]])>=0; }).length; });
+    b.innerHTML=esc(s.nome)+"<small>"+n+" operazioni di backtest</small>"; b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",function(){ scegli(s.id); }); sc.appendChild(b); });
+  scegli(STRAT.length?STRAT[0].id:null);
+}
+zona($("dropLive"),$("fileLive"),async function(files){
+  try{ S.liveRep=S.liveRep.concat(await leggiTutti(files));
+    var r=S.liveRep.find(function(x){return x.rischio;}); if(r && !$("rischioLive").value) $("rischioLive").value=r.rischio;
+    ricalcolaLive(); aggiorna(); }catch(e){ $("statoLive").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
+zona($("dropBt"),$("fileBt"),async function(files){
+  try{ S.btRep=S.btRep.concat(await leggiTutti(files)); ricalcolaBt(); mostraVeloce(); }
+  catch(e){ $("statoBt").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
+zona($("dropRif"),$("fileRif"),async function(files){
+  try{ var reps=await leggiTutti(files);
+    reps.forEach(function(rp){
+      if(!rp.rischio) throw new Error(rp.nome+": nel report non trovo il rischio % (serve un report del tester).");
+      var o=operazioni(rp, rp.rischio).ops; var tags=[]; o.forEach(function(x){ if(tags.indexOf(x.tag)<0) tags.push(x.tag); });
+      var id="u"+RIF.length;
+      RIF.push({id:id, nome:rp.nome.replace(/\.(html?|gz)$/i,""), simbolo:rp.simbolo, rischio:rp.rischio, tags:tags, nomiTag:{},
+        nota:rp.adattivo?"Questo backtest è girato col rischio adattivo acceso: la R è nominale, e il live va confrontato solo se gira con la stessa impostazione.":"",
+        fino:"", t:o.map(function(x){ return [x.ap, x.ch, x.verso, x.R, tags.indexOf(x.tag)]; })});
+      $("statoRif").textContent=rp.nome+" · "+o.length+" operazioni · aggiunta";
+    });
+    avvia(); scegli(RIF[RIF.length-1].id);
+  }catch(e){ $("statoRif").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
+$("fino").addEventListener("change",aggiorna);
+$("rischioLive").addEventListener("change",function(){ ricalcolaLive(); aggiorna(); });
+avvia();
+window.__monitor={S:S, calibra:calibra, orizzonte:orizzonte, leggiReport:leggiReport, operazioni:operazioni, tradeRif:tradeRif, STRAT:function(){return STRAT;}};
+})();
+</script>
