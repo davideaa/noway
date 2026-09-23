@@ -78,4 +78,8 @@ configurazione provata entra nel conteggio K.
 
 | # | data | cosa | esito |
 |---|---|---|---|
-| 1 | | valori a priori, USDJPY H1 2019–2023 | |
+| 1 | 2026-09-23 | valori a priori, USDJPY H1 2019–2022 (il report finisce al 2023-01-01) | **bocciata**: 1.433 operazioni (~358 all'anno), −0,113 R a operazione, **t −4,40**. Long −50 R, short −112 R: perdono tutte e due. Uscite: 503 target, 700 stop, 230 a tempo. Lo spread costa ~0,05 R (stop mediano 23 pip): anche prima dei costi l'ingresso perde. Il difetto è l'ingresso, non l'uscita |
+
+**Conclusione del #1:** su USDJPY H1 «riparte dopo la correzione» non
+regge: la correzione continua più spesso di quanto si pensasse. Il
+ritracciamento che funziona sull'oro H4 non si trasporta qui.
