@@ -1,0 +1,495 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font:14px/1.5 system-ui}</style></head><body>
+<title>È vera o è overfittata</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f7f6f3; --surface:#fcfcfb; --line:#e2e0da; --line-soft:#eeece7;
+  --ink:#16150f; --ink-2:#52514e; --ink-3:#86847c;
+  --neg:#b4472c; --ok:#1b8f63; --warn:#c98500; --acc:#2a78d6; --coda:#eda100; --spento:#c3c0b7;
+  --shadow:0 1px 2px rgba(20,18,10,.06), 0 8px 24px -16px rgba(20,18,10,.28);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme: dark;
+  --bg:#121211; --surface:#1a1a19; --line:#33332f; --line-soft:#252523;
+  --ink:#f6f5ef; --ink-2:#c3c2b7; --ink-3:#8b8a80;
+  --neg:#e0714f; --ok:#31b183; --warn:#dfa02b; --acc:#3987e5; --coda:#c98500; --spento:#4a4944;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121211; --surface:#1a1a19; --line:#33332f; --line-soft:#252523;
+  --ink:#f6f5ef; --ink-2:#c3c2b7; --ink-3:#8b8a80;
+  --neg:#e0714f; --ok:#31b183; --warn:#dfa02b; --acc:#3987e5; --coda:#c98500; --spento:#4a4944;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); line-height:1.55;
+  font-family:Archivo,"Helvetica Neue",Arial,sans-serif;
+  padding-block:30px 56px; padding-left:16px; padding-right:16px}
+.wrap{max-width:940px; margin:0 auto; display:flex; flex-direction:column; gap:22px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 10px}
+h1{font-size:clamp(30px,5.6vw,46px); font-weight:800; letter-spacing:-.024em;
+  margin:0 0 10px; text-wrap:balance; line-height:1.06}
+.sub{margin:0; color:var(--ink-2); max-width:66ch; font-size:15.5px}
+
+/* --- la domanda --- */
+.q{background:var(--surface); border:1px solid var(--line); border-radius:3px;
+  box-shadow:var(--shadow); overflow:hidden}
+.qh{padding:20px 22px 0; display:flex; gap:14px; align-items:flex-start; justify-content:space-between}
+.qh .num{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3);
+  letter-spacing:.1em; margin:0 0 4px}
+.qh h2{font-size:clamp(18px,2.6vw,22px); font-weight:700; margin:0; letter-spacing:-.016em; text-wrap:balance}
+.badge{flex:none; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.09em;
+  text-transform:uppercase; padding:4px 8px; border-radius:2px; border:1px solid; white-space:nowrap}
+.b-ok{color:var(--ok); border-color:var(--ok)}
+.b-warn{color:var(--warn); border-color:var(--warn)}
+.b-no{color:var(--neg); border-color:var(--neg)}
+.plot{padding:10px 10px 6px; position:relative}
+svg{display:block; width:100%; height:auto; overflow:visible}
+.say{padding:6px 22px 22px; display:flex; flex-direction:column; gap:10px}
+.say p{margin:0; font-size:14.5px; color:var(--ink-2); max-width:72ch}
+.say p b{color:var(--ink); font-weight:600}
+.say .risp{font-size:15.5px; color:var(--ink); font-weight:600; max-width:72ch}
+.say .risp em{font-style:normal; color:var(--ok)}
+.say .risp em.no{color:var(--neg)}
+.say .risp em.mid{color:var(--warn)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2); padding:12px 22px 0}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.sw{width:11px; height:11px; border-radius:2px; flex:none}
+
+/* --- verdetto --- */
+.fin{background:var(--surface); border:1px solid var(--line); border-radius:3px;
+  box-shadow:var(--shadow); padding:26px 24px}
+.fin .k{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 12px}
+.fin h2{font-size:clamp(24px,4.4vw,34px); font-weight:800; letter-spacing:-.022em;
+  margin:0 0 6px; line-height:1.1; text-wrap:balance}
+.fin h2 em{font-style:normal; color:var(--ok)}
+.fin .due{display:flex; flex-wrap:wrap; gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:3px; margin:20px 0 18px}
+.fin .due div{flex:1 1 180px; background:var(--surface); padding:14px 16px}
+.fin .due .k2{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-3)}
+.fin .due .v{font-size:26px; font-weight:700; letter-spacing:-.02em;
+  font-family:"IBM Plex Mono",monospace; line-height:1.2}
+.fin .due .n{font-size:12px; color:var(--ink-2)}
+.fin p{margin:0 0 12px; font-size:14.5px; color:var(--ink-2); max-width:74ch}
+.fin p b{color:var(--ink); font-weight:600}
+.fin p:last-child{margin-bottom:0}
+
+.scroll{overflow-x:auto; padding:0 22px 20px}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:440px}
+th,td{padding:8px 10px; text-align:right; border-bottom:1px solid var(--line-soft)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  font-family:"IBM Plex Mono",monospace; font-weight:500; border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+.dim{color:var(--ink-3)} .cneg{color:var(--neg)} .cok{color:var(--ok)}
+.tip{position:absolute; pointer-events:none; opacity:0; transition:opacity .1s; z-index:5;
+  background:var(--surface); border:1px solid var(--line); border-radius:3px;
+  box-shadow:var(--shadow); padding:8px 11px; font-size:12.5px; min-width:120px}
+.tip .dt{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3); margin-bottom:3px}
+.tip .row{display:flex; justify-content:space-between; gap:12px}
+.tip .row b{font-family:"IBM Plex Mono",monospace; font-weight:600}
+@media (max-width:560px){ .qh,.say,.legend{padding-left:15px; padding-right:15px}
+  .scroll{padding-left:15px; padding-right:15px} .fin{padding:20px 16px} }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Oro + Nasdaq · 2.749 operazioni · 2019.01 → 2026.09</p>
+    <h1>È vera o è overfittata?</h1>
+    <p class="sub">Sei domande, in ordine. Ognuna ha un grafico, una risposta in parole
+      semplici, e un'etichetta che dice <b>quanto è solida la prova</b>. Dove la prova non c'è,
+      è scritto che non c'è. In fondo, la risposta secca.</p>
+  </header>
+
+  <!-- 1 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 1</p>
+      <h2>Che tipo di strategia è? Cosa devo aspettarmi di vedere?</h2></div>
+      <span class="badge b-ok">prova solida</span></div>
+    <div class="plot" id="p1"><div class="tip" id="t1"></div></div>
+    <div class="say">
+      <p class="risp">È un <em>inseguitore di tendenza</em>: perde spesso poco, guadagna
+        raramente molto.</p>
+      <p>Il grafico è il conteggio di tutte le 2.749 operazioni, ordinate per risultato.
+        La montagna sta a sinistra dello zero: <b>l'operazione tipica perde</b> (la mediana è
+        −0,024 R). Poi c'è una coda lunga a destra che non finisce mai — fino a +10,8 R.</p>
+      <p><b>È normale per questo tipo di strategia, non è un difetto.</b> Un sistema che
+        insegue il trend accetta tanti piccoli stop per restare dentro quando parte il
+        movimento grosso. Se qualcuno ti mostra un inseguitore di tendenza che vince il 70%
+        delle volte, o ha un take profit stretto che gli amputa i guadagni, o c'è un errore.</p>
+      <p><b>Cosa vuol dire per te:</b> guardandolo giorno per giorno sembrerà che non
+        funzioni. È il prezzo d'ingresso di questa famiglia di strategie.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 2</p>
+      <h2>Guadagna, e in quanti anni? O è un anno fortunato?</h2></div>
+      <span class="badge b-ok">prova solida</span></div>
+    <div class="plot" id="p2"><div class="tip" id="t2"></div></div>
+    <div class="say">
+      <p class="risp">Otto anni su otto in utile. <em>Nessun anno in perdita.</em></p>
+      <p>Tutto in R, così il reinvestimento non gonfia gli anni finali e un anno si confronta
+        davvero con un altro. Il 2025 è il migliore (+101,7 R) e vale il 29% del totale: è
+        tanto, e va detto. Ma sotto non c'è il vuoto — quattro anni stanno sopra i 58 R.</p>
+      <p><b>Il 2019 è l'unico quasi fermo</b> (+2,9 R). È l'anno che nei test di robustezza
+        crolla sempre, perché non aveva niente da cui attingere.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 3</p>
+      <h2>Dipende da pochi colpi fortunati?</h2></div>
+      <span class="badge b-ok">prova solida</span></div>
+    <div class="plot" id="p3"><div class="tip" id="t3"></div></div>
+    <div class="say">
+      <p class="risp">No. <em>Regge anche cancellando per definizione tutti i colpi grossi.</em></p>
+      <p>Qui non si tolgono operazioni scelte a mano: si <b>azzoppa ogni vincita</b> sopra una
+        soglia, su tutte e 2.749. È il modo più severo di chiedere «e se la coda non ci fosse
+        stata?».</p>
+      <p>Tagliando ogni vincita a <b>3 R</b> — cioè buttando via ogni singolo colpo grosso di
+        sette anni — restano comunque <b>+180 R</b> e sette anni su otto in utile.</p>
+      <p><b>Dove invece si rompe: sotto i 2 R.</b> A 1,5 R di tetto il totale va a −81,8 R.
+        Serve poter incassare vincite grandi, ed è esattamente il motivo per cui non c'è take
+        profit e il trailing è largo. <b>Chi tocca quei due parametri per «incassare prima»
+        rompe il sistema.</b></p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 4</p>
+      <h2>I costi se la mangiano?</h2></div>
+      <span class="badge b-warn">solida, ma incompleta</span></div>
+    <div class="plot" id="p4"><div class="tip" id="t4"></div></div>
+    <div class="say">
+      <p class="risp">No, c'è <em>cinque volte e mezzo di margine</em> — ma un pezzo del
+        costo non è misurabile.</p>
+      <p>Oggi i costi si prendono il 17% del guadagno lordo (73,6 R su 423,6). Il grafico
+        mostra cosa resta moltiplicandoli: <b>il sistema muore a 5,5 volte quelli attuali</b>.
+        Nessun broker peggiora di cinque volte.</p>
+      <p><b>Il buco nella prova:</b> le commissioni sono zero perché è un conto dove tutto sta
+        nello spread — e <b>lo spread è già dentro i prezzi, dal report non si può
+        separare</b>. Quindi quel 17% è solo lo swap: il costo vero è più alto, e di quanto
+        non lo so dire. Il margine di 5,5× è quindi ottimista.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 5</p>
+      <h2>È fortuna? Questa è la domanda vera.</h2></div>
+      <span class="badge b-ok">prova solida</span></div>
+    <div class="plot" id="p5"><div class="tip" id="t5"></div></div>
+    <div class="say">
+      <p class="risp">No. Sul <em>fuori campione</em>, dove non è stata provata nessuna
+        configurazione, il risultato è forte.</p>
+      <p>La <b>t</b> misura quanto il guadagno è grande rispetto al rumore. Il problema è che
+        una t non si confronta con 2: se provi tante configurazioni, il caso da solo ti regala
+        una t alta. Con 272 configurazioni la soglia sale verso <b>3,3</b>. È la barra grigia
+        nel grafico.</p>
+      <p><b>Ma il fuori campione non va sgonfiato</b>, perché lì non si è provato niente: si è
+        guardato una volta sola. E lì la t è <b>4,36</b> — probabilità che sia caso: circa
+        <b>6 su un milione</b>.</p>
+      <p><b>Il segnale scomodo, e va detto:</b> il fuori campione va <b>meglio</b> del dentro
+        campione (+66,6 R all'anno contro +33,9). Di solito è il contrario. Qui la spiegazione
+        c'è — il 2024-2026 è stato eccezionale per l'oro — e vuol dire una cosa sola:
+        <b>per fare i piani si usa il numero basso, non l'alto.</b></p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="q">
+    <div class="qh"><div><p class="num">DOMANDA 6</p>
+      <h2>Quanto può rendere un anno, e quanto può andare male?</h2></div>
+      <span class="badge b-warn">vale solo se l'edge tiene</span></div>
+    <div class="plot" id="p6"><div class="tip" id="t6"></div></div>
+    <div class="say">
+      <p class="risp">Anno mediano <em>+44,7 R</em>, un anno su venti in perdita.</p>
+      <p>10.000 anni simulati ripescando le operazioni vere a blocchi di 20, così le serie di
+        perdite non si spezzano. Gli otto anni veri cadono dentro la distribuzione senza
+        anomalie: quattro sopra la mediana, quattro sotto.</p>
+      <p><b>Il limite di questa risposta, ed è grosso:</b> il simulatore ripesca da quello che
+        è già successo. <b>Non sa immaginare un mercato mai visto.</b> Dice cosa succede se il
+        futuro assomiglia al passato — non se lo farà.</p>
+    </div>
+  </section>
+
+  <!-- verdetto -->
+  <section class="fin">
+    <p class="k">La risposta secca</p>
+    <h2><em>Non è overfittata.</em> Ma il numero da usare per i piani<br>è quello basso, non quello che hai visto.</h2>
+    <div class="due">
+      <div><div class="k2">Prova che non sia caso</div><div class="v" style="color:var(--ok)">6 su 1 mln</div>
+        <div class="n">fuori campione, t 4,36, non sgonfiabile</div></div>
+      <div><div class="k2">Da usare per i piani</div><div class="v">~29%</div>
+        <div class="n">all'anno composto, scenario prudente</div></div>
+      <div><div class="k2">Drawdown da mettere in conto</div><div class="v" style="color:var(--neg)">34–37%</div>
+        <div class="n">95° percentile · il tuo tetto era 33%</div></div>
+    </div>
+    <p><b>Perché dico che non è overfittata.</b> Tre prove indipendenti puntano nella stessa
+      direzione: il fuori campione speso una volta sola dà t 4,36 senza bisogno di correzioni;
+      la strategia sopravvive cancellando ogni vincita sopra 3 R; e l'analisi dei regimi non
+      trova nessuna delle 25 variabili significativa, cioè l'edge non è appeso a una
+      particolare condizione di mercato. Un sistema sovra-ottimizzato fallisce il primo di
+      questi tre test, non li passa tutti.</p>
+    <p><b>Perché il numero alto non va usato.</b> Il fuori campione ha reso il doppio del
+      dentro campione. Il 2024-2026 è stato un periodo eccezionale per l'oro. Pianificare sul
+      +66 R all'anno significa scommettere che si ripeta; pianificare sul +34 significa
+      pretendere che basti il periodo normale.</p>
+    <p><b>La domanda che mi hai fatto e a cui nessuno può rispondere onestamente.</b> «Che
+      probabilità c'è che continui a rendere?» <b>Non è calcolabile da un backtest, e chi ti
+      dà una percentuale se la sta inventando.</b> Quello che ho misurato è la probabilità che
+      l'edge <b>ci fosse</b> nei dati — molto alta. Che <b>resti</b> dipende dal fatto che il
+      mercato continui a fare movimenti lunghi, e nessun dato storico lo garantisce. Il
+      campione vero non è 2.749 operazioni: sono <b>3 o 4 regimi di mercato</b>, e per questa
+      domanda contano quelli.</p>
+    <p><b>Le tre cose che restano aperte, e non sono piccole.</b> Il tetto di drawdown che
+      avevi posto tu è sforato. La gamba del nasdaq non ha mai avuto il test del plateau e non
+      si sa quante configurazioni siano state provate quando è stata costruita altrove —
+      quindi per quella gamba la t <b>non si può sgonfiare</b>. E la stessa logica non è mai
+      stata provata su un altro strumento: è il test che separa «meccanismo vero» da «cucito
+      addosso a questi due mercati», e costa mezz'ora.</p>
+  </section>
+
+</div>
+
+<script>
+window.V={"tot":{"n":2749,"s":350.0,"m":0.1273,"sd":1.336,"t":5.0,"p":2.915791473437473e-07},"gambe":{"oro":{"n":1123,"s":177.1,"m":0.1577,"sd":1.62,"t":3.26,"p":0.0005539526378644},"nas":{"n":1626,"s":172.9,"m":0.1064,"sd":1.098,"t":3.91,"p":4.67687786980809e-05}},"is":{"n":1765,"s":169.4,"m":0.096,"sd":1.344,"t":3.0,"p":0.0013526364357390912},"oos":{"n":984,"s":180.6,"m":0.1835,"sd":1.32,"t":4.36,"p":6.424550946665848e-06},"is_g":{"oro":{"n":715,"s":76.5,"m":0.107,"sd":1.634,"t":1.75,"p":0.0400299520400408},"nas":{"n":1050,"s":92.9,"m":0.0885,"sd":1.105,"t":2.59,"p":0.004736700179932358}},"oos_g":{"oro":{"n":408,"s":100.6,"m":0.2466,"sd":1.594,"t":3.13,"p":0.0008886358398261521},"nas":{"n":576,"s":80.0,"m":0.1389,"sd":1.084,"t":3.08,"p":0.001050916565217629}},"is_anni":5.0,"oos_anni":2.71,"anni":7.7,"soglie":{"10":2.15,"25":2.54,"50":2.8,"100":3.03,"272":3.35},"isto":{"x":[-3.0,-2.75,-2.5,-2.25,-2.0,-1.75,-1.5,-1.25,-1.0,-0.75,-0.5,-0.25,0.0,0.25,0.5,0.75,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.25,3.5,3.75,4.0,4.25,4.5,4.75,5.0,5.25,5.5,5.75,6.0,6.25,6.5,6.75,7.0,7.25,7.5,7.75,8.0,8.25,8.5,8.75,9.0,9.25,9.5,9.75,10.0,10.25,10.5,10.75,11.0],"y":[0,1,0,0,4,18,50,177,807,66,83,187,282,285,168,138,95,77,61,54,35,31,20,19,11,9,9,8,5,8,6,3,4,4,3,2,1,1,3,2,3,1,1,2,0,1,1,1,0,0,0,0,1,0,0,1,0]},"mediana":-0.024,"stress":[{"k":1,"r":350.0},{"k":2,"r":276.4},{"k":3,"r":202.8},{"k":4,"r":129.3},{"k":5,"r":55.7},{"k":6,"r":-17.9},{"k":7,"r":-91.5},{"k":8,"r":-165.1}],"tetto":[{"cap":null,"r":350.0},{"cap":5,"r":293.8},{"cap":4,"r":251.9},{"cap":3,"r":180.1},{"cap":2,"r":45.0},{"cap":1.5,"r":-81.8}],"mc":{"x":[-60,-55,-50,-45,-40,-35,-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,180],"y":[0,1,5,2,11,12,25,38,48,78,143,160,202,294,345,445,532,622,660,694,724,671,673,613,572,507,472,344,300,214,189,129,94,67,41,25,18,9,10,5,2,0,1,1,1,0,0,1,0],"p":{"5":-0.5,"25":26.4,"50":44.7,"75":64.3,"95":92.3},"neg":5.2,"n_anno":357},"per_anno":[["2019",2.9,344],["2020",60.7,345],["2021",30.0,358],["2022",17.4,362],["2023",58.4,356],["2024",18.6,362],["2025",101.7,373],["2026",60.3,249]]};
+</script>
+<script>
+(function(){
+var V=window.V; if(!V) return;
+var NS="http://www.w3.org/2000/svg";
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function fmt(v,d){return (v>=0?"+":"−")+Math.abs(v).toFixed(d==null?1:d).replace(".",",");}
+function txt(s,a){var t=el("text",a); t.textContent=s; return t;}
+var MONO="IBM Plex Mono, monospace";
+function place(tip,lx,rw){var s=lx>rw*.6;
+  tip.style.left=s?"":(lx+14)+"px"; tip.style.right=s?(rw-lx+14)+"px":"";
+  tip.style.top="10px"; tip.style.opacity=1;}
+
+/* 1 — distribuzione */
+(function(){
+  var I=V.isto, W=900,H=260,mL=44,mR=16,mT=18,mB=32;
+  var n=I.x.length, mx=Math.max.apply(null,I.y);
+  var bw=(W-mL-mR)/n;
+  var X=function(i){return mL+i*bw;};
+  var Y=function(v){return mT+(1-v/mx)*(H-mT-mB);};
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Distribuzione dei risultati: molte piccole perdite, coda lunga di vincite"});
+  var zero=I.x.findIndex(function(v){return v>=0;});
+  svg.appendChild(el("rect",{x:mL,y:mT,width:(X(zero)-mL).toFixed(1),height:H-mT-mB,
+    fill:"var(--neg)",opacity:.05}));
+  I.y.forEach(function(v,i){
+    if(!v) return;
+    svg.appendChild(el("rect",{x:(X(i)+.4).toFixed(1),y:Y(v).toFixed(1),
+      width:Math.max(bw-.8,1).toFixed(1),height:(H-mB-Y(v)).toFixed(1),
+      fill:I.x[i]>=2?"var(--coda)":(I.x[i]<0?"var(--neg)":"var(--acc)"),
+      opacity:I.x[i]>=2?.95:.7}));
+  });
+  svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:H-mB,y2:H-mB,stroke:"var(--line)","stroke-width":1.25}));
+  svg.appendChild(el("line",{x1:X(zero),x2:X(zero),y1:mT,y2:H-mB,stroke:"var(--ink-3)","stroke-width":1.25}));
+  [-2,0,2,4,6,8,10].forEach(function(g){
+    var i=I.x.findIndex(function(v){return v>=g;});
+    if(i<0) return;
+    svg.appendChild(txt((g>0?"+":"")+g+" R",{x:X(i),y:H-mB+18,"text-anchor":"middle",
+      fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+  });
+  svg.appendChild(txt("l'operazione tipica perde",{x:X(zero)-10,y:mT+14,"text-anchor":"end",
+    fill:"var(--neg)","font-size":11.5,"font-weight":600,"font-family":MONO}));
+  svg.appendChild(txt("la coda che paga tutto  →",{x:X(zero)+14,y:mT+14,
+    fill:"var(--coda)","font-size":11.5,"font-weight":600,"font-family":MONO}));
+  document.getElementById("p1").appendChild(svg);
+})();
+
+/* 2 — anni */
+(function(){
+  var A=V.per_anno, W=900,H=250,mL=46,mR=16,mT=22,mB=32;
+  var bw=(W-mL-mR)/A.length, bar=bw*.52;
+  var Y=function(v){return mT+(110-v)/(110-0)*(H-mT-mB);};
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":"R per anno, otto anni tutti positivi"});
+  for(var g=0;g<=100;g+=25){
+    svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:Y(g),y2:Y(g),
+      stroke:g===0?"var(--line)":"var(--line-soft)","stroke-width":g===0?1.25:1}));
+    svg.appendChild(txt((g>0?"+":"")+g,{x:mL-9,y:Y(g)+4,"text-anchor":"end",fill:"var(--ink-3)",
+      "font-size":11,"font-family":MONO}));
+  }
+  var tip=document.getElementById("t2");
+  A.forEach(function(r,i){
+    var cx=mL+i*bw+bw/2;
+    svg.appendChild(el("rect",{x:(cx-bar/2).toFixed(1),y:Y(r[1]).toFixed(1),width:bar.toFixed(1),
+      height:Math.max(Y(0)-Y(r[1]),2).toFixed(1),fill:"var(--acc)",rx:2,opacity:r[0]==="2025"?1:.78}));
+    svg.appendChild(txt(fmt(r[1],0),{x:cx,y:(Y(r[1])-7).toFixed(1),"text-anchor":"middle",
+      fill:"var(--ink-2)","font-size":11.5,"font-weight":600,"font-family":MONO}));
+    svg.appendChild(txt(r[0]+(r[0]==="2026"?"*":""),{x:cx,y:H-mB+18,"text-anchor":"middle",
+      fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+    var hz=el("rect",{x:(mL+i*bw).toFixed(1),y:mT,width:bw.toFixed(1),height:H-mT-mB,fill:"transparent"});
+    hz.addEventListener("mouseenter",function(){
+      tip.innerHTML='<div class="dt">'+r[0]+(r[0]==="2026"?" · fino a settembre":"")+'</div>'+
+        '<div class="row"><i>risultato</i><b>'+fmt(r[1])+' R</b></div>'+
+        '<div class="row"><i>operazioni</i><b>'+r[2]+'</b></div>';
+      var rr=svg.getBoundingClientRect(); place(tip,cx/W*rr.width,rr.width);
+    });
+    hz.addEventListener("mouseleave",function(){tip.style.opacity=0;});
+    svg.appendChild(hz);
+  });
+  svg.appendChild(txt("* anno non finito",{x:W-mR,y:mT-6,"text-anchor":"end",fill:"var(--ink-3)",
+    "font-size":10.5,"font-family":MONO}));
+  document.getElementById("p2").appendChild(svg);
+})();
+
+/* 3 — tetto */
+(function(){
+  var T=V.tetto, W=900,H=230,mL=46,mR=16,mT=22,mB=36;
+  var bw=(W-mL-mR)/T.length, bar=bw*.5;
+  var Y=function(v){return mT+(380-v)/(380-(-120))*(H-mT-mB);};
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":"Totale in R tagliando le vincite a vari tetti"});
+  [-100,0,100,200,300].forEach(function(g){
+    svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:Y(g),y2:Y(g),
+      stroke:g===0?"var(--line)":"var(--line-soft)","stroke-width":g===0?1.25:1}));
+    svg.appendChild(txt((g>0?"+":"")+g,{x:mL-9,y:Y(g)+4,"text-anchor":"end",fill:"var(--ink-3)",
+      "font-size":11,"font-family":MONO}));
+  });
+  T.forEach(function(r,i){
+    var cx=mL+i*bw+bw/2, neg=r.r<0;
+    svg.appendChild(el("rect",{x:(cx-bar/2).toFixed(1),y:Y(Math.max(0,r.r)).toFixed(1),
+      width:bar.toFixed(1),height:Math.max(Math.abs(Y(r.r)-Y(0)),2).toFixed(1),
+      fill:neg?"var(--neg)":(r.cap===null?"var(--ok)":(r.cap>=3?"var(--acc)":"var(--warn)")),rx:2}));
+    svg.appendChild(txt(fmt(r.r,0),{x:cx,y:(neg?Y(r.r)+15:Y(r.r)-7).toFixed(1),"text-anchor":"middle",
+      fill:neg?"var(--neg)":"var(--ink-2)","font-size":11.5,"font-weight":600,"font-family":MONO}));
+    svg.appendChild(txt(r.cap===null?"com'è":("max "+String(r.cap).replace(".",",")+" R"),
+      {x:cx,y:H-mB+18,"text-anchor":"middle",fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+  });
+  svg.appendChild(txt("← ogni vincita tagliata a questo tetto",{x:mL+bw*1.5,y:H-mB+32,
+    fill:"var(--ink-3)","font-size":10.5,"font-family":MONO}));
+  document.getElementById("p3").appendChild(svg);
+})();
+
+/* 4 — costi */
+(function(){
+  var S=V.stress, W=900,H=220,mL=46,mR=52,mT=20,mB=34;
+  var X=function(k){return mL+(k-1)/7*(W-mL-mR);};
+  var Y=function(v){return mT+(380-v)/(380-(-200))*(H-mT-mB);};
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":"Quanto resta moltiplicando i costi"});
+  [-200,-100,0,100,200,300].forEach(function(g){
+    svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:Y(g),y2:Y(g),
+      stroke:g===0?"var(--line)":"var(--line-soft)","stroke-width":g===0?1.25:1}));
+    svg.appendChild(txt((g>0?"+":"")+g,{x:mL-9,y:Y(g)+4,"text-anchor":"end",fill:"var(--ink-3)",
+      "font-size":11,"font-family":MONO}));
+  });
+  var d="";
+  S.forEach(function(p,i){ d+=(i?"L":"M")+X(p.k).toFixed(1)+" "+Y(p.r).toFixed(1); });
+  svg.appendChild(el("path",{d:d,fill:"none",stroke:"var(--acc)","stroke-width":2.4,"stroke-linejoin":"round"}));
+  S.forEach(function(p){
+    svg.appendChild(el("circle",{cx:X(p.k).toFixed(1),cy:Y(p.r).toFixed(1),r:4,
+      fill:p.r<0?"var(--neg)":"var(--acc)",stroke:"var(--surface)","stroke-width":1.5}));
+    svg.appendChild(txt(p.k+"×",{x:X(p.k),y:H-mB+18,"text-anchor":"middle",fill:"var(--ink-3)",
+      "font-size":11,"font-family":MONO}));
+  });
+  // il punto in cui incrocia lo zero
+  var a=S.filter(function(p){return p.r>0;}).pop(), b=S.filter(function(p){return p.r<=0;})[0];
+  var kx=a.k+(a.r/(a.r-b.r))*(b.k-a.k);
+  svg.appendChild(el("line",{x1:X(kx),x2:X(kx),y1:mT,y2:H-mB,stroke:"var(--neg)","stroke-width":1.5,
+    "stroke-dasharray":"4 3"}));
+  svg.appendChild(txt("muore a "+kx.toFixed(1).replace(".",",")+"×",{x:X(kx)+7,y:mT+12,
+    fill:"var(--neg)","font-size":11.5,"font-weight":700,"font-family":MONO}));
+  svg.appendChild(txt("costi di oggi",{x:X(1),y:mT-4,"text-anchor":"middle",fill:"var(--ink-3)",
+    "font-size":10.5,"font-family":MONO}));
+  document.getElementById("p4").appendChild(svg);
+})();
+
+/* 5 — t */
+(function(){
+  var W=900,H=250,mL=120,mR=90,mT=24,mB=30;
+  var righe=[["Dentro campione",V.is.t,"var(--spento)","2019–2023 · qui si è ottimizzato"],
+             ["FUORI campione",V.oos.t,"var(--ok)","2024–2026 · guardato una volta sola"],
+             ["Tutto insieme",V.tot.t,"var(--acc)","2.749 operazioni"]];
+  var mx=6.0;
+  var X=function(v){return mL+v/mx*(W-mL-mR);};
+  var bh=34, gap=18;
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"La t dentro e fuori campione contro le soglie del rumore"});
+  [0,1,2,3,4,5,6].forEach(function(g){
+    svg.appendChild(el("line",{x1:X(g),x2:X(g),y1:mT-6,y2:H-mB,
+      stroke:g===0?"var(--line)":"var(--line-soft)","stroke-width":1}));
+    svg.appendChild(txt(g,{x:X(g),y:H-mB+18,"text-anchor":"middle",fill:"var(--ink-3)",
+      "font-size":11,"font-family":MONO}));
+  });
+  // fascia del rumore fino a 3,35
+  svg.appendChild(el("rect",{x:X(0),y:mT-6,width:(X(3.35)-X(0)).toFixed(1),height:H-mB-mT+6,
+    fill:"var(--neg)",opacity:.07}));
+  svg.appendChild(el("line",{x1:X(3.35),x2:X(3.35),y1:mT-6,y2:H-mB,stroke:"var(--neg)",
+    "stroke-width":1.5,"stroke-dasharray":"4 3"}));
+  svg.appendChild(txt("3,35",{x:X(3.35),y:mT-12,"text-anchor":"middle",fill:"var(--neg)",
+    "font-size":11,"font-weight":700,"font-family":MONO}));
+  svg.appendChild(txt("quanto regala il caso con 272 configurazioni provate",
+    {x:X(3.35)-8,y:H-mB-6,"text-anchor":"end",fill:"var(--neg)","font-size":10.5,"font-family":MONO}));
+  righe.forEach(function(r,i){
+    var y=mT+i*(bh+gap);
+    svg.appendChild(el("rect",{x:X(0),y:y,width:Math.max(X(r[1])-X(0),2).toFixed(1),height:bh,
+      fill:r[2],rx:2,opacity:i===1?1:.8}));
+    svg.appendChild(txt(r[0],{x:mL-12,y:y+15,"text-anchor":"end",fill:"var(--ink)",
+      "font-size":12.5,"font-weight":i===1?700:500}));
+    svg.appendChild(txt(r[3],{x:mL-12,y:y+29,"text-anchor":"end",fill:"var(--ink-3)","font-size":10.5}));
+    svg.appendChild(txt("t "+String(r[1]).replace(".",","),{x:X(r[1])+8,y:y+bh/2+4,
+      fill:r[2],"font-size":13,"font-weight":700,"font-family":MONO}));
+  });
+  document.getElementById("p5").appendChild(svg);
+})();
+
+/* 6 — distribuzione dell'anno */
+(function(){
+  var M=V.mc, W=900,H=268,mL=44,mR=16,mT=26,mB=52;
+  var n=M.x.length, mx=Math.max.apply(null,M.y), bw=(W-mL-mR)/n;
+  var X=function(v){return mL+(v-M.x[0])/(M.x[n-1]+5-M.x[0])*(W-mL-mR);};
+  var Y=function(v){return mT+(1-v/mx)*(H-mT-mB);};
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Distribuzione di 10.000 anni simulati con gli otto anni veri"});
+  M.y.forEach(function(v,i){
+    if(!v) return;
+    svg.appendChild(el("rect",{x:(X(M.x[i])+.4).toFixed(1),y:Y(v).toFixed(1),
+      width:Math.max(bw-.8,1).toFixed(1),height:(H-mB-Y(v)).toFixed(1),
+      fill:M.x[i]<0?"var(--neg)":"var(--acc)",opacity:M.x[i]<0?.7:.45}));
+  });
+  svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:H-mB,y2:H-mB,stroke:"var(--line)","stroke-width":1.25}));
+  [-50,0,50,100,150].forEach(function(g){
+    svg.appendChild(txt((g>0?"+":"")+g+" R",{x:X(g),y:mT-10,"text-anchor":"middle",
+      fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+  });
+  svg.appendChild(el("line",{x1:X(M.p["50"]),x2:X(M.p["50"]),y1:mT-4,y2:H-mB,
+    stroke:"var(--acc)","stroke-width":2}));
+  svg.appendChild(txt("mediana "+fmt(M.p["50"]),{x:X(M.p["50"])+7,y:mT+6,fill:"var(--acc)",
+    "font-size":11.5,"font-weight":700,"font-family":MONO}));
+  svg.appendChild(txt(String(M.neg).replace(".",",")+"% degli anni in perdita",
+    {x:X(-55),y:mT+6,fill:"var(--neg)","font-size":11,"font-weight":600,"font-family":MONO}));
+  // Gli anni veri, come tacche sotto l'asse. Tre di loro (+58,4 / +60,3 / +60,7)
+  // finiscono a meno di 2 R l'uno dall'altro: nessuna disposizione di etichette li
+  // separa, quindi si etichettano solo i due estremi e le altre restano tacche.
+  var estremi={};
+  var ord=V.per_anno.slice().sort(function(u,v){return u[1]-v[1];});
+  estremi[ord[0][0]]="peggiore"; estremi[ord[ord.length-1][0]]="migliore";
+  V.per_anno.forEach(function(r){
+    var x=X(r[1]), nome=estremi[r[0]];
+    svg.appendChild(el("line",{x1:x,x2:x,y1:H-mB,y2:H-mB+(nome?14:8),
+      stroke:nome?"var(--ink)":"var(--ink-3)","stroke-width":nome?1.75:1.25}));
+    if(nome) svg.appendChild(txt(r[0],{x:x,y:H-mB+27,"text-anchor":"middle",
+      fill:"var(--ink-2)","font-size":10.5,"font-weight":600,"font-family":MONO}));
+  });
+  svg.appendChild(txt("ogni tacca in basso e\u0027 uno degli otto anni veri",{x:W-mR,y:mT+6,
+    "text-anchor":"end",fill:"var(--ink-3)","font-size":10.5,"font-family":MONO}));
+  document.getElementById("p6").appendChild(svg);
+})();
+})();
+</script>
+
+</body></html>

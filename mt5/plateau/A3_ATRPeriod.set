@@ -1,0 +1,58 @@
+; NAS100 v2.57 - test del plateau - A3_ATRPeriod
+; Caselle accese: ATRPeriod
+; PASSATE ATTESE: 7
+; Tutti gli altri parametri restano ai valori scelti.
+; Impostazioni -> Ottimizzazione: ALGORITMO COMPLETO LENTO (non genetico).
+
+; --- Core strategy ---
+FastEMAPeriod=12||12||0||12||N
+SlowEMAPeriod=120||120||0||120||N
+ATRPeriod=16||8||4||32||Y
+ATRStopMultiplier=8.0||8.0||0||8.0||N
+TrailActivationR=0.50||0.50||0||0.50||N
+SignalMode=0||0||0||0||N
+TrailUsesClosedBar=true||true||0||true||N
+TrailMode=4||4||0||4||N
+TrailATRBuffer=0.50||0.50||0||0.50||N
+MaxTradesPerItalyDay=1||1||0||1||N
+
+; --- Fixed entry filter - Mode 3 checkpoint ---
+FixedMinBodyToRange=0.075||0.075||0||0.075||N
+FixedMinEMADistanceATR=0.05||0.05||0||0.05||N
+
+; --- CARD-COUNT ADAPTIVE RISK ---
+RiskPercent=1.50||1.50||0||1.50||N
+RiskBase=0||0||0||0||N
+UseAdaptiveRisk=true||true||0||true||N
+AdaptiveRiskFormula=3||3||0||3||N
+AdaptiveStrength=0.50||0.50||0||0.50||N
+AdaptiveReferencePeriod=200||200||0||200||N
+AdaptiveShortWindow=20||20||0||20||N
+AdaptiveMinMultiplier=0.50||0.50||0||0.50||N
+AdaptiveMaxMultiplier=2.00||2.00||0||2.00||N
+DirectionalQualityWindow=20||20||0||20||N
+DirectionalQualityLow=0.20||0.20||0||0.20||N
+DirectionalQualityHigh=0.45||0.45||0||0.45||N
+
+; --- CARD-COUNT NORMALIZATION / DRAWDOWN CONTROL ---
+UseRollingMarketCenter=true||true||0||true||N
+MarketCenterWindow=200||200||0||200||N
+MarketCenterMinSamples=20||20||0||20||N
+UseEquityHealthThrottle=false||false||0||false||N
+EquityThrottleK=1.00||1.00||0||1.00||N
+EquityThrottleFloor=0.50||0.50||0||0.50||N
+MagicNumber=1208120||1208120||0||1208120||N
+MaxDeviationPoints=50||50||0||50||N
+PrintDebug=false||false||0||false||N
+WriteAdaptiveAuditCSV=false||false||0||false||N
+WriteRegimeResearchCSV=false||false||0||false||N
+
+; --- Broker server time -> Italy conversion ---
+BrokerTimeMode=4||4||0||4||N
+FixedBrokerUTCOffsetHours=0.0||0.0||0||0.0||N
+
+; --- Session controls ---
+NYRTHCloseHourET=16||16||0||16||N
+NYRTHCloseMinuteET=0||0||0||0||N
+ForceCloseAtNYRTHClose=false||false||0||false||N
+AllowNewEntryIfPreviousPositionStillOpen=false||false||0||false||N

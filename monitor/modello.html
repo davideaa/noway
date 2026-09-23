@@ -1,0 +1,1062 @@
+<title>Monitor live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f4f0; --surface:#fcfcfb; --sunk:#eeece6; --line:#dcdad2; --line-soft:#e9e7e1;
+  --ink:#16150f; --ink-2:#4f4e4a; --ink-3:#85837b;
+  --ok:#1b8f63; --ok-bg:#e1f2ea; --warn:#b67800; --warn-bg:#fbefd6; --neg:#b4472c; --neg-bg:#f8e3dc;
+  --zv:#bfe3d2; --zg:#f3dca6; --zr:#eab3a3;
+  --acc:#2a78d6; --band:#2a78d6; --bandA:.16; --bandB:.08; --live:#16150f; --stopdd:#c96a1d;
+  --shadow:0 1px 2px rgba(20,18,10,.06), 0 8px 22px -16px rgba(20,18,10,.28);
+  --sans:Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme: dark;
+  --bg:#111110; --surface:#1a1a18; --sunk:#141413; --line:#35342f; --line-soft:#272623;
+  --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
+  --ok:#35b585; --ok-bg:#142a20; --warn:#e0a52f; --warn-bg:#2d2311; --neg:#e7765a; --neg-bg:#301b15;
+  --zv:#1f4a37; --zg:#5a4516; --zr:#62291c;
+  --acc:#4a92ea; --band:#4a92ea; --bandA:.3; --bandB:.15; --live:#f5f4ee; --stopdd:#e89148;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#111110; --surface:#1a1a18; --sunk:#141413; --line:#35342f; --line-soft:#272623;
+  --ink:#f5f4ee; --ink-2:#c6c5bb; --ink-3:#8c8b82;
+  --ok:#35b585; --ok-bg:#142a20; --warn:#e0a52f; --warn-bg:#2d2311; --neg:#e7765a; --neg-bg:#301b15;
+  --zv:#1f4a37; --zg:#5a4516; --zr:#62291c;
+  --acc:#4a92ea; --band:#4a92ea; --bandA:.3; --bandB:.15; --live:#f5f4ee; --stopdd:#e89148;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.5;
+  padding-block:22px 56px; padding-left:16px; padding-right:16px; font-size:14.5px}
+.wrap{max-width:1080px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+h1{font-size:clamp(24px,4.2vw,32px); font-weight:800; letter-spacing:-.02em; margin:0; line-height:1.1}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px}
+.testa{display:flex; flex-wrap:wrap; gap:14px 24px; align-items:flex-end; justify-content:space-between}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:5px; box-shadow:var(--shadow)}
+.ph{padding:16px 20px 2px; display:flex; flex-wrap:wrap; gap:6px 18px; align-items:baseline; justify-content:space-between}
+.ph h2{font-size:16.5px; font-weight:700; margin:0; letter-spacing:-.01em}
+.ph .tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.pb{padding:10px 20px 18px; display:flex; flex-direction:column; gap:14px}
+.pb > p{margin:0; color:var(--ink-2); max-width:76ch}
+.pb p b{color:var(--ink)}
+.dim{color:var(--ink-3)} .cneg{color:var(--neg)} .cok{color:var(--ok)}
+
+/* strategie */
+.scelta{display:flex; flex-wrap:wrap; gap:8px}
+.chip{font:inherit; font-size:13.5px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+  border-radius:4px; padding:7px 12px; cursor:pointer; display:flex; flex-direction:column; align-items:flex-start; gap:1px; text-align:left}
+.chip .nome{display:inline-flex; align-items:center; gap:7px}
+.pal{display:none; width:10px; height:10px; border-radius:50%; flex:none}
+.pal.CONTINUA{display:inline-block; background:var(--ok)} .pal.ATTENZIONE{display:inline-block; background:var(--warn)} .pal.FERMATI{display:inline-block; background:var(--neg)}
+.chip small{font-family:var(--mono); font-size:10.5px; color:var(--ink-3)}
+.chip[aria-pressed="true"]{border-color:var(--acc); color:var(--ink); box-shadow:inset 0 0 0 1px var(--acc)}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px}
+
+/* i tre passi */
+.passi{margin:0; padding:0 0 0 20px; display:flex; flex-direction:column; gap:3px; font-size:13.5px; color:var(--ink-2)}
+.passi b{color:var(--ink)}
+/* file */
+.files{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.drop{border:1.5px dashed var(--line); border-radius:4px; padding:11px 14px; background:var(--sunk); cursor:pointer;
+  display:flex; flex-direction:column; gap:2px; min-height:70px; justify-content:center}
+.drop.su{border-color:var(--acc); background:var(--surface)}
+.drop b{font-size:13.5px}
+.drop span{font-size:12px; color:var(--ink-3)}
+.drop .caricato{color:var(--ink-2); font-family:var(--mono); font-size:11.5px}
+.drop input{display:none}
+.riga{display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center; font-size:12.5px; color:var(--ink-2)}
+.riga label{display:inline-flex; gap:8px; align-items:center}
+input[type=text], input[type=number]{font:inherit; font-family:var(--mono); font-size:12.5px; padding:4px 7px;
+  border:1px solid var(--line); border-radius:3px; background:var(--sunk); color:var(--ink); width:112px}
+input[type=number]{width:76px}
+.errore{color:var(--neg)}
+
+/* il verdetto */
+.verdetto{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:center; padding:18px 20px;
+  border-radius:5px; border:1px solid var(--line); background:var(--sunk)}
+.verdetto .luce{width:62px; height:62px; border-radius:50%; background:var(--line)}
+.verdetto h3{margin:0 0 4px; font-size:22px; letter-spacing:-.015em; line-height:1.15}
+.verdetto p{margin:0; color:var(--ink-2); max-width:78ch}
+.verdetto.CONTINUA{background:var(--ok-bg); border-color:var(--ok)} .verdetto.CONTINUA .luce{background:var(--ok)}
+.verdetto.ATTENZIONE{background:var(--warn-bg); border-color:var(--warn)} .verdetto.ATTENZIONE .luce{background:var(--warn)}
+.verdetto.FERMATI{background:var(--neg-bg); border-color:var(--neg)} .verdetto.FERMATI .luce{background:var(--neg)}
+.simbanner{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--acc); margin-bottom:4px}
+
+/* il cruscotto */
+.spie{display:flex; flex-direction:column; gap:2px}
+.spia{display:grid; grid-template-columns:minmax(150px,210px) 1fr minmax(150px,220px); gap:6px 18px; align-items:center;
+  padding:11px 2px; border-bottom:1px solid var(--line-soft)}
+.spia:last-child{border-bottom:0}
+.spia .t b{display:block; font-size:14px}
+.spia .t span{font-size:12.5px; color:var(--ink-2)}
+.spia .t em{display:block; font-style:normal; font-family:var(--mono); font-size:10px; letter-spacing:.06em; color:var(--ink-3); margin-top:2px}
+.pista{position:relative; height:14px; border-radius:7px; overflow:hidden; display:flex; background:var(--sunk)}
+.pista i{display:block; height:100%}
+.pista .zv{background:var(--zv)} .pista .zg{background:var(--zg)} .pista .zr{background:var(--zr)}
+.ago{position:absolute; top:0; width:4px; height:22px; margin-left:-2px; border-radius:2px; background:var(--ink);
+  box-shadow:0 0 0 2px var(--surface); transition:left .15s linear}
+.pistawrap{position:relative; padding:4px 0}
+.pista-l{position:relative; height:14px; display:flex; justify-content:space-between; font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-top:5px}
+.spia .v{text-align:right}
+.spia .v b{font-family:var(--mono); font-size:16px}
+.spia .v span{display:block; font-size:11.5px; color:var(--ink-3)}
+.spia .v .st{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:1px 6px; border-radius:2px; display:inline-block; margin-top:2px}
+.st.ok{background:var(--ok-bg); color:var(--ok)} .st.gi{background:var(--warn-bg); color:var(--warn)} .st.ro{background:var(--neg-bg); color:var(--neg)}
+.st.info{background:var(--sunk); color:var(--ink-3)}
+@media (max-width:720px){ .spia{grid-template-columns:1fr; gap:6px} .spia .v{text-align:left} }
+
+.ago.peggio{background:transparent; box-shadow:none; border:2px dashed var(--ink-3); width:6px; margin-left:-3px}
+.spia .v span b{font-family:var(--mono); color:var(--ink-2); font-size:12.5px; display:inline}
+.datiletti p{margin:0; font-size:13.5px; color:var(--ink-2)}
+.datiletti{display:flex; flex-direction:column; gap:6px}
+/* grafico e simulatore */
+.plot{position:relative}
+svg{display:block; width:100%; height:auto; overflow:visible}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.sw{width:16px; height:9px; border-radius:2px; flex:none}
+.tip{position:absolute; pointer-events:none; opacity:0; transition:opacity .1s; z-index:5; background:var(--surface);
+  border:1px solid var(--line); border-radius:3px; box-shadow:var(--shadow); padding:8px 10px; font-size:12px; min-width:170px}
+.tip .row{display:flex; justify-content:space-between; gap:12px}
+.tip b{font-family:var(--mono)}
+.sim{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.btn{font:inherit; font-size:13px; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+  border-radius:4px; padding:6px 11px; cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primo{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.btn[aria-pressed="true"]{border-color:var(--acc); box-shadow:inset 0 0 0 1px var(--acc)}
+.btn[disabled]{opacity:.45; cursor:default}
+.sim .lab{font-size:12.5px; color:var(--ink-3); margin-right:2px}
+
+/* le carte delle storie di prova */
+.carte{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px}
+.carta{font:inherit; text-align:left; cursor:pointer; background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+  border-top:4px solid var(--c,var(--ink-3)); border-radius:5px; padding:10px 12px 11px; display:flex; flex-direction:column; gap:3px}
+.carta:hover{border-color:var(--c,var(--ink-3))}
+.carta[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c,var(--acc)); border-color:var(--c,var(--acc))}
+.carta.vera{--c:var(--live)}
+.carta b{color:var(--ink); font-size:14px}
+.carta > span:last-child{font-size:12.5px; line-height:1.35}
+.carta .mini svg{width:100%; height:40px; display:block}
+.pt{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:7px; vertical-align:-1px}
+.riassunto ol, .riassunto ul{margin:4px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:3px}
+.riassunto ul.colori{list-style:none; padding-left:0}
+/* tabelle */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:13px; min-width:460px}
+th,td{padding:7px 9px; text-align:right; border-bottom:1px solid var(--line-soft)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--mono); font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); font-weight:500; border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+.pill{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; padding:2px 7px; border-radius:2px; white-space:nowrap}
+.pill.si{background:var(--ok-bg); color:var(--ok)} .pill.no{background:var(--neg-bg); color:var(--neg)} .pill.attesa{background:var(--sunk); color:var(--ink-3)}
+details{border-top:1px solid var(--line-soft); padding-top:10px}
+summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
+.vuoto{padding:16px; text-align:center; color:var(--ink-3); font-size:13.5px; border:1px dashed var(--line); border-radius:4px}
+.calcolo{font-family:var(--mono); font-size:11.5px; color:var(--ink-3)}
+.esec{display:flex; flex-direction:column; gap:12px}
+.leggi{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.leggi div{background:var(--sunk); border-radius:4px; padding:12px 14px; font-size:13.5px; color:var(--ink-2)}
+.leggi b{color:var(--ink)}
+.leggi div > b:first-child{display:block; margin-bottom:3px; font-size:14px}
+@media (max-width:560px){ .ph{padding:14px 14px 2px} .pb{padding:10px 14px 16px} .verdetto{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+
+<div class="testa">
+  <div>
+    <p class="eyebrow">Monitor live · sul tuo computer, anche senza internet</p>
+    <h1>La strategia regge ancora?</h1>
+  </div>
+  <div class="scelta" id="scelta" aria-label="Scegli la strategia"></div>
+</div>
+
+<section class="panel">
+  <div class="pb" style="padding-top:16px">
+    <ol class="passi">
+      <li><b>Una volta al mese</b> scarica da MetaTrader il report del conto, <i>dal primo giorno di live a oggi</i>.</li>
+      <li>Trascinalo nel riquadro ①. La pagina non ricorda niente: ogni volta il report intero.</li>
+      <li>Guarda i pallini sulle strategie in alto: <b>verde</b> vai avanti, <b>giallo</b> guardi e basta, <b>rosso</b> ti fermi.
+        Il conto intero e ogni strategia hanno il loro: se una sola diventa rossa, spegni quella.</li>
+    </ol>
+    <div class="files">
+      <label class="drop" id="dropLive" tabindex="0"><input type="file" id="fileLive" accept=".htm,.html,.gz" multiple>
+        <b>① Il report del conto live</b><span>MetaTrader → Storico → tasto destro → Report</span>
+        <span class="caricato" id="statoLive"></span></label>
+      <label class="drop" id="dropRif" tabindex="0"><input type="file" id="fileRif" accept=".htm,.html,.gz" multiple>
+        <b>③ Un'altra strategia</b><span>il suo report del tester: diventa un riferimento</span>
+        <span class="caricato" id="statoRif"></span></label>
+    </div>
+    <div class="riga">
+      <label>La perdita massima che accetti <input type="number" id="tetto" step="1" min="1" max="100" value="35" aria-label="Perdita massima accettata, percentuale del conto">% del conto</label>
+      <span id="rischi" class="riga" style="gap:8px 14px"></span>
+      <label>Backtest di riferimento fino al <input type="text" id="fino" placeholder="AAAA.MM.GG" aria-label="Data di fine del riferimento"></label>
+    </div>
+    <div class="riga"><span class="dim" id="rifinfo"></span>
+    </div>
+    <div class="datiletti" id="datiLetti"></div>
+  </div>
+</section>
+
+<section class="verdetto" id="verdetto" aria-live="polite">
+  <div class="luce" aria-hidden="true"></div>
+  <div><div class="simbanner" id="simbanner" hidden></div><h3 id="vTit">Calcolo…</h3><p id="vTxt"></p></div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>Il cruscotto</h2><span class="tag">la strategia funziona ancora?</span></div>
+  <div class="pb">
+    <div class="spie" id="spie"></div>
+    <p class="calcolo" id="calcolo"></p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>Il tuo live contro le storie normali</h2><span class="tag">passa il mouse sul grafico</span></div>
+  <div class="pb">
+    <div class="sim" id="sim">
+      <span class="lab">Guarda come reagirebbero le regole. Il disegnino di ogni carta è <b>quanto guadagna la strategia a ogni operazione</b>,
+        dall'inizio alla fine della storia: la riga tratteggiata in alto è il guadagno del backtest, quella in basso è zero.
+        Ogni clic, una storia diversa.</span>
+    </div>
+    <div class="carte" id="carte"></div>
+    <div><button class="btn primo" type="button" id="torna" hidden>Torna al mio conto</button></div>
+    <p style="margin:0">La fascia azzurra la calcola la pagina dal backtest che ha dentro: migliaia di storie possibili, tutte con l'edge
+      intatto. La linea spessa è il tuo conto, e compare quando carichi il report ①. Finché sta nella fascia, sei nella norma. Oltre la fine dell'orizzonte la fascia è più chiara: è solo indicativa, e le regole vanno rifatte.</p>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--band);opacity:var(--bandA)"></i>8 storie normali su 10 stanno qui</span>
+      <span><i class="sw" style="background:var(--band);height:3px"></i>la storia tipica</span>
+      <span><i class="sw" style="background:var(--live);height:3px"></i>il tuo conto</span>
+      <span><i class="sw" style="background:var(--stopdd);height:3px"></i>stop della caduta: se la curva la tocca, ti fermi</span>
+      <span><i class="sw" style="background:var(--neg);height:2px"></i>sotto qui l'edge sembra crollato</span>
+    </div>
+    <div class="plot" id="cono"><div class="tip" id="tipCono"></div></div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>Il sistema in poche righe</h2><span class="tag">cosa fare, e quanto ci vuole</span></div>
+  <div class="pb">
+    <div class="leggi riassunto">
+      <div><b>Ogni mese, 10 minuti</b><ol>
+        <li>Scarica da MetaTrader il report del conto <b>dal primo giorno a oggi</b>.</li>
+        <li>Trascinalo nel riquadro ①.</li>
+        <li>Guarda i <b>pallini</b> in alto: uno per ogni strategia e uno per il conto intero.</li></ol></div>
+      <div><b>I colori</b><ul class="colori">
+        <li><i class="pt" style="background:var(--ok)"></i><b>Verde</b>: vai avanti.</li>
+        <li><i class="pt" style="background:var(--warn)"></i><b>Giallo</b>: periodo brutto ma normale. Vai avanti, non tocchi niente.</li>
+        <li><i class="pt" style="background:var(--neg)"></i><b>Rosso</b>: ti fermi, come qui accanto.</li></ul></div>
+      <div><b>Quando diventa rosso</b>Quando tocchi la perdita massima che accetti, <b id="tettoTxt">35%</b>, decisa prima; oppure quando scatta una
+        delle 5 regole del cruscotto: caduta, perdite di fila, tempo senza un nuovo massimo, curva sotto il cono, calo lento.
+        Sono calcolate dal backtest e scattano per sbaglio solo <b>5 volte su 100</b>.</div>
+      <div><b>Se diventa rosso</b><ol>
+        <li>Spegni <b>solo quello che è rosso</b>. Una tecnica dell'oro si spegne dagli input, e l'altra continua.</li>
+        <li>Lascialo girare <b>in demo per 6 mesi</b>.</li>
+        <li>Rifai i test coi dati nuovi: riparte coi soldi veri <b>solo se li ripassa</b>.</li></ol></div>
+    </div>
+    <p style="margin:4px 0 0"><b>I tempi, per la strategia scelta in alto</b> — cosa vedono le regole se l'edge si rovina:</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Se succede questo</th><th>Te ne accorgi</th><th>Dopo circa</th><th>Perdita</th></tr></thead>
+      <tbody id="potere"></tbody></table></div>
+    <p class="dim" id="conferma" style="margin:0;font-size:13px"></p>
+    <p style="margin:0"><b>In una frase:</b> non puoi sapere in fretta se la strategia funziona, ma la perdita massima è decisa prima.
+      Di più la matematica non permette, con nessun metodo. Se l'EA si ferma o fa operazioni strane, lo vedi nelle statistiche qui sotto:
+      le operazioni al mese escono dalla fascia.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>Le statistiche del live</h2><span class="tag">informative, non fermano niente</span></div>
+  <div class="pb"><div id="statistiche"><div class="vuoto">Carica il live ①.</div></div></div>
+</section>
+
+<section class="panel">
+  <div class="ph"><h2>Come si legge</h2><span class="tag">in parole semplici</span></div>
+  <div class="pb">
+    <div class="leggi">
+      <div><b>Gli stop si decidono prima, non si aspetta la prova.</b>Per <i>dimostrare</i> che un edge funziona servono
+        centinaia di operazioni. Per <i>smettere</i> no: ci si ferma quando si tocca un limite scritto prima di partire.
+        È così che fanno i professionisti.</div>
+      <div><b>Due tipi di stop.</b>Uno è <b>tuo</b>: la perdita massima che accetti sul conto. Scatta comunque, anche se la
+        strategia fosse sana — è un limite di soldi, non una prova. Gli altri vengono dal backtest, rimescolato
+        migliaia di volte: scattano quando quello che vedi è diventato troppo raro per essere sfortuna. Tutti insieme
+        scattano per sbaglio <b>una volta su venti</b>.</div>
+      <div id="lungo"><b>Un edge sottile ha periodi lunghi.</b></div>
+      <div><b>Un edge morto non ti svuota il conto.</b>Se l'edge muore, la strategia guadagna in media zero: va su e giù,
+        meno i costi. Chi porta via i soldi è una strategia <i>rotta</i>, che perde di media: quella le regole la prendono
+        quasi sempre. E comunque c'è il tuo tetto.</div>
+      <div><b>Giallo non vuol dire niente di grave.</b>Vuol dire «periodo brutto, ma capita anche con l'edge intatto».
+        Rigiocando il 2024-26, la curva è rimasta nella parte bassa per mesi e poi è diventata il periodo migliore di sempre.
+        Sul giallo si guarda, non si spegne.</div>
+    </div>
+    <details>
+      <summary>Da dove viene il metodo</summary>
+      <p style="margin-top:8px;color:var(--ink-2);max-width:76ch">Le regole del cruscotto sono quelle che Kevin Davey elenca
+        per capire quando una strategia ha smesso di funzionare — caduta oltre il peggio simulato, perdite di fila oltre il
+        normale, curva nel 5% peggiore delle simulazioni, statistiche fuori norma — con una differenza: qui le soglie sono
+        tarate <b>insieme</b>, perché guardare più cose alla volta fa scattare più falsi allarmi. Il calo lento lo cerca il
+        CUSUM, lo strumento classico per accorgersi che una media sta scendendo. Il numero di operazioni che servono per
+        <i>confermare</i> l'edge è la Minimum Track Record Length di Bailey e López de Prado.</p>
+    </details>
+  </div>
+</section>
+
+</div>
+
+<script>
+/*__RIFERIMENTI__*/
+</script>
+<script>
+(function(){
+"use strict";
+var RIF = (window.RIFERIMENTI || []).slice();
+var FALSO_ALLARME = 0.05, BLOCCO = 20, N_CONO = 4000, N_CAL = 2000, N_POTERE = 500, Q_GIALLO = 0.80;
+var ORIZZ_MIN = 100, ORIZZ_MAX = 2000, CONO_DA = 20;
+
+/* ---------------- utilità ---------------- */
+function $(id){ return document.getElementById(id); }
+function fmt(v,d){ if(v==null||isNaN(v)) return "—"; return (v>=0?"+":"−")+Math.abs(v).toFixed(d==null?1:d).replace(".",","); }
+function num(v,d){ if(v==null||isNaN(v)) return "—"; return v.toFixed(d==null?1:d).replace(".",","); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function ts(s){ var m=/^(\d{4})\.(\d{2})\.(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(s||""); if(!m) return NaN;
+  return Date.UTC(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0))/1000; }
+function base(sim){ return String(sim||"").toUpperCase().split(".")[0]; }
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function media(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
+function devst(a){ var m=media(a),s=0; for(var i=0;i<a.length;i++) s+=(a[i]-m)*(a[i]-m); return Math.sqrt(s/(a.length-1)); }
+function pct(sorted,p){ if(!sorted.length) return NaN; var i=(sorted.length-1)*p/100, lo=Math.floor(i), hi=Math.ceil(i);
+  return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo); }
+function sotto(col,x){ var lo=0,hi=col.length; while(lo<hi){ var m=(lo+hi)>>1; if(col[m]<=x) lo=m+1; else hi=m; } return lo; }
+
+/* ---------------- lettura dei report MT5 ----------------
+   Le colonne si trovano per NOME, non per posizione: il report del tester e
+   quello del conto live non hanno le stesse colonne (il secondo ha anche la
+   tassa), e i nomi cambiano con la lingua. */
+var NOMI = {
+  ora:["ora","time","orario","tempo","data"], tipo:["tipo","type"], dir:["direzione","direction"],
+  vol:["volume","volumi"], prezzo:["prezzo","price"], simbolo:["simbolo","symbol"],
+  comm:["commissioni","commissione","commission","commissions"], tassa:["tassa","tariffa","fee","fees"],
+  swap:["swap"], profitto:["profitto","profit"], saldo:["bilancio","saldo","balance"], commento:["commento","comment"]
+};
+async function testo(file){
+  var buf = new Uint8Array(await file.arrayBuffer());
+  if(buf[0]===0x1f && buf[1]===0x8b){
+    var ds = new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip")));
+    buf = new Uint8Array(await ds.arrayBuffer());
+  }
+  if(buf[0]===0xFF && buf[1]===0xFE) return new TextDecoder("utf-16le").decode(buf);
+  if(buf[0]===0xFE && buf[1]===0xFF) return new TextDecoder("utf-16be").decode(buf);
+  var t = new TextDecoder("utf-8").decode(buf);
+  if(t.indexOf("<t")<0 && buf.length>1 && buf[1]===0) t = new TextDecoder("utf-16le").decode(buf);
+  return t;
+}
+function nr(s){ s=String(s||"").replace(/[\s  ]/g,""); if(!s) return 0;
+  if(s.indexOf(",")>=0 && s.indexOf(".")<0) s=s.replace(",","."); else s=s.replace(/,/g,"");
+  var v=parseFloat(s); return isNaN(v)?0:v; }
+function leggiReport(html, nome){
+  var doc = new DOMParser().parseFromString(html,"text/html");
+  var celle = function(tr){ return Array.prototype.map.call(tr.querySelectorAll("td,th"),function(c){ return c.textContent.replace(/ /g," ").trim(); }); };
+  var righe = doc.querySelectorAll("tr"), intest=-1, col={};
+  for(var i=0;i<righe.length;i++){
+    var c = celle(righe[i]).map(function(x){ return x.toLowerCase(); });
+    var trovato = {};
+    for(var k in NOMI){ for(var j=0;j<c.length;j++){ if(NOMI[k].indexOf(c[j])>=0){ trovato[k]=j; break; } } }
+    if(trovato.dir!=null && trovato.tipo!=null && trovato.profitto!=null && trovato.saldo!=null && trovato.ora!=null){ intest=i; col=trovato; break; }
+  }
+  if(intest<0) throw new Error(nome+": non trovo la tabella delle operazioni (serve la colonna «Direzione»/«Direction»).");
+  // parametri: nel report del tester ci sono gli input dell'EA
+  var par = {};
+  Array.prototype.forEach.call(doc.querySelectorAll("td"),function(td){
+    var m=/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(td.textContent.trim()); if(m) par[m[1]]=m[2].trim(); });
+  var rischio = parseFloat(par.InpRiskPercent||par.RiskPercent||par.Risk||"NaN");
+  var adattivo = /true/i.test(par.InpUseAdaptiveRisk||par.UseAdaptiveRisk||"");
+  var affari=[];
+  for(var r=intest+1;r<righe.length;r++){
+    var c2 = celle(righe[r]); if(c2.length < Object.keys(col).length) continue;
+    var ora=c2[col.ora]; if(!/^\d{4}\.\d{2}\.\d{2}/.test(ora)) continue;
+    affari.push({ora:ora, tipo:(c2[col.tipo]||"").toLowerCase(), dir:(c2[col.dir]||"").toLowerCase(),
+      vol:c2[col.vol], prezzo:nr(c2[col.prezzo]), simbolo:col.simbolo!=null?c2[col.simbolo]:"",
+      comm:nr(c2[col.comm])+(col.tassa!=null?nr(c2[col.tassa]):0), swap:nr(c2[col.swap]),
+      profitto:nr(c2[col.profitto]), saldo:nr(c2[col.saldo]), commento:col.commento!=null?c2[col.commento]:""});
+  }
+  return {nome:nome, affari:affari, rischio:isNaN(rischio)?null:rischio, adattivo:adattivo,
+          tester:Object.keys(par).length>3, simbolo:(affari.find(function(a){return a.simbolo;})||{}).simbolo||""};
+}
+/* apertura e chiusura si accoppiano per simbolo, volume e verso opposto,
+   prendendo l'apertura PIÙ RECENTE (LIFO): è il metodo del progetto. La
+   strategia la dice il commento dell'apertura. */
+function operazioni(rep, rischioPct){
+  var aperte=[], ops=[], orfane=0, saldo=null;
+  rep.affari.forEach(function(a){
+    var prima = saldo; saldo = a.saldo;
+    if(a.tipo!=="buy" && a.tipo!=="sell") return;
+    if(a.dir==="in"){ aperte.push(a); return; }
+    if(a.dir.indexOf("out")<0) return;
+    var opp = a.tipo==="buy"?"sell":"buy", k=-1;
+    for(var i=aperte.length-1;i>=0;i--){ var p=aperte[i];
+      if(p.tipo===opp && p.vol===a.vol && base(p.simbolo)===base(a.simbolo)){ k=i; break; } }
+    if(k<0){ orfane++; return; }
+    var ap = aperte.splice(k,1)[0];
+    var netto = a.profitto + a.comm + ap.comm + a.swap + ap.swap;
+    var saldoPrima = (prima!=null && prima>0) ? prima : (a.saldo - netto);
+    ops.push({ap:ap.ora, ch:a.ora, t:ts(ap.ora), tc:ts(a.ora), verso:ap.tipo==="buy"?"L":"S", tag:(ap.commento||"").trim(),
+      simbolo:ap.simbolo, R: rischioPct ? netto/(rischioPct/100*saldoPrima) : null, netto:netto, base:saldoPrima});
+  });
+  // in ordine di CHIUSURA: e' quando il risultato entra nel conto. Con due
+  // tecniche aperte insieme (l'oro) l'ordine di apertura sarebbe un altro.
+  ops.sort(function(x,y){ return x.tc-y.tc; });
+  return {ops:ops, orfane:orfane, aperte:aperte.length};
+}
+
+/* ---------------- le strategie ---------------- */
+var STRAT = [];
+function costruisciStrategie(){
+  STRAT = [];
+  RIF.forEach(function(rf){
+    var tags = rf.tags;
+    STRAT.push({id:rf.id, nome:rf.nome, rif:[rf], tags:null, simboli:[base(rf.simbolo)]});
+    if(tags.length>1) tags.forEach(function(tg,i){
+      var n = rf.t.filter(function(x){return x[4]===i;}).length;
+      if(n>=100) STRAT.push({id:rf.id+"#"+i, nome:rf.nome+" · "+(rf.nomiTag[tg]||tg), rif:[rf], tags:[tg], simboli:[base(rf.simbolo)]});
+    });
+  });
+  if(RIF.length>1) STRAT.push({id:"__tutte", nome:"Portafoglio: tutte insieme", rif:RIF.slice(), tags:null,
+    simboli:RIF.map(function(r){return base(r.simbolo);})});
+}
+function tradeRif(st, fino){
+  var out=[]; st.rif.forEach(function(rf){ rf.t.forEach(function(x){
+    var tg=rf.tags[x[4]]; if(st.tags && st.tags.indexOf(tg)<0) return;
+    if(fino && x[1].slice(0,10)>fino) return;
+    out.push({ch:x[1], R:x[3]}); }); });
+  out.sort(function(a,b){ return a.ch<b.ch?-1:a.ch>b.ch?1:0; });
+  return out.map(function(x){return x.R;});
+}
+function appartiene(st, op){
+  // prima il commento (esatto), poi, se il commento manca, il simbolo
+  var tutteTag=[]; st.rif.forEach(function(rf){ (st.tags||rf.tags).forEach(function(t){ tutteTag.push(t); }); });
+  // un'etichetta vuota combacerebbe con qualunque commento: si salta
+  tutteTag = tutteTag.filter(function(t){ return t; });
+  if(op.tag && tutteTag.length){ for(var i=0;i<tutteTag.length;i++){ var t=tutteTag[i];
+      if(op.tag===t || op.tag.indexOf(t)===0 || t.indexOf(op.tag)===0) return true; }
+    return false; }
+  return st.simboli.indexOf(base(op.simbolo))>=0;
+}
+
+
+/* ---------------- il motore ----------------
+   Cinque regole di stop, come le usano i professionisti (Kevin Davey):
+   caduta oltre il peggio simulato, troppe perdite di fila, troppo tempo
+   senza un nuovo massimo, curva nel fondo del cono, calo lento (CUSUM).
+   Le soglie escono dal backtest della strategia, rimescolato a blocchi, e
+   sono tarate INSIEME: tutte e cinque, sommate, scattano per sbaglio una
+   volta su venti su tutto l'orizzonte. Niente è scelto a occhio. */
+var REGOLE = [
+  {k:"dd",   nome:"Caduta dal massimo",       verso:1},
+  {k:"fila", nome:"Perdite di fila",          verso:1},
+  {k:"uw",   nome:"Tempo senza nuovo massimo", verso:1},
+  {k:"pc",   nome:"Posizione nel cono",       verso:-1},
+  {k:"cs",   nome:"Calo lento",               verso:1}
+];
+function orizzonte(x){
+  // la Minimum Track Record Length (Bailey, López de Prado): quante
+  // operazioni servono per dire, al 95%, che l'edge c'è
+  var n=x.length, m=media(x), sd=devst(x), s3=0, s4=0;
+  for(var i=0;i<n;i++){ var d=x[i]-m; s3+=d*d*d; s4+=d*d*d*d; }
+  var sk=s3/n/Math.pow(sd,3), ku=s4/n/Math.pow(sd,4), sr=m/sd;
+  if(!(sr>0)) return {n:null, sr:sr};
+  var mt = 1 + (1 - sk*sr + (ku-1)/4*sr*sr) * Math.pow(1.6449/sr,2);
+  return {n:Math.min(ORIZZ_MAX, Math.max(ORIZZ_MIN, Math.ceil(mt))), grezzo:Math.ceil(mt), sr:sr, sk:sk, ku:ku};
+}
+function percorso(pool, n, rnd, out){
+  // bootstrap a blocchi: pezzi di 20 operazioni consecutive, così le serie
+  // di perdite restano intere
+  var k=0, L=Math.min(BLOCCO, pool.length-1), maxI=pool.length-L;
+  while(k<n){ var s=Math.floor(rnd()*maxI); for(var j=0;j<L && k<n;j++) out[k++]=pool[s+j]; }
+  return out;
+}
+function scorri(seq, len, cal, cb){
+  var cum=0, picco=0, fila=0, uw=0, cs=0, w=cal.mu/(cal.sd*cal.sd), h=cal.mu/2, v={};
+  for(var j=0;j<len;j++){
+    var r=seq[j]; cum+=r;
+    if(cum>picco){ picco=cum; uw=0; } else uw++;
+    fila = r<0 ? fila+1 : 0;
+    cs = Math.max(0, cs + w*(h-r));
+    v.j=j; v.cum=cum; v.picco=picco; v.dd=picco-cum; v.fila=fila; v.uw=uw; v.cs=cs;
+    v.pc = (j<cal.n && j>=CONO_DA-1) ? sotto(cal.cum[j],cum)*100/N_CONO : null;
+    if(cb(v)===false) return;
+  }
+}
+function oltre(v, s){
+  // la prima regola che scatta, o null
+  if(v.dd>s.dd) return "dd"; if(v.fila>s.fila) return "fila"; if(v.uw>s.uw) return "uw";
+  if(v.pc!=null && v.pc<s.pc) return "pc"; if(v.cs>s.cs) return "cs"; return null;
+}
+function storia(R){
+  // i valori peggiori toccati dal backtest vero, per confronto
+  var c=0,p=0,dd=0,f=0,fm=0,u=0,um=0;
+  R.forEach(function(r){ c+=r; if(c>p){p=c;u=0;} else u++; if(p-c>dd) dd=p-c; f=r<0?f+1:0; if(f>fm) fm=f; if(u>um) um=u; });
+  return {dd:dd, fila:fm, uw:um, n:R.length};
+}
+function calibra(rif){
+  var o = orizzonte(rif);
+  if(!o.n) return {errore:"Il riferimento non ha edge (media ≤ 0): non c'è niente da sorvegliare."};
+  var n=o.n, mu=media(rif), sd=devst(rif), rnd=mulberry(7), seq=new Float64Array(n);
+  // il cono: dove sta il risultato cumulato dopo j operazioni, in 4000 storie
+  var cum=[]; for(var j=0;j<n;j++) cum.push(new Float32Array(N_CONO));
+  for(var i=0;i<N_CONO;i++){ percorso(rif,n,rnd,seq); var c=0; for(var j2=0;j2<n;j2++){ c+=seq[j2]; cum[j2][i]=c; } }
+  for(var j3=0;j3<n;j3++) cum[j3].sort();
+  var cal={n:n, mu:mu, sd:sd, cum:cum, mt:o, storia:storia(rif)};
+  // il peggio di ogni regola in 2000 storie normali (altre, non quelle del cono)
+  var W={dd:new Float64Array(N_CAL), fila:new Float64Array(N_CAL), uw:new Float64Array(N_CAL), pc:new Float64Array(N_CAL), cs:new Float64Array(N_CAL)};
+  var rnd2=mulberry(8);
+  for(var q=0;q<N_CAL;q++){
+    percorso(rif,n,rnd2,seq); var m={dd:0,fila:0,uw:0,pc:100,cs:0};
+    scorri(seq,n,cal,function(v){ if(v.dd>m.dd) m.dd=v.dd; if(v.fila>m.fila) m.fila=v.fila; if(v.uw>m.uw) m.uw=v.uw;
+      if(v.pc!=null && v.pc<m.pc) m.pc=v.pc; if(v.cs>m.cs) m.cs=v.cs; });
+    W.dd[q]=m.dd; W.fila[q]=m.fila; W.uw[q]=m.uw; W.pc[q]=m.pc; W.cs[q]=m.cs;
+  }
+  var ord={}; REGOLE.forEach(function(r){ ord[r.k]=Array.from(W[r.k]).sort(function(a,b){return a-b;}); });
+  function soglie(t){ var s={}; REGOLE.forEach(function(r){ s[r.k]=pct(ord[r.k], r.verso>0 ? 100*(1-t) : 100*t); }); return s; }
+  function falsi(s){ var f=0; for(var z=0;z<N_CAL;z++){ if(W.dd[z]>s.dd||W.fila[z]>s.fila||W.uw[z]>s.uw||W.pc[z]<s.pc||W.cs[z]>s.cs) f++; } return f/N_CAL; }
+  // un solo livello di coda per tutte le regole, cercato finché i falsi
+  // allarmi, sommati, non arrivano al 5%
+  var lo=0, hi=FALSO_ALLARME;
+  for(var it=0;it<40;it++){ var t=(lo+hi)/2; if(falsi(soglie(t))<=FALSO_ALLARME) lo=t; else hi=t; }
+  cal.stop=soglie(lo); cal.fa=falsi(cal.stop); cal.coda=lo; cal.falsi=falsi; cal.W=W;
+  // il giallo: ci arriva, almeno una volta, una storia normale su cinque
+  cal.giallo={}; REGOLE.forEach(function(r){ cal.giallo[r.k]=pct(ord[r.k], r.verso>0 ? 100*Q_GIALLO : 100*(1-Q_GIALLO)); });
+  cal.bande={p10:[],p50:[],p90:[],rosso:[]};
+  for(var j4=0;j4<n;j4++){ var col=cum[j4];
+    cal.bande.p10.push(pct(col,10)); cal.bande.p50.push(pct(col,50)); cal.bande.p90.push(pct(col,90));
+    cal.bande.rosso.push(j4>=CONO_DA-1 ? pct(col,cal.stop.pc) : null); }
+  return cal;
+}
+function livello(v, cal, s){
+  // per ogni regola: ok, gi(allo) o ro(sso)
+  var l={}; REGOLE.forEach(function(r){ var x=v[r.k];
+    if(x==null){ l[r.k]="info"; return; }
+    var su = r.verso>0 ? x>s[r.k] : x<s[r.k], gi = r.verso>0 ? x>cal.giallo[r.k] : x<cal.giallo[r.k];
+    l[r.k] = su ? "ro" : gi ? "gi" : "ok"; });
+  return l;
+}
+function analizza(R, cal, s){
+  // una fotografia per ogni operazione, e il primo stop (che resta)
+  var foto=[], stop=null;
+  scorri(R, R.length, cal, function(v){
+    var f={k:v.j+1, r:R[v.j], cum:v.cum, picco:v.picco, dd:v.dd, fila:v.fila, uw:v.uw, pc:v.pc, cs:v.cs};
+    if(!stop){ var m=oltre(v, s); if(m) stop={k:f.k, motivo:m, cum:f.cum}; }
+    foto.push(f); });
+  return {foto:foto, stop:stop};
+}
+/* le storie di prova: quanto resta dell'edge a ogni operazione (1 = tutto,
+   0 = niente), da j = 0 a j = n */
+var SCENARI = [
+  {id:"intatto",  nome:"Edge intatto",           breve:"guadagna come nel backtest",          col:"var(--ok)",     edge:function(){ return 1; }},
+  {id:"meta",     nome:"Edge dimezzato",         breve:"guadagna la metà, da subito",          col:"var(--warn)",   edge:function(){ return 0.5; }},
+  {id:"calo",     nome:"Edge in deterioramento", breve:"parte bene e si spegne piano piano",   col:"var(--stopdd)", edge:function(j,n){ return Math.max(0, 1-j/n); }},
+  {id:"morto",    nome:"Edge morto",             breve:"guadagno medio zero, da subito",       col:"var(--neg)",    edge:function(){ return 0; }}
+];
+function togli(seq, sc, mu, n){ for(var j=0;j<seq.length;j++) seq[j]-=(1-sc.edge(j,n))*mu; return seq; }
+function potere(rif, cal, s){
+  // se l'edge si rovinasse davvero, quante volte e quando le regole se ne
+  // accorgerebbero, dentro l'orizzonte
+  var seq=new Float64Array(cal.n);
+  return SCENARI.map(function(sc,si){
+    var rnd=mulberry(11+si), presi=0, quando=[], perso=[];
+    for(var i=0;i<N_POTERE;i++){
+      togli(percorso(rif,cal.n,rnd,seq), sc, cal.mu, cal.n);
+      var primo=null, cum=0;
+      scorri(seq,cal.n,cal,function(v){ if(oltre(v,s)){ primo=v.j+1; cum=v.cum; return false; } });
+      if(primo){ presi++; quando.push(primo); perso.push(cum); }
+    }
+    quando.sort(function(a,b){return a-b;}); perso.sort(function(a,b){return a-b;});
+    return {sc:sc, presi:presi/N_POTERE, mediana:quando.length?quando[Math.floor(quando.length/2)]:null,
+      perso:perso.length?perso[Math.floor(perso.length/2)]:null};
+  });
+}
+function scenario(rif, cal, sc, seme){
+  // una storia inventata: il backtest rimescolato, con l'edge tolto come dice lo scenario
+  var seq=new Float64Array(cal.n); percorso(rif,cal.n,mulberry(seme),seq);
+  return Array.from(togli(seq, sc, cal.mu, cal.n));
+}
+
+/* ---------------- stato della pagina ---------------- */
+var S = {strat:null, live:null, liveRep:[], cal:{}, rischi:{}, sim:null, anim:null};
+var NOMI_REGOLA = {dd:"la caduta dal massimo", fila:"le perdite di fila", uw:"il tempo senza un nuovo massimo", pc:"la posizione nel cono", cs:"il calo lento"};
+
+function refDi(op){
+  // a quale strategia appartiene un'operazione: prima il commento, poi il simbolo
+  for(var i=0;i<RIF.length;i++){ var rf=RIF[i], tg=rf.tags.filter(function(t){return t;});
+    if(op.tag && tg.length){ if(tg.some(function(t){ return op.tag===t || op.tag.indexOf(t)===0 || t.indexOf(op.tag)===0; })) return rf; continue; }
+    if(base(rf.simbolo)===base(op.simbolo)) return rf; }
+  return null;
+}
+function rischioDi(rf){ var v=S.rischi[rf.id]; return v>0 ? v : rf.rischio; }
+function rischioMedio(st){
+  // per il portafoglio: la media dei rischi, pesata sul numero di operazioni
+  var n=0, s=0; st.rif.forEach(function(rf){ var k=rf.t.length; n+=k; s+=k*rischioDi(rf); }); return s/n;
+}
+function tempo(k, cal){ var m=k/cal.ritmo*12;
+  return m<1.5 ? "meno di un mese" : m<24 ? "circa "+Math.round(m)+" mesi" : "circa "+num(m/12,1).replace(",0","")+" anni"; }
+function tradeDopo(st, fino){
+  var out=[]; st.rif.forEach(function(rf){ rf.t.forEach(function(x){
+    var tg=rf.tags[x[4]]; if(st.tags && st.tags.indexOf(tg)<0) return;
+    if(!fino || x[1].slice(0,10)<=fino) return; out.push({ch:x[1], R:x[3]}); }); });
+  out.sort(function(a,b){ return a.ch<b.ch?-1:a.ch>b.ch?1:0; });
+  return out;
+}
+function stopEff(cal, st){
+  // lo stop della caduta è il più stretto fra quello statistico e il tuo tetto
+  var s={}; for(var k in cal.stop) s[k]=cal.stop[k];
+  var tetto=parseFloat($("tetto").value), rm=rischioMedio(st||S.strat);
+  s.ddStat=cal.stop.dd; s.ddTetto = tetto>0 ? tetto/rm : Infinity;
+  s.dd=Math.min(s.ddStat, s.ddTetto); s.ddDaTetto = s.ddTetto<s.ddStat; s.rm=rm;
+  return s;
+}
+
+function scegli(id){
+  S.strat = STRAT.find(function(s){ return s.id===id; }) || STRAT[0];
+  Array.prototype.forEach.call($("scelta").children,function(b){ b.setAttribute("aria-pressed", b.dataset.id===S.strat.id?"true":"false"); });
+  var rf=S.strat.rif[0]; if(!$("fino").value && rf.fino) $("fino").value=rf.fino;
+  ferma(); S.sim=null; aggiorna();
+}
+function chiaveCal(st){ return (st||S.strat).id+"|"+($("fino").value||"").trim(); }
+function rifDi(st){
+  var fino=($("fino").value||"").trim(), rif=tradeRif(st, fino||null), d0=null, d1=null;
+  st.rif.forEach(function(rf){ rf.t.forEach(function(x){ if(fino && x[1].slice(0,10)>fino) return;
+    var t=ts(x[1]); if(d0===null||t<d0) d0=t; if(d1===null||t>d1) d1=t; }); });
+  return {rif:rif, ritmo:rif.length/((d1-d0)/(365.25*86400))};
+}
+function calDi(st){
+  var k=chiaveCal(st);
+  if(!S.cal[k]){ var r=rifDi(st);
+    if(r.rif.length<BLOCCO*3) S.cal[k]={errore:"Troppe poche operazioni nel riferimento per calibrare."};
+    else { var t0=performance.now(), c=calibra(r.rif);
+      if(!c.errore){ c.secondi=(performance.now()-t0)/1000; c.ritmo=r.ritmo; c.rif=r.rif; c.potere={}; }
+      S.cal[k]=c; } }
+  return S.cal[k];
+}
+function aggiorna(){
+  if(!S.strat) return;
+  var fino=($("fino").value||"").trim(), rr=rifDi(S.strat), rif=rr.rif, ritmo=rr.ritmo;
+  $("rifinfo").textContent = "Riferimento: "+rif.length+" operazioni di backtest, circa "+Math.round(ritmo)+" all'anno, guadagno medio "+fmt(media(rif),3)+" R per operazione.";
+  var dopo=tradeDopo(S.strat, fino), bo=$("btnOos");
+  if(dopo.length>=BLOCCO){ bo.hidden=false;
+    bo.querySelector("b").textContent="Il "+dopo[0].ch.slice(0,4)+"–"+dopo[dopo.length-1].ch.slice(0,4)+" vero";
+    var c=0; bo.querySelector(".mini").innerHTML=mini(dopo.map(function(x){ return c+=x.R; }), "var(--live)", true); } else bo.hidden=true;
+  if(rif.length<BLOCCO*3){ $("calcolo").textContent="Troppe poche operazioni nel riferimento per calibrare."; return; }
+  var k=chiaveCal();
+  if(!S.cal[k]){
+    $("vTit").textContent="Calcolo le regole di questa strategia…"; $("vTxt").textContent="Qualche secondo: rimescolo il backtest migliaia di volte.";
+    $("verdetto").className="verdetto";
+    setTimeout(function(){ calDi(S.strat); mostra(); semafori(); }, 30);
+    return;
+  }
+  mostra();
+}
+function liveDellaStrategia(st){ st=st||S.strat; if(!S.live) return []; return S.live.filter(function(o){ return o.R!=null && appartiene(st,o); }); }
+function statoDi(st, cal){
+  // il colore di una strategia, col suo live: per vedere a colpo d'occhio
+  // se una trascina l'altra
+  var R=liveDellaStrategia(st).map(function(o){return o.R;}); if(!R.length || cal.errore) return null;
+  var s=stopEff(cal, st), an=analizza(R, cal, s);
+  if(an.stop) return "FERMATI";
+  var l=livello(an.foto[an.foto.length-1], cal, s);
+  return REGOLE.some(function(r){ return l[r.k]==="gi"; }) ? "ATTENZIONE" : "CONTINUA";
+}
+var giroSemafori=0;
+function semafori(){
+  // un pallino su ogni strategia; le regole che mancano si calcolano una
+  // alla volta, senza bloccare la pagina
+  var giro=++giroSemafori, chips=$("scelta").children, i=0;
+  Array.prototype.forEach.call(chips,function(b){ var p=b.querySelector(".pal"); p.className="pal"; p.title=""; });
+  if(!S.live) return;
+  (function uno(){ if(giro!==giroSemafori || i>=STRAT.length) return;
+    var st=STRAT[i], b=chips[i]; i++;
+    var st8=statoDi(st, calDi(st)), p=b.querySelector(".pal");
+    if(st8){ p.className="pal "+st8; p.title={CONTINUA:"verde: nella norma",ATTENZIONE:"giallo: periodo brutto ma normale",FERMATI:"rosso: fermati"}[st8]; }
+    setTimeout(uno, 20); })();
+}
+
+/* ---------------- il cruscotto ---------------- */
+function mostra(){
+  var cal=S.cal[chiaveCal()]; if(!cal) return;
+  if(cal.errore){ $("vTit").textContent=cal.errore; $("vTxt").textContent=""; $("spie").innerHTML=""; return; }
+  var s=stopEff(cal), R, et=null;
+  if(S.sim){ R=S.sim.R; et=S.sim.et; } else R=liveDellaStrategia().map(function(o){return o.R;});
+  var an=analizza(R, cal, s);
+  S.vista={cal:cal, s:s, an:an, et:et, fine:!!(S.sim && !S.anim)};
+  var fa=cal.falsi(s), tettoFa=0; for(var z=0;z<N_CAL;z++) if(cal.W.dd[z]>s.ddTetto) tettoFa++;
+  var note=[]; S.strat.rif.forEach(function(rf){ if(rf.nota) note.push(rf.nota); });
+  $("calcolo").innerHTML="Regole calcolate da "+cal.rif.length+" operazioni del backtest, rimescolate a blocchi di "+BLOCCO+" in "+N_CAL+
+    " storie (più "+N_CONO+" per il cono), in "+num(cal.secondi,1)+" s. Orizzonte: "+cal.n+" operazioni. Le cinque regole statistiche insieme scattano per sbaglio nel "+
+    num(100*cal.fa,1)+"% delle storie normali"+(isFinite(s.ddTetto)?"; il tuo tetto da solo nel "+num(100*tettoFa/N_CAL,1)+"%; tutto insieme nel "+num(100*fa,1)+"%":"")+
+    ". Le percentuali del conto sono approssimate: R × "+num(s.rm,2)+"%."+(note.length?"<br>"+esc(note.join(" ")):"");
+  $("lungo").innerHTML="<b>Un edge sottile ha periodi lunghi.</b>Nel backtest di questa strategia il periodo più lungo senza un nuovo massimo è durato "+
+    cal.storia.uw+" operazioni, "+tempo(cal.storia.uw,cal)+". La caduta più profonda è stata di "+num(cal.storia.dd)+" R, circa il "+
+    num(cal.storia.dd*s.rm,0)+"% del conto. Se lo vivessi dal vero ti sembrerebbe morta: va saputo prima, non scoperto dopo.";
+  var chiaveP=s.dd.toFixed(3);
+  if(!cal.potere[chiaveP]) cal.potere[chiaveP]=potere(cal.rif, cal, s);
+  $("potere").innerHTML=cal.potere[chiaveP].map(function(p){ return "<tr><td><i class='pt' style='background:"+p.sc.col+"'></i>"+p.sc.nome+
+    " <span class='dim'>— "+p.sc.breve+"</span></td><td class='mono'>"+(p.sc.id==="intatto"?"per sbaglio ":"")+num(100*p.presi,0)+"% delle volte</td><td class='mono'>"+
+    (p.mediana?tempo(p.mediana,cal)+" <span class='dim'>("+p.mediana+" op)</span>":"—")+"</td><td class='mono'>"+(p.perso!=null?fmt(p.perso*s.rm,0)+"%":"—")+"</td></tr>"; }).join("");
+  $("conferma").innerHTML="Per <b>confermare</b> che l'edge funziona anche dal vero servono <b>"+cal.mt.grezzo+" operazioni, "+tempo(cal.mt.grezzo,cal)+
+    "</b>. Le percentuali qui sopra valgono dentro questo tempo; «perdita» è il risultato del conto dall'inizio al momento dello stop.";
+  $("tettoTxt").textContent=num(parseFloat($("tetto").value)||0,0)+"%";
+  disegna(S.anim ? S.anim.k : (S.sim && an.stop) ? an.stop.k : an.foto.length);
+  if(!S.sim){ mostraStatistiche(cal); mostraDati(cal, s); }
+}
+function disegna(k){
+  var v=S.vista; if(!v) return;
+  verdetto(v, k); spie(v, k); disegnaCono(v, k);
+}
+function comeSpegnere(st){
+  // una tecnica sola dell'oro si spegne dagli input, senza togliere l'EA
+  if(!st.tags) return st.rif.length>1 ? " Guarda anche i pallini delle singole strategie: se ne è rossa una sola, spegni quella." : "";
+  var rf=st.rif[0], x=st.tags.map(function(t){ return (rf.spegni||{})[t]; }).filter(Boolean);
+  return x.length ? " È una tecnica sola dell'EA: negli input metti "+x.join(", ")+", e l'altra continua." : "";
+}
+function verdetto(v, k){
+  var cal=v.cal, s=v.s, an=v.an, f=k?an.foto[k-1]:null, box=$("verdetto"), tit, txt;
+  var ban=$("simbanner"); ban.hidden=!v.et; if(v.et) ban.textContent="Simulazione · "+v.et+(/vero/.test(v.et)?" · il backtest, non il tuo conto":" · una storia inventata, non il tuo conto");
+  var pctDD=function(x){ return "circa il "+num(x*s.rm,0)+"% del conto"; };
+  var regole="la caduta supera "+num(s.dd)+" R ("+pctDD(s.dd)+(s.ddDaTetto?", il tuo tetto":"")+"), o perdi "+(Math.floor(s.fila)+1)+" operazioni di fila, o passano "+
+    (Math.floor(s.uw)+1)+" operazioni ("+tempo(s.uw,cal)+") senza un nuovo massimo, o la curva scende sotto la linea rossa del cono, o il guadagno medio cala (CUSUM oltre "+num(s.cs,2)+").";
+  var conferma = "Per dire che l'edge funziona davvero servono "+cal.mt.grezzo+" operazioni ("+tempo(cal.mt.grezzo,cal)+")";
+  if(!f){
+    box.className="verdetto";
+    tit = S.live && !S.sim ? "Nel conto non ci sono ancora operazioni di questa strategia" : "Le tue regole, decise oggi";
+    txt = "Ti fermi se "+regole+" "+conferma+"; per smettere no: basta toccare una di queste regole. Carica il report del conto ① per vedere dove sei.";
+  } else if(an.stop && an.stop.k<=k){
+    box.className="verdetto FERMATI"; var m=an.stop.motivo;
+    tit = m==="dd" && s.ddDaTetto ? "Fermati: hai toccato la perdita massima che accetti" :
+      {dd:"Fermati: la caduta ha superato lo stop", fila:"Fermati: troppe perdite di fila", uw:"Fermati: troppo tempo senza un nuovo massimo",
+       pc:"Fermati: la curva è sotto la linea rossa del cono", cs:"Fermati: il guadagno medio è sceso"}[m];
+    txt = "È successo all'operazione "+an.stop.k+", con un risultato dall'inizio di "+fmt(an.stop.cum)+" R ("+fmt(an.stop.cum*s.rm,0)+"% circa). "+
+      (m==="dd" && s.ddDaTetto ? "È il limite che ti eri dato: vale anche se la strategia fosse sana. " :
+        "Con l'edge intatto succede meno di una volta su venti. Non vuol dire per forza che è morta: vuol dire che è diventato troppo raro per essere solo sfortuna. ")+
+      "Spegni, e fai quello che avevi scritto per il dopo-rosso."+comeSpegnere(S.strat);
+  } else {
+    var l=livello(f, cal, s), gialli=REGOLE.filter(function(r){ return l[r.k]==="gi"; }).map(function(r){ return NOMI_REGOLA[r.k]; });
+    if(gialli.length){ box.className="verdetto ATTENZIONE"; tit="Periodo brutto, ma ancora normale";
+      txt="Da guardare: "+gialli.join(", ")+". Ci arriva una storia normale su cinque, anche con l'edge intatto. Si guarda, non si spegne. "; }
+    else { box.className="verdetto CONTINUA"; tit="Continua: tutto nella norma";
+      txt="Quello che vedi è compatibile con l'edge del backtest. "; }
+    if(k<cal.mt.grezzo) txt+=conferma+": sei a "+k+". Fino ad allora il live dice «non si è rotto», non «funziona».";
+    else { var x=an.foto.slice(0,k).map(function(q){return q.r;}), tt=media(x)/devst(x)*Math.sqrt(x.length);
+      txt+= tt>1.645 ? "Hai superato le "+cal.mt.grezzo+" operazioni e il guadagno del live è statisticamente positivo: l'edge è confermato anche dal vero."
+        : "Hai superato le "+cal.mt.grezzo+" operazioni, ma il guadagno del live non è ancora statisticamente positivo (t "+num(tt,2)+"): non si è rotta, ma non è neanche confermata."; }
+    if(k>cal.n) txt+=" Sei oltre l'orizzonte delle regole ("+cal.n+" operazioni): conviene rifarle mettendo il live dentro il riferimento.";
+  }
+  $("vTit").textContent=tit; $("vTxt").textContent=txt;
+}
+function pista(val, g, st, max, labs, peggio){
+  // verde, giallo e rosso sempre larghi uguali: l'ago si muove a tratti lineari
+  var P=[0,0.6,0.92,1], V=[0,g,st,max];
+  function pos(x){ if(x==null) return null; x=Math.max(0,Math.min(max,x));
+    for(var i=1;i<4;i++) if(x<=V[i]) return P[i-1]+(P[i]-P[i-1])*(V[i]-V[i-1]>0?(x-V[i-1])/(V[i]-V[i-1]):1); return 1; }
+  var p=pos(val), q=pos(peggio);
+  return '<div class="pistawrap"><div class="pista"><i class="zv" style="width:60%"></i><i class="zg" style="width:32%"></i><i class="zr" style="width:8%"></i></div>'+
+    (q==null||q===p?'':'<span class="ago peggio" title="il peggio finora" style="left:'+(100*q).toFixed(2)+'%"></span>')+
+    (p==null?'':'<span class="ago" title="adesso" style="left:'+(100*p).toFixed(2)+'%"></span>')+
+    '<div class="pista-l"><span>'+labs[0]+'</span><span style="position:absolute;left:60%;transform:translateX(-50%)">'+labs[1]+'</span><span style="position:absolute;left:92%;transform:translateX(-50%)">'+labs[2]+'</span><span></span></div></div>';
+}
+function spie(v, k){
+  var cal=v.cal, s=v.s, g=cal.giallo, f=k?v.an.foto[k-1]:{dd:0,fila:0,uw:0,pc:null,cs:0};
+  var l=k?livello(f,cal,s):{dd:"info",fila:"info",uw:"info",pc:"info",cs:"info"};
+  var fermo=v.an.stop && v.an.stop.k<=k ? v.an.stop.motivo : null;
+  var ET={ok:"normale", gi:"attenzione", ro:"stop", info:"—"};
+  function stato(key){ var x=l[key]; if(fermo===key) x="ro"; return '<span class="st '+x+'">'+(fermo===key?"stop":ET[x])+'</span>'; }
+  var fl=Math.floor(s.fila)+1, ul=Math.floor(s.uw)+1;
+  // il peggio toccato finora, non solo il valore di adesso
+  var w={dd:0,fila:0,uw:0,cs:0,pc:null};
+  v.an.foto.slice(0,k).forEach(function(x){ if(x.dd>w.dd) w.dd=x.dd; if(x.fila>w.fila) w.fila=x.fila; if(x.uw>w.uw) w.uw=x.uw;
+    if(x.cs>w.cs) w.cs=x.cs; if(x.pc!=null && (w.pc==null || x.pc<w.pc)) w.pc=x.pc; });
+  var pf=function(t){ return k ? "<br>il peggio finora: <b>"+t+"</b>" : ""; };
+  var righe=[
+    {k:"dd", t:"Caduta dal massimo", d:"quanto sei sceso dal punto più alto",
+      em:"stop a "+num(s.dd)+" R ≈ "+num(s.dd*s.rm,0)+"%"+(s.ddDaTetto?" (il tuo tetto)":"")+" · backtest: "+num(cal.storia.dd)+" R",
+      p:pista(f.dd, g.dd, s.dd, s.dd*1.3, ["0", num(g.dd,0)+" R", num(s.dd,0)+" R"], w.dd),
+      val:num(f.dd)+" R", sub:"adesso, ≈ "+num(f.dd*s.rm,1)+"% del conto"+pf(num(w.dd)+" R ≈ "+num(w.dd*s.rm,1)+"%")},
+    {k:"fila", t:"Perdite di fila", d:"operazioni perse una dopo l'altra",
+      em:"stop a "+fl+" · backtest: "+cal.storia.fila,
+      p:pista(f.fila, g.fila, s.fila, fl*1.3, ["0", String(Math.floor(g.fila)+1), String(fl)], w.fila),
+      val:String(f.fila), sub:"adesso"+pf(String(w.fila))},
+    {k:"uw", t:"Tempo senza nuovo massimo", d:"operazioni dall'ultimo record",
+      em:"stop a "+ul+" (≈ "+tempo(ul,cal).replace("circa ","")+") · backtest: "+cal.storia.uw,
+      p:pista(f.uw, g.uw, s.uw, ul*1.3, ["0", String(Math.round(g.uw)), String(ul)], w.uw),
+      val:String(f.uw), sub:(f.uw?"adesso, "+tempo(f.uw,cal):"adesso sei sul massimo")+pf(w.uw+" op, "+tempo(w.uw,cal))},
+    {k:"pc", t:"Posizione nel cono", d:"quante storie normali fanno meglio di te",
+      em:"stop oltre il "+num(100-s.pc,2)+"%",
+      p:pista(f.pc==null?null:100-f.pc, 100-g.pc, 100-s.pc, 100, ["0%", num(100-g.pc,0)+"%", num(100-s.pc,2)+"%"], w.pc==null?null:100-w.pc),
+      val:f.pc==null?"—":num(100-f.pc,0)+"%", sub:(f.pc==null?(k>=cal.n?"oltre l'orizzonte":"parte dall'operazione "+CONO_DA):"fanno meglio, adesso")+(w.pc!=null?pf(num(100-w.pc,1)+"%"):"")},
+    {k:"cs", t:"Calo lento", d:"si accorge se il guadagno medio scende",
+      em:"stop oltre "+num(s.cs,2)+" · CUSUM",
+      p:pista(f.cs, g.cs, s.cs, s.cs*1.3, ["0", num(g.cs,1), num(s.cs,1)], w.cs),
+      val:num(f.cs,2), sub:(f.cs<0.01?"adesso a zero: nessun calo":"adesso · sale con le perdite")+pf(num(w.cs,2))}
+  ];
+  $("spie").innerHTML=righe.map(function(r){
+    return '<div class="spia"><div class="t"><b>'+r.t+'</b><span>'+r.d+'</span><em>'+r.em+'</em></div>'+r.p+
+      '<div class="v"><b>'+r.val+'</b><span>'+r.sub+'</span>'+stato(r.k)+'</div></div>'; }).join("");
+}
+
+/* ---------------- il grafico ---------------- */
+var NS="http://www.w3.org/2000/svg", MONO="IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+function tx(s,a){ var t=el("text",a); t.textContent=s; return t; }
+function bandeFino(cal, L){
+  // oltre l'orizzonte le regole non valgono più, ma la fascia si può ancora
+  // disegnare: 1500 storie lunghe quanto il live, solo per il grafico
+  cal.lunghe=cal.lunghe||{}; if(cal.lunghe[L]) return cal.lunghe[L];
+  var M=1500, rnd=mulberry(21), seq=new Float64Array(L), col=[], out={p10:cal.bande.p10.slice(), p50:cal.bande.p50.slice(), p90:cal.bande.p90.slice()};
+  for(var j=cal.n;j<L;j++) col.push(new Float32Array(M));
+  for(var i=0;i<M;i++){ percorso(cal.rif,L,rnd,seq); var c=0; for(var j2=0;j2<L;j2++){ c+=seq[j2]; if(j2>=cal.n) col[j2-cal.n][i]=c; } }
+  col.forEach(function(x){ x.sort(); out.p10.push(pct(x,10)); out.p50.push(pct(x,50)); out.p90.push(pct(x,90)); });
+  return (cal.lunghe[L]=out);
+}
+function disegnaCono(v, k){
+  var cal=v.cal, s=v.s, foto=v.an.foto.slice(0,k), n=cal.n, nx=Math.max(n, v.an.foto.length), b=nx>n?bandeFino(cal,nx):cal.bande, rosso=cal.bande.rosso;
+  var host=$("cono"); Array.prototype.slice.call(host.querySelectorAll("svg")).forEach(function(x){ x.remove(); });
+  var W=960,H=380,mL=52,mR=16,mT=14,mB=34;
+  var lo=0, hi=0;
+  for(var i=0;i<nx;i++){ if(i<n && rosso[i]!=null) lo=Math.min(lo,rosso[i]); hi=Math.max(hi,b.p90[i]); }
+  var pk=0; foto.forEach(function(r){ lo=Math.min(lo,r.cum); hi=Math.max(hi,r.cum); pk=r.picco; });
+  lo=Math.min(lo, pk-s.dd);
+  var pad=(hi-lo)*0.05; lo-=pad; hi+=pad;
+  var X=function(j){ return mL+j/nx*(W-mL-mR); }, Y=function(y){ return mT+(hi-y)/(hi-lo)*(H-mT-mB); };
+  var svg=el("svg",{viewBox:"0 0 "+W+" "+H,role:"img","aria-label":"La curva del live dentro il cono delle storie normali"});
+  var passo=Math.pow(10,Math.floor(Math.log10((hi-lo)/4))); var st=[1,2,2.5,5,10].map(function(m){return m*passo;}).find(function(q){return (hi-lo)/q<=6;})||passo*10;
+  for(var g=Math.ceil(lo/st)*st; g<=hi; g+=st){ var zero=Math.abs(g)<1e-9;
+    svg.appendChild(el("line",{x1:mL,x2:W-mR,y1:Y(g),y2:Y(g),stroke:zero?"var(--ink-3)":"var(--line-soft)","stroke-width":zero?1:1}));
+    svg.appendChild(tx((g>0?"+":"")+(+g.toFixed(1))+" R",{x:mL-8,y:Y(g)+4,"text-anchor":"end",fill:"var(--ink-3)","font-size":11,"font-family":MONO})); }
+  var xs=Math.pow(10,Math.floor(Math.log10(nx/4))); var xst=[1,2,5,10].map(function(m){return m*xs;}).find(function(q){return nx/q<=7;})||xs*10;
+  for(var j=0;j<=nx;j+=xst) svg.appendChild(tx(String(j),{x:X(j),y:H-mB+17,"text-anchor":"middle",fill:"var(--ink-3)","font-size":11,"font-family":MONO}));
+  svg.appendChild(tx("operazioni",{x:W-mR,y:H-mB+31,"text-anchor":"end",fill:"var(--ink-3)","font-size":10.5,"font-family":MONO}));
+  function fascia(a, z, op){ var d="M"+X(a)+" "+Y(a?b.p90[a-1]:0);
+    for(var i1=a;i1<z;i1++) d+="L"+X(i1+1).toFixed(1)+" "+Y(b.p90[i1]).toFixed(1);
+    for(var i2=z-1;i2>=a;i2--) d+="L"+X(i2+1).toFixed(1)+" "+Y(b.p10[i2]).toFixed(1);
+    if(!a) d+="L"+X(0)+" "+Y(0);
+    svg.appendChild(el("path",{d:d+"Z",fill:"var(--band)",style:"opacity:var("+op+")"})); }
+  fascia(0, n, "--bandA"); if(nx>n) fascia(n, nx, "--bandB");
+  function linea(pts,col,w,dash){ if(!pts.length) return; var d="M"+pts.map(function(p){ return p[0].toFixed(1)+" "+p[1].toFixed(1); }).join("L");
+    svg.appendChild(el("path",{d:d,fill:"none",stroke:col,"stroke-width":w,"stroke-dasharray":dash||"","stroke-linejoin":"round"})); }
+  linea([[X(0),Y(0)]].concat(b.p50.slice(0,n).map(function(y,i){ return [X(i+1),Y(y)]; })),"var(--band)",2);
+  if(nx>n){ linea(b.p50.slice(n-1).map(function(y,i){ return [X(n+i),Y(y)]; }),"var(--band)",1.6,"6 5");
+    svg.appendChild(el("line",{x1:X(n),x2:X(n),y1:mT,y2:H-mB,stroke:"var(--ink-3)","stroke-width":1,"stroke-dasharray":"2 4"}));
+    svg.appendChild(tx("fine dell'orizzonte · "+n+" op",{x:X(n)+6,y:mT+12,fill:"var(--ink-3)","font-size":11,"font-family":MONO,stroke:"var(--surface)","stroke-width":4,"paint-order":"stroke"})); }
+  var ro=[]; rosso.forEach(function(y,i){ if(y!=null) ro.push([X(i+1),Y(y)]); }); linea(ro,"var(--neg)",1.6,"5 4");
+  // lo stop della caduta: segue il massimo del live
+  var sd=[[X(0),Y(-s.dd)]], pp=0; foto.forEach(function(r){ if(r.picco!==pp){ sd.push([X(r.k),Y(pp-s.dd)]); pp=r.picco; } sd.push([X(r.k),Y(pp-s.dd)]); });
+  linea(sd,"var(--stopdd)",2); linea([sd[sd.length-1],[X(nx),sd[sd.length-1][1]]],"var(--stopdd)",1.4,"2 4");
+  if(v.fine && k<v.an.foto.length){
+    linea(v.an.foto.slice(k-1).map(function(r){ return [X(r.k),Y(r.cum)]; }),"var(--ink-3)",1.4,"3 3");
+    var ul=v.an.foto[v.an.foto.length-1];
+    svg.appendChild(tx("se non ti fossi fermato",{x:X(ul.k)-4,y:Y(ul.cum)-10,"text-anchor":"end",fill:"var(--ink-3)","font-size":11,"font-family":MONO,stroke:"var(--surface)","stroke-width":4,"paint-order":"stroke"}));
+  }
+  if(foto.length){
+    linea([[X(0),Y(0)]].concat(foto.map(function(r){ return [X(r.k),Y(r.cum)]; })),"var(--live)",2.4);
+    var u=foto[foto.length-1];
+    svg.appendChild(el("circle",{cx:X(u.k),cy:Y(u.cum),r:4.5,fill:"var(--live)",stroke:"var(--surface)","stroke-width":2}));
+    var sp=v.an.stop; if(sp && sp.k<=k){
+      svg.appendChild(el("circle",{cx:X(sp.k),cy:Y(sp.cum),r:7,fill:"none",stroke:"var(--neg)","stroke-width":2.5}));
+      var dx=X(sp.k)>W*0.8?-12:12;
+      svg.appendChild(tx("STOP · op "+sp.k,{x:X(sp.k)+dx,y:Y(sp.cum)-12,"text-anchor":dx<0?"end":"start",fill:"var(--neg)","font-size":12,"font-weight":600,"font-family":MONO,stroke:"var(--surface)","stroke-width":4,"paint-order":"stroke"}));
+    }
+  }
+  var hit=el("rect",{x:mL,y:mT,width:W-mL-mR,height:H-mT-mB,fill:"transparent"}); svg.appendChild(hit);
+  var tip=$("tipCono");
+  function muovi(cx){
+    var r=svg.getBoundingClientRect(), j=Math.round(((cx-r.left)/r.width*W-mL)/(W-mL-mR)*nx);
+    if(j<1||j>nx){ tip.style.opacity=0; return; }
+    var rr=foto[j-1], h='<div class="dim mono" style="font-size:11px;margin-bottom:4px">operazione '+j+'</div>';
+    h+=(j>n?'<div class="dim" style="font-size:11px">oltre l\'orizzonte: la fascia è indicativa</div>':'')+
+      '<div class="row"><span>storia tipica</span><b>'+fmt(b.p50[j-1])+' R</b></div>'+
+      '<div class="row"><span>8 su 10 fra</span><b>'+fmt(b.p10[j-1])+' e '+fmt(b.p90[j-1])+'</b></div>'+
+      (j<=n && rosso[j-1]!=null?'<div class="row"><span>linea rossa</span><b>'+fmt(rosso[j-1])+' R</b></div>':'');
+    if(rr) h+='<div class="row"><span>'+(v.et?"la simulazione":"il tuo live")+'</span><b>'+fmt(rr.cum)+' R</b></div>'+
+      '<div class="row"><span>caduta</span><b>'+num(rr.dd)+' R</b></div>';
+    tip.innerHTML=h; tip.style.opacity=1;
+    var lx=X(j)/W*r.width, dx=lx>r.width*0.6; tip.style.left=dx?"":(lx+14)+"px"; tip.style.right=dx?(r.width-lx+14)+"px":""; tip.style.top="8px";
+  }
+  hit.addEventListener("mousemove",function(e){ muovi(e.clientX); });
+  hit.addEventListener("touchmove",function(e){ if(e.touches[0]) muovi(e.touches[0].clientX); },{passive:true});
+  hit.addEventListener("mouseleave",function(){ tip.style.opacity=0; });
+  host.appendChild(svg);
+}
+
+/* ---------------- il simulatore ---------------- */
+function mini(v, col, curva){
+  // il disegnino della carta: quanto resta dell'edge nel tempo (o la curva vera)
+  var W=120,H=38,lo=Math.min.apply(null,v.concat([0])),hi=Math.max.apply(null,v.concat([curva?0:1]));
+  var X=function(i){ return 2+i/(v.length-1)*(W-4); }, Y=function(y){ return H-4-(y-lo)/((hi-lo)||1)*(H-8); };
+  var d=v.map(function(y,i){ return (i?"L":"M")+X(i).toFixed(1)+" "+Y(y).toFixed(1); }).join("");
+  var guida=curva?'<line x1="2" x2="'+(W-2)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--ink-3)" stroke-dasharray="2 3"/>'
+    :'<line x1="2" x2="'+(W-2)+'" y1="'+Y(1)+'" y2="'+Y(1)+'" stroke="var(--ink-3)" stroke-dasharray="2 3"/><line x1="2" x2="'+(W-2)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--line)"/>';
+  var area=curva?"":'<path d="'+d+'L'+X(v.length-1)+' '+Y(0)+'L'+X(0)+' '+Y(0)+'Z" fill="'+col+'" opacity=".18"/>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+guida+area+'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+}
+function carte(){
+  var h=$("carte"), punti=[];
+  for(var i=0;i<=40;i++) punti.push(i/40);
+  SCENARI.forEach(function(sc){
+    var b=document.createElement("button"); b.type="button"; b.className="carta"; b.dataset.sc=sc.id;
+    b.innerHTML='<span class="mini">'+mini(punti.map(function(t){ return sc.edge(t*1000,1000); }), sc.col)+'</span><b>'+sc.nome+'</b><span>'+sc.breve+'</span>';
+    b.style.setProperty("--c", sc.col); h.appendChild(b); });
+  var o=document.createElement("button"); o.type="button"; o.className="carta vera"; o.dataset.sc="oos"; o.id="btnOos"; o.hidden=true;
+  o.innerHTML='<span class="mini"></span><b>Il periodo vero</b><span>dati veri del backtest, rigiocati come se fossero il tuo conto</span>';
+  h.appendChild(o);
+  Array.prototype.forEach.call(h.children,function(b){ b.addEventListener("click",function(){ simula(b.dataset.sc); }); });
+}
+function ferma(){ if(S.anim){ cancelAnimationFrame(S.anim.id); S.anim=null; } }
+function simula(sc){
+  var cal=S.cal[chiaveCal()]; if(!cal || cal.errore) return;
+  ferma();
+  var et, R;
+  if(sc==="oos"){ var d=tradeDopo(S.strat, ($("fino").value||"").trim()); R=d.map(function(x){return x.R;});
+    et="il "+d[0].ch.slice(0,4)+"–"+d[d.length-1].ch.slice(0,4)+" vero, rigiocato come se fosse il live"; }
+  else { var scn=SCENARI.find(function(x){ return x.id===sc; }); R=scenario(cal.rif, cal, scn, (Math.random()*1e9)|0);
+    et=scn.nome.toLowerCase(); }
+  S.sim={R:R, et:et}; $("torna").hidden=false;
+  Array.prototype.forEach.call(document.querySelectorAll("#carte button[data-sc]"),function(b){ b.setAttribute("aria-pressed", b.dataset.sc===sc?"true":"false"); });
+  S.anim={k:0, id:0}; mostra();
+  // la storia si ferma dove ti fermeresti tu; il resto si vede sbiadito
+  var sp=S.vista.an.stop, fine=sp?sp.k:R.length, passo=Math.max(1, Math.ceil(R.length/260));
+  (function giro(){ if(!S.anim) return; S.anim.k=Math.min(fine, S.anim.k+passo);
+    if(S.anim.k>=fine){ S.anim=null; S.vista.fine=true; } disegna(S.vista.fine?fine:S.anim.k);
+    if(S.anim) S.anim.id=requestAnimationFrame(giro); })();
+}
+function torna(){ ferma(); S.sim=null; $("torna").hidden=true;
+  Array.prototype.forEach.call(document.querySelectorAll("#carte button[data-sc]"),function(b){ b.removeAttribute("aria-pressed"); });
+  mostra(); }
+
+/* ---------------- i dati letti dal report ---------------- */
+function mostraDati(cal, s){
+  // per potersi fidare: cosa ha letto la pagina, e le ultime operazioni, da
+  // confrontare a occhio con MetaTrader
+  var host=$("datiLetti");
+  if(!S.live){ host.innerHTML=""; return; }
+  var ops=liveDellaStrategia();
+  if(!ops.length){ host.innerHTML='<p class="dim">Nel report non ci sono operazioni di «'+esc(S.strat.nome)+'».</p>'; return; }
+  var tot=0, c=0, p=0, dd=0; ops.forEach(function(o){ tot+=o.R; c+=o.R; if(c>p) p=c; if(p-c>dd) dd=p-c; });
+  var nomeTag=function(o){ var rf=refDi(o); return rf ? (rf.nomiTag[o.tag] ? rf.nome.split(" · ")[0]+" · "+rf.nomiTag[o.tag] : rf.nome) : (o.tag||o.simbolo); };
+  host.innerHTML='<p><b>Dati letti per «'+esc(S.strat.nome)+'»:</b> '+ops.length+' operazioni chiuse, dal '+esc(ops[0].ap.slice(0,10))+' al '+esc(ops[ops.length-1].ch.slice(0,10))+
+    '. Risultato '+fmt(tot)+' R (≈ '+fmt(tot*s.rm,0)+'% del conto, senza composto); la caduta più profonda è stata '+num(dd)+' R (≈ '+num(dd*s.rm,0)+'%).'+
+    (ops.length>cal.n?' <span class="cneg">Sono più delle '+cal.n+' dell\'orizzonte: le regole valgono per le prime '+cal.n+'.</span>':'')+'</p>'+
+    '<details><summary>Le ultime 10 operazioni lette — confrontale con MetaTrader</summary><div class="scroll" style="margin-top:8px"><table>'+
+    '<thead><tr><th>Chiusa il</th><th>Strategia</th><th>Verso</th><th>Netto</th><th>Risultato</th></tr></thead><tbody>'+
+    ops.slice(-10).reverse().map(function(o){ return "<tr><td class='mono'>"+esc(o.ch)+"</td><td>"+esc(nomeTag(o))+"</td><td>"+(o.verso==="L"?"long":"short")+
+      "</td><td class='mono'>"+fmt(o.netto,2)+"</td><td class='mono "+(o.R<0?"cneg":"")+"'>"+fmt(o.R,2)+" R</td></tr>"; }).join("")+
+    '</tbody></table></div></details>';
+}
+
+/* ---------------- le statistiche del live ---------------- */
+function pill(stato,testo){ return '<span class="pill '+stato+'">'+testo+'</span>'; }
+function mostraStatistiche(cal){
+  var host=$("statistiche"), live=liveDellaStrategia();
+  if(!live.length){ host.innerHTML='<div class="vuoto">'+(S.live?"Nessuna operazione live di questa strategia.":"Carica il live ①.")+'</div>'; return; }
+  var n=live.length, R=live.map(function(o){return o.R;}), rif=cal.rif, z=1.645;
+  function quota(a){ return a.filter(function(x){return x>0;}).length/a.length; }
+  function medSe(a,cond){ var b=a.filter(cond); return b.length?media(b):NaN; }
+  var righe=[], p=quota(rif), sp=Math.sqrt(p*(1-p)/n);
+  righe.push(["Operazioni vinte", num(100*quota(R),0)+"%", num(100*p,0)+"%", [100*(p-z*sp),100*(p+z*sp)], 100*quota(R), function(x){return num(x,0)+"%";}]);
+  var w=rif.filter(function(x){return x>0;}), nw=Math.max(1,Math.round(n*p)), mw=media(w), sw=devst(w)/Math.sqrt(nw);
+  righe.push(["Vincita media", fmt(medSe(R,function(x){return x>0;}),2)+" R", fmt(mw,2)+" R", [mw-z*sw,mw+z*sw], medSe(R,function(x){return x>0;}), function(x){return fmt(x,2);}]);
+  var ls=rif.filter(function(x){return x<=0;}), nl=Math.max(1,n-nw), ml=media(ls), sl=devst(ls)/Math.sqrt(nl);
+  righe.push(["Perdita media", fmt(medSe(R,function(x){return x<=0;}),2)+" R", fmt(ml,2)+" R", [ml-z*sl,ml+z*sl], medSe(R,function(x){return x<=0;}), function(x){return fmt(x,2);}]);
+  var mu=media(rif), sm=devst(rif)/Math.sqrt(n);
+  righe.push(["Guadagno medio per operazione", fmt(media(R),3)+" R", fmt(mu,3)+" R", [mu-z*sm,mu+z*sm], media(R), function(x){return fmt(x,3);}]);
+  var t0=Math.min.apply(null,live.map(function(o){return o.t;})), t1=Math.max.apply(null,live.map(function(o){return o.tc;})), mesi=Math.max(0.5,(t1-t0)/(30.44*86400));
+  var lam=cal.ritmo/12*mesi;
+  righe.push(["Operazioni al mese", num(n/mesi,1), num(cal.ritmo/12,1), [(lam-z*Math.sqrt(lam))/mesi,(lam+z*Math.sqrt(lam))/mesi], n/mesi, function(x){return num(Math.max(0,x),1);}]);
+  host.innerHTML='<p class="dim" style="margin:0 0 8px;font-size:12.5px">'+n+' operazioni live in '+num(mesi,1)+' mesi. La fascia è dove cadono 9 volte su 10 con lo stesso numero di operazioni. '+
+    'Fuori fascia non vuol dire guasto — su cinque righe, una fuori ogni tanto è normale — ma se ci resta, va capito perché.</p>'+
+    '<div class="scroll"><table><thead><tr><th>Cosa</th><th>Live</th><th>Backtest</th><th>Fascia normale</th><th></th></tr></thead><tbody>'+
+    righe.map(function(r){ var ok=!(r[4]<r[3][0]||r[4]>r[3][1]);
+      return "<tr><td>"+r[0]+"</td><td class='mono'>"+r[1]+"</td><td class='mono dim'>"+r[2]+"</td><td class='mono dim'>"+r[5](r[3][0])+" … "+r[5](r[3][1])+"</td><td>"+
+        (n<10?pill("attesa","pochi dati"):isNaN(r[4])?pill("attesa","—"):ok?pill("si","nella norma"):'<span class="pill" style="background:var(--warn-bg);color:var(--warn)">fuori fascia</span>')+"</td></tr>"; }).join("")+
+    "</tbody></table></div>";
+}
+
+/* ---------------- file trascinati ---------------- */
+function zona(drop, input, cb){
+  drop.addEventListener("dragover",function(e){ e.preventDefault(); drop.classList.add("su"); });
+  drop.addEventListener("dragleave",function(){ drop.classList.remove("su"); });
+  // i file si copiano subito in una lista: la FileList dell'input si svuota
+  // appena la si azzera, e la lettura e' asincrona
+  drop.addEventListener("drop",function(e){ e.preventDefault(); drop.classList.remove("su"); cb(Array.from(e.dataTransfer.files)); });
+  drop.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); input.click(); } });
+  input.addEventListener("change",function(){ var f=Array.from(input.files); input.value=""; cb(f); });
+}
+async function leggiTutti(files){ var out=[]; for(var i=0;i<files.length;i++){ out.push(leggiReport(await testo(files[i]), files[i].name)); } return out; }
+function unisci(reps){
+  // la R di ogni operazione: col rischio scritto nel report (il tester lo
+  // scrive), altrimenti con quello della sua strategia, qui sopra
+  var tutte=[], orfane=0;
+  reps.forEach(function(rp){ var o=operazioni(rp, null); orfane+=o.orfane;
+    o.ops.forEach(function(q){ var rf=refDi(q), r=rp.rischio || (rf?rischioDi(rf):null);
+      q.R = r ? q.netto/(r/100*q.base) : null; }); tutte=tutte.concat(o.ops); });
+  // lo stesso report caricato due volte non conta doppio
+  var visti={}; tutte=tutte.filter(function(o){ var k=o.ap+"|"+o.ch+"|"+o.verso+"|"+o.netto.toFixed(2); if(visti[k]) return false; visti[k]=1; return true; });
+  tutte.sort(function(a,b){ return a.tc-b.tc; });
+  return {ops:tutte, orfane:orfane};
+}
+function ricalcolaLive(){
+  if(!S.liveRep.length){ S.live=null; return; }
+  var u=unisci(S.liveRep); S.live=u.ops;
+  var senza=u.ops.filter(function(o){return o.R==null;}).length;
+  $("statoLive").textContent=S.liveRep.map(function(x){return x.nome;}).join(", ")+" · "+u.ops.length+" operazioni chiuse"+
+    (u.orfane?(" · "+u.orfane+" chiusure senza apertura"):"")+(senza?(" · "+senza+" di nessuna strategia nota"):"");
+}
+function campiRischio(){
+  var h=$("rischi"); h.innerHTML="";
+  RIF.forEach(function(rf){ var lab=document.createElement("label"), inp=document.createElement("input");
+    inp.type="number"; inp.step="0.01"; inp.min="0.01"; inp.value=rischioDi(rf); inp.setAttribute("aria-label","Rischio percentuale live di "+rf.nome);
+    inp.addEventListener("change",function(){ var x=parseFloat(inp.value); S.rischi[rf.id]= x>0?x:rf.rischio; ricalcolaLive(); aggiorna(); semafori(); });
+    lab.appendChild(document.createTextNode("Rischio live "+rf.nome.split(" · ")[0]+" ")); lab.appendChild(inp); lab.appendChild(document.createTextNode("%"));
+    h.appendChild(lab); });
+}
+
+function avvia(){
+  costruisciStrategie(); campiRischio();
+  var sc=$("scelta"); sc.innerHTML="";
+  STRAT.forEach(function(s){ var b=document.createElement("button"); b.className="chip"; b.type="button"; b.dataset.id=s.id;
+    var n=0; s.rif.forEach(function(rf){ n+=rf.t.filter(function(x){ return !s.tags || s.tags.indexOf(rf.tags[x[4]])>=0; }).length; });
+    b.innerHTML='<span class="nome"><span class="pal" aria-hidden="true"></span>'+esc(s.nome)+"</span><small>"+n+" operazioni di backtest</small>"; b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",function(){ scegli(s.id); }); sc.appendChild(b); });
+  // si parte dal conto intero: le due strategie girano sullo stesso conto
+  if(STRAT.length) scegli((STRAT.find(function(s){ return s.id==="__tutte"; })||STRAT[0]).id);
+  else { $("vTit").textContent="Nessuna strategia di riferimento"; $("vTxt").textContent="Trascina nel riquadro ③ il report del tester di una strategia."; }
+}
+zona($("dropLive"),$("fileLive"),async function(files){
+  try{ S.liveRep=S.liveRep.concat(await leggiTutti(files)); ricalcolaLive(); torna(); semafori(); }
+  catch(e){ $("statoLive").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
+zona($("dropRif"),$("fileRif"),async function(files){
+  try{ var reps=await leggiTutti(files);
+    reps.forEach(function(rp){
+      if(!rp.rischio) throw new Error(rp.nome+": nel report non trovo il rischio % (serve un report del tester).");
+      var o=operazioni(rp, rp.rischio).ops; var tags=[]; o.forEach(function(x){ if(tags.indexOf(x.tag)<0) tags.push(x.tag); });
+      RIF.push({id:"u"+RIF.length, nome:rp.nome.replace(/\.(html?|gz)$/i,""), simbolo:rp.simbolo, rischio:rp.rischio, tags:tags, nomiTag:{},
+        nota:rp.adattivo?"Questo backtest è girato col rischio adattivo acceso: la R è nominale, e il live va confrontato solo se gira con la stessa impostazione.":"",
+        fino:"", t:o.map(function(x){ return [x.ap, x.ch, x.verso, x.R, tags.indexOf(x.tag)]; })});
+      $("statoRif").textContent=rp.nome+" · "+o.length+" operazioni · aggiunta. Scrivi qui sotto la data di fine del periodo di costruzione.";
+    });
+    $("fino").value=""; avvia(); scegli(RIF[RIF.length-1].id); ricalcolaLive();
+  }catch(e){ $("statoRif").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
+$("fino").addEventListener("change",function(){ ferma(); S.sim=null; $("torna").hidden=true; aggiorna(); semafori(); });
+$("tetto").addEventListener("change",function(){ if(S.anim){ ferma(); } mostra(); semafori(); });
+carte();
+$("torna").addEventListener("click",torna);
+avvia();
+window.__monitor={S:S, calibra:calibra, orizzonte:orizzonte, leggiReport:leggiReport, operazioni:operazioni, tradeRif:tradeRif,
+  analizza:analizza, stopEff:stopEff, statoDi:statoDi, calDi:calDi, simula:simula, torna:torna, STRAT:function(){return STRAT;}};
+
+})();
+</script>
