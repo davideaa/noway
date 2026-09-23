@@ -31,6 +31,24 @@ Sul Mac MetaTrader è dentro Wine, e la riga di comando passa da lì
 `~/Library/Application Support/net.metaquotes.wine.metatrader5/`): si può,
 ma va verificato sul campo.
 
+**Sul Mac (scelto da Davide il 2026-09-23).** MetaTrader per macOS è
+un'app che contiene Wine. Da verificare sul posto, nell'ordine:
+
+1. dov'è Wine dentro l'app: di solito
+   `/Applications/MetaTrader 5.app/Contents/SharedSupport/wine/bin/`
+   (`wine64` o `wine`); cercarlo con `find` se non c'è;
+2. la cartella dati (il «prefisso» di Wine): di solito
+   `~/Library/Application Support/net.metaquotes.wine.metatrader5/`;
+   dentro, `drive_c/Program Files/MetaTrader 5/` con `terminal64.exe`,
+   `metaeditor64.exe` e la cartella `MQL5`;
+3. i comandi qui sotto si lanciano come
+   `WINEPREFIX="<prefisso>" "<wine>" "C:\Program Files\MetaTrader 5\terminal64.exe" /config:...`
+   (i percorsi dentro Wine sono stile Windows, `C:\...`);
+4. **prima prova**: compilare `FxTrendPullback.mq5` e lanciare un test di
+   un mese solo, per vedere che il report esca. Solo dopo si parte;
+5. MetaTrader aperto a mano va chiuso prima di lanciare il tester da riga
+   di comando.
+
 **Compilare un EA:**
 
 ```
