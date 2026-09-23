@@ -139,10 +139,13 @@ morte entro 4 ore hanno già colpito lo stop.
    di costruirci sopra una strategia di ritorno alla media.
 7. **Prima del live**, confrontare swap e spread veri con i numeri della
    sezione 3. Se sono peggiori, lo si sa prima e non dopo.
-8. **Dal primo giorno di live, due controlli** (`docs/metodo.md`, passo
-   22): ogni mese il backtest sugli stessi giorni contro il live,
-   operazione per operazione; a ogni operazione il monitor dell'edge.
-   Tutti e due in **`monitor/monitor.html`**, che si apre col doppio clic.
+8. **Dal primo giorno di live, ogni mese** (`docs/metodo.md`, passo 22):
+   si carica il report del conto dal primo giorno in
+   **`monitor/monitor.html`** e si guardano i pallini. Il controllo
+   dell'esecuzione è stato tolto il 2026-09-23 su richiesta di Davide.
+   **Dopo un rosso** (proposta scritta nella pagina, da confermare): si
+   spegne solo quello che è rosso, 6 mesi in demo, si rifanno i test coi
+   dati nuovi e riparte solo se li ripassa.
    **Il giallo nei primi mesi è normale.** Confermare l'edge dal live
    richiede ~450 operazioni, cioè ~15 mesi. Per **smettere** non si
    aspetta: il monitor ha cinque regole di stop tarate insieme (5% di

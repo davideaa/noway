@@ -62,7 +62,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 
 | | |
 |---|---|
-| `monitor/monitor.html` | **la pagina da usare**: doppio clic, trascini il report del conto. Cruscotto con le cinque regole di stop più il tetto, cono, simulatore, controllo veloce (l'esecuzione) |
+| `monitor/monitor.html` | **la pagina da usare**: doppio clic, trascini il report del conto. Pallini per strategia, cruscotto con le cinque regole di stop più il tetto, cono, simulatore, il sistema in poche righe |
 | `monitor/modello.html` | il sorgente della pagina, senza dati: si modifica questo e si rigenera |
 
 ## Le schede

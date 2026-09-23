@@ -89,21 +89,22 @@ Test che **non possono overfittare**: si ripetono quante volte si vuole.
     - le regole di stop statistiche — le calcola il monitor dal backtest
     - **cosa si fa dopo uno stop**
 21. **Demo, poi live piccolo.**
-22. **Due controlli, per sempre:**
+22. **Un controllo, per sempre: le regole di stop**, ogni mese, col report
+    del conto dal primo giorno.
 
-    | | cosa guarda | ogni quanto | cosa coglie |
-    |---|---|---|---|
-    | **esecuzione** | backtest sugli stessi giorni del live, confronto operazione per operazione (i cinque criteri del passo 13) | ogni mese | bug, broker, slittamenti — **in giorni** |
-    | **edge** | le regole di stop qui sotto | a ogni operazione | strategia rotta — in **~200 operazioni** |
+    Sta in **`monitor/monitor.html`**: una pagina che si apre col doppio
+    clic, anche senza internet. Si trascina il report del conto live, e i
+    pallini in cima dicono il colore di ogni strategia e del conto
+    intero. Le soglie e l'orizzonte li calcola lei dal backtest della
+    strategia scelta; altre strategie si aggiungono trascinando il loro
+    report del tester. Ha un simulatore: rigioca il fuori campione vero,
+    o inventa una storia con l'edge intatto, dimezzato, in deterioramento
+    o morto, per vedere **prima** come reagirebbero le regole.
 
-    Tutti e due stanno in **`monitor/monitor.html`**: una pagina che si apre
-    col doppio clic, anche senza internet. Si trascina il report del conto
-    live, e per il controllo veloce il backtest sugli stessi giorni. Le
-    soglie e l'orizzonte li calcola lei dal backtest della strategia
-    scelta; altre strategie si aggiungono trascinando il loro report del
-    tester. Ha un simulatore: rigioca il fuori campione vero, o inventa
-    una storia con l'edge intatto, dimezzato, morto o rotto, per vedere
-    **prima** come reagirebbero le regole.
+    Il controllo dell'esecuzione (il tester sugli stessi giorni del live)
+    **è stato tolto il 2026-09-23 su richiesta di Davide.** Un EA spento
+    o bloccato si vede comunque nelle statistiche del live: le operazioni
+    al mese escono dalla fascia.
 
 ### Le regole di stop (dal 2026-09-22)
 
@@ -146,14 +147,15 @@ del live al momento dello stop):
 | | ti fermi | dopo | perdita | ti fermi | dopo | perdita |
 | edge intatto (falso allarme) | 4% | 311 op | −18% | 5% | 194 op | −14% |
 | edge dimezzato | 17% | 338 op | −19% | 15% | 241 op | −14% |
-| edge morto | 38% | 293 op | −23% | 44% | 257 op | −18% |
-| strategia rotta | **85%** | 222 op | −27% | **90%** | 169 op | −21% |
+| edge in deterioramento (da tutto a zero lungo l'orizzonte) | 16% | 363 op | −18% | 19% | 303 op | −14% |
+| edge morto | 37% | 277 op | −23% | 41% | 267 op | −18% |
 
 **Un edge morto non svuota il conto**: guadagna in media zero, quindi
-oscilla. Chi porta via i soldi è una strategia rotta, e quella le regole
-la prendono quasi sempre. Non è un limite dello strumento: con uno Sharpe
-di 0,07 per operazione **nessun** monitor fa molto meglio. Per questo il
-controllo di esecuzione è l'altro pilastro: è l'unico veloce.
+oscilla, e il tetto ferma comunque la perdita. Non è un limite dello
+strumento: con uno Sharpe di 0,07 per operazione **nessun** monitor fa
+molto meglio (il CUSUM è il più veloce possibile a parità di falsi
+allarmi; la media mobile su 50-200 operazioni, provata il 2026-09-22,
+coglie meno).
 
 **Il monitor si adatta a qualunque strategia.** Tranne il 5% di falsi
 allarmi — che è una scelta, come in ogni test statistico — tutto si

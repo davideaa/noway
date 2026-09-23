@@ -138,6 +138,19 @@ svg{display:block; width:100%; height:auto; overflow:visible}
 .btn[disabled]{opacity:.45; cursor:default}
 .sim .lab{font-size:12.5px; color:var(--ink-3); margin-right:2px}
 
+/* le carte delle storie di prova */
+.carte{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px}
+.carta{font:inherit; text-align:left; cursor:pointer; background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+  border-top:4px solid var(--c,var(--ink-3)); border-radius:5px; padding:10px 12px 11px; display:flex; flex-direction:column; gap:3px}
+.carta:hover{border-color:var(--c,var(--ink-3))}
+.carta[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c,var(--acc)); border-color:var(--c,var(--acc))}
+.carta.vera{--c:var(--live)}
+.carta b{color:var(--ink); font-size:14px}
+.carta > span:last-child{font-size:12.5px; line-height:1.35}
+.carta .mini svg{width:100%; height:40px; display:block}
+.pt{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:7px; vertical-align:-1px}
+.riassunto ol, .riassunto ul{margin:4px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:3px}
+.riassunto ul.colori{list-style:none; padding-left:0}
 /* tabelle */
 .scroll{overflow-x:auto}
 table{border-collapse:collapse; width:100%; font-size:13px; min-width:460px}
@@ -181,9 +194,6 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
       <label class="drop" id="dropLive" tabindex="0"><input type="file" id="fileLive" accept=".htm,.html,.gz" multiple>
         <b>① Il report del conto live</b><span>MetaTrader → Storico → tasto destro → Report</span>
         <span class="caricato" id="statoLive"></span></label>
-      <label class="drop" id="dropBt" tabindex="0"><input type="file" id="fileBt" accept=".htm,.html,.gz" multiple>
-        <b>② Il backtest sugli stessi giorni</b><span>facoltativo: serve al controllo dell'esecuzione</span>
-        <span class="caricato" id="statoBt"></span></label>
       <label class="drop" id="dropRif" tabindex="0"><input type="file" id="fileRif" accept=".htm,.html,.gz" multiple>
         <b>③ Un'altra strategia</b><span>il suo report del tester: diventa un riferimento</span>
         <span class="caricato" id="statoRif"></span></label>
@@ -204,7 +214,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>Il cruscotto</h2><span class="tag">controllo lento · la strategia funziona ancora?</span></div>
+  <div class="ph"><h2>Il cruscotto</h2><span class="tag">la strategia funziona ancora?</span></div>
   <div class="pb">
     <div class="spie" id="spie"></div>
     <p class="calcolo" id="calcolo"></p>
@@ -212,17 +222,15 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>Il tuo live contro le storie normali</h2><span class="tag">controllo lento · passa il mouse sul grafico</span></div>
+  <div class="ph"><h2>Il tuo live contro le storie normali</h2><span class="tag">passa il mouse sul grafico</span></div>
   <div class="pb">
     <div class="sim" id="sim">
-      <span class="lab">Guarda come reagirebbe (ogni clic, una storia diversa):</span>
-      <button class="btn" type="button" data-sc="oos" id="btnOos">Rigioca il periodo vero</button>
-      <button class="btn" type="button" data-sc="0">Edge intatto</button>
-      <button class="btn" type="button" data-sc="0.5">Edge dimezzato</button>
-      <button class="btn" type="button" data-sc="1">Edge morto</button>
-      <button class="btn" type="button" data-sc="2">Strategia rotta</button>
-      <button class="btn primo" type="button" id="torna" hidden>Torna al mio live</button>
+      <span class="lab">Guarda come reagirebbero le regole. Il disegnino di ogni carta è <b>quanto guadagna la strategia a ogni operazione</b>,
+        dall'inizio alla fine della storia: la riga tratteggiata in alto è il guadagno del backtest, quella in basso è zero.
+        Ogni clic, una storia diversa.</span>
     </div>
+    <div class="carte" id="carte"></div>
+    <div><button class="btn primo" type="button" id="torna" hidden>Torna al mio conto</button></div>
     <p style="margin:0">La fascia azzurra la calcola la pagina dal backtest che ha dentro: migliaia di storie possibili, tutte con l'edge
       intatto. La linea spessa è il tuo conto, e compare quando carichi il report ①. Finché sta nella fascia, sei nella norma. Oltre la fine dell'orizzonte la fascia è più chiara: è solo indicativa, e le regole vanno rifatte.</p>
     <div class="legend">
@@ -237,12 +245,33 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
 </section>
 
 <section class="panel">
-  <div class="ph"><h2>Il conto esegue come il backtest?</h2><span class="tag">controllo veloce · l'EA fa quello che deve?</span></div>
+  <div class="ph"><h2>Il sistema in poche righe</h2><span class="tag">cosa fare, e quanto ci vuole</span></div>
   <div class="pb">
-    <p>Fai girare il tester sugli <b>stessi giorni</b> del live, stesso broker e stessi parametri, e trascinalo nel riquadro ②.
-      Le due serie devono essere quasi identiche. Ogni operazione mancante o in più è un guasto da spiegare, e si vede
-      <b>in giorni</b>, non in mesi.</p>
-    <div id="veloce"><div class="vuoto">Servono il live ① e il backtest sugli stessi giorni ②.</div></div>
+    <div class="leggi riassunto">
+      <div><b>Ogni mese, 10 minuti</b><ol>
+        <li>Scarica da MetaTrader il report del conto <b>dal primo giorno a oggi</b>.</li>
+        <li>Trascinalo nel riquadro ①.</li>
+        <li>Guarda i <b>pallini</b> in alto: uno per ogni strategia e uno per il conto intero.</li></ol></div>
+      <div><b>I colori</b><ul class="colori">
+        <li><i class="pt" style="background:var(--ok)"></i><b>Verde</b>: vai avanti.</li>
+        <li><i class="pt" style="background:var(--warn)"></i><b>Giallo</b>: periodo brutto ma normale. Vai avanti, non tocchi niente.</li>
+        <li><i class="pt" style="background:var(--neg)"></i><b>Rosso</b>: ti fermi, come qui accanto.</li></ul></div>
+      <div><b>Quando diventa rosso</b>Quando tocchi la perdita massima che accetti, <b id="tettoTxt">35%</b>, decisa prima; oppure quando scatta una
+        delle 5 regole del cruscotto: caduta, perdite di fila, tempo senza un nuovo massimo, curva sotto il cono, calo lento.
+        Sono calcolate dal backtest e scattano per sbaglio solo <b>5 volte su 100</b>.</div>
+      <div><b>Se diventa rosso</b><ol>
+        <li>Spegni <b>solo quello che è rosso</b>. Una tecnica dell'oro si spegne dagli input, e l'altra continua.</li>
+        <li>Lascialo girare <b>in demo per 6 mesi</b>.</li>
+        <li>Rifai i test coi dati nuovi: riparte coi soldi veri <b>solo se li ripassa</b>.</li></ol></div>
+    </div>
+    <p style="margin:4px 0 0"><b>I tempi, per la strategia scelta in alto</b> — cosa vedono le regole se l'edge si rovina:</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Se succede questo</th><th>Te ne accorgi</th><th>Dopo circa</th><th>Perdita</th></tr></thead>
+      <tbody id="potere"></tbody></table></div>
+    <p class="dim" id="conferma" style="margin:0;font-size:13px"></p>
+    <p style="margin:0"><b>In una frase:</b> non puoi sapere in fretta se la strategia funziona, ma la perdita massima è decisa prima.
+      Di più la matematica non permette, con nessun metodo. Se l'EA si ferma o fa operazioni strane, lo vedi nelle statistiche qui sotto:
+      le operazioni al mese escono dalla fascia.</p>
   </div>
 </section>
 
@@ -269,16 +298,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
       <div><b>Giallo non vuol dire niente di grave.</b>Vuol dire «periodo brutto, ma capita anche con l'edge intatto».
         Rigiocando il 2024-26, la curva è rimasta nella parte bassa per mesi e poi è diventata il periodo migliore di sempre.
         Sul giallo si guarda, non si spegne.</div>
-      <div><b>All'inizio conta il controllo veloce.</b>Nei primi mesi i numeri del live sono pochi e dicono poco.
-        Il confronto col backtest sugli stessi giorni, invece, trova subito un EA spento, un broker che esegue male, un
-        blocco sul conto.</div>
     </div>
-    <details>
-      <summary>Cosa sanno vedere questi stop, per questa strategia</summary>
-      <div class="scroll" style="margin-top:8px"><table>
-        <thead><tr><th>Se succedesse questo</th><th>Ti fermi</th><th>Dopo, in mediana</th><th>Perdita quando ti fermi</th></tr></thead>
-        <tbody id="potere"></tbody></table></div>
-    </details>
     <details>
       <summary>Da dove viene il metodo</summary>
       <p style="margin-top:8px;color:var(--ink-2);max-width:76ch">Le regole del cruscotto sono quelle che Kevin Davey elenca
@@ -301,7 +321,7 @@ window.RIFERIMENTI = [{"id":"oro","nome":"Oro · V1XAU","simbolo":"XAUUSD.s","ri
 "use strict";
 var RIF = (window.RIFERIMENTI || []).slice();
 var FALSO_ALLARME = 0.05, BLOCCO = 20, N_CONO = 4000, N_CAL = 2000, N_POTERE = 500, Q_GIALLO = 0.80;
-var ORIZZ_MIN = 100, ORIZZ_MAX = 2000, MIN_STAT = 30, TOLL_S = 7200, CONO_DA = 20;
+var ORIZZ_MIN = 100, ORIZZ_MAX = 2000, CONO_DA = 20;
 
 /* ---------------- utilità ---------------- */
 function $(id){ return document.getElementById(id); }
@@ -539,52 +559,40 @@ function analizza(R, cal, s){
     foto.push(f); });
   return {foto:foto, stop:stop};
 }
+/* le storie di prova: quanto resta dell'edge a ogni operazione (1 = tutto,
+   0 = niente), da j = 0 a j = n */
+var SCENARI = [
+  {id:"intatto",  nome:"Edge intatto",           breve:"guadagna come nel backtest",          col:"var(--ok)",     edge:function(){ return 1; }},
+  {id:"meta",     nome:"Edge dimezzato",         breve:"guadagna la metà, da subito",          col:"var(--warn)",   edge:function(){ return 0.5; }},
+  {id:"calo",     nome:"Edge in deterioramento", breve:"parte bene e si spegne piano piano",   col:"var(--stopdd)", edge:function(j,n){ return Math.max(0, 1-j/n); }},
+  {id:"morto",    nome:"Edge morto",             breve:"guadagno medio zero, da subito",       col:"var(--neg)",    edge:function(){ return 0; }}
+];
+function togli(seq, sc, mu, n){ for(var j=0;j<seq.length;j++) seq[j]-=(1-sc.edge(j,n))*mu; return seq; }
 function potere(rif, cal, s){
   // se l'edge si rovinasse davvero, quante volte e quando le regole se ne
   // accorgerebbero, dentro l'orizzonte
-  var out=[], seq=new Float64Array(cal.n);
-  [[0,"L'edge è intatto (falso allarme)"],[0.5,"L'edge si dimezza"],[1,"L'edge muore (guadagno medio zero)"],[2,"Si rompe: perde quanto guadagnava"]].forEach(function(sc,si){
+  var seq=new Float64Array(cal.n);
+  return SCENARI.map(function(sc,si){
     var rnd=mulberry(11+si), presi=0, quando=[], perso=[];
     for(var i=0;i<N_POTERE;i++){
-      percorso(rif,cal.n,rnd,seq); for(var j=0;j<cal.n;j++) seq[j]-=sc[0]*cal.mu;
+      togli(percorso(rif,cal.n,rnd,seq), sc, cal.mu, cal.n);
       var primo=null, cum=0;
       scorri(seq,cal.n,cal,function(v){ if(oltre(v,s)){ primo=v.j+1; cum=v.cum; return false; } });
       if(primo){ presi++; quando.push(primo); perso.push(cum); }
     }
     quando.sort(function(a,b){return a-b;}); perso.sort(function(a,b){return a-b;});
-    out.push({et:sc[1], f:sc[0], presi:presi/N_POTERE, mediana:quando.length?quando[Math.floor(quando.length/2)]:null,
-      perso:perso.length?perso[Math.floor(perso.length/2)]:null});
+    return {sc:sc, presi:presi/N_POTERE, mediana:quando.length?quando[Math.floor(quando.length/2)]:null,
+      perso:perso.length?perso[Math.floor(perso.length/2)]:null};
   });
-  return out;
 }
-function scenario(rif, cal, f, seme){
-  // una storia inventata: il backtest rimescolato, con l'edge tolto di f volte
+function scenario(rif, cal, sc, seme){
+  // una storia inventata: il backtest rimescolato, con l'edge tolto come dice lo scenario
   var seq=new Float64Array(cal.n); percorso(rif,cal.n,mulberry(seme),seq);
-  return Array.from(seq, function(x){ return x-f*cal.mu; });
+  return Array.from(togli(seq, sc, cal.mu, cal.n));
 }
-
-/* ---------------- il controllo veloce ---------------- */
-function confronta(bt, live){
-  // per ogni operazione del backtest, la live più vicina con lo stesso verso
-  // (e la stessa etichetta, se c'è) entro due ore
-  var usate={}, coppie=[];
-  bt.forEach(function(o){ var best=null;
-    live.forEach(function(q,j){ if(usate[j]||q.verso!==o.verso) return;
-      if(o.tag && q.tag && o.tag!==q.tag && q.tag.indexOf(o.tag)!==0 && o.tag.indexOf(q.tag)!==0) return;
-      var dt=Math.abs(q.t-o.t); if(dt<=TOLL_S && (!best||dt<best.dt)) best={dt:dt,j:j}; });
-    if(best){ usate[best.j]=1; coppie.push({b:o,l:live[best.j],dt:best.dt}); } });
-  var mancate=bt.filter(function(o){ return !coppie.some(function(c){return c.b===o;}); });
-  var inpiu=live.filter(function(q,j){ return !usate[j]; });
-  return {coppie:coppie, mancate:mancate, inpiu:inpiu};
-}
-function tStat(a,b){ var se=Math.sqrt(Math.pow(devst(a),2)/a.length+Math.pow(devst(b),2)/b.length); return (media(a)-media(b))/se; }
-function corr(x,y){ var mx=media(x),my=media(y),sxy=0,sx=0,sy=0; for(var i=0;i<x.length;i++){ var a=x[i]-mx,b=y[i]-my; sxy+=a*b; sx+=a*a; sy+=b*b; }
-  return sxy/Math.sqrt(sx*sy); }
-function pill(stato,testo){ return '<span class="pill '+stato+'">'+testo+'</span>'; }
-
 
 /* ---------------- stato della pagina ---------------- */
-var S = {strat:null, live:null, liveRep:[], bt:null, btRep:[], cal:{}, rischi:{}, sim:null, anim:null};
+var S = {strat:null, live:null, liveRep:[], cal:{}, rischi:{}, sim:null, anim:null};
 var NOMI_REGOLA = {dd:"la caduta dal massimo", fila:"le perdite di fila", uw:"il tempo senza un nuovo massimo", pc:"la posizione nel cono", cs:"il calo lento"};
 
 function refDi(op){
@@ -644,7 +652,9 @@ function aggiorna(){
   var fino=($("fino").value||"").trim(), rr=rifDi(S.strat), rif=rr.rif, ritmo=rr.ritmo;
   $("rifinfo").textContent = "Riferimento: "+rif.length+" operazioni di backtest, circa "+Math.round(ritmo)+" all'anno, guadagno medio "+fmt(media(rif),3)+" R per operazione.";
   var dopo=tradeDopo(S.strat, fino), bo=$("btnOos");
-  if(dopo.length>=BLOCCO){ bo.hidden=false; bo.textContent="Rigioca il "+dopo[0].ch.slice(0,4)+"–"+dopo[dopo.length-1].ch.slice(0,4)+" vero"; } else bo.hidden=true;
+  if(dopo.length>=BLOCCO){ bo.hidden=false;
+    bo.querySelector("b").textContent="Il "+dopo[0].ch.slice(0,4)+"–"+dopo[dopo.length-1].ch.slice(0,4)+" vero";
+    var c=0; bo.querySelector(".mini").innerHTML=mini(dopo.map(function(x){ return c+=x.R; }), "var(--live)", true); } else bo.hidden=true;
   if(rif.length<BLOCCO*3){ $("calcolo").textContent="Troppe poche operazioni nel riferimento per calibrare."; return; }
   var k=chiaveCal();
   if(!S.cal[k]){
@@ -698,11 +708,14 @@ function mostra(){
     num(cal.storia.dd*s.rm,0)+"% del conto. Se lo vivessi dal vero ti sembrerebbe morta: va saputo prima, non scoperto dopo.";
   var chiaveP=s.dd.toFixed(3);
   if(!cal.potere[chiaveP]) cal.potere[chiaveP]=potere(cal.rif, cal, s);
-  $("potere").innerHTML=cal.potere[chiaveP].map(function(p){ return "<tr><td>"+p.et+"</td><td class='mono'>"+num(100*p.presi,0)+"% delle volte</td><td class='mono'>"+
-    (p.mediana?p.mediana+" op · "+tempo(p.mediana,cal):"—")+"</td><td class='mono'>"+(p.perso!=null?fmt(p.perso)+" R ≈ "+fmt(p.perso*s.rm,0)+"%":"—")+"</td></tr>"; }).join("")+
-    "<tr><td colspan='4' class='dim' style='text-align:left'>Entro l'orizzonte di "+cal.n+" operazioni ("+tempo(cal.n,cal)+"). «Perdita» è il risultato dall'inizio del live al momento dello stop.</td></tr>";
+  $("potere").innerHTML=cal.potere[chiaveP].map(function(p){ return "<tr><td><i class='pt' style='background:"+p.sc.col+"'></i>"+p.sc.nome+
+    " <span class='dim'>— "+p.sc.breve+"</span></td><td class='mono'>"+(p.sc.id==="intatto"?"per sbaglio ":"")+num(100*p.presi,0)+"% delle volte</td><td class='mono'>"+
+    (p.mediana?tempo(p.mediana,cal)+" <span class='dim'>("+p.mediana+" op)</span>":"—")+"</td><td class='mono'>"+(p.perso!=null?fmt(p.perso*s.rm,0)+"%":"—")+"</td></tr>"; }).join("");
+  $("conferma").innerHTML="Per <b>confermare</b> che l'edge funziona anche dal vero servono <b>"+cal.mt.grezzo+" operazioni, "+tempo(cal.mt.grezzo,cal)+
+    "</b>. Le percentuali qui sopra valgono dentro questo tempo; «perdita» è il risultato del conto dall'inizio al momento dello stop.";
+  $("tettoTxt").textContent=num(parseFloat($("tetto").value)||0,0)+"%";
   disegna(S.anim ? S.anim.k : (S.sim && an.stop) ? an.stop.k : an.foto.length);
-  if(!S.sim){ mostraStatistiche(cal); mostraVeloce(); }
+  if(!S.sim) mostraStatistiche(cal);
 }
 function disegna(k){
   var v=S.vista; if(!v) return;
@@ -877,6 +890,28 @@ function disegnaCono(v, k){
 }
 
 /* ---------------- il simulatore ---------------- */
+function mini(v, col, curva){
+  // il disegnino della carta: quanto resta dell'edge nel tempo (o la curva vera)
+  var W=120,H=38,lo=Math.min.apply(null,v.concat([0])),hi=Math.max.apply(null,v.concat([curva?0:1]));
+  var X=function(i){ return 2+i/(v.length-1)*(W-4); }, Y=function(y){ return H-4-(y-lo)/((hi-lo)||1)*(H-8); };
+  var d=v.map(function(y,i){ return (i?"L":"M")+X(i).toFixed(1)+" "+Y(y).toFixed(1); }).join("");
+  var guida=curva?'<line x1="2" x2="'+(W-2)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--ink-3)" stroke-dasharray="2 3"/>'
+    :'<line x1="2" x2="'+(W-2)+'" y1="'+Y(1)+'" y2="'+Y(1)+'" stroke="var(--ink-3)" stroke-dasharray="2 3"/><line x1="2" x2="'+(W-2)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--line)"/>';
+  var area=curva?"":'<path d="'+d+'L'+X(v.length-1)+' '+Y(0)+'L'+X(0)+' '+Y(0)+'Z" fill="'+col+'" opacity=".18"/>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+guida+area+'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+}
+function carte(){
+  var h=$("carte"), punti=[];
+  for(var i=0;i<=40;i++) punti.push(i/40);
+  SCENARI.forEach(function(sc){
+    var b=document.createElement("button"); b.type="button"; b.className="carta"; b.dataset.sc=sc.id;
+    b.innerHTML='<span class="mini">'+mini(punti.map(function(t){ return sc.edge(t*1000,1000); }), sc.col)+'</span><b>'+sc.nome+'</b><span>'+sc.breve+'</span>';
+    b.style.setProperty("--c", sc.col); h.appendChild(b); });
+  var o=document.createElement("button"); o.type="button"; o.className="carta vera"; o.dataset.sc="oos"; o.id="btnOos"; o.hidden=true;
+  o.innerHTML='<span class="mini"></span><b>Il periodo vero</b><span>dati veri del backtest, rigiocati come se fossero il tuo conto</span>';
+  h.appendChild(o);
+  Array.prototype.forEach.call(h.children,function(b){ b.addEventListener("click",function(){ simula(b.dataset.sc); }); });
+}
 function ferma(){ if(S.anim){ cancelAnimationFrame(S.anim.id); S.anim=null; } }
 function simula(sc){
   var cal=S.cal[chiaveCal()]; if(!cal || cal.errore) return;
@@ -884,10 +919,10 @@ function simula(sc){
   var et, R;
   if(sc==="oos"){ var d=tradeDopo(S.strat, ($("fino").value||"").trim()); R=d.map(function(x){return x.R;});
     et="il "+d[0].ch.slice(0,4)+"–"+d[d.length-1].ch.slice(0,4)+" vero, rigiocato come se fosse il live"; }
-  else { var f=parseFloat(sc); R=scenario(cal.rif, cal, f, (Math.random()*1e9)|0);
-    et={0:"edge intatto",0.5:"edge dimezzato",1:"edge morto",2:"strategia rotta"}[sc]; }
+  else { var scn=SCENARI.find(function(x){ return x.id===sc; }); R=scenario(cal.rif, cal, scn, (Math.random()*1e9)|0);
+    et=scn.nome.toLowerCase(); }
   S.sim={R:R, et:et}; $("torna").hidden=false;
-  Array.prototype.forEach.call(document.querySelectorAll("#sim button[data-sc]"),function(b){ b.setAttribute("aria-pressed", b.dataset.sc===sc?"true":"false"); });
+  Array.prototype.forEach.call(document.querySelectorAll("#carte button[data-sc]"),function(b){ b.setAttribute("aria-pressed", b.dataset.sc===sc?"true":"false"); });
   S.anim={k:0, id:0}; mostra();
   // la storia si ferma dove ti fermeresti tu; il resto si vede sbiadito
   var sp=S.vista.an.stop, fine=sp?sp.k:R.length, passo=Math.max(1, Math.ceil(R.length/260));
@@ -896,10 +931,11 @@ function simula(sc){
     if(S.anim) S.anim.id=requestAnimationFrame(giro); })();
 }
 function torna(){ ferma(); S.sim=null; $("torna").hidden=true;
-  Array.prototype.forEach.call(document.querySelectorAll("#sim button[data-sc]"),function(b){ b.removeAttribute("aria-pressed"); });
+  Array.prototype.forEach.call(document.querySelectorAll("#carte button[data-sc]"),function(b){ b.removeAttribute("aria-pressed"); });
   mostra(); }
 
 /* ---------------- le statistiche del live ---------------- */
+function pill(stato,testo){ return '<span class="pill '+stato+'">'+testo+'</span>'; }
 function mostraStatistiche(cal){
   var host=$("statistiche"), live=liveDellaStrategia();
   if(!live.length){ host.innerHTML='<div class="vuoto">'+(S.live?"Nessuna operazione live di questa strategia.":"Carica il live ①.")+'</div>'; return; }
@@ -924,50 +960,6 @@ function mostraStatistiche(cal){
       return "<tr><td>"+r[0]+"</td><td class='mono'>"+r[1]+"</td><td class='mono dim'>"+r[2]+"</td><td class='mono dim'>"+r[5](r[3][0])+" … "+r[5](r[3][1])+"</td><td>"+
         (n<10?pill("attesa","pochi dati"):isNaN(r[4])?pill("attesa","—"):ok?pill("si","nella norma"):'<span class="pill" style="background:var(--warn-bg);color:var(--warn)">fuori fascia</span>')+"</td></tr>"; }).join("")+
     "</tbody></table></div>";
-}
-
-/* ---------------- il controllo veloce ---------------- */
-function mostraVeloce(){
-  var host=$("veloce");
-  if(!S.live || !S.bt){ host.innerHTML='<div class="vuoto">Servono il live ① e il backtest sugli stessi giorni ②.</div>'; return; }
-  var live=liveDellaStrategia();
-  if(!live.length){ host.innerHTML='<div class="vuoto">Nel live non ci sono operazioni di questa strategia.</div>'; return; }
-  var t0=Math.min.apply(null,live.map(function(o){return o.t;})), t1=Math.max.apply(null,live.map(function(o){return o.tc;}));
-  var bt=S.bt.filter(function(o){ return o.R!=null && appartiene(S.strat,o) && o.t>=t0-TOLL_S && o.t<=t1; });
-  if(!bt.length){ host.innerHTML='<div class="vuoto">Nel backtest non ci sono operazioni di questa strategia negli stessi giorni del live.</div>'; return; }
-  var c=confronta(bt,live), np=c.coppie.length;
-  var Rb=bt.map(function(o){return o.R;}), Rl=live.map(function(o){return o.R;});
-  var xb=c.coppie.map(function(p){return p.b.R;}), xl=c.coppie.map(function(p){return p.l.R;});
-  var diff=c.coppie.map(function(p){return p.l.R-p.b.R;}).sort(function(a,b){return a-b;});
-  var abbastanza=np>=MIN_STAT, tollN=Math.max(1, Math.round(0.15*bt.length));
-  var somma=function(a){ return a.reduce(function(x,y){return x+y;},0); };
-  var crit=[
-    ["Stesso numero di operazioni", Math.abs(live.length-bt.length)<=tollN, true, bt.length+" nel backtest, "+live.length+" nel live", "scarto al massimo del 15% (o di una)"],
-    ["Operazioni ritrovate", np/bt.length>=0.70, true, num(100*np/bt.length,0)+"% ("+np+" su "+bt.length+")", "almeno il 70%"],
-    ["Stesso segno del risultato", (media(Rb)>0)===(media(Rl)>0), abbastanza, fmt(somma(Rb))+" R contro "+fmt(somma(Rl))+" R", "con almeno "+MIN_STAT+" operazioni"],
-    ["Rendimento non diverso", abbastanza?Math.abs(tStat(Rb,Rl))<2:null, abbastanza, abbastanza?"t = "+num(tStat(Rb,Rl),2):"—", "|t| sotto 2"],
-    ["Stesso andamento operazione per operazione", abbastanza?corr(xb,xl)>=0.70:null, abbastanza, abbastanza?"correlazione "+num(corr(xb,xl),3):"—", "almeno 0,70"]
-  ];
-  var male=crit.some(function(r){return r[2]&&r[1]===false;}), buchi=c.mancate.length||c.inpiu.length;
-  var cls=male?"FERMATI":buchi?"ATTENZIONE":"CONTINUA";
-  var h='<div class="verdetto '+cls+'"><div class="luce" aria-hidden="true"></div><div>'+
-    '<h3>'+(cls==="CONTINUA"?"Il conto esegue come il backtest":male?"Qualcosa non torna":"Ci sono operazioni da spiegare")+'</h3>'+
-    '<p>'+np+' operazioni ritrovate su '+bt.length+'. Differenza per operazione, live meno backtest: mediana '+fmt(diff.length?diff[Math.floor(diff.length/2)]:NaN,3)+' R, media '+fmt(diff.length?media(diff):NaN,3)+' R.'+
-    (abbastanza?'':' Con meno di '+MIN_STAT+' operazioni appaiate le prove statistiche non dicono ancora niente: contano quelle mancanti o in più.')+'</p></div></div>';
-  h+='<div class="scroll"><table><thead><tr><th>Prova</th><th>Valore</th><th>Soglia</th><th></th></tr></thead><tbody>'+
-    crit.map(function(r){ return "<tr><td>"+r[0]+"</td><td class='mono'>"+r[3]+"</td><td class='dim'>"+r[4]+"</td><td>"+
-      (!r[2]?pill("attesa","servono più dati"):(r[1]?pill("si","ok"):pill("no","no")))+"</td></tr>"; }).join("")+"</tbody></table></div>";
-  function lista(v,titolo,spieg){ if(!v.length) return "";
-    return '<details open><summary><b>'+v.length+' '+titolo+'</b> — '+spieg+'</summary><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Apertura</th><th>Verso</th><th>Strategia</th><th>Risultato</th></tr></thead><tbody>'+
-      v.slice(0,60).map(function(o){ return "<tr><td class='mono'>"+esc(o.ap)+"</td><td>"+(o.verso==="L"?"long":"short")+"</td><td class='dim'>"+esc(o.tag||o.simbolo)+"</td><td class='mono'>"+fmt(o.R,2)+" R</td></tr>"; }).join("")+
-      "</tbody></table></div></details>"; }
-  h+=lista(c.mancate,"operazioni che il backtest ha fatto e il live no","EA spento, connessione, margine, o un blocco sul conto?");
-  h+=lista(c.inpiu,"operazioni che il live ha fatto e il backtest no","un'altra strategia sullo stesso conto, un riavvio, un intervento a mano?");
-  var peggiori=c.coppie.slice().sort(function(a,b){ return (a.l.R-a.b.R)-(b.l.R-b.b.R); }).slice(0,8);
-  if(peggiori.length) h+='<details><summary>Le appaiate più diverse</summary><div class="scroll" style="margin-top:8px"><table><thead><tr><th>Apertura</th><th>Backtest</th><th>Live</th><th>Differenza</th></tr></thead><tbody>'+
-    peggiori.map(function(p){ return "<tr><td class='mono'>"+esc(p.b.ap)+"</td><td class='mono'>"+fmt(p.b.R,2)+"</td><td class='mono'>"+fmt(p.l.R,2)+"</td><td class='mono "+((p.l.R-p.b.R)<0?"cneg":"")+"'>"+fmt(p.l.R-p.b.R,2)+"</td></tr>"; }).join("")+
-    "</tbody></table></div></details>";
-  host.className="esec"; host.innerHTML=h;
 }
 
 /* ---------------- file trascinati ---------------- */
@@ -1000,16 +992,11 @@ function ricalcolaLive(){
   $("statoLive").textContent=S.liveRep.map(function(x){return x.nome;}).join(", ")+" · "+u.ops.length+" operazioni chiuse"+
     (u.orfane?(" · "+u.orfane+" chiusure senza apertura"):"")+(senza?(" · "+senza+" di nessuna strategia nota"):"");
 }
-function ricalcolaBt(){
-  if(!S.btRep.length){ S.bt=null; return; }
-  var u=unisci(S.btRep); S.bt=u.ops;
-  $("statoBt").textContent=S.btRep.map(function(x){return x.nome;}).join(", ")+" · "+u.ops.length+" operazioni";
-}
 function campiRischio(){
   var h=$("rischi"); h.innerHTML="";
   RIF.forEach(function(rf){ var lab=document.createElement("label"), inp=document.createElement("input");
     inp.type="number"; inp.step="0.01"; inp.min="0.01"; inp.value=rischioDi(rf); inp.setAttribute("aria-label","Rischio percentuale live di "+rf.nome);
-    inp.addEventListener("change",function(){ var x=parseFloat(inp.value); S.rischi[rf.id]= x>0?x:rf.rischio; ricalcolaLive(); ricalcolaBt(); aggiorna(); semafori(); });
+    inp.addEventListener("change",function(){ var x=parseFloat(inp.value); S.rischi[rf.id]= x>0?x:rf.rischio; ricalcolaLive(); aggiorna(); semafori(); });
     lab.appendChild(document.createTextNode("Rischio live "+rf.nome.split(" · ")[0]+" ")); lab.appendChild(inp); lab.appendChild(document.createTextNode("%"));
     h.appendChild(lab); });
 }
@@ -1028,9 +1015,6 @@ function avvia(){
 zona($("dropLive"),$("fileLive"),async function(files){
   try{ S.liveRep=S.liveRep.concat(await leggiTutti(files)); ricalcolaLive(); torna(); semafori(); }
   catch(e){ $("statoLive").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
-zona($("dropBt"),$("fileBt"),async function(files){
-  try{ S.btRep=S.btRep.concat(await leggiTutti(files)); ricalcolaBt(); if(!S.sim) mostraVeloce(); }
-  catch(e){ $("statoBt").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
 zona($("dropRif"),$("fileRif"),async function(files){
   try{ var reps=await leggiTutti(files);
     reps.forEach(function(rp){
@@ -1045,7 +1029,7 @@ zona($("dropRif"),$("fileRif"),async function(files){
   }catch(e){ $("statoRif").innerHTML='<span class="errore">'+esc(e.message)+'</span>'; } });
 $("fino").addEventListener("change",function(){ ferma(); S.sim=null; $("torna").hidden=true; aggiorna(); semafori(); });
 $("tetto").addEventListener("change",function(){ if(S.anim){ ferma(); } mostra(); semafori(); });
-Array.prototype.forEach.call(document.querySelectorAll("#sim button[data-sc]"),function(b){ b.addEventListener("click",function(){ simula(b.dataset.sc); }); });
+carte();
 $("torna").addEventListener("click",torna);
 avvia();
 window.__monitor={S:S, calibra:calibra, orizzonte:orizzonte, leggiReport:leggiReport, operazioni:operazioni, tradeRif:tradeRif,
