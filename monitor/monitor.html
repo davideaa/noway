@@ -119,6 +119,10 @@ input[type=number]{width:76px}
 .st.info{background:var(--sunk); color:var(--ink-3)}
 @media (max-width:720px){ .spia{grid-template-columns:1fr; gap:6px} .spia .v{text-align:left} }
 
+.ago.peggio{background:transparent; box-shadow:none; border:2px dashed var(--ink-3); width:6px; margin-left:-3px}
+.spia .v span b{font-family:var(--mono); color:var(--ink-2); font-size:12.5px; display:inline}
+.datiletti p{margin:0; font-size:13.5px; color:var(--ink-2)}
+.datiletti{display:flex; flex-direction:column; gap:6px}
 /* grafico e simulatore */
 .plot{position:relative}
 svg{display:block; width:100%; height:auto; overflow:visible}
@@ -205,6 +209,7 @@ summary{cursor:pointer; font-size:13.5px; color:var(--ink-2)}
     </div>
     <div class="riga"><span class="dim" id="rifinfo"></span>
     </div>
+    <div class="datiletti" id="datiLetti"></div>
   </div>
 </section>
 
@@ -715,7 +720,7 @@ function mostra(){
     "</b>. Le percentuali qui sopra valgono dentro questo tempo; «perdita» è il risultato del conto dall'inizio al momento dello stop.";
   $("tettoTxt").textContent=num(parseFloat($("tetto").value)||0,0)+"%";
   disegna(S.anim ? S.anim.k : (S.sim && an.stop) ? an.stop.k : an.foto.length);
-  if(!S.sim) mostraStatistiche(cal);
+  if(!S.sim){ mostraStatistiche(cal); mostraDati(cal, s); }
 }
 function disegna(k){
   var v=S.vista; if(!v) return;
@@ -761,14 +766,15 @@ function verdetto(v, k){
   }
   $("vTit").textContent=tit; $("vTxt").textContent=txt;
 }
-function pista(val, g, st, max, labs){
+function pista(val, g, st, max, labs, peggio){
   // verde, giallo e rosso sempre larghi uguali: l'ago si muove a tratti lineari
   var P=[0,0.6,0.92,1], V=[0,g,st,max];
   function pos(x){ if(x==null) return null; x=Math.max(0,Math.min(max,x));
     for(var i=1;i<4;i++) if(x<=V[i]) return P[i-1]+(P[i]-P[i-1])*(V[i]-V[i-1]>0?(x-V[i-1])/(V[i]-V[i-1]):1); return 1; }
-  var p=pos(val);
+  var p=pos(val), q=pos(peggio);
   return '<div class="pistawrap"><div class="pista"><i class="zv" style="width:60%"></i><i class="zg" style="width:32%"></i><i class="zr" style="width:8%"></i></div>'+
-    (p==null?'':'<span class="ago" style="left:'+(100*p).toFixed(2)+'%"></span>')+
+    (q==null||q===p?'':'<span class="ago peggio" title="il peggio finora" style="left:'+(100*q).toFixed(2)+'%"></span>')+
+    (p==null?'':'<span class="ago" title="adesso" style="left:'+(100*p).toFixed(2)+'%"></span>')+
     '<div class="pista-l"><span>'+labs[0]+'</span><span style="position:absolute;left:60%;transform:translateX(-50%)">'+labs[1]+'</span><span style="position:absolute;left:92%;transform:translateX(-50%)">'+labs[2]+'</span><span></span></div></div>';
 }
 function spie(v, k){
@@ -778,27 +784,32 @@ function spie(v, k){
   var ET={ok:"normale", gi:"attenzione", ro:"stop", info:"—"};
   function stato(key){ var x=l[key]; if(fermo===key) x="ro"; return '<span class="st '+x+'">'+(fermo===key?"stop":ET[x])+'</span>'; }
   var fl=Math.floor(s.fila)+1, ul=Math.floor(s.uw)+1;
+  // il peggio toccato finora, non solo il valore di adesso
+  var w={dd:0,fila:0,uw:0,cs:0,pc:null};
+  v.an.foto.slice(0,k).forEach(function(x){ if(x.dd>w.dd) w.dd=x.dd; if(x.fila>w.fila) w.fila=x.fila; if(x.uw>w.uw) w.uw=x.uw;
+    if(x.cs>w.cs) w.cs=x.cs; if(x.pc!=null && (w.pc==null || x.pc<w.pc)) w.pc=x.pc; });
+  var pf=function(t){ return k ? "<br>il peggio finora: <b>"+t+"</b>" : ""; };
   var righe=[
     {k:"dd", t:"Caduta dal massimo", d:"quanto sei sceso dal punto più alto",
       em:"stop a "+num(s.dd)+" R ≈ "+num(s.dd*s.rm,0)+"%"+(s.ddDaTetto?" (il tuo tetto)":"")+" · backtest: "+num(cal.storia.dd)+" R",
-      p:pista(f.dd, g.dd, s.dd, s.dd*1.3, ["0", num(g.dd,0)+" R", num(s.dd,0)+" R"]),
-      val:num(f.dd)+" R", sub:"≈ "+num(f.dd*s.rm,1)+"% del conto"},
+      p:pista(f.dd, g.dd, s.dd, s.dd*1.3, ["0", num(g.dd,0)+" R", num(s.dd,0)+" R"], w.dd),
+      val:num(f.dd)+" R", sub:"adesso, ≈ "+num(f.dd*s.rm,1)+"% del conto"+pf(num(w.dd)+" R ≈ "+num(w.dd*s.rm,1)+"%")},
     {k:"fila", t:"Perdite di fila", d:"operazioni perse una dopo l'altra",
       em:"stop a "+fl+" · backtest: "+cal.storia.fila,
-      p:pista(f.fila, g.fila, s.fila, fl*1.3, ["0", String(Math.floor(g.fila)+1), String(fl)]),
-      val:String(f.fila), sub:"adesso"},
+      p:pista(f.fila, g.fila, s.fila, fl*1.3, ["0", String(Math.floor(g.fila)+1), String(fl)], w.fila),
+      val:String(f.fila), sub:"adesso"+pf(String(w.fila))},
     {k:"uw", t:"Tempo senza nuovo massimo", d:"operazioni dall'ultimo record",
       em:"stop a "+ul+" (≈ "+tempo(ul,cal).replace("circa ","")+") · backtest: "+cal.storia.uw,
-      p:pista(f.uw, g.uw, s.uw, ul*1.3, ["0", String(Math.round(g.uw)), String(ul)]),
-      val:String(f.uw), sub:f.uw?tempo(f.uw,cal):"sei sul massimo"},
+      p:pista(f.uw, g.uw, s.uw, ul*1.3, ["0", String(Math.round(g.uw)), String(ul)], w.uw),
+      val:String(f.uw), sub:(f.uw?"adesso, "+tempo(f.uw,cal):"adesso sei sul massimo")+pf(w.uw+" op, "+tempo(w.uw,cal))},
     {k:"pc", t:"Posizione nel cono", d:"quante storie normali fanno meglio di te",
       em:"stop oltre il "+num(100-s.pc,2)+"%",
-      p:pista(f.pc==null?null:100-f.pc, 100-g.pc, 100-s.pc, 100, ["0%", num(100-g.pc,0)+"%", num(100-s.pc,2)+"%"]),
-      val:f.pc==null?"—":num(100-f.pc,0)+"%", sub:f.pc==null?(k>=cal.n?"oltre l'orizzonte":"parte dall'operazione "+CONO_DA):"fanno meglio"},
+      p:pista(f.pc==null?null:100-f.pc, 100-g.pc, 100-s.pc, 100, ["0%", num(100-g.pc,0)+"%", num(100-s.pc,2)+"%"], w.pc==null?null:100-w.pc),
+      val:f.pc==null?"—":num(100-f.pc,0)+"%", sub:(f.pc==null?(k>=cal.n?"oltre l'orizzonte":"parte dall'operazione "+CONO_DA):"fanno meglio, adesso")+(w.pc!=null?pf(num(100-w.pc,1)+"%"):"")},
     {k:"cs", t:"Calo lento", d:"si accorge se il guadagno medio scende",
       em:"stop oltre "+num(s.cs,2)+" · CUSUM",
-      p:pista(f.cs, g.cs, s.cs, s.cs*1.3, ["0", num(g.cs,1), num(s.cs,1)]),
-      val:num(f.cs,2), sub:f.cs<0.01?"a zero: nessun calo":"sale con le perdite"}
+      p:pista(f.cs, g.cs, s.cs, s.cs*1.3, ["0", num(g.cs,1), num(s.cs,1)], w.cs),
+      val:num(f.cs,2), sub:(f.cs<0.01?"adesso a zero: nessun calo":"adesso · sale con le perdite")+pf(num(w.cs,2))}
   ];
   $("spie").innerHTML=righe.map(function(r){
     return '<div class="spia"><div class="t"><b>'+r.t+'</b><span>'+r.d+'</span><em>'+r.em+'</em></div>'+r.p+
@@ -933,6 +944,26 @@ function simula(sc){
 function torna(){ ferma(); S.sim=null; $("torna").hidden=true;
   Array.prototype.forEach.call(document.querySelectorAll("#carte button[data-sc]"),function(b){ b.removeAttribute("aria-pressed"); });
   mostra(); }
+
+/* ---------------- i dati letti dal report ---------------- */
+function mostraDati(cal, s){
+  // per potersi fidare: cosa ha letto la pagina, e le ultime operazioni, da
+  // confrontare a occhio con MetaTrader
+  var host=$("datiLetti");
+  if(!S.live){ host.innerHTML=""; return; }
+  var ops=liveDellaStrategia();
+  if(!ops.length){ host.innerHTML='<p class="dim">Nel report non ci sono operazioni di «'+esc(S.strat.nome)+'».</p>'; return; }
+  var tot=0, c=0, p=0, dd=0; ops.forEach(function(o){ tot+=o.R; c+=o.R; if(c>p) p=c; if(p-c>dd) dd=p-c; });
+  var nomeTag=function(o){ var rf=refDi(o); return rf ? (rf.nomiTag[o.tag] ? rf.nome.split(" · ")[0]+" · "+rf.nomiTag[o.tag] : rf.nome) : (o.tag||o.simbolo); };
+  host.innerHTML='<p><b>Dati letti per «'+esc(S.strat.nome)+'»:</b> '+ops.length+' operazioni chiuse, dal '+esc(ops[0].ap.slice(0,10))+' al '+esc(ops[ops.length-1].ch.slice(0,10))+
+    '. Risultato '+fmt(tot)+' R (≈ '+fmt(tot*s.rm,0)+'% del conto, senza composto); la caduta più profonda è stata '+num(dd)+' R (≈ '+num(dd*s.rm,0)+'%).'+
+    (ops.length>cal.n?' <span class="cneg">Sono più delle '+cal.n+' dell\'orizzonte: le regole valgono per le prime '+cal.n+'.</span>':'')+'</p>'+
+    '<details><summary>Le ultime 10 operazioni lette — confrontale con MetaTrader</summary><div class="scroll" style="margin-top:8px"><table>'+
+    '<thead><tr><th>Chiusa il</th><th>Strategia</th><th>Verso</th><th>Netto</th><th>Risultato</th></tr></thead><tbody>'+
+    ops.slice(-10).reverse().map(function(o){ return "<tr><td class='mono'>"+esc(o.ch)+"</td><td>"+esc(nomeTag(o))+"</td><td>"+(o.verso==="L"?"long":"short")+
+      "</td><td class='mono'>"+fmt(o.netto,2)+"</td><td class='mono "+(o.R<0?"cneg":"")+"'>"+fmt(o.R,2)+" R</td></tr>"; }).join("")+
+    '</tbody></table></div></details>';
+}
 
 /* ---------------- le statistiche del live ---------------- */
 function pill(stato,testo){ return '<span class="pill '+stato+'">'+testo+'</span>'; }
