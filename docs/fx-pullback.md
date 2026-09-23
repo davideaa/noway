@@ -51,6 +51,15 @@ Davide).
 | guadagno medio | ≥ +0,05 R |
 | long e short | nessuno dei due sotto −10 R |
 
+### Obiettivo di Davide: almeno 365 operazioni all'anno (2026-09-23)
+
+Sul **conto forex intero**, non su una coppia. Si raggiunge mettendo le
+stesse regole su **più coppie** (quelle che passano il passo 14), **non**
+allentando le regole su USDJPY o scendendo di timeframe: più operazioni
+fatte con un ingresso peggiore sono solo più costi. Il vantaggio è
+statistico: a 365 operazioni all'anno l'edge si conferma dal vivo in
+mesi invece che in anni.
+
 ### Conto forex
 
 Drawdown del conto, Monte Carlo a blocchi da 20: **≤ 35% al 95°
