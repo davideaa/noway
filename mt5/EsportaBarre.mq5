@@ -6,7 +6,7 @@
 //|  file e finisce. Non apre operazioni.                             |
 //|                                                                  |
 //|  Il file va in  MQL5\Files\  (File -> Apri cartella dati).        |
-//|  Di proposito si ferma al 2023-12-31: il 2024-2026 e' il fuori    |
+//|  Di proposito si ferma al 2022-12-31: il 2023-2026 e' il fuori    |
 //|  campione e non deve uscire da MetaTrader prima del test finale.  |
 //+------------------------------------------------------------------+
 #property copyright "Ricerca"
@@ -16,12 +16,12 @@
 input string          InpSimbolo = "USDJPY";       // Simbolo
 input ENUM_TIMEFRAMES InpTF      = PERIOD_M5;      // Timeframe
 input datetime        InpDal     = D'2019.01.01';  // Dal
-input datetime        InpAl      = D'2023.12.31 23:59'; // Al (non oltre il 2023)
+input datetime        InpAl      = D'2022.12.31 23:59'; // Al (non oltre il 2022)
 
 void OnStart()
   {
    datetime al = InpAl;
-   if(al > D'2023.12.31 23:59') al = D'2023.12.31 23:59';
+   if(al > D'2022.12.31 23:59') al = D'2022.12.31 23:59';
 
    MqlRates r[];
    ArraySetAsSeries(r, false);

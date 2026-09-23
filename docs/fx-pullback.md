@@ -18,8 +18,10 @@ sull'oro (è diventata il RITRACCIAMENTO di V1XAU).
 
 ## 2. I criteri, scritti prima
 
-**Dati: dentro campione 2019.01.01 – 2023.12.31. Fuori campione
-2024.01.01 – 2026.09, congelato, si guarda una volta sola** (deciso da
+**Dati (aggiornato da Davide il 2026-09-23): dentro campione
+2019.01.01 – 2022.12.31. Fuori campione 2023.01.01 – 2026.09, congelato:
+si guarda una volta sola, per ultimo, quando la strategia è finita, col
+rischio scelto e il Monte Carlo già fatto** (deciso da
 Davide).
 
 ### Dentro campione
@@ -42,7 +44,7 @@ Davide).
 - **EURUSD: nessuna previsione di utile.** Senza il yen l'ipotesi non vale;
   se rende è un'informazione, se no non boccia.
 
-### Fuori campione, un colpo solo
+### Fuori campione (2023–2026), un colpo solo
 
 | | soglia |
 |---|---|

@@ -34,7 +34,7 @@
 //|  NESSUN FILTRO SU ORE O GIORNI (regola del progetto).             |
 //|                                                                  |
 //|  PROTOCOLLO E CRITERI: docs/fx-pullback.md, scritti prima.        |
-//|  Costruzione fino al 2023-12-31. Il 2024.01-2026.09 resta         |
+//|  Costruzione fino al 2022-12-31. Il 2023.01-2026.09 resta         |
 //|  congelato e si guarda una volta sola.                            |
 //+------------------------------------------------------------------+
 #property copyright "Ricerca"

@@ -222,6 +222,21 @@ La regola che ne discende: **una gamba nuova entra solo se passa le
 soglie della sezione 5 e se è poco correlata con quelle che ci sono.**
 Il rendimento della singola conta meno della correlazione.
 
+## I conti separati, e il forex (2026-09-23)
+
+Davide tiene **tre conti**: oro + nasdaq (quello di sopra), **forex**,
+e più avanti **crypto**. Il lavoro aperto è il forex, **solo USDJPY**
+per ora:
+
+- obiettivo: **almeno 365 operazioni all'anno**, long e short in utile,
+  drawdown del conto ≤ 35% al 95° percentile;
+- **dentro campione 2019–2022, fuori campione 2023–2026**, che si guarda
+  per ultimo, a strategia, rischio e Monte Carlo finiti;
+- stato, criteri e registro delle prove: `docs/fx-pullback.md`. La
+  prova #1 (ritracciamento nel trend su H1) è bocciata;
+- la ricerca può continuare in una **sessione locale** che usa
+  MetaTrader da riga di comando: `docs/sessione-locale-mt5.md`.
+
 # 7. Limiti dichiarati, da non dimenticare
 
 - Le due strategie **non sono mai girate insieme dentro MetaTrader**: il
