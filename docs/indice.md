@@ -22,6 +22,7 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `GoldFadeBreak.mq5` | scartata — la TRAPPOLA, +50 R dentro e −44,9 R fuori |
 | `GoldRangeMR.mq5` | scartata — 174 configurazioni con ≥100 trade, zero in utile |
 | `GoldRandomNull.mq5` | benchmark a ingressi casuali, **mai eseguito** |
+| `FxTrendPullback.mq5` | **FOREX 1, in prova**: ritracciamento nel trend su USDJPY H1, long e short, target ATR e uscita a tempo. Criteri in `docs/fx-pullback.md` |
 
 ## Gli strumenti
 
@@ -74,6 +75,8 @@ Si apre quando serve un file preciso. Per lavorare basta
 | `storia.md` | l'archivio: scartate, errori, V2XAU, i parametri con il motivo di ogni scelta |
 | `indice.md` | questo file |
 | `test-broker.md` | la stessa strategia su tre broker: PUPrime, FTMO, Fusion. Regge, e Fusion costa la metà |
+| `fx-pullback.md` | FOREX 1: l'idea, i criteri scritti prima, il registro delle configurazioni |
+| `criteri-usdjpy-h1.md` | la strategia USDJPY di Algory: non passa, e perché |
 | `verdetto-robustezza.md` | **è vera o è overfittata**: le sei prove, i numeri corretti, i falsi breakout |
 | `verifica-conto-unico.md` | la verifica del 2026-09-21: il PDF era onesto, il tetto è sforato |
 | `analisi-regimi.md` | zero variabili significative su 25. L'edge non dipende dal regime |
