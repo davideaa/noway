@@ -1,42 +1,47 @@
 //+------------------------------------------------------------------+
-//|                                       V1XAU_TrendFollowing.mq5   |
+//|                                   V2XAU_TrendFollowing_VRC.mq5   |
 //|                                                                  |
-//|  V1XAU — TREND FOLLOWING SU ORO                                   |
+//|  V2XAU — CAPITALE DI RISCHIO VIRTUALE (VRC)                       |
 //|                                                                  |
-//|  Due gambe, stessa famiglia ma momenti diversi:                   |
+//|  STESSA STRATEGIA di V1XAU_TrendFollowing.mq5. Segnali, stop,     |
+//|  trailing, indicatori, timeframe, magic, cooldown, permessi       |
+//|  long/short: identici, riga per riga. Qui cambia SOLO da quale    |
+//|  capitale si calcola la dimensione della posizione.               |
 //|                                                                  |
-//|   ROTTURA (M30)        il prezzo sfonda il canale a 60 barre con  |
-//|                        la volatilita' in espansione, ed entra     |
-//|                        nella direzione dello sfondamento.         |
-//|                        Nessun take profit: trailing largo.        |
+//|  IL PROBLEMA                                                      |
+//|  Rischio e margine non sono la stessa cosa. Su XAUUSD un broker   |
+//|  puo' chiedere ~19.000 di margine per 1 lotto: due gambe aperte   |
+//|  insieme a 0,70 lotti totali vogliono ~13.300 di margine, che un  |
+//|  conto da 10.000 non ha — anche se il rischio da stop e' ~100.    |
 //|                                                                  |
-//|   RITRACCIAMENTO (H4)  dentro un trend gia' stabilito, aspetta    |
-//|                        che il prezzo ritracci di almeno N ATR dal |
-//|                        massimo recente e riparta. Entra dove la   |
-//|                        ROTTURA viene stoppata.                    |
+//|  LA SOLUZIONE                                                     |
+//|  Si versa capitale in piu' PER IL MARGINE, e si impedisce a quel  |
+//|  capitale di alzare il rischio.                                   |
 //|                                                                  |
-//|  Le due NON possono entrare sulla stessa candela: la ROTTURA      |
-//|  pretende un nuovo estremo, il RITRACCIAMENTO pretende che il     |
-//|  prezzo non ci sia. Correlazione mensile misurata: 0,53.          |
+//|    equity vera del conto   -> margine, free margin, sicurezza     |
+//|    capitale virtuale       -> UNICA base per il calcolo dei lotti |
 //|                                                                  |
-//|  ENTRAMBI I LATI. Misurato sui mesi in cui l'oro e' sceso, il     |
-//|  sistema guadagna: +1,6 punti R al mese in discesa lenta e +2,2   |
-//|  in discesa forte, con gli short a fare il lavoro. Il nemico non  |
-//|  e' la direzione, e' il mercato fermo: nei mesi in cui l'oro non  |
-//|  si muove (piu' o meno 0,5%) il sistema perde 1,5 R al mese.      |
+//|    capitale virtuale = InpInitialRiskCapital                      |
+//|                      + P&L netto REALIZZATO dei magic di questo EA|
 //|                                                                  |
-//|  RISULTATI (XAUUSD, 2019.01-2026.09, tick reali, rischio 1,05%)   |
-//|    1.122 operazioni, profit factor 1,33, +0,171 R per operazione  |
-//|    dentro campione 2019-2023  +91% a lotto fisso                  |
-//|    fuori campione  2024-2026  +111% a lotto fisso                 |
-//|    Monte Carlo: 90% degli scenari sotto il 35% di drawdown        |
+//|  Esempio: deposito 20.000, capitale virtuale 10.000, rischio 1%.  |
+//|  Il primo trade rischia 100, non 200. Dopo +2.000 realizzati il   |
+//|  capitale virtuale e' 12.000 e il trade rischia 120, mentre       |
+//|  l'equity vera e' 22.000 e NON viene usata per il sizing.         |
+//|  Il composto continua a funzionare, e in drawdown la size scende. |
 //|                                                                  |
-//|  I parametri sono stati scelti su 2019-2023 e verificati una sola |
-//|  volta su 2024-2026. Non ottimizzarli di nuovo: non ci sono piu'  |
-//|  dati vergini con cui controllare il risultato.                   |
+//|  RIAVVII: il capitale virtuale non si azzera. OnInit lo ricostru- |
+//|  isce sommando dallo storico i deal dei magic base+2 e base+3.    |
+//|                                                                  |
+//|  MARGINE: calcolato a parte con OrderCalcMargin(), cioe' col      |
+//|  calcolo vero del broker, mai con notional/leva. Se non basta,    |
+//|  l'ordine viene rifiutato e SCRITTO nel diario, non falsato in    |
+//|  silenzio (a meno di InpReduceLotsIfMargin).                      |
+//|                                                                  |
+//|  NON VERIFICATO: vedi docs/CONTINUA-QUI.md sezione 8.             |
 //+------------------------------------------------------------------+
 #property copyright "Ricerca"
-#property version   "1.00"
+#property version   "2.00"
 #property strict
 
 #include <Trade\Trade.mqh>
@@ -44,6 +49,18 @@
 //==================================================================
 //  INPUT
 //==================================================================
+input group "=== Capitale di rischio virtuale (VRC) ==="
+// La base per il calcolo dei lotti. NON e' l'equity del conto: il
+// deposito in piu' serve solo a reggere il margine, e non deve far
+// crescere il rischio. Nel tester: Deposito 20000 + questo a 10000
+// significa 20.000 disponibili per il margine, ma la strategia
+// rischia come se ne avesse 10.000.
+input double            InpInitialRiskCapital = 10000.0;  // Capitale di rischio iniziale
+input bool              InpUseMarginSafety    = true;     // Attiva la riserva di margine
+input double            InpMinFreeMarginAfterPct = 30.0;  // Margine libero che deve restare dopo l'ordine (% equity)
+input bool              InpReduceLotsIfMargin = false;    // Se il margine non basta: false = rifiuta, true = riduce il lotto
+input bool              InpVerboseSizing      = false;    // Scrive nel diario ogni calcolo (i rifiuti si scrivono sempre)
+
 input group "=== Generale ==="
 input long              InpMagicBase          = 997000;   // Magic base (RITRACC=+2, ROTTURA=+3)
 input double            InpRiskPercent        = 0.70;     // Rischio per operazione (% equity) - vedi nota
@@ -106,11 +123,6 @@ input double            InpS3TrailATR         = 4.0;      // Distanza trailing i
 input bool              InpS3AllowLong        = true;     // Consenti long
 input bool              InpS3AllowShort       = true;     // Consenti short
 
-input group "=== Pannello live (non tocca le operazioni) ==="
-input bool              InpPannello           = true;     // Mostra il pannello sul grafico
-input int               InpPannelloX          = 12;       // Distanza dal bordo sinistro (px)
-input int               InpPannelloY          = 24;       // Distanza dal bordo alto (px)
-
 //==================================================================
 //  STATO
 //==================================================================
@@ -119,6 +131,24 @@ CTrade   trade;
 int      hS2Ema   = INVALID_HANDLE, hS2Atr  = INVALID_HANDLE;
 int      hS3AtrF  = INVALID_HANDLE, hS3AtrS = INVALID_HANDLE;
 int      hRiskAtr = INVALID_HANDLE;
+
+// Capitale di rischio virtuale: P&L realizzato dei nostri magic, in
+// cache. g_capitalDirty lo fa ricalcolare quando qualcosa si e' chiuso.
+double   g_realizedPnL   = 0.0;
+bool     g_capitalDirty  = true;
+int      g_lastOpenCount = 0;
+
+// Prototipi. Alcune di queste funzioni si chiamano fra loro prima di
+// essere definite (CurrentOpenRiskPercent usa StrategyRiskCapital,
+// RiskMoney usa EffectiveRiskPercent): dichiararle qui toglie ogni
+// dipendenza dall'ordine in cui stanno nel file.
+double EffectiveRiskPercent();
+double RealizedPnLForEA();
+double StrategyRiskCapital();
+double RiskMoney(const double riskMult);
+double MarginBudget();
+bool   RequiredMargin(const bool isLong, const double lots, double &needed);
+double LotsMarginAllows(const bool isLong, const double wanted);
 
 datetime lastBarS2 = 0, lastBarS3 = 0;
 datetime s2LastEntryBar = 0;   // cooldown di S2
@@ -302,8 +332,10 @@ int CurrentDirection(const long magic)
 //------------------------------------------------------------------
 double CurrentOpenRiskPercent()
   {
-   double equity = AccountInfoDouble(ACCOUNT_EQUITY);
-   if(equity <= 0.0) return(0.0);
+   // in % del capitale virtuale, non dell'equity: "rischio" deve
+   // voler dire la stessa cosa in tutto l'EA
+   double capital = StrategyRiskCapital();
+   if(capital <= 0.0) return(0.0);
 
    double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
    double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
@@ -326,7 +358,144 @@ double CurrentOpenRiskPercent()
       double lots = PositionGetDouble(POSITION_VOLUME);
       risk += (dist / tickSize) * tickValue * lots;
      }
-   return(100.0 * risk / equity);
+   return(100.0 * risk / capital);
+  }
+
+//==================================================================
+//  CAPITALE DI RISCHIO VIRTUALE
+//
+//  L'unica cosa che V2 cambia rispetto a V1. Il capitale su cui si
+//  calcolano i lotti non e' piu' l'equity del conto: e' il capitale
+//  iniziale dichiarato piu' il P&L netto REALIZZATO attribuibile ai
+//  magic di questo EA.
+//
+//  Perche' realizzato e non equity:
+//   - l'equity comprende il deposito messo per il margine, che non
+//     deve alzare il rischio;
+//   - l'equity comprende il P&L fluttuante delle posizioni aperte,
+//     quindi un trade in corso gonfierebbe la size del successivo;
+//   - il realizzato si ricostruisce identico dopo un riavvio, il
+//     fluttuante no.
+//==================================================================
+
+//  Somma dei deal chiusi dei nostri due magic: profitto + commissione
+//  + swap + fee. Comprende i deal di APERTURA, dove sta la commissione
+//  d'ingresso. Filtra per simbolo e magic, quindi operazioni a mano o
+//  di altri EA non toccano questo capitale.
+double RealizedPnLForEA()
+  {
+   if(!HistorySelect(0, TimeCurrent())) return(0.0);
+
+   double pnl   = 0.0;
+   int    total = HistoryDealsTotal();
+   for(int i = 0; i < total; i++)
+     {
+      ulong tk = HistoryDealGetTicket(i);
+      if(tk == 0) continue;
+      if(HistoryDealGetString(tk, DEAL_SYMBOL) != _Symbol) continue;
+
+      long magic = HistoryDealGetInteger(tk, DEAL_MAGIC);
+      if(magic != InpMagicBase + 2 && magic != InpMagicBase + 3) continue;
+
+      pnl += HistoryDealGetDouble(tk, DEAL_PROFIT)
+           + HistoryDealGetDouble(tk, DEAL_COMMISSION)
+           + HistoryDealGetDouble(tk, DEAL_SWAP)
+           + HistoryDealGetDouble(tk, DEAL_FEE);
+     }
+   return(pnl);
+  }
+
+//  Il capitale virtuale, in cache. Si ricalcola solo quando qualcosa
+//  si e' chiuso (OnTradeTransaction, o il controllo in OnTick).
+double StrategyRiskCapital()
+  {
+   if(g_capitalDirty)
+     {
+      g_realizedPnL  = RealizedPnLForEA();
+      g_capitalDirty = false;
+     }
+   double cap = InpInitialRiskCapital + g_realizedPnL;
+   return(cap > 0.0 ? cap : 0.0);
+  }
+
+//  Il denaro che questo trade puo' perdere fino allo stop.
+double RiskMoney(const double riskMult)
+  {
+   return(StrategyRiskCapital() * EffectiveRiskPercent() * riskMult / 100.0);
+  }
+
+//==================================================================
+//  MARGINE — calcolato a parte dal rischio, col metodo del broker
+//==================================================================
+
+//  Margine vero richiesto da questo volume. Mai notional/leva: su
+//  XAUUSD il requisito puo' essere a scaglioni e non proporzionale.
+bool RequiredMargin(const bool isLong, const double lots, double &needed)
+  {
+   needed = 0.0;
+   if(lots <= 0.0) return(false);
+
+   double price = isLong ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
+                         : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+   if(price <= 0.0) return(false);
+
+   ENUM_ORDER_TYPE type = isLong ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+   return(OrderCalcMargin(type, _Symbol, lots, price, needed));
+  }
+
+//  Quanto margine possiamo spendere adesso. Il margine gia' occupato
+//  dall'altra gamba e' gia' scontato dentro ACCOUNT_MARGIN_FREE.
+double MarginBudget()
+  {
+   double freeMargin = AccountInfoDouble(ACCOUNT_MARGIN_FREE);
+   if(!InpUseMarginSafety) return(freeMargin > 0.0 ? freeMargin : 0.0);
+
+   double equity  = AccountInfoDouble(ACCOUNT_EQUITY);
+   double riserva = equity * InpMinFreeMarginAfterPct / 100.0;
+   double budget  = freeMargin - riserva;
+   return(budget > 0.0 ? budget : 0.0);
+  }
+
+//  Il volume piu' grande che il margine regge, mai sopra quello voluto.
+//  Parte da una stima lineare e poi scende a passi, perche' il margine
+//  potrebbe non essere proporzionale al volume.
+double LotsMarginAllows(const bool isLong, const double wanted)
+  {
+   double budget = MarginBudget();
+   double need   = 0.0;
+   if(!RequiredMargin(isLong, wanted, need)) return(0.0);
+   if(need <= budget) return(wanted);
+
+   double step   = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+   double minLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   if(step <= 0.0) step = 0.01;
+
+   double v = (need > 0.0) ? wanted * budget / need : 0.0;
+   v = MathFloor(v / step) * step;
+   if(v > wanted) v = wanted;
+
+   for(; v >= minLot - 1e-9; v -= step)
+     {
+      double vol = NormalizeDouble(v, 2);
+      double nd  = 0.0;
+      if(!RequiredMargin(isLong, vol, nd)) return(0.0);
+      if(nd <= budget) return(vol);
+     }
+   return(0.0);
+  }
+
+//  I rifiuti e le riduzioni si scrivono SEMPRE: un ordine che non parte
+//  deve lasciare traccia del perche'.
+void LogSizing(const string tag, const bool isLong, const double riskMoney,
+               const double wantLots, const double needed, const string esito,
+               const bool sempre)
+  {
+   if(!sempre && !InpVerboseSizing) return;
+   PrintFormat("%s %s | capitale virtuale %.2f | rischio %.2f%% = %.2f | volume %.2f | margine richiesto %.2f | libero %.2f | budget %.2f | %s",
+               tag, isLong ? "LONG" : "SHORT",
+               StrategyRiskCapital(), EffectiveRiskPercent(), riskMoney,
+               wantLots, needed, AccountInfoDouble(ACCOUNT_MARGIN_FREE),
+               MarginBudget(), esito);
   }
 
 //------------------------------------------------------------------
@@ -364,8 +533,11 @@ double LotsFromRisk(const double stopDistance, const double riskMult)
   {
    if(stopDistance <= 0.0 || riskMult <= 0.0) return(0.0);
 
-   double equity    = AccountInfoDouble(ACCOUNT_EQUITY);
-   double riskMoney = equity * EffectiveRiskPercent() * riskMult / 100.0;
+   // IL CAMBIO CENTRALE DI V2: non l'equity del conto, ma il capitale
+   // virtuale. Il deposito messo per reggere il margine non deve
+   // alzare il rischio.
+   double riskMoney = RiskMoney(riskMult);
+   if(riskMoney <= 0.0) return(0.0);
 
    double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
    double tickSize  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
@@ -464,7 +636,45 @@ bool OpenTrade(const long magic, const bool isLong, const double stopAtrDist,
    if(tp > 0.0) tp = NormalizeDouble(tp, digits);
 
    double lots = LotsFromRisk(realRisk, riskMult);
-   if(lots <= 0.0) return(false);
+   if(lots <= 0.0)
+     {
+      LogSizing(tag, isLong, RiskMoney(riskMult), 0.0, 0.0,
+                "NIENTE ORDINE: volume sotto il minimo del broker", true);
+      return(false);
+     }
+
+   // ---- margine: conto separato dal rischio ----
+   double needed = 0.0;
+   if(!RequiredMargin(isLong, lots, needed))
+     {
+      LogSizing(tag, isLong, RiskMoney(riskMult), lots, 0.0,
+                "NIENTE ORDINE: OrderCalcMargin non risponde", true);
+      return(false);
+     }
+
+   if(needed > MarginBudget())
+     {
+      if(!InpReduceLotsIfMargin)
+        {
+         LogSizing(tag, isLong, RiskMoney(riskMult), lots, needed,
+                   "ORDINE RIFIUTATO DALL'EA: margine insufficiente", true);
+         return(false);
+        }
+
+      double ridotto = LotsMarginAllows(isLong, lots);
+      if(ridotto <= 0.0)
+        {
+         LogSizing(tag, isLong, RiskMoney(riskMult), lots, needed,
+                   "ORDINE RIFIUTATO DALL'EA: margine insufficiente anche al minimo", true);
+         return(false);
+        }
+      PrintFormat("%s volume ridotto per margine: %.2f -> %.2f (rischio reale piu' basso del dichiarato)",
+                  tag, lots, ridotto);
+      lots = ridotto;
+      RequiredMargin(isLong, lots, needed);
+     }
+
+   LogSizing(tag, isLong, RiskMoney(riskMult), lots, needed, "ordine inviato", false);
 
    trade.SetExpertMagicNumber(magic);
    trade.SetDeviationInPoints(InpSlippagePoints);
@@ -764,554 +974,15 @@ void PrintStrategySummary()
       tot += gw[k] + gl[k];
      }
    PrintFormat("TOTALE %+.2f", tot);
+   g_capitalDirty = true;
+   PrintFormat("VRC finale: capitale %.2f = iniziale %.2f + realizzato %.2f",
+               StrategyRiskCapital(), InpInitialRiskCapital, g_realizedPnL);
   }
 
 double OnTester()
   {
    PrintStrategySummary();
    return(AccountInfoDouble(ACCOUNT_BALANCE));
-  }
-
-//==================================================================
-//  PANNELLO LIVE
-//  Solo disegno. Non apre, non chiude, non modifica e non dimensiona
-//  niente: legge il conto e lo scrive sul grafico. Si spegne da solo
-//  nel tester e in ottimizzazione, quindi non rallenta i backtest.
-//==================================================================
-#define PN_PRE "PN_"
-#define PN_OGNI 2          // secondi fra due riletture dello storico
-
-// Dichiarate qui, definite piu' sotto nella parte specifica di questo
-// EA: sono le uniche cose che cambiano fra il pannello dell'oro e
-// quello del nasdaq. Il resto del blocco e' identico nei due file.
-bool   PnMio(const ulong deal);
-string PnTitolo();
-string PnSotto();
-double PnRischioPct();
-double PnRischioSoldi();
-int    PnDiagnostica(string &r[],color &c[]);
-string PnPosizione(color &col);
-
-bool     g_pnOn        = false;
-datetime g_pnLento     = 0;     // ultimo giro "pesante"
-datetime g_pnDeal      = 0;     // tempo dell'ultimo deal gia' contato
-ulong    g_pnTicket    = 0;     // e il suo ticket: due deal possono cadere
-                                // nello stesso secondo, e il tempo da solo
-                                // ne farebbe sparire uno
-double   g_pnSaldo     = 0.0;   // saldo ricostruito a quel punto
-double   g_pnCurva     = 1.0;   // rendimento composto del conto (1 = piatto)
-double   g_pnPicco     = 1.0;
-double   g_pnDDmax     = 0.0;   // massimo drawdown toccato, in %
-// PnL del periodo: [0]=mio  [1]=tutto il conto  [2]=saldo a inizio periodo
-double   g_pnG[3], g_pnS[3], g_pnM[3];
-double   g_pnMioTot    = 0.0;
-int      g_pnMioN      = 0, g_pnMioW = 0;
-
-//------------------------------------------------------------------
-//  Disegno
-//------------------------------------------------------------------
-void PnRect(const string id,const int x,const int y,const int w,const int h,
-            const color bg,const color bordo)
-  {
-   string n = PN_PRE + id;
-   if(ObjectFind(0,n) < 0) ObjectCreate(0,n,OBJ_RECTANGLE_LABEL,0,0,0);
-   ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);
-   ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);
-   ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
-   ObjectSetInteger(0,n,OBJPROP_XSIZE,w);
-   ObjectSetInteger(0,n,OBJPROP_YSIZE,h);
-   ObjectSetInteger(0,n,OBJPROP_BGCOLOR,bg);
-   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,bordo);
-   ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
-   ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
-  }
-
-void PnText(const string id,const int x,const int y,const string txt,
-            const int size,const color c)
-  {
-   string n = PN_PRE + id;
-   if(ObjectFind(0,n) < 0) ObjectCreate(0,n,OBJ_LABEL,0,0,0);
-   ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);
-   ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);
-   ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
-   ObjectSetInteger(0,n,OBJPROP_FONTSIZE,size);
-   ObjectSetInteger(0,n,OBJPROP_COLOR,c);
-   ObjectSetString (0,n,OBJPROP_FONT,"Arial");
-   ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
-   ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
-   ObjectSetString (0,n,OBJPROP_TEXT,txt);
-  }
-
-void PnPulisci()
-  {
-   for(int i = ObjectsTotal(0) - 1; i >= 0; i--)
-     {
-      string n = ObjectName(0,i);
-      if(StringFind(n,PN_PRE) == 0) ObjectDelete(0,n);
-     }
-  }
-
-//------------------------------------------------------------------
-//  Inizio di giornata, settimana e mese in ora del server
-//------------------------------------------------------------------
-void PnInizioPeriodi(datetime &g,datetime &s,datetime &m)
-  {
-   MqlDateTime d; TimeToStruct(TimeCurrent(),d);
-   MqlDateTime z; z = d;                 // copia esplicita: piu' sicura
-   z.hour = 0; z.min = 0; z.sec = 0;
-   g = StructToTime(z);
-   z.day = 1; m = StructToTime(z);
-   int indietro = (d.day_of_week == 0 ? 6 : d.day_of_week - 1);
-   s = g - indietro * 86400;
-  }
-
-//------------------------------------------------------------------
-//  Curva del conto in frazione, immune ai versamenti
-//
-//  Per ogni deal:  f = (profitto + swap + commissione) / saldo_prima
-//  e il rendimento e' il prodotto dei (1+f). I versamenti e i prelievi
-//  spostano il saldo ma non entrano nel rendimento, che e' quello che
-//  serve: dice quanto ha reso il TRADING, non quanto e' stato messo.
-//  E' la stessa grandezza usata nelle analisi in Python.
-//
-//  Girata tutta una volta all'avvio, poi solo sui deal nuovi.
-//------------------------------------------------------------------
-void PnCurvaAggiorna(const bool daCapo)
-  {
-   if(daCapo)
-     {
-      if(!HistorySelect(0,TimeCurrent())) return;
-      // saldo a inizio storia = saldo di adesso meno tutto quello che e' passato
-      double somma = 0.0;
-      for(int i = 0; i < HistoryDealsTotal(); i++)
-        {
-         ulong t = HistoryDealGetTicket(i);
-         if(t == 0) continue;
-         somma += HistoryDealGetDouble(t,DEAL_PROFIT)
-                + HistoryDealGetDouble(t,DEAL_SWAP)
-                + HistoryDealGetDouble(t,DEAL_COMMISSION);
-        }
-      g_pnSaldo  = AccountInfoDouble(ACCOUNT_BALANCE) - somma;
-      g_pnCurva  = 1.0; g_pnPicco = 1.0; g_pnDDmax = 0.0;
-      g_pnDeal   = 0;   g_pnTicket = 0;
-      g_pnMioTot = 0.0; g_pnMioN = 0; g_pnMioW = 0;
-     }
-   else
-     {
-      // si rileggono solo i deal nuovi: lo storico intero si gira una
-      // volta sola all'avvio, non ogni due secondi
-      if(!HistorySelect(g_pnDeal,TimeCurrent())) return;
-     }
-
-   for(int i = 0; i < HistoryDealsTotal(); i++)
-     {
-      ulong t = HistoryDealGetTicket(i);
-      if(t == 0) continue;
-      if(!daCapo && t <= g_pnTicket) continue;       // gia' contato
-
-      double netto = HistoryDealGetDouble(t,DEAL_PROFIT)
-                   + HistoryDealGetDouble(t,DEAL_SWAP)
-                   + HistoryDealGetDouble(t,DEAL_COMMISSION);
-
-      g_pnDeal   = (datetime)HistoryDealGetInteger(t,DEAL_TIME);
-      g_pnTicket = t;
-
-      if(HistoryDealGetInteger(t,DEAL_TYPE) == DEAL_TYPE_BALANCE)
-        { g_pnSaldo += netto; continue; }            // versamento: non e' rendimento
-
-      // totale di questa strategia, accumulato nello stesso giro
-      if(PnMio(t))
-        {
-         g_pnMioTot += netto;
-         long e = HistoryDealGetInteger(t,DEAL_ENTRY);
-         if(e == DEAL_ENTRY_OUT || e == DEAL_ENTRY_OUT_BY)
-           {
-            g_pnMioN++;
-            if(HistoryDealGetDouble(t,DEAL_PROFIT) > 0.0) g_pnMioW++;
-           }
-        }
-
-      if(g_pnSaldo > 0.0) g_pnCurva *= (1.0 + netto / g_pnSaldo);
-      g_pnSaldo += netto;
-
-      if(g_pnCurva > g_pnPicco) g_pnPicco = g_pnCurva;
-      if(g_pnPicco > 0.0)
-        {
-         double dd = 100.0 * (g_pnPicco - g_pnCurva) / g_pnPicco;
-         if(dd > g_pnDDmax) g_pnDDmax = dd;
-        }
-     }
-  }
-
-//------------------------------------------------------------------
-//  PnL di un periodo: mio (per magic), di tutto il conto, e il saldo
-//  che c'era all'inizio del periodo.
-//
-//  Il saldo iniziale serve per la percentuale: su un conto che cresce,
-//  cento euro oggi non valgono la stessa percentuale di cento euro
-//  l'anno scorso. Si divide per quello che c'era ALL'INIZIO di quel
-//  periodo, non per il deposito di partenza.
-//
-//  Contati TUTTI i deal del magic, non solo quelli di chiusura: su
-//  molti broker la commissione sta sul deal di apertura, e contando
-//  solo le chiusure sparirebbe.
-//------------------------------------------------------------------
-void PnPeriodo(const datetime da,double &out[])
-  {
-   out[0] = 0.0; out[1] = 0.0; out[2] = 0.0;
-   if(!HistorySelect(da,TimeCurrent())) return;
-   for(int i = 0; i < HistoryDealsTotal(); i++)
-     {
-      ulong t = HistoryDealGetTicket(i);
-      if(t == 0) continue;
-      double netto = HistoryDealGetDouble(t,DEAL_PROFIT)
-                   + HistoryDealGetDouble(t,DEAL_SWAP)
-                   + HistoryDealGetDouble(t,DEAL_COMMISSION);
-      out[1] += netto;                              // tutto il conto, versamenti compresi
-      if(HistoryDealGetInteger(t,DEAL_TYPE) == DEAL_TYPE_BALANCE) continue;
-      if(PnMio(t)) out[0] += netto;                 // solo questa strategia
-     }
-   out[2] = AccountInfoDouble(ACCOUNT_BALANCE) - out[1];   // saldo a inizio periodo
-  }
-
-//------------------------------------------------------------------
-//  Formattazione
-//------------------------------------------------------------------
-string PnSoldi(const double v)
-  {
-   return (v >= 0.0 ? "+" : "") + DoubleToString(v,2);
-  }
-
-string PnPerc(const double v,const double base)
-  {
-   if(base <= 0.0) return "n/d";
-   double p = 100.0 * v / base;
-   return (p >= 0.0 ? "+" : "") + DoubleToString(p,2) + "%";
-  }
-
-color PnCol(const double v,const color su,const color giu,const color pari)
-  {
-   if(v > 0.0) return su;
-   if(v < 0.0) return giu;
-   return pari;
-  }
-
-//------------------------------------------------------------------
-//  Le parti che cambiano da un EA all'altro — qui l'ORO
-//------------------------------------------------------------------
-bool PnMio(const ulong deal)
-  {
-   long m = HistoryDealGetInteger(deal,DEAL_MAGIC);
-   return (m == InpMagicBase + 2 || m == InpMagicBase + 3);
-  }
-
-string PnTitolo() { return "ORO"; }
-string PnSotto()  { return "ROTTURA M30 + RITRACCIAMENTO H4"; }
-
-double PnRischioPct()   { return EffectiveRiskPercent(); }
-double PnRischioSoldi() { return AccountInfoDouble(ACCOUNT_EQUITY)
-                               * EffectiveRiskPercent() / 100.0; }
-
-//  Lo stato delle due gambe, in lettura pura: gli stessi indicatori e
-//  gli stessi confronti di RunS2 e RunS3, ma senza toccare niente.
-int PnDiagnostica(string &r[],color &c[])
-  {
-   color verde=C'82,214,143', rosso=C'244,101,105', smorto=C'158,164,178',
-         bianco=C'235,238,245';
-   int n = 0;
-
-   if(!TerminalInfoInteger(TERMINAL_CONNECTED))
-     { r[0]="MT5 NON CONNESSO"; c[0]=rosso; return 1; }
-
-   MqlDateTime d; TimeToStruct(TimeCurrent(),d);
-   if(d.day_of_week == 0 || d.day_of_week == 6)
-     { r[0]="WEEKEND - MERCATO CHIUSO"; c[0]=smorto; return 1; }
-
-   if(InpMaxSpreadPoints > 0 &&
-      SymbolInfoInteger(_Symbol,SYMBOL_SPREAD) > InpMaxSpreadPoints)
-     { r[n]="SPREAD TROPPO LARGO - ferma"; c[n]=rosso; n++; }
-
-   double bid = SymbolInfoDouble(_Symbol,SYMBOL_BID);
-
-   // ---------------- ROTTURA (M30) ----------------
-   if(!InpS3Enabled)
-     { r[n]="ROTTURA M30: spenta"; c[n]=smorto; n++; }
-   else if(CountPositions(InpMagicBase+3) > 0)
-     { r[n]="ROTTURA M30: posizione aperta"; c[n]=verde; n++; }
-   else
-     {
-      double atrF = IndValue(hS3AtrF,1), atrS = IndValue(hS3AtrS,1);
-      if(atrF <= 0.0 || atrS <= 0.0)
-        { r[n]="ROTTURA M30: dati non pronti"; c[n]=smorto; n++; }
-      else if((atrF/atrS) < InpS3VolExpandRatio)
-        {
-         r[n]="ROTTURA M30: volatilita' piatta (" +
-              DoubleToString(atrF/atrS,2) + " < " +
-              DoubleToString(InpS3VolExpandRatio,2) + ")";
-         c[n]=smorto; n++;
-        }
-      else
-        {
-         int iBH = iHighest(_Symbol,InpS3TF,MODE_HIGH,InpS3BreakBars,2);
-         int iBL = iLowest (_Symbol,InpS3TF,MODE_LOW, InpS3BreakBars,2);
-         if(iBH < 0 || iBL < 0)
-           { r[n]="ROTTURA M30: dati non pronti"; c[n]=smorto; n++; }
-         else
-           {
-            double bh = iHigh(_Symbol,InpS3TF,iBH), bl = iLow(_Symbol,InpS3TF,iBL);
-            double su = bh - bid, giu = bid - bl;
-            r[n] = "ROTTURA M30: " +
-                   (su <= 0.0 ? "SOPRA il canale"
-                              : "mancano " + DoubleToString(su,2) + " in su") +
-                   " / " +
-                   (giu <= 0.0 ? "SOTTO il canale"
-                               : DoubleToString(giu,2) + " in giu'");
-            c[n] = (su <= 0.0 || giu <= 0.0) ? bianco : smorto;
-            n++;
-           }
-        }
-     }
-
-   // ---------------- RITRACCIAMENTO (H4) ----------------
-   if(!InpS2Enabled)
-     { r[n]="RITRACC H4: spento"; c[n]=smorto; n++; }
-   else if(CountPositions(InpMagicBase+2) > 0)
-     { r[n]="RITRACC H4: posizione aperta"; c[n]=verde; n++; }
-   else
-     {
-      double ema1 = IndValue(hS2Ema,1);
-      double emaN = IndValue(hS2Ema,1+InpS2EmaSlopeBars);
-      double c1   = iClose(_Symbol,InpS2TF,1);
-      if(ema1 <= 0.0 || emaN <= 0.0 || c1 <= 0.0)
-        { r[n]="RITRACC H4: dati non pronti"; c[n]=smorto; n++; }
-      else
-        {
-         double slope = (ema1 - emaN) / InpS2EmaSlopeBars;
-         string t;
-         if(c1 > ema1 && slope > 0.0)      t = "trend SU, cerca il ritracciamento";
-         else if(c1 < ema1 && slope < 0.0) t = "trend GIU', cerca il rimbalzo";
-         else                              t = "niente trend, fermo";
-         // attesa dopo l'ultimo ingresso
-         if(InpS2CooldownBars > 0 && s2LastEntryBar > 0)
-           {
-            long passati = (long)(iTime(_Symbol,InpS2TF,0) - s2LastEntryBar);
-            long serve   = (long)InpS2CooldownBars * PeriodSeconds(InpS2TF);
-            if(passati < serve)
-               t = "attesa dopo l'ultimo ingresso (" +
-                   IntegerToString((int)((serve-passati)/3600)) + "h)";
-           }
-         r[n] = "RITRACC H4: " + t;
-         c[n] = (StringFind(t,"trend") == 0) ? bianco : smorto;
-         n++;
-        }
-     }
-   return n;
-  }
-
-//  La distanza di stop iniziale, letta e basta.
-//  NON si usa RecallRisk: quella, se non trova il ticket in memoria,
-//  lo va a cercare nello storico e POI LO SCRIVE nella memoria, che ha
-//  64 posti. Chiamarla dal pannello a ogni tick sfratterebbe le voci
-//  vere e il trailing perderebbe il suo 1R. Qui si legge soltanto: se
-//  il ticket non c'e' (EA riavviato a meta'), l'R non si mostra.
-double PnDistanzaRischio(const ulong ticket)
-  {
-   for(int i = 0; i < RISK_SLOTS; i++)
-      if(g_risk[i].ticket == ticket) return(g_risk[i].riskDistance);
-   return(0.0);
-  }
-
-//  La posizione aperta, con il suo R corrente
-string PnPosizione(color &col)
-  {
-   color verde=C'82,214,143', rosso=C'244,101,105', smorto=C'158,164,178';
-   for(int i = PositionsTotal() - 1; i >= 0; i--)
-     {
-      ulong t = PositionGetTicket(i);
-      if(t == 0 || !PositionSelectByTicket(t)) continue;
-      if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
-      long m = PositionGetInteger(POSITION_MAGIC);
-      if(m != InpMagicBase + 2 && m != InpMagicBase + 3) continue;
-
-      bool lungo = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
-      double apertura = PositionGetDouble(POSITION_PRICE_OPEN);
-      double prezzo   = PositionGetDouble(POSITION_PRICE_CURRENT);
-      double profitto = PositionGetDouble(POSITION_PROFIT)
-                      + PositionGetDouble(POSITION_SWAP);
-      col = PnCol(profitto,verde,rosso,smorto);
-
-      string nome = (m == InpMagicBase + 3 ? "ROTTURA" : "RITRACC");
-      string r = "";
-      double dist = PnDistanzaRischio(t);
-      if(dist > 0.0)
-        {
-         double rr = (lungo ? prezzo - apertura : apertura - prezzo) / dist;
-         r = "  R " + (rr >= 0.0 ? "+" : "") + DoubleToString(rr,2);
-        }
-      return nome + " " + (lungo ? "LONG" : "SHORT") + r;
-     }
-   col = smorto;
-   return "nessuna posizione";
-  }
-
-//------------------------------------------------------------------
-//  Il disegno vero e proprio. Le parti che cambiano da un EA
-//  all'altro stanno nelle funzioni PnMio, PnTitolo, PnSotto,
-//  PnDiagnostica, PnRischioPct e PnPosizione, definite piu' sotto.
-//------------------------------------------------------------------
-void PnDisegna()
-  {
-   color bg=C'13,15,22', card=C'21,24,34', bordo=C'80,61,115';
-   color bianco=C'235,238,245', smorto=C'158,164,178';
-   color verde=C'82,214,143', rosso=C'244,101,105', viola=C'190,102,255';
-
-   int X = InpPannelloX, Y = InpPannelloY, W = 360;
-   int cx = X + 16, cw = W - 32, tx = X + 28;
-
-   string diag[8]; color dcol[8];
-   int nd = PnDiagnostica(diag,dcol);
-   if(nd > 8) nd = 8;
-
-   // altezza totale: quello che c'e' sopra + le righe di diagnostica
-   int hDiag = 30 + 18*nd;
-   int H = 96 + hDiag + 8 + 66 + 8 + 116 + 8 + 48 + 8 + 48 + 8 + 52 + 14;
-
-   PnRect("BG",X,Y,W,H,bg,bordo);
-
-   PnText("T1",tx,Y+16,PnTitolo(),19,bianco);
-   PnText("T2",tx,Y+45,PnSotto(),9,viola);
-
-   bool algo = (bool)TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)
-            && (bool)MQLInfoInteger(MQL_TRADE_ALLOWED)
-            && (bool)AccountInfoInteger(ACCOUNT_TRADE_ALLOWED);
-   PnText("BOT",tx,Y+72,"BOT: " + (algo ? "ATTIVO" : "BLOCCATO"),11,
-          algo ? verde : rosso);
-
-   MqlTick q; double spread = 0.0;
-   if(SymbolInfoTick(_Symbol,q)) spread = q.ask - q.bid;
-   PnText("SP",X+232,Y+73,"Spread " + DoubleToString(spread,2),9,smorto);
-
-   int y = Y + 96;
-
-   // ---------------- diagnostica ----------------
-   PnRect("C0",cx,y,cw,hDiag,card,bordo);
-   PnText("H0",tx,y+9,"DIAGNOSTICA",10,bianco);
-   for(int i = 0; i < nd; i++)
-      PnText("D"+IntegerToString(i),tx,y+30+18*i,diag[i],9,dcol[i]);
-   for(int i = nd; i < 8; i++) ObjectDelete(0,PN_PRE+"D"+IntegerToString(i));
-   y += hDiag + 8;
-
-   // ---------------- conto ----------------
-   double bal = AccountInfoDouble(ACCOUNT_BALANCE);
-   double eq  = AccountInfoDouble(ACCOUNT_EQUITY);
-   double flt = eq - bal;
-   double mrg = AccountInfoDouble(ACCOUNT_MARGIN);
-   PnRect("C1",cx,y,cw,66,card,bordo);
-   PnText("H1",tx,y+9,"CONTO",10,bianco);
-   PnText("A1",tx,y+28,"Saldo  " + DoubleToString(bal,2),9,smorto);
-   PnText("A2",X+204,y+28,"Equity  " + DoubleToString(eq,2),9,smorto);
-   PnText("A3",tx,y+46,"Flottante  " + PnSoldi(flt),9,PnCol(flt,verde,rosso,smorto));
-   PnText("A4",X+204,y+46,"Margine  " + (eq > 0.0 ? DoubleToString(100.0*mrg/eq,1) : "0,0") + "%",
-          9,smorto);
-   y += 66 + 8;
-
-   // ---------------- questa strategia ----------------
-   PnRect("C2",cx,y,cw,116,card,bordo);
-   PnText("H2",tx,y+9,"QUESTA STRATEGIA",10,bianco);
-   PnText("H2b",X+236,y+10,"(solo il suo magic)",7,smorto);
-   string et[3] = {"Oggi","Settimana","Mese"};
-   for(int i = 0; i < 3; i++)
-     {
-      double mio, base;
-      if(i == 0)      { mio = g_pnG[0]; base = g_pnG[2]; }
-      else if(i == 1) { mio = g_pnS[0]; base = g_pnS[2]; }
-      else            { mio = g_pnM[0]; base = g_pnM[2]; }
-      color c = PnCol(mio,verde,rosso,smorto);
-      PnText("P"+IntegerToString(i)+"a",tx,y+30+20*i,et[i],9,smorto);
-      PnText("P"+IntegerToString(i)+"b",X+212,y+30+20*i,PnSoldi(mio),9,c);
-      PnText("P"+IntegerToString(i)+"c",X+292,y+30+20*i,PnPerc(mio,base),9,c);
-     }
-   PnText("P3a",tx,y+92,"Da sempre",9,smorto);
-   PnText("P3b",X+212,y+92,PnSoldi(g_pnMioTot),9,PnCol(g_pnMioTot,verde,rosso,smorto));
-   PnText("P3c",X+292,y+92,IntegerToString(g_pnMioN) + " op" +
-          (g_pnMioN > 0 ? "  " + DoubleToString(100.0*g_pnMioW/g_pnMioN,0) + "%" : ""),
-          9,smorto);
-   y += 116 + 8;
-
-   // ---------------- drawdown ----------------
-   // curva in frazione + il flottante di adesso, cosi' il "sotto il
-   // massimo" tiene conto anche di quello che e' ancora aperto
-   double curvaOra = g_pnCurva;
-   if(bal > 0.0) curvaOra *= (1.0 + flt / bal);
-   double ddOra = (g_pnPicco > 0.0 ? 100.0*(g_pnPicco - curvaOra)/g_pnPicco : 0.0);
-   if(ddOra < 0.0) ddOra = 0.0;
-   double ddMax = MathMax(g_pnDDmax,ddOra);
-   PnRect("C3",cx,y,cw,48,card,bordo);
-   PnText("H3",tx,y+9,"DRAWDOWN",10,bianco);
-   PnText("W1",tx,y+28,"Adesso  -" + DoubleToString(ddOra,2) + "%",9,
-          ddOra > 0.01 ? rosso : smorto);
-   PnText("W2",X+196,y+28,"Massimo toccato  -" + DoubleToString(ddMax,2) + "%",9,
-          ddMax > 0.01 ? rosso : smorto);
-   y += 48 + 8;
-
-   // ---------------- rendimento del conto ----------------
-   PnRect("C4",cx,y,cw,48,card,bordo);
-   PnText("H4",tx,y+9,"RENDIMENTO DEL CONTO",10,bianco);
-   PnText("H4b",X+230,y+10,"(versamenti esclusi)",7,smorto);
-   double rc = 100.0*(curvaOra - 1.0);
-   PnText("R0",tx,y+28,(rc >= 0.0 ? "+" : "") + DoubleToString(rc,2) + "%  composto, da quando c'e' storico",
-          9,PnCol(rc,verde,rosso,smorto));
-   y += 48 + 8;
-
-   // ---------------- rischio e operazione ----------------
-   PnRect("C5",cx,y,cw,52,card,bordo);
-   PnText("H5",tx,y+9,"RISCHIO E OPERAZIONE",10,bianco);
-   PnText("K1",tx,y+30,DoubleToString(PnRischioPct(),2) + "% = " +
-          DoubleToString(PnRischioSoldi(),2) + " per operazione",9,bianco);
-   color pcol = smorto;
-   string ps = PnPosizione(pcol);
-   PnText("K2",X+196,y+30,ps,9,pcol);
-
-   ChartRedraw(0);
-  }
-
-//------------------------------------------------------------------
-//  Aggancio al ciclo di vita dell'EA
-//------------------------------------------------------------------
-void PannelloInit()
-  {
-   // spento nel tester e in ottimizzazione: il backtest non deve
-   // pagare un centesimo di tempo per una cosa che nessuno guarda
-   g_pnOn = InpPannello
-         && !(bool)MQLInfoInteger(MQL_TESTER)
-         && !(bool)MQLInfoInteger(MQL_OPTIMIZATION);
-   if(!g_pnOn) return;
-   PnPulisci();
-   PnCurvaAggiorna(true);
-   datetime g,s,m; PnInizioPeriodi(g,s,m);
-   PnPeriodo(g,g_pnG); PnPeriodo(s,g_pnS); PnPeriodo(m,g_pnM);
-   g_pnLento = TimeCurrent();
-   PnDisegna();
-  }
-
-void PannelloTick()
-  {
-   if(!g_pnOn) return;
-   // lo storico si rilegge ogni PN_OGNI secondi; equity, flottante e
-   // posizione aperta si ridisegnano a ogni tick perche' costano nulla
-   if(TimeCurrent() - g_pnLento >= PN_OGNI)
-     {
-      PnCurvaAggiorna(false);
-      datetime g,s,m; PnInizioPeriodi(g,s,m);
-      PnPeriodo(g,g_pnG); PnPeriodo(s,g_pnS); PnPeriodo(m,g_pnM);
-      g_pnLento = TimeCurrent();
-     }
-   PnDisegna();
-  }
-
-void PannelloDeinit()
-  {
-   if(g_pnOn) PnPulisci();
   }
 
 //==================================================================
@@ -1338,13 +1009,22 @@ int OnInit()
    g_riskIdx  = 0;
    lastBarS2 = 0; lastBarS3 = 0; s2LastEntryBar = 0;
 
-   PannelloInit();
+   // Il capitale virtuale NON riparte da InpInitialRiskCapital: si
+   // ricostruisce dallo storico, quindi un riavvio di MT5, del VPS o
+   // un cambio di timeframe non azzerano il composto.
+   g_capitalDirty  = true;
+   double cap      = StrategyRiskCapital();
+   g_lastOpenCount = CountPositions(InpMagicBase + 2) + CountPositions(InpMagicBase + 3);
+   PrintFormat("VRC all'avvio: capitale %.2f = iniziale %.2f + realizzato %.2f | posizioni aperte %d",
+               cap, InpInitialRiskCapital, g_realizedPnL, g_lastOpenCount);
+   if(cap <= 0.0)
+      Print("VRC: capitale virtuale a zero, l'EA non aprira' piu' nulla");
+
    return(INIT_SUCCEEDED);
   }
 
 void OnDeinit(const int reason)
   {
-   PannelloDeinit();
    PrintStrategySummary();
    IndicatorRelease(hS2Ema);
    IndicatorRelease(hS2Atr);
@@ -1353,10 +1033,22 @@ void OnDeinit(const int reason)
    IndicatorRelease(hRiskAtr);
   }
 
+//  Una chiusura cambia il capitale virtuale. OnTradeTransaction lo
+//  segnala, ma questo controllo e' la rete di sicurezza se un evento
+//  non arriva: se il numero di posizioni nostre cambia, si ricalcola.
+void OnTradeTransaction(const MqlTradeTransaction &trans,
+                        const MqlTradeRequest     &request,
+                        const MqlTradeResult      &result)
+  {
+   if(trans.type == TRADE_TRANSACTION_DEAL_ADD) g_capitalDirty = true;
+  }
+
 void OnTick()
   {
-   PannelloTick();          // solo disegno, e solo fuori dal tester
    WeekendGuard();
+
+   int openNow = CountPositions(InpMagicBase + 2) + CountPositions(InpMagicBase + 3);
+   if(openNow != g_lastOpenCount) { g_capitalDirty = true; g_lastOpenCount = openNow; }
 
    // entrambe cavalcano, ciascuna con il proprio ATR e timeframe
    ManageTrailing(InpMagicBase + 2, InpS2TrailStartR, InpS2TrailATR, hS2Atr,  1.0);

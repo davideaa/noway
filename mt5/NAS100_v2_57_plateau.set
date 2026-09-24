@@ -1,0 +1,63 @@
+; NAS100 Session-Open Momentum v2.57
+; Configurazione che ha prodotto i backtest 2019-2026:
+;   PUPrime NAS100.s  1.626 operazioni, +978,7% composto, PF 1,343
+;   Fusion  NAS100    1.158 operazioni, +457,4% composto, PF 1,325
+; Formato di ogni riga:  nome = valore || inizio || passo || interrompi || ottimizza
+; Caricare da: Strategy Tester -> scheda Input -> Load.
+; QUESTO E' IL FILE PER IL TEST DEL PLATEAU: stessi valori, ma con
+; inizio/passo/interrompi gia' compilati sui 7 parametri da provare.
+; Ottimizza e' N su TUTTI: si accende UNA casella per volta, se no
+; MT5 prova tutte le combinazioni fra loro (milioni di passate).
+
+; --- Core strategy ---
+FastEMAPeriod=12||6||3||30||N
+SlowEMAPeriod=120||40||20||240||N
+ATRPeriod=16||8||4||32||N
+ATRStopMultiplier=8.0||3.0||1.0||14.0||N
+TrailActivationR=0.50||0.0||0.25||2.0||N
+SignalMode=0||0||0||0||N
+TrailUsesClosedBar=true||true||0||true||N
+TrailMode=4||4||0||4||N
+TrailATRBuffer=0.50||0.50||0||0.50||N
+MaxTradesPerItalyDay=1||1||0||1||N
+
+; --- Fixed entry filter - Mode 3 checkpoint ---
+FixedMinBodyToRange=0.075||0.0||0.025||0.30||N
+FixedMinEMADistanceATR=0.05||0.0||0.025||0.30||N
+
+; --- CARD-COUNT ADAPTIVE RISK ---
+RiskPercent=1.50||1.50||0||1.50||N
+RiskBase=0||0||0||0||N
+UseAdaptiveRisk=true||true||0||true||N
+AdaptiveRiskFormula=3||3||0||3||N
+AdaptiveStrength=0.50||0.50||0||0.50||N
+AdaptiveReferencePeriod=200||200||0||200||N
+AdaptiveShortWindow=20||20||0||20||N
+AdaptiveMinMultiplier=0.50||0.50||0||0.50||N
+AdaptiveMaxMultiplier=2.00||2.00||0||2.00||N
+DirectionalQualityWindow=20||20||0||20||N
+DirectionalQualityLow=0.20||0.20||0||0.20||N
+DirectionalQualityHigh=0.45||0.45||0||0.45||N
+
+; --- CARD-COUNT NORMALIZATION / DRAWDOWN CONTROL ---
+UseRollingMarketCenter=true||true||0||true||N
+MarketCenterWindow=200||200||0||200||N
+MarketCenterMinSamples=20||20||0||20||N
+UseEquityHealthThrottle=false||false||0||false||N
+EquityThrottleK=1.00||1.00||0||1.00||N
+EquityThrottleFloor=0.50||0.50||0||0.50||N
+MagicNumber=1208120||1208120||0||1208120||N
+MaxDeviationPoints=50||50||0||50||N
+PrintDebug=false||false||0||false||N
+WriteAdaptiveAuditCSV=false||false||0||false||N
+WriteRegimeResearchCSV=false||false||0||false||N
+
+; --- Broker server time -> Italy conversion ---
+BrokerTimeMode=4||4||0||4||N
+FixedBrokerUTCOffsetHours=0.0||0.0||0||0.0||N
+
+; --- Session controls ---
+NYRTHCloseHourET=16||16||0||16||N
+NYRTHCloseMinuteET=0||0||0||0||N
+ForceCloseAtNYRTHClose=false||false||0||false||N
+AllowNewEntryIfPreviousPositionStillOpen=false||false||0||false||N

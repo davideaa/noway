@@ -7,7 +7,18 @@ operazioni non si alternano, quindi l'abbinamento apertura->chiusura si
 fa per volume e direzione opposta. Con una posizione per strategia e
 volumi calcolati da distanze di stop diverse la coppia e' quasi sempre
 unica: il campo `ambigui` dice quante volte non lo e' stato, e il totale
-attribuito va confrontato con quello del report."""
+attribuito va confrontato con quello del report.
+
+ATTENZIONE, `aperte.pop(cand[-1])` piu' sotto e' una SCELTA, non un
+dettaglio: prende l'apertura piu' recente fra quelle compatibili, cioe'
+LIFO. L'errore n.4 del progetto (vedi docs/CONTINUA-QUI.md) e' nato
+esattamente li': la stima di S3 a +703% veniva da un'attribuzione FIFO,
+il test standalone diede +18%, e passando da FIFO a LIFO il P&L
+attribuito si spostava del 38%. Quando `ambigui` e' 0 la scelta non
+morde, perche' la coppia era unica ogni volta; appena `ambigui` sale,
+quel `[-1]` sta decidendo, e il numero che esce dipende da lui.
+Cambiarlo in `cand[0]` significa passare a FIFO e ottenere un altro
+risultato: se lo si fa, va dichiarato."""
 import re, html
 from collections import namedtuple
 
