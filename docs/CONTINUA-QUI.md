@@ -120,7 +120,11 @@ morte entro 4 ore hanno già colpito lo stop.
 2. **Allineare i rischi nel sorgente.** Le passate sono a 0,65% e 0,98%,
    ma i default nei `.mq5` sono ancora oro 0,70% e nasdaq 1,50%: basta
    un «carica default» per tornare indietro senza accorgersene.
-3. **Demo su Fusion**, un conto solo, due grafici, e lasciar girare
+3. **Demo su Fusion**, un conto solo, **due grafici: uno per l'oro, uno
+   per il nasdaq. L'EA dell'oro va messo una volta sola**, su un
+   grafico qualsiasi: guarda da solo le candele H4 e M30. Messo su due
+   grafici (uno H4 e uno M30) apre ogni segnale due volte, rischio
+   doppio: è successo a Davide il 2026-09-24. Poi lasciar girare
    tre-sei mesi. È l'unico dato nuovo che esiste. Risponde a: gli spread
    e gli slittamenti veri assomigliano ai simulati? e si riesce a
    guardarlo fermo per mesi senza spegnerlo? *(2022 e 2024 sono stati
