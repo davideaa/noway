@@ -147,4 +147,43 @@ confronti multipli.
 
 ## Modifiche successive
 
-(nessuna)
+### Emendamento 1 — 26/09/2026, PRIMA di qualunque test
+
+Motivo: la ricerca delle fonti ha trovato due dati che il protocollo
+originale non prevedeva perché non sapevo esistessero gratis:
+
+- **Nowcast CPI della Cleveland Fed** (ufficiale, pubblicato ogni giorno
+  lavorativo dal 2013-07, storico dei valori *come pubblicati allora*).
+- **Forecast ForexFactory** storico 2007–2026 (dataset raccolto da terzi
+  su GitHub, non ufficiale; il valore è quello mostrato al momento della
+  release, quindi noto prima di T0 ma non necessariamente già a T−3D).
+
+Nessuna statistica sugli esiti era stata ancora calcolata quando questo
+emendamento è stato scritto e committato.
+
+**Ipotesi H2 (economica, con segno dichiarato).** Se il nowcast è più
+caldo del consensus, aumenta la probabilità di una sorpresa calda, e una
+sorpresa calda spinge i rendimenti e il dollaro su e l'oro giù.
+Quindi: `gap_core = nowcast core CPI m/m − forecast FF core CPI m/m`;
+**gap positivo → BEARISH**.
+
+- Regola a zero parametri R3: `gap_core ≥ +0,05` → BEARISH,
+  `gap_core ≤ −0,05` → BULLISH, altrimenti nessun segnale.
+- Nowcast usato: l'ultimo con data < giorno della release (regola
+  prudente: il valore del giorno d si considera noto dalle 23:59 ET di d).
+- Criteri H2, sugli eventi con segnale: almeno 40 segnali, tasso di
+  successo ≥ 55%, test binomiale unilaterale p < 0,05, e tasso ≥ 55%
+  anche sulla sola parte 2020–2026.
+- Controllo del meccanismo (diagnostico, mai una feature): la
+  correlazione fra `gap_core` e la sorpresa realizzata (actual − forecast)
+  deve essere positiva. E un tetto teorico: che accuratezza avrebbe chi
+  conoscesse in anticipo il segno della sorpresa? Serve a capire quanto
+  del risultato è limitato dal target stesso.
+
+**Modello aggiunto M1N**: regressione logistica L2, C = 0,1, set CORE +
+`gap_core` + `gap_headline` + `consensus_core − previous_core`.
+Il set FULL include anche queste feature (NaN prima del 2013, imputati
+con la mediana del training).
+
+Il verdetto primario (§8) resta sul modello scelto in sviluppo fra
+M0–M5, M1N, R1, R2; H2/R3 ha un verdetto suo, riportato separatamente.
