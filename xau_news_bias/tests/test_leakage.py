@@ -81,3 +81,29 @@ def test_guard_rejects_unclosed_bar():
     MarketContext.assert_no_future({"m1": (ok, pd.Timedelta(minutes=1))}, t)
     with pytest.raises(LeakageError):
         MarketContext.assert_no_future({"m1": (df, pd.Timedelta(minutes=1))}, t)
+
+
+def test_phase2_features_invariant_to_future():
+    """Le famiglie di feature della fase 2 non devono vedere nulla dopo il cutoff."""
+    from xnb.phase2 import features2 as F2
+
+    outs = []
+    for seed in (100, 200):
+        ctx, m1, em1 = _world(seed)
+        rng = np.random.default_rng(seed)
+        jpy = em1.copy()
+        spx_h1 = _bars("2022-01-01", 800 * 24, "1h", 21, level=4000.0)
+        ts = pd.Timestamp(T)
+        for df in (jpy, spx_h1):
+            df.loc[df.index >= ts, ["o", "h", "l", "c"]] *= rng.uniform(0.5, 1.5)
+        f = {}
+        f.update(F2.pa_features(ctx, m1, ts))
+        f.update(F2.cross_features({"EURUSD": em1, "USDJPY": jpy}, ts))
+        f.update(F2.relationship_features(ctx, spx_h1, ts))
+        f.update(F2.rates_ext_features(ctx, ts))
+        outs.append(f)
+    fa, fb = outs
+    assert len(fa) > 100
+    for k in fa:
+        a, b = fa[k], fb[k]
+        assert (np.isnan(a) and np.isnan(b)) or a == pytest.approx(b), f"{k} dipende dal futuro: {a} vs {b}"

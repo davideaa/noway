@@ -53,7 +53,11 @@ DIVISOR = {
     "USDSEK": 100000,
     "USDCHF": 100000,
     "USDJPY": 1000,
+    "USA500IDXUSD": 1000,
+    "USATECHIDXUSD": 1000,
 }
+# nomi dell'API jetta per gli strumenti che non sono coppie di valute
+JETTA_NAMES = {"USA500IDXUSD": "USA500.IDX-USD", "USATECHIDXUSD": "USATECH.IDX-USD"}
 TICK_DT = np.dtype([("ms", ">u4"), ("ask", ">u4"), ("bid", ">u4"), ("av", ">f4"), ("bv", ">f4")])
 CANDLE_DT = np.dtype([("t", ">u4"), ("o", ">u4"), ("c", ">u4"), ("l", ">u4"), ("h", ">u4"), ("v", ">f4")])
 
@@ -109,7 +113,7 @@ class DukascopyProvider(MarketDataProvider):
 
     @staticmethod
     def _jsym(symbol: str) -> str:
-        return f"{symbol[:3]}-{symbol[3:]}"
+        return JETTA_NAMES.get(symbol, f"{symbol[:3]}-{symbol[3:]}")
 
     @staticmethod
     def _jetta_candles(js: dict) -> pd.DataFrame:

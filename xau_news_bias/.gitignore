@@ -6,3 +6,6 @@ data/
 *.sqlite-shm
 __pycache__/
 .pytest_cache/
+
+# percorsi tick grezzi (dati Dukascopy): ricostruibili dalla cache, non nel repository
+research_output/phase2/p2_paths.parquet

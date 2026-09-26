@@ -192,3 +192,43 @@ class CFTCProvider(PositioningProvider):
 
         out["available_from_utc"] = [avail(d) for d in out.index]
         return out
+
+
+class NewsIndexProvider(RatesProvider):
+    """Indici giornalieri costruiti dal testo dei giornali, timestampati:
+
+    - EPU (Economic Policy Uncertainty, Baker-Bloom-Davis), policyuncertainty.com,
+      pubblicato il giorno dopo: regola prudente D+2 00:00 ET;
+    - GPR (Geopolitical Risk, Caldara-Iacoviello), matteoiacoviello.com,
+      aggiornato con ~5 giorni di ritardo e a volte ricalcolato: regola D+8.
+
+    Sono l'unico contesto "notizie/geopolitica" riproducibile senza etichette
+    a posteriori: niente classificazioni manuali del tipo "periodo di guerra".
+    """
+
+    source_id = "news_indices"
+    EPU = "https://www.policyuncertainty.com/media/All_Daily_Policy_Data.csv"
+    GPR = "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls"
+
+    def __init__(self):
+        self.cache = _YearCache("news_indices")
+
+    def daily(self, start: date, end: date) -> pd.DataFrame:
+        if not self.cache.fresh("epu.csv", False, max_age_h=24):
+            r = http.get(self.EPU, self.source_id, timeout=90)
+            self.cache.path("epu.csv").write_text(r.text, encoding="utf-8")
+        if not self.cache.fresh("gpr.xls", False, max_age_h=24 * 3):
+            r = http.get(self.GPR, self.source_id, timeout=120)
+            self.cache.path("gpr.xls").write_bytes(r.content)
+        e = pd.read_csv(self.cache.path("epu.csv"))
+        e["d"] = pd.to_datetime(dict(year=e.year, month=e.month, day=e.day)).dt.date
+        e = e.set_index("d")[["daily_policy_index"]].rename(columns={"daily_policy_index": "epu"})
+        g = pd.read_excel(self.cache.path("gpr.xls"))
+        g["d"] = pd.to_datetime(g["date"]).dt.date
+        g = g.set_index("d")[["GPRD", "GPRD_THREAT", "GPRD_ACT"]].rename(
+            columns={"GPRD": "gpr", "GPRD_THREAT": "gpr_threat", "GPRD_ACT": "gpr_act"})
+        e = e.loc[(e.index >= start) & (e.index <= end)].copy()
+        g = g.loc[(g.index >= start) & (g.index <= end)].copy()
+        e["available_from_utc"] = [_avail(d, 0, add_days=2) for d in e.index]
+        g["available_from_utc"] = [_avail(d, 0, add_days=8) for d in g.index]
+        return e.sort_index(), g.sort_index()
