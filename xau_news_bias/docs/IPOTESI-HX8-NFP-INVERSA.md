@@ -25,3 +25,15 @@ Si dà la bias su **tutte** le NFP, senza filtri.
   - **e** l'R medio col trade di Davide è positivo.
 - **Stop anticipato**: se dopo 12 NFP ne ha indovinate 4 o meno, si
   ferma.
+
+## Aggiunta del 26/09/2026, scritta prima di calcolare: il sito solo NFP
+
+Descrittivo, non cambia niente del giudizio dal vivo.
+- Per ogni NFP dal 2014: prezzi veri alle 14:29, 14:30 e 14:31 (ora
+  italiana), trade con lo spread vero, massimo a favore e contro fino
+  all'uscita.
+- **Solo per confronto**: lo stesso trade se lo spread restasse quello
+  delle 14:29 per tutto il minuto. È **ottimistico** (alla news lo spread si
+  allarga sempre) e **non** sostituisce il risultato con lo spread vero, che
+  resta l'unico che conta per il criterio sopra.
+- "Ultimi 3 anni" = NFP dal 2023-10-01 al 2026-09-30.
