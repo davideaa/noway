@@ -126,3 +126,26 @@ File: `research_output/phase2/hx4/`.
 - Gli unici segnali coerenti fra studio e test sono sull'NFP e sulle
   regole CPI+NFP che puntano SHORT dopo sorprese deboli sui salari.
 - Il candidato da seguire dal vivo resta l'NFP.
+
+### Correzione del metodo dei soldi (26/09/2026)
+
+Avevo capito male: Davide non divide per le news rimaste. **Puntata =
+saldo attuale ÷ 24** (le news CPI+NFP di un anno), con l'interesse
+composto, partendo da 10.000. Ricalcolato (`hx4_money_div24.json`):
+
+| Strategia | Da 10.000 a |
+|---|---|
+| Modello NFP 2014–26 | 14.596 |
+| Regole CPI+NFP n.1–5, solo 2020–26 | da 10.614 a 12.637 |
+| Tirando a caso 2014–26 | 3.323 |
+| Sempre LONG 2014–26 | 3.280 |
+
+### Quanto rende il primo minuto
+
+| | Media quando indovini | Mediana quando indovini | Arriva a ≥ 1R | Arriva a ≥ 2R | Media quando sbagli |
+|---|---|---|---|---|---|
+| 2013–23 (60 pips) | +0,50 R | +0,34 R | 19% | 3% | −0,70 R |
+| 2024–26 (100 pips) | +0,93 R | +0,54 R | 32% | 14% | −0,90 R |
+
+I multipli da ×3 a ×10 di cui parla Davide non arrivano entro la chiusura
+della prima M1. Per misurarli serve un'uscita più lunga.
