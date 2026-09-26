@@ -49,3 +49,80 @@ sbagliato. Con una precisione di direzione p:
   indovinare. Quella si misura solo registrando le scelte di Davide
   **prima** delle news e confrontandole con p*.
 - Il test non dice nulla su uscite dopo la prima M1.
+
+## Risultati (eseguito il 26/09/2026, dopo il commit `9febd38` di questo file)
+
+Dati: `research_output/phase2/hx2_setup_davide.json` (tutte le varianti)
+e `hx2_main_trades.csv` (riga principale, trade per trade). Codice:
+`xnb/phase2/setup_davide.py`.
+
+### Riga principale
+
+Ingresso T−60 s, stop 10 $, uscita a fine M1, costi base, perdita tagliata
+a −1R. Parole usate:
+- **Serve indovinare**: la precisione di pareggio.
+- **Tirando a caso**: l'EV con il 50% di direzioni giuste.
+
+| | News | Serve indovinare | Tirando a caso | Al 60% | Lato giusto ≥ 2R |
+|---|---|---|---|---|---|
+| Tutte, 2013–2026 | 302 | **56%** | −0,07 R | +0,04 R | 3% |
+| 2013–19 | 146 | 60% | −0,07 | 0,00 | 0% |
+| 2020–22 | 70 | 61% | −0,10 | −0,01 | 1% |
+| 2023–24 | 47 | 58% | −0,11 | +0,02 | 2% |
+| **2025–26** | 39 | **46%** | **+0,08** | +0,28 | 21% |
+| NFP 2025–26 | 19 | 40% | +0,23 | +0,46 | 21% |
+| CPI 2025–26 | 20 | 54% | −0,06 | +0,10 | 20% |
+
+Per anno la differenza sta quasi tutta nel **2026**:
+
+| | Serve indovinare | Tirando a caso |
+|---|---|---|
+| NFP 2026 (8 news) | 26% | +0,82 R |
+| CPI 2026 (9 news) | 46% | +0,08 R |
+| 2025 | 64% | negativo |
+
+### Incertezza (bootstrap)
+
+- **2025–26, tirando a caso**: +0,08 R, intervallo 95% da −0,19 a +0,37.
+  Senza la sola news migliore (NFP 04/09/2026, +6,7 R) va a 0,00.
+- **Serve indovinare 2025–26**: 46%, intervallo da 36% a 63%.
+- **2023–26 insieme**: tirando a caso −0,03 R; serve indovinare il 52%.
+
+### Da dove viene l'asimmetria
+
+Con uno stop normale (perdita **A**, eseguita al primo prezzo disponibile)
+nel 2025–26 il lato sbagliato perde più di 1R l'**82%** delle volte: il
+prezzo salta lo stop. Lì serve indovinare il **62%**, e tirando a caso si
+perde −0,32 R a news. La perdita tagliata a −1R esiste solo se il conto è
+in full margin e il broker assorbe il salto (protezione dal saldo
+negativo).
+
+### Varianti (tutte riportate, nessuna scelta)
+
+**Tutte le news, perdita tagliata:**
+- serve indovinare fra il **52% e il 58%** con costi base;
+- fra il **60% e il 70%** con costi conservative.
+
+**2025–26:**
+- fra il 37% e il 49% con costi base;
+- fra il 42% e il 54% con costi conservative.
+
+Lo stop da 5 $ è la variante più favorevole negli ultimi anni. Non va
+scelta adesso, dopo averlo visto.
+
+### Conclusione (esplorativa)
+
+- Il setup **non** guadagna da solo sulla storia intera: serve indovinare
+  la direzione almeno il 56% delle volte, il 64% con costi più alti.
+- Negli ultimi due anni, e soprattutto nel 2026, la soglia scende sotto il
+  50%. È quello che Davide ha visto. Però poggia su poche news enormi (tre
+  NFP del 2026 da +5 a +6,7 R) e sulla perdita tagliata dal broker.
+- Il vantaggio, se c'è, è nella **precisione di Davide sulla direzione**.
+  Questa ricerca non la misura: le regole automatiche di price action e
+  i dati macro non vanno oltre il caso (fase 2). Si misura in due modi:
+  1. lo storico MT5 dei suoi trade sulle news;
+  2. le sue scelte LONG/SHORT registrate prima di ogni news, in modo non
+     modificabile, e confrontate con la soglia.
+- **Rischio**: in full margin ogni errore costa tutto il deposito. Con il
+  56% di direzioni giuste, in 50 news c'è il 36% di probabilità di
+  vederne almeno 5 perse di fila (8% di vederne almeno 7).
