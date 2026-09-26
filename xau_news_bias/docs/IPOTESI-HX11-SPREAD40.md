@@ -90,3 +90,21 @@ Scenario S1 (spread max 40 pips), 2014–2026:
 - Registro: `live/hx8_live.jsonl`, creato il 26/09/2026. Prime bias:
   NFP 02/10/2026 LONG, CPI 14/10/2026 LONG (CPI solo informativo).
 - Aggiornamento dopo ogni release: `live/README.md`.
+
+## Emendamento 1 — scritto il 26/09/2026 prima di calcolare S3
+
+Davide chiarisce: i 40 pips contano solo perché lo spread si apre pochi
+secondi prima della news e può toccare lo stop. Non vanno pagati alla
+chiusura.
+
+Nota: S1 non addebitava 40 pips alla chiusura. All'uscita pagava mezzo
+spread del momento, che a fine minuto è in mediana 4 pips (90° percentile
+9–10 pips).
+
+Si aggiunge **S3, spread solo sullo stop**:
+- stop controllato su bid e ask con spread max 40 pips, come in S1;
+- ingresso e uscita al prezzo medio, senza spread né costi;
+- stop preso = −1R.
+
+Il verdetto resta su S1, come scritto prima. S3 si riporta accanto, perché
+è il modo in cui Davide descrive il suo broker.
