@@ -50,7 +50,13 @@ section{display:grid;gap:12px}
 .tile.key{border-color:var(--gold)}
 .tile .v{font:600 26px/1.15 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
 .tile .l{font-size:14px;color:var(--ink2)}
-.edge{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px}
+.edge{display:grid;gap:10px}
+.pt{border-collapse:collapse;width:100%;font-size:14px}
+.pt th,.pt td{padding:6px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+.pt th:first-child,.pt td:first-child{text-align:left}
+.pt thead th{font:600 11px "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border-top:0}
+.pt td .sub{display:block;color:var(--muted);font-size:12px}
+@media (max-width:440px){.pt .cc{display:none}.pt th,.pt td{padding:6px 5px}}
 .ec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;align-content:start}
 .ec.key{border-color:var(--gold)} .ec.ref{opacity:.8}
 .ec .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
@@ -83,7 +89,7 @@ svg text{font-family:"IBM Plex Mono",monospace}
 .list{display:grid;gap:6px}
 details{background:var(--panel);border:1px solid var(--line);border-radius:10px}
 details[open]{border-color:var(--gold)}
-summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:36px 74px 58px 20px 1fr auto;gap:8px;align-items:center;padding:10px 12px;font-size:15px}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:84px 58px 20px 1fr auto;gap:8px;align-items:center;padding:10px 12px;font-size:15px}
 summary::-webkit-details-marker{display:none}
 summary .fm{font:600 11px "IBM Plex Mono",monospace;color:var(--muted)}
 summary .dt{font-family:"IBM Plex Mono",monospace;color:var(--ink2);font-size:14px}
@@ -101,7 +107,7 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 @media (max-width:640px){
   .tiles{grid-template-columns:repeat(2,1fr)}
   .tile .v{font-size:22px}
-  summary{grid-template-columns:26px 68px 48px 14px 1fr auto;gap:5px;font-size:14px;padding:9px 8px}
+  summary{grid-template-columns:76px 50px 16px 1fr auto;gap:5px;font-size:14px;padding:9px 8px}
   summary .dt{font-size:13px}
   .r{min-width:56px;font-size:13px}
   th,td{padding:7px 7px} table{font-size:14px}
@@ -110,32 +116,30 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 
 <div class="wrap">
 <header>
-  <div class="eyebrow">XAUUSD · NFP e CPI · bias prima della news</div>
-  <h1>L'edge c'è solo sull'NFP</h1>
-  <p class="muted">Bias: fai il contrario di come si è mosso l'oro alla release precedente. Il trade: entri alle 14:29, stop 60 pips fino al 2023 e 100 dal 2024, chiudi alle 14:31. Spread come il tuo broker: al massimo 40 pips. Tutti i prezzi vengono dai tick veri.</p>
+  <div class="eyebrow">XAUUSD · solo NFP · bias prima della news</div>
+  <h1>NFP: fai il contrario della NFP precedente</h1>
+  <p class="muted">Se all'ultima NFP l'oro è salito nel primo minuto, stavolta SHORT. Se è sceso, LONG. Entri alle 14:29, stop 60 pips fino al 2023 e 100 dal 2024, chiudi alle 14:31. Spread come il tuo broker: al massimo 40 pips. Tutti i prezzi vengono dai tick veri.</p>
 </header>
 
 <section>
-  <h2>Prossime news</h2>
+  <h2>Prossima NFP</h2>
   <div class="live" id="live"></div>
   <p class="small muted" id="livenote"></p>
 </section>
 
 <section>
-  <h2>Dove c'è edge</h2>
+  <h2>C'è edge?</h2>
   <div class="bar" role="group" aria-label="Spread">
     <span class="lab">Spread</span>
     <div class="seg" id="sSeg"><button data-v="S0" aria-pressed="false">Nessuno</button><button data-v="S1" aria-pressed="true">Max 40 pips</button><button data-v="S2" aria-pressed="false">Dukascopy</button></div>
   </div>
   <div class="edge" id="edge"></div>
-  <p class="small muted">2014–2026. "A caso" = media fra LONG e SHORT sulle stesse news. Vantaggio = R in più a trade rispetto al caso (2014–19 / 2020–26). Il verdetto è con lo spread a 40 pips: edge solo se il vantaggio è positivo in tutti e due i periodi <b>e</b> il trade guadagna.</p>
+  <p class="small muted">"A caso" = media fra LONG e SHORT sulle stesse NFP. Vantaggio = R in più a trade rispetto al caso. Il verdetto è con lo spread a 40 pips: edge se il vantaggio è positivo sia nel 2014–19 sia nel 2020–26 <b>e</b> il trade guadagna.</p>
 </section>
 
 <section>
-  <h2>Tutti i trade</h2>
-  <div class="bar" role="group" aria-label="Scelte">
-    <div class="seg" id="gSeg"><button data-v="NFP" aria-pressed="true">NFP</button><button data-v="CPI" aria-pressed="false">CPI</button><button data-v="ALL" aria-pressed="false">Entrambi</button></div>
-    <div class="seg" id="bSeg"><button data-v="rule" aria-pressed="true">Contrario della precedente</button><button data-v="model" aria-pressed="false">Calcolatore</button></div>
+  <h2>Tutte le NFP</h2>
+  <div class="bar" role="group" aria-label="Periodo">
     <div class="seg" id="pSeg"><button data-v="u3" aria-pressed="true">Ultimi 3 anni</button><button data-v="oos" aria-pressed="false">2020–26</button><button data-v="is" aria-pressed="false">2014–19</button><button data-v="all" aria-pressed="false">Tutto</button></div>
   </div>
   <div class="tiles" id="tiles"></div>
@@ -150,6 +154,7 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
     <li>La regola l'ho trovata guardando questi stessi dati. Nel 2008–13, anni mai usati, sull'NFP non funzionava (49%). La prova vera è dal vivo: dopo 24 NFP servono almeno 15 indovinate e somma R positiva.</li>
     <li>Lo spread a 40 pips è quello che dici tu del tuo broker. Sulle NFP non cambia niente rispetto allo spread Dukascopy: gli stop li prende il prezzo, non lo spread.</li>
     <li>Dati controllati con una seconda fonte (HistData.com): stesse candele, differenza mediana sotto 1 pip.</li>
+    <li>Il CPI è escluso: con la stessa regola indovina il 49% e perde 0,21R a trade. Anche il calcolatore sull'NFP non guadagna (51%, 0,00R a trade).</li>
     <li>Ottobre 2025 non c'è stata la NFP (shutdown). Il 3 aprile 2026 il mercato dell'oro era chiuso (Venerdì Santo).</li>
   </ul>
 </div>
@@ -158,7 +163,7 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 <script>
 const D = /*DATA*/null;
 const EV = D.ev, BINS = D.bins, LIVE = D.live, CAL = D.cal;
-const st = {s:"S1", g:"NFP", b:"rule", p:"u3"};
+const st = {s:"S1", g:"NFP", b:"rule", p:"u3"};  // solo NFP, solo la regola
 const $ = s => document.querySelector(s);
 const NS = "http://www.w3.org/2000/svg";
 const itNum = (v,d=2) => v.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -213,7 +218,7 @@ function niceStep(range, target){
 /* ---------- live ---------- */
 function live(){
   const preds = LIVE.filter(r => r.type==="prediction"), res = LIVE.filter(r => r.type==="result");
-  const open = preds.filter(p => !res.find(r => r.event_id===p.event_id));
+  const open = preds.filter(p => p.family==="NFP" && !res.find(r => r.event_id===p.event_id));
   const box = $("#live"); box.replaceChildren();
   for(const p of open){
     const e = {d: p.t0_utc};
@@ -226,10 +231,10 @@ function live(){
     box.appendChild(c);
   }
   const nfp = res.filter(r => r.family==="NFP"), k = nfp.filter(r => r.hit).length, sR = nfp.reduce((a,r)=>a + r.trade.S1.r, 0);
-  const first = preds.length ? utcOf(preds[0].created_utc) : null;
+  const pn = preds.filter(p => p.family==="NFP"), first = pn.length ? utcOf(pn[0].created_utc) : null;
   $("#livenote").innerHTML = `Ogni bias è scritta prima della news in un registro che non si può modificare (catena di hash), e il sito si aggiorna da solo dopo ogni NFP. ` +
     (nfp.length ? `<b>Dal vivo finora: ${k} indovinate su ${nfp.length} NFP, ${fR1(sR)}.</b>` : `Dal vivo: ancora nessuna NFP, la prima è il 2 ottobre.`) +
-    (first ? ` Prima bias scritta il ${first.toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}.` : "");
+    (first ? ` Prima bias NFP scritta il ${first.toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}.` : "");
   tick();
 }
 function tick(){
@@ -243,28 +248,24 @@ function tick(){
 
 /* ---------- dove c'è edge ---------- */
 function edge(){
-  const rows = [["NFP","rule","NFP","contrario della precedente"],["CPI","rule","CPI","contrario del precedente"],["ALL","rule","Entrambi","contrario della precedente"],
-                ["NFP","model","NFP","calcolatore"],["CPI","model","CPI","calcolatore"],["ALL","model","Entrambi","calcolatore"]];
-  const f2 = v => sgn(v) + Math.abs(v).toFixed(2);
-  let h = "";
-  for(const [g, b, fam, lab] of rows){
-    const base = EV.filter(e => GRP[g].includes(e.f) && !e.live);
-    const t = stats(base, b, st.s), tis = stats(base.filter(PER.is), b, st.s), toos = stats(base.filter(PER.oos), b, st.s);
-    // il verdetto si decide sempre sullo scenario principale S1 (spread max 40 pips), come pre-registrato in H-X11
-    const v1 = stats(base, b, "S1"), is = stats(base.filter(PER.is), b, "S1"), oos = stats(base.filter(PER.oos), b, "S1");
-    let v, key = false;
-    if(is.adv>0 && oos.adv>0 && v1.mean>0.02){ v = `<span class="chip g">edge · da confermare dal vivo</span>`; key = true; }
-    else if(is.adv>0 && oos.adv>0) v = `<span class="chip w">meglio del caso, ma non guadagna</span>`;
-    else v = `<span class="chip b">nessun edge</span>`;
-    h += `<div class="ec${key?" key":""}${b==="model"?" ref":""}"><div class="hd"><div><div class="eyebrow">${fam} · ${t.n} news</div><h3>${lab}</h3></div>${v}</div>
-      <div class="kv4">
-        <div><b>${fPct(t.k/t.n)}</b><span>direzione indovinata</span></div>
-        <div><b>${fPct(t.win/t.n)}</b><span>trade in guadagno</span></div>
-        <div><b class="${t.mean>0?"ok":"ko"}">${fR(t.mean)}</b><span>R atteso a trade · a caso ${fR(t.rnd)}</span></div>
-        <div><b>${fR(t.adv)}</b><span>vantaggio sul caso · ${f2(tis.adv)} / ${f2(toos.adv)}</span></div>
-      </div></div>`;
-  }
-  $("#edge").innerHTML = h;
+  const base = EV.filter(e => e.f==="NFP" && !e.live), b = "rule";
+  const t = stats(base, b, st.s);
+  // il verdetto si decide sempre sullo scenario principale S1 (spread max 40 pips), come pre-registrato in H-X11
+  const v1 = stats(base, b, "S1"), is1 = stats(base.filter(PER.is), b, "S1"), oos1 = stats(base.filter(PER.oos), b, "S1");
+  const ok = is1.adv>0 && oos1.adv>0 && v1.mean>0.02;
+  const v = ok ? `<span class="chip g">sì · da confermare dal vivo</span>` : `<span class="chip b">nessun edge</span>`;
+  const rowsP = [["2014–19 (IS)", PER.is], ["2020–26 (OOS)", PER.oos], ["Ultimi 3 anni", PER.u3], ["Tutto", PER.all]].map(([lab, f]) => {
+    const x = stats(base.filter(f), b, st.s);
+    return `<tr><td>${lab}<span class="sub">${x.n} NFP</span></td><td class="num">${fPct(x.k/x.n)}</td><td class="num ${x.mean>0?"ok":"ko"}">${fR(x.mean)}</td><td class="num cc">${fR(x.rnd)}</td><td class="num">${fR(x.adv)}</td></tr>`;
+  }).join("");
+  $("#edge").innerHTML = `<div class="ec key"><div class="hd"><div><div class="eyebrow">NFP · ${t.n} news dal 2014</div><h3>contrario della NFP precedente</h3></div>${v}</div>
+    <div class="kv4">
+      <div><b>${fPct(t.k/t.n)}</b><span>direzione indovinata</span></div>
+      <div><b>${fPct(t.win/t.n)}</b><span>trade in guadagno</span></div>
+      <div><b class="${t.mean>0?"ok":"ko"}">${fR(t.mean)}</b><span>R atteso a trade · a caso ${fR(t.rnd)}</span></div>
+      <div><b>${fR(t.adv)}</b><span>vantaggio sul caso a trade</span></div>
+    </div>
+    <div style="overflow-x:auto"><table class="pt"><thead><tr><th>Periodo</th><th>Direzione</th><th>R a trade</th><th class="cc">A caso</th><th>Vantaggio</th></tr></thead><tbody>${rowsP}</tbody></table></div></div>`;
 }
 
 /* ---------- tiles e R accumulato ---------- */
@@ -304,12 +305,12 @@ function cum(){
 /* ---------- lista ---------- */
 function list(){
   const rows = rowsNow().filter(e => e[st.b]).slice().reverse(), s = stats(rows, st.b, st.s);
-  $("#cnt").textContent = `${rows.length} news, dalla più recente. Indovinate ${s.k}, in guadagno ${s.win}. Tocca una riga per aprire il grafico.`;
+  $("#cnt").textContent = `${rows.length} NFP, dalla più recente. Indovinate ${s.k}, in guadagno ${s.win}. Tocca una riga per aprire il grafico.`;
   const box = $("#list"); box.replaceChildren();
   for(const e of rows){
     const d = document.createElement("details"); d.dataset.id = e.id;
     const b = e[st.b], h = hit(e, st.b), tr = e.sc[st.s][b[0]];
-    d.innerHTML = `<summary><span class="fm">${e.f}${e.live?"·live":""}</span><span class="dt">${fDate(e, true)}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips</span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
+    d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips</span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
     d.addEventListener("toggle", () => { if(d.open) openRow(d, e); });
     box.appendChild(d);
   }
@@ -450,7 +451,7 @@ function seg(id, key, fn){
 function lower(){ tiles(); cum(); list(); }
 function redrawOpen(){ document.querySelectorAll("#list details[open]").forEach(d => { const e = EV.find(x => x.id===d.dataset.id); chart(d.querySelector("svg"), e, d.dataset.v); }); }
 seg("#sSeg", "s", () => { edge(); lower(); });
-seg("#gSeg", "g", lower); seg("#bSeg", "b", lower); seg("#pSeg", "p", lower);
+seg("#pSeg", "p", lower);
 live(); setInterval(tick, 1000);
 edge(); lower();
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { cum(); redrawOpen(); }, 150); });

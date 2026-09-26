@@ -20,6 +20,9 @@ python3.11 -m venv ../venv-xnb && ../venv-xnb/bin/pip install -r requirements.tx
 ../venv-xnb/bin/python -m pytest -q
 ```
 
+Il sito mostra solo l'NFP (richiesta di Davide del 26/09/2026); il registro continua a
+scrivere anche le bias CPI, solo per informazione.
+
 Poi si ripubblica `docs/replay.html` sullo stesso artifact
 (https://claude.ai/artifact/KiFQgHyA9Aqqs5G9x7LEpV) e si fa commit e push.
 
