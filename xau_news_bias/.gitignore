@@ -1,0 +1,8 @@
+# dati scaricati, database, modelli e log: locali, mai nel repository
+data/
+.env
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+__pycache__/
+.pytest_cache/
