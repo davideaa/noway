@@ -37,3 +37,24 @@ Descrittivo, non cambia niente del giudizio dal vivo.
   allarga sempre) e **non** sostituisce il risultato con lo spread vero, che
   resta l'unico che conta per il criterio sopra.
 - "Ultimi 3 anni" = NFP dal 2023-10-01 al 2026-09-30.
+
+### Risultati del sito (dopo l'aggiunta sopra)
+
+File: `research_output/phase2/hx8/nfp_summary.json`. Codice:
+`scripts/hx8_nfp_site.py`. Sito: `docs/replay.html` (la versione con CPI
+e NFP resta in `docs/replay_cpi_nfp.html`).
+
+| Periodo | NFP | Indovinate | Somma R | In guadagno | Stop presi | Da 10.000 | Somma R, spread fermo |
+|---|---|---|---|---|---|---|---|
+| IS 2014–19 | 71 | 44 (62%) | +2,1 | 37 | 21 | 10.365 | +2,4 |
+| OOS 2020–26 | 77 | 46 (60%) | +16,8 | 42 | 23 | 18.028 | +17,3 |
+| Ultimi 3 anni (2023-10 → 2026-09) | 34 | 21 (62%) | **+17,7** | 19 | 9 | 19.191 | +18,1 |
+| Tutto 2014–26 | 148 | 90 (61%) | +18,9 | 79 | 44 | 18.685 | +19,7 |
+
+- Ultimi 3 anni: 34 NFP e non 36. A ottobre 2025 la NFP non è uscita
+  (shutdown). Il 3 aprile 2026 era Venerdì Santo: mercato dell'oro chiuso,
+  nessun tick.
+- Lo spread della news quasi non cambia il risultato delle NFP: gli stop
+  presi sono gli stessi con lo spread vero e con lo spread fermo.
+- Quasi tutto l'utile viene dagli ultimi 3 anni, quando l'oro si muove di
+  più: nell'IS la regola indovina il 62% ma fa solo +2,1 R in 71 trade.
