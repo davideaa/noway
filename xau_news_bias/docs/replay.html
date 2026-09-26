@@ -99,6 +99,11 @@ summary .mv small{display:block;font-size:12px;color:var(--muted)}
 .r{display:inline-block;min-width:66px;text-align:right;padding:1px 8px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:14px}
 .r.w{background:var(--good-bg);color:var(--good)} .r.l{background:var(--bad-bg);color:var(--bad)} .r.n{background:var(--none-bg);color:var(--muted)}
 .body{padding:0 12px 14px;display:grid;gap:12px}
+details.yr>summary{grid-template-columns:52px 1fr auto}
+details.yr>.body{padding:0 8px 10px;gap:6px}
+details.nf{background:var(--bg)}
+.money{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--ink2)}
+.money b{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink)}
 .kv{display:grid;grid-template-columns:1fr auto;gap:0 12px;font-size:15px}
 .kv>*{padding:6px 0;border-bottom:1px solid var(--line)}
 .kv b{font-family:"IBM Plex Mono",monospace;font-weight:500;text-align:right}
@@ -141,23 +146,21 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 </section>
 
 <section>
-  <h2>I soldi col tuo metodo</h2>
-  <div class="bar"><label class="small muted" for="budget">Budget all'anno</label>
-    <input id="budget" type="number" min="100" step="100" value="3000" inputmode="numeric" style="font:600 15px 'IBM Plex Mono',monospace;width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)"></div>
-  <p class="small muted">Ogni anno riparti dal budget. A ogni NFP rischi: cassa ÷ NFP rimaste nell'anno (gennaio 12, dicembre 1). Full margin: se va male perdi la puntata, se va bene guadagni puntata × R. Quando il profitto dell'anno arriva al budget, metti via il budget e rischi solo il profitto. Stesso spread scelto sopra.</p>
-  <div class="tiles" id="mtiles"></div>
-  <div class="list" id="mlist"></div>
-</section>
-
-<section>
-  <h2>Tutte le NFP</h2>
+  <h2>Risultati</h2>
   <div class="bar" role="group" aria-label="Periodo">
     <div class="seg" id="pSeg"><button data-v="u3" aria-pressed="true">Ultimi 3 anni</button><button data-v="oos" aria-pressed="false">2020–26</button><button data-v="is" aria-pressed="false">2014–19</button><button data-v="all" aria-pressed="false">Tutto</button></div>
   </div>
   <div class="tiles" id="tiles"></div>
   <div class="panel"><div class="legend" id="cumleg" style="margin-bottom:6px"></div><svg id="cum" role="img" aria-label="R accumulato, bias contro caso"></svg></div>
-  <p class="small muted" id="cnt"></p>
-  <div class="list" id="list"></div>
+</section>
+
+<section>
+  <h2>Anno per anno</h2>
+  <div class="bar"><label class="small muted" for="budget">Budget all'anno</label>
+    <input id="budget" type="number" min="100" step="100" value="3000" inputmode="numeric" style="font:600 15px 'IBM Plex Mono',monospace;width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)"></div>
+  <p class="small muted">Col tuo metodo: ogni anno riparti dal budget e a ogni NFP rischi cassa ÷ NFP rimaste nell'anno (gennaio 12, dicembre 1). Quando il profitto arriva al budget, metti via il budget e rischi solo il profitto. Tocca un anno, poi una NFP per vedere il grafico.</p>
+  <div class="tiles" id="mtiles"></div>
+  <div class="list" id="ylist"></div>
 </section>
 
 <div class="note">
@@ -327,22 +330,21 @@ function rangeOf(e){  // candela della news sul bid vero, dal minimo al massimo,
   const vs = e.sc.S2.c.filter((v,j) => v && BINS[j]>=0 && BINS[j]<60);
   return Math.round((Math.max(...vs.map(v=>v[1])) - Math.min(...vs.map(v=>v[2])))/10);
 }
-function list(){
-  const rows = rowsNow().filter(e => e[st.b]).slice().reverse(), s = stats(rows, st.b, st.s);
-  $("#cnt").textContent = `${rows.length} NFP, dalla più recente. Indovinate ${s.k}, in guadagno ${s.win}. Tocca una riga per aprire il grafico.`;
-  const box = $("#list"); box.replaceChildren();
-  for(const e of rows){
-    const d = document.createElement("details"); d.dataset.id = e.id;
-    const b = e[st.b], h = hit(e, st.b), tr = e.sc[st.s][b[0]];
-    d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips<small>candela ${rangeOf(e)}</small></span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
-    d.addEventListener("toggle", () => { if(d.open) openRow(d, e); });
-    box.appendChild(d);
-  }
-  const first = box.querySelector("details"); if(first) first.open = true;
+function nfRow(e, o){  // una NFP dentro il suo anno: riga compatta che si apre sul grafico
+  const d = document.createElement("details"); d.className = "nf"; d.dataset.id = e.id;
+  const b = e.rule, h = hit(e, "rule"), tr = e.sc[st.s][b[0]];
+  d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips<small>candela ${rangeOf(e)}</small></span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
+  d.addEventListener("toggle", () => { if(d.open) openRow(d, e, o); });
+  return d;
 }
-function openRow(d, e){
+function openRow(d, e, o){
   const body = d.querySelector(".body"); body.replaceChildren();
   d.dataset.v = d.dataset.v || "m1";
+  if(o){
+    const m = document.createElement("div"); m.className = "money";
+    m.innerHTML = `<span>Rischio <b>${fMoney(o.punt)}</b> (cassa ÷ ${o.rim})</span><span>Risultato <b class="${o.pl>0?"ok":"ko"}">${o.pl>=0?"+":"−"}${fMoney(Math.abs(o.pl))}</b></span><span>Cassa <b>${fMoney(o.cassa)}</b>${o.nota ? ` · ${o.nota}` : ""}</span>`;
+    body.appendChild(m);
+  }
   const svg = document.createElementNS(NS, "svg"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `Grafico ${e.f} ${fDate(e)}`);
   const tg = document.createElement("div"); tg.className = "seg"; tg.style.justifySelf = "start";
   tg.innerHTML = `<button data-v="m1">Candele 1 minuto</button><button data-v="s5">5 secondi</button>`;
@@ -477,24 +479,32 @@ function moneyYear(trades, B){
 }
 function money(){
   const B = Math.max(100, Number($("#budget").value) || 3000);
-  const ev = EV.filter(e => e.f==="NFP" && e.rule && e.mv!==0 && !e.live);
+  const ev = EV.filter(e => e.f==="NFP" && e.rule && e.mv!==0 && !e.live);  // i trade live si aggiungono sotto
+  ev.push(...EV.filter(e => e.f==="NFP" && e.rule && e.mv!==0 && e.live));
   const years = [...new Set(ev.map(e => e.y))].sort();
   const res = years.map(y => ({y, ...moneyYear(ev.filter(e => e.y===y), B)}));
   const last3 = res.filter(x => x.y >= 2024), tot = res.reduce((a,x) => a + x.prof, 0), l3 = last3.reduce((a,x) => a + x.prof, 0);
   const zero = res.filter(x => x.fine < 1).length;
   $("#mtiles").innerHTML = [
-    [(l3>=0?"+":"−")+fMoney(Math.abs(l3)), "profitto 2024–2026 (2026 fino a settembre)", true],
+    [(l3>=0?"+":"−")+fMoney(Math.abs(l3)), `profitto 2024–${res[res.length-1].y} (fino al ${fDate(ev[ev.length-1])})`, true],
     [(tot>=0?"+":"−")+fMoney(Math.abs(tot)), `profitto dal 2014 (${res.length} anni)`, false],
     [`${res.filter(x => x.prof>0).length}/${res.length}`, "anni chiusi in guadagno", false],
     [`${zero}`, "anni in cui perdi tutto il budget", false],
   ].map(([v,l,k]) => `<div class="tile${k?" key":""}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
-  const box = $("#mlist"); box.replaceChildren();
+  const openY = [...document.querySelectorAll("#ylist details.yr[open]")].map(d => d.dataset.y);
+  const openN = [...document.querySelectorAll("#ylist details.nf[open]")].map(d => d.dataset.id);
+  const box = $("#ylist"); box.replaceChildren();
   for(const x of res.slice().reverse()){
-    const d = document.createElement("details");
-    const rows = x.rows.map(o => `<tr><td>${fDate(o.e, true)}</td><td class="num rim">${o.rim}</td><td class="num">${fMoney(o.punt)}</td><td class="num ${o.r>0?"ok":"ko"}">${fR(o.r)}</td><td class="num ${o.pl>0?"ok":"ko"}">${o.pl>=0?"+":"−"}${fMoney(Math.abs(o.pl))}</td><td class="num">${fMoney(o.cassa)}${o.nota?`<span class="sub">${o.nota}</span>`:""}</td></tr>`).join("");
-    d.innerHTML = `<summary style="grid-template-columns:60px 1fr auto"><span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · fine anno ${fMoney(x.fine)}</span><span class="r ${cls(x.prof)}">${x.prof>=0?"+":"−"}${fMoney(Math.abs(x.prof))}</span></summary>
-      <div class="body"><div style="overflow-x:auto"><table class="pt mt"><thead><tr><th>NFP</th><th class="rim">Rimaste</th><th>Rischio</th><th>R</th><th>Risultato</th><th>Cassa</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    const d = document.createElement("details"); d.className = "yr"; d.dataset.y = x.y;
+    const k = x.rows.filter(o => hit(o.e, "rule")).length, sR = x.rows.reduce((a,o) => a + o.r, 0);
+    d.innerHTML = `<summary><span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · ${k} indovinate<small>${fR1(sR)} · fine anno ${fMoney(x.fine)}</small></span><span class="r ${cls(x.prof)}">${x.prof>=0?"+":"−"}${fMoney(Math.abs(x.prof))}</span></summary><div class="body"></div>`;
+    d.addEventListener("toggle", () => {
+      const body = d.querySelector(".body");
+      if(!d.open || body.childElementCount) return;
+      for(const o of x.rows){ const n = nfRow(o.e, o); body.appendChild(n); if(openN.includes(o.e.id)) n.open = true; }
+    });
     box.appendChild(d);
+    if(openY.length ? openY.includes(String(x.y)) : x === res[res.length-1]) d.open = true;
   }
 }
 
@@ -506,8 +516,8 @@ function seg(id, key, fn){
     fn();
   });
 }
-function lower(){ tiles(); cum(); list(); }
-function redrawOpen(){ document.querySelectorAll("#list details[open]").forEach(d => { const e = EV.find(x => x.id===d.dataset.id); chart(d.querySelector("svg"), e, d.dataset.v); }); }
+function lower(){ tiles(); cum(); }
+function redrawOpen(){ document.querySelectorAll("#ylist details.nf[open]").forEach(d => { const e = EV.find(x => x.id===d.dataset.id); chart(d.querySelector("svg"), e, d.dataset.v); }); }
 seg("#sSeg", "s", () => { edge(); money(); lower(); });
 $("#budget").addEventListener("input", money);
 seg("#pSeg", "p", lower);
