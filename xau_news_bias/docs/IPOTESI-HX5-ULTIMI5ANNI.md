@@ -57,3 +57,51 @@ il LONG, ask per lo SHORT) più mezzo spread di slittamento.
 
 Puntata = saldo ÷ 24, interesse composto, da 10.000, sullo studio e sul
 test separatamente.
+
+## Risultati (eseguito dopo i commit della pre-registrazione e del codice)
+
+File: `research_output/phase2/hx5/hx5_results.json`.
+
+- 116 news: 71 di studio, 45 di test.
+- Ricerca: circa 1,8 milioni di ipotesi per uscita, 1.000 permutazioni
+  ciascuna.
+
+### Senza regole
+
+Precisione di pareggio, "tirando a caso" e "sempre LONG" in R a news.
+
+| Uscita | Studio: serve | Studio: a caso | Test: serve | Test: a caso | Test: sempre LONG |
+|---|---|---|---|---|---|
+| E1 fine 1° minuto | 54% | −0,07 | 48% | +0,03 | +0,28 |
+| E2 5 minuti | 55% | −0,09 | 47% | +0,06 | +0,40 |
+| E3 15 minuti | 52% | −0,04 | 48% | +0,03 | +0,39 |
+| E4 take profit 2R | 55% | −0,08 | 62% | −0,18 | +0,09 |
+| E5 take profit 3R | 54% | −0,07 | 54% | −0,07 | +0,28 |
+
+- Nello studio "sempre LONG" fa da −0,12 a −0,08 R: il guadagno del test
+  viene dal rialzo dell'oro 2024–26, non dalla news.
+- **Soldi nel test** (saldo ÷ 24, da 10.000):
+  - sempre LONG: da 11.319 (E4) a 18.728 (E2);
+  - tirando a caso: da 6.995 a 10.913;
+  - sempre SHORT: da 4.035 a 6.143.
+
+### Regole
+
+- Nello studio **tutte le 15 candidate hanno vinto 12 trade su 12**, ma
+  nessuna batte il caso: p familywise fra 0,15 e 0,97.
+- Nel test **13 su 15 perdono**, da −0,24 a −1,00 R:
+  - una è in pari (E4-R2, +0,01 R);
+  - una è positiva (E3-R3, LONG, +0,76 R su 8 trade, p 0,23).
+  - Holm: tutte 1,00.
+- Soldi nel test: da 6.941 a 12.323.
+
+### Conclusione
+
+- Con 71 news di studio ogni ricerca trova combinazioni perfette per caso.
+  I due anni dopo lo confermano: 13 regole su 15 perdono.
+- Negli ultimi due anni l'unica cosa che ha reso è stata stare LONG, cioè
+  seguire il rialzo dell'oro. Un'uscita a 5–15 minuti ha reso più
+  dell'uscita al primo minuto; i take profit a 2R e 3R hanno reso meno.
+- Classe: **NO EVIDENCE** per le regole. La precisione di pareggio del
+  2024–26 (47–48%) conferma che il setup di Davide chiede poco, ma resta da
+  trovare chi indovina la direzione.
