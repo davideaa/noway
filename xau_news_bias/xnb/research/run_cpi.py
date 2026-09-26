@@ -254,6 +254,27 @@ def magnitude_analysis(u: pd.DataFrame) -> dict:
     return out
 
 
+def feature_importance(u: pd.DataFrame) -> dict:
+    """Quanto pesa ogni feature nei modelli addestrati su tutto lo storico (T-1H).
+
+    Attenzione: "importanza" = quanto il modello usa la feature, NON quanto
+    prevede. Un modello senza capacità fuori campione ha comunque feature
+    "importanti"."""
+    from .models import make_model
+
+    cols = list(u.columns)
+    out = {}
+    m2 = make_model("M2", cols, len(u)).fit(u, u["y"].to_numpy())
+    coef = m2.est[-1].coef_[0]
+    out["M2_logistic_std_coef"] = sorted(
+        [{"feature": c[2:], "value": float(v)} for c, v in zip(m2.cols, coef)], key=lambda r: -abs(r["value"]))[:25]
+    m3 = make_model("M3", cols, len(u)).fit(u, u["y"].to_numpy())
+    imp = m3.est[-1].feature_importances_
+    out["M3_forest_impurity"] = sorted(
+        [{"feature": c[2:], "value": float(v)} for c, v in zip(m3.cols, imp)], key=lambda r: -r["value"])[:25]
+    return out
+
+
 def checkpoint_stability(preds_by_cp: dict[str, pd.DataFrame]) -> dict:
     base = preds_by_cp.get(PRIMARY_CHECKPOINT)
     if base is None or base.empty:
@@ -390,6 +411,7 @@ def run(df: pd.DataFrame, dataset_hash: str, n_perm: int = 1000, n_explore_perm:
     res["surprise_ceiling"] = surprise_ceiling(u1)
     res["univariate"] = univariate_screen(u1)
     res["magnitude"] = magnitude_analysis(u1)
+    res["feature_importance"] = feature_importance(u1)
     res["feature_list"] = [c[2:] for c in full_features(u1)]
     res["feature_coverage"] = {c[2:]: float(u1[c].notna().mean()) for c in full_features(u1)}
     # previsioni OOS del modello scelto (per il Research Lab e l'analisi degli errori)

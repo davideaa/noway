@@ -83,3 +83,8 @@ details summary { cursor: pointer; color: var(--text-2); }
 h3 { margin: 0 0 8px; font-size: 16px; }
 p { margin: 6px 0; }
 .stat { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.btn { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--text); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+svg[role="img"] { width: 100%; max-width: 720px; height: auto; display: block; }
+svg[role="img"] text { fill: var(--text-2); font-size: 11px; }
+svg[role="img"] .grid line { stroke: var(--line); }

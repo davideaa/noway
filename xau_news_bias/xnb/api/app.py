@@ -10,6 +10,7 @@ import json
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -70,6 +71,25 @@ def _latest_pred(con, event_id: str, full: bool = True) -> dict | None:
     return d
 
 
+def _next_recalc(ev: dict, pred: dict | None, now):
+    """Quando lo scheduler ricalcolerà questo evento (cadenza o checkpoint, il primo dei due)."""
+    from ..live.engine import MODELLED, cadence_seconds
+
+    t0 = parse_iso(ev["t0_utc"])
+    tau = (t0 - now).total_seconds()
+    if tau <= 0:
+        return None
+    cps = [t0 - timedelta(seconds=s) for s in CHECKPOINTS.values() if t0 - timedelta(seconds=s) > now]
+    nxt_cp = min(cps) if cps else None
+    if tau > 7 * 86400:
+        return iso(t0 - timedelta(days=7))
+    if ev["family"] not in MODELLED:
+        return iso(nxt_cp) if nxt_cp else None
+    last = parse_iso(pred["prediction_utc"]) if pred else now
+    rolling = max(now, last + timedelta(seconds=cadence_seconds(tau)))
+    return iso(min(rolling, nxt_cp) if nxt_cp else rolling)
+
+
 @app.get("/api/overview")
 def overview():
     now = utc_now()
@@ -109,6 +129,8 @@ def overview():
         "next_recalc_utc": iso(svc.next_step()) if svc and svc.next_step() else None,
         "sources_warning": [{"id": s["id"], "state": s["state"], "detail": s["detail"]} for s in bad],
         "research_verdict": (research or {}).get("verdict"),
+        "auto_from_utc": iso(parse_iso(nxt["t0_utc"]) - timedelta(days=7)) if nxt else None,
+        "next_event_recalc_utc": _next_recalc(nxt, pred, now) if nxt else None,
     }
 
 
@@ -185,10 +207,13 @@ def recalculate():
     svc = SERVICE["svc"]
     if not svc:
         raise HTTPException(503, "scheduler non attivo")
+    from ..live.engine import MODELLED
+
     now = utc_now()
     out = []
-    for ev in svc.engine.upcoming(horizon_days=7):
-        if parse_iso(ev["t0_utc"]) > now:
+    for ev in svc.engine.upcoming(horizon_days=35):
+        t0 = parse_iso(ev["t0_utc"])
+        if t0 > now and (ev["family"] in MODELLED or (t0 - now).days < 7):
             out.append(svc.engine.predict(ev, now, "MANUAL")["id"])
     return {"recalculated": out}
 

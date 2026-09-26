@@ -64,11 +64,15 @@ def regimes(f: dict) -> list[dict]:
 def headline(pred: dict, research: dict | None) -> str:
     bias = pred.get("bias")
     if bias == "NO RELIABLE EDGE":
-        v = (research or {}).get("holdout", {}).get("metrics", {})
-        acc = v.get("accuracy")
-        return ("Il protocollo pre-registrato non ha trovato un vantaggio statistico affidabile per questa release: "
-                f"fuori campione il modello scelto ha indovinato il {_f((acc or 0) * 100, 0)}% delle volte, "
-                "un risultato compatibile con il caso. Per questo la direzione non viene mostrata come previsione.")
+        ho = (research or {}).get("holdout", {})
+        v = ho.get("metrics", {})
+        acc, base = v.get("accuracy"), v.get("base_rate_up")
+        pp = ho.get("permutation", {}).get("p_value")
+        return ("Il protocollo pre-registrato non ha trovato un vantaggio statistico affidabile per questa release. "
+                f"Sui CPI mai usati per sceglierlo il modello ha indovinato il {_f((acc or 0) * 100, 0)}% delle volte, "
+                f"ma in quel periodo l'oro è salito nel primo minuto il {_f((base or 0) * 100, 0)}% delle volte: "
+                f"è quanto avrebbe fatto dicendo sempre \"sale\" (test di permutazione p = {_f(pp)}). "
+                "Per questo la direzione non viene mostrata come previsione.")
     if bias == "NO MODEL":
         return "Per questa famiglia di release la ricerca non è ancora stata fatta: nessun modello, nessuna previsione."
     if bias == "NO DATA":

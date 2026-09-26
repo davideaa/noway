@@ -81,3 +81,25 @@ conta qualcosa.
 
 Rigenerare un report:
 `python3 tools/report_finale.py <report.html> --rischio 1.05 --due`
+
+---
+
+# Secondo progetto: XAU NEWS BIAS (`xau_news_bias/`)
+
+Web app locale + motore quantitativo che prova a prevedere, **prima** di
+una release USA ad alto impatto, la direzione della prima M1 di XAUUSD.
+Python (FastAPI, SQLite, scikit-learn/LightGBM), nessuna dipendenza da
+Claude in produzione. Chi riprende parta da `xau_news_bias/README.md` e
+`xau_news_bias/docs/RISULTATI-CPI.md`.
+
+- **Verdetto CPI (set. 2026): NO RELIABLE EDGE.** Protocollo
+  pre-registrato in `docs/PROTOCOLLO-CPI.md` (emendamenti datati, tutti
+  prima dei test). L'holdout 2020–2026 è già stato guardato: non si
+  riusa per scegliere modelli nuovi.
+- Tetto teorico: anche conoscendo il segno della sorpresa si indovina la
+  prima M1 solo il ~73% delle volte. Il movimento (range) invece si
+  prevede (Spearman 0,57).
+- Stesse regole del progetto MQL5: criteri prima dei test, errori
+  dichiarati, niente numeri ammorbiditi. `pytest` deve restare verde
+  (contiene il test anti-leakage e quello di immutabilità del track record).
+- Le previsioni live sono append-only con catena di hash: mai modificarle.

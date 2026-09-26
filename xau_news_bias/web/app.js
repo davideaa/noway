@@ -127,7 +127,7 @@ async function loadDash() {
       ["Affidabilità storica della fascia", p.prob_ci_low != null ? `${pct(p.prob_ci_low)} – ${pct(p.prob_ci_high)} (IC 95%)` : "n/d"],
       ["Modello", `${esc(p.model_version || "—")} ${extra.algo ? "· " + esc(extra.algo) : ""} ${extra.submodel_checkpoint ? "· sottomodello " + esc(extra.submodel_checkpoint) : ""}`],
       ["Ultimo aggiornamento", fmtTime(p.prediction_utc)],
-      ["Prossimo ricalcolo", fmtTime(o.next_recalc_utc)],
+      ["Prossimo ricalcolo", fmtTime(o.next_event_recalc_utc)],
     ];
     $("#kv").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
     const mv = extra.movement || {};
@@ -144,8 +144,8 @@ async function loadDash() {
       (o.sources_warning.length ? "<p class=\"small\">Fonti critiche: " + o.sources_warning.map((s) => `${esc(s.id)} ${statusPill(s.state)}`).join(" ") + "</p>" : "");
   } else {
     b.textContent = "—"; b.className = "bias NONE";
-    $("#headline").textContent = ev ? "Previsione non ancora calcolata: lo scheduler la produrrà al prossimo ciclo." : "";
-    $("#kv").innerHTML = `<dt>Prossimo ricalcolo</dt><dd>${fmtTime(o.next_recalc_utc)}</dd>`;
+    $("#headline").textContent = ev ? `Previsioni automatiche da ${fmtTime(o.auto_from_utc)} (7 giorni prima), poi sempre più fitte fino alla release. Puoi anche calcolarla ora.` : "";
+    $("#kv").innerHTML = `<dt>Prossimo ricalcolo</dt><dd>${fmtTime(o.next_event_recalc_utc)}</dd>`;
   }
   // timeline
   if (o.timeline) {
@@ -249,13 +249,28 @@ async function loadLab() {
     <p>${h2.signals} segnali su ${h2.events_with_gap} eventi con nowcast; direzione giusta ${h2.hits} volte (${pct(h2.hit_rate, 1)}, IC ${pct(h2.wilson[0], 0)}–${pct(h2.wilson[1], 0)}), p = ${num(h2.binom_p, 3)}. Holdout: ${pct(h2.holdout_hit_rate, 1)} su ${h2.holdout_signals}.</p>
     <p class="small muted">Meccanismo: correlazione fra scarto e sorpresa realizzata ρ = ${num((h2.mechanism_spearman_gap_vs_surprise || {}).rho)} (p ${num((h2.mechanism_spearman_gap_vs_surprise || {}).p, 3)}); lo scarto indovina il segno della sorpresa il ${pct((h2.gap_predicts_surprise_sign || {}).hit_rate, 0)} delle volte.</p></div>
     <div class="card"><div class="label">TETTO TEORICO — SE SI CONOSCESSE LA SORPRESA IN ANTICIPO</div>
-    <p>Sapendo il segno della sorpresa (actual − consensus FF) la direzione della prima M1 si indovina il <b>${pct((sc.combined || {}).hit_rate, 1)}</b> delle volte (${(sc.combined || {}).n} eventi). Con sorprese ≥ 0,2 punti: ${pct((sc["combined_abs_ge_0.2"] || {}).hit_rate, 0)} (${(sc["combined_abs_ge_0.2"] || {}).n}). Release in linea: ${(sc.in_line_releases || {}).n} eventi, ${pct((sc.in_line_releases || {}).bullish_share, 0)} bullish.</p>
+    <p>Sapendo il segno della sorpresa (actual − consensus FF) la direzione della prima M1 si indovina il <b>${pct((sc.combined || {}).hit_rate, 1)}</b> delle volte (${(sc.combined || {}).n} eventi): ${pct((sc.combined_move_ge_20_pips || {}).hit_rate, 0)} quando l'oro si muove di almeno 20 pips, solo ${pct((sc.combined_move_lt_20_pips || {}).hit_rate, 0)} quando si muove meno. Release in linea: ${(sc.in_line_releases || {}).n} eventi, ${pct((sc.in_line_releases || {}).bullish_share, 0)} bullish.</p>
     <p class="small muted">È informazione post-release, usata solo come diagnostica: dice quanto è prevedibile il target nel migliore dei casi.</p></div></div>`;
   // magnitude
   const mg = r.magnitude;
   h += `<div class="card"><div class="label">MOVIMENTO (NON DIREZIONE): È PREVEDIBILE?</div>
     <p>Range della prima M1 in unità di ATR H1: mediana ${num(mg.range_atr_median)}. Previsione walk-forward (mediana storica × ATR attuale) contro il realizzato: Spearman ρ = ${num(mg.spearman_pred_vs_actual)} su ${mg.oos_n} eventi (p ${num(mg.p, 4)});
     ${pct(mg.share_within_50pct, 0)} dei casi entro ±50% della stima. Errore log mediano ${num(mg.median_abs_log_error_atr_model)} contro ${num(mg.median_abs_log_error_naive_pips)} della mediana fissa in pips.</p></div>`;
+  // feature importance
+  const fi = r.feature_importance || {};
+  if (fi.M2_logistic_std_coef) {
+    const row = (x) => `<tr><td>${esc(x.feature)}</td><td class="num">${num(x.value, 3)}</td></tr>`;
+    h += `<div class="grid2"><div class="card"><div class="label">FEATURE IMPORTANCE — M2 (coefficienti standardizzati)</div><div class="table-wrap"><table class="tbl">${fi.M2_logistic_std_coef.slice(0, 12).map(row).join("")}</table></div></div>
+      <div class="card"><div class="label">FEATURE IMPORTANCE — M3 (random forest)</div><div class="table-wrap"><table class="tbl">${fi.M3_forest_impurity.slice(0, 12).map(row).join("")}</table></div></div></div>
+      <p class="small muted">Importanza = quanto il modello usa una feature, non quanto prevede: fuori campione nessun modello batte il caso, quindi queste classifiche non indicano segnali affidabili.</p>`;
+  }
+  if (r.posthoc_train_from_2013) {
+    const ph = r.posthoc_train_from_2013;
+    h += `<div class="card"><div class="label">CONTROLLO POST-HOC — ADDESTRAMENTO SOLO DAL 2013 (ESPLORATIVO, NON PRE-REGISTRATO)</div><div class="table-wrap"><table class="tbl">
+      <tr><th>Modello</th><th class="num">Acc. holdout</th><th class="num">Balanced acc.</th><th class="num">AUC</th><th class="num">Brier</th><th class="num">p perm.</th></tr>
+      ${Object.entries(ph).map(([k, x]) => `<tr><td>${k}</td><td class="num">${pct(x.accuracy, 1)}</td><td class="num">${pct(x.balanced_accuracy, 1)}</td><td class="num">${num(x.auc, 3)}</td><td class="num">${num(x.brier, 4)}</td><td class="num">${num(x.perm_p, 3)}</td></tr>`).join("")}
+      </table></div><p class="small muted">Accuratezza vicina al 61% ma AUC sotto 0,5 e balanced accuracy 50%: i modelli dicono quasi sempre "sale" perché l'holdout è stato un periodo rialzista. Nessuna capacità di distinguere.</p></div>`;
+  }
   // univariate
   const uv = r.univariate.slice(0, 20);
   h += `<div class="card"><div class="label">SCREENING UNIVARIATO (ESPLORATIVO) — SVILUPPO 2008–2019 E REPLICA SU HOLDOUT</div><div class="table-wrap"><table class="tbl">
@@ -299,5 +314,13 @@ async function loadSources() {
     ${md.map((m) => `<tr><td>${esc(m.model_version)}</td><td>${esc(m.status)}</td><td>${esc(m.algo)}</td><td>${m.n_train}</td><td>${m.oos_validated ? "YES" : "NO"}</td><td>${esc(m.verdict)}</td><td>${fmtShort(m.created_utc)}</td></tr>`).join("")}</table></div>`;
 }
 
+$("#recalc").addEventListener("click", async () => {
+  $("#recalc-msg").textContent = "calcolo in corso…";
+  try {
+    const r = await api("/api/recalculate", { method: "POST" });
+    $("#recalc-msg").textContent = `fatto: ${r.recalculated.length} previsioni registrate`;
+    loadDash();
+  } catch (e) { $("#recalc-msg").textContent = "errore: " + e.message; }
+});
 loadDash();
 setInterval(() => { if ($("#dash").classList.contains("on")) loadDash(); }, 20000);
