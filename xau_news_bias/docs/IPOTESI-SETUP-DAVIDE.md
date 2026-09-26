@@ -173,3 +173,70 @@ stesso trade con il setup S1:
 - Holm su tutti i test eseguiti.
 
 Nessun candidato viene scelto o scartato dopo.
+
+## Risultati H-X3 (eseguito dopo il commit `bd5b65d`)
+
+Dati: `research_output/phase2/hx3_dynamic_stop.json` e
+`hx3_main_trades.csv`. Codice: `xnb/phase2/setup_dyn.py`.
+
+### Stop in pips che avrebbe usato la regola S1 (ATR giornaliero), mediana per anno
+
+| 2014–16 | 2017–19 | 2020 | 2021–23 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|
+| 25–28 | 19–21 | 47 | 37–38 | 51 | 77 | 170 |
+
+### Precisione di pareggio con lo stop dinamico
+
+Costi base, perdita tagliata a −1R, ingresso T − 60 s, uscita a fine M1.
+
+| | 2013–26 | 2013–19 | 2020–22 | 2023–24 | 2025–26 |
+|---|---|---|---|---|---|
+| S1 ATR giornaliero | **52%** | 52% | 51% | 53% | 53% |
+| S2 ATR orario | 48% | 51% | 46% | 46% | 48% |
+| S3 U_news | 56% | 59% | 52% | 60% | 49% |
+| S1, solo NFP | **47%** | 45% | 51% | 44% | 51% |
+| S1, solo CPI | **59%** | 64% | 50% | 65% | 55% |
+
+- Con lo stop che segue la volatilità la soglia è **stabile in tutte le
+  ere**. Anche negli anni calmi il lato giusto arriva a ≥ 2R nel 21% dei
+  casi, contro lo 0% con 100 pips fissi. È esattamente il punto di Davide.
+- **Tirando a caso** (S1): −0,03 R a news, intervallo da −0,10 a +0,04.
+  - NFP: +0,07 R, intervallo da −0,04 a +0,18, **non significativo**.
+  - CPI: −0,13 R, intervallo da −0,22 a −0,05, **significativamente
+    negativo**.
+- **Costi conservative**: serve il 62%.
+- **Stop normale**, eseguito con il salto: serve il 67%. Anche con lo
+  stop dinamico, tutta l'asimmetria viene dalla perdita tagliata dal
+  broker.
+
+### I segnali di XNB dentro il setup (S1, fuori campione, 17 test)
+
+| Segnale | Periodo | Trade | Vinti | R medio | R totale | p | Holm |
+|---|---|---|---|---|---|---|---|
+| **Modello NFP** | NFP 2020–26 | 24 | 58% | **+0,52** | +12,5 | 0,053 | 0,89 |
+| Modello condiviso | NFP 2020–26 | 7 | 57% | +0,80 | +5,6 | 0,15 | 1,00 |
+| Regola NFP-3 | NFP 2020–26 | 14 | 57% | +0,25 | +3,5 | 0,25 | 1,00 |
+| Regola CPI-3 | CPI 2020–26 | 25 | 44% | +0,26 | +6,4 | 0,19 | 1,00 |
+| Modello CPI | CPI 2020–26 | 26 | 27% | −0,23 | −6,1 | 0,89 | 1,00 |
+| Regole condivise sul CPI | CPI 2020–26 | 11–30 | 21–55% | da −0,48 a −0,09 | | | 1,00 |
+
+Tutte le righe sono in `hx3_dynamic_stop.json`. Nessun test supera la
+correzione di Holm.
+
+### Conclusione (esplorativa)
+
+- Nel setup di Davide, con lo stop che segue l'ATR giornaliero:
+  - serve indovinare la direzione circa **52 volte su 100** (NFP 47, CPI
+    59), a patto di avere la perdita tagliata e costi bassi;
+  - con costi più alti serve il 62%;
+  - con uno stop normale, il 67%.
+- La soglia bassa viene dall'asimmetria. L'asimmetria viene dal full
+  margin con protezione dal saldo negativo.
+- Il calcolatore XNB non dà una direzione affidabile. Il suo segnale
+  migliore, il modello NFP, dentro il setup fa +0,52 R a news su 24 NFP
+  mai visti, ma con 17 test è compatibile con il caso (Holm 0,89).
+- È il candidato più sensato da **confermare dal vivo**. Da registrare
+  prima di ogni NFP:
+  1. la direzione del modello NFP;
+  2. la direzione scelta da Davide;
+  3. il risultato con il setup S1.
