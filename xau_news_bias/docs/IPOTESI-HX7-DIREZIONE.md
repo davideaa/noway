@@ -90,3 +90,33 @@ il contrario di come si è mosso l'oro alla NFP precedente", indovina:
 
 Si registra come **ipotesi nuova H-X8**. Si conferma solo dal vivo, su
 tutte le prossime NFP, senza toccare niente.
+
+### Col trade di Davide (solo informazione, come previsto sopra)
+
+File: `research_output/phase2/hx7/hx7_setup_summary.json`. Codice:
+`scripts/hx7_site.py`.
+
+Trade: ingresso T0 − 60 s, stop 60 pips prima del 2024 e 100 pips dopo,
+uscita a fine M1, costi base (spread tick per tick; il LONG si stoppa sul
+bid, lo SHORT sull'ask), perdita tagliata a −1R. Soldi: da 10.000, saldo ÷
+24 a news, interesse composto.
+
+| Bias | Periodo | News | Indovina | R medio | Vinti | Da 10.000 |
+|---|---|---|---|---|---|---|
+| NFP, contrario della precedente | 2014–19 | 71 | 62,0% | +0,03 | 52% | 10.365 |
+| NFP, contrario della precedente | 2020–26 | 77 | 59,7% | +0,22 | 55% | 18.028 |
+| **NFP, contrario della precedente** | **2014–26** | 148 | **60,8%** | **+0,13** | 53% | **18.685** |
+| NFP, calcolatore | 2014–26 | 148 | 51,4% | +0,00 | 48% | 8.649 |
+| NFP, sempre LONG | 2014–26 | 148 | 44,6% | −0,15 | | 3.575 |
+| NFP, sempre SHORT | 2014–26 | 148 | 55,4% | +0,01 | | 8.900 |
+| CPI, contrario del precedente | 2014–26 | 150 | 49,3% | −0,22 | | 2.354 |
+| CPI, calcolatore | 2014–26 | 150 | 50,0% | −0,08 | | 5.601 |
+
+- Anche indovinando la direzione, lo stop viene spesso preso prima della
+  chiusura: alla release lo spread si apre fino a 100–150 pips e da solo
+  può stoppare lo SHORT.
+- Nello studio 2014–19 la regola NFP indovina il 62% ma rende solo
+  +0,03 R: con stop a 60 pips gli sbagli costano più di quanto rendono le
+  vittorie.
+- Sito: `docs/replay.html` (candele da 5 s e da 1 minuto con wick, ask,
+  ingresso, stop, uscita e R per ogni news).
