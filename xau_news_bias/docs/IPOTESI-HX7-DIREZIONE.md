@@ -49,3 +49,44 @@ Scritta il 26/09/2026 **prima** di calcolare. Richiesta di Davide:
   news.
 - Sito: per ogni news, candele con wick dai tick bid/ask, ingresso, stop e
   chiusura con i prezzi scritti.
+
+## Risultati (dopo i commit `0e064bd` e del codice)
+
+File: `research_output/phase2/hx7/hx7_results.json`.
+
+### Modelli, bias su ogni news: accuratezza della direzione
+
+Configurazione scelta sullo studio, per gruppo.
+
+| Gruppo | Scelta | Studio 2014–19 | Test 2020–26 | "Direzione più frequente" nel test | p contro 50% | Holm |
+|---|---|---|---|---|---|---|
+| CPI+NFP | logistica, prezzo+macro+tassi | 54,2% | **47,4%** (156) | 52,6% | 0,76 | 1,00 |
+| NFP | logistica, prezzo+VIX/rischio | 60,6% | **48,1%** (77) | 50,6% | 0,68 | 1,00 |
+| CPI | LightGBM, prezzo+macro | 50,7% | **49,4%** (79) | 60,8% | 0,59 | 1,00 |
+
+- Media di tutte le 30 configurazioni per gruppo nel test: CPI+NFP 49,1%,
+  NFP 53,5%, CPI 49,4%.
+- **I modelli non indovinano la direzione su tutte le news.**
+
+### Scoperta dopo aver visto i dati (NON pre-registrata)
+
+Fra i confronti c'era "segui la reazione dell'NFP precedente": sull'NFP
+indovina il 38% nello studio e il 40% nel test. Quindi l'**opposto**, "fai
+il contrario di come si è mosso l'oro alla NFP precedente", indovina:
+
+| Periodo | Indovina | p (> 50%) |
+|---|---|---|
+| 2008–13 (mai usato da nessuna regola) | 34/69 = **49,3%** | 0,60 |
+| 2014–19 | 44/71 = 62,0% | 0,028 |
+| 2020–26 | 46/77 = 59,7% | 0,055 |
+| 2014–26 | 90/148 = **60,8%** | ~0,005 |
+
+- Per anno dal 2014 è ≥ 50% in 12 anni su 13; unica eccezione il 2020
+  (42%).
+- Prima del 2014 non c'è. Il feed di quegli anni reagiva lento e sporco
+  (fase 2, rotture strutturali), ma non si può escludere che la regola
+  semplicemente non esistesse.
+- Sul CPI la stessa regola non funziona: 48,4% su tutto il periodo.
+
+Si registra come **ipotesi nuova H-X8**. Si conferma solo dal vivo, su
+tutte le prossime NFP, senza toccare niente.
