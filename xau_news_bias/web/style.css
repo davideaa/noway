@@ -88,3 +88,14 @@ p { margin: 6px 0; }
 svg[role="img"] { width: 100%; max-width: 720px; height: auto; display: block; }
 svg[role="img"] text { fill: var(--text-2); font-size: 11px; }
 svg[role="img"] .grid line { stroke: var(--line); }
+nav#tabs { display: flex; flex-wrap: wrap; gap: 2px; }
+.simform { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; margin-top: 10px; }
+.simform label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 3px; }
+.simform input, .simform select { font: inherit; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }
+.simform input[type=number] { width: 90px; }
+.cls-robust { color: var(--good); font-weight: 700; }
+.cls-promising { color: #b07800; font-weight: 700; }
+.cls-weak { color: var(--text-2); font-weight: 600; }
+.cls-none { color: var(--muted); }
+.big-verdict { font-size: 30px; font-weight: 800; color: var(--bear); letter-spacing: .02em; }
+.pos { color: var(--good); } .neg { color: var(--bear); }

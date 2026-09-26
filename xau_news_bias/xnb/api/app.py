@@ -22,6 +22,7 @@ from ..db import session, verify_chain
 from ..quality.registry import registry_status
 from ..timeutil import CHECKPOINTS, iso, parse_iso, utc_now, xau_market_open
 from . import explain
+from .phase2 import router as phase2_router
 
 log = logging.getLogger("xnb.api")
 WEB = PROJECT_DIR / "web"
@@ -47,6 +48,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="XAU NEWS BIAS", lifespan=lifespan)
+app.include_router(phase2_router)
 
 
 def _pred_row(r) -> dict:
@@ -96,10 +98,10 @@ def overview():
     with session() as con:
         evs = [dict(r) for r in con.execute(
             "SELECT * FROM events WHERE t0_utc>=? ORDER BY t0_utc LIMIT 30", (iso(now),))]
-        # in primo piano la prossima release di una famiglia con modello (oggi: CPI)
-        from ..live.engine import MODELLED
+        # in primo piano la prossima release di una famiglia studiata (CPI e NFP, fase 2)
+        from ..live.engine import MODELLED, P2_FAMILIES
 
-        modelled = [e for e in evs if e["family"] in MODELLED]
+        modelled = [e for e in evs if e["family"] in MODELLED | P2_FAMILIES]
         nxt = modelled[0] if modelled else (evs[0] if evs else None)
         pred = timeline = None
         if nxt:
@@ -118,17 +120,23 @@ def overview():
     svc = SERVICE["svc"]
     sources = registry_status()
     bad = [s for s in sources if s["state"] in ("FAILED", "STALE") and s.get("critical_for_live")]
-    research = _research(nxt["family"]) if nxt else None
+    research = _research(nxt["family"]) if nxt and nxt["family"] in MODELLED else None
+    from ..phase2.live_card import verdict_for
+
+    p2_verdict = verdict_for(nxt["family"]) if nxt and nxt["family"] in P2_FAMILIES else None
     return {
         "now_utc": iso(now), "market_open": xau_market_open(now),
         "earlier_unmodelled": [e for e in evs if nxt and e["t0_utc"] < nxt["t0_utc"]],
         "next_event": nxt, "prediction": pred, "timeline": timeline, "upcoming": upcoming,
-        "headline": explain.headline(pred, research) if pred else None,
+        "headline": (explain.headline(pred, research) if pred and research else
+                     f"Fase 2: {p2_verdict['evidence']}. Nessuna direzione viene mostrata come previsione."
+                     if pred and p2_verdict else None),
         "last_quote": dict(last_quote) if last_quote else None,
         "last_recalc": dict(last_job) if last_job else None,
         "next_recalc_utc": iso(svc.next_step()) if svc and svc.next_step() else None,
         "sources_warning": [{"id": s["id"], "state": s["state"], "detail": s["detail"]} for s in bad],
         "research_verdict": (research or {}).get("verdict"),
+        "phase2_verdict": p2_verdict,
         "auto_from_utc": iso(parse_iso(nxt["t0_utc"]) - timedelta(days=7)) if nxt else None,
         "next_event_recalc_utc": _next_recalc(nxt, pred, now) if nxt else None,
     }

@@ -104,3 +104,25 @@ Il codice è lo stesso; cambia solo dove gira.
    `XNB_HOST=127.0.0.1` e accedi con un tunnel SSH
    (`ssh -L 8765:127.0.0.1:8765 server`) oppure metti davanti un reverse
    proxy con password e HTTPS.
+
+## Fase 2 nel motore live
+
+- Prima di ogni CPI e NFP la previsione immutabile contiene anche la
+  **scheda di trade di fase 2** (`features_json.extra.phase2`,
+  `xnb/phase2/live_card.py`):
+  - U_news e stop 0,60 × U_news;
+  - range, MFE e MAE attesi;
+  - EV LONG/SHORT storici senza condizioni;
+  - P(up) storica;
+  - azione (NO TRADE finché nessun candidato è ROBUST) e livello di
+    evidenza.
+- Dopo la release, `LiveEngine.resolve` simula lo stesso trade sui tick
+  reali e lo scrive nella tabella append-only `live_trades` (catena di
+  hash, trigger che vietano UPDATE e DELETE). Il ratio range/ATR della
+  release entra nella storia di U_news delle successive.
+- La storia viene da `research_output/phase2/p2_trades_base.csv` (tabella
+  congelata e piccola) più le release risolte dal vivo.
+- API di fase 2 in `xnb/api/phase2.py`: `/api/phase2`,
+  `/api/phase2/simulate`, `/api/phase2/null`, `/api/compute`,
+  `POST /api/compute/start`, `/api/livetrades`.
+

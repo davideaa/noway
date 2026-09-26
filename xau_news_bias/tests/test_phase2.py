@@ -79,3 +79,72 @@ def test_final_nfp_is_locked():
         period(df, "final_nfp")
     assert len(final_nfp_outcomes(df, FINAL_KEY)) == 1
     assert len(period(df, "discovery")) == 1
+
+
+# ------------------------------------------------------------------ live (scheda di fase 2)
+def _m1(end, n=180, rng=1.0):
+    idx = pd.date_range(end=end - pd.Timedelta(minutes=1), periods=n, freq="1min", tz="UTC")
+    return pd.DataFrame({"o": 100.0, "h": 100.0 + rng, "l": 100.0, "c": 100.0, "v": 1.0}, index=idx)
+
+
+def test_live_card_stop_and_action():
+    from xnb.phase2.live_card import _frozen, card, history
+
+    t = pd.Timestamp("2026-10-02 12:25", tz="UTC")
+    c = card("NFP", t, _m1(t), spread=0.5)
+    h = history("NFP", t)
+    med6 = float(np.median(h.range_over_atr.dropna().iloc[-6:]))
+    assert c["available"] and c["atr_m1_60_usd"] == pytest.approx(1.0)
+    assert c["U_news_usd"] == pytest.approx(med6)
+    assert c["sl_usd"] == pytest.approx(0.60 * med6)
+    # nessun candidato robusto: l'azione deve essere NO TRADE
+    assert c["action"] == "NO TRADE" and c["verdict"] == "NO RELIABLE EDGE"
+    assert 0 <= c["p_up_hist"] <= 1 and c["ev_long_R"] < 0.5
+    # la storia usa solo release precedenti a t
+    assert (h.t0_utc < t).all() and _frozen()["trades"] is not None
+    # con meno di 60 M1 chiuse la scheda non inventa un'unità
+    assert card("NFP", t, _m1(t, n=30), spread=0.5)["available"] is False
+
+
+def test_live_trade_result_on_ticks():
+    from xnb.phase2.live_card import trade_result
+
+    t0 = pd.Timestamp("2026-10-02 12:30", tz="UTC")
+    ms = int(t0.value // 1_000_000)
+    rel = np.array([-30_000, -20_000, -12_000, -10_000, 1_000, 10_000, 30_000, 59_000, 61_000])
+    bid = np.array([100, 100, 100, 100, 101, 104, 106, 108, 90], dtype=float)
+    ticks = pd.DataFrame({"ts_ms": ms + rel, "bid": bid, "ask": bid + 0.2})
+    c = {"sl_usd": 3.0, "U_news_usd": 5.0, "atr_m1_60_usd": 0.5, "action": "NO TRADE"}
+    r = trade_result(c, ticks, t0)
+    assert r["r_long"] > 2 and r["stopped_short"] is True and r["r_action"] is None
+    assert r["range_over_atr"] == pytest.approx(r["actual_range_usd"] / 0.5)
+
+
+def test_live_trades_append_only():
+    import sqlite3
+
+    from xnb.db import append_chained, session, verify_chain
+
+    with session() as con:
+        append_chained(con, "live_trades", {"resolved_utc": "2026-10-02T13:45:00.000Z", "event_id": "NFP_X",
+                                            "family": "NFP", "r_long": 1.2, "r_short": -1.0})
+    with pytest.raises(sqlite3.DatabaseError):
+        with session() as con:
+            con.execute("UPDATE live_trades SET r_long=5 WHERE event_id='NFP_X'")
+    with session() as con:
+        assert verify_chain(con, "live_trades") == (True, None)
+
+
+def test_phase2_api_smoke():
+    from fastapi.testclient import TestClient
+
+    from xnb.api.app import app
+
+    c = TestClient(app)
+    d = c.get("/api/phase2").json()
+    assert d["verdict"] == "NO RELIABLE EDGE" and len(d["final_tests"]) == 5
+    s = c.get("/api/phase2/simulate", params={"family": "NFP", "strategy": "always_long"}).json()
+    assert s["metrics"]["n"] > 100 and s["metrics"]["mean_R"] < 0
+    assert c.get("/api/phase2/simulate", params={"strategy": "boh"}).status_code == 400
+    assert "hardware" in c.get("/api/compute").json()
+    assert c.get("/api/livetrades").json()["chain_ok"] is True

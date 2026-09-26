@@ -107,7 +107,9 @@ class LiveMarket:
             h += timedelta(hours=1)
         return pd.concat(frames) if frames else pd.DataFrame(columns=["o", "h", "l", "c", "v"])
 
-    def recent_m1(self, symbol: str, start_day: date, now: datetime) -> pd.DataFrame:
+    def recent_m1(self, symbol: str, start_day: date, now: datetime, live: bool = True) -> pd.DataFrame:
+        """M1 recenti. ``live=False``: solo candele Dukascopy (range veri), senza le quotazioni live
+        aggregate, che hanno una lettura al minuto e quindi massimo = minimo."""
         frames = []
         d = start_day
         while d < now.date():
@@ -115,7 +117,7 @@ class LiveMarket:
             d += timedelta(days=1)
         frames.append(self._today_m1(symbol, now.date(), now))
         df = pd.concat([f for f in frames if len(f)]) if any(len(f) for f in frames) else pd.DataFrame()
-        if symbol == "XAUUSD":
+        if symbol == "XAUUSD" and live:
             last = df.index[-1] if len(df) else now - timedelta(days=5)
             live = self.quotes_m1(last + timedelta(minutes=1))
             if len(live):

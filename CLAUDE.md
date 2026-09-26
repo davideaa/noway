@@ -96,6 +96,17 @@ Claude in produzione. Chi riprende parta da `xau_news_bias/README.md` e
   pre-registrato in `docs/PROTOCOLLO-CPI.md` (emendamenti datati, tutti
   prima dei test). L'holdout 2020–2026 è già stato guardato: non si
   riusa per scegliere modelli nuovi.
+- **Fase 2 (CPI + NFP, trade sulla prima M1, aspettativa dopo i costi):
+  NO RELIABLE EDGE.** Parti da `docs/FINAL-EDGE-REPORT.md`. Protocollo
+  `docs/CPI-NFP-DISCOVERY-PROTOCOL.md` + emendamento 1, entrambi prima dei
+  risultati. 4,66 milioni di ipotesi con nullo a permutazioni; l'unica
+  regola significativa in scoperta (NFP, p 0,011) è crollata nella
+  conferma finale. **Il test finale NFP 2020–26 è stato aperto una volta
+  (`research_output/phase2/FINAL_NFP_OPENED.json`): non esiste più nessun
+  periodo storico vergine né per CPI né per NFP.** Ogni ipotesi nuova va
+  pre-registrata e confermata solo live. Unica cosa che funziona:
+  l'ampiezza (unità `U_news`), non la direzione. Anche con direzione nota
+  il CPI rende −0,20 R con costi conservative.
 - Tetto teorico: anche conoscendo il segno della sorpresa si indovina la
   prima M1 solo il ~73% delle volte. Il movimento (range) invece si
   prevede (Spearman 0,57).

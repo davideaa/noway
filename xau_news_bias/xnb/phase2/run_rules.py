@@ -73,7 +73,7 @@ def observed(prep: dict, tr_cons: pd.DataFrame) -> dict:
                                  "conditions": [sp.labels[i] for i in idx], "k": len(idx),
                                  "pa_only": bool(all(sp.is_pa[i] for i in idx)), "t_search": t,
                                  "mask": np.packbits(m).tobytes().hex(), **st})
-        REG.log_experiment("rules_discovery", g, "rule_search", n_hyp,
+        REG.log_experiment_once("rules_discovery", g, "rule_search", n_hyp,
                            {"cutoffs": CUTOFFS_SEARCH, "min_support": MIN_SUPPORT[g], "beam": 300,
                             "thresholds": "q25/q50/q75, binarie, categoriche<=8"}, "p2", None, best)
         res[g] = {"top": pd.DataFrame(rows).drop_duplicates(subset=["cutoff", "direction", "mask"])

@@ -147,12 +147,90 @@ def magnitude_selection(tr_base: pd.DataFrame, ev: pd.DataFrame) -> list[dict]:
     return rows
 
 
+PA_SIGNALS = ["f_pa_m1_b1_dir", "f_pa_m5_b1_dir", "f_pa_m15_b1_dir", "f_pa_h1_b1_dir", "f_pa_h4_b1_dir",
+              "f_pa_d1_b1_dir", "f_pa_m5_roc10_atr", "f_pa_m15_roc10_atr", "f_pa_h1_roc10_atr", "f_pa_h4_roc10_atr",
+              "f_pa_d1_roc10_atr", "f_xau_ret_5m_atrh", "f_xau_ret_15m_atrh", "f_xau_ret_60m_atrh",
+              "f_xau_ret_240m_atrh", "f_xau_ret_24h_atrd"]
+
+
+def pa_baselines(tr_base: pd.DataFrame, ev: pd.DataFrame, ft: pd.DataFrame) -> list[dict]:
+    """Regole di price action semplici (baseline): la M1 della news segue (o inverte) il segno del segnale?
+
+    Accuratezza di direzione (la domanda dell'ipotesi manuale) ed R medio del trade, per periodo."""
+    from scipy import stats as sps
+
+    x = ft[ft.cutoff == "T-1M"][["event_id"] + PA_SIGNALS]
+    d = tr_base[tr_base.ok == True].merge(x, on="event_id").merge(ev[["event_id", "a_move"]], on="event_id")  # noqa: E712
+    d = d[(d.t0_utc >= REGIME_START) & (d.a_move != 0)]
+    d["period"] = np.where(d.t0_utc < SPLIT, "2013-19", "2020-26")
+    rows = []
+    for sig in PA_SIGNALS:
+        for (fam, per), g in d.groupby(["family", "period"]):
+            s = np.sign(g[sig].to_numpy(dtype=float))
+            m = np.isfinite(s) & (s != 0)
+            hit = (s[m] == np.sign(g.a_move.to_numpy()[m]))
+            n = int(m.sum())
+            k = int(hit.sum())
+            r_mom = np.where(s[m] > 0, g.R_long.to_numpy()[m], g.R_short.to_numpy()[m])
+            r_rev = np.where(s[m] > 0, g.R_short.to_numpy()[m], g.R_long.to_numpy()[m])
+            rows.append({"signal": sig[2:], "family": fam, "period": per, "n": n,
+                         "momentum_hit_rate": k / n if n else None,
+                         "p_two_sided": float(sps.binomtest(k, n, 0.5).pvalue) if n else None,
+                         "mean_R_momentum": float(r_mom.mean()) if n else None,
+                         "mean_R_reversal": float(r_rev.mean()) if n else None})
+    return rows
+
+
+def scenario_tests(val: dict, tr: dict) -> list[dict]:
+    """Stessi trade dei test fuori campione, t e p unilaterale per ogni scenario di costo (descrittivo)."""
+    from .validate import holm, one_sided_t
+
+    rows = []
+    for it in val["items"]:
+        for stage in ("cpi_validation", "final"):
+            if stage not in it or not it[stage]["eval"].get("trades"):
+                continue
+            tt = pd.DataFrame(it[stage]["eval"]["trades"])
+            for sc, tab in tr.items():
+                t = tab.set_index("event_id").loc[tt.event_id]
+                r = np.where(tt.action.to_numpy() == "LONG", t.R_long.to_numpy(), t.R_short.to_numpy())
+                tv, pv = one_sided_t(r)
+                rows.append({"id": it["id"], "stage": stage, "scenario": sc, "n": int(len(r)),
+                             "mean_R": float(r.mean()), "t": tv, "p_one_sided": pv})
+    df = pd.DataFrame(rows)
+    for (stage, sc), g in df.groupby(["stage", "scenario"]):
+        m = 5 if stage == "final" else None
+        df.loc[g.index, "holm_p"] = holm(g.p_one_sided.tolist(), m)
+    return df.to_dict("records")
+
+
 def _hx1(tr_base, ev):
     rows = magnitude_selection(tr_base, ev)
     REG.log_experiment_once("exploratory", "ALL", "HX1_magnitude_selection", 6,
                             {"note": "dichiarata dopo la conferma finale; terzili di U_news/spread; descrittiva"},
                             "p2", None, {})
     return rows
+
+
+def export_trades(tr: dict, ev: pd.DataFrame, ft: pd.DataFrame) -> pd.DataFrame:
+    """Tabella piccola e congelata dei trade storici (serve al motore live e al simulatore anche
+    senza i percorsi tick, che non sono nel repository)."""
+    b = tr["base"][tr["base"].ok == True].copy()  # noqa: E712
+    c = tr["conservative"].set_index("event_id")
+    x = ft[ft.cutoff == "T-1M"].set_index("event_id")
+    b["R_long_cons"] = b.event_id.map(c.R_long)
+    b["R_short_cons"] = b.event_id.map(c.R_short)
+    b["unit_atr_m1_60"] = b.event_id.map(x.unit_atr_m1_60)
+    e = ev.set_index("event_id")
+    b["a_move"] = b.event_id.map(e.a_move)
+    b["a_range"] = b.event_id.map(e.a_range)
+    b["a_spread_m10"] = b.event_id.map(e.a_spread_m10)
+    b["range_over_atr"] = b.a_range / b.unit_atr_m1_60
+    cols = ["event_id", "family", "t0_utc", "year", "U", "sl_usd", "R_long", "R_short", "R_long_cons", "R_short_cons",
+            "stop_long", "stop_short", "a_move", "a_range", "a_spread_m10", "unit_atr_m1_60", "range_over_atr"]
+    out = b[cols].sort_values("t0_utc")
+    out.assign(t0_utc=out.t0_utc.astype(str)).to_csv(_dir() / "p2_trades_base.csv", index=False)
+    return out
 
 
 def run() -> dict:
@@ -173,6 +251,7 @@ def run() -> dict:
                           "t": c["t_search"], "p_fwer": c["p_fwer"], "q_bh": c["q_bh"], "sel_score": c["sel_score"]})
     pd.DataFrame(cands).to_csv(d / "rule_candidates.csv", index=False)
     pd.DataFrame(models["table"]).to_csv(d / "model_grid_discovery.csv", index=False)
+    export_trades(tr, ev, ft)
     prep = prepare(tr["base"], ft)
     out = {
         "rules_null": {g: {"n_hyp": r["n_hyp"], "n_perm": r["n_perm"], "null_max": r["null_max_quantiles"],
@@ -185,6 +264,8 @@ def run() -> dict:
         "family_value": family_value(models),
         "oos_direction_accuracy": oos_direction_accuracy(tr["base"], ft, models),
         "exploratory_HX1_magnitude_selection": _hx1(tr["base"], ev),
+        "pa_simple_baselines": pa_baselines(tr["base"], ev, ft),
+        "scenario_tests": scenario_tests(val, tr),
         "registry": REG.registry_summary(),
         "verdict": val["verdict"],
     }

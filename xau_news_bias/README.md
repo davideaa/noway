@@ -4,12 +4,17 @@ Motore quantitativo che, **prima** di una release macro USA ad alto
 impatto, stima la direzione della prima candela M1 di XAUUSD — e che dice
 **NO RELIABLE EDGE** quando i dati non giustificano una previsione.
 
-> **Risultato della ricerca CPI (settembre 2026): NO RELIABLE EDGE.**
+> **Fase 1 — direzione del CPI (settembre 2026): NO RELIABLE EDGE.**
 > Su 79 CPI mai usati per scegliere il modello (2020–2026) nessun modello
-> batte il caso in modo affidabile. Dettagli e perché in
-> [`docs/RISULTATI-CPI.md`](docs/RISULTATI-CPI.md). La dashboard mostra
-> questo verdetto come esito principale; la stima del **movimento** atteso
-> invece funziona ed è mostrata.
+> batte il caso in modo affidabile ([`docs/RISULTATI-CPI.md`](docs/RISULTATI-CPI.md)).
+>
+> **Fase 2 — trade sulla prima M1 di CPI e NFP, aspettativa dopo i costi:
+> NO RELIABLE EDGE.** 4,66 milioni di ipotesi con controllo a permutazioni,
+> 1.080 configurazioni di modello, validazione sul CPI 2020–26 e conferma
+> finale una sola volta sull'NFP 2020–26 mai guardato: niente regge
+> ([`docs/FINAL-EDGE-REPORT.md`](docs/FINAL-EDGE-REPORT.md), con le risposte
+> alle 32 domande). Il sistema dice **NO TRADE**; la stima dell'**ampiezza**
+> del movimento e lo stop normalizzato invece funzionano e sono mostrati.
 
 ## Come si avvia
 
@@ -48,11 +53,18 @@ Riavviandolo riprende da dove era: tutto è nel database locale.
 
 | Scheda | Cosa mostra |
 |---|---|
-| **Dashboard** | prossima release, XAU NEWS BIAS, confidence, OOS validated, casi comparabili, evoluzione T−3D → NOW, movimento atteso, ultimo aggiornamento e prossimo ricalcolo, DATA STATUS |
-| **Why?** | regime macro, tassi/Fed, tecnica XAU, cross-market, aspettative (nowcast vs consensus), casi storici comparabili, performance fuori campione della fascia di confidenza, tutte le feature della fotografia con il suo hash |
-| **Research Lab** | eventi totali/usabili/esclusi e motivo, distribuzione bullish/bearish, confronto modelli, calibrazione, fasce ≥60/65/70/75%, anni, regimi, screening feature, ipotesi H2, tetto teorico, movimento, errori |
-| **Track record** | ogni release prevista dal vivo: previsione T−1H, ultima pre-release, esito reale; integrità della catena di hash |
-| **Fonti & sistema** | registro fonti (HEALTHY / STALE / FAILED / NOT CONFIGURED), job e loro esito, versioni dei modelli |
+| **Next event** | prossima release CPI o NFP, XAU NEWS BIAS, evoluzione T−3D → NOW e la **scheda di trade di fase 2**: data quality, regime di mercato, P(bull)/P(bear) storiche, range atteso, MFE/MAE attesi, EV LONG/EV SHORT, azione, stop normalizzato, livello di evidenza |
+| **Why?** | regime macro, tassi/Fed, tecnica XAU, cross-market, aspettative, casi storici comparabili, tutte le feature della fotografia con il suo hash |
+| **CPI** | risultati di fase 2 sul CPI (baseline, ricerca, modelli, validazione 2020–26 esposta) e, sotto, il Research Lab della fase 1 |
+| **NFP** | risultati di fase 2 sull'NFP e la conferma finale 2020–26, aperta una volta |
+| **Discovery Lab** | quante ipotesi, il nullo a permutazioni contro l'osservato, singole/coppie/terne, famiglie di feature, adattività, price action semplice |
+| **Candidate edges** | i candidati scelti prima della verifica e la loro classe finale |
+| **Validation** | i test fuori campione con Holm, bootstrap, costi, stop ±30%, momento d'ingresso, dipendenza da un anno |
+| **Trade simulator** | ricostruzione storica tick per tick di strategie semplici, dell'oracolo (tetto) e dei candidati, con stop, ingresso e costi a scelta |
+| **Live record** | previsioni dal vivo e trade di fase 2 sulle release reali, con le catene di hash |
+| **Market state** | prezzo e spread live, volatilità e U_news della prossima release, regimi storici, rotture strutturali |
+| **Data health** | registro fonti (HEALTHY / STALE / FAILED / NOT CONFIGURED), job e loro esito, versioni dei modelli |
+| **Compute center** | CPU, RAM, campagne (fatte, rimanenti, velocità, ETA, errori, riprese dal checkpoint), modalità AUTO / BALANCED / MAXIMUM / CUSTOM, registro degli esperimenti |
 
 ### Come leggere i numeri
 
@@ -110,7 +122,31 @@ alternative a pagamento in [`docs/FONTI-DATI.md`](docs/FONTI-DATI.md).
 .venv/bin/python -m pytest                        # test (target, ora legale, leakage, immutabilità, qualità)
 ```
 
-Il metodo è in [`docs/PROTOCOLLO-CPI.md`](docs/PROTOCOLLO-CPI.md): criteri
+**Fase 2** (CPI e NFP, trade e aspettativa). Il protocollo è
+[`docs/CPI-NFP-DISCOVERY-PROTOCOL.md`](docs/CPI-NFP-DISCOVERY-PROTOCOL.md),
+committato prima di guardare i risultati.
+
+```bash
+.venv/bin/python scripts/phase2_prefetch.py      # tick e M1 (XAU, FX, indici), EPU/GPR
+.venv/bin/python scripts/phase2_build.py         # eventi, percorsi tick, 496 feature × 8 cutoff → dati congelati
+.venv/bin/python scripts/phase2_rules.py --mode MAXIMUM   # ricerca massiva + 1.000 permutazioni (riprendibile)
+.venv/bin/python scripts/phase2_models.py --mode MAXIMUM  # griglia dei modelli, walk-forward di scoperta
+.venv/bin/python scripts/phase2_validate.py      # validazione CPI + conferma finale NFP (UNA volta: sigillo)
+.venv/bin/python scripts/phase2_describe.py      # stop, MAE/MFE, oracolo, regimi (dopo il sigillo)
+.venv/bin/python scripts/phase2_summary.py       # riepiloghi e CSV per report e dashboard
+```
+
+I report sono in `docs/`: `FINAL-EDGE-REPORT.md` (da qui si parte),
+`CPI-RESULTS.md`, `NFP-RESULTS.md`, `CROSS-EVENT-RESULTS.md`,
+`ROBUSTNESS-REPORT.md`, `PRICE-ACTION-DISCOVERY.md`,
+`STOP-MAE-MFE-ANALYSIS.md`, `REGIME-ANALYSIS.md`, `FEATURE-REGISTRY.md`,
+`DATA-SOURCE-REGISTRY.md`, `POINT-IN-TIME-AUDIT.md`,
+`EXPERIMENT-REGISTRY.md`. I dati machine-readable sono in
+`research_output/phase2/`. I percorsi tick (`p2_paths.parquet`) non sono
+nel repository: si rigenerano con `phase2_build.py`. Servono solo al
+simulatore per stop e ingressi diversi da quelli del protocollo.
+
+Il metodo della fase 1 è in [`docs/PROTOCOLLO-CPI.md`](docs/PROTOCOLLO-CPI.md): criteri
 dichiarati e committati **prima** di calcolare qualunque risultato, con gli
 emendamenti datati. L'architettura, il database e la metodologia
 point-in-time in [`docs/ARCHITETTURA.md`](docs/ARCHITETTURA.md).

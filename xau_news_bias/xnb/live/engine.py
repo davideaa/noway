@@ -21,6 +21,8 @@ import numpy as np
 import pandas as pd
 
 from ..db import append_chained, canonical_json, session, sha256_text
+from ..phase2.live_card import card as p2_card
+from ..phase2.live_card import trade_result as p2_trade_result
 from ..providers.base import EventSpec
 from ..providers.bls import BLSProvider
 from ..providers.consensus import ClevelandFedNowcast
@@ -37,6 +39,7 @@ from .predictor import LoadedModel, active_model, checkpoint_for
 log = logging.getLogger("xnb.live.engine")
 
 MODELLED = {"CPI"}
+P2_FAMILIES = {"CPI", "NFP"}  # famiglie con la scheda di trade della fase 2
 WATCHED = ["CPI", "NFP", "PPI", "PCE", "FOMC", "RETAIL", "GDP", "ISM_M", "ISM_S"]
 FAMILY_NAMES = {"CPI": "CPI", "NFP": "Non-Farm Payrolls", "PPI": "PPI", "PCE": "Core PCE", "FOMC": "FOMC Rate Decision",
                 "RETAIL": "Retail Sales", "GDP": "GDP", "ISM_M": "ISM Manufacturing", "ISM_S": "ISM Services"}
@@ -220,6 +223,13 @@ class LiveEngine:
                "checkpoint": label or "ROLLING", "seconds_to_event": int(tau), "family": fam}
         mdl = self.model(fam) if fam in MODELLED else None
         if mdl is None:
+            if fam in P2_FAMILIES:
+                # studiata nella fase 2 senza modello di direzione valido: solo la scheda del trade
+                row.update(bias="NO RELIABLE EDGE", confidence="NONE", oos_validated=0, model_version=None,
+                           data_status="N/A", data_issues_json=json.dumps(
+                               [{"severity": "info", "code": "NO_DIRECTION_MODEL",
+                                 "message": f"{fam}: fase 2 senza edge fuori campione, nessun modello di direzione"}]))
+                return self._store(row, {}, {"phase2": self.phase2_card(fam, now)})
             row.update(bias="NO MODEL", confidence="NONE", oos_validated=0, model_version=None,
                        data_status="N/A", data_issues_json=json.dumps(
                            [{"severity": "info", "code": "NOT_RESEARCHED",
@@ -257,7 +267,24 @@ class LiveEngine:
             move_p75=mv.get("range_p75_pips"), data_status=dq.status, data_issues_json=json.dumps(dq.issues),
         )
         extra = {"lean": lean, "submodel_checkpoint": cp, "bucket": bucket, "movement": mv, "algo": pr["algo"]}
+        if fam in P2_FAMILIES:
+            extra["phase2"] = self.phase2_card(fam, now)
         return self._store(row, feats, extra)
+
+    def phase2_card(self, family: str, now: datetime) -> dict:
+        """Scheda del trade di fase 2 (stop normalizzato, EV storici, azione). Un errore qui non blocca la previsione."""
+        try:
+            # solo candele Dukascopy: le quotazioni live aggregate hanno range nullo e sporcherebbero l'ATR
+            m1 = self.market.recent_m1("XAUUSD", (now - timedelta(days=2)).date(), now, live=False)
+            q = self._last_quote or {}
+            qq = q.get("quote")
+            spread = (qq.ask - qq.bid) if qq is not None else None
+            with session() as con:
+                live = [dict(r) for r in con.execute("SELECT family, t0_utc, range_over_atr FROM live_trades")]
+            return p2_card(family, pd.Timestamp(now), m1, spread, live)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("scheda di fase 2 non calcolata per %s: %s", family, exc)
+            return {"available": False, "reason": f"errore: {exc}"}
 
     def _store(self, row: dict, feats: dict, extra: dict | None = None) -> dict:
         clean = {k: (None if isinstance(v, float) and not np.isfinite(v) else v) for k, v in feats.items()}
@@ -348,6 +375,8 @@ class LiveEngine:
                     "t1h_prediction_id": t1h["id"] if t1h else None, "final_prediction_id": final["id"] if final else None,
                 })
                 con.execute("UPDATE events SET status='released' WHERE event_id=?", (ev["event_id"],))
+            if ev["family"] in P2_FAMILIES:
+                self._resolve_phase2(ev, t0, ticks, now)
             if ev["family"] == "CPI":
                 try:
                     spec = EventSpec(ev["event_id"], "CPI", ev["name"], t0, ev.get("reference_period"),
@@ -363,3 +392,35 @@ class LiveEngine:
             log.info("esito registrato %s: %s (%.1f pips)", ev["event_id"], o.direction, o.move_pips or 0)
             done.append({"event_id": ev["event_id"], "direction": o.direction})
         return done
+
+    def _resolve_phase2(self, ev: dict, t0: datetime, ticks: pd.DataFrame, now: datetime) -> None:
+        """Il trade della scheda di fase 2 sui tick reali, registrato in modo immutabile."""
+        with session() as con:
+            if con.execute("SELECT 1 FROM live_trades WHERE event_id=?", (ev["event_id"],)).fetchone():
+                return
+            r = con.execute("SELECT id, features_json FROM predictions WHERE event_id=? AND prediction_utc<? "
+                            "ORDER BY id DESC LIMIT 1", (ev["event_id"], ev["t0_utc"])).fetchone()
+        if not r:
+            return
+        try:
+            c = (json.loads(r["features_json"] or "{}").get("extra") or {}).get("phase2") or {}
+        except json.JSONDecodeError:
+            c = {}
+        if not c.get("available"):
+            return
+        res = p2_trade_result(c, ticks, t0)
+        with session() as con:
+            append_chained(con, "live_trades", {
+                "resolved_utc": iso(now), "event_id": ev["event_id"], "family": ev["family"], "t0_utc": ev["t0_utc"],
+                "prediction_id": r["id"], "card_version": c.get("version"), "action": c.get("action"),
+                "u_news_usd": c.get("U_news_usd"), "sl_usd": c.get("sl_usd"), "atr_m1_60_usd": c.get("atr_m1_60_usd"),
+                "expected_range_usd": c.get("expected_range_usd"), "ev_long_r": c.get("ev_long_R"),
+                "ev_short_r": c.get("ev_short_R"), "p_up_hist": c.get("p_up_hist"),
+                "actual_range_usd": res.get("actual_range_usd"), "actual_move_usd": res.get("actual_move_usd"),
+                "range_log_error": res.get("range_log_error"), "range_over_atr": res.get("range_over_atr"),
+                "r_long": res.get("r_long"), "r_short": res.get("r_short"), "r_action": res.get("r_action"),
+                "stopped_long": res.get("stopped_long"), "stopped_short": res.get("stopped_short"),
+                "quality": res.get("quality"),
+            })
+        log.info("trade di fase 2 registrato per %s: R long %s, R short %s", ev["event_id"], res.get("r_long"),
+                 res.get("r_short"))

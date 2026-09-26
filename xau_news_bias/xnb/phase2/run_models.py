@@ -59,7 +59,7 @@ def run(tr_base: pd.DataFrame, ft: pd.DataFrame, workers: int) -> dict:
                 REG.campaign_update("p2_models_v1", stage="walk-forward scoperta", total=len(grid), done=k)
                 log.info("configurazioni %d/%d", k, len(grid))
     table = pd.DataFrame(rows)
-    REG.log_experiment("models_discovery", "ALL", "model_configs", len(table),
+    REG.log_experiment_once("models_discovery", "ALL", "model_configs", len(table),
                        {"models": MODELS, "features": list(FEATURE_SETS), "adapt": ADAPT, "taus": TAUS,
                         "years": DISC_YEARS}, "p2", 7)
     res: dict = {"table": table.to_dict("records"), "groups": {}}

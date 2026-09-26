@@ -123,6 +123,21 @@ BEGIN SELECT RAISE(ABORT, 'live_outcomes: append-only'); END;
 CREATE TRIGGER IF NOT EXISTS live_outcomes_no_delete BEFORE DELETE ON live_outcomes
 BEGIN SELECT RAISE(ABORT, 'live_outcomes: append-only'); END;
 
+CREATE TABLE IF NOT EXISTS live_trades(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  resolved_utc TEXT NOT NULL, event_id TEXT NOT NULL UNIQUE, family TEXT, t0_utc TEXT,
+  prediction_id INTEGER, card_version TEXT, action TEXT,
+  u_news_usd REAL, sl_usd REAL, atr_m1_60_usd REAL, expected_range_usd REAL,
+  ev_long_r REAL, ev_short_r REAL, p_up_hist REAL,
+  actual_range_usd REAL, actual_move_usd REAL, range_log_error REAL, range_over_atr REAL,
+  r_long REAL, r_short REAL, r_action REAL, stopped_long INTEGER, stopped_short INTEGER, quality TEXT,
+  prev_hash TEXT, row_hash TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS live_trades_no_update BEFORE UPDATE ON live_trades
+BEGIN SELECT RAISE(ABORT, 'live_trades: append-only'); END;
+CREATE TRIGGER IF NOT EXISTS live_trades_no_delete BEFORE DELETE ON live_trades
+BEGIN SELECT RAISE(ABORT, 'live_trades: append-only'); END;
+
 CREATE TABLE IF NOT EXISTS job_runs(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   job TEXT NOT NULL, started_utc TEXT NOT NULL, finished_utc TEXT,

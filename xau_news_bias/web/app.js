@@ -33,10 +33,18 @@ document.querySelectorAll("#tabs button").forEach((b) =>
   b.addEventListener("click", () => {
     document.querySelectorAll("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
     document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.id === b.dataset.tab));
-    if (b.dataset.tab === "why") loadWhy(currentEvent);
-    if (b.dataset.tab === "lab") loadLab();
-    if (b.dataset.tab === "track") loadTrack();
-    if (b.dataset.tab === "sources") loadSources();
+    const t = b.dataset.tab;
+    if (t === "why") loadWhy(currentEvent);
+    if (t === "cpi") { loadFamily("CPI"); loadLab(); }
+    if (t === "nfp") loadFamily("NFP");
+    if (t === "disc") loadDiscovery();
+    if (t === "cand") loadCandidates();
+    if (t === "valid") loadValidation();
+    if (t === "sim") loadSimOptions();
+    if (t === "track") { loadTrack(); loadLiveTrades(); }
+    if (t === "market") loadMarket();
+    if (t === "sources") loadSources();
+    if (t === "compute") loadCompute();
   }));
 
 /* ---------- small SVG charts ---------- */
@@ -131,7 +139,8 @@ async function loadDash() {
     ];
     $("#kv").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
     const mv = extra.movement || {};
-    $("#movement").innerHTML = mv.range_median_pips == null ? '<p class="muted">n/d</p>' : `
+    $("#movement").innerHTML = ev && ev.family !== "CPI" ? '<p class="muted">Per questa famiglia il movimento atteso è nella scheda di fase 2 (U_news).</p>' :
+      mv.range_median_pips == null ? '<p class="muted">n/d</p>' : `
       <div class="grid3">
         <div><div class="label">RANGE MEDIANO M1</div><div class="stat">~${Math.round(mv.range_median_pips)} pips</div><div class="muted small">tipico ${Math.round(mv.range_p25_pips)}–${Math.round(mv.range_p75_pips)}</div></div>
         <div><div class="label">BODY MEDIANO</div><div class="stat">~${Math.round(mv.body_median_pips)} pips</div><div class="muted small">tipico ${Math.round(mv.body_p25_pips)}–${Math.round(mv.body_p75_pips)}</div></div>
@@ -147,6 +156,7 @@ async function loadDash() {
     $("#headline").textContent = ev ? `Previsioni automatiche da ${fmtTime(o.auto_from_utc)} (7 giorni prima), poi sempre più fitte fino alla release. Puoi anche calcolarla ora.` : "";
     $("#kv").innerHTML = `<dt>Prossimo ricalcolo</dt><dd>${fmtTime(o.next_event_recalc_utc)}</dd>`;
   }
+  renderP2Card(ev, p, o);
   // timeline
   if (o.timeline) {
     $("#timeline").innerHTML = o.timeline.map((r) => {
@@ -312,6 +322,312 @@ async function loadSources() {
     ${hl.jobs.map((j) => `<tr><td>${esc(j.job)}</td><td>${fmtShort(j.started_utc)}</td><td>${j.ok == null ? "in corso" : j.ok ? '<span class="pill ok">OK</span>' : '<span class="pill bad">ERRORE</span>'}</td><td class="small">${esc(j.message)}</td></tr>`).join("")}</table></div>
     <div class="label mt">MODELLI</div><div class="table-wrap"><table class="tbl"><tr><th>Versione</th><th>Stato</th><th>Algoritmo</th><th>Eventi training</th><th>OOS validato</th><th>Verdetto</th><th>Creato</th></tr>
     ${md.map((m) => `<tr><td>${esc(m.model_version)}</td><td>${esc(m.status)}</td><td>${esc(m.algo)}</td><td>${m.n_train}</td><td>${m.oos_validated ? "YES" : "NO"}</td><td>${esc(m.verdict)}</td><td>${fmtShort(m.created_utc)}</td></tr>`).join("")}</table></div>`;
+}
+
+/* ================= FASE 2 ================= */
+let P2 = null;
+async function p2() { if (!P2) P2 = await api("/api/phase2"); return P2; }
+const R = (x, d = 2) => {
+  if (x == null || isNaN(x)) return "n/d";
+  const v = Number(Number(x).toFixed(d));
+  return (v > 0 ? "+" : v < 0 ? "" : "") + (v === 0 ? (0).toFixed(d) : v.toFixed(d)) + " R";
+};
+const usd = (x, d = 2) => (x == null || isNaN(x) ? "n/d" : "$" + Number(x).toFixed(d));
+const sgn = (x) => (x == null ? "" : x > 0 ? "pos" : x < 0 ? "neg" : "");
+function clsTag(c) {
+  const k = !c ? "none" : c.startsWith("ROBUST") ? "robust" : c.startsWith("PROMISING") ? "promising" : c.startsWith("WEAK") ? "weak" : "none";
+  return `<span class="cls-${k}">${esc(c || "—")}</span>`;
+}
+function stageName(st) { return st === "final" ? "NFP 2020–26 · CONFERMA FINALE (una volta)" : "CPI 2020–26 · PREVIOUSLY EXPOSED OOS"; }
+
+function renderP2Card(ev, p, o) {
+  const box = $("#p2card");
+  if (!ev || !["CPI", "NFP"].includes(ev.family)) { box.innerHTML = ""; box.hidden = true; return; }
+  box.hidden = false;
+  const c = p && p.features && p.features.extra ? p.features.extra.phase2 : null;
+  const v = o.phase2_verdict || {};
+  const head = `<div class="label">TRADE SULLA PRIMA M1 — FASE 2 (${esc(ev.family)})</div>
+    <div class="big-verdict">${esc(v.verdict || "NO RELIABLE EDGE")} / NO TRADE</div>
+    <p class="small muted">${esc(v.evidence || "")}</p>`;
+  if (!c || !c.available) {
+    box.innerHTML = head + `<p class="muted">${c ? esc(c.reason || "scheda non disponibile") : "La scheda viene registrata con la prossima previsione (a ogni checkpoint)."}</p>`;
+    return;
+  }
+  const rows = [
+    ["EVENT", `${esc(ev.name)} (${esc(ev.family)})`],
+    ["TIME", fmtTime(ev.t0_utc)],
+    ["DATA QUALITY", statusPill(p.data_status)],
+    ["MARKET REGIME", `volatilità M1 (ultime 60 candele Dukascopy) ${usd(c.atr_m1_60_usd)} (percentile ${pct(c.atr_percentile_5y)} delle release ${esc(ev.family)} degli ultimi 5 anni)` +
+      (c.atr_age_min != null && c.atr_age_min > 90 ? ` <span class="pill warn">ultima candela di ${Math.round(c.atr_age_min)} min fa</span>` : "") +
+      (c.room_U_over_spread != null ? ` · spazio U_news/spread ${num(c.room_U_over_spread, 1)} (percentile ${pct(c.room_percentile_5y)})` : "")],
+    ["P(BULL) / P(BEAR)", `${pct(c.p_up_hist)} / ${pct(c.p_down_hist)} <span class="small muted">— ${esc(c.p_source)}</span>`],
+    ["EXPECTED M1 RANGE", `~${usd(c.expected_range_usd)} <span class="small muted">(U_news)</span>`],
+    ["EXPECTED MFE / MAE", `${usd(c.expected_mfe_usd)} / ${usd(c.expected_mae_usd)} <span class="small muted">se la direzione è giusta: MFE mediana a 45 s, MAE 75° percentile</span>`],
+    ["EV LONG / EV SHORT", `<span class="${sgn(c.ev_long_R)}">${R(c.ev_long_R)}</span> / <span class="${sgn(c.ev_short_R)}">${R(c.ev_short_R)}</span> <span class="small muted">— ${esc(c.ev_source)}; con costi conservative ${R(c.ev_long_R_conservative)} / ${R(c.ev_short_R_conservative)}</span>`],
+    ["ACTION", `<b>${esc(c.action)}</b>`],
+    ["SL MODEL", `${usd(c.sl_usd)} = ${esc(c.sl_model)}`],
+    ["EVIDENCE LEVEL", esc(c.evidence_level)],
+  ];
+  box.innerHTML = head + `<dl class="kv">${rows.map(([k, x]) => `<dt>${k}</dt><dd>${x}</dd>`).join("")}</dl>
+    <p class="small muted mt">EV storici senza condizioni: dicono quanto costa tradare alla cieca, non sono un segnale. Storia fino a ${fmtShort(c.history_last_release)} (${c.n_history} release). Scheda ${esc(c.version)}, registrata nella previsione immutabile.</p>`;
+}
+
+function tableRows(rows, cols) {
+  return `<div class="table-wrap"><table class="tbl"><tr>${cols.map((c) => `<th class="${c.num ? "num" : ""}">${c.h}</th>`).join("")}</tr>
+    ${rows.map((r) => `<tr>${cols.map((c) => `<td class="${c.num ? "num" : ""} ${c.cls ? c.cls(r) : ""}">${c.f(r)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+}
+
+function baselinesTable(b) {
+  const names = { always_long: "sempre LONG", always_short: "sempre SHORT", prev_news_direction: "direzione release precedente", xau_momentum_1h: "segui l'oro dell'ultima ora",
+    xau_reversal_1h: "inverti l'oro dell'ultima ora", dxy_rule: "regola dollaro", yield_rule: "regola tassi", random: "casuale", historical_frequency: "frequenza storica" };
+  return tableRows(Object.entries(b || {}).map(([k, v]) => ({ k, ...v })), [
+    { h: "Baseline (walk-forward 2014–19)", f: (r) => esc(names[r.k] || r.k) }, { h: "Trade", num: 1, f: (r) => r.n_trades ?? "" },
+    { h: "R medio", num: 1, f: (r) => R(r.mean_R), cls: (r) => sgn(r.mean_R) }, { h: "t", num: 1, f: (r) => num(r.t) }, { h: "Win", num: 1, f: (r) => pct(r.win_rate) }]);
+}
+
+function testsTable(items, stage) {
+  const rows = items.filter((i) => i[stage]);
+  return tableRows(rows, [
+    { h: "Test", f: (r) => `<b>${esc(r.id)}</b>` },
+    { h: "Cosa", f: (r) => r.kind === "rule" ? `<span class="small">${esc(r.spec.direction)} @ ${esc(r.spec.cutoff)}: ${r.spec.conditions.map(esc).join(" · ")}</span>` : `<span class="small">${esc(r.spec.model)} · ${esc(r.spec.features)} · ${esc(r.spec.adapt)} · τ ${r.spec.tau}</span>` },
+    { h: "Scoperta", num: 1, f: (r) => `${R(r.discovery_mean_R)}<div class="small muted">n ${r.discovery_n} · t ${num(r.discovery_t)}${r.p_fwer != null ? " · pFW " + num(r.p_fwer, 3) : ""}</div>` },
+    { h: "Trade OOS", num: 1, f: (r) => `${r[stage].n_trades} <span class="small muted">/ ${r[stage].n_events}</span>` },
+    { h: "Win", num: 1, f: (r) => pct(r[stage].win_rate) },
+    { h: "R medio OOS", num: 1, f: (r) => R(r[stage].mean_R), cls: (r) => sgn(r[stage].mean_R) },
+    { h: "Conservative", num: 1, f: (r) => R((r[stage].by_scenario || {}).conservative), cls: (r) => sgn((r[stage].by_scenario || {}).conservative) },
+    { h: "p", num: 1, f: (r) => num(r[stage].p_one_sided, 3) },
+    { h: "Holm", num: 1, f: (r) => `${num(r[stage].holm_p, 2)} <span class="small muted">m=${r[stage].holm_m}</span>` },
+    { h: "Bootstrap 95%", num: 1, f: (r) => `${num((r[stage].bootstrap95_mean_R || [])[0])} … ${num((r[stage].bootstrap95_mean_R || [])[1])}` },
+    { h: "Classe", f: (r) => clsTag(r.class) },
+  ]);
+}
+
+async function loadFamily(fam) {
+  const box = $(fam === "CPI" ? "#cpi-body" : "#nfp-body");
+  let d;
+  try { d = await p2(); } catch (e) { box.innerHTML = `<div class="card">Fase 2 non disponibile (${esc(e.message)}).</div>`; return; }
+  const rn = d.rules[fam], m = d.models[fam], ck = (d.models_checkpoints || {})[fam] || {};
+  const items = d.items.filter((i) => i.group === fam || i.group === "SHARED");
+  const stage = fam === "CPI" ? "cpi_validation" : "final";
+  const oracle = (d.stops.oracle || []).filter((x) => x.family === fam && x.k === 0.6);
+  const ob = oracle.find((x) => x.scenario === "base") || {}, oc = oracle.find((x) => x.scenario === "conservative") || {};
+  let h = `<div class="card"><div class="label">${fam} — FASE 2: TRADE SULLA PRIMA M1 (INGRESSO T−10 s, STOP 0,60 × U_news, USCITA A FINE M1)</div>
+    <div class="big-verdict">NO RELIABLE EDGE</div>
+    <p>${fam === "CPI" ? "Il CPI 2020–26 era già stato usato nella fase 1: vale come <b>PREVIOUSLY EXPOSED OOS</b>. Nessun candidato è positivo dopo Holm." :
+      `Il periodo 2020–26 NFP era <b>mai guardato</b> ed è stato aperto una sola volta${d.sealed ? " il " + esc(fmtTime(d.sealed.opened_utc)) : ""}, con i test fissati prima (${(d.final_tests || []).map(esc).join(", ")}). Nessuno ha retto.`}</p>
+    <p class="small muted">Tetto: anche sapendo in anticipo la direzione, il trade rende ${R(ob.mean_R)} con costi base e ${R(oc.mean_R)} con costi conservative (${ob.n} release 2013–26).</p></div>`;
+  h += `<div class="grid2"><div class="card"><div class="label">BASELINE</div>${baselinesTable(m.baselines)}</div>
+    <div class="card"><div class="label">RICERCA MASSIVA DI REGOLE</div>
+      <p><b>${rn.n_hyp.toLocaleString("it-IT")}</b> ipotesi. Miglior t per caso (1.000 permutazioni): mediana ${num(rn.null_max_quantiles["0.5"])}, 95° pct ${num(rn.null_max_quantiles["0.95"])}.</p>
+      <p>Miglior t osservato: ${Object.entries(rn.observed_best).filter(([k]) => !k.endsWith("pa")).map(([k, v]) => `${esc(k)} <b>${num(v)}</b>`).join(" · ")}</p>
+      <p>Solo price action: ${Object.entries(rn.observed_best).filter(([k]) => k.endsWith("pa")).map(([k, v]) => `${esc(k.replace("|pa", ""))} ${num(v)}`).join(" · ")} — per caso mediana ${num(rn.null_pa_quantiles["0.5"])}.</p>
+      <div class="label mt">MODELLI (${m.n_configs} configurazioni con ≥ 20 trade)</div>
+      <p>Con R medio positivo: ${pct(m.share_configs_positive)} · t mediano ${num(m.t_quantiles_all_configs["0.5"])}. Scelto: <b>${esc(m.chosen.model)} · ${esc(m.chosen.features)} · ${esc(m.chosen.adapt)} · τ ${m.chosen.tau}</b>, ${m.chosen.n_trades} trade, ${R(m.chosen.mean_R)}, t ${num(m.chosen.t)}.</p>
+      <p class="small muted">Accuratezza di direzione della logistica L1 (scoperta): ${pct(ck.direction_accuracy, 1)} contro una frequenza di base ${pct(ck.direction_base_up, 1)}.</p></div></div>`;
+  h += `<div class="card"><div class="label">VERIFICA FUORI CAMPIONE — ${stageName(stage)}</div>${testsTable(items, stage)}
+    <p class="small muted">R medio dei trade eseguiti, costi base. p: test t unilaterale R &gt; 0. Holm: correzione per il numero di test (m). Nessuna soglia, stop o modello è stato cambiato dopo la scoperta.</p></div>`;
+  if (fam === "NFP") {
+    const shared = items.filter((i) => i.cpi_validation && i.group === "SHARED");
+    if (shared.length) h += `<div class="card"><div class="label">GLI STESSI CANDIDATI CONDIVISI SUL CPI 2020–26</div>${testsTable(shared, "cpi_validation")}</div>`;
+  }
+  const cps = Object.entries(ck.by_cutoff || {});
+  if (cps.length) h += `<div class="card"><div class="label">L'INFORMAZIONE CRESCE AVVICINANDOSI ALLA RELEASE? (MODELLO SCELTO, SCOPERTA)</div>${tableRows(cps.map(([k, v]) => ({ k, ...v })), [
+    { h: "Cutoff", f: (r) => r.k }, { h: "Trade", num: 1, f: (r) => r.n_trades ?? "" }, { h: "R medio", num: 1, f: (r) => R(r.mean_R), cls: (r) => sgn(r.mean_R) }, { h: "t", num: 1, f: (r) => num(r.t) }])}</div>`;
+  box.innerHTML = h;
+}
+
+function histogram(vals, obs, { W = 560, H = 170, bins = 30 } = {}) {
+  if (!vals || !vals.length) return "";
+  const lo = Math.min(...vals, obs) - 0.1, hi = Math.max(...vals, obs) + 0.1, bw = (hi - lo) / bins;
+  const cnt = new Array(bins).fill(0); vals.forEach((v) => cnt[Math.min(bins - 1, Math.floor((v - lo) / bw))]++);
+  const mx = Math.max(...cnt), L = 30, B = 22, x = (v) => L + ((v - lo) / (hi - lo)) * (W - L - 10), y = (c) => (H - B) - (c / mx) * (H - B - 10);
+  let s = cnt.map((c, i) => `<rect x="${x(lo + i * bw)}" y="${y(c)}" width="${Math.max(1, x(lo + (i + 1) * bw) - x(lo + i * bw) - 1)}" height="${(H - B) - y(c)}" fill="var(--neutral)" opacity=".55"/>`).join("");
+  s += `<line x1="${x(obs)}" x2="${x(obs)}" y1="6" y2="${H - B}" stroke="var(--bear)" stroke-width="2.5"/><text x="${x(obs) + 4}" y="16">osservato ${num(obs)}</text>`;
+  for (let t = Math.ceil(lo); t <= hi; t++) s += `<text x="${x(t)}" y="${H - 6}" text-anchor="middle">${t}</text>`;
+  return svgEl(W, H, s);
+}
+
+async function loadDiscovery() {
+  const box = $("#disc-body");
+  let d, nl = { available: false };
+  try { d = await p2(); } catch (e) { box.textContent = e.message; return; }
+  try { nl = await api("/api/phase2/null"); } catch (e) { /* database locale senza permutazioni */ }
+  const s = d.summary;
+  let h = `<div class="card"><div class="label">DISCOVERY LAB — COSA È STATO CERCATO</div>
+    <p>Ipotesi = congiunzioni di 1–3 condizioni su ${Object.values(s.by_k_conditions || {})[0]?.n_primitives ?? "~1.500"} condizioni elementari (quartili della scoperta), × LONG/SHORT × T−1H/T−1M × gruppo (CPI, NFP, CPI+NFP). Punteggio: t dell'R medio. Controllo: la ricerca intera ripetuta 1.000 volte con esiti rimescolati dentro ogni anno.</p></div>`;
+  h += '<div class="grid3">' + ["CPI", "NFP", "SHARED"].map((g) => {
+    const r = d.rules[g], obs = Math.max(...Object.entries(r.observed_best).filter(([k]) => !k.endsWith("pa")).map(([, v]) => v));
+    const pf = (s.rules_null || {})[g] || {};
+    return `<div class="card"><div class="label">${g === "SHARED" ? "CPI+NFP" : g}: MIGLIOR t PER CASO CONTRO OSSERVATO</div>
+      ${nl.available && nl.groups[g] ? histogram(nl.groups[g].max_all, obs) : `<p class="small muted">mediana ${num(r.null_max_quantiles["0.5"])}, 95° ${num(r.null_max_quantiles["0.95"])}, 99° ${num(r.null_max_quantiles["0.99"])}</p>`}
+      <p class="small">${r.n_hyp.toLocaleString("it-IT")} ipotesi · p familywise del migliore <b>${num(pf.best_p_fwer, 3)}</b> · solo price action ${num(pf.best_pa_p_fwer, 3)}</p></div>`;
+  }).join("") + "</div>";
+  const bk = Object.entries(s.by_k_conditions || {}).map(([k, v]) => ({ k, ...v }));
+  h += `<div class="grid2"><div class="card"><div class="label">SINGOLE, COPPIE, TERNE (MIGLIOR t OSSERVATO)</div>${tableRows(bk, [
+    { h: "Gruppo | cutoff | lato", f: (r) => esc(r.k) }, { h: "1", num: 1, f: (r) => num(r.max1) }, { h: "2", num: 1, f: (r) => num(r.max2) }, { h: "3", num: 1, f: (r) => num(r.max3) }])}
+    <p class="small muted">Le combinazioni fanno sempre numeri più grandi, ma anche sui dati rimescolati: per questo conta il p familywise, non il t.</p></div>`;
+  const fv = s.family_value || [];
+  const fsets = [...new Set(fv.map((x) => x.features))];
+  h += `<div class="card"><div class="label">FAMIGLIE DI FEATURE NEI MODELLI (t MIGLIORE, SCOPERTA)</div>${tableRows(fsets.map((f) => ({ f, ...Object.fromEntries(["CPI", "NFP", "SHARED"].map((g) => [g, (fv.find((x) => x.features === f && x.group === g) || {}).t_max])) })), [
+    { h: "Insieme", f: (r) => esc(r.f) }, ...["CPI", "NFP", "SHARED"].map((g) => ({ h: g === "SHARED" ? "CPI+NFP" : g, num: 1, f: (r) => num(r[g]), cls: (r) => sgn(r[g]) }))])}
+    <p class="small muted">Vuoto = nessuna configurazione con almeno 20 trade.</p></div></div>`;
+  const ad = s.adaptivity || [];
+  h += `<div class="grid2"><div class="card"><div class="label">ADATTIVITÀ (t MEDIANO / MIGLIORE)</div>${tableRows(ad, [
+    { h: "Gruppo", f: (r) => r.group }, { h: "Adattività", f: (r) => r.adapt }, { h: "Config.", num: 1, f: (r) => r.configs }, { h: "t mediano", num: 1, f: (r) => num(r.t_median) }, { h: "t max", num: 1, f: (r) => num(r.t_max) }])}</div>`;
+  const pb = (s.pa_simple_baselines || []).slice().sort((a, b) => a.p_two_sided - b.p_two_sided).slice(0, 12);
+  h += `<div class="card"><div class="label">PRICE ACTION SEMPLICE: LA M1 SEGUE L'ULTIMA CANDELA? (64 CONFRONTI)</div>${tableRows(pb, [
+    { h: "Segnale", f: (r) => esc(r.signal) }, { h: "Famiglia", f: (r) => r.family }, { h: "Periodo", f: (r) => r.period }, { h: "Indovina", num: 1, f: (r) => pct(r.momentum_hit_rate) },
+    { h: "p", num: 1, f: (r) => num(r.p_two_sided, 3) }, { h: "R seguire", num: 1, f: (r) => R(r.mean_R_momentum), cls: (r) => sgn(r.mean_R_momentum) }, { h: "R invertire", num: 1, f: (r) => R(r.mean_R_reversal), cls: (r) => sgn(r.mean_R_reversal) }])}
+    <p class="small muted">I 12 confronti con p più basso. Soglia corretta per 64 test: p &lt; 0,0008 — nessuno la supera, e nessuno tiene lo stesso verso fra 2013–19 e 2020–26.</p></div></div>`;
+  box.innerHTML = h;
+}
+
+async function loadCandidates() {
+  const box = $("#cand-body");
+  let d;
+  try { d = await p2(); } catch (e) { box.textContent = e.message; return; }
+  let h = `<div class="card"><div class="label">CANDIDATE EDGES — SELEZIONATI PRIMA DI GUARDARE I DATI DI VERIFICA</div>
+    <p>Regola del protocollo: R medio &gt; 0 anche con costi conservative, positivo in almeno il 60% degli anni, sovrapposizione &lt; 0,7, punteggio t − 0,5 × (condizioni − 1). Fino a 5 per gruppo. Poi, una sola verifica.</p></div>`;
+  for (const g of ["CPI", "NFP", "SHARED"]) {
+    const c = d.rules[g].candidates || [];
+    h += `<div class="card"><div class="label">${g === "SHARED" ? "CPI+NFP" : g}</div>${tableRows(c.map((x, i) => ({ ...x, id: `RULE-${g}-${i + 1}` })), [
+      { h: "Id", f: (r) => `<b>${r.id}</b>` }, { h: "Lato @ cutoff", f: (r) => `${r.direction} @ ${r.cutoff}` }, { h: "Condizioni", f: (r) => `<span class="small">${r.conditions.map(esc).join("<br>")}</span>` },
+      { h: "n", num: 1, f: (r) => r.n }, { h: "Win", num: 1, f: (r) => pct(r.win_rate) }, { h: "R medio", num: 1, f: (r) => R(r.mean_R) }, { h: "Conservative", num: 1, f: (r) => R(r.mean_R_conservative) },
+      { h: "t", num: 1, f: (r) => num(r.t_search) }, { h: "p familywise", num: 1, f: (r) => num(r.p_fwer, 3) },
+      { h: "Classe finale", f: (r) => clsTag((d.items.find((i) => i.id === r.id) || {}).class) }])}</div>`;
+  }
+  box.innerHTML = h;
+}
+
+async function loadValidation() {
+  const box = $("#valid-body");
+  let d;
+  try { d = await p2(); } catch (e) { box.textContent = e.message; return; }
+  const st = d.summary.scenario_tests || [];
+  let h = `<div class="card"><div class="label">VERDETTO FINALE</div><div class="big-verdict">${esc(d.verdict)}</div>
+    <p>Classe ROBUST OOS EDGE: Holm p &lt; 0,05 nel test finale NFP, R &gt; 0 con costi conservative, R &gt; 0 per stop da 0,42 a 0,78 U, nessun anno oltre il 50% dell'R, almeno 20 trade. Nessun candidato la raggiunge.</p>
+    ${d.sealed ? `<p class="small muted">Test finale aperto ${esc(fmtTime(d.sealed.opened_utc))}, commit ${esc(d.sealed.code_commit)}, Holm m = ${d.sealed.holm_m}, hash dei candidati ${esc(d.sealed.inputs.rules_sha)} / ${esc(d.sealed.inputs.models_sha)}.</p>` : ""}</div>`;
+  for (const stage of ["final", "cpi_validation"]) {
+    const items = d.items.filter((i) => i[stage]);
+    h += `<div class="card"><div class="label">${stageName(stage)}</div>${testsTable(items, stage)}
+      <div class="label mt">ROBUSTEZZA A DECISIONI FISSE</div>${tableRows(items, [
+        { h: "Test", f: (r) => r.id },
+        ...["optimistic", "base", "conservative", "stress"].map((sc) => ({ h: sc, num: 1, f: (r) => { const x = st.find((y) => y.id === r.id && y.stage === stage && y.scenario === sc) || {}; return `${R(x.mean_R)}<div class="small muted">Holm ${num(x.holm_p, 2)}</div>`; } })),
+        ...["0.42", "0.6", "0.78"].map((k) => ({ h: "k " + k, num: 1, f: (r) => R((r[stage].by_stop_k || {})[k]) })),
+        { h: "T−30 / T−10 / T−5", num: 1, f: (r) => ["m30", "m10", "m5"].map((e) => num((r[stage].by_entry || {})[e])).join(" / ") },
+        { h: "Quota dell'anno migliore", num: 1, f: (r) => r[stage].best_year_share == null ? "totale ≤ 0" : r[stage].best_year_share > 1 ? "oltre 100%" : pct(r[stage].best_year_share) }])}
+      <p class="small muted">"Oltre 100%": senza l'anno migliore il totale sarebbe negativo.</p></div>`;
+  }
+  box.innerHTML = h;
+}
+
+let simReady = false;
+async function loadSimOptions() {
+  if (simReady) return;
+  simReady = true;
+  try {
+    const d = await p2();
+    const sel = $("#sim-strategy");
+    d.items.forEach((i) => { const o = document.createElement("option"); o.value = "candidate:" + i.id; o.textContent = "candidato " + i.id + " (solo OOS)"; sel.appendChild(o); });
+  } catch (e) { /* senza fase 2 restano le strategie semplici */ }
+  $("#sim-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const q = new URLSearchParams(new FormData(e.target)).toString();
+    const out = $("#sim-out");
+    out.textContent = "calcolo…";
+    try {
+      const r = await api("/api/phase2/simulate?" + q);
+      const m = r.metrics;
+      out.innerHTML = (r.note ? `<p class="small"><b>${esc(r.note)}</b></p>` : "") + (m.n ? `<div class="grid3">
+        <div><div class="label">TRADE</div><div class="stat">${m.n}</div><div class="small muted">win ${pct(m.win_rate)} · t ${num(m.t)}</div></div>
+        <div><div class="label">R MEDIO</div><div class="stat ${sgn(m.mean_R)}">${R(m.mean_R)}</div><div class="small muted">avg win ${R(m.avg_win_R)} · avg loss ${R(m.avg_loss_R)}</div></div>
+        <div><div class="label">TOTALE / DD MAX</div><div class="stat">${R(m.total_R, 1)}</div><div class="small muted">PF ${num(m.pf)} · drawdown ${num(m.max_dd_R, 1)} R</div></div></div>
+        <div class="chart mt">${equityChart(r.equity)}</div>` : '<p class="muted">Nessun trade con questi parametri.</p>') +
+        '<p class="small muted">Eventi reali, trade ricostruito tick per tick con i costi dello scenario. È una ricostruzione storica: nessuna di queste strategie ha superato la verifica fuori campione.</p>';
+    } catch (err) { out.textContent = err.message; }
+  });
+}
+
+function equityChart(eq) {
+  if (!eq.length) return "";
+  const W = 720, H = 200, L = 40, B = 20, T = 10;
+  const ys = eq.map((e) => e.cum), lo = Math.min(0, ...ys), hi = Math.max(0, ...ys);
+  const x = (i) => L + (i / Math.max(1, eq.length - 1)) * (W - L - 10), y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
+  const d = eq.map((e, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(e.cum).toFixed(1)}`).join("");
+  return svgEl(W, H, `<g class="grid"><line x1="${L}" x2="${W - 10}" y1="${y(0)}" y2="${y(0)}" stroke-dasharray="4 3"/></g>
+    <text x="${L - 4}" y="${y(hi) + 4}" text-anchor="end">${num(hi, 0)}</text><text x="${L - 4}" y="${y(lo) + 4}" text-anchor="end">${num(lo, 0)}</text>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    <text x="${L}" y="${H - 4}">${esc(eq[0].event_id)}</text><text x="${W - 10}" y="${H - 4}" text-anchor="end">${esc(eq[eq.length - 1].event_id)}</text>`);
+}
+
+async function loadLiveTrades() {
+  const box = $("#livetrades-body");
+  let t;
+  try { t = await api("/api/livetrades"); } catch (e) { box.textContent = e.message; return; }
+  box.innerHTML = `<div class="label">TRADE DI FASE 2 SULLE RELEASE REALI (IMMUTABILE)</div>
+    <p>Catena di hash: ${t.chain_ok ? '<span class="pill ok">INTEGRA</span>' : `<span class="pill bad">ALTERATA alla riga ${esc(t.chain_broken_at)}</span>`} · ${t.trades.length} release registrate.
+    Per ogni CPI e NFP: la scheda salvata prima (stop, ampiezza attesa, azione) e il trade simulato sui tick reali dopo.</p>
+    ${t.trades.length ? tableRows(t.trades, [
+      { h: "Evento", f: (r) => esc(r.event_id) }, { h: "Azione", f: (r) => esc(r.action) }, { h: "Stop", num: 1, f: (r) => usd(r.sl_usd) },
+      { h: "Range atteso / reale", num: 1, f: (r) => `${usd(r.expected_range_usd)} / ${usd(r.actual_range_usd)}` },
+      { h: "Errore ampiezza (log)", num: 1, f: (r) => num(r.range_log_error) },
+      { h: "R LONG", num: 1, f: (r) => R(r.r_long), cls: (r) => sgn(r.r_long) }, { h: "R SHORT", num: 1, f: (r) => R(r.r_short), cls: (r) => sgn(r.r_short) },
+      { h: "EV previsti L/S", num: 1, f: (r) => `${R(r.ev_long_r)} / ${R(r.ev_short_r)}` }, { h: "Qualità", f: (r) => esc(r.quality) }]) :
+      '<p class="muted">Nessuna release ancora risolta con la scheda di fase 2.</p>'}`;
+}
+
+async function loadMarket() {
+  const box = $("#market-body");
+  let o, d;
+  try { [o, d] = await Promise.all([api("/api/overview"), p2()]); } catch (e) { box.textContent = e.message; return; }
+  const p = o.prediction, c = p && p.features && p.features.extra ? p.features.extra.phase2 : null, f = (p && p.features && p.features.features) || {};
+  let h = `<div class="card"><div class="label">MARKET STATE — ADESSO</div>
+    <p>${o.last_quote ? `XAU ${num((o.last_quote.bid + o.last_quote.ask) / 2)} · spread ${o.last_quote.ask > o.last_quote.bid ? usd(o.last_quote.ask - o.last_quote.bid) : "n/d (la fonte dà solo il prezzo medio)"} (${esc(o.last_quote.provider)}, ${fmtTime(o.last_quote.ts_utc)})` : "nessun prezzo live registrato"} · mercato ${o.market_open ? "aperto" : "chiuso"}</p>
+    ${c && c.available ? `<p>Prossima release studiata: <b>${esc(o.next_event.name)}</b>. Volatilità M1 dell'ultima ora ${usd(c.atr_m1_60_usd)} (percentile ${pct(c.atr_percentile_5y)}); U_news ${usd(c.U_news_usd)}; stop 0,60 U = ${usd(c.sl_usd)}.</p>` : '<p class="muted">Scheda di fase 2 non ancora calcolata per la prossima release.</p>'}
+    ${Object.keys(f).length ? `<p class="small muted">Dalla fotografia della previsione: ${["ret_60m_atrh", "atr_h1_pct", "dxy_ret_1d_pct", "y2y", "vix"].filter((k) => f[k] != null).map((k) => `${esc(k)} ${num(f[k], 3)}`).join(" · ")}</p>` : ""}</div>`;
+  const eras = (d.eras || []).filter((x) => x.scenario === "base");
+  h += `<div class="card"><div class="label">REGIMI STORICI DEL TRADE (COSTI BASE)</div>${tableRows(eras, [
+    { h: "Famiglia", f: (r) => r.family }, { h: "Era", f: (r) => r.era }, { h: "Release", num: 1, f: (r) => r.n },
+    { h: "Sempre LONG", num: 1, f: (r) => R(r.mean_R_long), cls: (r) => sgn(r.mean_R_long) }, { h: "Sempre SHORT", num: 1, f: (r) => R(r.mean_R_short), cls: (r) => sgn(r.mean_R_short) },
+    { h: "Costo", num: 1, f: (r) => R(-r.cost_R) }, { h: "Oracolo", num: 1, f: (r) => R(r.oracle_R) }])}
+    <p class="small muted">Costo = perdita media aprendo LONG e SHORT insieme. Oracolo = chi conosce in anticipo il lato migliore: il tetto.</p></div>`;
+  const br = d.regime_breaks || {};
+  h += `<div class="card"><div class="label">ROTTURE STRUTTURALI (SEGMENTAZIONE CON TEST A PERMUTAZIONI)</div>${["CPI", "NFP"].map((fam) => `<h3>${fam}</h3>` + tableRows(Object.entries(br[fam] || {}).map(([k, v]) => ({ k, v })), [
+    { h: "Serie", f: (r) => esc(r.k) }, { h: "Segmenti (dal → al: media)", f: (r) => `<span class="small">${(r.v || []).map((s) => `${s.from} → ${s.to}: ${num(s.mean, 2)} (${s.n})`).join("<br>")}</span>` }])).join("")}</div>`;
+  box.innerHTML = h;
+}
+
+async function loadCompute() {
+  const box = $("#compute-body");
+  let c;
+  try { c = await api("/api/compute"); } catch (e) { box.textContent = e.message; return; }
+  const hw = c.hardware;
+  let h = `<div class="grid3"><div class="card"><div class="label">CPU</div><div class="stat">${hw.cpu_cores}</div><div class="small muted">core disponibili</div></div>
+    <div class="card"><div class="label">RAM</div><div class="stat">${hw.ram_gb ?? "n/d"} GB</div><div class="small muted">disco libero ${hw.disk_free_gb} GB</div></div>
+    <div class="card"><div class="label">IPOTESI REGISTRATE</div><div class="stat">${c.registry.total_hypotheses.toLocaleString("it-IT")}</div><div class="small muted">tutte contate nella correzione</div></div></div>`;
+  h += `<div class="card"><div class="label">CAMPAGNE</div>${tableRows(c.campaigns, [
+    { h: "Campagna", f: (r) => `<b>${esc(r.name || r.key)}</b>` }, { h: "Stato", f: (r) => r.running ? '<span class="pill warn">IN CORSO</span>' : esc(r.stage || "mai eseguita") },
+    { h: "Fatti / totale", num: 1, f: (r) => `${r.done ?? 0} / ${r.total ?? "?"}` }, { h: "Rimanenti", num: 1, f: (r) => (r.total ?? 0) - (r.done ?? 0) },
+    { h: "Worker · modo", f: (r) => `${r.workers ?? "?"} · ${esc(r.mode || "")}` }, { h: "Velocità · ETA", f: (r) => esc(r.note || "") },
+    { h: "Ripresi dal checkpoint", num: 1, f: (r) => r.checkpointed ?? "—" }, { h: "Errori", num: 1, f: (r) => r.errors ?? 0 },
+    { h: "Aggiornato", f: (r) => fmtShort(r.updated_utc) }])}
+    <form id="compute-form" class="simform"><label>Campagna <select name="campaign"><option value="rules">regole (permutazioni)</option><option value="models">modelli</option></select></label>
+      <label>Modalità <select name="mode">${Object.entries(c.modes).map(([m, w]) => `<option value="${m}">${m}${m === "CUSTOM" ? "" : " (" + w + " worker)"}</option>`).join("")}</select></label>
+      <label>Worker (CUSTOM) <input name="workers" type="number" min="1" max="${hw.cpu_cores}" value="1"></label>
+      <button class="btn" type="submit">Avvia / riprendi</button> <span id="compute-msg" class="small muted"></span></form>
+    <p class="small muted">AUTO = tutti i core meno uno · BALANCED = metà · MAXIMUM = tutti (un thread per processo) · CUSTOM = a scelta. Le campagne riprendono dal checkpoint: ciò che è già salvato non si ricalcola, e il risultato non dipende dal numero di worker.</p></div>`;
+  h += `<div class="card"><div class="label">REGISTRO DEGLI ESPERIMENTI</div>${tableRows(c.registry.by_stage, [
+    { h: "Fase", f: (r) => esc(r.stage) }, { h: "Gruppo", f: (r) => esc(r.group) }, { h: "Tipo", f: (r) => esc(r.kind) }, { h: "Ipotesi", num: 1, f: (r) => r.hypotheses.toLocaleString("it-IT") }, { h: "Esecuzioni", num: 1, f: (r) => r.runs }])}</div>`;
+  box.innerHTML = h;
+  $("#compute-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      const r = await api("/api/compute/start", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campaign: fd.get("campaign"), mode: fd.get("mode"), workers: Number(fd.get("workers")) }) });
+      $("#compute-msg").textContent = `avviata ${r.started} (${r.mode}, ${r.workers} worker)`;
+    } catch (err) { $("#compute-msg").textContent = err.message; }
+  });
 }
 
 $("#recalc").addEventListener("click", async () => {
