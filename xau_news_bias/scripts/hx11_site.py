@@ -23,7 +23,10 @@ from xnb.providers.dukascopy import DukascopyProvider  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 BINS = np.arange(-120, 120, 5)
 C = SCENARIOS["base"]
-SPREAD_CAP = {"S0": 0.0, "S1": 4.0, "S2": None}  # dollari; 4 $ = 40 pips
+SPREAD_CAP = {"S0": 0.0, "S1": 4.0, "S2": None, "S3": 4.0}  # dollari; 4 $ = 40 pips
+# S0 nessun costo; S1/S2 costi base; S3 (emendamento 1): lo spread conta solo per lo stop,
+# ingresso e uscita al prezzo medio senza costi
+MODE = {"S0": "none", "S1": "full", "S2": "full", "S3": "stop_only"}
 
 
 def quotes(bid, ask, scen):
@@ -33,17 +36,25 @@ def quotes(bid, ask, scen):
     return mid - s2 / 2, mid + s2 / 2
 
 
-def trade(t, b, a, d, stop, costs):
+def trade(t, b, a, d, stop, mode):
     j = int(np.searchsorted(t, -60_000, side="right") - 1)
     sp0 = a[j] - b[j]
-    fixed = C.bp * (b[j] + a[j]) / 2 if costs else 0.0
-    entry = a[j] + C.entry_spreads * sp0 + fixed if d > 0 else b[j] - C.entry_spreads * sp0 - fixed
     k = np.nonzero((t > t[j]) & (t < 60_000))[0]
     side, sp = (b[k] if d > 0 else a[k]), a[k] - b[k]
-    fav = d * (side - entry)
-    hit = np.nonzero(fav <= -stop)[0]
-    h, stopped = (int(hit[0]), True) if len(hit) else (len(k) - 1, False)
-    ex = side[h] - d * ((C.stop_spreads if stopped else C.exit_spreads) * sp[h] + fixed)
+    if mode == "stop_only":
+        mid = (b[k] + a[k]) / 2
+        entry = (b[j] + a[j]) / 2
+        hit = np.nonzero(d * (side - entry) <= -stop)[0]
+        fav = d * (mid - entry)
+        h, stopped = (int(hit[0]), True) if len(hit) else (len(k) - 1, False)
+        ex = side[h] - d * C.stop_spreads * sp[h] if stopped else mid[h]
+    else:
+        fixed = C.bp * (b[j] + a[j]) / 2 if mode == "full" else 0.0
+        entry = a[j] + C.entry_spreads * sp0 + fixed if d > 0 else b[j] - C.entry_spreads * sp0 - fixed
+        fav = d * (side - entry)
+        hit = np.nonzero(fav <= -stop)[0]
+        h, stopped = (int(hit[0]), True) if len(hit) else (len(k) - 1, False)
+        ex = side[h] - d * ((C.stop_spreads if stopped else C.exit_spreads) * sp[h] + fixed)
     return {"en": round(float(entry), 2), "sl": round(float(entry - d * stop), 2), "ex": round(float(ex), 2),
             "et": int(t[k][h]), "st": stopped, "r": round(float(max(d * (ex - entry) / stop, -1.0)), 3),
             "mfe": round(float(fav[: h + 1].max()), 2), "mae": round(float(fav[: h + 1].min()), 2),
@@ -96,7 +107,7 @@ def event_rows(duka, ev, pred):
                 i = int(np.searchsorted(t, ms, side="right") - 1)
                 return [round(float(b[i]), 2), round(float(a[i]), 2)]
             sc[s] = {"c": cand, "p29": px(-60_000), "p30": px(-1), "p31": px(59_999),
-                     "L": trade(t, b, a, 1, stop, s != "S0"), "S": trade(t, b, a, -1, stop, s != "S0")}
+                     "L": trade(t, b, a, 1, stop, MODE[s]), "S": trade(t, b, a, -1, stop, MODE[s])}
         rows.append({"id": r.event_id, "f": r.family, "d": str(r.t0_utc)[:16], "y": int(r.year),
                      "live": bool(r.live), "mv": round(float(r.mv), 2), "stop": stop, "ref": round(float(ref), 2),
                      "rule": rule, "model": None if q is None else ("LONG" if q >= 0.5 else "SHORT"),
@@ -106,10 +117,11 @@ def event_rows(duka, ev, pred):
 
 def live_events(path: Path) -> pd.DataFrame:
     """Release risolte dal vivo (record 'result' del registro live)."""
-    if not path.exists():
-        return pd.DataFrame(columns=["event_id", "family", "t0_utc", "year", "mv", "live"])
-    res = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    cols = ["event_id", "family", "t0_utc", "year", "mv", "live"]
+    res = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()] if path.exists() else []
     res = [x for x in res if x["type"] == "result"]
+    if not res:
+        return pd.DataFrame(columns=cols)
     return pd.DataFrame([{"event_id": x["event_id"], "family": x["family"], "t0_utc": pd.Timestamp(x["t0_utc"]),
                           "year": pd.Timestamp(x["t0_utc"]).year, "mv": x["mv"], "live": True} for x in res])
 

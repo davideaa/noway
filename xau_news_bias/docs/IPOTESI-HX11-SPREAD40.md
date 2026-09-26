@@ -108,3 +108,25 @@ Si aggiunge **S3, spread solo sullo stop**:
 
 Il verdetto resta su S1, come scritto prima. S3 si riporta accanto, perché
 è il modo in cui Davide descrive il suo broker.
+
+### Risultati S3 (dopo l'emendamento 1)
+
+NFP, regola "contrario della precedente":
+
+| Periodo | S1 (verdetto) R a trade | S3 R a trade | S3 vantaggio sul caso | S3 da 10.000 |
+|---|---|---|---|---|
+| IS 2014–19 | +0,03 | +0,15 | +0,13 | 14.510 |
+| OOS 2020–26 | +0,22 | +0,35 | +0,27 | 27.298 |
+| Ultimi 3 anni | +0,52 | +0,66 | +0,44 | 23.299 |
+| Tutto (148) | +0,13 | +0,25 | +0,20 | 39.608 |
+
+- Lo spread che si apre prima della news ha preso lo stop solo in **2 NFP
+  su 148** (03/04/2020 e 06/11/2020). Negli ultimi 3 anni mai: S3 = S0.
+- La differenza fra S1 e S3 è tutta nei costi di ingresso e uscita
+  (slittamento e 0,5 bp), non nello stop.
+- S3 è ottimistico: compra e vende al prezzo medio. Lo spread normale è in
+  mediana 4 pips all'ingresso e 4 alla chiusura, quindi comprando all'ask e
+  vendendo al bid si perdono circa 4 pips a trade (0,04–0,07 R).
+- Il verdetto resta quello di S1: **edge solo sull'NFP, da confermare dal
+  vivo**. Il vantaggio sul caso è lo stesso in tutti gli scenari (+0,19–0,20
+  R a trade).

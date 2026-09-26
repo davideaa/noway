@@ -5,7 +5,7 @@
 
 Bias = contrario della reazione della release precedente della stessa famiglia (prima M1, mid).
 Risultato: movimento della prima M1 e trade di Davide (T0-60 s, stop 60/100 pips, uscita fine M1, -1R)
-nei tre scenari di spread di H-X11. Il CPI si registra solo per informazione: non si trada.
+negli scenari di spread di H-X11 (S0-S3). Il CPI si registra solo per informazione: non si trada.
 """
 import hashlib
 import json
@@ -78,7 +78,7 @@ def resolve(ev: dict) -> dict | None:
     from xnb.phase2 import hx5
     from xnb.providers.dukascopy import DukascopyProvider
     sys.path.insert(0, str(ROOT / "scripts"))
-    from hx11_site import SPREAD_CAP, first_minute_move, load_ticks, quotes, trade
+    from hx11_site import MODE, SPREAD_CAP, first_minute_move, load_ticks, quotes, trade
 
     t0 = pd.Timestamp(ev["t0_utc"])
     t, bid, ask = load_ticks(DukascopyProvider(), t0)
@@ -90,7 +90,7 @@ def resolve(ev: dict) -> dict | None:
     res = {}
     for s in SPREAD_CAP:
         b, a = quotes(bid, ask, s)
-        tr = trade(t, b, a, d, stop, s != "S0")
+        tr = trade(t, b, a, d, stop, MODE[s])
         res[s] = {k: tr[k] for k in ("en", "sl", "ex", "st", "r")}
     return {"mv": round(mv, 2), "hit": bool(mv != 0 and (mv > 0) == (d > 0)), "stop_usd": stop, "trade": res,
             "n_ticks": int(len(t))}

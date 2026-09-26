@@ -94,7 +94,8 @@ summary::-webkit-details-marker{display:none}
 summary .fm{font:600 11px "IBM Plex Mono",monospace;color:var(--muted)}
 summary .dt{font-family:"IBM Plex Mono",monospace;color:var(--ink2);font-size:14px}
 summary .tg{font:600 13px "IBM Plex Mono",monospace}
-summary .mv{color:var(--ink2);font-size:14px}
+summary .mv{color:var(--ink2);font-size:14px;line-height:1.2}
+summary .mv small{display:block;font-size:12px;color:var(--muted)}
 .r{display:inline-block;min-width:66px;text-align:right;padding:1px 8px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:14px}
 .r.w{background:var(--good-bg);color:var(--good)} .r.l{background:var(--bad-bg);color:var(--bad)} .r.n{background:var(--none-bg);color:var(--muted)}
 .body{padding:0 12px 14px;display:grid;gap:12px}
@@ -118,7 +119,7 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 <header>
   <div class="eyebrow">XAUUSD · solo NFP · bias prima della news</div>
   <h1>NFP: fai il contrario della NFP precedente</h1>
-  <p class="muted">Se all'ultima NFP l'oro è salito nel primo minuto, stavolta SHORT. Se è sceso, LONG. Entri alle 14:29, stop 60 pips fino al 2023 e 100 dal 2024, chiudi alle 14:31. Spread come il tuo broker: al massimo 40 pips. Tutti i prezzi vengono dai tick veri.</p>
+  <p class="muted">Se all'ultima NFP l'oro è salito nel primo minuto, stavolta SHORT. Se è sceso, LONG. Entri alle 14:29, stop 60 pips fino al 2023 e 100 dal 2024, chiudi alle 14:31. Lo spread si apre fino a 40 pips pochi secondi prima della news e può toccare lo stop. Tutti i prezzi vengono dai tick veri.</p>
 </header>
 
 <section>
@@ -131,9 +132,10 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
   <h2>C'è edge?</h2>
   <div class="bar" role="group" aria-label="Spread">
     <span class="lab">Spread</span>
-    <div class="seg" id="sSeg"><button data-v="S0" aria-pressed="false">Nessuno</button><button data-v="S1" aria-pressed="true">Max 40 pips</button><button data-v="S2" aria-pressed="false">Dukascopy</button></div>
+    <div class="seg" id="sSeg"><button data-v="S0" aria-pressed="false">Nessuno</button><button data-v="S3" aria-pressed="false">Solo stop</button><button data-v="S1" aria-pressed="true">40 pips</button><button data-v="S2" aria-pressed="false">Dukascopy</button></div>
   </div>
   <div class="edge" id="edge"></div>
+  <p class="small muted" id="sdesc"></p>
   <p class="small muted">"A caso" = media fra LONG e SHORT sulle stesse NFP. Vantaggio = R in più a trade rispetto al caso. Il verdetto è con lo spread a 40 pips: edge se il vantaggio è positivo sia nel 2014–19 sia nel 2020–26 <b>e</b> il trade guadagna.</p>
 </section>
 
@@ -152,7 +154,8 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
   <b>Da sapere</b>
   <ul>
     <li>La regola l'ho trovata guardando questi stessi dati. Nel 2008–13, anni mai usati, sull'NFP non funzionava (49%). La prova vera è dal vivo: dopo 24 NFP servono almeno 15 indovinate e somma R positiva.</li>
-    <li>Lo spread a 40 pips è quello che dici tu del tuo broker. Sulle NFP non cambia niente rispetto allo spread Dukascopy: gli stop li prende il prezzo, non lo spread.</li>
+    <li>Lo spread che si apre prima della news ha preso lo stop solo 2 volte su 148 NFP (aprile e novembre 2020). Gli altri stop li ha presi il prezzo.</li>
+    <li>Nella lista il primo numero è di quanto ha chiuso la candela della news rispetto a quella prima; sotto c'è quanto è grande la candela dal minimo al massimo. Negli ultimi 3 anni la candela è in mediana 145 pips, ma chiude solo 90 pips più in là: 8 NFP su 34 hanno fatto una candela di 200 pips o più, 6 sotto i 100.</li>
     <li>Dati controllati con una seconda fonte (HistData.com): stesse candele, differenza mediana sotto 1 pip.</li>
     <li>Il CPI è escluso: con la stessa regola indovina il 49% e perde 0,21R a trade. Anche il calcolatore sull'NFP non guadagna (51%, 0,00R a trade).</li>
     <li>Ottobre 2025 non c'è stata la NFP (shutdown). Il 3 aprile 2026 il mercato dell'oro era chiuso (Venerdì Santo).</li>
@@ -247,7 +250,14 @@ function tick(){
 }
 
 /* ---------- dove c'è edge ---------- */
+const SDESC = {
+  S0: "Nessuno: niente spread e niente costi. Irrealistico, serve solo come limite.",
+  S3: "Solo stop: lo spread (max 40 pips) conta solo se tocca lo stop; ingresso e uscita al prezzo medio. È come lo descrivi tu, ma un po' ottimistico: compri comunque all'ask e chiudi al bid (circa 4 pips a testa in mediana).",
+  S1: "40 pips: spread max 40 pips e costi pieni: ingresso e uscita con mezzo spread di slittamento in più, stop con uno spread in più, 0,5 punti base a lato. Prudente: il verdetto si decide qui.",
+  S2: "Dukascopy: come 40 pips, ma con lo spread vero di Dukascopy, che alla news arriva a 100–150 pips.",
+};
 function edge(){
+  $("#sdesc").textContent = SDESC[st.s];
   const base = EV.filter(e => e.f==="NFP" && !e.live), b = "rule";
   const t = stats(base, b, st.s);
   // il verdetto si decide sempre sullo scenario principale S1 (spread max 40 pips), come pre-registrato in H-X11
@@ -303,6 +313,10 @@ function cum(){
 }
 
 /* ---------- lista ---------- */
+function rangeOf(e){  // candela della news sul bid vero, dal minimo al massimo, in pips
+  const vs = e.sc.S2.c.filter((v,j) => v && BINS[j]>=0 && BINS[j]<60);
+  return Math.round((Math.max(...vs.map(v=>v[1])) - Math.min(...vs.map(v=>v[2])))/10);
+}
 function list(){
   const rows = rowsNow().filter(e => e[st.b]).slice().reverse(), s = stats(rows, st.b, st.s);
   $("#cnt").textContent = `${rows.length} NFP, dalla più recente. Indovinate ${s.k}, in guadagno ${s.win}. Tocca una riga per aprire il grafico.`;
@@ -310,7 +324,7 @@ function list(){
   for(const e of rows){
     const d = document.createElement("details"); d.dataset.id = e.id;
     const b = e[st.b], h = hit(e, st.b), tr = e.sc[st.s][b[0]];
-    d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips</span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
+    d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips<small>candela ${rangeOf(e)}</small></span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
     d.addEventListener("toggle", () => { if(d.open) openRow(d, e); });
     box.appendChild(d);
   }
@@ -337,7 +351,7 @@ function kvFill(kv, e){
   const fam = EV.filter(x => x.f===e.f), i = fam.indexOf(e), prev = fam[i-1], b = e[st.b], S = e.sc[st.s], tr = S[b[0]], op = S[other(b[0])];
   const why = st.b==="rule" ? (prev ? `${e.f} del ${fDate(prev)} ${prev.mv>0?"salito":"sceso"} → ${b}` : `Contrario della release precedente → ${b}`)
                             : `Calcolatore: probabilità che salga ${Math.round(e.pm*100)}% → ${b}`;
-  const sc = {S0:"senza spread", S1:"spread max 40 pips", S2:"spread Dukascopy"}[st.s];
+  const sc = {S0:"senza spread", S1:"spread max 40 pips con costi", S2:"spread Dukascopy con costi", S3:"spread max 40 pips solo sullo stop, ingresso e uscita al prezzo medio"}[st.s];
   const rng = (() => { const vs = S.c.filter((v,j) => v && BINS[j]>=0 && BINS[j]<60); return Math.round((Math.max(...vs.map(v=>v[1])) - Math.min(...vs.map(v=>v[2])))/10); })();
   const rows = [
     [`<span class="why">${why}. Stop ${pips(e.stop)} pips = 1R. Prezzi: ${sc}.</span>`],
