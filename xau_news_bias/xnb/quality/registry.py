@@ -44,7 +44,8 @@ class Source:
 SOURCES: list[Source] = [
     Source(
         id="dukascopy", name="Dukascopy historical (tick, M1, H1)", provider="Dukascopy Bank SA",
-        category="market", variables=["XAUUSD tick/M1/H1", "EURUSD, USDJPY, GBPUSD, USDCAD, USDSEK, USDCHF H1/M1"],
+        category="market", variables=["XAUUSD tick/M1/H1", "EURUSD, USDJPY, GBPUSD, USDCAD, USDSEK, USDCHF H1/M1",
+                                            "USA500.IDX, USATECH.IDX M1 (fase 2, dal 2012)"],
         endpoint="https://jetta.dukascopy.com/v1 (JSON) · fallback https://datafeed.dukascopy.com/datafeed (.bi5)",
         frequency="tick", latency="file orario pubblicato dopo la chiusura dell'ora (+ qualche minuto)",
         history="XAUUSD tick dal 2003-05-05; FX dal 2003", live="no (solo storico, ritardo ~1 h)",
@@ -74,8 +75,11 @@ SOURCES: list[Source] = [
         used_in=["live: fallback e controllo incrociato del prezzo"], stale_after_s=600, market_hours_only=True,
     ),
     Source(
-        id="bls", name="BLS — archivio comunicati, calendario iCal, Tabella A CPI", provider="U.S. Bureau of Labor Statistics",
-        category="calendar+macro", variables=["date/ore release CPI, NFP, PPI", "CPI e core CPI m/m e y/y come pubblicati"],
+        id="bls", name="BLS — archivio comunicati, calendario iCal, Tabella A CPI, Summary table NFP",
+        provider="U.S. Bureau of Labor Statistics",
+        category="calendar+macro", variables=["date/ore release CPI, NFP, PPI", "CPI e core CPI m/m e y/y come pubblicati",
+                                              "NFP: payrolls, revisioni dei 2 mesi prima, disoccupazione, salari, ore "
+                                              "(Summary table A/B dei comunicati Employment Situation, dal 2010)"],
         endpoint="https://www.bls.gov/bls/news-release/cpi.htm · /schedule/news_release/bls.ics · /news.release/archives/",
         frequency="mensile", latency="il comunicato è pubblico alle 08:30 ET", history="comunicati dal 1994 (HTML dal 2008)",
         live="sì (calendario futuro con ora esatta)", point_in_time="SÌ (testo del comunicato del giorno)",
@@ -139,7 +143,9 @@ SOURCES: list[Source] = [
     ),
     Source(
         id="ff_history_github", name="ForexFactory storico (dataset di terzi)", provider="github.com/janickfarrell/newfac",
-        category="consensus", variables=["forecast, previous, actual CPI 2007–2026"],
+        category="consensus", variables=["forecast, previous, actual CPI 2007–2026",
+                                         "fase 2: prime stampe e forecast di NFP, disoccupazione, salari, PPI, PCE, "
+                                         "vendite al dettaglio, ISM, claims, ADP, JOLTS, UoM, Fed funds (memoria delle sorprese)"],
         endpoint="https://github.com/janickfarrell/newfac/releases/download/calendar-data/forexfactory_calendar.csv",
         frequency="aggiornamenti sporadici", latency="—", history="2007–2026", live="no",
         point_in_time="PARZIALE: forecast mostrato alla release (noto prima di T0, non garantito a T−3D); "
@@ -157,6 +163,19 @@ SOURCES: list[Source] = [
         limits="richiede poche richieste l'ora (lo scheduler legge ogni 30 min)", timezone="America/New_York (ISO con offset)",
         fallback="bls (solo date/ore, senza consensus)", used_in=["live"], stale_after_s=6 * 3600,
         critical_for_live=True,
+    ),
+    Source(
+        id="news_indices", name="Indici di incertezza dal testo dei giornali (EPU, GPR)",
+        provider="Baker-Bloom-Davis (policyuncertainty.com) · Caldara-Iacoviello (matteoiacoviello.com)",
+        category="news", variables=["EPU giornaliero USA", "GPR giornaliero, minacce, atti"],
+        endpoint="https://www.policyuncertainty.com/media/All_Daily_Policy_Data.csv · "
+                 "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls",
+        frequency="giornaliera", latency="EPU 1-2 giorni; GPR aggiornato a blocchi, fino a una settimana",
+        history="EPU dal 1985, GPR dal 1985", live="giornaliero (in ritardo)",
+        point_in_time="PARZIALE: le serie possono essere ricalcolate; regole prudenti EPU D+2, GPR D+8",
+        cost="gratuito", limits="file accademici, formato non garantito", timezone="date (USA)", fallback=None,
+        used_in=["research (fase 2)"], stale_after_s=None,
+        notes="Unica forma di 'news/geopolitica' ricostruibile point-in-time senza etichette a posteriori.",
     ),
 ]
 

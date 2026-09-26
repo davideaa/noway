@@ -126,13 +126,15 @@ def search(sp: Space, r: np.ndarray, min_support: int, rows: np.ndarray | None =
     t2 = _t(S2, Q2, N2)
     invalid = (N2 < min_support) | (fid[:, None] == fid[None, :]) | np.tri(P, dtype=bool)
     t2[invalid] = -np.inf
-    flat = np.argpartition(t2.ravel(), -BEAM)[-BEAM:]
+    beam = min(BEAM, t2.size)
+    flat = np.argpartition(t2.ravel(), -beam)[-beam:]
     bi, bj = np.unravel_index(flat, t2.shape)
     B = M[bi] * M[bj]
     N3 = B @ M.T
     t3 = _t((B * r) @ M.T, (B * r2) @ M.T, N3)
     inv3 = (N3 < min_support) | (fid[None, :] == fid[bi][:, None]) | (fid[None, :] == fid[bj][:, None])
     t3[inv3] = -np.inf
+    t3[~np.isfinite(t2[bi, bj])] = -np.inf  # coppie non valide nel beam (solo con pochissime primitive)
     out = {"max1": float(t1.max()), "max2": float(np.max(t2)), "max3": float(np.max(t3))}
     out["max"] = max(out["max1"], out["max2"], out["max3"])
     if keep_top:

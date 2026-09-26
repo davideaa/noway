@@ -60,6 +60,16 @@ def log_experiment(stage: str, grp: str, kind: str, n_hyp: int, config: dict, da
     con.close()
 
 
+def log_experiment_once(stage: str, grp: str, kind: str, n_hyp: int, config: dict, dataset_sha: str,
+                        seed: int | None, result: dict | None = None) -> None:
+    """Come ``log_experiment`` ma una sola volta per (stage, grp, kind): rieseguire non gonfia i conteggi."""
+    con = _con()
+    n = con.execute("SELECT COUNT(*) FROM experiments WHERE stage=? AND grp=? AND kind=?", (stage, grp, kind)).fetchone()[0]
+    con.close()
+    if not n:
+        log_experiment(stage, grp, kind, n_hyp, config, dataset_sha, seed, result)
+
+
 def campaign_update(name: str, **kw) -> None:
     con = _con()
     with con:
