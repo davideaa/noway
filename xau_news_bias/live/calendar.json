@@ -1,0 +1,41 @@
+{
+ "nota": "Prossime release CPI e NFP dal calendario ufficiale BLS (iCal), esportate dal database locale il 2026-09-26.",
+ "eventi": [
+  {
+   "event_id": "NFP_2026-10-02",
+   "family": "NFP",
+   "t0_utc": "2026-10-02T12:30:00Z",
+   "source": "bls_ics"
+  },
+  {
+   "event_id": "CPI_2026-10-14",
+   "family": "CPI",
+   "t0_utc": "2026-10-14T12:30:00Z",
+   "source": "bls_ics"
+  },
+  {
+   "event_id": "NFP_2026-11-06",
+   "family": "NFP",
+   "t0_utc": "2026-11-06T13:30:00Z",
+   "source": "bls_ics"
+  },
+  {
+   "event_id": "CPI_2026-11-10",
+   "family": "CPI",
+   "t0_utc": "2026-11-10T13:30:00Z",
+   "source": "bls_ics"
+  },
+  {
+   "event_id": "NFP_2026-12-04",
+   "family": "NFP",
+   "t0_utc": "2026-12-04T13:30:00Z",
+   "source": "bls_ics"
+  },
+  {
+   "event_id": "CPI_2026-12-10",
+   "family": "CPI",
+   "t0_utc": "2026-12-10T13:30:00Z",
+   "source": "bls_ics"
+  }
+ ]
+}

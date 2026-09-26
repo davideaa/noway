@@ -1,0 +1,458 @@
+<title>XAU News Bias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;112,800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f5f5f2; --panel:#ffffff; --ink:#15171c; --ink2:#4d515a; --muted:#7b7f88; --line:#e3e2dc; --grid:#ecebe6;
+  --gold:#a8791c; --long:#2a78d6; --short:#eb6834; --good:#0f8a0f; --bad:#c93434; --warn:#8a6d1a;
+  --good-bg:#e6f4e6; --bad-bg:#fbe9e8; --none-bg:#eeeeea; --warn-bg:#f6efe0; --zone:#f6efe0; --rl:#d9d6cc;
+  --up:#139c72; --dn:#d64545; --ask:#9a9eab; --entry:#0a9be0; --stop:#d11f1f; --rand:#9a9eab;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121316; --panel:#1b1c20; --ink:#f2f2ee; --ink2:#c2c4c9; --muted:#8d9098; --line:#2e3036; --grid:#25272c;
+    --gold:#d9a63e; --long:#3987e5; --short:#d95926; --good:#3fbf3f; --bad:#ec6a6a; --warn:#d9b54e;
+    --good-bg:#16301a; --bad-bg:#3a1c1c; --none-bg:#26272c; --warn-bg:#2e2716; --zone:#2a2519; --rl:#3a3c42;
+    --up:#26b38a; --dn:#ef5b5b; --ask:#6d717d; --entry:#38bdf8; --stop:#ff5a5a; --rand:#6d717d;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121316; --panel:#1b1c20; --ink:#f2f2ee; --ink2:#c2c4c9; --muted:#8d9098; --line:#2e3036; --grid:#25272c;
+  --gold:#d9a63e; --long:#3987e5; --short:#d95926; --good:#3fbf3f; --bad:#ec6a6a; --warn:#d9b54e;
+  --good-bg:#16301a; --bad-bg:#3a1c1c; --none-bg:#26272c; --warn-bg:#2e2716; --zone:#2a2519; --rl:#3a3c42;
+  --up:#26b38a; --dn:#ef5b5b; --ask:#6d717d; --entry:#38bdf8; --stop:#ff5a5a; --rand:#6d717d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;display:grid;gap:26px}
+h1,h2,h3{font-family:"Archivo","Arial Narrow",system-ui,sans-serif;font-stretch:112%;margin:0;text-wrap:balance}
+h1{font-weight:800;font-size:clamp(26px,6vw,40px);line-height:1.08} h2{font-weight:600;font-size:21px} h3{font-weight:600;font-size:17px}
+p{margin:0}
+.eyebrow{font:500 12px/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--ink2)} .small{font-size:14px}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+header{display:grid;gap:12px}
+section{display:grid;gap:12px}
+.live{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.nx{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.nx.trade{border-color:var(--gold)}
+.nx .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.cd{font:600 15px "IBM Plex Mono",monospace;color:var(--ink2)}
+.bias{font:800 30px/1 "Archivo",sans-serif;font-stretch:112%}
+.L{color:var(--long)} .S{color:var(--short)} .ok{color:var(--good)} .ko{color:var(--bad)}
+.chip{display:inline-block;border-radius:999px;padding:1px 10px;font:600 12px/1.7 "IBM Plex Mono",monospace;white-space:nowrap}
+.chip.g{background:var(--good-bg);color:var(--good)} .chip.b{background:var(--bad-bg);color:var(--bad)} .chip.w{background:var(--warn-bg);color:var(--warn)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px;align-content:start}
+.tile.key{border-color:var(--gold)}
+.tile .v{font:600 26px/1.15 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.tile .l{font-size:14px;color:var(--ink2)}
+.edge{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px}
+.ec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;align-content:start}
+.ec.key{border-color:var(--gold)} .ec.ref{opacity:.8}
+.ec .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ec .kv4{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px}
+.ec .chip{white-space:normal;text-align:center;max-width:52%}
+.ec .hd>div{min-width:0}
+.ec .kv4 div{display:grid;gap:0}
+.ec .kv4 b{font:600 18px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.ec .kv4 span{font-size:13px;color:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font:600 11px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+tbody tr:last-child td{border-bottom:0}
+tr.ref td{color:var(--muted)}
+td .sub{display:block;color:var(--muted);font-size:12px;font-family:"Source Sans 3",sans-serif;font-weight:400}
+.bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center}
+.bar .lab{font:600 11px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);width:100%;margin-bottom:-4px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{font:600 14px "Source Sans 3",sans-serif;background:none;border:0;padding:7px 11px;color:var(--ink2);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+svg{display:block;width:100%}
+svg text{font-family:"IBM Plex Mono",monospace}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)}
+.sw{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--stop) 0 5px,transparent 5px 8px)}
+.list{display:grid;gap:6px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details[open]{border-color:var(--gold)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:36px 74px 58px 20px 1fr auto;gap:8px;align-items:center;padding:10px 12px;font-size:15px}
+summary::-webkit-details-marker{display:none}
+summary .fm{font:600 11px "IBM Plex Mono",monospace;color:var(--muted)}
+summary .dt{font-family:"IBM Plex Mono",monospace;color:var(--ink2);font-size:14px}
+summary .tg{font:600 13px "IBM Plex Mono",monospace}
+summary .mv{color:var(--ink2);font-size:14px}
+.r{display:inline-block;min-width:66px;text-align:right;padding:1px 8px;border-radius:6px;font-family:"IBM Plex Mono",monospace;font-size:14px}
+.r.w{background:var(--good-bg);color:var(--good)} .r.l{background:var(--bad-bg);color:var(--bad)} .r.n{background:var(--none-bg);color:var(--muted)}
+.body{padding:0 12px 14px;display:grid;gap:12px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:0 12px;font-size:15px}
+.kv>*{padding:6px 0;border-bottom:1px solid var(--line)}
+.kv b{font-family:"IBM Plex Mono",monospace;font-weight:500;text-align:right}
+.kv .why{grid-column:1/-1;color:var(--ink2);font-size:14px}
+.note{border-left:3px solid var(--gold);padding:10px 14px;background:var(--panel);border-radius:0 8px 8px 0;display:grid;gap:6px;font-size:15px}
+ul{margin:0;padding-left:20px;display:grid;gap:4px}
+@media (max-width:640px){
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .tile .v{font-size:22px}
+  summary{grid-template-columns:26px 68px 48px 14px 1fr auto;gap:5px;font-size:14px;padding:9px 8px}
+  summary .dt{font-size:13px}
+  .r{min-width:56px;font-size:13px}
+  th,td{padding:7px 7px} table{font-size:14px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">XAUUSD · NFP e CPI · bias prima della news</div>
+  <h1>L'edge c'è solo sull'NFP</h1>
+  <p class="muted">Bias: fai il contrario di come si è mosso l'oro alla release precedente. Il trade: entri alle 14:29, stop 60 pips fino al 2023 e 100 dal 2024, chiudi alle 14:31. Spread come il tuo broker: al massimo 40 pips. Tutti i prezzi vengono dai tick veri.</p>
+</header>
+
+<section>
+  <h2>Prossime news</h2>
+  <div class="live" id="live"></div>
+  <p class="small muted" id="livenote"></p>
+</section>
+
+<section>
+  <h2>Dove c'è edge</h2>
+  <div class="bar" role="group" aria-label="Spread">
+    <span class="lab">Spread</span>
+    <div class="seg" id="sSeg"><button data-v="S0" aria-pressed="false">Nessuno</button><button data-v="S1" aria-pressed="true">Max 40 pips</button><button data-v="S2" aria-pressed="false">Dukascopy</button></div>
+  </div>
+  <div class="edge" id="edge"></div>
+  <p class="small muted">2014–2026. "A caso" = media fra LONG e SHORT sulle stesse news. Vantaggio = R in più a trade rispetto al caso (2014–19 / 2020–26). Il verdetto è con lo spread a 40 pips: edge solo se il vantaggio è positivo in tutti e due i periodi <b>e</b> il trade guadagna.</p>
+</section>
+
+<section>
+  <h2>Tutti i trade</h2>
+  <div class="bar" role="group" aria-label="Scelte">
+    <div class="seg" id="gSeg"><button data-v="NFP" aria-pressed="true">NFP</button><button data-v="CPI" aria-pressed="false">CPI</button><button data-v="ALL" aria-pressed="false">Entrambi</button></div>
+    <div class="seg" id="bSeg"><button data-v="rule" aria-pressed="true">Contrario della precedente</button><button data-v="model" aria-pressed="false">Calcolatore</button></div>
+    <div class="seg" id="pSeg"><button data-v="u3" aria-pressed="true">Ultimi 3 anni</button><button data-v="oos" aria-pressed="false">2020–26</button><button data-v="is" aria-pressed="false">2014–19</button><button data-v="all" aria-pressed="false">Tutto</button></div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="panel"><div class="legend" id="cumleg" style="margin-bottom:6px"></div><svg id="cum" role="img" aria-label="R accumulato, bias contro caso"></svg></div>
+  <p class="small muted" id="cnt"></p>
+  <div class="list" id="list"></div>
+</section>
+
+<div class="note">
+  <b>Da sapere</b>
+  <ul>
+    <li>La regola l'ho trovata guardando questi stessi dati. Nel 2008–13, anni mai usati, sull'NFP non funzionava (49%). La prova vera è dal vivo: dopo 24 NFP servono almeno 15 indovinate e somma R positiva.</li>
+    <li>Lo spread a 40 pips è quello che dici tu del tuo broker. Sulle NFP non cambia niente rispetto allo spread Dukascopy: gli stop li prende il prezzo, non lo spread.</li>
+    <li>Dati controllati con una seconda fonte (HistData.com): stesse candele, differenza mediana sotto 1 pip.</li>
+    <li>Ottobre 2025 non c'è stata la NFP (shutdown). Il 3 aprile 2026 il mercato dell'oro era chiuso (Venerdì Santo).</li>
+  </ul>
+</div>
+</div>
+
+<script>
+const D = /*DATA*/null;
+const EV = D.ev, BINS = D.bins, LIVE = D.live, CAL = D.cal;
+const st = {s:"S1", g:"NFP", b:"rule", p:"u3"};
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const itNum = (v,d=2) => v.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fP = v => itNum(v,2);
+const sgn = v => v>0?"+":v<0?"−":"";
+const fR = v => v==null ? "—" : sgn(v) + Math.abs(v).toFixed(2) + "R";
+const fR1 = v => sgn(v) + Math.abs(v).toFixed(1) + "R";
+const fPct = v => v==null ? "—" : Math.round(v*100) + "%";
+const fMoney = v => Math.round(v).toLocaleString("it-IT");
+const pips = usd => Math.round(usd*10);
+const fPips = usd => sgn(pips(usd)) + Math.abs(pips(usd)) + " pips";
+const cls = v => v==null?"n":v>0?"w":"l";
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const utcOf = s => new Date(s.length===16 ? s.replace(" ","T")+":00Z" : s);
+const fDate = (e, y2) => utcOf(e.d).toLocaleDateString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:y2?"2-digit":"numeric"});
+const fClock = (e, s, sec) => new Date(utcOf(e.d).getTime()+s*1000).toLocaleTimeString("it-IT",{timeZone:"Europe/Rome",hour:"2-digit",minute:"2-digit",...(sec?{second:"2-digit"}:{})});
+const PER = {u3: e => e.d >= "2023-10-01", oos: e => e.y >= 2020, is: e => e.y <= 2019, all: () => true};
+const GRP = {NFP: ["NFP"], CPI: ["CPI"], ALL: ["NFP","CPI"]};
+const side = (e, b) => e[b] ? e[b][0] : null;
+const other = x => x==="L" ? "S" : "L";
+const hit = (e, b) => (e[b]==="LONG")===(e.mv>0);
+
+function stats(rows, b, s){
+  const u = rows.filter(e => e[b] && e.mv!==0);
+  let bal = 10000, cb = 0, cr = 0; const curve = [];
+  u.forEach(e => { const r = e.sc[s][side(e,b)].r, o = e.sc[s][other(side(e,b))].r;
+    bal += bal/24*r; cb += r; cr += (r+o)/2; curve.push([e, cb, cr]); });
+  const n = u.length, R = u.map(e => e.sc[s][side(e,b)].r), O = u.map(e => e.sc[s][other(side(e,b))].r);
+  const mean = a => a.reduce((x,y)=>x+y,0)/(a.length||1);
+  return {n, k: u.filter(e => hit(e,b)).length, win: R.filter(v=>v>0).length, mean: mean(R), rnd: mean(R.map((v,i)=>(v+O[i])/2)),
+          adv: mean(R) - mean(R.map((v,i)=>(v+O[i])/2)), sum: cb, money: bal, curve};
+}
+function el(tag, attrs, parent, text){
+  const x = document.createElementNS(NS, tag);
+  for(const a in attrs) x.setAttribute(a, attrs[a]);
+  if(text!=null) x.textContent = text;
+  if(parent) parent.appendChild(x);
+  return x;
+}
+function sized(svg, hDesk, hMob){
+  const W = Math.max(280, Math.round(svg.parentNode.clientWidth || 600));
+  const H = W < 560 ? hMob : hDesk;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H);
+  svg.replaceChildren();
+  return [W, H];
+}
+function niceStep(range, target){
+  const raw = range/target, p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw/p;
+  return (n<1.5?1:n<3?2:n<7?5:10)*p;
+}
+
+/* ---------- live ---------- */
+function live(){
+  const preds = LIVE.filter(r => r.type==="prediction"), res = LIVE.filter(r => r.type==="result");
+  const open = preds.filter(p => !res.find(r => r.event_id===p.event_id));
+  const box = $("#live"); box.replaceChildren();
+  for(const p of open){
+    const e = {d: p.t0_utc};
+    const c = document.createElement("div"); c.className = "nx" + (p.da_tradare ? " trade" : "");
+    const prev = {d: p.precedente.t0_utc};
+    c.innerHTML = `<div class="top"><span class="eyebrow">${p.family}</span><span class="cd" data-t="${p.t0_utc}"></span></div>
+      <h3>${utcOf(p.t0_utc).toLocaleDateString("it-IT",{timeZone:"Europe/Rome",weekday:"long",day:"numeric",month:"long"})} · ${fClock(e,0)}</h3>
+      <div class="top"><div class="bias ${p.bias[0]}">${p.bias}</div>${p.da_tradare ? `<span class="chip g">si trada</span>` : `<span class="chip b">non tradare</span>`}</div>
+      <p class="small muted">${p.family} del ${fDate(prev)}: ${p.precedente.mv>0?"salito":"sceso"} di ${Math.abs(pips(p.precedente.mv))} pips → oggi il contrario.${p.da_tradare ? "" : " Sul CPI non c'è edge: solo per vedere."}</p>`;
+    box.appendChild(c);
+  }
+  const nfp = res.filter(r => r.family==="NFP"), k = nfp.filter(r => r.hit).length, sR = nfp.reduce((a,r)=>a + r.trade.S1.r, 0);
+  const first = preds.length ? utcOf(preds[0].created_utc) : null;
+  $("#livenote").innerHTML = `Ogni bias è scritta prima della news in un registro che non si può modificare (catena di hash), e il sito si aggiorna da solo dopo ogni NFP. ` +
+    (nfp.length ? `<b>Dal vivo finora: ${k} indovinate su ${nfp.length} NFP, ${fR1(sR)}.</b>` : `Dal vivo: ancora nessuna NFP, la prima è il 2 ottobre.`) +
+    (first ? ` Prima bias scritta il ${first.toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}.` : "");
+  tick();
+}
+function tick(){
+  document.querySelectorAll(".cd").forEach(x => {
+    const ms = utcOf(x.dataset.t) - Date.now();
+    if(ms <= 0){ x.textContent = "uscita, in attesa del risultato"; return; }
+    const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5), m = Math.floor(ms%36e5/6e4), s = Math.floor(ms%6e4/1e3);
+    x.textContent = d ? `fra ${d} g ${h} h ${m} min` : `fra ${h} h ${m} min ${s} s`;
+  });
+}
+
+/* ---------- dove c'è edge ---------- */
+function edge(){
+  const rows = [["NFP","rule","NFP","contrario della precedente"],["CPI","rule","CPI","contrario del precedente"],["ALL","rule","Entrambi","contrario della precedente"],
+                ["NFP","model","NFP","calcolatore"],["CPI","model","CPI","calcolatore"],["ALL","model","Entrambi","calcolatore"]];
+  const f2 = v => sgn(v) + Math.abs(v).toFixed(2);
+  let h = "";
+  for(const [g, b, fam, lab] of rows){
+    const base = EV.filter(e => GRP[g].includes(e.f) && !e.live);
+    const t = stats(base, b, st.s), tis = stats(base.filter(PER.is), b, st.s), toos = stats(base.filter(PER.oos), b, st.s);
+    // il verdetto si decide sempre sullo scenario principale S1 (spread max 40 pips), come pre-registrato in H-X11
+    const v1 = stats(base, b, "S1"), is = stats(base.filter(PER.is), b, "S1"), oos = stats(base.filter(PER.oos), b, "S1");
+    let v, key = false;
+    if(is.adv>0 && oos.adv>0 && v1.mean>0.02){ v = `<span class="chip g">edge · da confermare dal vivo</span>`; key = true; }
+    else if(is.adv>0 && oos.adv>0) v = `<span class="chip w">meglio del caso, ma non guadagna</span>`;
+    else v = `<span class="chip b">nessun edge</span>`;
+    h += `<div class="ec${key?" key":""}${b==="model"?" ref":""}"><div class="hd"><div><div class="eyebrow">${fam} · ${t.n} news</div><h3>${lab}</h3></div>${v}</div>
+      <div class="kv4">
+        <div><b>${fPct(t.k/t.n)}</b><span>direzione indovinata</span></div>
+        <div><b>${fPct(t.win/t.n)}</b><span>trade in guadagno</span></div>
+        <div><b class="${t.mean>0?"ok":"ko"}">${fR(t.mean)}</b><span>R atteso a trade · a caso ${fR(t.rnd)}</span></div>
+        <div><b>${fR(t.adv)}</b><span>vantaggio sul caso · ${f2(tis.adv)} / ${f2(toos.adv)}</span></div>
+      </div></div>`;
+  }
+  $("#edge").innerHTML = h;
+}
+
+/* ---------- tiles e R accumulato ---------- */
+function rowsNow(){ return EV.filter(e => GRP[st.g].includes(e.f) && PER[st.p](e)); }
+function tiles(){
+  const s = stats(rowsNow(), st.b, st.s);
+  $("#tiles").innerHTML = [
+    [`${fPct(s.k/s.n)}`, `direzione indovinata (${s.k} su ${s.n})`, true],
+    [fR(s.mean), `R atteso a trade · a caso ${fR(s.rnd)}`, false],
+    [`${fPct(s.win/s.n)}`, `trade chiusi in guadagno`, false],
+    [fMoney(s.money), `10.000 diventano · somma ${fR1(s.sum)}`, false],
+  ].map(([v,l,k]) => `<div class="tile${k?" key":""}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+}
+function cum(){
+  const s = stats(rowsNow(), st.b, st.s), svg = $("#cum"), [W, H] = sized(svg, 220, 190);
+  $("#cumleg").innerHTML = `<span><span class="sw" style="background:var(--gold)"></span>con la bias: <b class="num">${fR1(s.sum)}</b></span><span><span class="sw" style="background:var(--rand)"></span>a caso: <b class="num">${fR1(s.curve.length ? s.curve[s.curve.length-1][2] : 0)}</b></span>`;
+  const m = {l:44, r:10, t:10, b:24};
+  let lo = 0, hi = 0; s.curve.forEach(([, a, b]) => { lo = Math.min(lo, a, b); hi = Math.max(hi, a, b); });
+  const pad = (hi-lo)*.08 || 1; lo -= pad; hi += pad;
+  const n = s.curve.length, X = i => m.l + i/Math.max(1,n)*(W-m.l-m.r), Y = v => m.t + (hi-v)/(hi-lo)*(H-m.t-m.b);
+  const stp = niceStep(hi-lo, 4);
+  for(let v = Math.ceil(lo/stp)*stp; v <= hi; v += stp){
+    const z = Math.abs(v) < 1e-9;
+    el("line", {x1:m.l, x2:W-m.r, y1:Y(v), y2:Y(v), stroke: z ? css("--ink2") : css("--grid"), "stroke-dasharray": z ? "4 3" : ""}, svg);
+    el("text", {x:m.l-6, y:Y(v)+4, "text-anchor":"end", "font-size":11, fill:css("--muted")}, svg, (v>0?"+":"")+Math.round(v)+"R");
+  }
+  let ly = null;
+  s.curve.forEach(([e], i) => { if(e.y!==ly){ ly = e.y; el("line", {x1:X(i), x2:X(i), y1:m.t, y2:H-m.b, stroke:css("--grid")}, svg);
+    if(W>=560 || e.y%2===0 || i===0) el("text", {x:X(i)+2, y:H-6, "font-size":11, fill:css("--muted")}, svg, W<560 ? "'"+String(e.y).slice(2) : e.y); } });
+  for(const [idx, col, w] of [[2, css("--rand"), 1.6], [1, css("--gold"), 2.4]]){
+    let pts = `${X(0)},${Y(0)}`, prev = 0;
+    s.curve.forEach((c, i) => { pts += ` ${X(i+1)},${Y(prev)} ${X(i+1)},${Y(c[idx])}`; prev = c[idx]; });
+    el("polyline", {points:pts, fill:"none", stroke:col, "stroke-width":w, "stroke-linejoin":"round"}, svg);
+  }
+}
+
+/* ---------- lista ---------- */
+function list(){
+  const rows = rowsNow().filter(e => e[st.b]).slice().reverse(), s = stats(rows, st.b, st.s);
+  $("#cnt").textContent = `${rows.length} news, dalla più recente. Indovinate ${s.k}, in guadagno ${s.win}. Tocca una riga per aprire il grafico.`;
+  const box = $("#list"); box.replaceChildren();
+  for(const e of rows){
+    const d = document.createElement("details"); d.dataset.id = e.id;
+    const b = e[st.b], h = hit(e, st.b), tr = e.sc[st.s][b[0]];
+    d.innerHTML = `<summary><span class="fm">${e.f}${e.live?"·live":""}</span><span class="dt">${fDate(e, true)}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips</span><span class="r ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
+    d.addEventListener("toggle", () => { if(d.open) openRow(d, e); });
+    box.appendChild(d);
+  }
+  const first = box.querySelector("details"); if(first) first.open = true;
+}
+function openRow(d, e){
+  const body = d.querySelector(".body"); body.replaceChildren();
+  d.dataset.v = d.dataset.v || "m1";
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", `Grafico ${e.f} ${fDate(e)}`);
+  const tg = document.createElement("div"); tg.className = "seg"; tg.style.justifySelf = "start";
+  tg.innerHTML = `<button data-v="m1">Candele 1 minuto</button><button data-v="s5">5 secondi</button>`;
+  const setV = () => tg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.v===d.dataset.v ? "true" : "false"));
+  tg.querySelectorAll("button").forEach(x => x.onclick = () => { d.dataset.v = x.dataset.v; setV(); chart(svg, e, d.dataset.v); });
+  setV(); body.appendChild(tg);
+  const wrap = document.createElement("div"); wrap.appendChild(svg); body.appendChild(wrap);
+  const lg = document.createElement("div"); lg.className = "legend";
+  lg.innerHTML = `<span><span class="sw" style="background:var(--up)"></span><span class="sw" style="background:var(--dn)"></span>candele (bid) con wick</span>${st.s!=="S0" ? `<span><span class="sw" style="background:var(--ask);height:2px"></span>ask: la distanza è lo spread</span>` : ""}<span><span class="sw" style="background:var(--entry)"></span>ingresso</span><span><span class="sw dash"></span>stop</span><span>righe grigie = 1R, 2R, 3R…</span>`;
+  body.appendChild(lg);
+  const kv = document.createElement("div"); kv.className = "kv"; body.appendChild(kv);
+  kvFill(kv, e);
+  chart(svg, e, d.dataset.v);
+}
+function kvFill(kv, e){
+  const fam = EV.filter(x => x.f===e.f), i = fam.indexOf(e), prev = fam[i-1], b = e[st.b], S = e.sc[st.s], tr = S[b[0]], op = S[other(b[0])];
+  const why = st.b==="rule" ? (prev ? `${e.f} del ${fDate(prev)} ${prev.mv>0?"salito":"sceso"} → ${b}` : `Contrario della release precedente → ${b}`)
+                            : `Calcolatore: probabilità che salga ${Math.round(e.pm*100)}% → ${b}`;
+  const sc = {S0:"senza spread", S1:"spread max 40 pips", S2:"spread Dukascopy"}[st.s];
+  const rng = (() => { const vs = S.c.filter((v,j) => v && BINS[j]>=0 && BINS[j]<60); return Math.round((Math.max(...vs.map(v=>v[1])) - Math.min(...vs.map(v=>v[2])))/10); })();
+  const rows = [
+    [`<span class="why">${why}. Stop ${pips(e.stop)} pips = 1R. Prezzi: ${sc}.</span>`],
+    [`Prezzo alle ${fClock(e,-60)} (bid / ask)`, `${fP(S.p29[0])} / ${fP(S.p29[1])}`],
+    [`Ingresso ${b} alle ${fClock(e,-60)}`, `<span style="color:var(--entry)">${fP(tr.en)}</span>`],
+    [`Stop (${pips(e.stop)} pips)`, `<span style="color:var(--stop)">${fP(tr.sl)}</span>`],
+    [`Prezzo alle ${fClock(e,0)}, news (bid)`, fP(S.p30[0])],
+    [`Prezzo alle ${fClock(e,60)} (bid)`, fP(S.p31[0])],
+    [`Movimento del 1° minuto`, `<span class="${e.mv>0?"L":"S"}">${fPips(e.mv)}</span>`],
+    [`Candela della news, dal minimo al massimo`, `${rng} pips`],
+    [tr.st ? `Stop preso alle ${fClock(e, tr.et/1000, true)}` : `Chiusura ${fClock(e, 60)}`, fP(tr.ex)],
+    [`Massimo a favore (wick) prima dell'uscita`, `${fPips(tr.mfe)} · ${fR1(tr.mfe/e.stop)}`],
+    [`Massimo contro`, `${fPips(tr.mae)} · ${fR1(tr.mae/e.stop)}`],
+    ...(st.s!=="S0" ? [[`Spread alle ${fClock(e,-60)} / massimo`, `${pips(tr.sp0)} / ${pips(tr.spmax)} pips`]] : []),
+    [`<b style="font-family:inherit;font-weight:600">Risultato</b>`, `<span class="r ${cls(tr.r)}">${fR(tr.r)}</span>`],
+    [`Col trade opposto`, `<span class="r ${cls(op.r)}">${fR(op.r)}</span>`],
+  ];
+  if(tr.st && tr.r===-1 && Math.abs(tr.ex - tr.sl) >= 0.1) rows.push([`<span class="why">Lo stop è stato eseguito ${pips(Math.abs(tr.ex-tr.sl))} pips oltre il livello: il prezzo è saltato. Col full margin la perdita resta −1R.</span>`]);
+  kv.innerHTML = rows.map(r => r.length===1 ? r[0] : `<span>${r[0]}</span><b>${r[1]}</b>`).join("");
+}
+function candles(c, view){
+  const out = [];
+  if(view==="s5"){
+    BINS.forEach((b, i) => { if(b>=-75 && b<75 && c[i]) out.push({t0:b, t1:b+5, v:c[i], core: b>=-60 && b<60}); });
+  } else {
+    for(let k=-2; k<=1; k++){
+      const vs = BINS.map((b,i)=>[b,c[i]]).filter(([b,v]) => v && Math.floor(b/60)===k).map(x=>x[1]);
+      if(!vs.length) continue;
+      out.push({t0:k*60, t1:k*60+60, core: k===-1 || k===0,
+        v:[vs[0][0], Math.max(...vs.map(v=>v[1])), Math.min(...vs.map(v=>v[2])), vs[vs.length-1][3], Math.max(...vs.map(v=>v[4])), Math.min(...vs.map(v=>v[5]))]});
+    }
+  }
+  return out;
+}
+function chart(svg, e, view){
+  const [W, H] = sized(svg, 400, 330), mob = W < 560;
+  const b = e[st.b], tr = e.sc[st.s][b[0]], d = b==="LONG" ? 1 : -1, S = e.stop;
+  const cs = candles(e.sc[st.s].c, view);
+  const tA = view==="s5" ? -75 : -120, tB = view==="s5" ? 75 : 120;
+  const m = {l: mob?40:48, r: mob?100:150, t:24, b:40};
+  const X = t => m.l + (t-tA)/(tB-tA)*(W-m.l-m.r);
+  let lo = Infinity, hi = -Infinity; const add = v => { lo = Math.min(lo, v); hi = Math.max(hi, v); };
+  cs.filter(c => c.core).forEach(c => c.v.forEach(v => add(e.ref + v/100)));
+  [tr.en, tr.sl, tr.ex, tr.en + d*S].forEach(add);
+  const pad = (hi-lo)*.06; lo -= pad; hi += pad;
+  const Y = p => m.t + (hi-p)/(hi-lo)*(H-m.t-m.b);
+  const clip = "c" + e.id.replace(/\W/g, "") + view + st.s;
+  const cp = el("clipPath", {id:clip}, el("defs", {}, svg));
+  el("rect", {x:m.l, y:m.t, width:W-m.l-m.r, height:H-m.t-m.b}, cp);
+  el("rect", {x:X(0), y:m.t, width:X(60)-X(0), height:H-m.t-m.b, fill:css("--zone")}, svg);
+  for(let k = 1; ; k++){
+    const p = tr.en + d*k*S; if(p>hi || p<lo) break;
+    el("line", {x1:m.l, x2:W-m.r, y1:Y(p), y2:Y(p), stroke:css("--rl")}, svg);
+    el("text", {x:m.l-5, y:Y(p)+4, "text-anchor":"end", "font-size":11, fill:css("--muted")}, svg, "+"+k+"R");
+  }
+  el("text", {x:m.l-5, y:Y(tr.en)+4, "text-anchor":"end", "font-size":11, fill:css("--entry")}, svg, "0");
+  el("text", {x:m.l-5, y:Y(tr.sl)+4, "text-anchor":"end", "font-size":11, fill:css("--stop")}, svg, "−1R");
+  for(const [s, lab] of [[-60, "ingresso"], [0, "news"], [60, "chiusura"]]){
+    el("line", {x1:X(s), x2:X(s), y1:m.t, y2:H-m.b, stroke: s===0 ? css("--ink2") : css("--grid"), "stroke-dasharray": s===0 ? "4 3" : ""}, svg);
+    el("text", {x:X(s), y:H-m.b+15, "text-anchor":"middle", "font-size":11, fill:css("--ink2")}, svg, fClock(e, s));
+    el("text", {x:X(s), y:H-m.b+29, "text-anchor":"middle", "font-size":10, fill:css("--muted")}, svg, lab);
+  }
+  const g = el("g", {"clip-path":`url(#${clip})`}, svg);
+  const up = css("--up"), dn = css("--dn"), ask = css("--ask"), gap = view==="s5" ? .28 : .42;
+  for(const c of cs){
+    const [o,h,l,cl,ah,al] = c.v.map(v => e.ref + v/100);
+    const x0 = X(c.t0), x1 = X(c.t1), w = x1-x0, bw = Math.max(1.5, w*(1-gap)), xc = (x0+x1)/2;
+    const gg = el("g", {opacity: c.core ? 1 : .35}, g);
+    if(st.s!=="S0") el("line", {x1:xc+bw/2+Math.max(1.5, w*.06), x2:xc+bw/2+Math.max(1.5, w*.06), y1:Y(ah), y2:Y(al), stroke:ask, "stroke-width":Math.min(2, Math.max(1, w*.05)), "stroke-linecap":"round"}, gg);
+    const col = cl>=o ? up : dn;
+    el("line", {x1:xc, x2:xc, y1:Y(h), y2:Y(l), stroke:col, "stroke-width":Math.max(1, Math.min(2.5, w*.1))}, gg);
+    el("rect", {x:xc-bw/2, y:Math.min(Y(o),Y(cl)), width:bw, height:Math.max(1, Math.abs(Y(o)-Y(cl))), fill:col, rx: w>24 ? 2 : 0}, gg);
+  }
+  const exT = Math.max(tA, Math.min(tB, tr.et/1000));
+  el("line", {x1:m.l, x2:W-m.r, y1:Y(tr.en), y2:Y(tr.en), stroke:css("--entry"), opacity:.5}, svg);
+  el("line", {x1:X(-60), x2:X(exT), y1:Y(tr.en), y2:Y(tr.en), stroke:css("--entry"), "stroke-width":2.5}, svg);
+  el("line", {x1:m.l, x2:W-m.r, y1:Y(tr.sl), y2:Y(tr.sl), stroke:css("--stop"), "stroke-dasharray":"3 4", opacity:.55}, svg);
+  el("line", {x1:X(-60), x2:X(exT), y1:Y(tr.sl), y2:Y(tr.sl), stroke:css("--stop"), "stroke-width":2, "stroke-dasharray":"7 4"}, svg);
+  if(tr.st && Math.abs(tr.ex - tr.sl) > (hi-lo)*.01)
+    el("line", {x1:X(exT), x2:X(exT), y1:Y(tr.sl), y2:Y(tr.ex), stroke:css("--stop"), "stroke-width":1.5, "stroke-dasharray":"2 3"}, svg);
+  el("circle", {cx:X(-60), cy:Y(tr.en), r:5, fill:css("--entry"), stroke:css("--panel"), "stroke-width":2}, svg);
+  const rc = tr.r>0 ? css("--good") : css("--bad");
+  el("circle", {cx:X(exT), cy:Y(tr.ex), r:6, fill:rc, stroke:css("--panel"), "stroke-width":2}, svg);
+  const labs = [
+    {p:tr.en, c:css("--entry"), t:(mob?"In ":"Ingresso ")+fP(tr.en)},
+    {p:tr.sl, c:css("--stop"), t:(mob?"SL ":"Stop ")+fP(tr.sl)},
+    {p:tr.ex, c:rc, t:(mob?"Out ":"Uscita ")+fP(tr.ex)},
+    {p:tr.ex, c:rc, t:fR(tr.r), bold:true},
+  ].map(o => ({...o, y:Y(o.p)}));
+  labs[3].y = labs[2].y + 16;
+  const ord = [...labs].sort((a,c) => a.y-c.y), gl = 16;
+  for(let i=1; i<ord.length; i++) if(ord[i].y - ord[i-1].y < gl) ord[i].y = ord[i-1].y + gl;
+  const over = ord[ord.length-1].y - (H - m.b + 4); if(over > 0) ord.forEach(o => o.y -= over);
+  for(let i=ord.length-2; i>=0; i--) if(ord[i+1].y - ord[i].y < gl) ord[i].y = ord[i+1].y - gl;
+  for(const o of labs){
+    el("line", {x1:W-m.r+2, x2:W-m.r+7, y1:Y(o.p), y2:o.y, stroke:o.c}, svg);
+    el("text", {x:W-m.r+10, y:o.y+4, "font-size":mob?11:12.5, "font-weight":o.bold?600:500, fill:o.c}, svg, o.t);
+  }
+  el("text", {x:(X(0)+X(60))/2, y:m.t-8, "text-anchor":"middle", "font-size":11, fill:css("--gold")}, svg, mob ? "news" : "candela della news");
+  if(view==="m1") el("text", {x:(X(-60)+X(0))/2, y:m.t-8, "text-anchor":"middle", "font-size":11, fill:css("--muted")}, svg, mob ? "prima" : "candela prima");
+}
+
+/* ---------- controlli ---------- */
+function seg(id, key, fn){
+  $(id).querySelectorAll("button").forEach(bt => bt.onclick = () => {
+    st[key] = bt.dataset.v;
+    $(id).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x===bt ? "true" : "false"));
+    fn();
+  });
+}
+function lower(){ tiles(); cum(); list(); }
+function redrawOpen(){ document.querySelectorAll("#list details[open]").forEach(d => { const e = EV.find(x => x.id===d.dataset.id); chart(d.querySelector("svg"), e, d.dataset.v); }); }
+seg("#sSeg", "s", () => { edge(); lower(); });
+seg("#gSeg", "g", lower); seg("#bSeg", "b", lower); seg("#pSeg", "p", lower);
+live(); setInterval(tick, 1000);
+edge(); lower();
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { cum(); redrawOpen(); }, 150); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { cum(); redrawOpen(); });
+</script>
