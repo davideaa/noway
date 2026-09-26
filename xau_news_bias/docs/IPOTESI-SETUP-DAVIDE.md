@@ -126,3 +126,50 @@ scelta adesso, dopo averlo visto.
 - **Rischio**: in full margin ogni errore costa tutto il deposito. Con il
   56% di direzioni giuste, in 50 news c'è il 36% di probabilità di
   vederne almeno 5 perse di fila (8% di vederne almeno 7).
+
+---
+
+# Ipotesi H-X3 — stop che segue la volatilità, e i segnali di XNB nel setup di Davide (pre-registrata)
+
+Scritta il 26/09/2026 **prima** di eseguire il test, dopo l'osservazione di
+Davide: «i 100 pips li ho usati negli ultimi due anni perché la volatilità
+è salita; prima lo stop doveva essere più piccolo, in proporzione». Ha
+ragione: con 100 pips fissi, negli anni calmi un trade giusto non poteva
+arrivare a 2–3R. Esplorativa: i dati sono già stati visti.
+
+## Stop dinamico
+
+Stop in $ = 10 $ × V(adesso) / V_rif. Tre misure V:
+
+| Nome | V | Cosa guarderebbe Davide sul grafico |
+|---|---|---|
+| **S1 (principale)** | ATR(14) giornaliero all'ultima candela D1 chiusa | l'indicatore ATR sul giornaliero |
+| S2 | ATR(14) orario all'ultima H1 chiusa | ATR sull'orario |
+| S3 | U_news (unità della fase 2) | reazione delle ultime 6 news × ATR M1 |
+
+V_rif = mediana di V sulle news CPI e NFP degli **ultimi due anni**
+(2024-10-01 → 2026-09-30). È il periodo in cui Davide usa 100 pips. È una
+sola costante di scala, presa dalle sue parole e non ottimizzata. Si
+riporta lo stop medio in pips per anno.
+
+Tutto il resto come H-X2:
+- ingresso T − 60 s, uscita a fine prima M1;
+- costi base (sensibilità: conservative);
+- perdita tagliata a −1R (sensibilità: stop eseguito con il salto).
+
+Si riportano, per era e per anno:
+- precisione di pareggio;
+- EV tirando a caso;
+- EV al 55% e al 60%;
+- quota del lato giusto ≥ 1R, ≥ 2R e ≥ 3R.
+
+## I segnali di direzione di XNB dentro il setup
+
+La direzione la danno i 18 candidati della fase 2: 15 regole e 3 modelli,
+**congelati** con le decisioni già registrate in `p2_validation.json`.
+Per ognuno, sul suo periodo fuori campione (CPI 2020–26 o NFP 2020–26), lo
+stesso trade con il setup S1:
+- trade eseguiti, direzioni giuste, R medio, t unilaterale;
+- Holm su tutti i test eseguiti.
+
+Nessun candidato viene scelto o scartato dopo.
