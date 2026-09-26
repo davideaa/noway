@@ -162,3 +162,39 @@ Ogni ipotesi valutata viene contata nel registro degli esperimenti
 (`experiments` nel database e `research_output/phase2/experiment_registry.json`):
 numero di primitive, coppie, terne, configurazioni di modello, soglie,
 permutazioni, con seed, hash dei dati e commit del codice.
+
+## Emendamento 1 — 2026-09-26, prima di guardare qualunque risultato della scoperta
+
+Scritto mentre le permutazioni girano e prima che la griglia dei modelli
+parta: nessun numero della ricerca è stato ancora letto. Fissa i dettagli
+di esecuzione di §7–§8 che il testo sopra lasciava aperti.
+
+1. **Modelli congelati.** Per la validazione CPI e per la conferma NFP il
+   modello scelto viene addestrato **una volta** su tutti gli eventi del
+   gruppo prima del 2020-01-01 (con la stessa adattività: `rolling5y` =
+   2015–2019, `decay3y` = pesi calcolati per l'anno 2020) e applicato
+   senza riaddestramento a tutto il 2020–2026. Così nessun esito dei
+   periodi di verifica entra mai in un addestramento, e gli esiti NFP del
+   test finale non vengono toccati prima della sua apertura.
+2. **Regole.** Le soglie sono quelle calcolate sulla scoperta (congelate
+   nello spazio delle primitive, ricostruito in modo deterministico). Una
+   regola del gruppo CONDIVISO si applica, nella validazione CPI, agli
+   eventi CPI; nel test finale, agli eventi NFP.
+3. **Famiglia di Holm per il CPI**: tutti i test eseguiti sugli eventi CPI
+   2020–2026 — i candidati CPI (≤ 5), i candidati CONDIVISI (≤ 5) applicati
+   al CPI, il modello CPI e il modello CONDIVISO. Includere anche le regole
+   condivise rende la correzione più severa, non più facile.
+4. **Test finale NFP**: le 3 regole con punteggio di selezione più alto fra
+   i candidati NFP e CONDIVISI, il modello NFP, il modello CONDIVISO.
+   **Holm sempre con m = 5**: se i test disponibili sono meno di 5, quelli
+   mancanti contano come p = 1.
+5. **Il test**: t unilaterale sull'R medio dei trade eseguiti (costi base),
+   H0: R medio ≤ 0, gradi di libertà n − 1. Con meno di 5 trade il test
+   vale p = 1.
+6. **Robustezza richiesta dalla classe ROBUST** (§8): costi conservative
+   sugli stessi trade; stop k ∈ {0,42; 0,51; 0,60; 0,69; 0,78} × U_news
+   con le **stesse decisioni** (per i modelli, le azioni restano quelle
+   prese con k = 0,60); quota dell'R totale del singolo anno migliore.
+7. **Ordine**: prima la validazione CPI, poi l'apertura del test finale
+   NFP, in un'unica esecuzione di `scripts/phase2_validate.py`; nessuna
+   scelta dipende dall'esito della prima.
