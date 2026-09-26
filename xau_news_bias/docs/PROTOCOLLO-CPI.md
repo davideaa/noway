@@ -194,3 +194,24 @@ previsioni walk-forward 2013–2019; a parità entro 0,002 vince il più
 semplice (ordine: M0, R1, R2, M1, M1N, M5, M2, M3, M4). Le regole R1/R2
 ricevono come probabilità il loro tasso di successo nel training, così
 sono confrontabili con i modelli.
+
+### Emendamento 2 — 26/09/2026, PRIMA di qualunque test statistico
+
+Motivo: collaudando il calcolo del target su due eventi (gennaio 2024 e
+giugno 2020, nessuna statistica aggregata) la regola del §3 "reazione
+prima di T0 o dopo 5 s → quarantena" si è rivelata sbagliata in due modi:
+
+1. scattava per la normale deriva del prezzo nei 30 s prima di T0
+   (gennaio 2024 marcato "reazione a −30 s", mentre il salto vero parte a
+   +200 ms);
+2. applicata alla lettera escluderebbe le release in linea con le attese,
+   dove l'oro si muove poco e una "reazione" netta non c'è: sarebbe un
+   bias di selezione a favore degli eventi con movimento grande.
+
+Nuova regola: il ritardo della prima reazione resta registrato come
+**diagnostica** (soglia: 0,02% del prezzo o 5 volte la variazione tipica
+tick-to-tick, cercata da T0−2 s). L'esclusione per errore di orario
+avviene solo con una prova specifica: la candela M1 di T0 **non** è
+anomala (range < 1,5 volte la mediana delle due ore precedenti) **mentre**
+quella di T0−60 min o T0+60 min lo è (> 4 volte). È la firma di un errore
+di ora legale. Stato: `TIMESTAMP_SUSPECT`.
