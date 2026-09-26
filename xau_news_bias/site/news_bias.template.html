@@ -56,7 +56,7 @@ section{display:grid;gap:12px}
 .pt th:first-child,.pt td:first-child{text-align:left}
 .pt thead th{font:600 11px "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border-top:0}
 .pt td .sub{display:block;color:var(--muted);font-size:12px}
-@media (max-width:440px){.pt .cc{display:none}.pt th,.pt td{padding:6px 5px}}
+@media (max-width:440px){.pt .cc,.mt .rim{display:none}.pt th,.pt td{padding:6px 5px}.mt{font-size:12.5px}.mt th,.mt td{padding:5px 4px}.mt td:last-child{white-space:normal}}
 .ec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;align-content:start}
 .ec.key{border-color:var(--gold)} .ec.ref{opacity:.8}
 .ec .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
@@ -136,7 +136,17 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
   </div>
   <div class="edge" id="edge"></div>
   <p class="small muted" id="sdesc"></p>
+  <p class="small muted"><b>Come si calcola l'R</b>: (prezzo di uscita − prezzo di ingresso) ÷ stop. Esempio 04/09/2026: SHORT a 4.471,75, chiuso a 4.405,05 = 667 pips; stop 100 pips → +6,67R. Se lo stop viene preso, −1R. L'R a trade è la media di tutti.</p>
   <p class="small muted">"A caso" = media fra LONG e SHORT sulle stesse NFP. Vantaggio = R in più a trade rispetto al caso. Il verdetto è con lo spread a 40 pips: edge se il vantaggio è positivo sia nel 2014–19 sia nel 2020–26 <b>e</b> il trade guadagna.</p>
+</section>
+
+<section>
+  <h2>I soldi col tuo metodo</h2>
+  <div class="bar"><label class="small muted" for="budget">Budget all'anno</label>
+    <input id="budget" type="number" min="100" step="100" value="3000" inputmode="numeric" style="font:600 15px 'IBM Plex Mono',monospace;width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)"></div>
+  <p class="small muted">Ogni anno riparti dal budget. A ogni NFP rischi: cassa ÷ NFP rimaste nell'anno (gennaio 12, dicembre 1). Full margin: se va male perdi la puntata, se va bene guadagni puntata × R. Quando il profitto dell'anno arriva al budget, metti via il budget e rischi solo il profitto. Stesso spread scelto sopra.</p>
+  <div class="tiles" id="mtiles"></div>
+  <div class="list" id="mlist"></div>
 </section>
 
 <section>
@@ -454,6 +464,40 @@ function chart(svg, e, view){
   if(view==="m1") el("text", {x:(X(-60)+X(0))/2, y:m.t-8, "text-anchor":"middle", "font-size":11, fill:css("--muted")}, svg, mob ? "prima" : "candela prima");
 }
 
+/* ---------- soldi col metodo di Davide ---------- */
+function moneyYear(trades, B){
+  let cassa = B, via = 0; const rows = [];
+  for(const e of trades){
+    const rim = 13 - Number(e.d.slice(5,7)), r = e.sc[st.s][side(e,"rule")].r, punt = cassa / rim, pl = punt * r;
+    cassa += pl; let nota = "";
+    if(!via && cassa >= 2*B){ cassa -= B; via = B; nota = `messi via ${fMoney(B)}`; }
+    rows.push({e, rim, punt, r, pl, cassa, nota});
+  }
+  return {rows, fine: cassa + via, prof: cassa + via - B};
+}
+function money(){
+  const B = Math.max(100, Number($("#budget").value) || 3000);
+  const ev = EV.filter(e => e.f==="NFP" && e.rule && e.mv!==0 && !e.live);
+  const years = [...new Set(ev.map(e => e.y))].sort();
+  const res = years.map(y => ({y, ...moneyYear(ev.filter(e => e.y===y), B)}));
+  const last3 = res.filter(x => x.y >= 2024), tot = res.reduce((a,x) => a + x.prof, 0), l3 = last3.reduce((a,x) => a + x.prof, 0);
+  const zero = res.filter(x => x.fine < 1).length;
+  $("#mtiles").innerHTML = [
+    [(l3>=0?"+":"−")+fMoney(Math.abs(l3)), "profitto 2024–2026 (2026 fino a settembre)", true],
+    [(tot>=0?"+":"−")+fMoney(Math.abs(tot)), `profitto dal 2014 (${res.length} anni)`, false],
+    [`${res.filter(x => x.prof>0).length}/${res.length}`, "anni chiusi in guadagno", false],
+    [`${zero}`, "anni in cui perdi tutto il budget", false],
+  ].map(([v,l,k]) => `<div class="tile${k?" key":""}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  const box = $("#mlist"); box.replaceChildren();
+  for(const x of res.slice().reverse()){
+    const d = document.createElement("details");
+    const rows = x.rows.map(o => `<tr><td>${fDate(o.e, true)}</td><td class="num rim">${o.rim}</td><td class="num">${fMoney(o.punt)}</td><td class="num ${o.r>0?"ok":"ko"}">${fR(o.r)}</td><td class="num ${o.pl>0?"ok":"ko"}">${o.pl>=0?"+":"−"}${fMoney(Math.abs(o.pl))}</td><td class="num">${fMoney(o.cassa)}${o.nota?`<span class="sub">${o.nota}</span>`:""}</td></tr>`).join("");
+    d.innerHTML = `<summary style="grid-template-columns:60px 1fr auto"><span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · fine anno ${fMoney(x.fine)}</span><span class="r ${cls(x.prof)}">${x.prof>=0?"+":"−"}${fMoney(Math.abs(x.prof))}</span></summary>
+      <div class="body"><div style="overflow-x:auto"><table class="pt mt"><thead><tr><th>NFP</th><th class="rim">Rimaste</th><th>Rischio</th><th>R</th><th>Risultato</th><th>Cassa</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    box.appendChild(d);
+  }
+}
+
 /* ---------- controlli ---------- */
 function seg(id, key, fn){
   $(id).querySelectorAll("button").forEach(bt => bt.onclick = () => {
@@ -464,10 +508,11 @@ function seg(id, key, fn){
 }
 function lower(){ tiles(); cum(); list(); }
 function redrawOpen(){ document.querySelectorAll("#list details[open]").forEach(d => { const e = EV.find(x => x.id===d.dataset.id); chart(d.querySelector("svg"), e, d.dataset.v); }); }
-seg("#sSeg", "s", () => { edge(); lower(); });
+seg("#sSeg", "s", () => { edge(); money(); lower(); });
+$("#budget").addEventListener("input", money);
 seg("#pSeg", "p", lower);
 live(); setInterval(tick, 1000);
-edge(); lower();
+edge(); money(); lower();
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { cum(); redrawOpen(); }, 150); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { cum(); redrawOpen(); });
 </script>
