@@ -49,3 +49,33 @@ somma R, R medio, trade in guadagno.
 - Se Davide vuole un'altra uscita, la si registra **dal vivo in
   parallelo** a X0 dalla prossima NFP, con lo stesso criterio (dopo 24
   NFP: almeno 15 indovinate e somma R positiva).
+
+## Risultati (dopo il commit della pre-registrazione)
+
+File: `research_output/phase2/hx8/hx9_exits.json`. Codice:
+`scripts/hx9_exits.py`. Controllo: X0 coincide al millesimo con il trade del
+sito.
+
+Somma R, ultimi 3 anni (34 NFP) e tutto 2014–26 (148):
+
+| Uscita | Bias H-X8, 3 anni | Bias H-X8, tutto | Bias opposta, tutto | A caso, tutto |
+|---|---|---|---|---|
+| **X0 fine M1** | **+17,7** | **+18,9** | −39,6 | −10,3 |
+| X1 5 s | −1,6 | −9,5 | −37,7 | −23,6 |
+| X2 10 s | +8,0 | +5,8 | −38,3 | −16,2 |
+| X3 15 s | +13,7 | +10,6 | −36,4 | −12,9 |
+| X4 20 s | +13,3 | +10,3 | −36,3 | −13,0 |
+| X5 30 s | +12,2 | +10,5 | −36,5 | −13,0 |
+| X6 TP 1R | +10,3 | +11,2 | −42,4 | −15,6 |
+| X7 TP 2R | +10,2 | +13,2 | −41,1 | −13,9 |
+| X8 TP 3R | +12,5 | +13,6 | −40,6 | −13,5 |
+| X9 tetto teorico | +38,7 | +104,9 | **+61,9** | **+83,4** |
+
+- **Nessuna uscita reale batte la fine della M1.** Uscire nei primi 5–10
+  secondi rende meno: in quel momento lo spread è di 100 pips o più, e
+  uscire costa mezzo spread.
+- **Il tetto teorico non è una misura onesta**: con l'uscita sul punto
+  migliore della wick guadagna anche la bias **opposta** (+61,9 R) e anche
+  tirare a caso (+83,4 R). Misura solo quanto si muove l'oro, non se la
+  bias è giusta.
+- Per la regola scritta prima: il criterio live resta su X0.
