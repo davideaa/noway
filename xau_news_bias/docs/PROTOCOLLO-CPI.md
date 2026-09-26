@@ -187,3 +187,10 @@ con la mediana del training).
 
 Il verdetto primario (§8) resta sul modello scelto in sviluppo fra
 M0–M5, M1N, R1, R2; H2/R3 ha un verdetto suo, riportato separatamente.
+
+**Criterio di scelta in sviluppo** (il §6 non lo diceva): vince il
+modello con la **log loss più bassa** delle probabilità calibrate sulle
+previsioni walk-forward 2013–2019; a parità entro 0,002 vince il più
+semplice (ordine: M0, R1, R2, M1, M1N, M5, M2, M3, M4). Le regole R1/R2
+ricevono come probabilità il loro tasso di successo nel training, così
+sono confrontabili con i modelli.
