@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XAU News Bias</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="/favicon.ico" type="image/svg+xml">
+</head>
+<body>
+<header class="top">
+  <div class="brand">XAU NEWS BIAS <span class="muted small">motore quantitativo pre-release</span></div>
+  <nav id="tabs">
+    <button data-tab="dash" class="on">Dashboard</button>
+    <button data-tab="why">Why?</button>
+    <button data-tab="lab">Research Lab</button>
+    <button data-tab="track">Track record</button>
+    <button data-tab="sources">Fonti &amp; sistema</button>
+  </nav>
+</header>
+
+<main>
+<section id="dash" class="tab on">
+  <div class="grid2">
+    <div class="card hero" id="hero">
+      <div class="label">NEXT HIGH IMPACT EVENT</div>
+      <div id="ev-name" class="ev-name">—</div>
+      <div id="ev-time" class="muted">—</div>
+      <div class="label mt">XAU NEWS BIAS</div>
+      <div id="bias" class="bias">—</div>
+      <div id="headline" class="headline muted"></div>
+      <dl class="kv" id="kv"></dl>
+    </div>
+    <div class="card">
+      <div class="label">EVOLUZIONE DELLA PREVISIONE</div>
+      <table class="tl" id="timeline"></table>
+      <div class="label mt">PROBABILITÀ NEL TEMPO (BULLISH)</div>
+      <div id="probchart" class="chart"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="label">MOVIMENTO CONTESTUALE ATTESO</div>
+      <div id="movement"></div>
+      <p class="small muted">Stima dai casi storici comparabili, riscalata sulla volatilità attuale. Non influenza BULLISH/BEARISH.</p>
+    </div>
+    <div class="card">
+      <div class="label">DATA STATUS</div>
+      <div id="datastatus"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">PROSSIME RELEASE USD AD ALTO IMPATTO</div>
+    <table class="tbl" id="upcoming"></table>
+  </div>
+</section>
+
+<section id="why" class="tab">
+  <div class="card"><div id="why-body" class="muted">Seleziona un evento dalla dashboard.</div></div>
+</section>
+
+<section id="lab" class="tab">
+  <div id="lab-body" class="muted">Caricamento…</div>
+</section>
+
+<section id="track" class="tab">
+  <div class="card"><div id="track-body"></div></div>
+</section>
+
+<section id="sources" class="tab">
+  <div class="card"><div class="label">REGISTRO FONTI</div><div id="sources-body"></div></div>
+  <div class="card"><div class="label">JOB E MODELLI</div><div id="system-body"></div></div>
+</section>
+</main>
+<div id="tip" class="tip" hidden></div>
+<footer class="muted small">Ogni numero viene dal database locale: dati reali → fotografia pre-news → feature → modello → probabilità calibrata. Nessun valore è scritto a mano in questa pagina.</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>
