@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XAU News Bias</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="/favicon.ico" type="image/svg+xml">
+</head>
+<body>
+<header class="top">
+  <div class="brand">XAU NEWS BIAS <span class="muted small">motore quantitativo pre-release</span></div>
+  <nav id="tabs">
+    <button data-tab="dash" class="on">Next event</button>
+    <button data-tab="why">Why?</button>
+    <button data-tab="cpi">CPI</button>
+    <button data-tab="nfp">NFP</button>
+    <button data-tab="disc">Discovery Lab</button>
+    <button data-tab="cand">Candidate edges</button>
+    <button data-tab="valid">Validation</button>
+    <button data-tab="sim">Trade simulator</button>
+    <button data-tab="track">Live record</button>
+    <button data-tab="market">Market state</button>
+    <button data-tab="sources">Data health</button>
+    <button data-tab="compute">Compute center</button>
+  </nav>
+</header>
+
+<main>
+<section id="dash" class="tab on">
+  <div class="grid2">
+    <div class="card hero" id="hero">
+      <div class="label">NEXT HIGH IMPACT EVENT</div>
+      <div id="ev-name" class="ev-name">—</div>
+      <div id="ev-time" class="muted">—</div>
+      <div class="label mt">XAU NEWS BIAS</div>
+      <div id="bias" class="bias">—</div>
+      <div id="headline" class="headline muted"></div>
+      <dl class="kv" id="kv"></dl>
+      <p class="mt"><button id="recalc" class="btn">Ricalcola ora</button> <span id="recalc-msg" class="small muted"></span></p>
+    </div>
+    <div class="card">
+      <div class="label">EVOLUZIONE DELLA PREVISIONE</div>
+      <table class="tl" id="timeline"></table>
+      <div class="label mt">PROBABILITÀ NEL TEMPO (BULLISH)</div>
+      <div id="probchart" class="chart"></div>
+    </div>
+  </div>
+  <div class="card" id="p2card"></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="label">MOVIMENTO CONTESTUALE ATTESO</div>
+      <div id="movement"></div>
+      <p class="small muted">Stima dai casi storici comparabili, riscalata sulla volatilità attuale. Non influenza BULLISH/BEARISH.</p>
+    </div>
+    <div class="card">
+      <div class="label">DATA STATUS</div>
+      <div id="datastatus"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">PROSSIME RELEASE USD AD ALTO IMPATTO</div>
+    <table class="tbl" id="upcoming"></table>
+  </div>
+</section>
+
+<section id="why" class="tab">
+  <div class="card"><div id="why-body" class="muted">Seleziona un evento dalla dashboard.</div></div>
+</section>
+
+<section id="cpi" class="tab">
+  <div id="cpi-body" class="muted">Caricamento…</div>
+  <details class="card"><summary>Fase 1 — direzione della prima M1 CPI (T−1H), protocollo del 2026-09</summary>
+    <div id="lab-body" class="muted mt">Caricamento…</div></details>
+</section>
+
+<section id="nfp" class="tab"><div id="nfp-body" class="muted">Caricamento…</div></section>
+<section id="disc" class="tab"><div id="disc-body" class="muted">Caricamento…</div></section>
+<section id="cand" class="tab"><div id="cand-body" class="muted">Caricamento…</div></section>
+<section id="valid" class="tab"><div id="valid-body" class="muted">Caricamento…</div></section>
+
+<section id="sim" class="tab">
+  <div class="card">
+    <div class="label">TRADE SIMULATOR — EVENTI STORICI (SOLO DESCRITTIVO)</div>
+    <form id="sim-form" class="simform">
+      <label>Famiglia <select name="family"><option>NFP</option><option>CPI</option><option value="ALL">CPI+NFP</option></select></label>
+      <label>Strategia <select name="strategy" id="sim-strategy">
+        <option value="always_long">sempre LONG</option><option value="always_short">sempre SHORT</option>
+        <option value="random">casuale</option><option value="oracle">oracolo (tetto)</option></select></label>
+      <label>Stop k × U_news <input name="k" type="number" step="0.01" min="0.1" max="5" value="0.60"></label>
+      <label>Ingresso <select name="entry"><option value="m10">T−10 s</option><option value="m30">T−30 s</option><option value="m60">T−60 s</option><option value="m5">T−5 s</option><option value="last">ultimo tick</option></select></label>
+      <label>Costi <select name="scenario"><option>base</option><option>optimistic</option><option>conservative</option><option>stress</option></select></label>
+      <label>Dal <input name="start" type="number" value="2013" min="2008" max="2026"></label>
+      <label>Al <input name="end" type="number" value="2026" min="2008" max="2026"></label>
+      <button class="btn" type="submit">Simula</button>
+    </form>
+    <div id="sim-out" class="mt"></div>
+  </div>
+</section>
+
+<section id="track" class="tab">
+  <div class="card"><div id="track-body"></div></div>
+  <div class="card"><div id="livetrades-body"></div></div>
+</section>
+
+<section id="market" class="tab"><div id="market-body" class="muted">Caricamento…</div></section>
+
+<section id="sources" class="tab">
+  <div class="card"><div class="label">REGISTRO FONTI</div><div id="sources-body"></div></div>
+  <div class="card"><div class="label">JOB E MODELLI</div><div id="system-body"></div></div>
+</section>
+
+<section id="compute" class="tab"><div id="compute-body" class="muted">Caricamento…</div></section>
+</main>
+<div id="tip" class="tip" hidden></div>
+<footer class="muted small">Ogni numero viene dal database locale: dati reali → fotografia pre-news → feature → modello → probabilità calibrata. Nessun valore è scritto a mano in questa pagina.</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

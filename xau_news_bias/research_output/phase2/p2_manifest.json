@@ -1,0 +1,31 @@
+{
+ "created_utc": "2026-09-26T11:39:54.266Z",
+ "files": {
+  "p2_events": {
+   "file": "p2_events.parquet",
+   "sha256": "0a1e6ca76066aea1dbad0553533c2f883490bcafe1a4b7132543de418b96411f",
+   "rows": 448
+  },
+  "p2_paths": {
+   "file": "p2_paths.parquet",
+   "sha256": "6810d9548c3aeee2634a28453a222b2951b3874e3384154323b2aeaf274b0113",
+   "rows": 442
+  },
+  "p2_features": {
+   "file": "p2_features.parquet",
+   "sha256": "6bbc2c066951ee2aabd3ffdb47ac9ef194245884fe608d436561e191ba98762b",
+   "rows": 3584
+  }
+ },
+ "cutoffs": [
+  "T-3D",
+  "T-24H",
+  "T-4H",
+  "T-1H",
+  "T-30M",
+  "T-15M",
+  "T-5M",
+  "T-1M"
+ ],
+ "n_features": 361
+}

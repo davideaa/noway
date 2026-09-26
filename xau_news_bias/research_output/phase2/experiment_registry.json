@@ -1,0 +1,80 @@
+{
+ "by_stage": [
+  {
+   "stage": "cpi_validation",
+   "group": "CPI",
+   "kind": "oos_tests",
+   "hypotheses": 12,
+   "runs": 1
+  },
+  {
+   "stage": "exploratory",
+   "group": "ALL",
+   "kind": "HX1_magnitude_selection",
+   "hypotheses": 6,
+   "runs": 1
+  },
+  {
+   "stage": "models_discovery",
+   "group": "ALL",
+   "kind": "model_configs",
+   "hypotheses": 1080,
+   "runs": 1
+  },
+  {
+   "stage": "nfp_final",
+   "group": "NFP",
+   "kind": "oos_tests",
+   "hypotheses": 5,
+   "runs": 1
+  },
+  {
+   "stage": "rules_discovery",
+   "group": "CPI",
+   "kind": "rule_search",
+   "hypotheses": 1622027,
+   "runs": 1
+  },
+  {
+   "stage": "rules_discovery",
+   "group": "NFP",
+   "kind": "rule_search",
+   "hypotheses": 1558481,
+   "runs": 1
+  },
+  {
+   "stage": "rules_discovery",
+   "group": "SHARED",
+   "kind": "rule_search",
+   "hypotheses": 1478986,
+   "runs": 1
+  }
+ ],
+ "total_hypotheses": 4660597,
+ "campaigns": [
+  {
+   "name": "p2_rules_v1",
+   "stage": "completata",
+   "total": 1000,
+   "done": 1000,
+   "errors": 0,
+   "started_utc": "2026-09-26T11:46:29.131Z",
+   "updated_utc": "2026-09-26T11:58:37.046Z",
+   "workers": 4,
+   "mode": "MAXIMUM",
+   "note": "1.64 perm/s, ETA 0 s"
+  },
+  {
+   "name": "p2_models_v1",
+   "stage": "completata",
+   "total": 270,
+   "done": 270,
+   "errors": 0,
+   "started_utc": "2026-09-26T11:58:46.847Z",
+   "updated_utc": "2026-09-26T11:59:21.761Z",
+   "workers": 4,
+   "mode": "MAXIMUM",
+   "note": null
+  }
+ ]
+}

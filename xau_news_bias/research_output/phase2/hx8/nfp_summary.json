@@ -1,0 +1,74 @@
+{
+ "IS 2014-19": {
+  "n": 71,
+  "indovinate": 44,
+  "tr": {
+   "somma_R": 2.09,
+   "R_medio": 0.029,
+   "vinti": 37,
+   "stop": 21,
+   "soldi": 10365
+  },
+  "fx": {
+   "somma_R": 2.4,
+   "R_medio": 0.034,
+   "vinti": 37,
+   "stop": 21,
+   "soldi": 10494
+  }
+ },
+ "OOS 2020-26": {
+  "n": 77,
+  "indovinate": 46,
+  "tr": {
+   "somma_R": 16.82,
+   "R_medio": 0.218,
+   "vinti": 42,
+   "stop": 23,
+   "soldi": 18028
+  },
+  "fx": {
+   "somma_R": 17.26,
+   "R_medio": 0.224,
+   "vinti": 42,
+   "stop": 23,
+   "soldi": 18331
+  }
+ },
+ "ultimi 3 anni (2023-10 -> 2026-09)": {
+  "n": 34,
+  "indovinate": 21,
+  "tr": {
+   "somma_R": 17.67,
+   "R_medio": 0.52,
+   "vinti": 19,
+   "stop": 9,
+   "soldi": 19191
+  },
+  "fx": {
+   "somma_R": 18.09,
+   "R_medio": 0.532,
+   "vinti": 19,
+   "stop": 9,
+   "soldi": 19496
+  }
+ },
+ "tutto 2014-26": {
+  "n": 148,
+  "indovinate": 90,
+  "tr": {
+   "somma_R": 18.91,
+   "R_medio": 0.128,
+   "vinti": 79,
+   "stop": 44,
+   "soldi": 18685
+  },
+  "fx": {
+   "somma_R": 19.66,
+   "R_medio": 0.133,
+   "vinti": 79,
+   "stop": 44,
+   "soldi": 19235
+  }
+ }
+}
