@@ -7,8 +7,19 @@ export const DESCRIPTION =
   "Tre strategie su oro, Nasdaq e USDJPY: criteri fissati prima del test, correlazioni e drawdown. Risultati validati fuori campione, non garantiti.";
 export const DETTAGLI_TITLE = "Tre strategie algoritmiche: metodo, numeri e rischio";
 
-/** L'unico h1 (COPY.md 3.1) e le due frasi del film (COPY.md 3.2 e footer): il film non ha altro testo. */
-export const FILM_H1 = "Tre strategie algoritmiche, misurate e raccontate senza ritocchi";
+/**
+ * Il PROLOGO del film (brief di Davide, testi esatti): tre schermate sopra la
+ * figura dell'atto 1. S1 e' l'unico h1 della home.
+ */
+export const FILM_H1 = "Tre strategie algoritmiche validate attraverso modelli quantitativi.";
+export const FILM_SUB = "USDJPY · NASDAQ · XAUUSD";
+export const FILM_S2 = "Analisi quantitativa, IA e conoscenza dei mercati trasformano ipotesi di trading in sistemi statistici verificabili.";
+export const FILM_S3_WORDS = ["OSSERVIAMO", "VERIFICHIAMO", "COSTRUIAMO"];
+export const FILM_S3 = "Dal comportamento del mercato all'ipotesi. Dall'ipotesi ai dati. Dai dati a un sistema replicabile.";
+/** La schermata finale: un titolo, UN bottone (porta a /dettagli). */
+export const FILM_END = "I risultati vengono dopo il metodo.";
+export const FILM_CTA = "ESPLORA IL PORTFOLIO →";
+/** Le due frasi ricorrenti degli atti 2-5 (COPY.md 3.2). */
 export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
 /** Frase B del film (una sola costante: se Davide manda la sua versione, si cambia qui). */
 export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
@@ -21,6 +32,8 @@ export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
 export const RISK_STATEMENT =
   "Risultati di backtest validati fuori campione con metodo quantitativo: criteri fissati prima del test, dati mai visti, bootstrap a blocchi. Non garantiscono rendimenti futuri: indicano la mediana di cosa aspettarsi, e il suo intervallo, se il vantaggio esiste e non si è rotto.";
 export const RISK_SHORT = "Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria";
+/** La barra fissa in basso (brief di Davide, testo esatto): mono, piccola, sempre visibile. */
+export const RISK_BAR = "V2 · BACKTEST SU DATI STORICI · TRADING AD ALTO RISCHIO · NON È CONSULENZA FINANZIARIA";
 
 /** Testo alternativo dell'immagine social (COPY.md sez. 5). */
 export const OG_ALT = "Portfolio Algo Manager: strategie algoritmiche su XAUUSD, backtest e rischio dichiarati.";
@@ -44,12 +57,13 @@ export type Scene = { id: string; n: string; label: string; nav?: boolean };
 /** Ordine delle scene di /dettagli (COPY.md v2, sezioni 3.1-3.9). `nav` = compare nel menu. */
 export const SCENES: Scene[] = [
   { id: "ingresso", n: "01", label: "Ingresso" },
-  { id: "metodo", n: "02", label: "Metodo", nav: true },
-  { id: "strategie", n: "03", label: "Strategie", nav: true },
-  { id: "portafoglio", n: "04", label: "Portafoglio", nav: true },
-  { id: "scartate", n: "05", label: "Scartate" },
-  { id: "rischio", n: "06", label: "Rischio", nav: true },
-  { id: "monitoraggio", n: "07", label: "Monitoraggio", nav: true },
-  { id: "contatti", n: "08", label: "Contatti", nav: true },
-  { id: "avviso", n: "09", label: "Avviso" },
+  { id: "riepilogo", n: "02", label: "Riepilogo", nav: true },
+  { id: "metodo", n: "03", label: "Metodo", nav: true },
+  { id: "strategie", n: "04", label: "Strategie", nav: true },
+  { id: "portafoglio", n: "05", label: "Portafoglio", nav: true },
+  { id: "scartate", n: "06", label: "Scartate" },
+  { id: "rischio", n: "07", label: "Rischio", nav: true },
+  { id: "monitoraggio", n: "08", label: "Monitoraggio", nav: true },
+  { id: "contatti", n: "09", label: "Contatti", nav: true },
+  { id: "avviso", n: "10", label: "Avviso" },
 ];

@@ -71,8 +71,9 @@ export const actAxis = (p: number) => clamp01(p / ACT_AXIS_END);
  *   6 Contatti   p 0.80..0.90 -> fine
  */
 export function computeGates(p: number, sp: number, out: number[]) {
-  out[0] = 1 - smoothstep(0.16, 0.26, sp);
-  out[1] = smoothstep(0.14, 0.24, sp) * (1 - smoothstep(0.34, 0.44, sp));
+  // atto 1 allargato (prologo a tre schermate): esce 0.19..0.29, l'atto 2 entra 0.17..0.27
+  out[0] = 1 - smoothstep(0.19, 0.29, sp);
+  out[1] = smoothstep(0.17, 0.27, sp) * (1 - smoothstep(0.34, 0.44, sp));
   out[2] = smoothstep(0.32, 0.4, sp) * (1 - smoothstep(0.62, 0.72, sp));
   out[3] = smoothstep(0.62, 0.7, sp) * (1 - smoothstep(0.82, 0.92, sp));
   out[4] = smoothstep(0.82, 0.9, sp) * (1 - smoothstep(0.86, 0.94, p));
@@ -82,7 +83,7 @@ export function computeGates(p: number, sp: number, out: number[]) {
 
 /** Il lime (figura, gabbia, impulso dei fili) e' in scena? Allora la stanza NON e' oro. */
 export function limeInFrame(sp: number) {
-  const figure = 1 - smoothstep(0.22, 0.27, sp);
+  const figure = 1 - smoothstep(0.25, 0.3, sp);
   // la coda segue l'ULTIMO impulso lime (filo 6: sp 0.554 + 0.24 x 0.115 = 0.58), non la morte del filo (0.669):
   // cosi' la stanza torna oro prima e non resta il buco grigio fra i fili e la valle (QA-FILM C2)
   const strands = smoothstep(0.33, 0.36, sp) * (1 - smoothstep(0.59, 0.64, sp));
@@ -104,11 +105,23 @@ export function entryDecaySlope(scrollP: number) {
 }
 
 /** Figura: visibile nell'atto 1, si dissolve prima che la camera la attraversi. */
-export const figureGate = (sp: number) => 1 - smoothstep(0.17, 0.235, sp);
-/** Gabbia: UNO scalare la tesse (0..0.14) e la stesse (0.17..0.25). */
-export const latticeBuild = (sp: number) => smoothstep(0, 0.14, sp) * (1 - smoothstep(0.17, 0.25, sp));
+export const figureGate = (sp: number) => 1 - smoothstep(0.2, 0.265, sp);
+/** Gabbia: UNO scalare la tesse (0..0.14) e la stesse (0.20..0.28). */
+export const latticeBuild = (sp: number) => smoothstep(0, 0.14, sp) * (1 - smoothstep(0.2, 0.28, sp));
 /** Stanza: appare mentre la camera entra. */
-export const roomGate = (sp: number) => smoothstep(0.1, 0.22, sp);
+export const roomGate = (sp: number) => smoothstep(0.13, 0.25, sp);
+/**
+ * Il prologo (S1-S3) e' sopra la figura: mentre un testo e' a fuoco la figura e
+ * la gabbia si attenuano (funzione di sp), cosi' il bianco non sta sul lime.
+ */
+export function prologueText(sp: number) {
+  let m = 0;
+  for (let i = 0; i < 3; i++) {
+    const w = OVERLAY_WINDOWS[i];
+    m = Math.max(m, smoothstep(w.in0, w.in1, sp) * (1 - smoothstep(w.out0, w.out1, sp)));
+  }
+  return m;
+}
 /** Orizzonte (atto 5): la barra sottile in fondo. */
 export const horizonGate = (sp: number, p: number) => smoothstep(0.78, 0.9, sp) * (1 - smoothstep(0.9, 0.98, p));
 
@@ -282,23 +295,21 @@ export function fogFar(p: number) {
 
 /**
  * RITMO DEL PLAY AUTOMATICO: secondi per unita' di p, interpolati linearmente
- * fra i nodi. Corridoio (atti 2-3) veloce, valle (atto 4) lenta, arrivo in
- * frenata. Integrale ~25 s + la partenza dolce: il film intero in 25-30 s.
+ * fra i nodi. E' VELOCITA', non taglio: tutto il percorso resta intero e viene
+ * percorso in fretta (Davide: 10-11 s in tutto). Il prologo tiene i testi a fuoco
+ * il tempo di leggerli; wormhole e fili sono il picco; frenata sul finale.
+ * Integrale ~9,3 s da p 0.06 + ingresso 1,2 s + partenza dolce = ~10,5 s.
  * Il play muove SOLO lo scroll della pagina: p resta la posizione di scroll,
  * la scena non sa che si sta riproducendo da sola (ONE RULE intatta).
  */
 const PLAY_KNOTS: [number, number][] = [
-  [0.0, 30],
-  [0.13, 30],
-  [0.2, 24],
-  [0.3, 20],
-  [0.36, 16],
-  [0.56, 16],
-  [0.6, 40],
-  [0.7, 40],
-  [0.76, 25],
-  [0.88, 22],
-  [1.0, 30],
+  [0.0, 18], // prologo: tre schermate leggibili (~1,2-1,5 s ciascuna)
+  [0.3, 18],
+  [0.35, 7], // wormhole e fili: il picco di velocita'
+  [0.6, 5],
+  [0.72, 6], // valle e orizzonte
+  [0.88, 6],
+  [1.0, 9], // frenata sulla schermata finale
 ];
 export function playSecondsPerUnit(p: number) {
   const x = clamp01(p);
@@ -322,7 +333,7 @@ export function currentAct(gates: number[]) {
  * -1..1 (fuori = parcheggiata), funzione di sp su finestre di 0.04. Stesso
  * scroll, stessa fase: mai tempo.
  */
-export const PULSE_AT = [0.2, 0.38, 0.66, 0.86];
+export const PULSE_AT = [0.23, 0.38, 0.66, 0.86];
 export function hairlinePulse(sp: number) {
   for (const at of PULSE_AT) {
     const u = (sp - at) / 0.04;
@@ -338,10 +349,12 @@ export function hairlinePulse(sp: number) {
  */
 export type Win = { in0: number; in1: number; out0: number; out1: number; axis: "sp" | "p" };
 export const OVERLAY_WINDOWS: Win[] = [
-  { in0: -1, in1: -0.5, out0: 0.09, out1: 0.17, axis: "sp" }, // titolo (atto 1)
-  { in0: 0.2, in1: 0.27, out0: 0.33, out1: 0.4, axis: "sp" }, // frase A (atto 2)
-  { in0: 0.43, in1: 0.5, out0: 0.58, out1: 0.65, axis: "sp" }, // frase B (atto 3)
+  { in0: -1, in1: -0.5, out0: 0.1, out1: 0.13, axis: "sp" }, // S1 titolo + sottotitolo (prologo, atto 1)
+  { in0: 0.12, in1: 0.15, out0: 0.21, out1: 0.24, axis: "sp" }, // S2 (prologo)
+  { in0: 0.23, in1: 0.26, out0: 0.33, out1: 0.36, axis: "sp" }, // S3 processo (prologo, sopra l'ingresso nella stanza)
+  { in0: 0.37, in1: 0.4, out0: 0.42, out1: 0.45, axis: "sp" }, // frase A (atto 2)
+  { in0: 0.47, in1: 0.51, out0: 0.58, out1: 0.65, axis: "sp" }, // frase B (atto 3)
   { in0: 0.72, in1: 0.79, out0: 0.84, out1: 0.9, axis: "sp" }, // frase A (atto 4)
   { in0: 0.738, in1: 0.787, out0: 0.86, out1: 0.92, axis: "p" }, // frase B (atto 5): entra a sp 0.90..0.96, esce con il wipe (su p)
-  { in0: 0.88, in1: 0.96, out0: 2, out1: 3, axis: "p" }, // contatti (atto 6, su p)
+  { in0: 0.88, in1: 0.96, out0: 2, out1: 3, axis: "p" }, // finale: titolo + UN bottone (atto 6, su p)
 ];

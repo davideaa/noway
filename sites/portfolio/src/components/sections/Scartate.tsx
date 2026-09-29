@@ -76,7 +76,7 @@ export function Scartate() {
     <section id="scartate" data-scene className="scene" aria-labelledby="scartate-t">
       <div className="wrap">
         <SceneHeader
-          n="05"
+          n="06"
           label="Scartate"
           id="scartate-t"
           title={["Le idee che", "non hanno funzionato"]}

@@ -26,7 +26,7 @@ export function Metodo() {
   return (
     <section id="metodo" data-scene className="scene" aria-labelledby="metodo-t">
       <div className="wrap">
-        <SceneHeader n="02" label="Metodo" id="metodo-t" title={["Si decide prima,", "si misura dopo"]} />
+        <SceneHeader n="03" label="Metodo" id="metodo-t" title={["Si decide prima,", "si misura dopo"]} />
 
         <Reveal className="prose space-y-4">
           <p className="t-lead">

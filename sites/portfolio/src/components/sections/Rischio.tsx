@@ -16,7 +16,7 @@ export function Rischio() {
   return (
     <section id="rischio" data-scene className="scene" aria-labelledby="rischio-t">
       <div className="wrap">
-        <SceneHeader n="06" label="Rischio" id="rischio-t" title={["Il rischio vero,", "non quello del backtest"]} />
+        <SceneHeader n="07" label="Rischio" id="rischio-t" title={["Il rischio vero,", "non quello del backtest"]} />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="prose space-y-4 lg:col-span-5">

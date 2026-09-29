@@ -9,7 +9,7 @@ export function Monitoraggio() {
     <section id="monitoraggio" data-scene className="scene" aria-labelledby="monitoraggio-t">
       <div className="wrap">
         <SceneHeader
-          n="07"
+          n="08"
           label="Monitoraggio"
           id="monitoraggio-t"
           title={["Prima di fidarsi,", "si guarda in tempo reale"]}

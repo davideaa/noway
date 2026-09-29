@@ -16,7 +16,7 @@ export function Portafoglio() {
     <section id="portafoglio" data-scene className="scene" aria-labelledby="portafoglio-t">
       <div className="wrap">
         <SceneHeader
-          n="04"
+          n="05"
           label="Portafoglio"
           id="portafoglio-t"
           title={["Tre strategie che", "non perdono negli stessi mesi"]}

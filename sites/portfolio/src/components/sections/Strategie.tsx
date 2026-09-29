@@ -161,7 +161,7 @@ export function Strategie() {
   return (
     <section id="strategie" data-scene className="scene" aria-labelledby="strategie-t">
       <div className="wrap">
-        <SceneHeader n="03" label="Strategie" id="strategie-t" title={["Tre strategie,", "tre mercati"]} />
+        <SceneHeader n="04" label="Strategie" id="strategie-t" title={["Tre strategie,", "tre mercati"]} />
         <div className="prose space-y-4">
           <Reveal>
             <p className="t-lead">
