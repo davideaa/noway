@@ -105,7 +105,9 @@ Voci: `Metodo` · `Strategie` · `Portafoglio` · `Rischio` · `Monitoraggio` ·
 Pulsante in barra: `Scrivi via email`
 
 **Barra fissa in fondo allo schermo (sempre visibile, con link a #avviso):**
-> Backtest su dati storici, non risultati reali. Trading ad alto rischio. Non è consulenza finanziaria. [Leggi l'avviso completo](#avviso)
+> Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria. [Leggi l'avviso completo](#avviso)
+
+> Fonte: richiesta di Davide, riformulata (v3, 29/09/2026). Sostituisce "Backtest su dati storici, non risultati reali. Trading ad alto rischio." È la versione breve della frase completa in 3.9. Mai "machine learning", mai "alta probabilità".
 
 ---
 
@@ -435,7 +437,8 @@ Le risposte hanno carattere informativo sul metodo. Non è consulenza finanziari
 **Testo (completo, in pagina, sempre leggibile; nessun testo grigio su grigio):**
 
 - **Il trading comporta un alto rischio di perdita.** Si può perdere una parte o tutto il capitale. Non operare con denaro che non puoi permetterti di perdere.
-- **I risultati di questa pagina sono simulazioni (backtest) su dati storici. Non sono risultati reali.** Non possono riprodurre tutto quello che succede su un conto reale: slittamenti, differenze di esecuzione, costi diversi da quelli simulati, comportamento di chi opera.
+- **Risultati di backtest validati fuori campione con metodo quantitativo: criteri fissati prima del test, dati mai visti, bootstrap a blocchi.** Non garantiscono rendimenti futuri: indicano la mediana di cosa aspettarsi, e il suo intervallo, se il vantaggio esiste e non si è rotto. Non possono riprodurre tutto quello che succede su un conto reale: slittamenti, differenze di esecuzione, costi diversi da quelli simulati, comportamento di chi opera.
+  > Fonte: richiesta di Davide, riformulata (v3, 29/09/2026). La stessa frase, per intero, chiude il film (atto 6, pannello dei dati) accanto ai bottoni.
 - **I risultati passati non garantiscono quelli futuri.** I parametri sono stati scelti guardando i dati passati: il risultato in quel periodo è gonfiato per costruzione, e il fuori campione è già stato usato.
 - **Le strategie possono andare in perdita per un anno intero, e più.** Lo storico stesso contiene, per l'oro, un anno in perdita e uno quasi a zero su otto; per USDJPY, nove mesi del 2026 a zero.
 - **Tre strategie insieme non eliminano il rischio.** Nello storico hanno perso tutte e tre nello stesso mese sei volte su 93. Può succedere di nuovo, e più spesso.

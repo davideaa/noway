@@ -35,6 +35,8 @@ export const film = {
   paused: false,
   /** Il play automatico sta muovendo lo scroll (informativo: la scena non lo legge). */
   playing: false,
+  /** secondi di play accumulati (dt limitato), solo per misurare: la scena non lo legge */
+  playT: 0,
   mobile: false,
   /** larghezza/altezza della finestra: scala laterale dei fili e dello swing */
   aspect: 1.6,
@@ -81,8 +83,24 @@ export function computeGates(p: number, sp: number, out: number[]) {
 /** Il lime (figura, gabbia, impulso dei fili) e' in scena? Allora la stanza NON e' oro. */
 export function limeInFrame(sp: number) {
   const figure = 1 - smoothstep(0.22, 0.27, sp);
-  const strands = smoothstep(0.33, 0.36, sp) * (1 - smoothstep(0.66, 0.7, sp));
+  // la coda segue l'ULTIMO impulso lime (filo 6: sp 0.554 + 0.24 x 0.115 = 0.58), non la morte del filo (0.669):
+  // cosi' la stanza torna oro prima e non resta il buco grigio fra i fili e la valle (QA-FILM C2)
+  const strands = smoothstep(0.33, 0.36, sp) * (1 - smoothstep(0.59, 0.64, sp));
   return Math.max(figure, strands);
+}
+
+/**
+ * Decadimento dell'offset d'ingresso con lo scroll: smoothstep su 0..0.2, non
+ * lineare su 0..0.12 (QA-FILM C1: la velocita' raddoppiava di colpo a 0.12).
+ * Derivata massima di smoothstep = 1.5/0.2 = 7.5: con ENTRY 0.06, dp/dscroll
+ * resta >= 0.55, quindi p sale sempre, senza spigoli.
+ */
+export const ENTRY_DECAY_END = 0.2;
+export const entryDecay = (scrollP: number) => 1 - smoothstep(0, ENTRY_DECAY_END, scrollP);
+/** d(entryDecay)/d(scrollP): serve al play per convertire la velocita' di p in velocita' di scroll. */
+export function entryDecaySlope(scrollP: number) {
+  const u = clamp01(scrollP / ENTRY_DECAY_END);
+  return -(6 * u * (1 - u)) / ENTRY_DECAY_END;
 }
 
 /** Figura: visibile nell'atto 1, si dissolve prima che la camera la attraversi. */

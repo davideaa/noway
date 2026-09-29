@@ -13,7 +13,7 @@
  * modo puro dalla scena. Mai un lerp dentro la scena.
  */
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B } from "@/lib/site";
 import type { Palette } from "./FilmCanvas";
@@ -27,6 +27,8 @@ import {
   computeGates,
   currentAct,
   easeOutCubic,
+  entryDecay,
+  entryDecaySlope,
   film,
   hairlinePulse,
   limeInFrame,
@@ -36,9 +38,16 @@ import {
 
 const FilmCanvas = dynamic(() => import("./FilmCanvas"), { ssr: false });
 
-/** Ingresso automatico: p sale da 0 a ENTRY in ENTRY_MS, poi parte il play. */
+/**
+ * Ingresso automatico: p sale da 0 a ENTRY in ENTRY_MS, poi parte il play.
+ * Il tempo dell'ingresso e' ACCUMULATO per fotogramma con dt limitato a 50 ms
+ * (QA-FILM B3: il primo fotogramma blocca il thread per il bake e la
+ * compilazione degli shader; con il tempo di parete la rampa veniva mangiata),
+ * e parte solo dopo il secondo fotogramma disegnato. In pausa non avanza (B4).
+ */
 const ENTRY = 0.06;
 const ENTRY_MS = 2500;
+const ENTRY_DT_MAX = 0.05;
 /** Partenza dolce del play (ms) e frenata sull'ultimo tratto. */
 const PLAY_EASE_MS = 900;
 /** Sfalsamento tra le lettere (0 = tutte insieme). */
@@ -122,7 +131,24 @@ export function Film({ panel }: { panel: ReactNode }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const { reduced } = useMotionPrefs();
   const { mode, palette } = useSyncExternalStore(noopSubscribe, getClient, () => SSR);
-  const entryT0 = useRef(0);
+  /** true dal secondo fotogramma disegnato dal canvas (bake e shader gia' fatti) */
+  const ready = useRef(false);
+  /** secondi d'ingresso accumulati (dt limitato, fermo in pausa) */
+  const entryS = useRef(0);
+  // Il canvas (three.js, ~240 kB) si monta dopo il primo disegno dell'h1: LCP e
+  // TBT non aspettano il film (QA-FILM C3). Un solo setState, una volta.
+  const [canvasOn, setCanvasOn] = useState(false);
+  useEffect(() => {
+    if (mode !== "film") return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setCanvasOn(true));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [mode]);
 
   useEffect(() => {
     film.reduced = reduced;
@@ -231,7 +257,6 @@ export function Film({ panel }: { panel: ReactNode }) {
     const loop = (now: number) => {
       const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
       last = now;
-      const still = film.reduced || film.paused;
 
       /* --- smussamento dell'input (H(m)): esponenziale con dt, identico a 30 e 120 fps --- */
       const k = 1 - Math.exp(-dt / TAU_SCENE);
@@ -249,9 +274,11 @@ export function Film({ panel }: { panel: ReactNode }) {
       film.my = ((ptr.sy / window.innerHeight) * 2 - 1) * ptr.sin;
       film.min = ptr.sin;
 
-      /* --- ingresso: offset che sale in 2,5 s e DECADE con lo scroll (zero da scrollP 0.12) --- */
-      const entryOn = !film.reduced && !startedScrolled && entryT0.current > 0;
-      const entryDone = entryOn && now - entryT0.current >= ENTRY_MS;
+      /* --- ingresso: offset che sale in 2,5 s (tempo accumulato, fermo in pausa) e DECADE con lo scroll --- */
+      const entryOn = !film.reduced && !startedScrolled && ready.current;
+      if (entryOn && !player.paused && entryS.current < ENTRY_MS / 1000) entryS.current += Math.min(dt, ENTRY_DT_MAX);
+      const entryNow = entryOn ? ENTRY * easeOutCubic(entryS.current / (ENTRY_MS / 1000)) : 0;
+      const entryDone = entryOn && entryS.current >= ENTRY_MS / 1000;
       // play automatico: UNA volta, dopo l'ingresso; mai con meno movimento, mai se si e' aperti a meta'
       if (entryDone && !autoStarted && !noAuto && pin === null) {
         autoStarted = true;
@@ -273,13 +300,13 @@ export function Film({ panel }: { panel: ReactNode }) {
         }
         const rectNow = track.getBoundingClientRect();
         const s0 = clamp01(-rectNow.top / scrollLen());
-        // dp/dscrollP: finche' l'ingresso decade (scrollP < 0.12) p sale meta' dello scroll
-        const entryNow = entryOn ? ENTRY * easeOutCubic((now - entryT0.current) / ENTRY_MS) : 0;
-        const gain = s0 < 0.12 ? 1 - entryNow / 0.12 : 1;
-        const pNow = clamp01(s0 + entryNow * (1 - clamp01(s0 / 0.12)));
+        // dp/dscrollP: finche' l'ingresso decade, p sale meno dello scroll (mai sotto 0.55)
+        const gain = 1 + entryNow * entryDecaySlope(s0);
+        const pNow = clamp01(s0 + entryNow * entryDecay(s0));
         const ease = smoothstep(0, 1, (now - playT0) / PLAY_EASE_MS) * (0.3 + 0.7 * (1 - smoothstep(0.96, 1, pNow)));
         const dp = (dt / playSecondsPerUnit(pNow)) * ease;
-        const s1 = s0 + dp / Math.max(0.25, gain);
+        film.playT += dt;
+        const s1 = s0 + dp / Math.max(0.5, gain);
         if (s1 >= 1) {
           setScrollP(1);
           player.interrupt();
@@ -293,9 +320,7 @@ export function Film({ panel }: { panel: ReactNode }) {
       const rect = track.getBoundingClientRect();
       const vh = window.innerHeight;
       const scrollP = clamp01(-rect.top / Math.max(1, rect.height - vh));
-      let entry = 0;
-      if (entryOn) entry = ENTRY * easeOutCubic((now - entryT0.current) / ENTRY_MS);
-      const off = entry * (1 - clamp01(scrollP / 0.12));
+      const off = entryNow * entryDecay(scrollP);
       const p = pin ?? clamp01(scrollP + off);
       film.scrollP = scrollP;
       film.p = p;
@@ -444,11 +469,11 @@ export function Film({ panel }: { panel: ReactNode }) {
       <FilmTopBar controls={mode === "film"} />
       <div className="film-track" ref={trackRef}>
         <div className="film-stage" ref={stageRef}>
-          {mode === "film" && palette && (
+          {mode === "film" && palette && canvasOn && (
             <FilmCanvas
               palette={palette}
               onReady={() => {
-                if (!entryT0.current) entryT0.current = performance.now();
+                ready.current = true;
               }}
             />
           )}

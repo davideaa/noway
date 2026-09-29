@@ -37,6 +37,12 @@ Sono mostrati come in COPY.md. Se Davide conferma un valore diverso, va cambiato
 | 13 | Scheda "Take profit fisso a 2,5R": 159 $ -> 1.795 $ | Viene da una versione precedente della strategia: confermare o togliere la scheda | `Scartate.tsx` |
 | 14 | Regole del RITRACCIAMENTO | Nei file c'e' solo il caso rialzista ("prezzo sopra la media"): confermare che esiste il caso speculare, o riformulare | `Strategie.tsx` |
 
+## 3b. Il simulatore (`/simulatore/`)
+
+| # | Cosa | Cosa fa il sito adesso |
+|---|---|---|
+| 15 | **`public/simulatore/index.html` è il file di Davide** (`esempio/index.html`, 1,7 MB, HTML autonomo), copiato **senza toccarne il contenuto** e aperto dal bottone "Apri il simulatore" alla fine del film. In dev/`next start` la rotta `/simulatore` è riscritta sul file (`next.config.ts`); nell'export statico l'host serve `index.html` da solo | Contiene la dicitura **"DATI REALI · 10.000 POSSIBILI FUTURI"** e, nella tabella dei rendimenti, **"+56,9%" annuo** (scenario completo 2019–2026). Contraddice l'etichetta "Backtest · validato fuori campione" del film e la frase sul rischio approvata: **decide Davide** se correggere la dicitura nel suo file (il sito non lo modifica) |
+
 ## 4. Scelte e cose non fatte
 
 - **Fase 2 inglese** (COPY.md sez. 7): non costruita. Il sito e' solo italiano (`lang="it"`).
@@ -45,4 +51,6 @@ Sono mostrati come in COPY.md. Se Davide conferma un valore diverso, va cambiato
 - **Icone di sezione** in `assets/icons/`: non usate, il sito usa `lucide-react` come da DESIGN.md sez. 10.
 - **Menu su telefono senza JavaScript**: il pulsante "Menu" richiede JS. Il resto del sito funziona senza JS.
 - **Informativa privacy / cookie**: il sito non usa analisi ne' cookie; se si aggiungono, serve.
+- **Export statico**: `npm run export` (= `EXPORT_STATIC=1 next build`) scrive `out-export/` e poi **cancella `.next`**, perche' Next 16 salva comunque in `.next` la configurazione dell'export e un successivo `next start` servirebbe /dettagli senza CSS/JS (QA-FILM A1). Dopo un export, per `next start` serve un `npm run build` normale.
+- **Barra alta nel finale del film**: RIFERIMENTI E9 la farebbe sparire nel wipe (translateZ -300, opacita' 0); qui recede e si attenua al 50% ma resta usabile, perche' porta il tasto Riproduci/Pausa (WCAG 2.2.2) e il link ai dettagli.
 - **Prodotto commerciale di partenza**: non nominato e nessun suo numero (COPY.md sez. 8, punto 15).

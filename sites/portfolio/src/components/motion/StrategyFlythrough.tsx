@@ -47,7 +47,10 @@ function Layer({ i, progress, children }: { i: number; progress: MotionValue<num
     const start = piecewise(p, [0, 0.1], [0, 1]); // i livelli restano spenti all'inizio
     // QA B1: il livello uscente (z > 0, davanti alla camera) deve essere a zero prima che
     // l'entrante superi ~0,2, altrimenti i due testi si intrecciano (preserve-3d lo disegna sopra).
-    return start * piecewise(layerZ(p, i), [-1700, -700, -220, 80, 200], [0, 0, 1, 1, 0]);
+    // QA-FILM (residuo): a p 0,72 il livello uscente era a 0,405 e l'entrante a 0,464. La mappa e' piu'
+    // stretta: l'entrante accende da z -420 (prima -700), l'uscente e' spento a +170 (prima 200).
+    // Con FOCUS_STEP 0,38: quando l'uscente e' a 0,5 (z 125) l'entrante e' a z -518 = 0.
+    return start * piecewise(layerZ(p, i), [-1700, -420, -180, 80, 170], [0, 0, 1, 1, 0]);
   });
   return (
     <m.div className="zlayer" style={{ z, opacity }}>

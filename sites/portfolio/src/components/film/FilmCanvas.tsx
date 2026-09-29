@@ -66,7 +66,7 @@ const FIG_C = new THREE.Vector3(0, 9, 0);
 const FIG_H = 14;
 /** Conteggio dichiarato: ~40k desktop, ridotto su telefono. */
 const BEADS_DESKTOP = 40000;
-const BEADS_MOBILE = 14000;
+const BEADS_MOBILE = 10000;
 const BEAD_R = 0.5; // raggio della geometria; la scala per perla lo porta a ~0.06-0.12
 const BEAD_SCALE = 0.13;
 /** Segmenti per filo: meno su telefono, MAI meno fili. */
@@ -513,7 +513,8 @@ function Room({ palette }: { palette: Palette }) {
     const gate = roomGate(film.sp);
     g.visible = gate > 0.002;
     if (!g.visible) return;
-    const lime = limeInFrame(film.sp);
+    // oro solo senza lime in scena; e si spegne anche quando arriva l'atto 6 (il pannello ha il CTA lime: QA-FILM B2)
+    const lime = Math.max(limeInFrame(film.sp), film.gates[5]);
     tmp.copy(gold).lerp(dim, lime);
     const par = film.reduced ? 0 : 1;
     // parallasse dal puntatore (gia' smussato): SOLO posizione
@@ -880,7 +881,18 @@ const GRAIN = {
   `,
 };
 
-function Post() {
+/** Senza post chain (telefono): disegna R3F; qui si segnala solo il secondo fotogramma. */
+function Ready({ onReady }: { onReady?: () => void }) {
+  const frames = useRef(0);
+  // priorita' 0: con una priorita' positiva R3F smetterebbe di disegnare da solo
+  useFrame(() => {
+    if (frames.current < 3 && ++frames.current === 2) onReady?.();
+  });
+  return null;
+}
+
+function Post({ onReady }: { onReady?: () => void }) {
+  const frames = useRef(0);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const camera = useThree((s) => s.camera);
@@ -927,6 +939,8 @@ function Post() {
       chain.lens.uniforms.uSmear.value = fr;
     }
     chain.composer.render();
+    // l'ingresso parte dal SECONDO fotogramma: bake e compilazione degli shader sono gia' passati (QA-FILM B3)
+    if (frames.current < 3 && ++frames.current === 2) onReady?.();
   }, 1);
   return null;
 }
@@ -934,6 +948,9 @@ function Post() {
 /* -------------------------------------------------------------------------- */
 export default function FilmCanvas({ palette, onReady }: { palette: Palette; onReady?: () => void }) {
   const portrait = film.aspect < 0.75;
+  // Telefono: niente post chain (bloom, lente, grana): meno GPU e meno thread principale (QA-FILM C3).
+  // Le linee sopra soglia restano semplicemente piu' chiare; frangia e smear sono dichiarati "off" su telefono (E7).
+  const post = !film.mobile;
   return (
     <Canvas
       dpr={[1, film.mobile ? 1 : 1.5]}
@@ -944,7 +961,6 @@ export default function FilmCanvas({ palette, onReady }: { palette: Palette; onR
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.setClearColor(new THREE.Color(palette.field), 1);
-        onReady?.();
       }}
     >
       <color attach="background" args={[palette.field]} />
@@ -955,7 +971,7 @@ export default function FilmCanvas({ palette, onReady }: { palette: Palette; onR
       <Room palette={palette} />
       <Strands palette={palette} />
       <Horizon palette={palette} />
-      <Post />
+      {post ? <Post onReady={onReady} /> : <Ready onReady={onReady} />}
     </Canvas>
   );
 }

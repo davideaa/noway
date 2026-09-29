@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // export statico e l'HTML autonomo del simulatore (file di Davide, non si tocca)
+    "out-export/**",
+    "public/simulatore/**",
   ]),
 ]);
 

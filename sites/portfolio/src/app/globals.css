@@ -645,6 +645,18 @@
 .dtable--narrow .r {
   white-space: normal;
 }
+/* QA-FILM (residuo): a 390 la tabella delle correlazioni scorreva di 15 px: meno padding e a capo libero */
+@media (max-width: 599px) {
+  .dtable--narrow th,
+  .dtable--narrow td {
+    padding: var(--sp-3) var(--sp-2);
+    overflow-wrap: anywhere;
+  }
+  .dtable--narrow th:first-child,
+  .dtable--narrow td:first-child {
+    padding-left: var(--sp-3);
+  }
+}
 .dtable caption {
   text-align: left;
   padding: var(--sp-4) var(--sp-4) var(--sp-2);
@@ -1251,15 +1263,73 @@ html:not(.js) .hero__content {
   color: var(--film-type-mute);
   overflow-wrap: anywhere;
 }
-/* barra alta del film */
+/* --------------------------------------------------------------------------
+   Barra alta del film (E9): trasparente in cima, pillola di vetro appena si
+   entra nel film (.is-pill, toggolata una volta dal ciclo). Il ciclo scrive
+   solo --nav-out (uscita nel wipe: recede e si attenua, resta usabile), il
+   valore della barra, il filetto E6 (transform/opacity). Su telefono niente
+   blur: superficie piena (blur sopra un canvas WebGL su iOS = 20 fps).
+   -------------------------------------------------------------------------- */
 .film-top {
   position: fixed;
   inset-inline: 0;
   top: 0;
   z-index: 50;
+  padding: 0 var(--gutter);
+  pointer-events: none;
+  --nav-out: 0;
+}
+.film-top__in {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--sp-3);
+  max-width: 1216px;
+  min-height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 var(--sp-2);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  pointer-events: auto;
+  transition:
+    background-color var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease),
+    margin var(--dur-base) var(--ease);
+  transform: scale(calc(1 - 0.12 * var(--nav-out)));
+  transform-origin: 50% 0;
+  opacity: calc(1 - 0.5 * var(--nav-out));
+}
+.film-top.is-pill .film-top__in {
+  margin-top: var(--sp-3);
   background: var(--film-top-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-color: var(--line);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+}
+@media (pointer: coarse), (max-width: 599px) {
+  .film-top.is-pill .film-top__in {
+    background: var(--surf2);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+.film-top__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: 0 var(--sp-2);
+  color: var(--acc);
+}
+.film-top__brand span {
+  color: var(--film-type);
+}
+.film-top__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-left: auto;
 }
 .film-top__link {
   display: inline-flex;
@@ -1269,24 +1339,499 @@ html:not(.js) .hero__content {
   font-size: 14px;
   font-weight: 500;
   color: var(--film-type);
-  border-radius: var(--r-2);
+  border-radius: 999px;
   transition: color var(--dur-base) var(--ease);
 }
 .film-top__link:hover {
   color: var(--film-accent-figure);
 }
-.film-top__pause {
+/* il controllo unico Riproduci / Pausa + contatore di atto */
+.film-play {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.film-play__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
   min-height: 40px;
-  font-size: 13px;
+  min-width: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line3);
+  border-radius: 999px;
   background: transparent;
+  color: var(--film-type);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    border-color var(--dur-base) var(--ease),
+    background-color var(--dur-base) var(--ease);
+}
+.film-play__btn:hover {
+  border-color: var(--acc);
+  background: var(--acc2);
+}
+.film-play__act {
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  color: var(--film-type-mute);
+  font-variant-numeric: tabular-nums;
+}
+/* barra di avanzamento = p: traccia 2 px, area di presa 20 px, tutta la larghezza */
+.film-seek {
+  flex: 1 0 100%;
+  order: 10;
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+.film-seek::-webkit-slider-runnable-track {
+  height: 2px;
+  background: color-mix(in srgb, var(--film-neutral-line) 45%, transparent);
+  border-radius: 1px;
+}
+.film-seek::-moz-range-track {
+  height: 2px;
+  background: color-mix(in srgb, var(--film-neutral-line) 45%, transparent);
+  border-radius: 1px;
+}
+.film-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--acc);
+  border: 0;
+}
+.film-seek::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--acc);
+  border: 0;
+}
+.film-seek::-moz-range-progress {
+  height: 2px;
+  background: var(--acc);
+}
+.film-seek:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+/* E6: il filetto della pillola con la luce che lo percorre agli snodi di atto */
+.film-top__hair {
+  position: absolute;
+  left: var(--sp-5);
+  right: var(--sp-5);
+  bottom: -1px;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+.film-top.is-pill .film-top__hair {
+  opacity: 1;
+}
+.film-top__pulse {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, var(--acc), transparent);
+  transform: translate3d(-100%, 0, 0);
+  opacity: 0;
+  will-change: transform, opacity;
 }
 @media (max-width: 599px) {
-  .film-top__pause span,
-  .film-top__pause {
-    font-size: 0;
+  .film-play__label,
+  .film-top__link--mail {
+    display: none;
   }
-  .film-top__pause svg {
-    font-size: 16px;
+  .film-play__btn {
+    padding: 0 var(--sp-3);
+  }
+  .film-top {
+    padding: 0 var(--sp-2);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   E2 torcia ed E3 cursore: layer fissi, pointer-events none, solo transform e
+   opacity dal ciclo. Solo puntatore fine, mai con meno movimento. Il cursore di
+   sistema resta (a11y, iframe, cursori personalizzati).
+   -------------------------------------------------------------------------- */
+.film-torch {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 640px;
+  height: 640px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  /* morbidezza DENTRO il gradiente: filter: blur() ridipingerebbe 640 px a ogni frame */
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 22%, transparent) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.film-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0;
+  transition:
+    opacity 180ms var(--ease),
+    width 180ms var(--ease),
+    height 180ms var(--ease),
+    margin 180ms var(--ease),
+    border-width 180ms var(--ease);
+  will-change: transform;
+}
+.film-cursor--dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background: var(--acc);
+}
+.film-cursor--ring {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 1px solid color-mix(in oklab, var(--acc) 70%, transparent);
+}
+.film-cursor[data-state="on"],
+.film-cursor[data-state="link"],
+.film-cursor[data-state="drag"] {
+  opacity: 0.9;
+}
+.film-cursor--ring[data-state="link"] {
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border-width: 1.5px;
+}
+.film-cursor--ring[data-state="drag"] {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .film-torch,
+  .film-cursor {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Atto 6: il pannello dei dati, dentro il film. L'overlay resta pointer-events
+   none; il pannello e' l'unico figlio che li riabilita, e scorre al suo interno.
+   E8: ogni carta ha dietro un alone del proprio colore (--zc), opacita' =
+   0.08 + 0.10 * --focus (scritto dal ciclo, funzione della finestra) + hover.
+   -------------------------------------------------------------------------- */
+.film-ov--end {
+  align-content: center;
+  padding-top: calc(var(--header-h) + var(--sp-6));
+  padding-bottom: calc(var(--film-riskbar-h) + var(--sp-4));
+  will-change: transform, filter, opacity;
+}
+.film-panel {
+  --focus: 0;
+  width: min(100%, 1120px);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--film-field-2) 88%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+@media (pointer: coarse) {
+  .film-panel {
+    background: var(--film-field-2);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+.film-panel__in {
+  display: grid;
+  gap: var(--sp-5);
+  padding: var(--sp-5) var(--sp-4) var(--sp-6);
+}
+@media (min-width: 950px) {
+  .film-panel__in {
+    padding: var(--sp-6) var(--sp-6) var(--sp-7);
+  }
+}
+.film-panel__head {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: start;
+}
+.film-panel__head .tag {
+  margin-top: var(--sp-2);
+}
+.film-cards {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .film-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.film-card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--zc, var(--st-oro)) 40%, transparent);
+  border-radius: var(--r-2);
+  background: color-mix(in srgb, var(--surf) 92%, transparent);
+  box-shadow: 0 25px 75px -55px color-mix(in srgb, var(--zc, var(--st-oro)) 40%, transparent);
+}
+.film-card::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(60% 50% at 50% 30%, var(--zc, var(--st-oro)) 0%, transparent 70%);
+  opacity: calc(0.08 + 0.1 * var(--focus));
+  transition: opacity 180ms var(--ease);
+  pointer-events: none;
+}
+.film-card:hover::before {
+  opacity: calc(0.12 + 0.1 * var(--focus));
+}
+.film-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.film-card__name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.film-card__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--zc, var(--st-oro));
+}
+.film-card__mkt {
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--film-type-mute);
+}
+.film-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.film-table th,
+.film-table td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: baseline;
+}
+.film-table th[scope="row"] {
+  text-align: left;
+  font-weight: 400;
+  color: var(--film-type-mute);
+}
+.film-table thead th {
+  font-weight: 500;
+  color: var(--film-type);
+  border-bottom-color: var(--line2);
+}
+.film-table thead small {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--film-type-mute);
+}
+.film-table td {
+  font-family: var(--font-mono);
+}
+.film-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.film-card__facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+  font-size: 13px;
+}
+.film-card__facts dt {
+  color: var(--film-type-mute);
+}
+.film-card__risk,
+.film-panel__risk {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--film-type);
+}
+.film-card__risk svg,
+.film-panel__risk svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--warn);
+}
+.film-panel__risk {
+  font-size: 14px;
+  max-width: 78ch;
+}
+.film-card--port {
+  --zc: var(--acc);
+}
+.film-port {
+  display: grid;
+  gap: var(--sp-4);
+}
+@media (min-width: 768px) {
+  .film-port {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+.film-port__corr {
+  display: grid;
+  gap: var(--sp-2);
+  font-size: 14px;
+}
+.film-port__corr > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+.film-port__corr dt {
+  color: var(--film-type-mute);
+}
+.film-port__note {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--film-type);
+}
+.film-panel .film-cta {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+.film-panel .film-mail {
+  margin-top: calc(-1 * var(--sp-3));
+}
+
+/* --------------------------------------------------------------------------
+   E10: sweep di luce (una volta per pointerenter) + magnetismo (--mx/--my dal
+   puntatore, solo transform; il wrapper e' l'area di presa +24 px).
+   -------------------------------------------------------------------------- */
+.cta-lux__wrap {
+  display: inline-block;
+  padding: 0;
+}
+.cta-lux {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --mx: 0px;
+  --my: 0px;
+  transform: translate3d(var(--mx), var(--my), 0);
+  transition:
+    transform 300ms var(--ease),
+    background-color 180ms var(--ease);
+}
+.cta-lux:hover {
+  transform: translate3d(var(--mx), var(--my), 0) scale(1.03);
+}
+.cta-lux::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.55) 50%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.cta-lux.is-sweep::after {
+  animation: cta-sweep 900ms var(--ease) 1;
+}
+@keyframes cta-sweep {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cta-lux,
+  .cta-lux:hover {
+    transform: none;
+  }
+  .cta-lux.is-sweep::after {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   E5: il titolo si mette a fuoco DA DIETRO, lettera per lettera, una volta
+   sola (fa parte dell'ingresso automatico, corre sul tempo); poi la sua uscita
+   e' funzione pura di sp (back-to-front, dal ciclo). L'animazione vince sugli
+   stili inline: il ciclo puo' gia' scrivere opacity 1 senza interferire.
+   Sfalsamento per parola (60 ms) + per lettera (14 ms): 62 lettere atterrano
+   entro ~1 s. Con meno movimento o senza JS: stato finale subito.
+   -------------------------------------------------------------------------- */
+.film-h1 {
+  perspective: var(--persp);
+}
+.js .film-ov--title .film-l {
+  animation: film-focus-in 700ms var(--ease) both;
+  animation-delay: calc(150ms + var(--w, 0) * 60ms + var(--i, 0) * 14ms);
+}
+@keyframes film-focus-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, -140px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .film-ov--title .film-l {
+    animation: none;
   }
 }
 /* fallback senza WebGL: stessa pagina, ferma */
