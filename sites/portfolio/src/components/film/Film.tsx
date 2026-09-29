@@ -524,8 +524,12 @@ export function Film() {
         const gain = 1 + entryNow * entryDecaySlope(s0);
         const pNow = clamp01(s0 + entryNow * entryDecay(s0));
         const ease = smoothstep(0, 1, (now - playT0) / PLAY_EASE_MS) * (0.3 + 0.7 * (1 - smoothstep(0.96, 1, pNow)));
-        const dp = (dt / playSecondsPerUnit(pNow)) * ease;
-        film.playT += dt;
+        // Tempo REALE per il play: `dt` e' tagliato a 0,1 s per la scena, ma se il telefono
+        // disegna a 6-8 fps il film andrebbe al 60-80 % della velocita' (Davide su iPhone:
+        // "come in slow"). Il cap a 0,5 s serve solo per il ritorno da una scheda nascosta.
+        const playDt = Math.min(0.5, rawDt);
+        const dp = (playDt / playSecondsPerUnit(pNow)) * ease;
+        film.playT += playDt;
         const s1 = s0 + dp / Math.max(0.5, gain);
         if (s1 >= 1) {
           setScrollP(1);

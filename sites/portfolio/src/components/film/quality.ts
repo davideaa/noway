@@ -9,7 +9,7 @@
  *  - renderer WebGL (WEBGL_debug_renderer_info): SwiftShader / llvmpipe /
  *    Intel HD / Mali-4xx -> lite (rendering software o GPU molto vecchia)
  *  - deviceMemory <= 4 GB o hardwareConcurrency <= 4 -> media
- *  - touch -> mai alta
+ *  - touch -> lite (telefoni e tablet: 20 s di WebGL a schermo intero, niente bloom)
  *  - ?quality=alta|media|lite forza il livello (per le prove di Davide)
  *
  * Qui vivono anche lo stato del CARICAMENTO (bake, compilazione, primo
@@ -41,7 +41,7 @@ export type Profile = {
 export const PROFILES: Record<Tier, Profile> = {
   alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3 },
   media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3 },
-  lite: { dpr: 1, beads: 8000, curves: 25, dust: 0, post: "none", fringe: false, seg: 12, shells: 2 },
+  lite: { dpr: 1, beads: 5000, curves: 25, dust: 0, post: "none", fringe: false, seg: 12, shells: 2 },
 };
 
 export type Probe = { ok: boolean; renderer: string; vendor: string; webgl2: boolean };
@@ -108,8 +108,8 @@ export function pickTier(s: Signals): { tier: Tier; reason: string } {
     tier = "media";
     why.push(`${s.cores} core`);
   }
-  if (s.touch && tier === "alta") {
-    tier = "media";
+  if (s.touch && tier !== "lite") {
+    tier = "lite";
     why.push("touch");
   }
   return { tier, reason: why.length ? why.join(", ") : "nessun segnale di limite" };
