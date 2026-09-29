@@ -12,16 +12,19 @@
  * camera), H il puntatore smussato ALL'INGRESSO (qui, con dt), poi usato in
  * modo puro dalla scena. Mai un lerp dentro la scena.
  */
+import { Play } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
 import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, FILM_S2, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
 import { MagneticCta } from "./MagneticCta";
+import { bakeFan, fanParams } from "./bake";
 import type { Palette } from "./FilmCanvas";
 import { FilmFallback } from "./FilmFallback";
 import { FilmTopBar } from "./FilmTopBar";
 import { player, ui } from "./player";
+import { PROFILES, boot, diag, installErrorCapture, probeWebGL, quality, readSignals } from "./quality";
 import {
   OVERLAY_WINDOWS,
   actAxis,
@@ -74,17 +77,16 @@ function readPalette(): Palette {
   };
 }
 
-function hasWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    const gl = (c.getContext("webgl2") || c.getContext("webgl")) as WebGLRenderingContext | null;
-    if (!gl) return false;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return true;
-  } catch {
-    return false;
-  }
-}
+/**
+ * Tap semplice (touch o click): sotto questo spostamento NON e' un input che
+ * ferma il play. Il tempo non serve a distinguere: senza movimento (anche una
+ * pressione lunga) la pagina non scorre e il play non si ferma mai.
+ */
+const TAP_PX = 10;
+/** Finestra di misura degli fps dopo l'avvio del play (quality.adjust). */
+const FPS_WINDOW_MS = 2000;
+/** Se il film non e' pronto entro questo tempo, il caricamento lo dice invece di restare muto. */
+const SLOW_BOOT_MS = 12000;
 
 /**
  * Testo diviso per lettera (parole intere: mai a capo dentro una parola).
@@ -114,28 +116,109 @@ function Letters({ text }: { text: string }) {
 }
 
 type Ov = { el: HTMLElement; letters: HTMLElement[]; key: string; whole: boolean; stagger: number };
-type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null };
+type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null; diag: boolean };
 
-/** Scelta iniziale, UNA volta e fuori da React: WebGL si' (film) o no (fallback). */
-const SSR: Client = { mode: "ssr", palette: null };
+/**
+ * Scelta iniziale, UNA volta e fuori da React: WebGL si' (film) o no (fallback);
+ * il LIVELLO di qualita' (quality.ts) dai segnali del dispositivo; e il bake
+ * della figura parte SUBITO, in un worker, mentre il chunk di three scarica.
+ */
+const SSR: Client = { mode: "ssr", palette: null, diag: false };
 let clientCache: Client | undefined;
 function getClient(): Client {
   if (!clientCache) {
     film.mobile = window.matchMedia("(max-width: 820px)").matches;
     film.aspect = window.innerWidth / Math.max(1, window.innerHeight);
-    clientCache = hasWebGL() ? { mode: "film", palette: readPalette() } : { mode: "fallback", palette: null };
+    const probe = probeWebGL();
+    const isDiag = new URLSearchParams(window.location.search).get("diag") === "1";
+    diag.on = isDiag;
+    boot.t0 = performance.now();
+    if (probe.ok) {
+      quality.init(probe, readSignals(window.location.search));
+      bakeFan(fanParams(quality.profile, film.aspect)).catch(() => {});
+      boot.set("chunk", 0.05);
+      clientCache = { mode: "film", palette: readPalette(), diag: isDiag };
+    } else clientCache = { mode: "fallback", palette: null, diag: isDiag };
   }
   return clientCache;
 }
+
+/** Il testo della diagnostica (?diag=1): quello che Davide incolla. */
+function diagText(extra: { entry: number; autoStarted: boolean; measuring: boolean }) {
+  const q = quality;
+  const sg = q.signals;
+  const ms = (v: number | null) => (v === null ? "—" : `${v.toFixed(0)} ms`);
+  const st = player.playing ? "play" : player.paused ? "pausa" : "fermo";
+  const lines = [
+    `qualita: ${q.tier} — ${q.reason}`,
+    `renderer: ${q.probe.renderer || "?"}${q.probe.vendor ? ` · ${q.probe.vendor}` : ""} · webgl${q.probe.webgl2 ? 2 : 1}`,
+    `dpr: schermo ${window.devicePixelRatio} · canvas ${Math.min(window.devicePixelRatio, PROFILES[q.tier].dpr)}`,
+    `fps: ${diag.fpsNow.toFixed(0)} ora · ${diag.fpsAvg.toFixed(0)} media${q.fpsMeasured !== null ? ` · finestra 2 s: ${q.fpsMeasured.toFixed(0)}` : extra.measuring ? " · misura in corso" : ""}`,
+    `bake: ${ms(boot.bakeMs)} (${boot.bakeWhere || "—"}) · compile: ${ms(boot.compileMs)} · primo frame: ${ms(boot.firstFrameMs)} · pronto: ${ms(boot.readyMs)}`,
+    `p: ${film.p.toFixed(3)} · sp ${film.sp.toFixed(3)} · atto ${currentAct(film.gates)} · ingresso ${extra.entry.toFixed(2)} s · autoplay ${extra.autoStarted ? "partito" : "no"}`,
+    `player: ${st}${player.reason ? ` (${player.reason})` : ""} · fase boot: ${boot.stage}`,
+    `schermo: ${window.innerWidth}x${window.innerHeight} · touch ${sg?.touch ? "si" : "no"} · core ${sg?.cores ?? "?"} · mem ${sg?.memoryGB ?? "?"} GB · mobile ${film.mobile ? "si" : "no"} · reduced ${film.reduced ? "si" : "no"}`,
+    `ua: ${navigator.userAgent}`,
+    `errori: ${diag.errors.length ? diag.errors.join(" | ") : "nessuno"}`,
+  ];
+  return lines.join("\n");
+}
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+}
 const noopSubscribe = () => () => {};
+
+/** Pannello ?diag=1: mono, in alto a destra; il ciclo lo riscrive, il tasto copia il testo. */
+function DiagPanel({ textRef }: { textRef: React.RefObject<() => string> }) {
+  const [copied, setCopied] = useState<"" | "ok" | "no">("");
+  return (
+    <div className="film-diag" data-film-controls>
+      <pre className="film-diag__txt mono" ref={(el) => void (ui.diag = el)} />
+      <button
+        type="button"
+        className="film-diag__copy mono"
+        onClick={async () => {
+          const ok = await copyText(textRef.current());
+          setCopied(ok ? "ok" : "no");
+          window.setTimeout(() => setCopied(""), 1600);
+        }}
+      >
+        {copied === "ok" ? "Copiato" : copied === "no" ? "Copia fallita: seleziona il testo" : "Copia diagnostica"}
+      </button>
+    </div>
+  );
+}
 
 export function Film() {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { reduced } = useMotionPrefs();
-  const { mode, palette } = useSyncExternalStore(noopSubscribe, getClient, () => SSR);
+  const { mode, palette, diag: diagOn } = useSyncExternalStore(noopSubscribe, getClient, () => SSR);
   /** true dal secondo fotogramma disegnato dal canvas (bake e shader gia' fatti) */
   const ready = useRef(false);
+  /** ms (performance.now) in cui il canvas e' diventato pronto */
+  const readyAt = useRef(0);
+  /** il testo della diagnostica, per il tasto "Copia" (lo compone il ciclo) */
+  const diagTextRef = useRef<() => string>(() => "");
   /** secondi d'ingresso accumulati (dt limitato, fermo in pausa) */
   const entryS = useRef(0);
   // Il canvas (three.js, ~240 kB) si monta dopo il primo disegno dell'h1: LCP e
@@ -150,6 +233,32 @@ export function Film() {
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
+    };
+  }, [mode]);
+
+  // Lo stato di caricamento: barra sottile + percentuale, scritti dal boot (quality.ts), mai per frame.
+  useEffect(() => {
+    if (mode !== "film") return;
+    const paint = () => {
+      const el = ui.loader;
+      if (!el) return;
+      if (boot.stage === "ready") {
+        el.classList.add("is-done");
+        return;
+      }
+      if (ui.loaderBar) ui.loaderBar.style.transform = `scaleX(${boot.progress.toFixed(3)})`;
+      if (ui.loaderText)
+        ui.loaderText.textContent =
+          boot.stage === "error" ? "il film non riesce a partire · scorri per continuare" : `caricamento ${Math.round(boot.progress * 100)}%`;
+    };
+    paint();
+    const un = boot.subscribe(paint);
+    const slow = window.setTimeout(() => {
+      if (boot.stage !== "ready" && ui.loaderText) ui.loaderText.textContent = "il film fatica a partire · scorri per continuare";
+    }, SLOW_BOOT_MS);
+    return () => {
+      un();
+      window.clearTimeout(slow);
     };
   }, [mode]);
 
@@ -210,34 +319,78 @@ export function Film() {
       const t = (e.target as Element | null)?.closest?.("[data-cursor], a, button, input") as HTMLElement | null;
       cursorState = t ? t.dataset.cursor || (t.tagName === "INPUT" ? "drag" : "link") : "";
     };
-    const onResize = () => {
+    /* ---------------- geometria dello scroll: misurata UNA volta e su resize, mai per frame ----------------
+       (niente getBoundingClientRect / offsetHeight nel ciclo: su telefono, con la barra degli
+       indirizzi che cambia altezza, ogni lettura di layout dopo uno scrollTo e' un layout thrash) */
+    let trackTop = 0;
+    let scrollLen = 1;
+    const measure = () => {
+      trackTop = track.getBoundingClientRect().top + window.scrollY;
+      scrollLen = Math.max(1, track.offsetHeight - window.innerHeight);
       film.aspect = window.innerWidth / Math.max(1, window.innerHeight);
     };
+    measure();
+    const onResize = () => measure();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => measure()) : null;
+    ro?.observe(track);
     window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("pointerover", onOver, { passive: true });
     window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    // lo scroll programmatico deve essere istantaneo: html ha scroll-behavior: smooth, e uno
+    // scroll animato verrebbe letto come input dell'utente. Si spegne per la durata del film.
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+    html.classList.add("film-on"); // overscroll-behavior: none (niente pull-to-refresh sopra il play)
 
-    /* ---------------- il play: interrotto da QUALSIASI input dell'utente ---------------- */
+    /* ---------------- il play: interrotto da MOVIMENTO dell'utente, mai da un tap ----------------
+       Un tap semplice (touch o click: < 10 px, < 300 ms) non ferma niente: su telefono un tocco
+       per "vedere se risponde" lasciava il film fermo e sembrava bloccato. Fermano il play:
+       touchmove vero, rotellina, tasti, scroll non nostro (scrollbar, gesture), barra. */
     let expectedY = -1;
     const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.("[data-film-controls]");
-    const stopOnInput = (e: Event) => {
-      if (isControl(e)) return;
-      player.interrupt();
+    const onWheel = (e: Event) => {
+      if (!isControl(e)) player.interrupt("rotellina");
+    };
+    const touch = { x: 0, y: 0, t: 0, on: false };
+    const onTouchStart = (e: TouchEvent) => {
+      if (isControl(e) || e.touches.length !== 1) return;
+      touch.x = e.touches[0].clientX;
+      touch.y = e.touches[0].clientY;
+      touch.t = performance.now();
+      touch.on = true;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!touch.on || !e.touches.length) return;
+      const dx = e.touches[0].clientX - touch.x;
+      const dy = e.touches[0].clientY - touch.y;
+      if (dx * dx + dy * dy >= TAP_PX * TAP_PX) {
+        touch.on = false;
+        player.interrupt("touchmove");
+      }
+    };
+    const onTouchEnd = () => {
+      // tap (< 10 px, < 300 ms) o pressione lunga senza movimento: nessun effetto sul play
+      touch.on = false;
     };
     const onKey = (e: KeyboardEvent) => {
       if (isControl(e)) return;
-      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " ", "Spacebar"].includes(e.key)) player.interrupt();
+      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " ", "Spacebar"].includes(e.key)) player.interrupt("tasti");
     };
     const onScroll = () => {
       // scroll non nostro (scrollbar, tasti, gesture): il play si ferma dov'e'
-      if (player.playing && expectedY >= 0 && Math.abs(window.scrollY - expectedY) > 3) player.interrupt();
+      if (player.playing && expectedY >= 0 && Math.abs(window.scrollY - expectedY) > 3) player.interrupt("scroll");
     };
-    window.addEventListener("wheel", stopOnInput, { passive: true });
-    window.addEventListener("touchstart", stopOnInput, { passive: true });
-    window.addEventListener("pointerdown", stopOnInput, { passive: true });
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKey);
     window.addEventListener("scroll", onScroll, { passive: true });
+    const unErrors = installErrorCapture();
 
     let raf = 0;
     let last = 0;
@@ -249,18 +402,48 @@ export function Film() {
     let pulseKey = "";
     let navOutKey = "";
     let cursorShown = "";
-    const trackTop = () => track.getBoundingClientRect().top + window.scrollY;
-    const scrollLen = () => Math.max(1, track.offsetHeight - window.innerHeight);
+    let resumeShown: boolean | null = null;
+    let resumeLabel = "";
+    let fpsEma = 0;
+    let measureT0 = -1;
+    let allFrames = 0;
+    let allSeconds = 0;
+    let diagAt = 0;
     const setScrollP = (s: number) => {
-      const y = trackTop() + clamp01(s) * scrollLen();
+      const y = trackTop + clamp01(s) * scrollLen;
       expectedY = Math.round(y);
-      // "instant": html ha scroll-behavior: smooth, e uno scroll animato sarebbe letto come input dell'utente
-      window.scrollTo({ top: y, behavior: "instant" });
+      try {
+        html.scrollTo({ top: y, behavior: "instant" });
+      } catch {
+        html.scrollTop = y;
+      }
     };
 
     const loop = (now: number) => {
-      const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
+      const rawDt = last ? (now - last) / 1000 : 1 / 60;
+      const dt = Math.min(0.1, rawDt);
       last = now;
+
+      /* --- fps: istantanei (EMA) e media; nei primi 2 s di play decidono il livello (una volta, solo in giu') --- */
+      if (rawDt > 0 && rawDt < 0.5 && !document.hidden) {
+        fpsEma += (1 / rawDt - fpsEma) * Math.min(1, rawDt * 4);
+        if (ready.current) {
+          allFrames++;
+          allSeconds += rawDt;
+        }
+        if (!quality.settled) {
+          if (measureT0 < 0) {
+            // parte con il play; se il play non parte (reduced, pagina aperta a meta') 3 s dopo il ready
+            if (player.playing || (ready.current && now - readyAt.current > 3000)) measureT0 = now;
+          } else {
+            diag.frames++;
+            diag.seconds += rawDt;
+            if (now - measureT0 >= FPS_WINDOW_MS && diag.seconds > 0.5) quality.adjust(diag.frames / diag.seconds);
+          }
+        }
+      }
+      diag.fpsNow = fpsEma;
+      diag.fpsAvg = allSeconds > 0 ? allFrames / allSeconds : 0;
 
       /* --- smussamento dell'input (H(m)): esponenziale con dt, identico a 30 e 120 fps --- */
       const k = 1 - Math.exp(-dt / TAU_SCENE);
@@ -302,8 +485,7 @@ export function Film() {
           playT0 = now;
           if (film.scrollP >= 0.995) setScrollP(0); // Play a fine corsa: si riparte dall'inizio
         }
-        const rectNow = track.getBoundingClientRect();
-        const s0 = clamp01(-rectNow.top / scrollLen());
+        const s0 = clamp01((window.scrollY - trackTop) / scrollLen);
         // dp/dscrollP: finche' l'ingresso decade, p sale meno dello scroll (mai sotto 0.55)
         const gain = 1 + entryNow * entryDecaySlope(s0);
         const pNow = clamp01(s0 + entryNow * entryDecay(s0));
@@ -313,17 +495,15 @@ export function Film() {
         const s1 = s0 + dp / Math.max(0.5, gain);
         if (s1 >= 1) {
           setScrollP(1);
-          player.interrupt();
+          player.interrupt("fine corsa");
         } else setScrollP(s1);
       }
       wasPlaying = playing;
       film.playing = playing;
       film.paused = player.paused;
 
-      /* --- p: funzione della posizione di scroll (+ l'ingresso che decade) --- */
-      const rect = track.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const scrollP = clamp01(-rect.top / Math.max(1, rect.height - vh));
+      /* --- p: funzione della posizione di scroll (+ l'ingresso che decade); nessuna lettura di layout --- */
+      const scrollP = clamp01((window.scrollY - trackTop) / scrollLen);
       const off = entryNow * entryDecay(scrollP);
       const p = pin ?? clamp01(scrollP + off);
       film.scrollP = scrollP;
@@ -443,21 +623,54 @@ export function Film() {
           ui.ring.dataset.state = cs;
         }
       }
+
+      /* --- il tasto grande "Riprendi": quando il play e' fermo il film non deve sembrare bloccato --- */
+      if (ui.resume) {
+        const idle = !player.playing && (player.everPlayed || startedScrolled || film.reduced);
+        const want = ready.current && idle && !noAuto && pin === null && p < 0.985 && film.gates[5] < 0.5;
+        if (want !== resumeShown) {
+          resumeShown = want;
+          ui.resume.classList.toggle("is-on", want);
+          ui.resume.setAttribute("aria-hidden", want ? "false" : "true");
+          ui.resume.tabIndex = want ? 0 : -1;
+        }
+        const label = player.everPlayed ? "Riprendi" : "Riproduci";
+        if (want && label !== resumeLabel) {
+          resumeLabel = label;
+          const t = ui.resume.querySelector(".film-resume__label");
+          if (t) t.textContent = label;
+          ui.resume.setAttribute("aria-label", `${label} il film da qui`);
+        }
+      }
+
+      /* --- diagnostica (?diag=1): testo riscritto 4 volte al secondo --- */
+      if (ui.diag && now - diagAt > 250) {
+        diagAt = now;
+        ui.diag.textContent = diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled });
+      }
       raf = requestAnimationFrame(loop);
     };
+    diagTextRef.current = () => diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled });
     raf = requestAnimationFrame(loop);
     return () => {
       cancelAnimationFrame(raf);
+      ro?.disconnect();
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("pointerover", onOver);
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("wheel", stopOnInput);
-      window.removeEventListener("touchstart", stopOnInput);
-      window.removeEventListener("pointerdown", stopOnInput);
+      window.removeEventListener("orientationchange", onResize);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("scroll", onScroll);
-      player.interrupt();
+      unErrors();
+      html.style.scrollBehavior = prevBehavior;
+      html.classList.remove("film-on");
+      player.interrupt("smontato");
     };
   }, [mode]);
 
@@ -478,10 +691,39 @@ export function Film() {
             <FilmCanvas
               palette={palette}
               onReady={() => {
+                if (ready.current) return; // un abbassamento di livello rimonta il post: non e' un nuovo avvio
                 ready.current = true;
+                readyAt.current = performance.now();
+                boot.readyMs = readyAt.current - boot.t0;
+                boot.set("ready", 1);
               }}
             />
           )}
+          {/* Caricamento: barra sottile lime + percentuale mono, in basso al centro; sparisce al primo fotogramma pieno.
+              Solo con JS (html.js): senza JS non c'e' nulla da aspettare. */}
+          <div className="film-load" aria-live="polite" ref={(el) => void (ui.loader = el)}>
+            <span className="film-load__track" aria-hidden="true">
+              <span className="film-load__bar" ref={(el) => void (ui.loaderBar = el)} />
+            </span>
+            <span className="film-load__txt mono" ref={(el) => void (ui.loaderText = el)}>
+              caricamento
+            </span>
+          </div>
+          {/* Il tasto grande quando il play e' fermo (tap, touchmove, Pausa): il film non deve sembrare bloccato */}
+          <button
+            type="button"
+            className="film-resume"
+            data-film-controls
+            data-cursor="link"
+            aria-hidden="true"
+            tabIndex={-1}
+            ref={(el) => void (ui.resume = el)}
+            onClick={() => player.play()}
+          >
+            <Play size={22} strokeWidth={1.8} aria-hidden />
+            <span className="film-resume__label">Riprendi</span>
+          </button>
+          {diagOn && <DiagPanel textRef={diagTextRef} />}
 
           {/* Overlay: assoluti, pointer-events none, finestre sull'ASSE DEGLI ATTI.
               PROLOGO (S1-S3, brief di Davide): molto vuoto, testo bone, a fuoco da dietro, mai dal basso. */}

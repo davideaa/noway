@@ -18,11 +18,18 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+// EXPORT_HOST=1 (letta in build): l'export per l'hosting di anteprima non va
+// indicizzato. Il noindex passa dai metadata di Next, non da un <meta> aggiunto
+// a mano nell'HTML esportato: quello non era nell'albero React e all'idratazione
+// produceva l'errore #418 (mismatch).
+const NOINDEX = process.env.EXPORT_HOST === "1";
+
 export const metadata: Metadata = {
   metadataBase: SITE_URL ? new URL(SITE_URL) : undefined,
   title: TITLE,
   description: DESCRIPTION,
   alternates: SITE_URL ? { canonical: "/" } : undefined,
+  robots: NOINDEX ? { index: false, follow: false } : undefined,
   // Icone dal kit di brand (public/). favicon.ico di Next rimosso: prevaleva sull'SVG.
   icons: {
     icon: [

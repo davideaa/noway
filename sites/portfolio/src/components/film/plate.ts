@@ -78,7 +78,19 @@ const decode = (row: string) => row.split(",").map((v) => Number(v) / 4095);
  * 70 e 110 gradi (lime e dintorni: coerenti con l'accento della figura), la
  * mediana ha un cuore quasi bianco (la speculare) e un mantello lime chiaro.
  */
-export function buildFan(count: number, curves: number, width: number, height: number, depth: number, seed = 7): Fan {
+export type FanParams = { count: number; curves: number; width: number; height: number; depth: number; seed?: number };
+
+/**
+ * Il bake, A PEZZI: un generatore che cede il controllo ogni BAKE_SLICE perle
+ * (yield = avanzamento 0..1) e alla fine restituisce il ventaglio. Dentro un
+ * Web Worker si svuota in un colpo (bake.ts); sul thread principale, se il
+ * worker manca, si svuota in fette da <= 8 ms per fotogramma.
+ */
+export const BAKE_SLICE = 2000;
+
+export function* buildFanSteps(params: FanParams): Generator<number, Fan, void> {
+  const { count, curves, width, height, depth } = params;
+  const seed = params.seed ?? 7;
   const all = PLATE_CURVES.map(decode);
   const K = Math.max(2, Math.min(curves, all.length));
   const rand = mulberry(seed);
@@ -149,6 +161,7 @@ export function buildFan(count: number, curves: number, width: number, height: n
   // MEDIANA: tubo r 0.14; cuore quasi bianco, mantello lime chiaro; perle piu' grandi
   const rMed = 0.14;
   for (let i = 0; i < nMed; i++) {
+    if (i % BAKE_SLICE === BAKE_SLICE - 1) yield n / total;
     const u = rand();
     const q = Math.pow(rand(), 0.6);
     const rho = q * rMed;
@@ -166,6 +179,7 @@ export function buildFan(count: number, curves: number, width: number, height: n
     const rk = 0.11 - f * 0.05;
     const size = 0.42 + (1 - f) * 0.3;
     for (let i = 0; i < nEach; i++) {
+      if (n % BAKE_SLICE === BAKE_SLICE - 1) yield n / total;
       const u = rand();
       const rho = Math.sqrt(rand()) * rk;
       const theta = rand() * Math.PI * 2;
@@ -183,5 +197,39 @@ export function buildFan(count: number, curves: number, width: number, height: n
       samples[o + 2] = k ? zk[k] : 0;
     }
 
+  // MESCOLAMENTO deterministico (Fisher-Yates con lo stesso PRNG): cosi' un
+  // PREFISSO qualsiasi delle perle e' un campione uniforme di tutte le curve, e
+  // abbassare la qualita' a runtime = ridurre instanceCount, senza nuovo bake.
+  for (let i = total - 1; i > 0; i--) {
+    if (i % BAKE_SLICE === 0) yield 0.9 + 0.1 * (1 - i / total);
+    const j = Math.floor(rand() * (i + 1));
+    if (j === i) continue;
+    for (let c = 0; c < 3; c++) {
+      const a = pos[i * 3 + c];
+      pos[i * 3 + c] = pos[j * 3 + c];
+      pos[j * 3 + c] = a;
+      const b = col[i * 3 + c];
+      col[i * 3 + c] = col[j * 3 + c];
+      col[j * 3 + c] = b;
+    }
+    for (let c = 0; c < 4; c++) {
+      const a = info[i * 4 + c];
+      info[i * 4 + c] = info[j * 4 + c];
+      info[j * 4 + c] = a;
+    }
+    const m = med[i];
+    med[i] = med[j];
+    med[j] = m;
+  }
+
   return { count: total, curves: K, pos, info, col, med, samples };
+}
+
+/** Bake in un colpo solo (worker, o prove): svuota il generatore. */
+export function buildFan(count: number, curves: number, width: number, height: number, depth: number, seed = 7): Fan {
+  const g = buildFanSteps({ count, curves, width, height, depth, seed });
+  for (;;) {
+    const r = g.next();
+    if (r.done) return r.value;
+  }
 }

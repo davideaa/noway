@@ -1543,6 +1543,150 @@ html:not(.js) .hero__content {
 }
 
 /* --------------------------------------------------------------------------
+   Caricamento, tasto "Riprendi", diagnostica (?diag=1), scroll del film.
+   Il caricamento e' scritto dal boot (quality.ts), il tasto dal ciclo (classe
+   .is-on), il pannello dal ciclo 4 volte al secondo: mai React per frame.
+   -------------------------------------------------------------------------- */
+/* Sul film lo scroll programmatico e' istantaneo (html.style) e niente pull-to-refresh sopra il play */
+html.film-on {
+  overscroll-behavior: none;
+}
+.film-stage {
+  overscroll-behavior: none;
+}
+.film-load {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--film-riskbar-h) + var(--sp-5));
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-2);
+  width: min(160px, 40vw);
+  transform: translateX(-50%);
+  pointer-events: none;
+  color: var(--film-type-mute);
+  transition:
+    opacity 320ms var(--ease),
+    visibility 0s linear 320ms;
+}
+html:not(.js) .film-load,
+.film-load.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+.film-load__track {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: color-mix(in srgb, var(--film-type) 14%, transparent);
+  overflow: hidden;
+}
+.film-load__bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--film-accent-figure);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 240ms var(--ease);
+  will-change: transform;
+}
+.film-load__txt {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}
+.film-resume {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--film-riskbar-h) + var(--sp-5));
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 52px;
+  padding: 0 var(--sp-5) 0 var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--film-accent-figure) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--film-field-2) 82%, transparent);
+  color: var(--film-type);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transform: translate(-50%, 8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 220ms var(--ease),
+    transform 220ms var(--ease),
+    visibility 0s linear 220ms;
+}
+.film-resume svg {
+  color: var(--film-accent-figure);
+}
+.film-resume.is-on {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+  transition:
+    opacity 220ms var(--ease),
+    transform 220ms var(--ease),
+    visibility 0s;
+}
+.film-resume:hover {
+  border-color: var(--film-accent-figure);
+}
+.film-diag {
+  position: absolute;
+  top: calc(var(--header-h) + var(--sp-3));
+  right: var(--sp-3);
+  z-index: 4;
+  display: grid;
+  gap: var(--sp-2);
+  width: min(360px, calc(100vw - 2 * var(--sp-3)));
+  padding: var(--sp-3);
+  border: 1px solid color-mix(in srgb, var(--film-type) 18%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--film-field) 88%, transparent);
+  color: var(--film-type);
+  pointer-events: auto;
+}
+.film-diag__txt {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.film-diag__copy {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--film-accent-figure);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--film-accent-figure);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-load,
+  .film-load__bar,
+  .film-resume {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
    E2 torcia ed E3 cursore: layer fissi, pointer-events none, solo transform e
    opacity dal ciclo. Solo puntatore fine, mai con meno movimento. Il cursore di
    sistema resta (a11y, iframe, cursori personalizzati).

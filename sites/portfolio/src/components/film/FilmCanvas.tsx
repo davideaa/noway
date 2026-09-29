@@ -10,14 +10,23 @@
  * per priorita' (negativa = prima), il post chain ha priorita' 1 e disegna lui
  * (R3F non disegna piu' da solo).
  *
- * Costi dichiarati (desktop): figura 1 draw call istanziato (40k perle, 49
+ * Costi dichiarati (livello ALTA): figura 1 draw call istanziato (40k perle, 49
  * traiettorie), gabbia 1, stanza 3 shell + 1 nube di particelle (900 segmenti),
  * fili 1 (LineSegments2, 8 fili),
  * orizzonte 1; post: bloom (5 mip) + lente/frangia (1 pass, 15 tap al picco,
  * SPENTO a riposo) + vignette + output + grana.
+ * I numeri per livello (alta / media / lite) stanno in quality.ts: il livello
+ * e' una costante letta al montaggio (o al piu' abbassata una volta), non stato
+ * per frame.
+ *
+ * AVVIO (quality.ts `boot`): il bake della figura gira in un Web Worker gia'
+ * mentre il chunk di three scarica; il canvas parte con frameloop "never",
+ * precompila i materiali (gl.compileAsync), disegna UN fotogramma completo con
+ * `advance` (compila anche il post chain), e solo allora accende il loop:
+ * l'ingresso automatico parte dal primo fotogramma pieno, mai da uno vuoto.
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
@@ -28,7 +37,9 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { VignetteShader } from "three/examples/jsm/shaders/VignetteShader.js";
-import { FAN_SAMPLES, buildFan } from "./plate";
+import { bakeFan, fanParams } from "./bake";
+import { FAN_SAMPLES, type Fan } from "./plate";
+import { PROFILES, boot, diag, quality } from "./quality";
 import {
   FIRE_END,
   RELEASE_END,
@@ -64,25 +75,14 @@ export type Palette = {
   boneDim: string;
 };
 
-/** La figura: 11 unita' di altezza (22 di larghezza, 6 di profondita'), centrata in (0, 9, 0). */
+/** La figura: FIG_H x (fino a 22) x FIG_D unita' (bake.ts), centrata in (0, 9, 0). */
 const FIG_C = new THREE.Vector3(0, 9, 0);
-const FIG_H = 11;
-const FIG_D = 6;
-/** Conteggio dichiarato: ~40k desktop, ridotto su telefono. */
-const BEADS_DESKTOP = 40000;
-const BEADS_MOBILE = 10000;
-/** Traiettorie del ventaglio (mediana inclusa): 49 desktop, 25 telefono (la plate ne ha 49). */
-const FAN_CURVES_DESKTOP = 49;
-const FAN_CURVES_MOBILE = 25;
+/** Perle, traiettorie, segmenti per filo, particelle: per livello in quality.ts (PROFILES). */
 const FAN_MAX = 64; // dimensione dell'array uniform uHot
 const BEAD_R = 0.5; // raggio della geometria; la scala per perla lo porta a ~0.06-0.12
 const BEAD_SCALE = 0.13;
-/** Segmenti per filo: meno su telefono, MAI meno fili. */
-const SEG_DESKTOP = 28;
-const SEG_MOBILE = 12;
-/** Particelle del wormhole: meno su telefono. */
-const DUST_DESKTOP = 900;
-const DUST_MOBILE = 350;
+/** Particelle del wormhole: la geometria e' costruita al massimo, il livello ne disegna un prefisso. */
+const DUST_MAX = PROFILES.alta.dust;
 /** Guadagno del bone dei fili: sopra la soglia di bloom (1.15) in spazio lineare. */
 const STRAND_GAIN = 1.5;
 
@@ -160,16 +160,14 @@ const FAN_FRAG = /* glsl */ `
   }
 `;
 
-function Figure() {
+/**
+ * `fan` arriva gia' cotto (bake.ts: worker o fette). `beads` e' il livello: il
+ * bake e' mescolato, quindi un prefisso di instanceCount e' un campione uniforme
+ * di tutte le curve, e abbassare la qualita' non richiede un nuovo bake.
+ */
+function Figure({ fan, beads }: { fan: Fan; beads: number }) {
   const ref = useRef<THREE.Mesh>(null!);
   const camera = useThree((s) => s.camera);
-  const fan = useMemo(() => {
-    const count = film.mobile ? BEADS_MOBILE : BEADS_DESKTOP;
-    const curves = film.mobile ? FAN_CURVES_MOBILE : FAN_CURVES_DESKTOP;
-    // larghezza del ventaglio: piu' stretto su schermo verticale (resta nell'inquadratura)
-    const width = Math.min(22, Math.max(10, FIG_H * film.aspect * 1.4));
-    return buildFan(count, curves, width, FIG_H, FIG_D);
-  }, []);
   const { geo, mat } = useMemo(() => {
     const sphere = new THREE.SphereGeometry(BEAD_R * BEAD_SCALE, 8, 6);
     const geo = new THREE.InstancedBufferGeometry();
@@ -179,7 +177,7 @@ function Figure() {
     geo.setAttribute("aInfo", new THREE.InstancedBufferAttribute(fan.info, 4));
     geo.setAttribute("aCol", new THREE.InstancedBufferAttribute(fan.col, 3));
     geo.setAttribute("aMed", new THREE.InstancedBufferAttribute(fan.med, 1));
-    geo.instanceCount = fan.count;
+    geo.instanceCount = Math.min(fan.count, beads);
     const mat = new THREE.ShaderMaterial({
       vertexShader: FAN_VERT,
       fragmentShader: FAN_FRAG,
@@ -199,7 +197,11 @@ function Figure() {
       depthWrite: false,
     });
     return { geo, mat };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- beads si applica sotto senza ricostruire
   }, [fan]);
+  useEffect(() => {
+    geo.instanceCount = Math.min(fan.count, beads);
+  }, [geo, fan, beads]);
   useEffect(
     () => () => {
       geo.dispose();
@@ -530,9 +532,9 @@ const DUST_FRAG = /* glsl */ `
 `;
 const DUST_SPAN = 120;
 
-function Dust({ palette }: { palette: Palette }) {
+function Dust({ palette, count }: { palette: Palette; count: number }) {
   const { geo, mat } = useMemo(() => {
-    const n = film.mobile ? DUST_MOBILE : DUST_DESKTOP;
+    const n = DUST_MAX;
     const seed = new Float32Array(n * 2 * 3);
     const end = new Float32Array(n * 2);
     let s = 23;
@@ -576,6 +578,10 @@ function Dust({ palette }: { palette: Palette }) {
     });
     return { geo, mat };
   }, [palette.gold]);
+  useEffect(() => {
+    // il livello disegna un prefisso (i semi sono casuali: un prefisso e' un campione uniforme)
+    geo.setDrawRange(0, Math.min(DUST_MAX, count) * 2);
+  }, [geo, count]);
   useEffect(
     () => () => {
       geo.dispose();
@@ -590,7 +596,7 @@ function Dust({ palette }: { palette: Palette }) {
   const cam = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
   useFrame(() => {
     const worm = wormGate(film.sp);
-    const on = worm > 0.002;
+    const on = count > 0 && worm > 0.002;
     if (ref.current) ref.current.visible = on;
     if (!on) return;
     spine(film.sp, cam);
@@ -609,7 +615,7 @@ function Dust({ palette }: { palette: Palette }) {
   return <lineSegments ref={ref} args={[geo, mat]} frustumCulled={false} />;
 }
 
-function Room({ palette }: { palette: Palette }) {
+function Room({ palette, shells: shellCount, dust }: { palette: Palette; shells: number; dust: number }) {
   const group = useRef<THREE.Group>(null!);
   const shells = useMemo(
     () =>
@@ -653,6 +659,8 @@ function Room({ palette }: { palette: Palette }) {
     const fog = fogFar(film.p);
     g.children.forEach((child, i) => {
       if (i >= shells.length) return;
+      // livello lite: due shell (la piu' esterna, la piu' costosa in fill, non si disegna)
+      child.visible = i < shellCount;
       child.rotation.z = shells[i].drift * film.sp * 40;
       const u = shells[i].mat.uniforms;
       // v1 aveva la stanza oro netta e i fili bianchi con contrasto forte: nel wormhole le shell
@@ -675,7 +683,7 @@ function Room({ palette }: { palette: Palette }) {
       {shells.map((s, i) => (
         <lineSegments key={i} args={[s.geo, s.mat]} frustumCulled={false} />
       ))}
-      <Dust palette={palette} />
+      <Dust palette={palette} count={dust} />
     </group>
   );
 }
@@ -750,10 +758,9 @@ function Horizon({ palette }: { palette: Palette }) {
    reduced): il termine collassa esattamente a zero. Costo: ~340 vertici x 2
    trasformazioni per frame.
    -------------------------------------------------------------------------- */
-function Strands({ palette }: { palette: Palette }) {
+function Strands({ palette, seg }: { palette: Palette; seg: number }) {
   const size = useThree((s) => s.size);
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
-  const seg = film.mobile ? SEG_MOBILE : SEG_DESKTOP;
   const N = STRANDS.length * seg;
   const { geo, mat } = useMemo(() => {
     const geo = new LineSegmentsGeometry();
@@ -1013,7 +1020,7 @@ const GRAIN = {
   `,
 };
 
-/** Senza post chain (telefono): disegna R3F; qui si segnala solo il secondo fotogramma. */
+/** Senza post chain (livello lite): disegna R3F; qui si segnala solo il secondo fotogramma. */
 function Ready({ onReady }: { onReady?: () => void }) {
   const frames = useRef(0);
   // priorita' 0: con una priorita' positiva R3F smetterebbe di disegnare da solo
@@ -1023,7 +1030,12 @@ function Ready({ onReady }: { onReady?: () => void }) {
   return null;
 }
 
-function Post({ onReady }: { onReady?: () => void }) {
+/**
+ * Post chain per livello: "full" = bloom -> lente -> vignette -> output -> grana;
+ * "bloom" = bloom -> output (vignette, grana e lente disabilitate: due passate
+ * a schermo intero in meno). `fringe` accende frangia e smear (solo alta).
+ */
+function Post({ mode, fringe, onReady }: { mode: "full" | "bloom"; fringe: boolean; onReady?: () => void }) {
   const frames = useRef(0);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -1046,7 +1058,7 @@ function Post({ onReady }: { onReady?: () => void }) {
     composer.addPass(new OutputPass());
     const grain = new ShaderPass(GRAIN);
     composer.addPass(grain);
-    return { composer, bloom, lens, grain };
+    return { composer, bloom, lens, vignette, grain };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gl, scene, camera]);
   useEffect(() => {
@@ -1056,56 +1068,145 @@ function Post({ onReady }: { onReady?: () => void }) {
     chain.grain.uniforms.res.value.set(size.width * dpr, size.height * dpr);
     chain.lens.uniforms.uAspect.value = size.width / Math.max(1, size.height);
   }, [chain, size.width, size.height, dpr]);
+  useEffect(() => {
+    // "bloom": solo bloom + output. Le passate disabilitate non costano nulla (EffectComposer le salta).
+    chain.vignette.enabled = mode === "full";
+    chain.grain.enabled = mode === "full";
+    if (mode !== "full") chain.lens.enabled = false;
+  }, [chain, mode]);
   useEffect(() => () => chain.composer.dispose(), [chain]);
   useFrame(() => {
     // grana ferma con meno movimento o in pausa; altrimenti vive di tempo
     chain.grain.uniforms.time.value = film.reduced || film.paused ? 0.37 : film.t;
-    // lente: funzione di sp; frangia e smear solo nel picco di velocita', mai su reduced
-    const lensA = film.reduced ? 0 : lensAmount(film.sp);
-    const fr = film.reduced ? 0 : fringeAmount(film.sp);
-    const on = lensA > 0.002 || fr > 0.002;
-    chain.lens.enabled = on;
-    if (on) {
-      chain.lens.uniforms.uWarp.value = 0.14 * lensA;
-      chain.lens.uniforms.uFringe.value = fr;
-      chain.lens.uniforms.uSmear.value = fr;
+    if (mode === "full") {
+      // lente: funzione di sp; frangia e smear solo nel picco di velocita', mai su reduced, solo in alta
+      const lensA = film.reduced ? 0 : lensAmount(film.sp);
+      const fr = film.reduced || !fringe ? 0 : fringeAmount(film.sp);
+      // PRIMO fotogramma (quello di boot, sotto il caricamento): la lente si accende a zero
+      // (campionamento identita') cosi' il suo shader si compila adesso e non a meta' tunnel
+      const prewarm = frames.current === 0;
+      const on = prewarm || lensA > 0.002 || fr > 0.002;
+      chain.lens.enabled = on;
+      if (on) {
+        chain.lens.uniforms.uWarp.value = prewarm ? 0 : 0.14 * lensA;
+        chain.lens.uniforms.uFringe.value = prewarm ? 0 : fr;
+        chain.lens.uniforms.uSmear.value = prewarm ? 0 : fr;
+      }
     }
     // piu' luce nel tunnel: il bloom sale con il wormhole (funzione di p), 0.55 a riposo come la v1
     chain.bloom.strength = 0.55 + 0.35 * wormGate(film.sp);
     chain.composer.render();
-    // l'ingresso parte dal SECONDO fotogramma: bake e compilazione degli shader sono gia' passati (QA-FILM B3)
+    // l'ingresso parte dal SECONDO fotogramma: il primo e' quello di boot (QA-FILM B3)
     if (frames.current < 3 && ++frames.current === 2) onReady?.();
   }, 1);
+  return null;
+}
+
+/**
+ * BOOT: con la figura cotta e in scena, precompila i materiali (compileAsync:
+ * KHR_parallel_shader_compile dove c'e', il thread non aspetta il link), poi
+ * disegna UN fotogramma completo con `advance` (compila anche il post chain,
+ * misurato come "primo fotogramma"), e solo allora chiede il loop.
+ */
+function Boot({ fan, onBooted }: { fan: Fan | null; onBooted: () => void }) {
+  const gl = useThree((s) => s.gl);
+  const scene = useThree((s) => s.scene);
+  const camera = useThree((s) => s.camera);
+  const advance = useThree((s) => s.advance);
+  const invalidate = useThree((s) => s.invalidate);
+  const frameloop = useThree((s) => s.frameloop);
+  const started = useRef(false);
+  useEffect(() => {
+    if (!fan || started.current) return;
+    started.current = true;
+    let on = true;
+    (async () => {
+      boot.set("compile", 0.6);
+      const t0 = performance.now();
+      try {
+        await gl.compileAsync(scene, camera);
+      } catch (e) {
+        diag.pushError(`compileAsync: ${String((e as Error)?.message || e)}`);
+      }
+      boot.compileMs = performance.now() - t0;
+      boot.set("compile", 0.8);
+      if (!on) return;
+      const t1 = performance.now();
+      try {
+        advance(performance.now());
+      } catch (e) {
+        diag.pushError(`primo fotogramma: ${String((e as Error)?.message || e)}`);
+      }
+      boot.firstFrameMs = performance.now() - t1;
+      boot.set("first", 0.92);
+      if (on) onBooted();
+    })();
+    return () => {
+      on = false;
+    };
+  }, [fan, gl, scene, camera, advance, onBooted]);
+  // il passaggio a "always" arriva dalla prop del Canvas; R3F non riparte da solo: si invalida
+  useEffect(() => {
+    if (frameloop === "always") invalidate();
+  }, [frameloop, invalidate]);
   return null;
 }
 
 /* -------------------------------------------------------------------------- */
 export default function FilmCanvas({ palette, onReady }: { palette: Palette; onReady?: () => void }) {
   const portrait = film.aspect < 0.75;
-  // Telefono: niente post chain (bloom, lente, grana): meno GPU e meno thread principale (QA-FILM C3).
-  // Le linee sopra soglia restano semplicemente piu' chiare; frangia e smear sono dichiarati "off" su telefono (E7).
-  const post = !film.mobile;
+  // il livello: costante scelta all'avvio (quality.ts), al piu' abbassata UNA volta a runtime (un solo re-render)
+  const tier = useSyncExternalStore(quality.subscribe, quality.snapshot, quality.snapshot);
+  const Q = PROFILES[tier];
+  const [fan, setFan] = useState<Fan | null>(null);
+  const [loop, setLoop] = useState<"never" | "always">("never");
+  const onBooted = useCallback(() => setLoop("always"), []);
+  useEffect(() => {
+    let on = true;
+    bakeFan(fanParams(quality.profile, film.aspect))
+      .then((f) => {
+        if (on) setFan(f);
+      })
+      .catch((e) => {
+        diag.pushError(`bake: ${String((e as Error)?.message || e)}`);
+        boot.set("error", boot.progress);
+      });
+    return () => {
+      on = false;
+    };
+  }, []);
   return (
     <Canvas
-      dpr={[1, film.mobile ? 1 : 1.5]}
+      dpr={[1, Q.dpr]}
       camera={{ fov: portrait ? 64 : 50, near: 0.1, far: 400, position: [0, 9, 34] }}
       gl={{ antialias: false, alpha: false, stencil: false, powerPreference: "high-performance" }}
-      frameloop="always"
+      frameloop={loop}
       style={{ position: "absolute", inset: 0 }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.setClearColor(new THREE.Color(palette.field), 1);
+        if (!quality.probe.renderer) {
+          // la sonda non ha letto il renderer: si prova dal contesto vero
+          try {
+            const ctx = gl.getContext();
+            const info = ctx.getExtension("WEBGL_debug_renderer_info");
+            if (info) quality.probe.renderer = String(ctx.getParameter(info.UNMASKED_RENDERER_WEBGL) || "");
+          } catch {
+            /* niente */
+          }
+        }
       }}
     >
       <color attach="background" args={[palette.field]} />
       <fog attach="fog" args={[palette.field, 18, 95]} />
       <CameraRig />
-      <Figure />
+      {fan && <Figure fan={fan} beads={Q.beads} />}
       <Lattice palette={palette} />
-      <Room palette={palette} />
-      <Strands palette={palette} />
+      <Room palette={palette} shells={Q.shells} dust={Q.dust} />
+      <Strands palette={palette} seg={Q.seg} />
       <Horizon palette={palette} />
-      {post ? <Post onReady={onReady} /> : <Ready onReady={onReady} />}
+      {Q.post !== "none" ? <Post mode={Q.post} fringe={Q.fringe} onReady={onReady} /> : <Ready onReady={onReady} />}
+      <Boot fan={fan} onBooted={onBooted} />
     </Canvas>
   );
 }

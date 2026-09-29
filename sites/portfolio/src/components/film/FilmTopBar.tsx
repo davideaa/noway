@@ -95,13 +95,13 @@ function ProgressBar() {
       data-cursor="drag"
       onPointerDown={() => {
         ui.dragging = true;
-        player.interrupt();
+        player.interrupt("barra");
       }}
       onPointerUp={() => void (ui.dragging = false)}
       onPointerCancel={() => void (ui.dragging = false)}
-      onKeyDown={() => player.interrupt()}
+      onKeyDown={() => player.interrupt("barra")}
       onInput={(e) => {
-        player.interrupt();
+        player.interrupt("barra");
         ui.seekTo = Number((e.target as HTMLInputElement).value) / 1000;
       }}
     />

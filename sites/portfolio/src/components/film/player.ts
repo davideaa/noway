@@ -12,15 +12,17 @@
  *   fermo          (dopo un input dell'utente) lo scroll comanda; il tasto dice "Riproduci"
  *   paused         Pausa premuta: anche il respiro G(t) e la grana si fermano (WCAG 2.2.2)
  */
-export type PlayerState = { playing: boolean; paused: boolean };
+export type PlayerState = { playing: boolean; paused: boolean; reason: string };
 
-let snap: PlayerState = { playing: false, paused: false };
+let snap: PlayerState = { playing: false, paused: false, reason: "non ancora partito" };
 const listeners = new Set<() => void>();
+/** il play e' partito almeno una volta (da solo o a mano): il tasto grande dice "Riprendi" */
+let everPlayed = false;
 
-function set(playing: boolean, paused: boolean) {
-  if (snap.playing === playing && snap.paused === paused) return;
+function set(playing: boolean, paused: boolean, reason: string) {
+  if (snap.playing === playing && snap.paused === paused && snap.reason === reason) return;
   // nuovo oggetto: useSyncExternalStore confronta per identita'
-  snap = { playing, paused };
+  snap = { playing, paused, reason };
   listeners.forEach((l) => l());
 }
 
@@ -31,6 +33,13 @@ export const player = {
   get paused() {
     return snap.paused;
   },
+  /** perche' e' fermo (diagnostica): "rotellina", "touchmove", "tasti", "scroll", "barra", "tasto Pausa", "fine corsa" */
+  get reason() {
+    return snap.reason;
+  },
+  get everPlayed() {
+    return everPlayed;
+  },
   snapshot: () => snap,
   subscribe(cb: () => void) {
     listeners.add(cb);
@@ -39,12 +48,19 @@ export const player = {
     };
   },
   /** Play: riparte da dove si e'. */
-  play: () => set(true, false),
+  play: () => {
+    everPlayed = true;
+    set(true, false, "");
+  },
   /** Pausa esplicita: ferma il play E il respiro. */
-  pause: () => set(false, true),
-  /** Input dell'utente o fine corsa: il play si ferma, il respiro continua. */
-  interrupt: () => {
-    if (snap.playing) set(false, false);
+  pause: (reason = "tasto Pausa") => set(false, true, reason),
+  /**
+   * Input dell'utente o fine corsa: il play si ferma, il respiro continua.
+   * Un TAP semplice (touch o click, < 10 px e < 300 ms) NON arriva qui: solo
+   * movimento vero (touchmove, rotellina, tasti, scroll, barra).
+   */
+  interrupt: (reason = "input") => {
+    if (snap.playing) set(false, false, reason);
   },
   toggle: () => (snap.playing ? player.pause() : player.play()),
 };
@@ -66,4 +82,27 @@ export const ui: {
   dragging: boolean;
   /** richiesta di scroll dalla barra (p): il ciclo la esegue */
   seekTo: number | null;
-} = { top: null, bar: null, counter: null, pulse: null, torch: null, dot: null, ring: null, dragging: false, seekTo: null };
+  /** il tasto grande "Riprendi" (in basso al centro, quando il play e' fermo) */
+  resume: HTMLElement | null;
+  /** lo stato di caricamento: barra sottile + percentuale mono */
+  loader: HTMLElement | null;
+  loaderBar: HTMLElement | null;
+  loaderText: HTMLElement | null;
+  /** il pannello ?diag=1 */
+  diag: HTMLElement | null;
+} = {
+  top: null,
+  bar: null,
+  counter: null,
+  pulse: null,
+  torch: null,
+  dot: null,
+  ring: null,
+  dragging: false,
+  seekTo: null,
+  resume: null,
+  loader: null,
+  loaderBar: null,
+  loaderText: null,
+  diag: null,
+};
