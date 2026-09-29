@@ -6,6 +6,7 @@ Cartella separata dalla ricerca sull'oro. Ogni sito sta in `sites/<nome-progetto
 
 | Agente | Quando |
 |---|---|
+| `capo-progetto` | coordina tutto: brief, creazione del sito, ordine di lavoro |
 | `art-director` | all'inizio (identità visiva) e alla fine (giudizio estetico) |
 | `ux-designer` | struttura, percorsi, wireframe, accessibilità |
 | `copywriter` | testi in italiano, SEO di base |
@@ -23,3 +24,5 @@ Cartella separata dalla ricerca sull'oro. Ogni sito sta in `sites/<nome-progetto
 5. `qa-performance` → rapporto con prove; correzioni; `art-director` approva
 
 Nessun agente dichiara di aver usato uno strumento (Figma, Adobe, Canva…) se non è collegato.
+
+Per collegamenti e stato degli strumenti vedi `SETUP.md`. Nuovo sito: `sites/nuovo-sito.sh <nome>`.
