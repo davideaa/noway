@@ -1,6 +1,6 @@
 /**
  * Il bake della figura, fuori dal thread principale dove si puo':
- *  1. Web Worker (fan.worker.ts) con trasferimento dei buffer;
+ *  1. Web Worker (fan.worker.js) con trasferimento dei buffer;
  *  2. altrimenti a FETTE sul thread principale: il generatore di plate.ts
  *     avanza per <= 8 ms a fotogramma (requestIdleCallback se c'e', se no rAF).
  * Parte appena si sa che il film si fara' (Film.tsx), in parallelo al
@@ -56,7 +56,7 @@ function bakeInWorker(params: FanParams): Promise<Fan> {
     if (typeof Worker === "undefined") return reject(new Error("no Worker"));
     let w: Worker;
     try {
-      w = new Worker(new URL("./fan.worker.ts", import.meta.url));
+      w = new Worker(new URL("./fan.worker.js", import.meta.url));
     } catch (e) {
       return reject(e);
     }

@@ -144,7 +144,7 @@ function getClient(): Client {
 }
 
 /** Il testo della diagnostica (?diag=1): quello che Davide incolla. */
-function diagText(extra: { entry: number; autoStarted: boolean; measuring: boolean }) {
+function diagText(extra: { entry: number; autoStarted: boolean; measuring: boolean; expectedY: number }) {
   const q = quality;
   const sg = q.signals;
   const ms = (v: number | null) => (v === null ? "—" : `${v.toFixed(0)} ms`);
@@ -156,7 +156,7 @@ function diagText(extra: { entry: number; autoStarted: boolean; measuring: boole
     `fps: ${diag.fpsNow.toFixed(0)} ora · ${diag.fpsAvg.toFixed(0)} media${q.fpsMeasured !== null ? ` · finestra 2 s: ${q.fpsMeasured.toFixed(0)}` : extra.measuring ? " · misura in corso" : ""}`,
     `bake: ${ms(boot.bakeMs)} (${boot.bakeWhere || "—"}) · compile: ${ms(boot.compileMs)} · primo frame: ${ms(boot.firstFrameMs)} · pronto: ${ms(boot.readyMs)}`,
     `p: ${film.p.toFixed(3)} · sp ${film.sp.toFixed(3)} · atto ${currentAct(film.gates)} · ingresso ${extra.entry.toFixed(2)} s · autoplay ${extra.autoStarted ? "partito" : "no"}`,
-    `player: ${st}${player.reason ? ` (${player.reason})` : ""} · fase boot: ${boot.stage}`,
+    `player: ${st}${player.reason ? ` (${player.reason})` : ""} · fase boot: ${boot.stage} · scroll ${Math.round(window.scrollY)}${extra.expectedY >= 0 ? ` (atteso ${extra.expectedY})` : ""}`,
     `schermo: ${window.innerWidth}x${window.innerHeight} · touch ${sg?.touch ? "si" : "no"} · core ${sg?.cores ?? "?"} · mem ${sg?.memoryGB ?? "?"} GB · mobile ${film.mobile ? "si" : "no"} · reduced ${film.reduced ? "si" : "no"}`,
     `ua: ${navigator.userAgent}`,
     `errori: ${diag.errors.length ? diag.errors.join(" | ") : "nessuno"}`,
@@ -350,6 +350,13 @@ export function Film() {
        per "vedere se risponde" lasciava il film fermo e sembrava bloccato. Fermano il play:
        touchmove vero, rotellina, tasti, scroll non nostro (scrollbar, gesture), barra. */
     let expectedY = -1;
+    // Al (ri)avvio del play l'atteso si azzera: gli eventi scroll sono consegnati all'inizio del
+    // fotogramma, PRIMA del rAF, e uno scroll gia' in coda (il fling appena finito, lo
+    // scroll-into-view del tasto premuto) confrontato con l'atteso del play precedente
+    // fermava "Riprendi" all'istante. Il primo fotogramma di play riparte dalla posizione vera.
+    const unPlayer = player.subscribe(() => {
+      if (player.playing) expectedY = -1;
+    });
     const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.("[data-film-controls]");
     const onWheel = (e: Event) => {
       if (!isControl(e)) player.interrupt("rotellina");
@@ -646,11 +653,11 @@ export function Film() {
       /* --- diagnostica (?diag=1): testo riscritto 4 volte al secondo --- */
       if (ui.diag && now - diagAt > 250) {
         diagAt = now;
-        ui.diag.textContent = diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled });
+        ui.diag.textContent = diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled, expectedY });
       }
       raf = requestAnimationFrame(loop);
     };
-    diagTextRef.current = () => diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled });
+    diagTextRef.current = () => diagText({ entry: entryS.current, autoStarted, measuring: measureT0 >= 0 && !quality.settled, expectedY });
     raf = requestAnimationFrame(loop);
     return () => {
       cancelAnimationFrame(raf);
@@ -668,6 +675,7 @@ export function Film() {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("scroll", onScroll);
       unErrors();
+      unPlayer();
       html.style.scrollBehavior = prevBehavior;
       html.classList.remove("film-on");
       player.interrupt("smontato");
