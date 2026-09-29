@@ -36,12 +36,21 @@ export type Profile = {
   seg: number;
   /** shell del tunnel */
   shells: number;
+  /**
+   * Overlay DOM (i testi del prologo e del finale): con `domBlur` le lettere si
+   * risolvono da una sfocatura CSS; con `perLetter` si anima ogni lettera, altrimenti
+   * ogni PAROLA. Su iOS un filter blur su decine di layer sopra un canvas WebGL
+   * costa piu' della scena intera (Davide: "sul telefono e' lenta"): in lite
+   * niente blur e un layer per parola, non per lettera.
+   */
+  domBlur: boolean;
+  perLetter: boolean;
 };
 
 export const PROFILES: Record<Tier, Profile> = {
-  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3 },
-  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3 },
-  lite: { dpr: 1, beads: 5000, curves: 25, dust: 0, post: "none", fringe: false, seg: 12, shells: 2 },
+  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true },
+  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true },
+  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false },
 };
 
 export type Probe = { ok: boolean; renderer: string; vendor: string; webgl2: boolean };

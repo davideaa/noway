@@ -1323,6 +1323,19 @@ html:not(.js) .hero__content {
   backface-visibility: hidden;
   transform: translate3d(0, 0, 0);
 }
+/* livello lite (telefoni, quality.ts): il ciclo anima le PAROLE, senza blur.
+   Le lettere non sono piu' layer: su iOS decine di layer sfocati sopra un
+   canvas WebGL costavano piu' della scena. */
+html.film-lite .film-l {
+  will-change: auto;
+  backface-visibility: visible;
+  transform: none;
+}
+html.film-lite .film-w {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
 .film-end {
   display: grid;
   justify-items: center;

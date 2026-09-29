@@ -115,7 +115,17 @@ function Letters({ text }: { text: string }) {
   );
 }
 
-type Ov = { el: HTMLElement; letters: HTMLElement[]; key: string; whole: boolean; stagger: number };
+type Ov = {
+  el: HTMLElement;
+  /** unita' animate: lettere (alta/media) o parole (lite) — vedi Profile.perLetter */
+  letters: HTMLElement[];
+  words: HTMLElement[];
+  /** quale delle due e' in uso ora (l'altra viene ripulita al cambio) */
+  perLetter: boolean;
+  key: string;
+  whole: boolean;
+  stagger: number;
+};
 type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null; diag: boolean };
 
 /**
@@ -287,9 +297,23 @@ export function Film() {
 
     const ovs: Ov[] = Array.from(stage.querySelectorAll<HTMLElement>("[data-ov]")).map((el) => {
       const letters = Array.from(el.querySelectorAll<HTMLElement>(".film-l"));
+      const words = Array.from(el.querySelectorAll<HTMLElement>(".film-w"));
       // data-stagger: sfalsamento maggiore (S3: le tre parole si accendono in sequenza)
-      return { el, letters, key: "", whole: el.hasAttribute("data-ov-whole"), stagger: Number(el.dataset.stagger || STAGGER) };
+      return {
+        el,
+        letters,
+        words,
+        perLetter: quality.profile.perLetter,
+        key: "",
+        whole: el.hasAttribute("data-ov-whole"),
+        stagger: Number(el.dataset.stagger || STAGGER),
+      };
     });
+    // Livello lite (telefoni): un layer per PAROLA e niente blur (globals.css, html.film-lite).
+    // Il livello puo' scendere UNA volta a runtime: si segue con la stessa classe.
+    const applyTierClass = () => document.documentElement.classList.toggle("film-lite", quality.tier === "lite");
+    applyTierClass();
+    const unsubTier = quality.subscribe(applyTierClass);
 
     // Se la pagina si apre gia' scrollata (ricarica a meta'), niente ingresso e niente play automatico.
     const rect0 = track.getBoundingClientRect();
@@ -570,7 +594,8 @@ export function Film() {
           continue;
         }
         ov.el.style.visibility = "visible";
-        const blurOn = !film.reduced;
+        const prof = quality.profile;
+        const blurOn = !film.reduced && prof.domBlur;
         if (ov.whole) {
           // il pannello dei dati: entra intero (front-to-back non ha senso su una tabella)
           const blur = blurOn ? (1 - wIn) * BLUR_PX : 0;
@@ -579,10 +604,20 @@ export function Film() {
           ov.el.style.transform = `translate3d(0,0,0) scale(${(0.96 + 0.04 * wIn).toFixed(4)})`;
           continue;
         }
-        const n = ov.letters.length || 1;
+        if (ov.perLetter !== prof.perLetter) {
+          // il livello e' sceso a runtime: le lettere restano com'erano (opacita' compresa), si ripuliscono
+          ov.perLetter = prof.perLetter;
+          for (const el of prof.perLetter ? ov.words : ov.letters) {
+            el.style.opacity = "";
+            el.style.filter = "";
+            el.style.transform = "";
+          }
+        }
+        const units = ov.perLetter ? ov.letters : ov.words;
+        const n = units.length || 1;
         const stagger = ov.stagger;
         for (let i = 0; i < n; i++) {
-          const L = ov.letters[i];
+          const L = units[i];
           if (!L) break;
           // chiusura che arriva FRONT-TO-BACK (prime lettere prima), risolvendosi dal blur
           const ei = clamp01(wIn * (1 + stagger) - (i / n) * stagger);
@@ -710,6 +745,8 @@ export function Film() {
       unPlayer();
       html.style.scrollBehavior = prevBehavior;
       html.classList.remove("film-on");
+      html.classList.remove("film-lite");
+      unsubTier();
       player.interrupt("smontato");
     };
   }, [mode]);
