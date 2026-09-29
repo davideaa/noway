@@ -65,6 +65,13 @@ export const viewport: Viewport = {
 
 // Aggiunge .js prima del primo disegno: lo stato "nascosto" delle entrate
 // esiste solo se JavaScript gira. Senza JS il contenuto e' sempre visibile.
+// Lo script sta come PRIMO figlio del <body>, non nell'<head>: e' l'unico
+// elemento nostro non "hoistable", e se sta nell'<head> React idrata i figli
+// dell'<head> in ordine. Un host che inietta un nodo di testo li' (Netlify
+// mette un commento HTML preceduto da un a-capo dopo <meta charset>) faceva
+// fallire l'idratazione (errore #418) su tutte le pagine, e la classe .js
+// veniva persa. Nel <body> il parser lo esegue comunque prima di disegnare
+// il contenuto che segue.
 const JS_FLAG = "document.documentElement.classList.add('js')";
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -74,10 +81,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${manrope.variable} ${plexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: JS_FLAG }} />
-      </head>
       <body className="flex min-h-full flex-col">
+        <script dangerouslySetInnerHTML={{ __html: JS_FLAG }} />
         <a href="#contenuto" className="skip">
           Vai al contenuto
         </a>
