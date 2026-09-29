@@ -159,6 +159,57 @@ export function spine(sp: number, out: { x: number; y: number; z: number }) {
   return out;
 }
 
+export type Pose = { x: number; y: number; z: number; tx: number; ty: number; tz: number; bank: number };
+const tmpA = { x: 0, y: 0, z: 0 };
+const tmpB = { x: 0, y: 0, z: 0 };
+
+/**
+ * LA POSA DELLA CAMERA, funzione pura di sp. Spina + swing dalla stessa tabella
+ * dei fili: laterale side*3.2*sin(pi u), tuffo di 1.5 (si passa sotto
+ * l'ancora), 0.15 rad di bank nella curva. Lo swing va SOLO sulla posizione,
+ * mai sul bersaglio: la camera ruota per tenere l'asse mentre trasla, ed e'
+ * questo che fa leggere un offset come un arco. Ogni inviluppo e' zero agli
+ * estremi: i termini si sommano senza lasciare un offset negli atti dopo.
+ * Con prefers-reduced-motion l'ampiezza dello swing e del bank e' zero.
+ */
+export function cameraPose(sp: number, aspect: number, reduced: boolean, out: Pose) {
+  spine(sp, tmpA);
+  spine(Math.min(1, sp + 0.035), tmpB);
+  let lat = 0;
+  let dip = 0;
+  let bank = 0;
+  if (!reduced) {
+    const ls = lateralScale(aspect);
+    for (const s of STRANDS) {
+      const t = (sp - s.at) / s.span;
+      if (t <= 0 || t >= 1) continue;
+      const e = Math.sin(Math.PI * swingU(t));
+      lat += s.side * 3.2 * ls * e;
+      dip += -1.5 * e;
+      bank += s.side * 0.15 * e;
+    }
+    bank += valleyBank(sp);
+  }
+  out.x = tmpA.x + lat;
+  out.y = tmpA.y + dip;
+  out.z = tmpA.z;
+  out.tx = tmpB.x;
+  out.ty = tmpB.y;
+  // all'arrivo spina(sp) e spina(sp+0.035) coincidono: il bersaglio resta davanti
+  out.tz = Math.min(tmpB.z, tmpA.z - 3);
+  out.bank = bank;
+  return out;
+}
+
+/** Ancora del filo k: DERIVATA dalla spina, mai scritta in coordinate mondo. */
+export function strandAnchor(s: Strand, aspect: number, out: { x: number; y: number; z: number }) {
+  spine(s.at, out);
+  out.x += s.side * s.radius * lateralScale(aspect);
+  out.y += s.lift;
+  out.z -= s.lead;
+  return out;
+}
+
 /** Inviluppo del bank nella discesa (atto 4): ~15 gradi a meta' caduta, dritto all'arrivo. */
 export const valleyBank = (sp: number) => Math.sin(Math.PI * clamp01((sp - 0.68) / (0.86 - 0.68))) * (15 * Math.PI) / 180;
 
