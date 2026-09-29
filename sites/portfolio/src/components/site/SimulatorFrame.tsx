@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink, Maximize2, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { buttonVariants } from "@/components/ui/button";
 
 /**
@@ -15,10 +15,12 @@ import { buttonVariants } from "@/components/ui/button";
 export function SimulatorFrame({ src, title }: { src: string; title: string }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [loaded, setLoaded] = useState(false);
-  const [touch, setTouch] = useState(false);
-  useEffect(() => {
-    setTouch(window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
-  }, []);
+  // touch letto fuori dal render (nessun setState in effect): sul server e' false, sul client il valore vero
+  const touch = useSyncExternalStore(
+    () => () => {},
+    () => window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0,
+    () => false,
+  );
   const schermoIntero = () => {
     const el = ref.current;
     if (el && typeof el.requestFullscreen === "function") {

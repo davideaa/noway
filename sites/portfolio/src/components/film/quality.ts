@@ -108,7 +108,7 @@ export function pickTier(s: Signals): { tier: Tier; reason: string } {
     tier = "media";
     why.push(`${s.cores} core`);
   }
-  if (s.touch && tier !== "lite") {
+  if (s.touch) {
     tier = "lite";
     why.push("touch");
   }
