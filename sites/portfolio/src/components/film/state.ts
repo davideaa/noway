@@ -305,9 +305,9 @@ export function fogFar(p: number) {
 const PLAY_KNOTS: [number, number][] = [
   [0.0, 18], // prologo: tre schermate leggibili (~1,2-1,5 s ciascuna)
   [0.3, 18],
-  [0.35, 7], // wormhole e fili: il picco di velocita'
-  [0.6, 5],
-  [0.72, 6], // valle e orizzonte
+  [0.35, 12], // wormhole e fili: veloce ma leggibile (Davide: "troppo veloce" a 7)
+  [0.6, 13],
+  [0.72, 8], // valle e orizzonte
   [0.88, 6],
   [1.0, 9], // frenata sulla schermata finale
 ];
