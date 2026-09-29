@@ -1,56 +1,158 @@
+import type { CSSProperties, ReactNode } from "react";
 import { StrategyFlythrough } from "@/components/motion/StrategyFlythrough";
 import { BacktestTag, Reveal, RiskNote, SceneHeader, TableScroll } from "@/components/site/ui";
 
-/** Larghezza di una barra-dato divergente: scala da -2 a +5 R al mese, zero al 28,6%. */
-const MIN = -2;
-const MAX = 5;
-const zeroPct = (-MIN / (MAX - MIN)) * 100;
-function divergingBar(v: number) {
-  const w = (Math.abs(v) / (MAX - MIN)) * 100;
-  return v >= 0 ? { left: `${zeroPct}%`, width: `${w}%` } : { left: `${zeroPct - w}%`, width: `${w}%` };
-}
+/**
+ * COPY.md v2, 3.3: tre strategie, tre mercati. Numeri da data/strategie.json.
+ * Orizzonte e regole di Nasdaq e USDJPY sono [DA COMPLETARE]: non si mostrano.
+ */
+type Strat = {
+  id: "oro" | "nas" | "usdjpy";
+  n: string;
+  nome: string;
+  mercato: string;
+  colore: string; // token CSS
+  numeri: string;
+  fuori: ReactNode;
+  scomodi: ReactNode;
+  anni: string;
+  regole?: ReactNode;
+};
 
-const MESI: { nome: string; mesi: number; r: string; v: number; emph?: boolean }[] = [
-  { nome: "Forte discesa (oltre −3%)", mesi: 8, r: "+2,15", v: 2.15 },
-  { nome: "Discesa lenta (da −3% a −0,5%)", mesi: 23, r: "+1,57", v: 1.57 },
-  { nome: "Fermo (±0,5%)", mesi: 14, r: "−1,54", v: -1.54, emph: true },
-  { nome: "Salita lenta (da 0,5% a 3%)", mesi: 17, r: "+0,88", v: 0.88 },
-  { nome: "Forte salita (oltre 3%)", mesi: 30, r: "+4,88", v: 4.88 },
+const STRATS: Strat[] = [
+  {
+    id: "oro",
+    n: "01",
+    nome: "ORO",
+    mercato: "XAUUSD · ROTTURA su M30 e RITRACCIAMENTO su H4",
+    colore: "var(--st-oro)",
+    numeri:
+      "1.123 operazioni, +0,1643 R per operazione, +184,5 R in totale, t 3,40. Chiude in utile il 42,2% delle operazioni: si perde più spesso di quanto si vinca, e il conto torna perché le vincenti, lasciate correre, pesano più delle perdenti.",
+    fuori: (
+      <>
+        Nel periodo di costruzione (2019–2023) +0,1134 R per operazione su 715 operazioni, t 1,86; fuori campione (dal
+        2024) +0,2534 R su 408, t 3,21. Va meglio fuori che dentro: vedi “Il metodo” per perché non è una buona notizia.
+      </>
+    ),
+    scomodi: (
+      <>
+        Il 2021 è chiuso in perdita (−2,9 R) e il 2024 quasi a zero (+3,9 R). La serie di perdite consecutive più lunga è
+        di <strong>14 operazioni</strong>. Il drawdown del backtest è 27,5 R, il più alto delle tre. Il mese peggiore è
+        settembre 2019 (−11,5 R). Chi lo guarda deve essere pronto a vederlo pareggiare per un anno intero.
+      </>
+    ),
+    anni: "2019 +5,9 · 2020 +30,7 · 2021 −2,9 · 2022 +8,6 · 2023 +38,8 · 2024 +3,9 · 2025 +55,2 · 2026 (a settembre) +44,3",
+    regole: (
+      <>
+        <p>
+          Entrambi entrano quando il prezzo si muove in una direzione e ci restano finché il movimento regge. Non hanno
+          un obiettivo di guadagno fisso (nessun take profit): un’uscita a obiettivo fisso è stata provata e peggiorava
+          ogni configurazione. Quando il prezzo va bene, un’uscita che lo insegue (il trailing) lo lascia correre.
+        </p>
+        <ul className="ticks">
+          <li>
+            <strong>ROTTURA (M30).</strong> Il prezzo chiude oltre il massimo (o sotto il minimo) delle ultime 60 barre da
+            30 minuti ed è già al bordo del proprio intervallo delle ultime 480 barre. Entra nella direzione dello
+            sfondamento. Stop iniziale 2,0 ATR (l’ATR è l’ampiezza media dei movimenti recenti). Trailing a 4,0 ATR,
+            attivato quando l’operazione è a +1R.
+          </li>
+          <li>
+            <strong>RITRACCIAMENTO (H4).</strong> Il trend è stabilito (prezzo sopra la media mobile a 30 periodi, con la
+            media inclinata). Il prezzo ritraccia di almeno 1 ATR dal massimo delle ultime 20 barre, poi riparte
+            chiudendo sopra il massimo della barra precedente. Stop sotto il minimo del ritracciamento, più un margine di
+            0,10 ATR. Trailing a 1,5 ATR, attivato a +1R. Attesa di 3 barre dopo un ingresso.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "nas",
+    n: "02",
+    nome: "NASDAQ",
+    mercato: "indice Nasdaq",
+    colore: "var(--st-nas)",
+    numeri:
+      "1.626 operazioni, +0,1106 R per operazione, +179,8 R in totale, t 4,06. Chiude in utile il 54,5% delle operazioni: è la sola delle tre che vince più spesso di quanto perde, ma le sue operazioni sono anche le più piccole in R.",
+    fuori: (
+      <>
+        Nel periodo di costruzione (2019–2023) +0,0918 R per operazione su 1.050 operazioni, t 2,69, 53,6% in utile.
+        Fuori campione (dal 2024) +0,1448 R su 576 operazioni, t 3,21, 56,1% in utile. Anche qui va meglio fuori che
+        dentro, e vale lo stesso avvertimento dato per l’oro: il numero da usare per il futuro è il più basso dei due.
+      </>
+    ),
+    scomodi: (
+      <>
+        Il primo anno, il 2019, è chiuso in perdita (−1,3 R). La serie di perdite consecutive più lunga è di 7
+        operazioni. Il drawdown del backtest è 13,7 R. Il mese peggiore è febbraio 2024 (−5,5 R), dentro il fuori
+        campione.
+      </>
+    ),
+    anni: "2019 −1,3 · 2020 +29,9 · 2021 +35,8 · 2022 +10,2 · 2023 +21,7 · 2024 +17,1 · 2025 +48,9 · 2026 (a settembre) +17,4",
+  },
+  {
+    id: "usdjpy",
+    n: "03",
+    nome: "USDJPY",
+    mercato: "dollaro contro yen",
+    colore: "var(--st-usdjpy)",
+    numeri: "1.457 operazioni, +0,0900 R per operazione, +131,2 R in totale, t 3,31. Chiude in utile il 46,8% delle operazioni.",
+    fuori: (
+      <>
+        <strong>Qui il numero scomodo è questo.</strong> Nel periodo di costruzione (2019–2022) +0,1238 R per operazione
+        su 725 operazioni, t 3,20. Fuori campione (dal 2023, quindi quasi quattro anni) <strong>+0,0566 R</strong> su 732
+        operazioni, <strong>t 1,48</strong>, 45,1% in utile. Fuori campione il guadagno medio è{" "}
+        <strong>meno della metà</strong> di quello dentro, e una t di 1,48 non basta a distinguere il risultato dal caso.
+        È la strategia del portafoglio con la conferma più debole. Non è bocciata: è ancora in utile su 732 operazioni.
+        Ma è quella da guardare per prima in tempo reale.
+      </>
+    ),
+    scomodi: (
+      <>
+        Il 2026, fino a settembre, è a <strong>+1,4 R</strong>: nove mesi a zero. L’anno intero peggiore è il 2023 (+6,1
+        R). La serie di perdite consecutive più lunga è di 8 operazioni. Il drawdown del backtest è 14,0 R. Il mese
+        peggiore è gennaio 2025 (−8,3 R). Il 2022, l’anno migliore, è l’ultimo del periodo di costruzione: dopo, la
+        strategia non ha più reso allo stesso modo.
+      </>
+    ),
+    anni: "2019 +12,8 · 2020 +6,9 · 2021 +29,1 · 2022 +40,9 · 2023 +6,1 · 2024 +24,5 · 2025 +9,5 · 2026 (a settembre) +1,4",
+  },
 ];
 
-function LayerCard({
-  n,
-  title,
-  frame,
-  children,
-  rules,
-}: {
-  n: string;
-  title: string;
-  frame: string;
-  children: React.ReactNode;
-  rules: string[];
-}) {
+const RIEPILOGO: { voce: string; v: [string, string, string]; bad?: boolean[] }[] = [
+  { voce: "Operazioni", v: ["1.123", "1.626", "1.457"] },
+  { voce: "Guadagno medio per operazione", v: ["+0,1643 R", "+0,1106 R", "+0,0900 R"] },
+  { voce: "Somma dei risultati", v: ["+184,5 R", "+179,8 R", "+131,2 R"] },
+  { voce: "t-statistica", v: ["3,40", "4,06", "3,31"] },
+  { voce: "Operazioni in utile", v: ["42,2%", "54,5%", "46,8%"] },
+  { voce: "Perdite consecutive massime", v: ["14", "7", "8"], bad: [true, true, true] },
+  { voce: "Drawdown massimo del backtest", v: ["27,5 R", "13,7 R", "14,0 R"], bad: [true, true, true] },
+  { voce: "Anno migliore", v: ["2025 (+55,2 R)", "2025 (+48,9 R)", "2022 (+40,9 R)"] },
+  { voce: "Anno peggiore", v: ["2021 (−2,9 R)", "2019 (−1,3 R)", "2026, parziale (+1,4 R)"], bad: [true, true, true] },
+  { voce: "Mesi in perdita su 93", v: ["40", "30", "34"], bad: [true, true, true] },
+];
+
+/** Scheda-livello nel volo: identita' = colore + nome scritto (mai colore da solo). */
+function LayerCard({ s }: { s: Strat }) {
   return (
-    <article className="zcard" aria-labelledby={`strat-${n}`}>
+    <article className="zcard" aria-labelledby={`strat-${s.id}`} style={{ "--zc": s.colore } as CSSProperties}>
       <div className="flex items-center justify-between gap-3">
         <p className="eyebrow">
-          <b>Livello {n}</b>
+          <b>Livello {s.n}</b>
         </p>
-        <p className="eyebrow inline-flex items-center gap-2 text-oro!">
-          <span aria-hidden className="inline-block size-2 rounded-full bg-oro" />
-          XAUUSD · oro
+        <p className="eyebrow inline-flex items-center gap-2" style={{ color: s.colore }}>
+          <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: s.colore }} />
+          {s.nome}
         </p>
       </div>
-      <h3 id={`strat-${n}`} className="mt-4 text-2xl font-medium tracking-[-0.04em] text-oro">
-        {title} <span className="text-ink">· {frame}</span>
+      <h3 id={`strat-${s.id}`} className="mt-4 text-2xl font-medium tracking-[-0.04em]" style={{ color: s.colore }}>
+        {s.nome} <span className="text-ink">· {s.mercato}</span>
       </h3>
-      <p className="mt-4 text-[15px] leading-[1.6] text-ink md:text-base">{children}</p>
-      <ul className="ticks mt-4 text-sm text-ink">
-        {rules.map((r) => (
-          <li key={r}>{r}</li>
-        ))}
-      </ul>
+      <p className="mt-4 text-[15px] leading-[1.6] text-ink md:text-base">{s.numeri}</p>
+      <p className="t-sec mt-3">Backtest 2019.01–2026.09. Il numero scomodo è nella scheda qui sotto.</p>
+      <div className="mt-4">
+        <BacktestTag />
+      </div>
     </article>
   );
 }
@@ -59,176 +161,107 @@ export function Strategie() {
   return (
     <section id="strategie" data-scene className="scene" aria-labelledby="strategie-t">
       <div className="wrap">
-        <SceneHeader n="03" label="Strategie" id="strategie-t" title={["Due strategie,", "due orizzonti"]} />
+        <SceneHeader n="03" label="Strategie" id="strategie-t" title={["Tre strategie,", "tre mercati"]} />
         <div className="prose space-y-4">
           <Reveal>
             <p className="t-lead">
-              Sono entrambe trend following: entrano quando il prezzo si muove in una direzione e ci restano finché il
-              movimento regge. Non hanno un obiettivo di guadagno fisso (nessun take profit): un’uscita a obiettivo fisso
-              è stata provata e peggiorava ogni configurazione. Quando il prezzo va bene, un’uscita che lo insegue (il
-              trailing) lo lascia correre.
-            </p>
-          </Reveal>
-          <Reveal i={1}>
-            <p>
-              Non si vince spesso: circa 42 operazioni su 100 chiudono in utile. Il conto torna perché le vincenti,
-              lasciate correre, pesano più delle perdenti.
+              Tre sistemi automatici, uno per mercato: oro (XAUUSD), Nasdaq e USDJPY. Sono presentati con le stesse voci
+              e lo stesso periodo (backtest, 2019.01–2026.09, 93 mesi). Per ognuno c’è il numero buono e quello scomodo.
+              Il 2026 è un anno parziale: arriva a settembre.
             </p>
           </Reveal>
         </div>
-      </div>
 
-      {/* Volo attraverso i due livelli: la camera avanza lungo Z con lo scroll */}
-      <div className="mt-12 md:mt-16">
-        <StrategyFlythrough label="Le due strategie, un livello ciascuna">
-          <LayerCard
-            n="01"
-            title="ROTTURA"
-            frame="grafico M30"
-            rules={[
-              "Stop iniziale: 2,0 ATR (l’ATR è l’ampiezza media dei movimenti recenti).",
-              "Nessun take profit.",
-              "Trailing a 4,0 ATR, attivato quando l’operazione è a +1R.",
-            ]}
-          >
-            Il prezzo chiude oltre il massimo (o sotto il minimo) delle ultime 60 barre da 30 minuti ed è già al bordo
-            del proprio intervallo delle ultime 480 barre. Entra nella direzione dello sfondamento.
-          </LayerCard>
-          <LayerCard
-            n="02"
-            title="RITRACCIAMENTO"
-            frame="grafico H4"
-            rules={[
-              "Stop sotto il minimo del ritracciamento, più un margine di 0,10 ATR.",
-              "Nessun take profit.",
-              "Trailing a 1,5 ATR, attivato a +1R. Attesa di 3 barre dopo un ingresso.",
-            ]}
-          >
-            Il trend è stabilito (prezzo sopra la media mobile a 30 periodi, con la media inclinata). Il prezzo ritraccia
-            di almeno 1 ATR dal massimo delle ultime 20 barre, poi riparte chiudendo sopra il massimo della barra
-            precedente.
-          </LayerCard>
-        </StrategyFlythrough>
-      </div>
-
-      <div className="wrap mt-12 space-y-16 md:mt-16 md:space-y-24">
-        {/* ---------- Tabella dei numeri ---------- */}
-        <div className="space-y-6">
-          <Reveal className="space-y-3">
-            <BacktestTag>Backtest · non è un risultato reale</BacktestTag>
-            <p className="t-sec">Backtest, 2019.01–2026.09, tick reali, ritardo 103 ms.</p>
+        {/* ---------- Tabella riassuntiva ---------- */}
+        <div className="mt-10 space-y-3">
+          <Reveal>
+            <BacktestTag />
           </Reveal>
           <Reveal i={1}>
-            <TableScroll label="Operazioni, vincenti e profit factor per strategia e conto (backtest)">
+            <TableScroll label="Tabella riassuntiva delle tre strategie (backtest, 2019.01–2026.09)">
               <table className="dtable">
-                <caption className="sr-only">Numeri per strategia e conto</caption>
+                <caption>Tabella riassuntiva (backtest, 2019.01–2026.09)</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Strategia e conto</th>
-                    <th scope="col" className="r">Operazioni</th>
-                    <th scope="col" className="r">Vincenti</th>
-                    <th scope="col" className="r">Profit factor</th>
+                    <th scope="col">Misura</th>
+                    <th scope="col" className="r">Oro (XAUUSD)</th>
+                    <th scope="col" className="r">Nasdaq</th>
+                    <th scope="col" className="r">USDJPY</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><th scope="row">ROTTURA, conto <span className="mono">.p</span></th><td className="r">567</td><td className="r">37,0%</td><td className="r">1,40</td></tr>
-                  <tr><th scope="row">ROTTURA, conto <span className="mono">.s</span></th><td className="r">572</td><td className="r">36,5%</td><td className="r">1,35</td></tr>
-                  <tr><th scope="row">RITRACCIAMENTO, conto <span className="mono">.p</span></th><td className="r">555</td><td className="r">47,7%</td><td className="r">1,25</td></tr>
-                  <tr><th scope="row">RITRACCIAMENTO, conto <span className="mono">.s</span></th><td className="r">551</td><td className="r">47,7%</td><td className="r">1,22</td></tr>
-                  <tr className="emph"><th scope="row">Insieme, conto <span className="mono">.p</span></th><td className="r">1.122</td><td className="r">42,3%</td><td className="r">1,33</td></tr>
-                  <tr className="emph"><th scope="row">Insieme, conto <span className="mono">.s</span></th><td className="r">1.123</td><td className="r">42,0%</td><td className="r">1,30</td></tr>
+                  {RIEPILOGO.map((r) => (
+                    <tr key={r.voce}>
+                      <th scope="row">{r.voce}</th>
+                      {r.v.map((val, i) => (
+                        <td key={i} className={`r ${r.bad?.[i] ? "text-bad" : ""}`}>
+                          {val}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </TableScroll>
           </Reveal>
-          <Reveal i={2} className="prose space-y-4">
-            <p>
-              Guadagno medio per operazione: +0,1710 R su <span className="mono">.p</span>, +0,1494 R su{" "}
-              <span className="mono">.s</span>. Totale: 191,9 R su <span className="mono">.p</span>, 167,7 R su{" "}
-              <span className="mono">.s</span>.
-            </p>
-            <RiskNote level="0.70" />
-            <p>
-              <strong>
-                Come leggere <span className="mono">.p</span> e <span className="mono">.s</span>:
-              </strong>{" "}
-              sono due tipi di conto dello stesso broker (demo), con lo stesso oro ma costi diversi. Su{" "}
-              <span className="mono">.p</span> le commissioni sono 7,03 $ a lotto; su <span className="mono">.s</span>{" "}
-              sono zero, perché tutto è nello spread. Lo spread più largo di <span className="mono">.s</span> costa il
-              13% del vantaggio. Non è una prova indipendente (stesso broker, stesso sottostante), ma mostra che il
-              risultato non dipende da un solo listino.
+          <Reveal i={2} className="space-y-3">
+            <RiskNote />
+            <p className="t-sec">
+              Il drawdown “del backtest” è quello di un solo percorso, in R: non è il drawdown vero (vedi “Il rischio”).
+              “Mesi in perdita” è un conteggio sui risultati mensili.
             </p>
           </Reveal>
         </div>
+      </div>
 
-        {/* ---------- Quando funziona ---------- */}
-        <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12">
-          <Reveal className="lg:col-span-4">
-            <h3 className="t-h2 lg:sticky lg:top-24">Cosa dice il mercato: quando funziona e quando no</h3>
-          </Reveal>
-          <div className="space-y-6 lg:col-span-8">
-            <Reveal className="prose">
-              <p>
-                Il nemico non è la direzione: è l’immobilità. Nei mesi in cui l’oro sta fermo (±0,5%), le strategie
-                perdono. Guadagnano anche quando l’oro scende: a produrre sono soprattutto le operazioni al ribasso.
-              </p>
-            </Reveal>
-            <Reveal i={1} className="space-y-3">
-              <BacktestTag />
-              <TableScroll label="Risultato in R al mese secondo il movimento dell'oro (backtest)">
-                <table className="dtable">
-                  <caption className="sr-only">R al mese secondo il movimento dell’oro nel mese</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Cosa fa l’oro nel mese</th>
-                      <th scope="col" className="r">Mesi</th>
-                      <th scope="col" className="r">R al mese</th>
-                      <th scope="col" aria-hidden="true" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {MESI.map((r) => (
-                      <tr key={r.nome} className={r.emph ? "emph" : undefined}>
-                        <th scope="row">{r.nome}</th>
-                        <td className="r">{r.mesi}</td>
-                        <td className={`r ${r.v < 0 ? "text-bad" : ""}`}>{r.r}</td>
-                        <td aria-hidden="true" className="align-middle">
-                          <span className="bar">
-                            <u style={{ left: `${zeroPct}%` }} />
-                            <i className={r.v < 0 ? "neg" : undefined} style={divergingBar(r.v)} />
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </TableScroll>
-              <RiskNote level="0.70" />
-            </Reveal>
-            <Reveal i={2} className="prose">
-              <p>
-                Due anni su sette, 2022 e 2024, il sistema ha lavorato a vuoto: 675 operazioni per il 9% del risultato.
-                Chi lo guarda deve essere pronto a vederlo pareggiare per un anno intero.
-              </p>
-            </Reveal>
-          </div>
-        </div>
+      {/* Volo attraverso i tre livelli: la camera avanza lungo Z con lo scroll */}
+      <div className="mt-12 md:mt-16">
+        <StrategyFlythrough label="Le tre strategie, un livello ciascuna">
+          {STRATS.map((s) => (
+            <LayerCard key={s.id} s={s} />
+          ))}
+        </StrategyFlythrough>
+      </div>
 
-        {/* ---------- Strumenti ---------- */}
-        <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12">
-          <Reveal className="lg:col-span-4">
-            <h3 className="t-h2 lg:sticky lg:top-24">Su quali strumenti</h3>
-          </Reveal>
-          <Reveal i={1} className="prose space-y-4 lg:col-span-8">
-            <p>
-              Il lavoro documentato in questa pagina riguarda <strong>solo l’oro (XAUUSD)</strong>.
-            </p>
-            <p className="callout">
-              <strong>Altri strumenti: in preparazione.</strong> Finché non ci sono numeri misurati e verificati, per
-              altri strumenti non compare nessun risultato.
-            </p>
-          </Reveal>
-        </div>
+      {/* ---------- Schede complete ---------- */}
+      <div className="wrap mt-12 space-y-16 md:mt-16 md:space-y-24">
+        {STRATS.map((s) => (
+          <article key={s.id} className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12" aria-labelledby={`sch-${s.id}`}>
+            <Reveal className="lg:col-span-4">
+              <h3 id={`sch-${s.id}`} className="t-h2 lg:sticky lg:top-24">
+                <span className="inline-flex items-center gap-2">
+                  <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: s.colore }} />
+                  {s.nome}
+                </span>
+                <span className="t-sec block font-normal">{s.mercato}</span>
+              </h3>
+            </Reveal>
+            <div className="prose space-y-5 lg:col-span-8">
+              {s.regole && <Reveal className="space-y-4">{s.regole}</Reveal>}
+              <Reveal i={1} className="space-y-3">
+                <BacktestTag />
+                <p>
+                  <strong>I numeri (backtest):</strong> {s.numeri}
+                </p>
+              </Reveal>
+              <Reveal i={2}>
+                <p>
+                  <strong>Dentro e fuori campione:</strong> {s.fuori}
+                </p>
+              </Reveal>
+              <Reveal i={3} className="callout">
+                <p>
+                  <strong>I numeri scomodi:</strong> {s.scomodi}
+                </p>
+              </Reveal>
+              <Reveal i={4}>
+                <p className="t-sec">
+                  <strong className="text-ink">Per anno (backtest, in R):</strong> <span className="mono">{s.anni}</span>
+                </p>
+              </Reveal>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );

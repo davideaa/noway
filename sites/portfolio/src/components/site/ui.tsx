@@ -7,7 +7,7 @@ export function Reveal({
   children,
   className,
   i = 0,
-  as: Tag = "div",
+  as = "div",
   variant,
 }: {
   children: ReactNode;
@@ -16,6 +16,10 @@ export function Reveal({
   as?: ElementType;
   variant?: "scene" | "monitor";
 }) {
+  // @types/react 19.3 da' ai tag "vuoti" children: never, e l'unione di tutti i tag
+  // diventa `never`. I tag usati qui (div, section, li, p) accettano tutti
+  // className, style e children: si tipizza come "div".
+  const Tag = as as "div";
   return (
     <Tag
       className={cn("reveal", variant && `reveal--${variant}`, className)}
@@ -56,15 +60,21 @@ export function BacktestTag({ children = "Backtest · non è un risultato reale"
   return <span className="tag">{children}</span>;
 }
 
-/** Il rischio sta sempre accanto alla cifra (DESIGN.md sez. 12, regola 1). */
-export function RiskNote({ level = "0.70" }: { level?: "0.70" | "1.05" }) {
-  const t = level === "0.70" ? { r: "0,70%", d90: "26%", d99: "35%" } : { r: "1,05%", d90: "35%", d99: "49%" };
+/**
+ * Il rischio sta sempre accanto alla cifra (DESIGN.md sez. 12, regola 1).
+ * Numeri da COPY.md v2 / data/strategie.json: drawdown massimo del backtest in R
+ * (una sola sequenza) e perdite consecutive. Il bootstrap sulla misura piu'
+ * recente non e' ancora stato fatto: si dice.
+ */
+export function RiskNote() {
   return (
     <p className="risknote">
       <TriangleAlert size={16} strokeWidth={1.6} aria-hidden />
       <span>
-        <b>Rischio accanto:</b> a rischio {t.r} per operazione, nel 90% degli scenari simulati il drawdown resta sotto il{" "}
-        {t.d90} (99° percentile: {t.d99}). Vedi{" "}
+        <b>Rischio accanto:</b> drawdown massimo del backtest, in R, su una sola sequenza: oro{" "}
+        <b>27,5 R</b> (14 perdite di fila), Nasdaq <b>13,7 R</b> (7), USDJPY <b>14,0 R</b> (8). A rischio 1% per
+        operazione, 27,5 R vuol dire circa il 27% dal massimo. Il drawdown vero, con il bootstrap, sulla misura più
+        recente non è ancora stato calcolato. Vedi{" "}
         <a href="#rischio" className="textlink">
           Il rischio
         </a>

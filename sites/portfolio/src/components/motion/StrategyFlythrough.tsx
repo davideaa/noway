@@ -23,7 +23,7 @@ const FRAME_SPAN = 3640; // profondita' totale del tunnel
 const FRAME_TRAVEL = 3400; // quanta strada fanno le cornici in tutto lo scroll
 
 const FOCUS_START = 0.25; // progresso a cui il livello 0 e' a fuoco
-const FOCUS_STEP = 0.37; // distanza (in progresso) tra due livelli
+const FOCUS_STEP = 0.45; // distanza (in progresso) tra due livelli (QA B1: le finestre non si toccano)
 const PLATEAU = 0.12; // mezza ampiezza del plateau di lettura (z quasi fermo)
 
 /** interpolazione lineare a tratti */
@@ -45,7 +45,9 @@ function Layer({ i, progress, children }: { i: number; progress: MotionValue<num
   const z = useTransform(progress, (p) => layerZ(p, i));
   const opacity = useTransform(progress, (p) => {
     const start = piecewise(p, [0, 0.1], [0, 1]); // i livelli restano spenti all'inizio
-    return start * piecewise(layerZ(p, i), [-1700, -900, -160, 120, 520], [0, 0.22, 1, 1, 0]);
+    // QA B1: il livello uscente (z > 0, davanti alla camera) deve essere a zero prima che
+    // l'entrante superi ~0,2, altrimenti i due testi si intrecciano (preserve-3d lo disegna sopra).
+    return start * piecewise(layerZ(p, i), [-1700, -700, -220, 80, 200], [0, 0, 1, 1, 0]);
   });
   return (
     <m.div className="zlayer" style={{ z, opacity }}>

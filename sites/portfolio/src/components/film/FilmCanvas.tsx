@@ -1,4 +1,7 @@
 "use client";
+/* eslint-disable react-hooks/immutability -- three.js e' imperativo: gli oggetti
+   della scena (materiali, buffer, camera) si scrivono ogni frame dentro useFrame
+   come funzione pura di p. E' il disegno del film, non un effetto collaterale. */
 
 /**
  * UN canvas, UNA scena, sei atti. Ogni useFrame legge `film` (state.ts) e scrive

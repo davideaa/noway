@@ -32,7 +32,8 @@ export function CopyEmail() {
         {state === "ok" ? <Check size={16} strokeWidth={1.6} aria-hidden /> : <Copy size={16} strokeWidth={1.6} aria-hidden />}
         Copia l&rsquo;indirizzo
       </button>
-      <p className={`t-note mt-2 min-h-[1.5em] ${state === "err" ? "text-bad" : "text-ok"}`} role="status" aria-live="polite">
+      {/* text-bad!/text-ok!: .t-note e' fuori @layer e vincerebbe sulle utility (QA B4) */}
+      <p className={`t-note mt-2 min-h-[1.5em] ${state === "err" ? "text-bad!" : "text-ok!"}`} role="status" aria-live="polite">
         {state === "ok" && "Indirizzo copiato"}
         {state === "err" && "Non è stato possibile copiare. Seleziona l’indirizzo e copialo a mano."}
       </p>

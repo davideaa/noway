@@ -1,5 +1,6 @@
 import { BacktestTag, Reveal, SceneHeader } from "@/components/site/ui";
 
+/** COPY.md v2, 3.5: le schede riguardano la ricerca sull'oro; per Nasdaq e USDJPY e' [DA COMPLETARE] (omesso). */
 type Card = { n: number; titolo: string; sub?: string; testo: React.ReactNode; tag?: boolean };
 
 const CARDS: Card[] = [
@@ -23,10 +24,10 @@ const CARDS: Card[] = [
     tag: true,
     testo: (
       <>
-        <strong>+50 R</strong> nel periodo di costruzione, <strong className="text-bad">−44,9 R</strong> fuori campione.
-        Vende le rotture fallite su un oro che triplica. È stata tolta <em>dopo</em> aver visto il fuori campione: è il
-        punto aperto del lavoro, e per questo i risultati hanno due numeri (vedi “Il metodo”). Si decide con dati nuovi,
-        in tempo reale.
+        In utile nel periodo di costruzione, <strong className="text-bad">in perdita netta fuori campione</strong>. Vende
+        le rotture fallite su un oro che triplica. È stata tolta <em>dopo</em> aver visto il fuori campione: è il punto
+        aperto del lavoro, ed è il motivo per cui il fuori campione dell’oro si legge come conferma parziale (vedi “Il
+        metodo”). Si decide con dati nuovi, in tempo reale.
       </>
     ),
   },
@@ -36,20 +37,19 @@ const CARDS: Card[] = [
     tag: true,
     testo: (
       <>
-        Il peso è stato ridotto in tre passi, da 1,0 a 0,5 a 0. Il rapporto profitto/rischio è salito ogni volta: 6,36,
-        6,56, 6,63. Se togliendola il portafoglio migliora, esce.
+        Il peso è stato ridotto in tre passi, da 1,0 a 0,5 a 0. Il rapporto profitto/rischio del portafoglio è salito a
+        ogni passo. Se togliendola il portafoglio migliora, esce.
       </>
     ),
   },
   {
     n: 4,
     titolo: "EMA cross",
-    tag: true,
     testo: (
       <>
         Scartata, ma con un motivo sbagliato all’inizio: il profit factor misura la qualità della singola operazione,
-        non quanto una strategia porta al portafoglio. Quella gamba valeva circa 90 punti R. La decisione forse è ancora
-        giusta (a drawdown uguale il portafoglio senza di lei è migliore), ma il motivo dichiarato non lo era.
+        non quanto una strategia porta al portafoglio. La decisione forse è ancora giusta (a drawdown uguale il
+        portafoglio senza di lei è migliore), ma il motivo dichiarato non lo era.
       </>
     ),
   },
@@ -60,12 +60,12 @@ const CARDS: Card[] = [
   },
   {
     n: 6,
-    titolo: "Take profit fisso a 2,5R",
+    titolo: "Take profit fisso",
     tag: true,
     testo: (
       <>
-        Peggiorava tutte le configurazioni testate di una delle strategie. Il migliore trade è passato da 159 $ a 1.795 $
-        togliendolo.
+        Peggiorava tutte le configurazioni testate di una delle strategie sull’oro: un obiettivo fisso taglia proprio le
+        operazioni che fanno il risultato.
       </>
     ),
   },
@@ -76,7 +76,7 @@ export function Scartate() {
     <section id="scartate" data-scene className="scene" aria-labelledby="scartate-t">
       <div className="wrap">
         <SceneHeader
-          n="04"
+          n="05"
           label="Scartate"
           id="scartate-t"
           title={["Le idee che", "non hanno funzionato"]}
@@ -84,11 +84,12 @@ export function Scartate() {
         <Reveal className="prose space-y-3">
           <p className="t-lead">
             Per ogni idea entrata nel portafoglio ce n’è una uscita. Il motivo è misurato, e mostrarlo è parte del metodo:
-            chi conosce solo i successi non può giudicare la selezione.
+            chi conosce solo i successi non può giudicare la selezione. Le schede qui sotto riguardano la ricerca
+            sull’oro.
           </p>
           <p className="t-sec">
             Nota di lettura: 1 R è il rischio corso in quell’operazione, quindi ogni cifra in R ha già il suo rischio
-            dentro. Tutti i numeri di questa sezione sono backtest.
+            dentro. Tutti i risultati di questa sezione sono backtest.
           </p>
         </Reveal>
 

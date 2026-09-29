@@ -3,6 +3,63 @@
 @import "shadcn/tailwind.css";
 
 /* ==========================================================================
+   COLORE DEL FILM - tre livelli: primitivi raw -> ruoli semantici -> bind
+   (SPEC-FILM.md, "COLOUR"). Principio: UN NERO CHE TIENE LA TINTA DELL'ACCENTO.
+   L'accento del sito e' il lime #c8fa72 (DESIGN.md), tinta HSL ~82 gradi.
+   Ogni passo di "ink" ha la STESSA tinta (80-83 gradi) e cala solo di croma,
+   cosi' il campo piu' scuro dell'inquadratura e' dello stesso colore
+   dell'accento, non un grigio su cui l'accento e' appoggiato.
+
+   Valori scelti (tinta HSL calcolata sui canali):
+     --raw-ink-950 #080a04  h 80   il campo (clear color, fog, sfondo stage)
+     --raw-ink-900 #0c0f07  h 82.5 campo secondario (fallback, barra alta)
+     --raw-ink-800 #13170c  h 81.8 superficie tenue
+     --raw-ink-700 #202616  h 82.5 foschia / filetti
+     --raw-bone-50 #f1f4ee  quasi bianco (= --ink di DESIGN.md)
+     --raw-bone-400 #9aa38f h 87   testo attenuato sul campo (7,2:1 su ink-950)
+     --raw-bone-500 #737b69 h 86.7 linee neutre (la stanza quando il lime e' in scena)
+     --raw-lime-500 #c8fa72 accento della FIGURA e dei FILI (= --acc)
+     --raw-lime-300 #e2ffb0 impulso, quasi-bianco verde
+     --raw-gold-500 #e5b966 accento della STANZA (= --st-oro)
+   DUE accenti, e non condividono MAI un fotogramma: lime = figura, gabbia,
+   impulso dei fili; oro = stanza. Quando il lime e' in scena la stanza e'
+   bone-500 (vedi limeInFrame in state.ts). I token di DESIGN.md per /dettagli
+   (--bg, --surf, ...) restano quelli misurati: qui non si toccano.
+   ========================================================================== */
+:root {
+  /* livello 1: primitivi raw */
+  --raw-ink-950: #080a04;
+  --raw-ink-900: #0c0f07;
+  --raw-ink-800: #13170c;
+  --raw-ink-700: #202616;
+  --raw-bone-50: #f1f4ee;
+  --raw-bone-400: #9aa38f;
+  --raw-bone-500: #737b69;
+  --raw-lime-500: #c8fa72;
+  --raw-lime-300: #e2ffb0;
+  --raw-gold-500: #e5b966;
+
+  /* livello 2: ruoli semantici (il canvas li legge da qui con getComputedStyle) */
+  --film-field: var(--raw-ink-950); /* il campo: clear color, nebbia, stage */
+  --film-field-2: var(--raw-ink-900);
+  --film-surface: var(--raw-ink-800);
+  --film-haze: var(--raw-ink-700);
+  --film-type: var(--raw-bone-50);
+  --film-type-mute: var(--raw-bone-400);
+  --film-neutral-line: var(--raw-bone-500);
+  --film-accent-figure: var(--raw-lime-500);
+  --film-accent-impulse: var(--raw-lime-300);
+  --film-accent-room: var(--raw-gold-500);
+
+  /* livello 3: bind (classi .film-* piu' sotto) */
+  --film-bg: var(--film-field);
+  --film-fg: var(--film-type);
+  --film-top-bg: color-mix(in srgb, var(--film-field-2) 72%, transparent);
+  --film-track-h: 2200vh;
+  --film-riskbar-h: 56px; /* spazio lasciato in basso agli overlay */
+}
+
+/* ==========================================================================
    TOKEN - UNICA FONTE DELLO STILE
    Tutto quello che si cambia "a tentativi" sta in questo blocco :root.
    Nessun altro file contiene colori, spaziature o tempi scritti a mano.
@@ -57,6 +114,7 @@
   --gutter: 16px; /* margine pagina, cresce con i breakpoint sotto */
   --scene-pad: var(--sp-7); /* respiro sopra/sotto ogni scena */
   --header-h: 64px;
+  --riskbar-h: 72px; /* barra fissa del rischio: due righe sotto 950 px (QA B2) */
 
   /* --- raggi --- */
   --r-1: 4px;
@@ -130,6 +188,7 @@
   :root {
     --gutter: 24px;
     --scene-pad: var(--sp-9);
+    --riskbar-h: 48px;
   }
 }
 @media (min-width: 1200px) {
@@ -173,6 +232,8 @@
   --color-line2: var(--line2);
   --color-line3: var(--line3);
   --color-oro: var(--st-oro);
+  --color-nas: var(--st-nas);
+  --color-usdjpy: var(--st-usdjpy);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
@@ -230,6 +291,7 @@
     @apply font-sans;
     background: var(--bg);
     scroll-padding-top: calc(var(--header-h) + var(--sp-4));
+    scroll-padding-bottom: calc(var(--riskbar-h) + var(--sp-4)); /* il focus non finisce sotto la barra (QA B2) */
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
   }
@@ -575,6 +637,9 @@
   border-collapse: collapse;
   font-size: 14px;
   line-height: 1.5;
+}
+.dtable--narrow {
+  min-width: 0; /* QA B5: tabelle a tre colonne con testi corti: si legge tutto senza scorrere */
 }
 .dtable caption {
   text-align: left;
@@ -926,10 +991,11 @@
 .zcard {
   width: min(84vw, 560px);
   padding: var(--sp-5);
-  border: 1px solid color-mix(in srgb, var(--st-oro) 40%, transparent);
+  /* --zc = colore della strategia del livello (oro / nasdaq / usdjpy) */
+  border: 1px solid color-mix(in srgb, var(--zc, var(--st-oro)) 40%, transparent);
   border-radius: var(--r-3);
   background: color-mix(in srgb, var(--surf) 94%, transparent);
-  box-shadow: 0 25px 75px -55px color-mix(in srgb, var(--st-oro) 40%, transparent);
+  box-shadow: 0 25px 75px -55px color-mix(in srgb, var(--zc, var(--st-oro)) 40%, transparent);
 }
 
 /* Versione statica: reduced-motion, senza JS, schermi bassi. Nessun transform,
@@ -1075,4 +1141,168 @@ html:not(.js) .hero__content {
 }
 .skip:focus-visible {
   transform: none;
+}
+
+/* ==========================================================================
+   FILM A SCROLL (home): una traccia, una stage sticky, un canvas, overlay DOM
+   ========================================================================== */
+.film-track {
+  position: relative;
+  height: var(--film-track-h);
+  background: var(--film-bg);
+}
+.film-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--film-bg);
+  color: var(--film-fg);
+}
+.film-stage > canvas,
+.film-stage > div[style*="position: absolute"] {
+  z-index: 0;
+}
+/* Overlay: assoluti, inset 0, pointer-events none; visibili solo nella propria finestra */
+.film-ov {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: calc(var(--header-h) + var(--sp-4)) var(--gutter) calc(var(--film-riskbar-h) + var(--sp-6));
+  pointer-events: none;
+  visibility: hidden;
+  text-align: center;
+}
+.film-ov a,
+.film-ov button {
+  pointer-events: auto;
+}
+.film-ov--title {
+  align-content: end;
+  justify-items: start;
+  text-align: left;
+}
+.film-ov--low {
+  align-content: end;
+  padding-bottom: calc(var(--film-riskbar-h) + 14vh);
+}
+.film-h1 {
+  max-width: 16ch;
+  font-size: var(--fs-display);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px color-mix(in srgb, var(--film-field) 80%, transparent);
+}
+.film-line {
+  max-width: 22ch;
+  font-size: var(--fs-scene);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px color-mix(in srgb, var(--film-field) 80%, transparent);
+}
+.film-line--s {
+  font-size: clamp(22px, 1.1rem + 1.6vw, 34px);
+}
+.film-line--mute {
+  color: var(--film-type-mute);
+}
+/* per lettera: promosse UNA volta; si toccano solo transform / filter / opacity */
+.film-w {
+  display: inline-block;
+  white-space: nowrap;
+}
+.film-l {
+  display: inline-block;
+  will-change: transform, filter, opacity;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+.film-end {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+  max-width: 640px;
+}
+.film-end .film-line--s + .film-line--s {
+  margin-top: calc(-1 * var(--sp-1));
+}
+.film-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+}
+.film-mail {
+  font-size: 14px;
+  color: var(--film-type-mute);
+  overflow-wrap: anywhere;
+}
+/* barra alta del film */
+.film-top {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  background: var(--film-top-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.film-top__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--film-type);
+  border-radius: var(--r-2);
+  transition: color var(--dur-base) var(--ease);
+}
+.film-top__link:hover {
+  color: var(--film-accent-figure);
+}
+.film-top__pause {
+  min-height: 40px;
+  font-size: 13px;
+  background: transparent;
+}
+@media (max-width: 599px) {
+  .film-top__pause span,
+  .film-top__pause {
+    font-size: 0;
+  }
+  .film-top__pause svg {
+    font-size: 16px;
+  }
+}
+/* fallback senza WebGL: stessa pagina, ferma */
+.film-fallback {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding: calc(var(--header-h) + var(--sp-7)) 0 calc(var(--film-riskbar-h) + var(--sp-7));
+  background: radial-gradient(70% 90% at 30% 35%, var(--film-haze) 0%, var(--film-field-2) 55%, var(--film-field) 100%);
+  color: var(--film-fg);
+}
+.film-fallback__in {
+  display: grid;
+  gap: var(--sp-4);
+  justify-items: start;
+}
+.film-fallback .film-cta {
+  justify-content: flex-start;
+}
+.film-fallback__note {
+  max-width: 60ch;
+  color: var(--film-type-mute);
 }

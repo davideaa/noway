@@ -1,12 +1,15 @@
 import { Reveal, SceneHeader } from "@/components/site/ui";
 
-/** "Cosa si pubblica" e' [DA COMPLETARE] in COPY.md: nota sobria, nessun dato inventato. */
+/**
+ * COPY.md v2, 3.7. "Cosa si pubblica" e il criterio scritto da Davide per USDJPY sono
+ * [DA COMPLETARE]: nota sobria, nessun dato inventato.
+ */
 export function Monitoraggio() {
   return (
     <section id="monitoraggio" data-scene className="scene" aria-labelledby="monitoraggio-t">
       <div className="wrap">
         <SceneHeader
-          n="06"
+          n="07"
           label="Monitoraggio"
           id="monitoraggio-t"
           title={["Prima di fidarsi,", "si guarda in tempo reale"]}
@@ -17,7 +20,7 @@ export function Monitoraggio() {
             Nessun backtest può rispondere a due domande. Gli spread e gli slittamenti veri assomigliano a quelli
             simulati? E si riesce a guardare il sistema fermo per mesi, senza spegnerlo? Per questo il passo successivo
             non è un altro test sugli stessi anni: è un conto demo in tempo reale, con parametri congelati, per tre-sei
-            mesi.
+            mesi, con tutte e tre le strategie insieme.
           </p>
         </Reveal>
 
@@ -31,16 +34,29 @@ export function Monitoraggio() {
                 fatto nel backtest, e lo si sa prima.
               </li>
               <li>
-                <strong>Il risultato contro la banda simulata.</strong> Il risultato reale si mette dentro la
-                distribuzione del bootstrap: in quale percentile cade? Così è stato fatto anche sul fuori campione (24°
-                percentile).
+                <strong>Il risultato contro la banda simulata.</strong> Il risultato reale di ogni strategia si mette
+                dentro la distribuzione del bootstrap: in quale percentile cade? Serve che il bootstrap sulla misura più
+                recente sia stato fatto (vedi{" "}
+                <a href="#rischio" className="textlink">
+                  Il rischio
+                </a>
+                ).
               </li>
               <li>
-                <strong>La strategia scartata.</strong> La TRAPPOLA si decide sul demo: è dato nuovo.
+                <strong>USDJPY per prima.</strong> È la strategia con il fuori campione più debole (t 1,48) e con il 2026
+                a zero. Il criterio per tenerla o toglierla va scritto <em>prima</em> di guardare il demo, non dopo.
+              </li>
+              <li>
+                <strong>Le correlazioni.</strong> Mese per mese si aggiorna il conteggio: quante volte le tre strategie
+                perdono insieme. Con pochi mesi il numero dice poco; si accumula.
+              </li>
+              <li>
+                <strong>La strategia scartata sull’oro.</strong> La TRAPPOLA si decide sul demo: è dato nuovo.
               </li>
               <li>
                 <strong>Il numero di operazioni.</strong> Con poche operazioni, un risultato anche lontano dallo storico
-                resta statisticamente compatibile con esso. Una serie negativa corta non invalida il sistema.
+                resta statisticamente compatibile con esso. Una serie negativa corta non invalida il sistema: sull’oro il
+                backtest contiene già 14 perdite di fila.
               </li>
             </ol>
           </Reveal>
@@ -53,7 +69,7 @@ export function Monitoraggio() {
             <p className="eyebrow mt-6">Regola per la pagina</p>
             <p className="mt-2">
               Quando compaiono i primi risultati reali, sono mostrati accanto a quelli simulati, con lo stesso formato,
-              e senza togliere i mesi brutti.
+              per ognuna delle tre strategie, e senza togliere i mesi brutti.
             </p>
           </Reveal>
         </div>

@@ -19,6 +19,8 @@ export const OG_ALT = "Portfolio Algo Manager: strategie algoritmiche su XAUUSD,
 export const EMAIL = "PORTFOLIOALGOMANAGER21@gmail.com";
 export const EMAIL_SHOWN = EMAIL.toLowerCase();
 export const MAILTO = `mailto:${EMAIL}?subject=Domanda%20sul%20metodo&body=Ciao%2C%0A%0Avorrei%20chiedere%3A%0A%0A`;
+/** Nel film il mailto e' in minuscolo (le email non distinguono le maiuscole). */
+export const MAILTO_LOWER = `mailto:${EMAIL_SHOWN}?subject=Domanda%20sul%20metodo&body=Ciao%2C%0A%0Avorrei%20chiedere%3A%0A%0A`;
 
 /**
  * URL pubblico: non e' ancora deciso (COPY.md, [DA COMPLETARE: URL]).
@@ -29,14 +31,15 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
 
 export type Scene = { id: string; n: string; label: string; nav?: boolean };
 
-/** Ordine delle scene (COPY.md, sezioni 3.1-3.8). `nav` = compare nel menu. */
+/** Ordine delle scene di /dettagli (COPY.md v2, sezioni 3.1-3.9). `nav` = compare nel menu. */
 export const SCENES: Scene[] = [
   { id: "ingresso", n: "01", label: "Ingresso" },
   { id: "metodo", n: "02", label: "Metodo", nav: true },
   { id: "strategie", n: "03", label: "Strategie", nav: true },
-  { id: "scartate", n: "04", label: "Scartate" },
-  { id: "rischio", n: "05", label: "Rischio", nav: true },
-  { id: "monitoraggio", n: "06", label: "Monitoraggio", nav: true },
-  { id: "contatti", n: "07", label: "Contatti", nav: true },
-  { id: "avviso", n: "08", label: "Avviso" },
+  { id: "portafoglio", n: "04", label: "Portafoglio", nav: true },
+  { id: "scartate", n: "05", label: "Scartate" },
+  { id: "rischio", n: "06", label: "Rischio", nav: true },
+  { id: "monitoraggio", n: "07", label: "Monitoraggio", nav: true },
+  { id: "contatti", n: "08", label: "Contatti", nav: true },
+  { id: "avviso", n: "09", label: "Avviso" },
 ];

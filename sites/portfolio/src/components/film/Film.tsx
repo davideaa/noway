@@ -8,7 +8,7 @@
  */
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
 import { EMAIL_SHOWN, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, MAILTO_LOWER } from "@/lib/site";
@@ -56,12 +56,15 @@ function Letters({ text }: { text: string }) {
   return (
     <span aria-hidden="true">
       {words.map((w, wi) => (
-        <span key={wi} className="film-w">
-          {Array.from(w).map((ch, ci) => (
-            <span key={ci} className="film-l">
-              {ch}
-            </span>
-          ))}
+        <span key={wi}>
+          <span className="film-w">
+            {Array.from(w).map((ch, ci) => (
+              <span key={ci} className="film-l">
+                {ch}
+              </span>
+            ))}
+          </span>
+          {/* lo spazio sta FUORI dall'inline-block, altrimenti viene tolto in fondo alla parola */}
           {wi < words.length - 1 ? " " : null}
         </span>
       ))}
@@ -70,31 +73,32 @@ function Letters({ text }: { text: string }) {
 }
 
 type Ov = { el: HTMLElement; letters: HTMLElement[]; key: string };
+type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null };
+
+/** Scelta iniziale, UNA volta e fuori da React: WebGL si' (film) o no (fallback). */
+const SSR: Client = { mode: "ssr", palette: null };
+let clientCache: Client | undefined;
+function getClient(): Client {
+  if (!clientCache) {
+    film.mobile = window.matchMedia("(max-width: 820px)").matches;
+    film.aspect = window.innerWidth / Math.max(1, window.innerHeight);
+    clientCache = hasWebGL() ? { mode: "film", palette: readPalette() } : { mode: "fallback", palette: null };
+  }
+  return clientCache;
+}
+const noopSubscribe = () => () => {};
 
 export function Film() {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { reduced, paused } = useMotionPrefs();
-  const [mode, setMode] = useState<"ssr" | "film" | "fallback">("ssr");
-  const [palette, setPalette] = useState<Palette | null>(null);
+  const { mode, palette } = useSyncExternalStore(noopSubscribe, getClient, () => SSR);
   const entryT0 = useRef(0);
 
   useEffect(() => {
     film.reduced = reduced;
     film.paused = paused;
   }, [reduced, paused]);
-
-  // Scelta iniziale (una volta): WebGL o fallback. Non dipende dallo scroll.
-  useEffect(() => {
-    film.mobile = window.matchMedia("(max-width: 820px)").matches;
-    film.aspect = window.innerWidth / Math.max(1, window.innerHeight);
-    if (!hasWebGL()) {
-      setMode("fallback");
-      return;
-    }
-    setPalette(readPalette());
-    setMode("film");
-  }, []);
 
   // Il ciclo: legge lo scroll, scrive `film`, aggiorna gli overlay. Mai React.
   useEffect(() => {
@@ -107,6 +111,9 @@ export function Film() {
       process.env.NODE_ENV !== "production" || window.location.search.includes("film-debug");
     const pinRaw = debug ? new URLSearchParams(window.location.search).get("film-p") : null;
     const pin = pinRaw !== null && pinRaw !== "" ? clamp01(Number(pinRaw)) : null;
+    // solo debug: congela il tempo (grana, float) per confrontare due fotogrammi allo stesso p
+    const tRaw = debug ? new URLSearchParams(window.location.search).get("film-t") : null;
+    const tPin = tRaw !== null && tRaw !== "" ? Number(tRaw) : null;
     if (debug) (window as unknown as { __film: typeof film }).__film = film;
 
     const ovs: Ov[] = Array.from(stage.querySelectorAll<HTMLElement>("[data-ov]")).map((el) => ({
@@ -145,7 +152,7 @@ export function Film() {
       film.scrollP = scrollP;
       film.p = p;
       film.sp = actAxis(p);
-      film.t = now / 1000;
+      film.t = tPin ?? now / 1000;
       film.frame++;
       computeGates(p, film.sp, film.gates);
 

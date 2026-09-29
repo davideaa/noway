@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import { BacktestTag, Reveal, RiskNote, SceneHeader, TableScroll, Term } from "@/components/site/ui";
 
 const GLOSSARIO: [string, string][] = [
@@ -19,28 +18,25 @@ const GLOSSARIO: [string, string][] = [
   ["Plateau", "una zona di valori vicini che rende bene tutta, al contrario di un picco isolato."],
   ["Swap", "il costo (o il ricavo) di tenere una posizione aperta da un giorno all’altro."],
   ["t-statistica", "misura di quanto un risultato si distingue dal caso. Più è alta, meno è probabile che sia fortuna."],
+  ["Correlazione", "un numero fra −1 e +1 che dice quanto due serie di risultati si muovono insieme. Vicino a 0, ognuna va per conto suo."],
 ];
 
-function Esito() {
-  return (
-    <span className="inline-flex items-center gap-2 text-ok">
-      <Check size={16} strokeWidth={1.6} aria-hidden />
-      passa
-    </span>
-  );
-}
-
+/** COPY.md v2, 3.2. Numeri da data/strategie.json (oro dentro/fuori campione). */
 export function Metodo() {
   return (
     <section id="metodo" data-scene className="scene" aria-labelledby="metodo-t">
       <div className="wrap">
         <SceneHeader n="02" label="Metodo" id="metodo-t" title={["Si decide prima,", "si misura dopo"]} />
 
-        <Reveal className="prose">
+        <Reveal className="prose space-y-4">
           <p className="t-lead">
             Un backtest è facile da far uscire bene: basta provare abbastanza configurazioni e tenere la migliore. Per
             questo il lavoro segue tre regole. Non sono decorazione: sono il motivo per cui i numeri di questa pagina si
             possono discutere.
+          </p>
+          <p className="t-sec">
+            I numeri di questa pagina vengono dalla misura più recente del portafoglio (settembre 2026). La ricerca
+            documentata nel repo è una versione precedente del sistema oro.
           </p>
         </Reveal>
 
@@ -62,18 +58,19 @@ export function Metodo() {
               </Reveal>
               <Reveal className="callout" i={1}>
                 <p>
-                  <em>Un esempio scomodo.</em> Per la strategia di ritracciamento erano stati fissati tre criteri: almeno
-                  150 operazioni, profit factor almeno 1,20, t-statistica almeno 3,4. Su 192 configurazioni provate,{" "}
-                  <strong>nessuna</strong> li ha centrati tutti e tre. La migliore arrivava a una t di 1,61. La strategia è
-                  stata bocciata.
+                  <em>Un esempio scomodo.</em> Per la strategia di ritracciamento sull’oro erano stati fissati tre
+                  criteri: almeno 150 operazioni, profit factor almeno 1,20, t-statistica almeno 3,4. Su 192
+                  configurazioni provate, <strong>nessuna</strong> li ha centrati tutti e tre. La strategia è stata
+                  bocciata.
                 </p>
               </Reveal>
               <Reveal i={2}>
                 <p>
                   Poi è stata riaperta, e va detto come: la griglia di parametri aveva l’ottimo sul bordo, quindi non
                   aveva provato la zona giusta. Prima dell’estensione è stata scritta una regola di arresto (“se la t
-                  resta sotto 2,5, la strategia è chiusa”). Dopo l’estensione la t è salita a 2,61. Resta sotto la soglia
-                  iniziale di 3,4: la strategia è dentro il portafoglio come candidata credibile, non come caso chiuso.
+                  resta sotto 2,5, la strategia è chiusa”). Dopo l’estensione la regola di arresto è stata superata, ma la
+                  soglia iniziale di 3,4 no. La strategia è entrata nel portafoglio come candidata credibile, non come
+                  caso chiuso.
                 </p>
               </Reveal>
             </div>
@@ -89,59 +86,64 @@ export function Metodo() {
             <div className="prose space-y-6 lg:col-span-8">
               <Reveal>
                 <p>
-                  Una parte dei dati (2024.01–2026.09) è rimasta chiusa durante tutta la costruzione. È stata aperta{" "}
-                  <strong>una volta sola</strong>, con i criteri già scritti, senza ottimizzare niente.
+                  Una parte dei dati (per oro e Nasdaq dal 2024.01; per USDJPY dal 2023.01) è rimasta chiusa durante la
+                  costruzione. È stata aperta <strong>una volta sola</strong>, con i criteri già scritti, senza
+                  ottimizzare niente.
                 </p>
               </Reveal>
 
               <Reveal i={1} className="space-y-3">
                 <BacktestTag />
-                <TableScroll label="Criteri dichiarati prima del test e risultato ottenuto (backtest)">
+                <TableScroll label="Oro, dentro e fuori campione (backtest)">
                   <table className="dtable">
-                    <caption>Fuori campione 2024.01–2026.09: criteri dichiarati prima, risultato ottenuto</caption>
+                    <caption>Oro, dentro e fuori campione (backtest)</caption>
                     <thead>
                       <tr>
-                        <th scope="col">Criterio (dichiarato prima)</th>
-                        <th scope="col" className="r">Soglia</th>
-                        <th scope="col" className="r">Ottenuto</th>
-                        <th scope="col">Esito</th>
+                        <th scope="col">Misura</th>
+                        <th scope="col" className="r">Periodo di costruzione (2019–2023)</th>
+                        <th scope="col" className="r">Fuori campione (2024.01–2026.09)</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
+                        <th scope="row">Operazioni</th>
+                        <td className="r">715</td>
+                        <td className="r">408</td>
+                      </tr>
+                      <tr>
                         <th scope="row">Guadagno medio per operazione</th>
-                        <td className="r">≥ +0,050 R</td>
-                        <td className="r">+0,2554 R</td>
-                        <td><Esito /></td>
+                        <td className="r">+0,1134 R</td>
+                        <td className="r">+0,2534 R</td>
                       </tr>
                       <tr>
-                        <th scope="row">Profit factor</th>
-                        <td className="r">≥ 1,10</td>
-                        <td className="r">1,526</td>
-                        <td><Esito /></td>
+                        <th scope="row">t-statistica</th>
+                        <td className="r">1,86</td>
+                        <td className="r">3,21</td>
                       </tr>
                       <tr>
-                        <th scope="row">Perdita massima (a rischio 0,60%)</th>
-                        <td className="r">≤ 27,4%</td>
-                        <td className="r">8,26%</td>
-                        <td><Esito /></td>
+                        <th scope="row">Operazioni in utile</th>
+                        <td className="r">40,6%</td>
+                        <td className="r">45,1%</td>
                       </tr>
                     </tbody>
                   </table>
                 </TableScroll>
+                <RiskNote />
               </Reveal>
 
               <Reveal i={2}>
-                <p>Tre criteri su tre. Ma ci sono quattro cose da leggere insieme a questa tabella.</p>
+                <p>
+                  Il criterio dichiarato prima sul guadagno medio (almeno +0,050 R per operazione) è passato. Ma ci sono
+                  quattro cose da leggere insieme a questa tabella.
+                </p>
               </Reveal>
 
               <Reveal i={3}>
                 <ol className="count space-y-4">
                   <li>
-                    <strong>Va meglio fuori che dentro, e non è una buona notizia.</strong> Nel periodo di costruzione
-                    (2019–2023) il guadagno medio è +0,1219 R con profit factor 1,23. Fuori campione è +0,2554 R con
-                    profit factor 1,53. Il 2024–2026 è stato un periodo eccezionale per l’oro: il numero da usare per il
-                    futuro è il più basso dei due, non il più alto.
+                    <strong>Va meglio fuori che dentro, e non è una buona notizia.</strong> Il guadagno medio fuori
+                    campione è più del doppio di quello del periodo di costruzione. Il 2024–2026 è stato un periodo
+                    eccezionale per l’oro: il numero da usare per il futuro è il più basso dei due, non il più alto.
                   </li>
                   <li>
                     <strong>
@@ -155,44 +157,14 @@ export function Metodo() {
                       è già stato speso.
                     </strong>{" "}
                     Non c’è più nessun dato mai visto. Provare altre configurazioni sugli stessi anni peggiora la
-                    statistica invece di migliorarla. In totale sono state provate 272 configurazioni.
+                    statistica invece di migliorarla. Nella ricerca sull’oro sono state provate in totale 272
+                    configurazioni.
                   </li>
                   <li>
-                    <strong>Una scelta è stata fatta dopo aver guardato.</strong> Una terza strategia (vedi “Cosa è
-                    stato scartato”) è stata tolta dopo aver visto il fuori campione. Di solito questo invalida il test.
-                    Per questo esistono due numeri, tenuti separati:
-                    <div className="mt-4 space-y-3">
-                      <BacktestTag />
-                      <TableScroll label="Portafoglio a tre gambe e a due gambe, simulazione a rischio 1,05% (backtest)">
-                        <table className="dtable">
-                          <caption>Simulazione a rischio 1,05%, fuori campione</caption>
-                          <thead>
-                            <tr>
-                              <th scope="col">Portafoglio</th>
-                              <th scope="col" className="r">Annuo (backtest)</th>
-                              <th scope="col">Come leggerlo</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <th scope="row">Portafoglio a tre gambe</th>
-                              <td className="r">22%</td>
-                              <td>pulito: nessuna scelta fatta guardandolo</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Portafoglio a due gambe (quello attuale)</th>
-                              <td className="r">47%</td>
-                              <td>contaminato dalla scelta a posteriori</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </TableScroll>
-                      <RiskNote level="1.05" />
-                      <p>
-                        Il valore vero sta in mezzo, più vicino al primo. Si decide con dati nuovi, non rianalizzando
-                        questi. Sono percentuali di simulazione, non un obiettivo.
-                      </p>
-                    </div>
+                    <strong>Una scelta è stata fatta dopo aver guardato.</strong> Una terza strategia sull’oro (vedi
+                    “Cosa è stato scartato”) è stata tolta dopo aver visto il fuori campione. Di solito questo contamina
+                    il test. Il fuori campione dell’oro va quindi letto come una conferma parziale, non come una prova
+                    pulita. Si decide con dati nuovi, non rianalizzando questi.
                   </li>
                   <li>
                     <strong>Il fuori campione, da solo, non dimostra niente.</strong> Il valore di quel test sta
@@ -202,20 +174,10 @@ export function Metodo() {
               </Reveal>
 
               <Reveal i={4}>
-                <details className="disclosure">
-                  <summary>Lo stesso test, a tre gambe</summary>
-                  <div className="disclosure__body prose space-y-3">
-                    <BacktestTag />
-                    <p>
-                      Sulla versione a tre gambe, unica con la verifica fuori campione non contaminata: 891 operazioni,
-                      guadagno medio +0,0618 R (soglia +0,050), profit factor 1,123 (soglia 1,10), perdita massima 10,85%
-                      (soglia 27,4%). Passa tutti e tre i criteri, ma di poco sul guadagno medio. Il risultato è arrivato
-                      al 24° percentile di quanto simulato: sotto la mediana, dentro la parte centrale. La t del solo
-                      fuori campione è 1,39. Il guadagno medio in campione era +0,0953 R: l’edge si è ridotto di circa un
-                      terzo, come ci si aspetta da parametri scelti guardando il primo periodo.
-                    </p>
-                  </div>
-                </details>
+                <p>
+                  Lo stesso confronto per Nasdaq e USDJPY è nelle loro schede. Una delle due, USDJPY, fuori campione va{" "}
+                  <strong>peggio</strong> che dentro: è il caso più importante da tenere d’occhio.
+                </p>
               </Reveal>
             </div>
           </article>
@@ -237,15 +199,15 @@ export function Metodo() {
               <Reveal i={1}>
                 <ul className="ticks">
                   <li>
-                    <strong>ROTTURA:</strong> posizione nel range 0,91 con plateau 0,91–0,93; trailing con plateau fra 3
-                    e 6 ATR.
+                    <strong>ROTTURA (oro):</strong> posizione nel range 0,91 con plateau 0,91–0,93; trailing con plateau
+                    fra 3 e 6 ATR.
                   </li>
                   <li>
-                    <strong>RITRACCIAMENTO:</strong> media mobile a 30 periodi, collina fra 30 e 40.
+                    <strong>RITRACCIAMENTO (oro):</strong> media mobile a 30 periodi, collina fra 30 e 40.
                   </li>
                   <li>
-                    <strong>Il caso opposto:</strong> nella prima prova del ritracciamento il profitto mediano rispetto
-                    alla media mobile faceva così: 567 (periodo 30), −68 (60), 176 (90), 643 (120). Un buco in mezzo a
+                    <strong>Il caso opposto:</strong> nella prima prova del ritracciamento, cambiando il periodo della
+                    media mobile il profitto saliva, crollava sotto zero, risaliva e saliva ancora. Un buco in mezzo a
                     due picchi è la firma del rumore, non di una struttura.
                   </li>
                   <li>
@@ -256,7 +218,7 @@ export function Metodo() {
                     <strong>Meglio del secondo miglior valore, non del migliore.</strong> Nel ritracciamento
                     l’ottimizzazione voleva il margine di sicurezza dello stop a 0,05 ATR. È stato fissato a 0,10, apposta:
                     0,05 ATR sull’oro valgono poco più dello spread, e uno stop appoggiato esattamente sul minimo è dove
-                    il mercato va a prendere gli stop. Costa circa il 16% del profitto di backtest. Non si riabbassa.
+                    il mercato va a prendere gli stop. Costa una parte del profitto di backtest. Non si riabbassa.
                   </li>
                 </ul>
               </Reveal>
@@ -278,15 +240,17 @@ export function Metodo() {
                 <ul className="ticks">
                   <li>
                     Il trailing (l’uscita che insegue il prezzo) era uguale allo stop e tagliava i vincitori. Allargato,
-                    una delle strategie originali è passata da 6 a 98 punti R.
+                    il risultato di una delle strategie originali è cambiato di un ordine di grandezza.
                   </li>
                   <li>
                     Le chiusure ereditavano l’etichetta sbagliata: il riepilogo per strategia era falso, anche se il
                     profitto totale no.
                   </li>
                   <li>
-                    La deviazione standard usata come stima (1,26 R) era più bassa di quella misurata (1,45 R). Le t
-                    calcolate prima vanno abbassate del 15% circa.
+                    La deviazione standard dei risultati usata come stima all’inizio era più bassa di quella misurata
+                    sulle operazioni. Le t calcolate con la stima erano ottimistiche. Nella misura più recente la
+                    deviazione standard è 1,62 R sull’oro, 1,10 R sul Nasdaq, 1,04 R su USDJPY, ed è quella usata per
+                    tutte le t di questa pagina.
                   </li>
                   <li>Una strategia (EMA cross) era stata scartata per un motivo sbagliato. Vedi sotto.</li>
                 </ul>

@@ -27,7 +27,19 @@ export function RevealObserver() {
       { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
     );
     els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    // QA B2: un blocco raggiunto da tastiera entra subito, anche se l'osservatore non l'ha ancora visto
+    const onFocus = (e: FocusEvent) => {
+      const block = (e.target as HTMLElement | null)?.closest?.(".reveal");
+      if (block && !block.classList.contains("in")) {
+        block.classList.add("in");
+        io.unobserve(block);
+      }
+    };
+    document.addEventListener("focusin", onFocus);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("focusin", onFocus);
+    };
   }, []);
   return null;
 }

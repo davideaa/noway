@@ -3,15 +3,15 @@ import { HeroScene } from "@/components/motion/HeroScene";
 import { PauseButton } from "@/components/motion/PauseButton";
 import { BacktestTag, Reveal, RiskNote } from "@/components/site/ui";
 import { buttonVariants } from "@/components/ui/button";
-import { EMAIL_SHOWN, MAILTO } from "@/lib/site";
+import { EMAIL_SHOWN, FILM_H1, MAILTO } from "@/lib/site";
 
-// Cifre della fascia (COPY.md 3.1). La cifra "mesi di risultati in tempo reale"
-// e' [DA COMPLETARE]: non si mostra (vedi DA-COMPLETARE.md).
+// Cifre della fascia (COPY.md v2, 3.1; fonte data/strategie.json). La cifra "mesi di
+// risultati in tempo reale" e' [DA COMPLETARE]: non si mostra (vedi DA-COMPLETARE.md).
 const STATS = [
-  { fig: "2", label: "strategie trend following: ROTTURA (M30) e RITRACCIAMENTO (H4)" },
-  { fig: "1.122", label: "operazioni simulate in 7,7 anni" },
-  { fig: "42,3%", label: "operazioni chiuse in utile: si perde più spesso di quanto si vinca" },
-  { fig: "3×", label: "costi attuali: oltre questa soglia il sistema non regge" },
+  { fig: "3", label: "strategie, su tre mercati che si muovono per motivi diversi" },
+  { fig: "4.206", label: "operazioni simulate in 7,7 anni (backtest)" },
+  { fig: "93", label: "mesi misurati, mese per mese, senza togliere quelli in perdita" },
+  { fig: "6", label: "mesi su 93 in cui hanno perso tutte e tre insieme (backtest)" },
 ];
 
 export function Hero() {
@@ -20,18 +20,18 @@ export function Hero() {
       <div className="max-w-[1100px]">
         <Reveal variant="scene">
           <p className="eyebrow chip-solid">
-            <b>01</b> &mdash; Ingresso &nbsp;·&nbsp; XAUUSD · Trend following · Backtest 2019–2026
+            <b>01</b> &mdash; Ingresso &nbsp;·&nbsp; Oro · Nasdaq · USDJPY · Backtest 2019–2026
           </p>
         </Reveal>
         <Reveal variant="scene" i={1}>
           <h1 id="titolo-hero" className="t-display mt-5">
-            Strategie algoritmiche sull&rsquo;oro, misurate e raccontate senza ritocchi
+            {FILM_H1}
           </h1>
         </Reveal>
         <Reveal i={2}>
           <p className="hero__lead mt-6">
-            Un portafoglio di sistemi automatici sull&rsquo;oro (XAUUSD). Ogni criterio è dichiarato prima del test.
-            Ogni numero scomodo resta sul tavolo. E i risultati sono di backtest: non sono risultati reali.
+            Un portafoglio di tre sistemi automatici su oro (XAUUSD), Nasdaq e USDJPY. Ogni criterio è dichiarato prima
+            del test. Ogni numero scomodo resta sul tavolo. E i risultati sono di backtest: non sono risultati reali.
           </p>
         </Reveal>
         <Reveal i={3} className="mt-8 flex flex-wrap items-center gap-3">
@@ -55,10 +55,10 @@ export function Hero() {
         </Reveal>
       </div>
 
-      <Reveal i={4} className="mt-10 space-y-3 md:mt-14">
+      <Reveal i={5} className="mt-10 space-y-3 md:mt-14">
         <div className="flex flex-wrap items-center gap-3">
           <BacktestTag>Backtest · non è un risultato reale</BacktestTag>
-          <span className="chip-solid t-note">XAUUSD.p, periodo 2019.01–2026.09</span>
+          <span className="chip-solid t-note">Periodo 2019.01–2026.09, 93 mesi (il 2026 arriva a settembre)</span>
         </div>
         <ul className="stats">
           {STATS.map((s) => (
@@ -68,7 +68,7 @@ export function Hero() {
             </li>
           ))}
         </ul>
-        <RiskNote level="0.70" />
+        <RiskNote />
         <div className="pt-1">
           <PauseButton />
         </div>
