@@ -303,13 +303,9 @@ export function fogFar(p: number) {
  * la scena non sa che si sta riproducendo da sola (ONE RULE intatta).
  */
 const PLAY_KNOTS: [number, number][] = [
-  [0.0, 18], // prologo: tre schermate leggibili (~1,2-1,5 s ciascuna)
-  [0.3, 18],
-  [0.35, 12], // wormhole e fili: veloce ma leggibile (Davide: "troppo veloce" a 7)
-  [0.6, 13],
-  [0.72, 8], // valle e orizzonte
-  [0.88, 6],
-  [1.0, 9], // frenata sulla schermata finale
+  // Davide: "tutto alla stessa velocita', normale": ritmo costante, ~20 s per l'intero film.
+  [0.0, 20],
+  [1.0, 20],
 ];
 export function playSecondsPerUnit(p: number) {
   const x = clamp01(p);
