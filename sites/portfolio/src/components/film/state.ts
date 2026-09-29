@@ -1,0 +1,183 @@
+/**
+ * Stato del film: UN oggetto mutabile scritto una volta per frame.
+ *
+ * LA REGOLA: ogni valore della scena e' funzione pura di `p` (0..1, lo scroll).
+ * Niente state React, niente molle, niente "lerp verso un obiettivo" dentro la
+ * scena. Chi legge (useFrame, overlay DOM) legge da qui; React non ri-renderizza
+ * mai dallo scroll. Prova: scrub indietro = stesso identico fotogramma.
+ *
+ * Eccezioni dichiarate (SPEC-FILM.md, Adattamento):
+ *  - l'ingresso automatico: un offset che sale a ~0,06 in 2,5 s e decade a zero
+ *    con lo scroll (vedi Film.tsx). Dopo 2,5 s p e' di nuovo funzione pura dello
+ *    scroll.
+ *  - `t` (secondi) serve SOLO a float della figura e grana: mai alla camera.
+ */
+export const film = {
+  /** posizione reale 0..1 (scroll + ingresso) */
+  p: 0,
+  /** asse degli atti: clamp01(p / 0.82) */
+  sp: 0,
+  /** solo scroll, senza ingresso */
+  scrollP: 0,
+  /** mouse normalizzato -1..1 (tilt figura, parallasse stanza) */
+  mx: 0,
+  my: 0,
+  /** secondi: idle float e grana, nient'altro */
+  t: 0,
+  reduced: false,
+  paused: false,
+  mobile: false,
+  /** larghezza/altezza della finestra: scala laterale dei fili e dello swing */
+  aspect: 1.6,
+  /** gate dei sei atti (esposti su window in dev) */
+  gates: [1, 0, 0, 0, 0, 0],
+  /** stamp dell'ultimo frame scritto */
+  frame: 0,
+};
+
+export const ACT_AXIS_END = 0.82;
+
+export const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
+export const smoothstep = (a: number, b: number, x: number) => {
+  const t = clamp01((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+export const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+export const easeOutCubic = (t: number) => 1 - Math.pow(1 - clamp01(t), 3);
+export const actAxis = (p: number) => clamp01(p / ACT_AXIS_END);
+
+/**
+ * Gate dei sei atti. Ogni confine si SOVRAPPONE al vicino di 0,06-0,14
+ * dell'asse degli atti: dove e' vivo un solo atto c'e' un taglio, e un taglio
+ * trasforma il film in una presentazione. Gli atti 1-5 corrono su `sp`;
+ * l'uscita del 5 e il 6 (wipe) corrono su `p` reale.
+ *
+ *   1 Ingresso   ... -> 0.16..0.26 (out)
+ *   2 Metodo     0.14..0.24 (in) -> 0.34..0.44 (out)
+ *   3 Strategie  0.32..0.40 -> 0.62..0.72
+ *   4 Rischio    0.62..0.70 -> 0.82..0.92
+ *   5 Monitor    0.82..0.90 -> p 0.86..0.94
+ *   6 Contatti   p 0.80..0.90 -> fine
+ */
+export function computeGates(p: number, sp: number, out: number[]) {
+  out[0] = 1 - smoothstep(0.16, 0.26, sp);
+  out[1] = smoothstep(0.14, 0.24, sp) * (1 - smoothstep(0.34, 0.44, sp));
+  out[2] = smoothstep(0.32, 0.4, sp) * (1 - smoothstep(0.62, 0.72, sp));
+  out[3] = smoothstep(0.62, 0.7, sp) * (1 - smoothstep(0.82, 0.92, sp));
+  out[4] = smoothstep(0.82, 0.9, sp) * (1 - smoothstep(0.86, 0.94, p));
+  out[5] = smoothstep(0.8, 0.9, p);
+  return out;
+}
+
+/** Il lime (figura, gabbia, impulso dei fili) e' in scena? Allora la stanza NON e' oro. */
+export function limeInFrame(sp: number) {
+  const figure = 1 - smoothstep(0.22, 0.27, sp);
+  const strands = smoothstep(0.33, 0.36, sp) * (1 - smoothstep(0.66, 0.7, sp));
+  return Math.max(figure, strands);
+}
+
+/** Figura: visibile nell'atto 1, si dissolve prima che la camera la attraversi. */
+export const figureGate = (sp: number) => 1 - smoothstep(0.17, 0.235, sp);
+/** Gabbia: UNO scalare la tesse (0..0.14) e la stesse (0.17..0.25). */
+export const latticeBuild = (sp: number) => smoothstep(0, 0.14, sp) * (1 - smoothstep(0.17, 0.25, sp));
+/** Stanza: appare mentre la camera entra. */
+export const roomGate = (sp: number) => smoothstep(0.1, 0.22, sp);
+/** Orizzonte (atto 5): la barra sottile in fondo. */
+export const horizonGate = (sp: number, p: number) => smoothstep(0.78, 0.9, sp) * (1 - smoothstep(0.9, 0.98, p));
+
+/**
+ * LA TABELLA: sei fili che guidano SIA i fili SIA la camera.
+ * Spaziatura che si stringe (0.045, 0.045, 0.038, 0.035, 0.031): il corridoio
+ * accelera verso l'atto dopo. lead ~= 3.8 * radius fissa l'angolo dell'ancora
+ * fuori dall'asse di vista (atan(r/lead) ~ 14.7 gradi contro una mezza
+ * inquadratura di ~29 x 19). Due fili per ROTTURA, due per RITRACCIAMENTO,
+ * due per il portafoglio insieme: e' solo un nome, il disegno e' lo stesso.
+ */
+export type Strand = { at: number; span: number; side: 1 | -1; lead: number; radius: number; lift: number; tag: string };
+export const STRANDS: Strand[] = [
+  { at: 0.36, span: 0.12, side: 1, radius: 5.0, lead: 19.0, lift: 6.0, tag: "ROTTURA" },
+  { at: 0.405, span: 0.12, side: -1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "ROTTURA" },
+  { at: 0.45, span: 0.115, side: 1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "RITRACCIAMENTO" },
+  { at: 0.488, span: 0.11, side: -1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "RITRACCIAMENTO" },
+  { at: 0.523, span: 0.105, side: 1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "INSIEME" },
+  { at: 0.554, span: 0.115, side: -1, radius: 5.2, lead: 19.8, lift: 6.2, tag: "INSIEME" },
+];
+
+/** Fasi del filo sul suo t locale. */
+export const FIRE_END = 0.12;
+export const TAUT_END = 0.55;
+export const RELEASE_END = 0.8;
+/** Finestra dello swing: 0.08..0.82 della vita del filo, cosi' le finestre si sovrappongono (S-weave). */
+export const swingU = (t: number) => clamp01((t - 0.08) / 0.74);
+
+/**
+ * Scala laterale: su schermo stretto l'ancora a 14.7 gradi starebbe al 92% della
+ * mezza inquadratura (tecnicamente a schermo, invisibile in pratica). Si riduce
+ * `side * radius` e lo swing, non il lead.
+ */
+export const lateralScale = (aspect: number) => Math.min(1, Math.max(0.55, aspect / 1.6));
+
+/**
+ * LA SPINA DELLA CAMERA: keyframe su `sp`. z e' un'Hermite cubica con tangenti
+ * dichiarate (unita' per unita' di sp): tratti LINEARI dove entrambe le tangenti
+ * sono uguali alla corda (il corridoio: marce 300 -> 150 -> 360, con il cambio
+ * esattamente dove un filo prende o lascia: 0.405 e 0.554), tangenti a zero
+ * solo dove la camera deve davvero fermarsi (riposo iniziale, arrivo).
+ * y e' uno smoothstep tra i keyframe (la valle del drawdown: atto 4).
+ */
+type Key = { sp: number; y: number; z: number; m0: number; m1: number };
+export const SPINE: Key[] = [
+  // sp     y     z       m0     m1   (m0 = tangente in uscita da questo key, m1 = in arrivo al prossimo)
+  { sp: 0.0, y: 9.0, z: 34.0, m0: -44, m1: -44 }, // riposo -> figura, lineare
+  { sp: 0.16, y: 9.0, z: 27.0, m0: -44, m1: -300 }, // tuffo attraverso la figura, accelerazione costante
+  { sp: 0.36, y: 9.0, z: -7.4, m0: -300, m1: -300 }, // MARCIA 300: il primo filo prende
+  { sp: 0.405, y: 9.0, z: -20.9, m0: -150, m1: -150 }, // MARCIA 150: il secondo filo prende
+  { sp: 0.554, y: 9.0, z: -43.25, m0: -360, m1: -360 }, // MARCIA 360: il sesto filo prende
+  { sp: 0.68, y: 9.0, z: -88.6, m0: -360, m1: -180 }, // discesa nella valle
+  { sp: 0.77, y: 2.0, z: -112.9, m0: -180, m1: -90 }, // fondo della valle
+  { sp: 0.86, y: 7.5, z: -125.05, m0: -90, m1: 0 }, // risalita
+  { sp: 1.0, y: 8.5, z: -131.35, m0: 0, m1: 0 }, // orizzonte, riposo
+];
+
+export function spine(sp: number, out: { x: number; y: number; z: number }) {
+  const s = clamp01(sp);
+  let i = 0;
+  while (i < SPINE.length - 2 && s > SPINE[i + 1].sp) i++;
+  const a = SPINE[i];
+  const b = SPINE[i + 1];
+  const L = b.sp - a.sp;
+  const t = clamp01((s - a.sp) / L);
+  const t2 = t * t;
+  const t3 = t2 * t;
+  const h00 = 2 * t3 - 3 * t2 + 1;
+  const h10 = t3 - 2 * t2 + t;
+  const h01 = -2 * t3 + 3 * t2;
+  const h11 = t3 - t2;
+  out.z = h00 * a.z + h10 * L * a.m0 + h01 * b.z + h11 * L * a.m1;
+  out.y = mix(a.y, b.y, t * t * (3 - 2 * t));
+  out.x = 0;
+  return out;
+}
+
+/** Inviluppo del bank nella discesa (atto 4): ~15 gradi a meta' caduta, dritto all'arrivo. */
+export const valleyBank = (sp: number) => Math.sin(Math.PI * clamp01((sp - 0.68) / (0.86 - 0.68))) * (15 * Math.PI) / 180;
+
+/** Nebbia: il fondo lontano si dissolve; per il wipe si chiude tutta (su p reale). */
+export function fogFar(p: number) {
+  return mix(95, 3.5, smoothstep(0.82, 0.985, p));
+}
+
+/**
+ * Finestre degli overlay DOM sull'ASSE DEGLI ATTI (mai su p reale: con il DOM
+ * su p e gli atti su sp ogni scritta arriverebbe un terzo di pagina in ritardo).
+ * L'ultima finestra (contatti) corre su p perche' il suo atto corre su p.
+ */
+export type Win = { in0: number; in1: number; out0: number; out1: number; axis: "sp" | "p" };
+export const OVERLAY_WINDOWS: Win[] = [
+  { in0: -1, in1: -0.5, out0: 0.09, out1: 0.17, axis: "sp" }, // titolo (atto 1)
+  { in0: 0.2, in1: 0.27, out0: 0.33, out1: 0.4, axis: "sp" }, // frase A (atto 2)
+  { in0: 0.43, in1: 0.5, out0: 0.58, out1: 0.65, axis: "sp" }, // frase B (atto 3)
+  { in0: 0.72, in1: 0.79, out0: 0.84, out1: 0.9, axis: "sp" }, // frase A (atto 4)
+  { in0: 0.738, in1: 0.787, out0: 0.86, out1: 0.92, axis: "p" }, // frase B (atto 5): entra a sp 0.90..0.96, esce con il wipe (su p)
+  { in0: 0.88, in1: 0.96, out0: 2, out1: 3, axis: "p" }, // contatti (atto 6, su p)
+];
