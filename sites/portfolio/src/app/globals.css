@@ -641,6 +641,10 @@
 .dtable--narrow {
   min-width: 0; /* QA B5: tabelle a tre colonne con testi corti: si legge tutto senza scorrere */
 }
+.dtable--narrow thead th,
+.dtable--narrow .r {
+  white-space: normal;
+}
 .dtable caption {
   text-align: left;
   padding: var(--sp-4) var(--sp-4) var(--sp-2);
@@ -946,7 +950,7 @@
    ========================================================================== */
 .zscene {
   position: relative;
-  height: 360svh;
+  height: 440svh; /* tre livelli */
 }
 .zstage {
   position: sticky;

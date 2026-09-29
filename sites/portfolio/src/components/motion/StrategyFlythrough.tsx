@@ -22,8 +22,8 @@ const FRAMES_LITE = 3; // "modo lite": meno cornici
 const FRAME_SPAN = 3640; // profondita' totale del tunnel
 const FRAME_TRAVEL = 3400; // quanta strada fanno le cornici in tutto lo scroll
 
-const FOCUS_START = 0.25; // progresso a cui il livello 0 e' a fuoco
-const FOCUS_STEP = 0.45; // distanza (in progresso) tra due livelli (QA B1: le finestre non si toccano)
+const FOCUS_START = 0.18; // progresso a cui il livello 0 e' a fuoco (tre livelli: 0.18 / 0.56 / 0.94)
+const FOCUS_STEP = 0.38; // distanza tra due livelli: la finestra di visibilita' e' larga ~0.34, quindi non si toccano (QA B1)
 const PLATEAU = 0.12; // mezza ampiezza del plateau di lettura (z quasi fermo)
 
 /** interpolazione lineare a tratti */
