@@ -28,3 +28,4 @@ Refero (abbonamento), Cult Pro, Scrolltide (239 $, ma ha un prompt gratuito), Ma
 - Marcato `noindex` + `robots.txt` Disallow: condivisibile via link, non indicizzato. Togliere quando diventa il sito ufficiale.
 - Il noindex sta nei metadata di Next (attivo con `EXPORT_HOST=1`). L'errore React #418 visto in produzione era causato dal commento che Netlify inietta nell'`<head>` unito a un nostro script inline nell'head: risolto spostando lo script nel `<body>` (layout.tsx).
 - Su iOS: il simulatore non si incorpora piu' da solo in /dettagli (crash di Safari per memoria); su touch si apre in una scheda a parte.
+- Su telefono il film gira in livello `lite` (quality.ts): testi animati per parola e senza blur CSS, 3500 perle, niente post. Il blur per lettera sopra il canvas WebGL era il costo principale su iOS. Per controllare: `?diag=1` → Copia diagnostica.
