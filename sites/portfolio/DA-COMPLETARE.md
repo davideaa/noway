@@ -17,7 +17,7 @@ mostra una nota sobria ("in preparazione"); non c'e' nessun numero inventato.
 
 | # | Cosa manca | Cosa fa il sito adesso |
 |---|---|---|
-| 5 | **Risultati live/demo**: se il demo e' iniziato, da quando, cosa si pubblica e con che cadenza | Fascia numeri dell'hero: la cifra "mesi di risultati in tempo reale" e' **omessa**. Scena Monitoraggio, "Cosa si pubblica": nota "In preparazione." La frase "Nessun risultato in tempo reale da mostrare. Il demo non e' ancora iniziato." **non** e' usata (COPY.md la vuole solo se confermata) |
+| 5 | **Risultati live/demo**: se il demo e' iniziato, da quando, cosa si pubblica e con che cadenza | Fascia numeri dell'hero: la cifra "mesi di risultati in tempo reale" e' **omessa**. Scena Monitoraggio, "Cosa si pubblica": solo la regola per la pagina e la frase che oggi non c'e' nessun risultato in tempo reale (la nota "In preparazione" e' stata tolta: nessun campo resta vuoto). La frase "Nessun risultato in tempo reale da mostrare. Il demo non e' ancora iniziato." **non** e' usata (COPY.md la vuole solo se confermata) |
 | 6 | **Nasdaq, USDJPY e altri strumenti**: stato e dati misurati | Sotto-blocco "Su quali strumenti": "solo l'oro (XAUUSD)" + nota "Altri strumenti: in preparazione" (formula sobria; se non esistono strumenti in lavorazione, togliere la nota). I colori Nasdaq/USDJPY esistono nei token ma non sono usati |
 | 7 | **Tempi di risposta alle email** | Omessi |
 | 7b | **URL pubblico del sito** | Si imposta con la variabile `NEXT_PUBLIC_SITE_URL` (es. `https://esempio.it`) **al momento della build**. Senza: nessun canonical, `sitemap.xml` vuota, `robots.txt` senza riga Sitemap, JSON-LD senza `url`/`@id`, **nessun `og:image`** (Next scriverebbe `http://localhost:3000/og.png`: meglio niente che un indirizzo sbagliato) |
@@ -37,11 +37,17 @@ Sono mostrati come in COPY.md. Se Davide conferma un valore diverso, va cambiato
 | 13 | Scheda "Take profit fisso a 2,5R": 159 $ -> 1.795 $ | Viene da una versione precedente della strategia: confermare o togliere la scheda | `Scartate.tsx` |
 | 14 | Regole del RITRACCIAMENTO | Nei file c'e' solo il caso rialzista ("prezzo sopra la media"): confermare che esiste il caso speculare, o riformulare | `Strategie.tsx` |
 
+## 3a. Fatto dopo la v2 del copy
+
+- **Bootstrap a blocchi sulla misura piu' recente** (COPY.md sez. 8, punto 11): fatto con `scripts/derivati.py` (stessa logica di `tools/montecarlo.py`, blocchi di 20, 10.000 sequenze, seme 12345) sulle 4.206 operazioni del simulatore. Percentili 50/90/95/99 del drawdown in R per strategia e per la somma a pari rischio, in `data/derivati.json`, mostrati in `/dettagli` (Rischio, schede, Portafoglio). Da confermare con Davide: che i R del simulatore siano quelli giusti da rimescolare (punto 6 sui costi resta aperto).
+- **Curva unica del portafoglio** (punto 13): mostrata **a pari rischio** (1 R per operazione per ciascuna strategia), dichiarato come ipotesi, in R, con "backtest" e drawdown accanto. Se Davide decide i pesi, si cambia `scripts/derivati.py`.
+- **Regole di Nasdaq e USDJPY** (punto 7): non nei file; in pagina c'e' la frase di microcopy di COPY.md ("descritte nel simulatore e non ancora riportate in questa pagina").
+
 ## 3b. Il simulatore (`/simulatore/`)
 
 | # | Cosa | Cosa fa il sito adesso |
 |---|---|---|
-| 15 | **`public/simulatore/index.html` è il file di Davide** (`esempio/index.html`, 1,7 MB, HTML autonomo), copiato **senza toccarne il contenuto** e aperto dal bottone "Apri il simulatore" alla fine del film. In dev/`next start` la rotta `/simulatore` è riscritta sul file (`next.config.ts`); nell'export statico l'host serve `index.html` da solo | Contiene la dicitura **"DATI REALI · 10.000 POSSIBILI FUTURI"** e, nella tabella dei rendimenti, **"+56,9%" annuo** (scenario completo 2019–2026). Contraddice l'etichetta "Backtest · validato fuori campione" del film e la frase sul rischio approvata: **decide Davide** se correggere la dicitura nel suo file (il sito non lo modifica) |
+| 15 | **`public/simulatore/index.html` è il file di Davide** (`esempio/index.html`, 1,7 MB, HTML autonomo), copiato **senza toccarne il contenuto**, aperto dal bottone "Apri il simulatore" del Riepilogo e **incorporato in `/dettagli`** (scena 06, iframe lazy con "Apri a schermo intero"; accanto una nota di lettura sulla dicitura qui sotto). In dev/`next start` la rotta `/simulatore` è riscritta sul file (`next.config.ts`); nell'export statico l'host serve `index.html` da solo | Contiene la dicitura **"DATI REALI · 10.000 POSSIBILI FUTURI"** e, nella tabella dei rendimenti, **"+56,9%" annuo** (scenario completo 2019–2026). Contraddice l'etichetta "Backtest · validato fuori campione" del film e la frase sul rischio approvata: **decide Davide** se correggere la dicitura nel suo file (il sito non lo modifica) |
 
 ## 4. Scelte e cose non fatte
 

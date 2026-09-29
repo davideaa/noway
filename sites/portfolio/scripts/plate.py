@@ -12,6 +12,7 @@ su [0, 4095] (interi). Nessun numero finisce nel film.
 
 Uso:  python3 scripts/plate.py            (portafoglio intero)
       python3 scripts/plate.py --solo-oro (solo la gamba oro, chi == 0)
+      python3 scripts/plate.py --n 48     (numero di traiettorie del fascio)
 """
 import json
 import random
@@ -20,7 +21,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PUNTI = 160
-TRAIETTORIE = 28
+TRAIETTORIE = 48
+if "--n" in sys.argv:
+    TRAIETTORIE = int(sys.argv[sys.argv.index("--n") + 1])
 BLOCCO = 20
 SEME = 20260929
 
@@ -31,7 +34,8 @@ n = len(R)
 
 
 def cumulata(seq):
-    out, acc = [], 0.0
+    # parte da 0: tutte le traiettorie hanno lo STESSO punto di partenza (il ventaglio si apre da li')
+    out, acc = [0.0], 0.0
     for r in seq:
         acc += r
         out.append(acc)
@@ -69,8 +73,8 @@ fonte = "solo oro (chi == 0)" if solo_oro else "portafoglio intero (oro + nasdaq
 ts = f"""// GENERATO da scripts/plate.py: non modificare a mano.
 // Fonte: data/operazioni.json, {n} operazioni, {fonte}.
 // Riga 0 = somma cumulata in R del portafoglio, righe 1..{TRAIETTORIE} = bootstrap a
-// blocchi di {BLOCCO} (seme {SEME}). {PUNTI} punti per curva, quantizzati insieme su
-// 0..4095. E' solo la FORMA della figura: nel film non compare nessun numero.
+// blocchi di {BLOCCO} (seme {SEME}). {PUNTI} punti per curva (la prima e' lo zero comune),
+// quantizzati insieme su 0..4095. E' solo la FORMA della figura: nel film non compare nessun numero.
 export const PLATE_POINTS = {PUNTI};
 export const PLATE_CURVES: string[] = [
 {chr(10).join('  "' + r + '",' for r in righe)}

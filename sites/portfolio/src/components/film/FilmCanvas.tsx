@@ -10,13 +10,14 @@
  * per priorita' (negativa = prima), il post chain ha priorita' 1 e disegna lui
  * (R3F non disegna piu' da solo).
  *
- * Costi dichiarati (desktop): figura 1 draw call istanziato (40k), gabbia 1,
- * stanza 3 shell + 1 nube di particelle (900 segmenti), fili 1 (LineSegments2),
+ * Costi dichiarati (desktop): figura 1 draw call istanziato (40k perle, 49
+ * traiettorie), gabbia 1, stanza 3 shell + 1 nube di particelle (900 segmenti),
+ * fili 1 (LineSegments2, 8 fili),
  * orizzonte 1; post: bloom (5 mip) + lente/frangia (1 pass, 15 tap al picco,
  * SPENTO a riposo) + vignette + output + grana.
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
@@ -27,7 +28,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { VignetteShader } from "three/examples/jsm/shaders/VignetteShader.js";
-import { buildBeads } from "./plate";
+import { FAN_SAMPLES, buildFan } from "./plate";
 import {
   FIRE_END,
   RELEASE_END,
@@ -35,6 +36,7 @@ import {
   TAUT_END,
   cameraPose,
   clamp01,
+  fanDraw,
   figureGate,
   film,
   fogFar,
@@ -62,12 +64,17 @@ export type Palette = {
   boneDim: string;
 };
 
-/** La figura: 14 unita' di altezza, centrata in (0, 9, 0). */
+/** La figura: 11 unita' di altezza (22 di larghezza, 6 di profondita'), centrata in (0, 9, 0). */
 const FIG_C = new THREE.Vector3(0, 9, 0);
-const FIG_H = 14;
+const FIG_H = 11;
+const FIG_D = 6;
 /** Conteggio dichiarato: ~40k desktop, ridotto su telefono. */
 const BEADS_DESKTOP = 40000;
 const BEADS_MOBILE = 10000;
+/** Traiettorie del ventaglio (mediana inclusa): 49 desktop, 25 telefono (la plate ne ha 49). */
+const FAN_CURVES_DESKTOP = 49;
+const FAN_CURVES_MOBILE = 25;
+const FAN_MAX = 64; // dimensione dell'array uniform uHot
 const BEAD_R = 0.5; // raggio della geometria; la scala per perla lo porta a ~0.06-0.12
 const BEAD_SCALE = 0.13;
 /** Segmenti per filo: meno su telefono, MAI meno fili. */
@@ -78,28 +85,121 @@ const DUST_DESKTOP = 900;
 const DUST_MOBILE = 350;
 /** Guadagno del bone dei fili: sopra la soglia di bloom (1.15) in spazio lineare. */
 const STRAND_GAIN = 1.5;
-const LIME_HUE = 82 / 360;
 
 /* --------------------------------------------------------------------------
-   FIGURA: nuvola di perle istanziate, ombreggiatura bake in instanceColor.
-   E4: respiro G(t) a tre frequenze incommensurabili (non si ripete a vista),
-   che si calma con p (il moto appartiene all'ingresso, nel corridoio c'e' gia'
-   lo swing); inclinazione H(m) dal puntatore smussato, attorno al proprio
-   centro (traslazione compensativa). Una matrice per frame: le perle sono ferme.
+   FIGURA: le SIMULAZIONI MONTE CARLO del portafoglio. Un ventaglio di perle
+   istanziate (plate.ts: mediana luminosa al centro, fascio di traiettorie
+   bootstrap piu' sottili intorno, tutte dallo stesso punto), in 3D dentro la
+   gabbia. Colore e ombreggiatura bake una volta; TUTTO il resto sta nel vertex
+   shader come funzione di (p, t, m):
+    - F(p): il ventaglio si disegna da solo nell'ingresso (fanDraw), si apre
+      passando (scala), si attenua sotto i testi del prologo;
+    - G(t): FLUSSO lungo le traiettorie (pulsi che corrono dall'inizio alla
+      fine, sopra la soglia di bloom) + respiro E4 della figura intera;
+    - H(m): il fascio si APRE e si PIEGA verso il puntatore, la traiettoria piu'
+      vicina al puntatore si accende e le altre si attenuano (la CPU proietta
+      10 campioni per curva e passa un peso per curva: uHot[64]), piu'
+      l'inclinazione della figura attorno al proprio centro.
+   Zero su touch e con meno movimento: i termini H collassano a zero, il flusso
+   e' spento con reduced. Costo: 1 draw call istanziato, 40k x 11 float una volta.
    -------------------------------------------------------------------------- */
+const FAN_VERT = /* glsl */ `
+  attribute vec3 aPos;    // posizione base, locale alla figura
+  attribute vec4 aInfo;   // k (curva), u (0..1 lungo la traiettoria), seme, scala
+  attribute vec3 aCol;    // colore lineare gia' ombreggiato
+  attribute float aMed;   // y della mediana allo stesso u
+  uniform float uT;       // G(t): 0 se fermo
+  uniform float uFlowAmp; // 0 con meno movimento
+  uniform float uDraw;    // F(p): quanto del ventaglio e' gia' disegnato (0..1 lungo u)
+  uniform float uMx;      // H(m): puntatore smussato, -1..1
+  uniform float uMy;
+  uniform float uMin;     // presenza del puntatore fine (0 su touch)
+  uniform float uHot[${FAN_MAX}]; // vicinanza al puntatore per curva (0..1)
+  uniform float uFogNear;
+  uniform float uFogFar;
+  varying vec3 vCol;
+  varying float vA;
+  void main() {
+    float k = aInfo.x;
+    float u = aInfo.y;
+    float seed = aInfo.z;
+    vec3 P = aPos;
+    // H(m): il ventaglio si apre attorno alla mediana (di piu' verso la fine e con il puntatore a destra)
+    float open = 1.0 + uMin * (0.35 + 0.35 * uMx) * u;
+    P.y = aMed + (P.y - aMed) * open;
+    P.z *= open;
+    // ... e la coda del fascio si piega verso il puntatore (su/giu')
+    P.y += -uMy * uMin * 2.4 * u * u;
+    // F(p): disegno progressivo, con una testa luminosa sul fronte
+    float ahead = u - uDraw;
+    float drawn = 1.0 - smoothstep(0.0, 0.015, ahead);
+    float head = exp(-ahead * ahead / 0.0012) * step(uDraw, 0.999);
+    // G(t): pulsi che corrono dall'inizio alla fine (fase per curva dal seme)
+    float flow = pow(0.5 + 0.5 * sin(6.2832 * (u * 1.5 - uT * 0.35 + seed)), 12.0) * uFlowAmp;
+    // H(m): la curva piu' vicina si accende, le altre si attenuano
+    float hot = uHot[int(k + 0.5)];
+    float dim = mix(1.0, 0.55, uMin) + 1.3 * hot;
+    vCol = aCol * dim * (1.0 + 1.4 * flow + 2.0 * head);
+    float sz = aInfo.w * (1.0 + 0.5 * flow + 0.8 * head) * drawn;
+    vec4 mv = modelViewMatrix * vec4(P, 1.0);
+    mv.xyz += position * sz;
+    float d = -mv.z;
+    float fog = clamp((d - uFogNear) / (uFogFar - uFogNear), 0.0, 1.0);
+    vA = (1.0 - fog) * drawn;
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const FAN_FRAG = /* glsl */ `
+  uniform float uOpacity;
+  varying vec3 vCol;
+  varying float vA;
+  void main() {
+    gl_FragColor = vec4(vCol, uOpacity * vA);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
 function Figure() {
-  const ref = useRef<THREE.InstancedMesh>(null!);
-  const beads = useMemo(() => {
+  const ref = useRef<THREE.Mesh>(null!);
+  const camera = useThree((s) => s.camera);
+  const fan = useMemo(() => {
     const count = film.mobile ? BEADS_MOBILE : BEADS_DESKTOP;
-    // larghezza della plate: piu' stretta su schermo verticale (resta nell'inquadratura)
-    const width = Math.min(24, Math.max(10, FIG_H * film.aspect * 1.25));
-    return buildBeads(count, width, FIG_H, LIME_HUE);
+    const curves = film.mobile ? FAN_CURVES_MOBILE : FAN_CURVES_DESKTOP;
+    // larghezza del ventaglio: piu' stretto su schermo verticale (resta nell'inquadratura)
+    const width = Math.min(22, Math.max(10, FIG_H * film.aspect * 1.4));
+    return buildFan(count, curves, width, FIG_H, FIG_D);
   }, []);
-  const geo = useMemo(() => new THREE.SphereGeometry(BEAD_R, 8, 6), []);
-  const mat = useMemo(
-    () => new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, fog: true }),
-    [],
-  );
+  const { geo, mat } = useMemo(() => {
+    const sphere = new THREE.SphereGeometry(BEAD_R * BEAD_SCALE, 8, 6);
+    const geo = new THREE.InstancedBufferGeometry();
+    geo.index = sphere.index;
+    geo.setAttribute("position", sphere.attributes.position);
+    geo.setAttribute("aPos", new THREE.InstancedBufferAttribute(fan.pos, 3));
+    geo.setAttribute("aInfo", new THREE.InstancedBufferAttribute(fan.info, 4));
+    geo.setAttribute("aCol", new THREE.InstancedBufferAttribute(fan.col, 3));
+    geo.setAttribute("aMed", new THREE.InstancedBufferAttribute(fan.med, 1));
+    geo.instanceCount = fan.count;
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: FAN_VERT,
+      fragmentShader: FAN_FRAG,
+      uniforms: {
+        uT: { value: 0 },
+        uFlowAmp: { value: 1 },
+        uDraw: { value: 1 },
+        uMx: { value: 0 },
+        uMy: { value: 0 },
+        uMin: { value: 0 },
+        uHot: { value: new Float32Array(FAN_MAX) },
+        uFogNear: { value: 18 },
+        uFogFar: { value: 95 },
+        uOpacity: { value: 1 },
+      },
+      transparent: true,
+      depthWrite: false,
+    });
+    return { geo, mat };
+  }, [fan]);
   useEffect(
     () => () => {
       geo.dispose();
@@ -108,31 +208,9 @@ function Figure() {
     [geo, mat],
   );
 
-  // Bake UNA volta: matrici (in coordinate mondo, centro incluso) e colore ombreggiato.
-  useLayoutEffect(() => {
-    const m = ref.current;
-    if (!m || !beads.count) return;
-    const mat4 = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    const pos = new THREE.Vector3();
-    const scl = new THREE.Vector3();
-    const c = new THREE.Color();
-    for (let i = 0; i < beads.count; i++) {
-      pos.set(beads.pos[i * 3] + FIG_C.x, beads.pos[i * 3 + 1] + FIG_C.y, beads.pos[i * 3 + 2] + FIG_C.z);
-      const s = beads.scale[i] * BEAD_SCALE;
-      scl.set(s, s, s);
-      mat4.compose(pos, q, scl);
-      m.setMatrixAt(i, mat4);
-      c.setRGB(beads.col[i * 3], beads.col[i * 3 + 1], beads.col[i * 3 + 2], THREE.SRGBColorSpace);
-      m.setColorAt(i, c);
-    }
-    m.instanceMatrix.needsUpdate = true;
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-    m.computeBoundingSphere();
-  }, [beads]);
-
   const rot = useMemo(() => new THREE.Euler(0, 0, 0, "YXZ"), []);
-  const cv = useMemo(() => new THREE.Vector3(), []);
+  const v = useMemo(() => new THREE.Vector3(), []);
+  const ndc = useMemo(() => new Float32Array(FAN_SAMPLES * 2), []);
   useFrame(() => {
     const m = ref.current;
     if (!m) return;
@@ -140,7 +218,7 @@ function Figure() {
     m.visible = g > 0.002;
     if (!m.visible) return;
     const still = film.reduced || film.paused;
-    // G(t): tre frequenze, ampiezze del 2,5% di una figura di 14 unita'; si calma con p
+    // G(t): tre frequenze, ampiezze del 2,5% della figura; si calma con p
     const calm = 1 / (1 + film.p * 4);
     const t = film.t;
     const floatY = still ? 0 : 0.35 * Math.sin(t * 0.9) * calm;
@@ -153,15 +231,57 @@ function Figure() {
     rot.set(tiltX, tiltY + gy, gz);
     m.rotation.copy(rot);
     m.scale.setScalar(s);
-    // traslazione compensativa: il perno resta al centro della figura, non all'origine
-    cv.copy(FIG_C).applyEuler(rot).multiplyScalar(s);
-    m.position.set(FIG_C.x - cv.x, FIG_C.y - cv.y + floatY, FIG_C.z - cv.z);
+    // le perle sono in coordinate locali: il perno e' gia' il centro della figura
+    m.position.set(FIG_C.x, FIG_C.y + floatY, FIG_C.z);
+    m.updateMatrixWorld();
+    const u = mat.uniforms;
+    u.uT.value = still ? 0 : t;
+    u.uFlowAmp.value = film.reduced ? 0 : 1;
+    u.uDraw.value = fanDraw(film.p, film.reduced);
+    const pin = film.reduced ? 0 : film.min;
+    u.uMx.value = film.mx;
+    u.uMy.value = film.my;
+    u.uMin.value = pin;
+    u.uFogFar.value = fogFar(film.p);
+    u.uFogNear.value = Math.min(18, u.uFogFar.value * 0.5);
     // sotto un testo del prologo la figura si attenua (bianco sul lime: QA-FILM C4)
-    mat.opacity = g * (1 - 0.45 * prologueText(film.sp));
+    u.uOpacity.value = g * (1 - 0.45 * prologueText(film.sp));
+    // H(m): la curva piu' vicina al puntatore. Proiezione di 10 campioni per curva in NDC,
+    // distanza punto-segmento (x corretta per l'aspetto), peso gaussiano: liscio, niente scatti.
+    const hot = u.uHot.value as Float32Array;
+    if (pin > 0.001) {
+      const px = film.mx;
+      const py = -film.my;
+      const asp = film.aspect;
+      for (let k = 0; k < fan.curves; k++) {
+        for (let i = 0; i < FAN_SAMPLES; i++) {
+          const o = (k * FAN_SAMPLES + i) * 3;
+          v.set(fan.samples[o], fan.samples[o + 1], fan.samples[o + 2]).applyMatrix4(m.matrixWorld).project(camera);
+          ndc[i * 2] = v.x;
+          ndc[i * 2 + 1] = v.y;
+        }
+        let best = 1e9;
+        for (let i = 0; i < FAN_SAMPLES - 1; i++) {
+          const ax = ndc[i * 2];
+          const ay = ndc[i * 2 + 1];
+          const bx = ndc[i * 2 + 2];
+          const by = ndc[i * 2 + 3];
+          const dx = bx - ax;
+          const dy = by - ay;
+          const l2 = dx * dx + dy * dy || 1e-9;
+          const tt = clamp01(((px - ax) * dx + (py - ay) * dy) / l2);
+          const ex = (ax + dx * tt - px) * asp;
+          const ey = ay + dy * tt - py;
+          const d2 = ex * ex + ey * ey;
+          if (d2 < best) best = d2;
+        }
+        hot[k] = Math.exp(-best / 0.012) * pin;
+      }
+    } else if (hot[0] !== 0 || hot[1] !== 0) hot.fill(0);
   }, -1);
 
-  if (!beads.count) return null;
-  return <instancedMesh ref={ref} args={[geo, mat, beads.count]} frustumCulled={false} />;
+  if (!fan.count) return null;
+  return <mesh ref={ref} geometry={geo} material={mat} frustumCulled={false} />;
 }
 
 /* --------------------------------------------------------------------------
@@ -286,7 +406,7 @@ const ROOM = [
   { r: 19.8, drift: 0.014 },
 ];
 const ROOM_Z0 = 8;
-const ROOM_Z1 = -262;
+const ROOM_Z1 = -280; // la camera arriva a z -151 e la nebbia si apre a 150 nel wormhole
 
 const SHELL_VERT = /* glsl */ `
   uniform float uTwist;     // rad per unita' di z, relativo alla camera
@@ -319,8 +439,8 @@ const SHELL_FRAG = /* glsl */ `
   varying float vFog;
   void main() {
     // le bande vanno sopra la soglia di bloom (1.15): e' il post a farle brillare
-    vec3 col = uColor * (1.0 + 1.6 * vBand);
-    gl_FragColor = vec4(col, uOpacity * (1.0 + 1.2 * vBand) * (1.0 - vFog));
+    vec3 col = uColor * (1.0 + 2.2 * vBand);
+    gl_FragColor = vec4(col, uOpacity * (1.0 + 1.4 * vBand) * (1.0 - vFog));
   }
 `;
 
@@ -392,9 +512,11 @@ const DUST_VERT = /* glsl */ `
     float z = uCamZ + 0.12 * uSpan - u + aEnd * uStreak;
     vec3 p = vec3(cos(aSeed.z) * aSeed.y, sin(aSeed.z) * aSeed.y, z);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    float fog = smoothstep(uFogFar * 0.25, uFogFar, -mv.z);
+    // le particelle lontane si spengono PRIMA della nebbia: altrimenti si ammucchiano al centro
+    // in una foschia verde (v2) e il fondo del tunnel non e' piu' nero (v1)
+    float fog = smoothstep(uFogFar * 0.12, uFogFar * 0.6, -mv.z);
     float k = u / uSpan;
-    vA = smoothstep(0.0, 0.08, k) * (1.0 - smoothstep(0.6, 1.0, k)) * (1.0 - fog) * (1.0 - 0.75 * aEnd);
+    vA = smoothstep(0.0, 0.08, k) * (1.0 - smoothstep(0.5, 0.9, k)) * (1.0 - fog) * (1.0 - 0.75 * aEnd);
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -420,7 +542,8 @@ function Dust({ palette }: { palette: Palette }) {
     };
     for (let i = 0; i < n; i++) {
       const z0 = rand() * DUST_SPAN;
-      const r = 1.5 + Math.sqrt(rand()) * 16.5;
+      // mai vicino all'asse: e' li' che in prospettiva si sommavano tutte insieme
+      const r = 3.5 + Math.sqrt(rand()) * 15;
       const th = rand() * Math.PI * 2;
       for (let e = 0; e < 2; e++) {
         const o = (i * 2 + e) * 3;
@@ -461,8 +584,9 @@ function Dust({ palette }: { palette: Palette }) {
     [geo, mat],
   );
   const ref = useRef<THREE.LineSegments>(null!);
-  const gold = useMemo(() => new THREE.Color(palette.gold).multiplyScalar(0.9), [palette.gold]);
-  const lime = useMemo(() => new THREE.Color(palette.lime).lerp(new THREE.Color(palette.bone), 0.45).multiplyScalar(0.9), [palette.lime, palette.bone]);
+  // scintille SOPRA la soglia di bloom (1.15 lineare): oro pieno nella stanza, bone-lime fra i fili (come i fili della v1)
+  const gold = useMemo(() => new THREE.Color(palette.gold).multiplyScalar(1.7), [palette.gold]);
+  const lime = useMemo(() => new THREE.Color(palette.lime).lerp(new THREE.Color(palette.bone), 0.5).multiplyScalar(1.6), [palette.lime, palette.bone]);
   const cam = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
   useFrame(() => {
     const worm = wormGate(film.sp);
@@ -478,7 +602,7 @@ function Dust({ palette }: { palette: Palette }) {
     u.uFlow.value = still ? 0 : -film.t * 0.6;
     u.uStreak.value = film.reduced ? 0 : (0.3 + 9 * speed * speed) * worm;
     u.uFogFar.value = fogFar(film.p);
-    u.uOpacity.value = 0.55 * worm;
+    u.uOpacity.value = 0.7 * worm;
     // bone/lime nella fase dei fili, oro nella stanza: mai i due insieme
     (u.uColor.value as THREE.Color).copy(gold).lerp(lime, limeInFrame(film.sp));
   }, -1);
@@ -531,8 +655,10 @@ function Room({ palette }: { palette: Palette }) {
       if (i >= shells.length) return;
       child.rotation.z = shells[i].drift * film.sp * 40;
       const u = shells[i].mat.uniforms;
-      (u.uColor.value as THREE.Color).copy(tmp);
-      u.uOpacity.value = 0.22 * gate;
+      // v1 aveva la stanza oro netta e i fili bianchi con contrasto forte: nel wormhole le shell
+      // guadagnano colore (oro saturo verso la soglia di bloom) e opacita', invece di spegnersi
+      (u.uColor.value as THREE.Color).copy(tmp).multiplyScalar(1 + 0.35 * worm);
+      u.uOpacity.value = (0.22 + 0.12 * worm) * gate;
       // torsione: cresce con la velocita', segno alterno per shell (contro-elica)
       u.uTwist.value = film.reduced ? 0 : (i % 2 ? -1 : 1) * 0.022 * worm * (0.25 + 0.75 * speed);
       u.uCamZ.value = cam.z;
@@ -598,15 +724,15 @@ function Horizon({ palette }: { palette: Palette }) {
   useFrame(() => {
     const g = horizonGate(film.sp, film.p);
     mat.uniforms.uOpacity.value = g;
-    // la luce corre sulla barra fra sp 0.86 e 0.90: da -0.6 a +0.6 (il resto e' fuori inquadratura)
-    const u = (film.sp - 0.86) / 0.04;
+    // la luce corre sulla barra fra sp 0.92 e 0.96: da -0.6 a +0.6 (il resto e' fuori inquadratura)
+    const u = (film.sp - 0.92) / 0.04;
     const on = !film.reduced && u > 0 && u < 1;
     mat.uniforms.uPulseX.value = on ? -0.6 + 1.2 * u : -2;
     mat.uniforms.uPulseA.value = on ? Math.sin(Math.PI * u) : 0;
     if (ref.current) ref.current.visible = g > 0.002;
   }, -1);
   return (
-    <mesh ref={ref} position={[0, FIG_C.y + 0.6, -200]} material={mat}>
+    <mesh ref={ref} position={[0, FIG_C.y + 0.6, -215]} material={mat}>
       <planeGeometry args={[320, 0.09]} />
     </mesh>
   );
@@ -849,10 +975,13 @@ const LENS = {
       vec2 uv = c + d * (1.0 - uWarp * g);
       vec3 acc = vec3(0.0);
       float wsum = 0.0;
+      // frangia e smear solo ai BORDI (r^2) e piccoli: nella v2 la frangia arcobaleno sui fili
+      // e lo smear a 5 tap spegnevano i fili bianchi e le linee sottili (Davide: "piu' spenta")
+      float edge = r * r;
       for (int i = -2; i <= 2; i++) {
         float fi = float(i);
-        vec2 off = d * (fi * uSmear * 0.014 * r);
-        float k = uFringe * r * 0.02;
+        vec2 off = d * (fi * uSmear * 0.004 * edge);
+        float k = uFringe * edge * 0.005;
         float w = 1.0 - 0.3 * abs(fi);
         acc.r += texture2D(tDiffuse, uv + off + d * k).r * w;
         acc.g += texture2D(tDiffuse, uv + off).g * w;
@@ -941,6 +1070,8 @@ function Post({ onReady }: { onReady?: () => void }) {
       chain.lens.uniforms.uFringe.value = fr;
       chain.lens.uniforms.uSmear.value = fr;
     }
+    // piu' luce nel tunnel: il bloom sale con il wormhole (funzione di p), 0.55 a riposo come la v1
+    chain.bloom.strength = 0.55 + 0.35 * wormGate(film.sp);
     chain.composer.render();
     // l'ingresso parte dal SECONDO fotogramma: bake e compilazione degli shader sono gia' passati (QA-FILM B3)
     if (frames.current < 3 && ++frames.current === 2) onReady?.();

@@ -1,22 +1,25 @@
 import { BacktestTag, Reveal, SceneHeader, TableScroll } from "@/components/site/ui";
-
-const DD_MAX = 30; // scala delle barre: 0-30 R
-
-const RIGHE = [
-  { nome: "Oro (XAUUSD)", dd: 27.5, ddTxt: "27,5 R", serie: 14 },
-  { nome: "Nasdaq", dd: 13.7, ddTxt: "13,7 R", serie: 7 },
-  { nome: "USDJPY", dd: 14.0, ddTxt: "14,0 R", serie: 8 },
-];
+import { D, IDS, META, PORT } from "@/lib/dati";
+import { int, it } from "@/lib/format";
 
 /**
- * COPY.md v2, 3.6. Il bootstrap a blocchi sulla misura piu' recente non e' ancora
- * stato eseguito ([DA COMPLETARE]): lo si dice, non si mette un numero vecchio.
+ * COPY.md v2, 3.6. Il drawdown del backtest e, dal bootstrap a blocchi di 20
+ * (data/derivati.json, stessa logica di tools/montecarlo.py), la distribuzione
+ * del drawdown per ogni strategia e per la somma a pari rischio. Le barre
+ * sono in scala unica (0 - tetto della tabella), con il numero accanto.
  */
 export function Rischio() {
+  const righe = [
+    ...IDS.map((id) => ({ nome: id === "oro" ? "Oro (XAUUSD)" : META[id].nome, p: D[id].periodi.tutto, b: D[id].bootstrap_dd })),
+    { nome: "Tutte e tre, a pari rischio", p: PORT.stats, b: PORT.bootstrap_dd },
+  ];
+  const tetto = Math.ceil(Math.max(...righe.map((r) => r.b.p99)) / 10) * 10;
+  const oro = D.oro;
+  const nb = int(oro.bootstrap_dd.campioni);
   return (
     <section id="rischio" data-scene className="scene" aria-labelledby="rischio-t">
       <div className="wrap">
-        <SceneHeader n="07" label="Rischio" id="rischio-t" title={["Il rischio vero,", "non quello del backtest"]} />
+        <SceneHeader n="08" label="Rischio" id="rischio-t" title={["Il rischio vero,", "non quello del backtest"]} />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="prose space-y-4 lg:col-span-5">
@@ -38,9 +41,10 @@ export function Rischio() {
             </Reveal>
             <Reveal i={2}>
               <p className="callout">
-                <strong>Non ancora disponibile:</strong> il bootstrap sulla misura più recente delle tre strategie (90° e
-                99° percentile del drawdown per un rischio per operazione dichiarato). Lo strumento esiste; il risultato
-                sarà pubblicato qui quando ci sarà, con la scritta “backtest”.
+                <strong>Il risultato, sulla misura più recente:</strong> {nb} sequenze per strategia, blocchi di 20. Per
+                l’oro il drawdown del backtest è {it(oro.periodi.tutto.dd_max_R, 1)} R, ma in una sequenza su dieci supera{" "}
+                <b className="text-bad">{it(oro.bootstrap_dd.p90, 1)} R</b> e in una su cento {it(oro.bootstrap_dd.p99, 1)} R.
+                La distribuzione completa di ciascuna strategia è nella sua scheda; quella della somma è nel Portafoglio.
               </p>
             </Reveal>
           </div>
@@ -48,42 +52,56 @@ export function Rischio() {
           <div className="space-y-6 lg:col-span-7">
             <Reveal i={1} className="space-y-3">
               <BacktestTag />
-              <TableScroll label="Drawdown massimo del backtest e perdite consecutive per strategia (backtest, in R)">
+              <TableScroll label="Drawdown del backtest, perdite consecutive e percentili del bootstrap a blocchi, per strategia e per la somma (backtest, in R)">
                 <table className="dtable">
-                  <caption>Il drawdown del backtest, in R (una sola sequenza, quella storica)</caption>
+                  <caption>Il drawdown in R: la sequenza storica e i percentili del bootstrap a blocchi di 20 ({nb} sequenze)</caption>
                   <thead>
                     <tr>
                       <th scope="col">Strategia</th>
-                      <th scope="col" className="r">Drawdown massimo del backtest</th>
-                      <th scope="col" className="r">Perdite consecutive massime</th>
+                      <th scope="col" className="r">Backtest</th>
+                      <th scope="col" className="r">Perdite di fila</th>
+                      <th scope="col" className="r">Mediana</th>
+                      <th scope="col" className="r">90°</th>
+                      <th scope="col" className="r">99°</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {RIGHE.map((r) => (
-                      <tr key={r.nome}>
+                    {righe.map((r) => (
+                      <tr key={r.nome} className={r.nome.startsWith("Tutte") ? "emph" : undefined}>
                         <th scope="row">{r.nome}</th>
                         <td className="r">
-                          <span className="block text-base">{r.ddTxt}</span>
+                          <span className="block">{it(r.p.dd_max_R, 1)} R</span>
                           <span className="bar mt-2" aria-hidden="true">
-                            <i className="neg" style={{ left: 0, width: `${(r.dd / DD_MAX) * 100}%` }} />
+                            <i className="neg" style={{ left: 0, width: `${(r.p.dd_max_R / tetto) * 100}%` }} />
                           </span>
                         </td>
-                        <td className="r">
-                          <span className="block text-base">{r.serie}</span>
+                        <td className="r">{r.p.perdite_consecutive_max}</td>
+                        <td className="r">{it(r.b.p50, 1)} R</td>
+                        <td className="r text-bad">
+                          <span className="block">{it(r.b.p90, 1)} R</span>
+                          <span className="bar mt-2" aria-hidden="true">
+                            <i className="neg" style={{ left: 0, width: `${(r.b.p90 / tetto) * 100}%` }} />
+                          </span>
                         </td>
+                        <td className="r text-bad">{it(r.b.p99, 1)} R</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </TableScroll>
-              <p className="t-note">Le barre vanno da 0 a 30 R.</p>
+              <p className="t-note">
+                Le barre vanno da 0 a {tetto} R. “Tutte e tre” è la somma a pari rischio (1 R per operazione per ciascuna).
+              </p>
             </Reveal>
             <Reveal i={2} className="prose space-y-4">
               <p>
-                Lettura: “27,5 R” vuol dire che, rischiando 1% del conto per operazione, nel punto peggiore della
-                simulazione l’oro era sotto di circa il 27% dal suo massimo, senza contare l’interesse composto. Con 0,5%
-                per operazione, circa il 14%. Il rischio per operazione è una scelta di chi opera, non una proprietà del
-                sistema.
+                Lettura: “{it(oro.periodi.tutto.dd_max_R, 1)} R” vuol dire che, rischiando 1% del conto per operazione, nel
+                punto peggiore della simulazione l’oro era sotto di circa il {it(oro.periodi.tutto.dd_max_R, 0)}% dal suo
+                massimo, senza contare l’interesse composto. Con 0,5% per operazione, circa il{" "}
+                {it(oro.periodi.tutto.dd_max_R / 2, 0)}%. Il 90° percentile del bootstrap, {it(oro.bootstrap_dd.p90, 1)} R, è
+                il numero con cui prepararsi: a 1% circa il {it(oro.bootstrap_dd.p90, 0)}%, a 0,5% circa il{" "}
+                {it(oro.bootstrap_dd.p90 / 2, 0)}%. Il rischio per operazione è una scelta di chi opera, non una proprietà
+                del sistema.
               </p>
             </Reveal>
           </div>

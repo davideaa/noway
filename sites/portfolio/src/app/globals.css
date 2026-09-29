@@ -55,7 +55,7 @@
   --film-bg: var(--film-field);
   --film-fg: var(--film-type);
   --film-top-bg: color-mix(in srgb, var(--film-field-2) 72%, transparent);
-  --film-track-h: 2200vh;
+  --film-track-h: 2800vh; /* quarto giro: il tunnel (atti 2-3) e' il 60% della traccia, +60% di scroll rispetto a 2200 */
   --film-riskbar-h: 56px; /* spazio lasciato in basso agli overlay */
 }
 
@@ -1897,4 +1897,472 @@ html:not(.js) .hero__content {
 .film-fallback__note {
   max-width: 60ch;
   color: var(--film-type-mute);
+}
+
+/* ==========================================================================
+   GRAFICI di /dettagli (server component: SVG per le forme, HTML per il testo).
+   Palette: linea della strategia nel suo colore, griglia --line, assi mono 12 px
+   --mut (DESIGN.md sez. 10). Nessun valore scritto a mano fuori dai token.
+   ========================================================================== */
+:root {
+  --chart-h: 220px; /* altezza dell'area del disegno */
+  --chart-yw: 44px; /* colonna delle tacche verticali */
+}
+@media (min-width: 950px) {
+  :root {
+    --chart-h: 260px;
+    --chart-yw: 52px;
+  }
+}
+.chart {
+  position: relative;
+  display: grid;
+  gap: var(--sp-3);
+  min-width: 0;
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surf);
+}
+@media (min-width: 950px) {
+  .chart {
+    padding: 20px;
+  }
+}
+.chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+}
+.chart__title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+.chart__sub {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mut);
+  max-width: 68ch;
+}
+.chart__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.chart__unit {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--mut);
+}
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  list-style: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--ink);
+}
+.chart__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.chart__swatch {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid currentColor;
+}
+.chart__swatch--dash {
+  border-top-style: dashed;
+}
+.chart__swatch--area,
+.chart__swatch--quadrato {
+  height: 12px;
+  border: 0;
+  border-radius: 2px;
+  background: currentColor;
+}
+.chart__swatch--area {
+  opacity: 0.6;
+}
+/* corpo: colonna tacche y | disegno ; riga tacche x */
+.chart__body {
+  display: grid;
+  grid-template-columns: var(--chart-yw) minmax(0, 1fr);
+  grid-template-rows: var(--chart-h) 24px;
+  min-width: 0;
+}
+.chart__y {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--mut);
+  font-variant-numeric: tabular-nums;
+}
+.chart__y span {
+  position: absolute;
+  right: var(--sp-2);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.chart__plot {
+  position: relative;
+  min-width: 0;
+  border-left: 1px solid var(--line2);
+}
+.chart__plot > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.chart__grid {
+  stroke: var(--line);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.chart__zero {
+  stroke: var(--line3);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.chart__marker {
+  stroke: var(--line3);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.chart__hist-storico {
+  stroke: currentColor;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+.chart__region {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--surf2) 70%, transparent);
+  pointer-events: none;
+}
+.chart__region-label,
+.chart__marker-label {
+  position: absolute;
+  top: var(--sp-1);
+  padding: 2px 6px;
+  border-radius: var(--r-1);
+  background: color-mix(in srgb, var(--surf2) 92%, transparent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: var(--mut);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart__region-label {
+  margin-left: var(--sp-2);
+  color: var(--ink);
+}
+.chart__marker-label {
+  transform: translateX(-50%);
+}
+.chart__marker-label--r1 {
+  top: calc(var(--sp-1) + 22px);
+}
+.chart__end {
+  position: absolute;
+  transform: translate(-100%, -120%);
+  padding: 2px 6px;
+  border-radius: var(--r-1);
+  border-left: 2px solid;
+  background: color-mix(in srgb, var(--surf2) 92%, transparent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart__end--hist {
+  top: auto;
+  bottom: var(--sp-2);
+  transform: translateX(var(--sp-1));
+}
+.chart__x {
+  grid-column: 2;
+  position: relative;
+  height: 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--mut);
+  font-variant-numeric: tabular-nums;
+}
+.chart__xtick {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.chart__xtick.is-first {
+  transform: none;
+}
+.chart__xtick.is-last {
+  transform: translateX(-100%);
+}
+/* sotto i 600 px sull'asse delle operazioni si mostra un anno si' e uno no */
+@media (max-width: 599px) {
+  .chart__x--anni .chart__xtick:nth-child(even) {
+    display: none;
+  }
+}
+.chart__x--cols {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  padding-top: 6px;
+  text-align: center;
+}
+.chart__note {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.chart__note p {
+  max-width: 68ch;
+}
+.chart__note p + p {
+  margin-top: var(--sp-2);
+}
+.chart__source {
+  color: var(--mut);
+}
+.chart__table > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--acc);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.chart__table > summary::-webkit-details-marker {
+  display: none;
+}
+.chart__table > summary::before {
+  content: "+";
+  font-family: var(--font-mono);
+}
+.chart__table[open] > summary::before {
+  content: "\2212";
+}
+.chart__table .dtable {
+  font-size: 13px;
+}
+
+/* barre per anno */
+.ybars__cols {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ybars__cols li {
+  position: relative;
+}
+.ybars__bar {
+  position: absolute;
+  left: 50%;
+  width: min(24px, 60%);
+  transform: translateX(-50%);
+  background: currentColor;
+  border-radius: 3px 3px 0 0;
+}
+.ybars__bar.is-neg {
+  background: var(--bad);
+  border-radius: 0 0 3px 3px;
+}
+.ybars__val {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, calc(-100% - 3px));
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ybars__val.is-neg {
+  transform: translate(-50%, 3px);
+}
+@media (max-width: 599px) {
+  .ybars__val {
+    font-size: 11px; /* otto valori su 330 px: sotto i 12 px solo qui, con il valore ripetuto nella tabella */
+  }
+}
+
+/* mappa anno x mese */
+.heat {
+  display: grid;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.heat__grid {
+  display: grid;
+  grid-template-columns: 40px repeat(12, minmax(0, 1fr));
+  gap: 2px; /* il vuoto della superficie separa le celle */
+}
+.heat__col,
+.heat__row {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--mut);
+  align-self: center;
+}
+.heat__col {
+  text-align: center;
+  padding-bottom: 2px;
+}
+.heat__cell,
+.heat__void {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 26px;
+  border-radius: 2px;
+}
+.heat__val {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 950px) {
+  .heat__cell {
+    min-height: 34px;
+  }
+  .heat__val {
+    display: block;
+  }
+}
+.heat__scale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-2);
+}
+.heat__sw {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* griglia delle schede strategia: i grafici a coppie dai 950 px in su */
+.charts {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 950px) {
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .charts > .is-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* simulatore incorporato */
+.sim__frame {
+  display: block;
+  width: 100%;
+  min-height: 720px;
+  height: min(85svh, 960px);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-3);
+  background: var(--surf);
+}
+.sim__frame:fullscreen {
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+}
+.chart__end--pt {
+  transform: translate(-50%, -130%);
+}
+.chart__end--pt.is-sotto {
+  transform: translate(-50%, 30%);
+}
+/* l'area del disegno non allarga mai la pagina: le etichette lunghe si tagliano di lato, mai sopra */
+.chart__plot {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+.chart__marker-label.is-left {
+  transform: translateX(var(--sp-1));
+}
+.chart__marker-label.is-right {
+  transform: translateX(calc(-100% - var(--sp-1)));
+}
+/* mappa mensile: otto passi di intensita', tinta dal segno (--q = quota del colore sulla superficie) */
+.heat__cell.is-neg {
+  background: color-mix(in srgb, var(--bad) var(--q), var(--surf));
+}
+.heat__cell.is-pos {
+  background: color-mix(in srgb, var(--acc) var(--q), var(--surf));
+}
+.heat__cell.is-zero {
+  background: var(--line2);
+}
+.heat__cell--1 { --q: 16%; }
+.heat__cell--2 { --q: 26%; }
+.heat__cell--3 { --q: 36%; }
+.heat__cell--4 { --q: 47%; }
+.heat__cell--5 { --q: 58%; }
+.heat__cell--6 { --q: 69%; }
+.heat__cell--7 { --q: 80%; }
+.heat__cell--8 { --q: 92%; }
+/* l'etichetta della regione sta in basso: le curve finiscono in alto, dove c'e' il valore finale */
+.chart__region-label {
+  top: auto;
+  bottom: var(--sp-1);
+}
+/* marcatori: etichetta breve sotto i 600 px; "in basso" quando le curve stanno in alto a destra */
+.chart__breve {
+  display: none;
+}
+@media (max-width: 599px) {
+  .chart__lungo {
+    display: none;
+  }
+  .chart__breve {
+    display: inline;
+  }
+}
+.chart__marker-label.is-basso {
+  top: auto;
+  bottom: var(--sp-1);
+}
+.chart__marker-label.is-basso.chart__marker-label--r1 {
+  bottom: calc(var(--sp-1) + 22px);
 }

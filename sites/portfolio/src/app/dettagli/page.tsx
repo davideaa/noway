@@ -8,6 +8,7 @@ import { Portafoglio } from "@/components/sections/Portafoglio";
 import { Riepilogo } from "@/components/sections/Riepilogo";
 import { Rischio } from "@/components/sections/Rischio";
 import { Scartate } from "@/components/sections/Scartate";
+import { Simulatore } from "@/components/sections/Simulatore";
 import { Strategie } from "@/components/sections/Strategie";
 import { DESCRIPTION, DETTAGLI_TITLE, SITE_URL } from "@/lib/site";
 
@@ -33,7 +34,7 @@ function jsonLd() {
   };
 }
 
-/** La pagina onesta: tabelle, metodo, scarti, rischio e avviso completo (la vecchia home). */
+/** La pagina onesta: tabelle, grafici, metodo, portafoglio, simulatore, scarti, rischio e avviso completo. */
 export default function Dettagli() {
   return (
     <>
@@ -46,6 +47,7 @@ export default function Dettagli() {
       <Metodo />
       <Strategie />
       <Portafoglio />
+      <Simulatore />
       <Scartate />
       <Rischio />
       <Monitoraggio />

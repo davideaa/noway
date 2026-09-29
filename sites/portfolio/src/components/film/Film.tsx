@@ -36,6 +36,7 @@ import {
   limeInFrame,
   playSecondsPerUnit,
   smoothstep,
+  wormGate,
 } from "./state";
 
 const FilmCanvas = dynamic(() => import("./FilmCanvas"), { ssr: false });
@@ -420,8 +421,9 @@ export function Film() {
 
       /* --- torcia (E2) e cursore (E3): solo puntatore fine, mai reduced; DOM fisso, solo transform/opacity --- */
       if (ui.torch) {
-        // lime: si spegne dove comanda l'oro (stanza), si spegne del tutto nel wipe
-        const a = ptr.sin * 0.9 * limeInFrame(film.sp) * (1 - smoothstep(0.94, 1, p));
+        // lime: si spegne dove comanda l'oro (stanza), a meta' nel wormhole (li' la luce e' dei fili:
+        // la foschia verde al centro della v2 era questa), del tutto nel wipe
+        const a = ptr.sin * 0.9 * limeInFrame(film.sp) * (1 - 0.5 * wormGate(film.sp)) * (1 - smoothstep(0.94, 1, p));
         if (a > 0.005) {
           ui.torch.style.opacity = a.toFixed(3);
           ui.torch.style.transform = `translate3d(${(ptr.tx - 320).toFixed(1)}px,${(ptr.ty - 320).toFixed(1)}px,0)`;

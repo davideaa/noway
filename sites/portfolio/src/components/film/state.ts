@@ -63,30 +63,34 @@ export const actAxis = (p: number) => clamp01(p / ACT_AXIS_END);
  * trasforma il film in una presentazione. Gli atti 1-5 corrono su `sp`;
  * l'uscita del 5 e il 6 (wipe) corrono su `p` reale.
  *
- *   1 Ingresso   ... -> 0.16..0.26 (out)
- *   2 Metodo     0.14..0.24 (in) -> 0.34..0.44 (out)
- *   3 Strategie  0.32..0.40 -> 0.62..0.72
- *   4 Rischio    0.62..0.70 -> 0.82..0.92
- *   5 Monitor    0.82..0.90 -> p 0.86..0.94
+ * Quarto giro (Davide: «il tunnel deve durare di piu'»): gli atti 2-3 occupano
+ * sp 0.15..0.86 invece di 0.17..0.72; i fili corrono su sp 0.33..0.80 (+55%
+ * rispetto a 0.36..0.669). Il play resta a 20 s per unita' di p: il tempo in
+ * piu' del tunnel viene dal prologo (-0,7 s) e dalla valle (-1,6 s).
+ *
+ *   1 Ingresso   ... -> 0.17..0.27 (out)
+ *   2 Metodo     0.15..0.25 (in) -> 0.31..0.41 (out)
+ *   3 Strategie  0.29..0.37 -> 0.76..0.86
+ *   4 Rischio    0.76..0.84 -> 0.90..0.98
+ *   5 Monitor    0.90..0.98 -> p 0.86..0.94
  *   6 Contatti   p 0.80..0.90 -> fine
  */
 export function computeGates(p: number, sp: number, out: number[]) {
-  // atto 1 allargato (prologo a tre schermate): esce 0.19..0.29, l'atto 2 entra 0.17..0.27
-  out[0] = 1 - smoothstep(0.19, 0.29, sp);
-  out[1] = smoothstep(0.17, 0.27, sp) * (1 - smoothstep(0.34, 0.44, sp));
-  out[2] = smoothstep(0.32, 0.4, sp) * (1 - smoothstep(0.62, 0.72, sp));
-  out[3] = smoothstep(0.62, 0.7, sp) * (1 - smoothstep(0.82, 0.92, sp));
-  out[4] = smoothstep(0.82, 0.9, sp) * (1 - smoothstep(0.86, 0.94, p));
+  out[0] = 1 - smoothstep(0.17, 0.27, sp);
+  out[1] = smoothstep(0.15, 0.25, sp) * (1 - smoothstep(0.31, 0.41, sp));
+  out[2] = smoothstep(0.29, 0.37, sp) * (1 - smoothstep(0.76, 0.86, sp));
+  out[3] = smoothstep(0.76, 0.84, sp) * (1 - smoothstep(0.9, 0.98, sp));
+  out[4] = smoothstep(0.9, 0.98, sp) * (1 - smoothstep(0.86, 0.94, p));
   out[5] = smoothstep(0.8, 0.9, p);
   return out;
 }
 
 /** Il lime (figura, gabbia, impulso dei fili) e' in scena? Allora la stanza NON e' oro. */
 export function limeInFrame(sp: number) {
-  const figure = 1 - smoothstep(0.25, 0.3, sp);
-  // la coda segue l'ULTIMO impulso lime (filo 6: sp 0.554 + 0.24 x 0.115 = 0.58), non la morte del filo (0.669):
+  const figure = 1 - smoothstep(0.23, 0.28, sp);
+  // la coda segue l'ULTIMO impulso lime (filo 8: sp 0.66 + 0.24 x 0.14 = 0.694), non la morte del filo (0.80):
   // cosi' la stanza torna oro prima e non resta il buco grigio fra i fili e la valle (QA-FILM C2)
-  const strands = smoothstep(0.33, 0.36, sp) * (1 - smoothstep(0.59, 0.64, sp));
+  const strands = smoothstep(0.3, 0.33, sp) * (1 - smoothstep(0.7, 0.75, sp));
   return Math.max(figure, strands);
 }
 
@@ -105,11 +109,16 @@ export function entryDecaySlope(scrollP: number) {
 }
 
 /** Figura: visibile nell'atto 1, si dissolve prima che la camera la attraversi. */
-export const figureGate = (sp: number) => 1 - smoothstep(0.2, 0.265, sp);
-/** Gabbia: UNO scalare la tesse (0..0.14) e la stesse (0.20..0.28). */
-export const latticeBuild = (sp: number) => smoothstep(0, 0.14, sp) * (1 - smoothstep(0.2, 0.28, sp));
+export const figureGate = (sp: number) => 1 - smoothstep(0.18, 0.245, sp);
+/**
+ * Il ventaglio si DISEGNA da solo nell'ingresso (p 0..0.05: le simulazioni
+ * "girano"): funzione di p, non di tempo. Con meno movimento e' gia' intero.
+ */
+export const fanDraw = (p: number, reduced: boolean) => (reduced ? 1 : smoothstep(0, 0.05, p));
+/** Gabbia: UNO scalare la tesse (0..0.13) e la stesse (0.18..0.26). */
+export const latticeBuild = (sp: number) => smoothstep(0, 0.13, sp) * (1 - smoothstep(0.18, 0.26, sp));
 /** Stanza: appare mentre la camera entra. */
-export const roomGate = (sp: number) => smoothstep(0.13, 0.25, sp);
+export const roomGate = (sp: number) => smoothstep(0.12, 0.23, sp);
 /**
  * Il prologo (S1-S3) e' sopra la figura: mentre un testo e' a fuoco la figura e
  * la gabbia si attenuano (funzione di sp), cosi' il bianco non sta sul lime.
@@ -123,24 +132,28 @@ export function prologueText(sp: number) {
   return m;
 }
 /** Orizzonte (atto 5): la barra sottile in fondo. */
-export const horizonGate = (sp: number, p: number) => smoothstep(0.78, 0.9, sp) * (1 - smoothstep(0.9, 0.98, p));
+export const horizonGate = (sp: number, p: number) => smoothstep(0.86, 0.96, sp) * (1 - smoothstep(0.9, 0.98, p));
 
 /**
- * LA TABELLA: sei fili che guidano SIA i fili SIA la camera.
- * Spaziatura che si stringe (0.045, 0.045, 0.038, 0.035, 0.031): il corridoio
- * accelera verso l'atto dopo. lead ~= 3.8 * radius fissa l'angolo dell'ancora
- * fuori dall'asse di vista (atan(r/lead) ~ 14.7 gradi contro una mezza
- * inquadratura di ~29 x 19). Due fili per ROTTURA, due per RITRACCIAMENTO,
- * due per il portafoglio insieme: e' solo un nome, il disegno e' lo stesso.
+ * LA TABELLA: otto fili che guidano SIA i fili SIA la camera.
+ * Spaziatura che si stringe (0.055, 0.055, 0.050, 0.047, 0.044, 0.041, 0.038):
+ * il corridoio accelera verso l'atto dopo. lead ~= 3.8 * radius fissa l'angolo
+ * dell'ancora fuori dall'asse di vista (atan(r/lead) ~ 14.7 gradi contro una
+ * mezza inquadratura di ~29 x 19). Due fili per strategia (XAUUSD, NASDAQ,
+ * USDJPY) e due per il portafoglio insieme: e' solo un nome, il disegno e' lo
+ * stesso. Otto e non sei allungati: cosi' il tunnel dura di piu' (0.33..0.80)
+ * senza rallentare lo swing di ogni filo.
  */
 export type Strand = { at: number; span: number; side: 1 | -1; lead: number; radius: number; lift: number; tag: string };
 export const STRANDS: Strand[] = [
-  { at: 0.36, span: 0.12, side: 1, radius: 5.0, lead: 19.0, lift: 6.0, tag: "ROTTURA" },
-  { at: 0.405, span: 0.12, side: -1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "ROTTURA" },
-  { at: 0.45, span: 0.115, side: 1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "RITRACCIAMENTO" },
-  { at: 0.488, span: 0.11, side: -1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "RITRACCIAMENTO" },
-  { at: 0.523, span: 0.105, side: 1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "INSIEME" },
-  { at: 0.554, span: 0.115, side: -1, radius: 5.2, lead: 19.8, lift: 6.2, tag: "INSIEME" },
+  { at: 0.33, span: 0.14, side: 1, radius: 5.0, lead: 19.0, lift: 6.0, tag: "XAUUSD" },
+  { at: 0.385, span: 0.14, side: -1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "XAUUSD" },
+  { at: 0.44, span: 0.135, side: 1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "NASDAQ" },
+  { at: 0.49, span: 0.13, side: -1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "NASDAQ" },
+  { at: 0.537, span: 0.125, side: 1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "USDJPY" },
+  { at: 0.581, span: 0.125, side: -1, radius: 3.2, lead: 12.2, lift: 4.0, tag: "USDJPY" },
+  { at: 0.622, span: 0.125, side: 1, radius: 3.4, lead: 12.9, lift: 4.2, tag: "INSIEME" },
+  { at: 0.66, span: 0.14, side: -1, radius: 5.2, lead: 19.8, lift: 6.2, tag: "INSIEME" },
 ];
 
 /** Fasi del filo sul suo t locale. */
@@ -161,22 +174,25 @@ export const lateralScale = (aspect: number) => Math.min(1, Math.max(0.55, aspec
  * LA SPINA DELLA CAMERA: keyframe su `sp`. z e' un'Hermite cubica con tangenti
  * dichiarate (unita' per unita' di sp): tratti LINEARI dove entrambe le tangenti
  * sono uguali alla corda (il corridoio: marce 300 -> 150 -> 360, con il cambio
- * esattamente dove un filo prende o lascia: 0.405 e 0.554), tangenti a zero
+ * esattamente dove un filo prende o lascia: 0.385 e 0.622), tangenti a zero
  * solo dove la camera deve davvero fermarsi (riposo iniziale, arrivo).
  * y e' uno smoothstep tra i keyframe (la valle del drawdown: atto 4).
+ * Le marce sono le stesse della v1: il tunnel piu' lungo si percorre alla
+ * stessa velocita', quindi si va piu' lontano (z -151 all'arrivo, la stanza
+ * arriva a -280).
  */
 type Key = { sp: number; y: number; z: number; m0: number; m1: number };
 export const SPINE: Key[] = [
   // sp     y     z       m0     m1   (m0 = tangente in uscita da questo key, m1 = in arrivo al prossimo)
   { sp: 0.0, y: 9.0, z: 34.0, m0: -44, m1: -44 }, // riposo -> figura, lineare
-  { sp: 0.16, y: 9.0, z: 27.0, m0: -44, m1: -300 }, // tuffo attraverso la figura, accelerazione costante
-  { sp: 0.36, y: 9.0, z: -7.4, m0: -300, m1: -300 }, // MARCIA 300: il primo filo prende
-  { sp: 0.405, y: 9.0, z: -20.9, m0: -150, m1: -150 }, // MARCIA 150: il secondo filo prende
-  { sp: 0.554, y: 9.0, z: -43.25, m0: -360, m1: -360 }, // MARCIA 360: il sesto filo prende
-  { sp: 0.68, y: 9.0, z: -88.6, m0: -360, m1: -180 }, // discesa nella valle
-  { sp: 0.77, y: 2.0, z: -112.9, m0: -180, m1: -90 }, // fondo della valle
-  { sp: 0.86, y: 7.5, z: -125.05, m0: -90, m1: 0 }, // risalita
-  { sp: 1.0, y: 8.5, z: -131.35, m0: 0, m1: 0 }, // orizzonte, riposo
+  { sp: 0.145, y: 9.0, z: 27.62, m0: -44, m1: -300 }, // tuffo attraverso la figura, accelerazione costante
+  { sp: 0.33, y: 9.0, z: -4.2, m0: -300, m1: -300 }, // MARCIA 300: il primo filo prende
+  { sp: 0.385, y: 9.0, z: -20.7, m0: -150, m1: -150 }, // MARCIA 150: il secondo filo prende
+  { sp: 0.622, y: 9.0, z: -56.25, m0: -360, m1: -360 }, // MARCIA 360: il settimo filo prende
+  { sp: 0.8, y: 9.0, z: -120.33, m0: -360, m1: -180 }, // discesa nella valle (l'ottavo filo lascia)
+  { sp: 0.87, y: 2.0, z: -139.23, m0: -180, m1: -90 }, // fondo della valle
+  { sp: 0.94, y: 7.5, z: -148.68, m0: -90, m1: 0 }, // risalita
+  { sp: 1.0, y: 8.5, z: -151.38, m0: 0, m1: 0 }, // orizzonte, riposo
 ];
 
 export function spine(sp: number, out: { x: number; y: number; z: number }) {
@@ -224,7 +240,7 @@ export const speedNorm = (sp: number) => clamp01(spineSpeed(sp) / 360);
  * Gate sull'asse degli atti: entra con il corridoio, esce nella valle.
  * Le intensita' (torsione, bande, particelle, lente) sono gate x velocita'.
  */
-export const wormGate = (sp: number) => smoothstep(0.22, 0.36, sp) * (1 - smoothstep(0.7, 0.8, sp));
+export const wormGate = (sp: number) => smoothstep(0.2, 0.32, sp) * (1 - smoothstep(0.8, 0.88, sp));
 /** Frangia RGB + smear: SOLO nel picco di velocita' (marce 300 e 360), mai a riposo. */
 export const fringeAmount = (sp: number) => wormGate(sp) * smoothstep(0.5, 0.95, speedNorm(sp));
 /** Lente al centro: si apre con il wormhole, un po' di piu' con la velocita'. */
@@ -282,7 +298,7 @@ export function strandAnchor(s: Strand, aspect: number, out: { x: number; y: num
 }
 
 /** Inviluppo del bank nella discesa (atto 4): ~15 gradi a meta' caduta, dritto all'arrivo. */
-export const valleyBank = (sp: number) => Math.sin(Math.PI * clamp01((sp - 0.68) / (0.86 - 0.68))) * (15 * Math.PI) / 180;
+export const valleyBank = (sp: number) => Math.sin(Math.PI * clamp01((sp - 0.8) / (0.94 - 0.8))) * (15 * Math.PI) / 180;
 
 /**
  * Nebbia: il fondo lontano si dissolve; nel wormhole si APRE (si vede piu'
@@ -329,7 +345,7 @@ export function currentAct(gates: number[]) {
  * -1..1 (fuori = parcheggiata), funzione di sp su finestre di 0.04. Stesso
  * scroll, stessa fase: mai tempo.
  */
-export const PULSE_AT = [0.23, 0.38, 0.66, 0.86];
+export const PULSE_AT = [0.21, 0.33, 0.8, 0.94];
 export function hairlinePulse(sp: number) {
   for (const at of PULSE_AT) {
     const u = (sp - at) / 0.04;
@@ -345,12 +361,13 @@ export function hairlinePulse(sp: number) {
  */
 export type Win = { in0: number; in1: number; out0: number; out1: number; axis: "sp" | "p" };
 export const OVERLAY_WINDOWS: Win[] = [
-  { in0: -1, in1: -0.5, out0: 0.1, out1: 0.13, axis: "sp" }, // S1 titolo + sottotitolo (prologo, atto 1)
-  { in0: 0.12, in1: 0.15, out0: 0.21, out1: 0.24, axis: "sp" }, // S2 (prologo)
-  { in0: 0.23, in1: 0.26, out0: 0.33, out1: 0.36, axis: "sp" }, // S3 processo (prologo, sopra l'ingresso nella stanza)
-  { in0: 0.37, in1: 0.4, out0: 0.42, out1: 0.45, axis: "sp" }, // frase A (atto 2)
-  { in0: 0.47, in1: 0.51, out0: 0.58, out1: 0.65, axis: "sp" }, // frase B (atto 3)
-  { in0: 0.72, in1: 0.79, out0: 0.84, out1: 0.9, axis: "sp" }, // frase A (atto 4)
-  { in0: 0.738, in1: 0.787, out0: 0.86, out1: 0.92, axis: "p" }, // frase B (atto 5): entra a sp 0.90..0.96, esce con il wipe (su p)
+  // a 20 s per unita' di p (1 sp = 16,4 s) ogni scritta resta leggibile (opacita' > 0,5) per:
+  { in0: -1, in1: -0.5, out0: 0.09, out1: 0.12, axis: "sp" }, // S1 titolo + sottotitolo (prologo): 1,7 s + l'ingresso
+  { in0: 0.11, in1: 0.14, out0: 0.19, out1: 0.22, axis: "sp" }, // S2 (prologo): 1,3 s
+  { in0: 0.21, in1: 0.24, out0: 0.29, out1: 0.32, axis: "sp" }, // S3 processo (prologo, sopra l'ingresso nella stanza): 1,3 s
+  { in0: 0.35, in1: 0.38, out0: 0.44, out1: 0.48, axis: "sp" }, // frase A (atto 2): 1,6 s
+  { in0: 0.52, in1: 0.56, out0: 0.66, out1: 0.72, axis: "sp" }, // frase B (atto 3): 2,5 s, il respiro in mezzo al tunnel
+  { in0: 0.82, in1: 0.86, out0: 0.91, out1: 0.95, axis: "sp" }, // frase A (atto 4, la valle): 1,5 s
+  { in0: 0.78, in1: 0.82, out0: 0.86, out1: 0.92, axis: "p" }, // frase B (atto 5): entra a sp 0.95..1.0, esce con il wipe (su p): 1,8 s
   { in0: 0.88, in1: 0.96, out0: 2, out1: 3, axis: "p" }, // finale: titolo + UN bottone (atto 6, su p)
 ];

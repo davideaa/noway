@@ -75,7 +75,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="mono hidden text-xs text-mut md:inline" aria-hidden="true">
+          <span className="mono hidden text-xs text-mut lg:inline" aria-hidden="true">
             <b className="font-medium text-acc">{current.n}</b> / {SCENES.length.toString().padStart(2, "0")}
           </span>
           <a href={MAILTO} className={buttonVariants({ size: "sm" })} aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}>

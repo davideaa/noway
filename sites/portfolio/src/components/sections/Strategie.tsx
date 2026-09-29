@@ -1,13 +1,17 @@
 import type { CSSProperties, ReactNode } from "react";
 import { StrategyFlythrough } from "@/components/motion/StrategyFlythrough";
+import { SchedaStrategia } from "@/components/sections/SchedaStrategia";
 import { BacktestTag, Reveal, RiskNote, SceneHeader, TableScroll } from "@/components/site/ui";
+import type { Id } from "@/lib/dati";
 
 /**
- * COPY.md v2, 3.3: tre strategie, tre mercati. Numeri da data/strategie.json.
- * Orizzonte e regole di Nasdaq e USDJPY sono [DA COMPLETARE]: non si mostrano.
+ * COPY.md v2, 3.3: tre strategie, tre mercati. Numeri da data/strategie.json;
+ * le schede complete (tabella dentro/fuori/tutto e sei grafici) da
+ * data/derivati.json (SchedaStrategia). Le regole di Nasdaq e USDJPY non sono
+ * nei file: la scheda lo dice con la frase di COPY.md, senza inventarle.
  */
 type Strat = {
-  id: "oro" | "nas" | "usdjpy";
+  id: Id;
   n: string;
   nome: string;
   mercato: string;
@@ -67,7 +71,7 @@ const STRATS: Strat[] = [
     ),
   },
   {
-    id: "nas",
+    id: "nasdaq",
     n: "02",
     nome: "NASDAQ",
     mercato: "indice Nasdaq",
@@ -223,44 +227,21 @@ export function Strategie() {
         </StrategyFlythrough>
       </div>
 
-      {/* ---------- Schede complete ---------- */}
+      {/* ---------- Schede complete: tabella dentro/fuori/tutto + sei grafici ---------- */}
       <div className="wrap mt-12 space-y-16 md:mt-16 md:space-y-24">
+        <Reveal className="prose">
+          <p className="t-lead">
+            Per ogni strategia, tutto quello che c’è: la tabella per periodo, la curva, il drawdown, la media mobile, gli
+            anni, i mesi e la distribuzione del drawdown con il bootstrap. Ogni grafico ha la tabella dei suoi numeri
+            (“Vedi i numeri”).
+          </p>
+        </Reveal>
         {STRATS.map((s) => (
-          <article key={s.id} className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12" aria-labelledby={`sch-${s.id}`}>
-            <Reveal className="lg:col-span-4">
-              <h3 id={`sch-${s.id}`} className="t-h2 lg:sticky lg:top-24">
-                <span className="inline-flex items-center gap-2">
-                  <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: s.colore }} />
-                  {s.nome}
-                </span>
-                <span className="t-sec block font-normal">{s.mercato}</span>
-              </h3>
-            </Reveal>
-            <div className="prose space-y-5 lg:col-span-8">
-              {s.regole && <Reveal className="space-y-4">{s.regole}</Reveal>}
-              <Reveal i={1} className="space-y-3">
-                <BacktestTag />
-                <p>
-                  <strong>I numeri (backtest):</strong> {s.numeri}
-                </p>
-              </Reveal>
-              <Reveal i={2}>
-                <p>
-                  <strong>Dentro e fuori campione:</strong> {s.fuori}
-                </p>
-              </Reveal>
-              <Reveal i={3} className="callout">
-                <p>
-                  <strong>I numeri scomodi:</strong> {s.scomodi}
-                </p>
-              </Reveal>
-              <Reveal i={4}>
-                <p className="t-sec">
-                  <strong className="text-ink">Per anno (backtest, in R):</strong> <span className="mono">{s.anni}</span>
-                </p>
-              </Reveal>
-            </div>
-          </article>
+          <SchedaStrategia
+            key={s.id}
+            id={s.id}
+            testi={{ mercato: s.mercato, regole: s.regole, numeri: s.numeri, fuori: s.fuori, scomodi: s.scomodi, anni: s.anni }}
+          />
         ))}
       </div>
     </section>

@@ -1,15 +1,16 @@
 import { Reveal, SceneHeader } from "@/components/site/ui";
 
 /**
- * COPY.md v2, 3.7. "Cosa si pubblica" e il criterio scritto da Davide per USDJPY sono
- * [DA COMPLETARE]: nota sobria, nessun dato inventato.
+ * COPY.md v2, 3.7. "Cosa si pubblica" (cadenza, stato del demo) e il criterio
+ * scritto da Davide per USDJPY sono [DA COMPLETARE]: la carta mostra solo la
+ * regola gia' decisa per la pagina, senza segnaposto e senza dati inventati.
  */
 export function Monitoraggio() {
   return (
     <section id="monitoraggio" data-scene className="scene" aria-labelledby="monitoraggio-t">
       <div className="wrap">
         <SceneHeader
-          n="08"
+          n="09"
           label="Monitoraggio"
           id="monitoraggio-t"
           title={["Prima di fidarsi,", "si guarda in tempo reale"]}
@@ -35,12 +36,12 @@ export function Monitoraggio() {
               </li>
               <li>
                 <strong>Il risultato contro la banda simulata.</strong> Il risultato reale di ogni strategia si mette
-                dentro la distribuzione del bootstrap: in quale percentile cade? Serve che il bootstrap sulla misura più
-                recente sia stato fatto (vedi{" "}
+                dentro la distribuzione del bootstrap: in quale percentile cade? La distribuzione sulla misura più recente
+                è in{" "}
                 <a href="#rischio" className="textlink">
                   Il rischio
-                </a>
-                ).
+                </a>{" "}
+                e, strategia per strategia, nelle schede.
               </li>
               <li>
                 <strong>USDJPY per prima.</strong> È la strategia con il fuori campione più debole (t 1,48) e con il 2026
@@ -63,13 +64,14 @@ export function Monitoraggio() {
 
           <Reveal variant="monitor" i={1} className="card lg:col-span-5">
             <h3 className="t-h2">Cosa si pubblica</h3>
-            <p className="callout mt-5">
-              <strong>In preparazione.</strong>
-            </p>
-            <p className="eyebrow mt-6">Regola per la pagina</p>
+            <p className="eyebrow mt-5">Regola per la pagina</p>
             <p className="mt-2">
               Quando compaiono i primi risultati reali, sono mostrati accanto a quelli simulati, con lo stesso formato,
               per ognuna delle tre strategie, e senza togliere i mesi brutti.
+            </p>
+            <p className="t-sec mt-4">
+              Oggi in questa pagina non c’è nessun risultato in tempo reale: tutti i numeri sono di backtest, e ogni
+              tabella e grafico lo dice.
             </p>
           </Reveal>
         </div>
