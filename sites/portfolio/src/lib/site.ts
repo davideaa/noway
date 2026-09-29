@@ -1,9 +1,16 @@
 /** Costanti del sito. Il nome e' provvisorio (COPY.md): va confermato da Davide. */
 export const SITE_NAME = "Portfolio Algo Manager";
 
-export const TITLE = "Strategie algoritmiche sull'oro (XAUUSD): metodo e rischio";
+/** COPY.md v2 (sez. 2, versione "tre strategie"). */
+export const TITLE = "Strategie algoritmiche su oro, Nasdaq e USDJPY: il metodo";
 export const DESCRIPTION =
-  "Strategie trend following su XAUUSD con criteri fissati prima del test, fuori campione, scarti e drawdown vero. Sono backtest, non risultati reali.";
+  "Tre strategie su oro, Nasdaq e USDJPY: criteri fissati prima del test, fuori campione, correlazioni e drawdown. Sono backtest, non risultati reali.";
+export const DETTAGLI_TITLE = "Tre strategie algoritmiche: metodo, numeri e rischio";
+
+/** L'unico h1 (COPY.md 3.1) e le due frasi del film (COPY.md 3.2 e footer): il film non ha altro testo. */
+export const FILM_H1 = "Tre strategie algoritmiche, misurate e raccontate senza ritocchi";
+export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
+export const FILM_PHRASE_B = "Backtest, non risultati reali.";
 
 /** Testo alternativo dell'immagine social (COPY.md sez. 5). */
 export const OG_ALT = "Portfolio Algo Manager: strategie algoritmiche su XAUUSD, backtest e rischio dichiarati.";

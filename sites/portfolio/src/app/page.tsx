@@ -1,11 +1,5 @@
-import { Avviso } from "@/components/sections/Avviso";
-import { Contatti } from "@/components/sections/Contatti";
-import { Hero } from "@/components/sections/Hero";
-import { Metodo } from "@/components/sections/Metodo";
-import { Monitoraggio } from "@/components/sections/Monitoraggio";
-import { Rischio } from "@/components/sections/Rischio";
-import { Scartate } from "@/components/sections/Scartate";
-import { Strategie } from "@/components/sections/Strategie";
+import { Film } from "@/components/film/Film";
+import { FilmTopBar } from "@/components/film/FilmTopBar";
 import { DESCRIPTION, SITE_NAME, SITE_URL, TITLE } from "@/lib/site";
 
 // JSON-LD minimo (COPY.md sez. 2): solo WebSite e WebPage. Gli url si
@@ -24,6 +18,10 @@ function jsonLd() {
   };
 }
 
+/**
+ * Home = il film a scroll (SPEC-FILM.md). Nessuna sezione: una traccia, una
+ * stage, un canvas. Titolo e due frasi; tutto il resto e' in /dettagli.
+ */
 export default function Home() {
   return (
     <>
@@ -31,14 +29,10 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()).replace(/</g, "\\u003c") }}
       />
-      <Hero />
-      <Metodo />
-      <Strategie />
-      <Scartate />
-      <Rischio />
-      <Monitoraggio />
-      <Contatti />
-      <Avviso />
+      <FilmTopBar />
+      <main id="contenuto" className="flex-1">
+        <Film />
+      </main>
     </>
   );
 }

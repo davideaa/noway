@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { MotionPrefsProvider } from "@/components/motion/MotionPrefs";
-import { RevealObserver } from "@/components/motion/RevealObserver";
 import { RiskBar } from "@/components/site/RiskBar";
-import { SiteFooter } from "@/components/site/SiteFooter";
-import { SiteHeader } from "@/components/site/SiteHeader";
 import { DESCRIPTION, OG_ALT, SITE_NAME, SITE_URL, TITLE } from "@/lib/site";
 
 // Font self-hosted da next/font: nessuna chiamata a Google dal visitatore.
@@ -77,15 +74,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#contenuto" className="skip">
           Vai al contenuto
         </a>
+        {/* Ogni rotta porta il proprio <main id="contenuto">: il film (/) e i dettagli (/dettagli).
+            La barra del rischio e' qui: sempre visibile, in entrambe. */}
         <MotionPrefsProvider>
-          <SiteHeader />
-          <main id="contenuto" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
+          {children}
           <RiskBar />
         </MotionPrefsProvider>
-        <RevealObserver />
       </body>
     </html>
   );
