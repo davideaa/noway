@@ -4,8 +4,18 @@ import type { NextConfig } from "next";
 // percorsi relativi, usata solo per le anteprime pubblicate fuori da un server
 // Node. La build normale (`next build`) non cambia.
 const staticExport = process.env.EXPORT_STATIC === "1";
+// EXPORT_HOST=1: export statico per un hosting vero (Netlify, Vercel, Pages):
+// percorsi assoluti normali, cartella out-host.
+const hostExport = process.env.EXPORT_HOST === "1";
 
-const nextConfig: NextConfig = staticExport
+const nextConfig: NextConfig = hostExport
+  ? {
+      output: "export",
+      distDir: "out-host",
+      trailingSlash: true,
+      images: { unoptimized: true },
+    }
+  : staticExport
   ? {
       output: "export",
       distDir: "out-export",

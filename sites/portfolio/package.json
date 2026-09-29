@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "export": "EXPORT_STATIC=1 next build && rm -rf .next"
+    "export": "EXPORT_STATIC=1 next build && rm -rf .next",
+    "export:host": "EXPORT_HOST=1 next build && rm -rf .next"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
