@@ -393,12 +393,497 @@ Proposte di palette/tipografia per l'art director (da §1–3, non decisioni):
 
 ## 5. Template e demo visti, sito per sito
 
-*(in compilazione: il crawl è in corso)*
+Procedura per ogni pagina: 3 s fermi (6 frame a 500 ms), attesa rete, misure, 6 frame a riposo ("Riposo" = frame
+identici consecutivi su 5: 5/5 = fermo, 0/5 = si muove da solo), 8 posizioni del mouse con passi (frame `m-p*-f0/f1`;
+"Mouse" = massima % di pixel cambiati rispetto a prima), 14 tocchi di rotellina da 260 px (frame `s-w*`; "Scroll" =
+% pixel cambiati fra 4 frame), video `video.webm` di tutta la sessione, `note.json`. Cartella:
+`refs/<sito>/templates/<nome>/`. Promemoria: qui **niente WebGPU e niente H.264**, rendering software.
+
+### 5.1 shaders.com — 12 pagine (galleria `/presets`, `/sections`, 3 `collection`)
+
+Non esistono demo live aperte: ogni preset è un canvas **WebGPU** (nero qui) dentro la pagina del preset, con
+"Unlock with Pro". Le uniche immagini reali sono i poster JPEG delle sezioni.
+
+| Pagina | Caricamento | Mouse | Scroll | Canvas | Riposo | Paywall | Cosa ho visto |
+|---|---|---|---|---|---|---|---|
+| `/collection/voxel-shift` | 8,0 s, 23 MB | 0,4 % | 20/5/0/0 | 3 WebGL (1440×720 dpr 0,21; 1068×601 dpr 0,28; 1068×120) | 5/5 | "Unlock with Pro", 13 lucchetti | Tela nera 1068×601 (WebGPU assente), "Quick Edit", sidebar sticky h-dvh, "Similar collections" |
+| `/collection/raindrops` | 9,5 s, 23 MB | 0,4 % | 31/5/0/0 | idem | 5/5 | idem | idem |
+| `/collection/fluid-displacement` | 7,4 s, 22,5 MB | 0,4 % | 42/5/0/0 | idem | 5/5 | idem | idem |
+| `/presets/backgrounds` | 8,7 s, 20 MB | 0,4 % | 50/37/33/26 | 2 WebGL | 5/5 | 67 lucchetti | Griglia "Pixel Shifts, Offsets, Data Cube…" con contatore "33 of 140"; anteprime nere |
+| `/presets/logo-shaders` | 9,4 s, 18 MB | 0,4 % | 42/47/34/16 | 2 | 5/5 | 67 | idem |
+| `/presets/image-effects` | 8,7 s, 21 MB | 0 % | 52/40/15/0 | 2 | 5/5 | 46 | idem |
+| `/presets/gradient` | 9,5 s, 19 MB | 0,3 % | 46/45/67/34 | 2 | 5/5 | 73 | "36 of 100", poi la griglia sparisce dopo lo scroll (lazy WebGPU) |
+| `/presets/vibrant` | 9,7 s, 20 MB | 0,9 % | 38/52/53/23 | 2 | 5/5 | 73 | idem |
+| `/presets/geometric` | 9,9 s, 23 MB | 3,3 % (hover su chip filtro) | 47/42/49/29 | 2 | 5/5 | 70 | idem |
+| `/sections` | 8,0 s, 16 MB | 0 % | 32/39/40/54 | 2 | 5/5 | 119 lucchetti | 59 sezioni con **poster JPEG** visibili: Glitch Rays Hero (raggi di luce su nero), Irradiance Logo Hero (gradiente viola-arancio + logo), Obsidian Hero (gemma nera), Hologram Studio Hero (chiaro), Particle Swarm Hero (sciame di punti), Electron Scan Hero (griglia esagonale scansionata), Polyhedron Footer, Voxel Logo CTA, Grid Shift Hero |
+| `/updates/introducing-shaders-cli` | 7,1 s, 15 MB | 0 % | 6/7/6/4 | 2 | 5/5 | — | Articolo; l'hero dell'articolo è un video (statico qui) |
+| `/framer` | 11 s, 3,7 MB | 0 % | 85/86/76/73 | 0 | 5/5 | — | Pagina plugin; 1 video; nessun canvas |
+
+Lettura: shaders.com **non si può osservare in movimento da qui**. Quello che si porta a casa è nel §1.3 (luce sui
+filetti, marquee, editor-hero, render a bassa risoluzione) e nei soggetti dei poster: raggi di luce, sciami di punti,
+griglie scansionate, gemme nere: tutti temi "tecnici" coerenti col nostro.
+
+### 5.2 horizonx.so — 12 pagine + 5 shader live (`/explore`, `/tools`, `/textures`, `/shaders`)
+
+Tre tipi di pagina: **explore** = scheda prodotto Premium (video mp4 + carosello "peek-slide" di screenshot, testo
+"Overview" molto dettagliato, nessuna demo live); **tools/shaders/textures** = **configuratori live** in WebGL o canvas
+2D, aperti senza login (export dietro membership). Le seconde sono le uniche demo davvero osservate in movimento.
+
+| Pagina | Caricamento | Mouse | Scroll | Canvas | Riposo | Paywall | Cosa fa (misurato + testo pubblico della pagina) |
+|---|---|---|---|---|---|---|---|
+| `/explore/crest-water-hero` | 5,5 s, 16 MB | 6,5 % (carosello che scorre da solo + popup) | 19/14/31/37 | 1 WebGL 1440×845 (hero sito, dpr 0,21) | 5/5 | Premium | Scheda: "carta di credito 3D su mare al tramonto, riflesso planare, la carta **si inclina verso il puntatore**, sheen in hover, **scia (wake) dove passa il mouse**", `?palette=`, reduced-motion rispettato. Demo = mp4 (nero qui) |
+| `/explore/vigil` | 6,8 s, 11 MB | 25 % (carosello + popup) | 42/18/38/48 | 1 | 5/5 | Premium | "Passeggiata notturna in 5 capitoli in un castello three.js, Lenis, materiali PBR progressivi". Solo screenshot |
+| `/explore/orvane-particle-hero` | 6,0 s, 29 MB | 7,3 % | 26/15/31/44 | 1 | 5/5 | Premium | "Busto scansionato in **150.000 particelle**, il cursore le **disperde lungo il suo percorso e poi tornano a posto**; griglia di misura; frase con blur per lettera; WebGL2 puro; point cloud cotto in un buffer da 1,8 MB; pausa a tab nascosta; fallback testo senza WebGL2" |
+| `/explore/kai-rennard` | 5,9 s, 25 MB | 6,4 % | 20/20/35/61 | 1 | 5/5 | Premium | Portfolio pilota: "ritratto con **fluid reveal** interattivo, GSAP + Lenis" |
+| `/tools/cobalt-sphere` | 12,3 s, 8,8 MB | 8,2 % | 5/5/6/6 | **1 WebGL 620×620, dpr 0,65** | **0/5** (2,3–3,9 % ogni ~850 ms) | export a pagamento | **Live**: sfera blu cobalto `#1734EE` con pieghe organiche che si muovono da sole (relief 0,08, folds 3,8, roughness 0,43), luce da studio, "drag to rotate". Il solo passaggio del mouse dà diff simili al moto a riposo: la rotazione è **su trascinamento**, non su hover |
+| `/tools/fold-carousel` | 11,7 s, 5,3 MB | 1,4 % | 10/5/5/5 | 1 WebGL 745×873, dpr 1,93 | 4/5 | idem | **Live**: carosello WebGL, carta centrale piatta, le vicine "si piegano come porte" verso la lente, **smear a strisce + frangia spettrale (RGB) sui bordi**, settle speed 10,5, drag e rotellina |
+| `/tools/crystal-cube` | 7,9 s, 8,6 MB | 1,7 % | 0 | 1 WebGL 664×498 dpr 1,45 | 5/5 | idem | **Live**: cubo di cristallo, rifrazione 1,52, dispersione 0,09, rotazione 0,16 rad/s (qui fermo: troppo pesante per SwiftShader) |
+| `/tools/particle-galaxy` | 6,7 s, 4,8 MB | 3,5 % | 2/2/2/2 | 1 WebGL 664×374 | **0/5** | idem | **Live**: galassia di punti bianchi + blu `#4267FF`, rotazione lenta + turbolenza, tilt −23°, profondità 44 % |
+| `/textures/tulip-study` | 8,7 s, 23 MB | 1,7 % | 0 | 1 **canvas 2D** 744×872 | 3/5 | export a pagamento | Filtro ASCII fotografico live (110 colonne, rampa caratteri, duotono) |
+| `/textures/marble-signal` | 6,5 s, 14 MB | 2,7 % | 0 | 1 canvas 2D | 5/5 | idem | Dither ordinato (Bayer 2×2…8×8, halftone, grana) su una statua |
+| `/textures/riso-glow-default-look` | 6,7 s, 4,3 MB | 11 % (slider) | 8/9/2/11 | 1 canvas 2D | **0/5** | idem | Halftone "riso" caldo con "animate plates": le lastre di inchiostro oscillano |
+| `/shaders` (hub) | 5,9 s, 15 MB | 5,6 % | 50/0/0/0 | 0 | 5/5 | — | 11 shader con anteprima video; sidebar sticky |
+| `/shaders/neural-noise-cursor` | 9,5 s, 6,3 MB | 4,3 % | 2/2/2/2 | 1 WebGL 744×872 dpr 1 | **0/5** (1–6 % ogni ~650 ms) | export | **Live, il più interessante**: filamenti verdi che scorrono in un campo profondo e **si piegano intorno al puntatore** (un "nodo" di curve segue il mouse: nei frame `m-p*` il nodo sta dove sta il puntatore, e resta al centro quando il mouse è fuori dal canvas). Parametri esposti: flow speed, noise scale, glow, **pointer influence, pointer radius**, edge fade, scroll colour shift |
+| `/shaders/flowing-waves` | 10,9 s, 6,3 MB | 20,7 % | 18/17/15/13 | 1 WebGL | **0/5** (11–13 %) | export | **Live**: onde liquide bianco-argento su inchiostro `#171717`, distorsione di flusso, "center dimming 0,7". Cambia molto anche da fermo: il mouse qui non è distinguibile dal moto proprio |
+| `/shaders/a-shader` | 26 s (lento), 5,9 MB | 12 % (cresce col tempo: è il moto proprio) | 0 | 1 WebGL | 0/5 ma 2–4 s per frame | export | Vetro scanalato animato; troppo pesante per il rendering software |
+| `/shaders/gradient-dots` | 9,2 s, 6,3 MB | 6,1 % | 2/1/3/4 | 1 WebGL | 0/5 (0–5 %) | export | **Live**: griglia di punti (spacing 10, raggio 1,5) illuminata da campi di luce in movimento; shimmer 0 |
+| `/shaders/old-television` | 7,2 s, 6,2 MB | **15,6 %** | 4/1/0/1 | 1 WebGL | 3/5 | export | **Live**: una **macchia di luminanza morbida che segue il puntatore** (pointer influence 0,3) su grana analogica 0,58, luce `#D4D4D4`, bloom spread 1. Nei frame la macchia si sposta verso l'ultimo punto del mouse dentro il canvas |
+
+### 5.3 vividsites.app — 14 schede aperte (dialoghi della home)
+
+Le carte **non sono link**: un clic apre un dialogo (`sheetIn`, sfondo sfocato) con il **video** del sito, i badge
+Free/Premium, "Copy prompt" / "Deploy this site" / "View full prompt" (bloccato per i Premium) e i tag. **Non esiste
+una demo live navigabile**: il "sito" è un mp4, che qui non si decodifica. Screenshot dei primi tre dialoghi in
+`refs/vividsites/click-carta-{0,1,2}.png`, testi in `refs/vividsites/click-carte.json`. Nessun paywall aggirato: dei
+Premium ho letto solo la riga di descrizione pubblica.
+
+| # | Scheda | Categoria (mono) | Accesso | Descrizione pubblica | Osservabile qui |
+|---|---|---|---|---|---|
+| 0 | Brand New Day | Scroll Film | **Free** | "landing page built from one cinematic clip"; tag react, three.js, scroll film. È il brief di `SPEC-FILM.md` | poster: figura a punti rossa/blu dentro una gabbia wireframe, titolo per lettera |
+| 1 | Plinth | Object Studio | Premium | "landing page from one clip" | poster: lettere "PLINTH" 3D su fondo arancio scuro |
+| 2 | Massif | Mountain Guiding | Premium | idem | poster: montagna wireframe dorata |
+| 3 | Murmur | Interface Studio | Premium | "**a full scroll film. One WebGL world, five acts that overlap instead of cut**" | poster: sfera di particelle bianca |
+| 4 | Substrate | Materials Foundry | Premium | "a full scroll film. One WebGL world, five acts that overlap…" | poster scuro |
+| 5 | Vesper | Automotive AI | Premium | "a hero section from one clip" | — |
+| 6 | Aureum | Distillery | Premium | hero section | — |
+| 7 | Apsis | Orbital Servicing | Premium | template | — |
+| 8 | Enamel | Dental Clinic | Premium | landing page | — |
+| 9 | Tencha | Matcha Room | Premium | landing page | — |
+| 10 | Halo | Smart Ring | Premium | landing page | — |
+| 11 | Char | Restaurant | Premium | landing page | — |
+| 12 | Verve | Sparkling Energy | Premium | landing page | — |
+| 13 | Glare | Eyewear | Premium | landing page | — |
+
+Le pagine `/build`, `/guides`, `/playbook`, `/reviews`, `/custom`, `/create` esistono ma non contengono demo. In
+`/#library` i filtri contano 15 Template, 99 Landing Page, 76 Hero, 29 "3D Section", 8 Background.
+
+Lettura: vividsites vende **video + prompt**; la fluidità che si vede nelle anteprime è quella del video. Il valore per
+noi è la *grammatica* (un mondo WebGL, atti che si sovrappongono, copy minimo) già assorbita in `SPEC-FILM.md`, più il
+cursore e la comparsa delle carte (§3.3).
+
+---
 
 ## 6. I dieci effetti più moderni e fluidi, come prompt-specifica
 
-*(in compilazione)*
+Criterio di scelta: (a) visto muoversi davvero (o misurato nei keyframes), (b) fluido per costruzione (compositor o
+GPU, nessun layout), (c) compatibile con **verso l'interno** e con la **ONE RULE** del film (ogni valore = funzione
+pura di `p`, più termini di tempo e di puntatore **limitati, a media zero, che non toccano mai il target della
+camera**). Ogni scheda: riga italiana, poi il prompt-specifica in inglese tecnico, ricostruito dai frame e dalle
+misure, **non** dal loro codice. I numeri senza "measured" sono stime ragionate.
+
+### E1 — Campo di traiettorie che si piega intorno al puntatore (da `neural-noise-cursor`, horizonx)
+
+*In italiano: le 42 traiettorie del nostro grafico "Profondità" scorrono da sole e si curvano dolcemente attorno al
+mouse, come limatura vicino a una calamita; via il mouse, tornano dritte.*
+
+```
+EFFECT: pointer-bent trajectory field.
+STACK: our existing 2D canvas with hand projection (scale = 1/(1 + rz*0.22), 42 paths, yaw -0.32 rad),
+  drawn inside requestAnimationFrame, only while the canvas is on screen (IntersectionObserver). No library.
+  Alternative for the film (act 3/4): the same displacement applied in the vertex stage of the fat-line strands
+  (LineSegments2 / LineMaterial, @react-three/fiber, three r0.186 already installed).
+
+THE ONE RULE OF THIS EFFECT:
+  Every drawn point is a PURE FUNCTION of (path sample, p, t, m) where p = scroll progress, t = time in seconds,
+  m = smoothed pointer in canvas space (mx, my in [0,1], plus mIn in {0,1}). No per-point velocity, no state.
+  displaced = P + bend(P, m) + flow(P, t). Removing the pointer (mIn=0) collapses bend() to exactly zero.
+
+GEOMETRY & NUMBERS:
+  bend(P, m): d = P - M (screen space, after projection); r = |d|; R = 0.22 * min(canvasW, canvasH) (pointer radius:
+    ~22% of the short side, measured impression on the reference: the knot is ~1/4 of the stage);
+    w = smoothstep(R, 0, r)^2 (soft, zero outside R, zero slope at R so nothing "snaps" when entering the radius);
+    tangential deflection, not radial: bend = w * A * perp(d)/r, A = 18 px * dpr (estimate). Tangential is what makes
+    lines CURVE AROUND the pointer (the reference shows loops/whorls, not a hole); radial would push a bald spot.
+  flow(P, t): advance each path's phase by 0.06 * t (paths already have a phase); amplitude 0 on the median curve
+    (the lime line), so the data line never moves: only the bootstrap strands breathe.
+  Pointer smoothing: m += (target - m) * (1 - exp(-dt / 0.12)). Time constant 120 ms: under ~80 ms it jitters with
+    a 60 Hz mouse, over ~200 ms it feels rubbery. NOTE this smoothing is on the INPUT, outside the scene: allowed.
+  Draw order: strands (0.20 alpha, 1 px), then median (1.6 px, --acc), then the head dot with a 12 px halo.
+  Colour: strands --st-oro at 0.18-0.30 alpha over --bg; halo lime only on the median head. Two accents never in
+    the same frame (SPEC-FILM): the field is GOLD (room), the median is LIME (figure).
+
+MOUSE / TOUCH:
+  Desktop: pointermove on the canvas's parent. Touch: mIn=0 (no hover on touch), the flow(t) term alone keeps it alive.
+  Exit: on pointerleave set mIn target 0; the bend fades with the same 120 ms constant (no snap).
+
+TRAPS:
+  - Do NOT lerp the displaced points themselves (hysteresis: a moving pointer leaves trails that never resolve).
+    Smooth only m, then recompute everything from scratch each frame.
+  - Recomputing projection for 42 x ~400 points per frame is fine on desktop; on phone drop to 24 paths x 200
+    samples, never drop the median.
+  - Clear with fillRect of --bg, not clearRect over a transparent canvas: transparent canvases over the shader
+    layer force expensive compositing.
+  - Keep the head dot drawn AFTER the halo, and use globalCompositeOperation 'lighter' ONLY for the halo, then reset.
+  - Devicepixel: canvas.width = cssW * min(dpr, 1.5) desktop, exactly 1 on phones; otherwise 3x pixels on iPhones.
+
+FLOORS:
+  prefers-reduced-motion: flow amplitude 0, bend amplitude 0, draw once (the graphic stays, the motion goes).
+  No JS: the static PNG/SVG of the same chart (already the plan in MOTION.md).
+  390 px: canvas width = container width (no fixed px), aspect 4:3, no horizontal overflow.
+  Tab hidden: cancel the rAF (document.visibilitychange).
+COST: 0 kB of library; CPU ~1-2 ms/frame desktop at 42 paths (estimate, unmeasured here: software renderer).
+FILM ACT: 3 (Strategie, the strands) and 4 (Rischio, the drawdown valley) — the field is the room of those acts.
+```
+
+### E2 — Luminanza morbida che segue il puntatore (da `old-television`, horizonx)
+
+*In italiano: una macchia di luce lime, molto sfumata, si sposta pigramente dove sta il mouse, sopra il nero. È la
+"torcia" che dice al visitatore che la scena è viva. Costa zero.*
+
+```
+EFFECT: pointer-following soft luminance ("torch").
+STACK: ONE DOM layer, position:fixed; inset:0; pointer-events:none; z-index below the text, above the shader.
+  Framer Motion useMotionValue + useSpring on x/y; the glow is a radial-gradient painted once; only transform moves.
+  No canvas, no shader uniform (ShaderGradient exposes no pointer uniform; do not fork it for this).
+
+THE ONE RULE: glow position = spring(pointer), glow opacity = mIn * 0.9 * (1 - p_wipe). Nothing else reads it.
+
+GEOMETRY & NUMBERS:
+  Element: 640 x 640 px (phones: 360), background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 22%,
+    transparent) 0%, transparent 70%). 22% lime at the centre is the ceiling: above ~30% the text --mut under it
+    drops below 4.5:1 on --bg (DESIGN.md §8 measured that lime backgrounds kill --mut).
+  Spring: stiffness 120, damping 24, mass 1 -> settles in ~0.45 s, no overshoot visible (the reference lags
+    about 300-500 ms behind the pointer; pointer influence 0.3 on their panel).
+  Idle drift when the pointer is still: none. (The reference blooms drift with noise; ours must not: a moving
+    light under a table of numbers reads as a glitch.)
+  Blend: mix-blend-mode: screen. On a near-black field screen ~= add, and it never darkens text.
+
+MOUSE / TOUCH: pointermove on window (passive). pointer:coarse -> layer hidden. Leaving the window -> opacity 0 in 300 ms.
+TRAPS:
+  - filter: blur() on a 640 px element repaints every frame: paint the softness INTO the gradient instead.
+  - Do not put the glow inside the sticky stage: a transform on an ancestor with perspective breaks the fixed layer.
+  - z-order: under the text, over the shader/canvas; over the panels? No: panels are opaque --surf by design.
+  - Keep will-change: transform ON this one element only.
+FLOORS: reduced-motion -> hidden. Keyboard-only users never see it and lose nothing.
+COST: one composited layer, one passive listener. 0 kB.
+FILM ACT: all acts except 6 (Contatti/wipe): fade it out with p in the last 0.06 so the ending is still.
+```
+
+### E3 — Cursore anello + punto, che cambia stato sopra i bersagli (da vividsites; misurato)
+
+*In italiano: un anellino lime segue il mouse con un filo di ritardo, un puntino sta esattamente sotto la freccia;
+sopra un bottone l'anello si allarga; sopra un livello del film dice "apri". Il cursore di sistema resta.*
+
+```
+EFFECT: cursor ring + dot with target states.
+STACK: two fixed <div>s, pointer-events:none, Framer Motion useMotionValue (dot, instant) + useSpring (ring).
+  State from data-cursor attributes on targets (data-cursor="link" | "layer" | "drag"), read on pointerover via
+  event delegation on document (one listener), never per element.
+
+THE ONE RULE: dot = pointer; ring = spring(pointer); ring scale/label = f(state) with a 180 ms transition.
+GEOMETRY & NUMBERS (measured on the reference: ring ~44 px, 1 px border, white ~60%; ours):
+  dot 6 px, --acc, opacity 0.9. ring 40 px, border 1px solid color-mix(in oklab, var(--acc) 70%, transparent).
+  ring spring: stiffness 300, damping 30 (settle ~180 ms; the reference lags a little less than E2, it must feel
+    attached, not dragged). States: link -> scale 1.5, border 1.5 px; layer -> scale 2.2 + centered 12 px mono
+    label "APRI" in --acc-ink on a --acc disc (this is the only place lime is a fill, 88 px, allowed as a control);
+    drag -> ring becomes a 40x40 with two 6 px chevrons.
+  Transition scale/opacity 180 ms var(--ease). Label swaps with opacity only.
+TRAPS:
+  - cursor:none on body is NOT used: system cursor stays (a11y, iframes, canvases, users with custom cursors).
+  - mix-blend-mode: difference is invisible on near-black: use the lime border instead.
+  - Do not read getBoundingClientRect on pointermove; states come from delegation, positions from the event.
+  - Hide when the pointer leaves the window (pointerleave on document) or opacity stays stuck at the edge.
+FLOORS: hidden under (pointer:coarse), under prefers-reduced-motion, and while a modal dialog is open.
+COST: 2 layers, 1 listener. 0 kB. FILM ACT: all acts; the "layer" state appears in act 3 over the strategy panels.
+```
+
+### E4 — Moto proprio continuo dell'oggetto-eroe + inclinazione verso il puntatore (da `cobalt-sphere`, `particle-galaxy`)
+
+*In italiano: la nuvola di punti del capitale non sta mai ferma del tutto: respira lentamente e si inclina di pochi
+gradi verso il mouse, e torna dritta quando il mouse se ne va. Nessuno scroll richiesto: è la "fluidità continua"
+che Davide chiede.*
+
+```
+EFFECT: idle float + cursor tilt on the instanced bead cloud (act 1 figure of SPEC-FILM).
+STACK: @react-three/fiber, InstancedMesh (40k beads, r 0.5, 8x6), instanceColor baked once. Values written in
+  useFrame from a plain mutable object {p, t, mx, my}; React never re-renders from any of them.
+
+THE ONE RULE: group.rotation/position = F(p) + G(t) + H(m). G and H are bounded, zero-mean, and added to the
+  FIGURE'S transform only, never to camera.lookAt. Scrubbing back to the same p reproduces F exactly; G and H are
+  the only frame-to-frame difference, by design (the brief's own "idle float plus cursor tilt").
+GEOMETRY & NUMBERS:
+  G(t): y += 0.35 * sin(t * 0.9); rotation.y += 0.04 * sin(t * 0.37); rotation.z += 0.015 * sin(t * 0.61 + 1.3).
+    Three incommensurate frequencies so the loop never visibly repeats (galaxy tool: "rotation speed" + "turbulence").
+    Amplitudes in world units of a 14-unit figure: 0.35 = 2.5%: visible, not swaying.
+  H(m): target tilt = (my - 0.5) * 0.14 rad on X, (mx - 0.5) * 0.18 rad on Y (+-8 / +-10 deg; the cobalt sphere
+    turns more, but it is alone on screen; ours carries numbers next to it). Applied around the figure's own centre:
+    translate(-c) rotate translate(+c), or the pivot drifts (the brief's "compensating translation").
+  m smoothing: exponential, tau 0.15 s, computed from dt (clock.getDelta), so 30 fps and 120 fps feel identical.
+  Speed of G scales with 1/(1+p*4) : the idle calms down as the camera flies (motion belongs to the intro, not to
+    the corridor, where the swing already moves).
+MOUSE / TOUCH: pointer on window, normalized to the canvas rect. Touch: H = 0, G stays. Drag-to-rotate: NO (the
+  cobalt sphere does it, but a rotating data figure invites the reading "it is a toy").
+TRAPS:
+  - Lerp the pointer, never the rotation itself (double smoothing = mushy, and the second lerp is hidden state
+    inside the scene).
+  - camera.rotation.order = 'YXZ' (brief) or the tilt leaks roll.
+  - Do not update instanceMatrix per bead for idle: transform the parent group (one matrix), the beads are static.
+FLOORS: reduced-motion -> G = 0, H = 0 (figure stays, motion goes). DPR clamp 1 phone / 1.5 desktop. Tab hidden:
+  frameloop="demand" and invalidate() only on input.
+COST: negligible on top of the existing draw call (one matrix per frame). FILM ACT: 1 (Ingresso), fading by act 2.
+```
+
+### E5 — Titolo che si mette a fuoco da dietro, lettera per lettera (da `hero-char-rise` horizonx + `prEnter` vividsites)
+
+*In italiano: le lettere del titolo arrivano da dietro, sfocate, e diventano nitide una dopo l'altra in meno di un
+secondo. È la loro entrata "dal basso" tradotta nel nostro asse Z.*
+
+```
+EFFECT: per-letter depth focus-in (replaces translateY rises).
+STACK: Framer Motion 13, motion.span per letter, or pure CSS @keyframes with --i for the stagger (preferred: 0 JS).
+MEASURED ON REFERENCES: horizonx 0.85 s / 0.7 s cubic-bezier(.16,1,.3,1), translateY(var(--rise)) rotate(var(--rot));
+  vividsites 0.7 s cubic-bezier(.22,.68,.32,1), translateY(18px) + blur(8px) -> none. Stagger not measured (estimate
+  18-25 ms/letter: the whole first line lands in <1 s).
+THE ONE RULE (DOM overlays of the film): opacity/transform of each overlay = smoothstep window on the ACT axis sp,
+  not on real p (brief). This per-letter entry is the OPENING of the title overlay in act 1: it plays on TIME once,
+  because it is part of the auto-intro, then the overlay's exit is a pure function of sp (back-to-front, blurring).
+GEOMETRY & NUMBERS:
+  from: opacity 0, transform: translateZ(-140px) (our --z-from), filter: blur(6px); to: none.
+  duration 700 ms, easing var(--ease) = cubic-bezier(.2,.7,.2,1), delay 150 ms + i * 22 ms, max 40 letters
+  (beyond that, the tail lands after 1 s: split into words, stagger per word 60 ms).
+  perspective 1200px on the h1 (our --persp). No rotateX on letters: rotation per letter reads as "fun", not "technical".
+  Exit (closing) per SPEC-FILM: opacity 1->0, translateZ(0 -> +120px) (toward the camera = "we pass through the
+  title"), blur 0 -> 4px, window 0.10 wide on sp, smoothstep.
+TRAPS:
+  - blur on 40 spans for 0.7 s is fine; blur that stays is not: force filter:none at the end (animation-fill-mode both
+    with a final keyframe filter:none).
+  - Wrap letters in inline-block spans with white-space: pre for spaces or the words collapse.
+  - aria: the h1 keeps the whole string in aria-label; spans are aria-hidden.
+  - will-change: transform, filter set only via the animation window (class toggled), not permanently.
+FLOORS: reduced-motion -> no animation, final state immediately. No JS -> final state (CSS-only variant is the reason
+  to prefer @keyframes here).
+COST: 0 kB. FILM ACT: 1 opening; the same recipe for the two repeated phrases in acts 3 and 5.
+```
+
+### E6 — Luce che corre lungo i filetti dell'HUD (da `ruled-flow`, shaders.com; misurato)
+
+*In italiano: le linee sottili dell'HUD (assi, cornici, il filo di avanzamento) ogni tanto sono percorse da una
+striscia di luce lime, una volta sola ciascuna, mai tutte insieme.*
+
+```
+EFFECT: light pulse travelling along hairlines.
+MEASURED: mask-position-x -38cqw -> 100cqw, opacity 0->1 by 2.5% and 1->0 by ~17% of a 9.3-9.8 s linear track,
+  iteration 1, several variants with slightly different timings (unsynchronized).
+STACK: CSS only; ::after with a gradient strip moved by transform (not mask-position, which repaints).
+THE ONE RULE: In the film the pulse is triggered by sp crossing a threshold (act boundary), not by time: the same
+  scroll position always shows the same pulse phase. Implementation: the strip's translateX = f(sp) over a 0.04
+  window; outside the window it is parked off-screen with opacity 0.
+GEOMETRY & NUMBERS: strip width 38% of the line, gradient transparent -> --acc -> transparent, travel from -100% to
+  +360% (so it fully leaves both ends), opacity 1 only in the middle 80% of the travel. If time-based (static page):
+  duration 9.5 s linear, delay per line = index * 1.3 s, one iteration, restart on re-entry via IntersectionObserver.
+  Never on more than 2 lines at once.
+TRAPS: overflow:hidden on the line; the strip must be a child with position:absolute, or it paints outside;
+  linear is right here (a light on a wire does not ease), the exception to "never linear" is deliberate and only
+  for a non-interface glow.
+FLOORS: reduced-motion -> no strip (static line). COST: 0 kB, compositor only.
+FILM ACT: 2 (Metodo: the grid room) and 5 (Monitor: the horizon bar), at act handoffs.
+```
+
+### E7 — Smear e frangia spettrale sul livello che passa oltre la camera (da `fold-carousel`, horizonx)
+
+*In italiano: quando un livello (una strategia) ci passa accanto e sparisce dietro la camera, per un attimo si
+"striscia" e i suoi bordi si separano nei tre colori, come in un obiettivo. Solo su desktop e solo per 0,1 di p.*
+
+```
+EFFECT: passing-layer motion smear + RGB fringe.
+OBSERVED: fold carousel side cards "smeared into streaks with a spectral edge fringe" (their words), visible in
+  frames as horizontal streaking and coloured edges on the folded cards.
+STACK (DOM version, our StrategyFlythrough): the layer's own translateZ already produces the pass. Add, as PURE
+  functions of layerZ(p): scaleX = 1 + 0.12 * k, where k = smoothstep(120, 520, z) (k rises only while the layer is
+  between "in focus" and "gone"); two aria-hidden clones of the layer's border/title (no text content: the clones are
+  the outline only) offset by +-3px * k in X, tinted with mix-blend-mode: screen in rgb(255,80,80) and rgb(80,160,255)
+  at opacity 0.35 * k. That is the fringe. No filter:blur (compositor-unsafe); the stretch reads as blur at speed.
+  Film version (r3f): a fullscreen post pass is NOT worth it (adds a render target); instead the LineMaterial
+  strands get vertex-colour fringing: draw each strand 3 times at +-1.2 px screen offset with R/G/B tint, only while
+  its local t is in RELEASE (0.55-0.80). Cost: 3x strands draw calls for 6 strands = nothing.
+GEOMETRY & NUMBERS: k window 120..520 px of z (from the existing opacity table [-1700,-900,-160,120,520]); max
+  stretch 12% (more reads as a glitch); fringe offset max 3 px (more separates into three legible copies).
+TRAPS: the clones must be position:absolute; inset:0 inside the layer, or they shift layout; never fringe the text
+  itself (unreadable, and a11y tools would see it three times).
+FLOORS: reduced-motion -> k = 0 always; phones -> fringe off (2 fewer layers per strategy).
+COST: 2 extra composited layers per strategy on desktop. FILM ACT: 3, the strands' RELEASE phase and the layer pass.
+```
+
+### E8 — Carta "tinta" con alone del proprio colore e contenuto che si sveglia a fuoco (da horizonx `card-glow-mesh` + anteprime su hover)
+
+*In italiano: ogni pannello di strategia ha dietro un alone del suo colore (oro, lime); quando è a fuoco l'alone
+sale un po' e il suo grafico comincia a muoversi; quando passa oltre, tutto si spegne.*
+
+```
+EFFECT: tinted halo + wake-on-focus.
+MEASURED: .card-glow-mesh opacity 0.069, translateY(-63px) (a blurred colour mesh behind each card); card
+  transitions opacity .45s ease-out + transform .2s; hover video plays.
+STACK: CSS ::before radial-gradient halo (no box-shadow animation), opacity driven by Framer useTransform of
+  layerZ(p) in the flythrough; the panel's chart canvas starts its rAF only when focus > 0.5 (IntersectionObserver
+  is not enough here because the layer is always "in view": use the same focus scalar).
+THE ONE RULE: halo opacity = 0.08 + 0.10 * focus(p); chart animation phase = t * focus(p) (so it freezes, never
+  jumps, when focus drops); hover adds +0.04 to the halo with a 180 ms transition.
+GEOMETRY & NUMBERS: halo = radial-gradient(60% 50% at 50% 30%, var(--st-oro) 0%, transparent 70%), 140% of the card
+  size, behind the card, opacity 0.08 base (measured 0.069 on the reference: ours a touch higher on a darker field).
+  Box-shadow (static, from DESIGN.md): 0 25px 75px -55px <strategy colour at 40%>.
+  Focus scalar: 1 - smoothstep(0, 400, |z|) with z = layerZ(p) (plateau of +-40 px already exists: full focus there).
+TRAPS: animating box-shadow = repaint; animate the ::before opacity instead. mix-blend-mode on the halo is
+  unnecessary on black and costs a compositing group: plain alpha.
+FLOORS: reduced-motion -> static halo at 0.12, chart static. COST: 0 kB. FILM ACT: 3 (strategy panels), 5 (monitor).
+```
+
+### E9 — Barra di navigazione che diventa pillola di vetro allo scroll, con avanzamento (horizonx, vividsites; misurato)
+
+*In italiano: all'inizio la barra è trasparente sul nero; appena si entra nel film diventa una pillola di vetro
+smerigliato con il contatore di atto e il filo di avanzamento. Sparisce (in Z) durante il wipe finale.*
+
+```
+EFFECT: glass pill nav + act counter + progress.
+MEASURED: horizonx nav fixed 1216x58 at top .75rem, radius pill, backdrop blur (blurEls present); vividsites sticky
+  72 px glass pill with mono counter "227 / 227".
+STACK: our existing top bar. State "in film" = sp > 0.02, set via the same p object (a class toggle on a ref, not
+  React state, once per crossing). backdrop-filter: blur(20px) saturate(1.1) on --surf at 78% alpha (DESIGN.md's
+  #0b0f12e8), border 1px --line.
+THE ONE RULE: pill alpha = smoothstep(0.00, 0.03, sp); progress bar scaleX = p; counter = 1 + floor(sp * 6)
+  (an integer step function of sp: the film has six acts; text swaps with 200 ms opacity, never counts).
+  Exit: translateZ(-300px) + opacity -> 0 over the wipe window (real p 0.90-1.0).
+TRAPS: backdrop-filter on an element with will-change:transform creates a new stacking context per frame on some
+  GPUs: keep the pill static in layout and move only its inner progress bar; toggle the blur class once, do not
+  animate blur radius. On phones use a solid --surf2 instead of blur (blur on iOS Safari with a WebGL canvas
+  underneath is the classic 20 fps trap).
+FLOORS: reduced-motion -> pill always on, no transform exit. 390 px: counter and email button collapse (already).
+COST: one blurred layer on desktop. FILM ACT: 2 -> 6.
+```
+
+### E10 — Bottone principale: sweep di luce + magnetismo leggero (da vividsites `luxSweep` + horizonx `scale 1.035`)
+
+*In italiano: la CTA principale, all'hover, viene attraversata una volta da un riflesso e si sposta di pochi pixel
+verso il mouse; al rilascio torna al suo posto con la curva del sito. È l'unico bottone che lo fa.*
+
+```
+EFFECT: light sweep + light magnetism on the primary CTA only.
+MEASURED: vividsites luxSweep translateX(120%) and hover translateY(-1px), transform .3s cubic-bezier(.22,.68,.32,1);
+  horizonx "Sign up" scale(1.035) .2s ease-out. Magnetism itself not measured on either: it is our proposal.
+STACK: CSS for the sweep (E-V4 code in §3.3); Framer useMotionValue for the offset; one pointermove listener on the
+  button only.
+THE ONE RULE: offset = clamp(pointer - centre, +-r) * k with k = 0.18 while hovering, k = 0 otherwise (spring back:
+  stiffness 260, damping 22); scale = 1 + 0.03 * hover. The sweep runs once per pointerenter (900 ms, var(--ease)).
+GEOMETRY & NUMBERS: r = half the button size + 24 px capture margin; max travel = 0.18 * r (about 6-8 px on a 44 px
+  button: felt, not seen). Anything above ~0.3 makes the label hard to hit for tremor users.
+TRAPS: magnetism on a button that also moves the layout (margin) breaks the hit target: transform only, and the
+  hit area is the untransformed box + the 24 px margin (use a padding wrapper). Never magnetize links in text.
+FLOORS: reduced-motion -> no offset, no sweep, colour change only (200 ms). Touch -> none. Keyboard focus shows the
+  DESIGN.md outline, unmoved.
+COST: 0 kB. FILM ACT: 6 (Contatti) and the "Apri il simulatore" CTA in act 5. One button per screen.
+```
+
+### Riserve (viste, utili, ma non tra i dieci)
+
+- **Render a bassa risoluzione** (shaders.com, dpr 0,21–0,44): `pixelDensity 0.5` sul nostro shader e `dpr` 1 sul
+  canvas 2D dei telefoni. È un risparmio, non un effetto: va fatto e basta.
+- **Riflesso del titolo** sotto la "superficie" (editor-hero di shaders.com): per il titolo dell'atto 1, `scaleY(-1)`
+  mascherato al 18 %. Solo se il titolo poggia visivamente su un piano (la stanza dell'atto 2 ha il "thin horizon
+  bar": lì ha senso).
+- **Dither/ASCII come texture** (textures horizonx): potrebbe diventare la grana della plate della figura (la nuvola
+  di punti campionata da una plate ditherata dà punti più "quantizzati" e tecnici). Da provare nel bake, non a runtime.
+- **Particelle disperse dal cursore che tornano a posto** (Orvane, 150k punti): lo stesso principio di E1 applicato
+  alle perle della figura: `offset = w(r) * A * perp(d)` sui vertici via attributo + uniform del puntatore in un
+  `onBeforeCompile`. Più caro (shader custom); tenuto come **fase 2** se E4 non basta.
+
+---
 
 ## 7. Piano di adozione nel film
 
-*(in compilazione)*
+Obiettivi dichiarati da Davide: **ingresso automatico all'apertura**, **interattività col mouse ovunque**, **fluidità
+continua**, **movimento verso l'interno**. Vincolo: la ONE RULE di `SPEC-FILM.md` (tutto funzione pura di `p`; il
+DOM sull'asse degli atti `sp`; due accenti mai nello stesso fotogramma; floors non negoziabili).
+
+### 7.1 Come stanno insieme ONE RULE, tempo e mouse (da fissare prima di scrivere codice)
+
+Ogni valore della scena è `V = F(p) + G(t) + H(m)` con:
+- `F(p)`: la camera, i keyframe, le finestre degli overlay, i fili. **Solo** questa parte muove la camera e il suo
+  target. Scrub avanti/indietro → stesso fotogramma.
+- `G(t)`: respiro a media zero (E4, la deriva della stanza, il flusso delle traiettorie E1). Ampiezze piccole,
+  frequenze incommensurabili, mai sul target della camera. **Questa è la "fluidità continua"**: la pagina vive
+  anche da ferma, senza rubare lo scroll (niente Lenis).
+- `H(m)`: il puntatore, **smussato all'ingresso** (costante di tempo 120–150 ms, calcolata con `dt`), poi usato in
+  modo puro. Inclina la figura (E4), piega il campo (E1), sposta la torcia (E2), guida il cursore (E3). Zero su
+  touch, zero con reduced-motion.
+- Trappola da scrivere nel codice come commento: **si smussa solo l'input `m`, mai un valore di scena**; un
+  secondo lerp dentro la scena è stato nascosto e crea isteresi (scrub all'indietro ≠ scrub in avanti).
+
+**Ingresso automatico** (l'unica eccezione, come deciso in SPEC-FILM): `p_eff = clamp01(p_scroll + off)`, con
+`off = min(off_t, off_p)`, `off_t = 0.06 · smoothstep(0, 1, t / 2.5 s)`, `off_p = 0.06 · max(0, 1 − p_scroll / 0.12)`.
+Perché così: a `t = 0` vale 0 (si parte fermi davanti allo schermo); dopo 2,5 s vale 0,06 (siamo entrati); quando
+l'utente scorre, `off` scende linearmente e `p_eff` continua a **salire** (derivata ≥ 0,5: mai un passo indietro);
+scrub a `p_scroll = 0` dopo l'intro → `p_eff = 0.06`, il fotogramma post-intro, coerente. Con reduced-motion `off_t`
+è 0,06 dal primo frame (nessuna auto-riproduzione). Nessuno stato dentro la scena: `t` e `p_scroll` sono i due
+scalari scritti nell'oggetto condiviso una volta per frame.
+
+**La sequenza d'ingresso**, dai frame di Davide (`esempio/00-arrivo.png` → `play-3.png`): atto 0 = davanti a uno
+schermo con il grafico (piano `PlaneGeometry` con `CanvasTexture` del grafico "Profondità", cornice sottile, alone
+lime sotto); `p_eff` 0 → 0,06: la camera avanza (leg LINEARE, come chiede il brief per le partenze) fino ad
+attraversare il piano; il piano sfuma (`opacity = 1 − smoothstep(0.03, 0.06, p)`) e dietro ci sono già le
+traiettorie in 3D (le stesse curve, estruse in profondità) che convergono al punto di fuga; l'HUD DOM (data
+`2026-09`, capitale `328.232 €`, "capitale mediano nel percorso") è una **funzione di `sp`**: indice della serie
+= `floor(sp · N)`, valore = `serie[indice]`, `tabular-nums`, larghezza fissa. Non è un contatore che sale: è la
+lettura della serie nel punto in cui siamo (compatibile con "mai contatori"). Le cifre vengono da `COPY.md`/docs,
+non dal codice.
+
+### 7.2 Quali prompt-specifica, in quale atto, in che ordine di costruzione
+
+| Ordine | Effetto | Atto del film | Perché prima | Fallback / floor |
+|---|---|---|---|---|
+| 1 | **Ingresso automatico** (§7.1) + **E5** titolo a fuoco da dietro | 0 → 1 (Ingresso) | È la richiesta n. 1 di Davide ed è la cosa che rende il sito "non statico" nei primi 3 s | reduced-motion: fotogramma post-intro statico, titolo già nitido |
+| 2 | **E4** respiro + inclinazione della figura | 1 (Ingresso), sfuma entro l'atto 2 | Fluidità continua a costo zero; usa la figura già prevista dal brief | touch: solo respiro; reduced: fermo |
+| 3 | **E2** torcia lime + **E3** cursore anello | tutti (spenti nel wipe) | Interattività "ovunque" con due layer DOM, senza toccare la scena | pointer:coarse e reduced: nascosti |
+| 4 | **E1** campo che si piega al puntatore | 3 (Strategie) e 4 (Rischio) | È l'effetto più vicino ai dati: il visitatore "tocca" le traiettorie. Sul canvas 2D esistente, poi sui fili `LineSegments2` | telefono: 24 tracce, nessun bend; reduced: disegno statico |
+| 5 | **E8** alone tinto + sveglia a fuoco, **E9** nav a pillola | 3 (pannelli), 2 → 6 (nav) | Struttura e orientamento; poco costo | telefono: nav senza blur |
+| 6 | **E6** luce sui filetti agli snodi di atto, **E10** CTA con sweep e magnetismo | 2 e 5 (E6); 5 e 6 (E10) | Rifiniture: si fanno quando il resto è misurato | reduced: niente |
+| 7 (opzionale) | **E7** smear + frangia sul livello che passa | 3 | Solo desktop, solo dopo aver misurato gli fps di 1–6 | telefono/reduced: off |
+
+Regole di cantiere che vengono dai tre siti e dai nostri documenti:
+- **Un solo canvas WebGL** in pagina (il film). Il grafico "Profondità" resta canvas 2D finché non entra nel film
+  come `CanvasTexture`; mai due contesti GL vivi insieme (horizonx ne ha uno per tool e sta a 5–12 s di caricamento).
+- **DPR**: 1 su telefono, 1,5 desktop (brief); `pixelDensity 0.5` per lo sfondo sfocato (lezione shaders.com).
+- **Peso**: i tre siti stanno fra 28 e 223 MB per la home. Noi: prima schermata ≤ 350 kB gzip senza film, film in
+  chunk separato dopo il primo disegno; niente video, niente mp4, niente HDR remoti.
+- **Accenti**: lime alla figura e ai fili, oro alla stanza (E1 campo oro, E2 torcia lime: la torcia si spegne
+  nell'atto 2, la stanza, dove l'oro comanda; si riaccende nell'atto 3 sui pannelli lime). Da verificare con lo
+  screenshot a ogni confine: mai i due insieme.
+- **Misurare prima di aggiungere**: dopo i passi 1–4, screenshot a 8 punti di `p` in avanti e indietro (devono
+  coincidere a meno di `G(t)`), CLS 0, nessuno scroll orizzontale a 390 px, fps su un telefono vero (qui non si può).
+
+### 7.3 Proposte per l'art director (palette e tipografia), riassunte
+
+1. Nero **tinto** confermato (`#080b0e`): i tre riferimenti sono neutri, il brief chiede un nero che tiene la tinta.
+2. Titolo a **due toni** confermato (vividsites fa lo stesso); peso 500, tracking −0,045 em: nel mezzo del gruppo.
+3. **Più mono**: etichette dell'HUD, contatore di atto, data e capitale in IBM Plex Mono 12–14 px maiuscolo con
+   +0,13 em; è ciò che rende "strumento" shaders.com e vividsites.
+4. Raggi: valutare **8 px** sulle carte del film (oggi 14) per un tono più tecnico; 4 e pillola restano.
+5. Un **colore di stato** distinto dall'accento non serve: `--ok` = lime con icona/testo, come già scritto. Il verde
+   `#4ade80` di vividsites non si importa.
+6. Cursore: anello lime al 70 %, punto lime 6 px, cursore di sistema visibile. Nessun `cursor: none`.
+
+### 7.4 Cosa non abbiamo potuto verificare (e va fatto su una macchina vera)
+
+- Tutto shaders.com in movimento (WebGPU) e tutte le anteprime mp4 (vividsites, horizonx explore): qui poster o nero.
+- Fps reali di E1/E4/E7 su telefono economico e su Safari/iOS (sticky + 3D + blur).
+- Il magnetismo di E10 e lo stagger di E5: valori proposti, non misurati sui riferimenti.
+- I file di questa osservazione (screenshot, video, `measure.json`, `note.json`) sono nello scratchpad indicato in §0:
+  non fanno parte del repository e vanno copiati altrove se servono dopo la sessione.
