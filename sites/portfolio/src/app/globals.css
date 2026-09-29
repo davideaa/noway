@@ -600,9 +600,11 @@
 }
 .dtable .r {
   text-align: right;
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+.dtable td.r {
+  font-family: var(--font-mono);
 }
 .dtable tr.emph > * {
   font-weight: 600;
@@ -871,6 +873,7 @@
   inset: 0;
   perspective: 1000px;
   perspective-origin: 50% 50%;
+  transform-style: preserve-3d; /* il livello piu' vicino sta sopra, non l'ultimo nel DOM */
 }
 .zlayer {
   position: absolute;
@@ -921,6 +924,7 @@
   .zpersp {
     position: static;
     perspective: none;
+    transform-style: flat;
     display: grid;
     gap: var(--sp-5);
     justify-items: center;
@@ -954,6 +958,7 @@ html:not(.js) .zstage {
 html:not(.js) .zpersp {
   position: static;
   perspective: none;
+  transform-style: flat;
   display: grid;
   gap: var(--sp-5);
   justify-items: center;
@@ -999,7 +1004,7 @@ html:not(.js) .hero__content {
 }
 .frames-still > i {
   position: absolute;
-  left: 50%;
+  left: 72%;
   top: 50%;
   width: 70vmin;
   height: 70vmin;

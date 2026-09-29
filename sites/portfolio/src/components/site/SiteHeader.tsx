@@ -1,7 +1,7 @@
 "use client";
 
 import { useScroll } from "framer-motion";
-import * as m from "framer-motion/m";
+import { motion as m } from "framer-motion";
 import { Mail, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
@@ -63,7 +63,7 @@ export function SiteHeader() {
                 key={s.id}
                 href={`#${s.id}`}
                 aria-current={isActive ? "location" : undefined}
-                className={`relative flex h-11 items-center px-3 text-sm font-medium transition-colors duration-300 hover:text-acc ${
+                className={`relative flex h-11 items-center px-3 text-sm font-medium transition-[color] duration-300 hover:text-acc ${
                   isActive ? "text-acc" : "text-mut"
                 }`}
               >

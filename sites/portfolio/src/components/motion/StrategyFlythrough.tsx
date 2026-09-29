@@ -13,7 +13,7 @@
  * globals.css, stesso DOM, livelli uno sotto l'altro.
  */
 import { useScroll, useTransform, type MotionValue } from "framer-motion";
-import * as m from "framer-motion/m";
+import { motion as m } from "framer-motion";
 import { Children, useRef, type ReactNode } from "react";
 import { useMotionPrefs } from "./MotionPrefs";
 

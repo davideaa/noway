@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
  * (MOTION.md), nessuno spostamento verticale. Colori solo da token.
  */
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent text-sm font-semibold whitespace-nowrap outline-none select-none transition-[transform,background-color,border-color,color] duration-[180ms] ease-[var(--ease)] focus-visible:outline-2 focus-visible:outline-offset-[5px] focus-visible:outline-acc disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent text-sm font-semibold whitespace-nowrap select-none transition-[transform,background-color,border-color,color] duration-[180ms] ease-[var(--ease)] disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
