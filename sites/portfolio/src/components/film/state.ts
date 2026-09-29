@@ -253,9 +253,64 @@ export function strandAnchor(s: Strand, aspect: number, out: { x: number; y: num
 /** Inviluppo del bank nella discesa (atto 4): ~15 gradi a meta' caduta, dritto all'arrivo. */
 export const valleyBank = (sp: number) => Math.sin(Math.PI * clamp01((sp - 0.68) / (0.86 - 0.68))) * (15 * Math.PI) / 180;
 
-/** Nebbia: il fondo lontano si dissolve; per il wipe si chiude tutta (su p reale). */
+/**
+ * Nebbia: il fondo lontano si dissolve; nel wormhole si APRE (si vede piu'
+ * lontano, il tunnel ha una fine luminosa); per il wipe si chiude tutta (su p reale).
+ */
 export function fogFar(p: number) {
-  return mix(95, 3.5, smoothstep(0.82, 0.985, p));
+  const open = mix(95, 150, wormGate(actAxis(p)));
+  return mix(open, 3.5, smoothstep(0.82, 0.985, p));
+}
+
+/**
+ * RITMO DEL PLAY AUTOMATICO: secondi per unita' di p, interpolati linearmente
+ * fra i nodi. Corridoio (atti 2-3) veloce, valle (atto 4) lenta, arrivo in
+ * frenata. Integrale ~25 s + la partenza dolce: il film intero in 25-30 s.
+ * Il play muove SOLO lo scroll della pagina: p resta la posizione di scroll,
+ * la scena non sa che si sta riproducendo da sola (ONE RULE intatta).
+ */
+const PLAY_KNOTS: [number, number][] = [
+  [0.0, 30],
+  [0.13, 30],
+  [0.2, 24],
+  [0.3, 20],
+  [0.36, 16],
+  [0.56, 16],
+  [0.6, 40],
+  [0.7, 40],
+  [0.76, 25],
+  [0.88, 22],
+  [1.0, 30],
+];
+export function playSecondsPerUnit(p: number) {
+  const x = clamp01(p);
+  for (let i = 1; i < PLAY_KNOTS.length; i++) {
+    const [p0, s0] = PLAY_KNOTS[i - 1];
+    const [p1, s1] = PLAY_KNOTS[i];
+    if (x <= p1) return mix(s0, s1, (x - p0) / (p1 - p0));
+  }
+  return PLAY_KNOTS[PLAY_KNOTS.length - 1][1];
+}
+
+/** Atto corrente 1..6 = gate piu' alto (per il contatore della barra: intero, mai un conteggio). */
+export function currentAct(gates: number[]) {
+  let k = 0;
+  for (let i = 1; i < gates.length; i++) if (gates[i] > gates[k]) k = i;
+  return k + 1;
+}
+
+/**
+ * E6 - luce che corre lungo il filetto della barra agli snodi di atto: posizione
+ * -1..1 (fuori = parcheggiata), funzione di sp su finestre di 0.04. Stesso
+ * scroll, stessa fase: mai tempo.
+ */
+export const PULSE_AT = [0.2, 0.38, 0.66, 0.86];
+export function hairlinePulse(sp: number) {
+  for (const at of PULSE_AT) {
+    const u = (sp - at) / 0.04;
+    if (u > 0 && u < 1) return { x: -0.38 + u * 1.76, a: Math.sin(Math.PI * u) };
+  }
+  return { x: -1, a: 0 };
 }
 
 /**
