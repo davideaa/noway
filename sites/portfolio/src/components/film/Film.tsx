@@ -386,9 +386,32 @@ export function Film() {
       if (isControl(e)) return;
       if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " ", "Spacebar"].includes(e.key)) player.interrupt("tasti");
     };
+    // Scroll non nostro (scrollbar, gesture del touchpad senza wheel, tasti del browser).
+    // ATTENZIONE: su dispositivi veri lo scroll e' composito e `window.scrollY` puo' leggere in
+    // ritardo di un fotogramma rispetto al nostro scrollTo: con tolleranza 3 px il play si fermava
+    // da solo appena partito. Regole: (1) qualsiasi evento scroll entro 250 ms da un nostro
+    // scrollTo e' nostro; (2) oltre, serve una differenza grande (>= 48 px o 3 fotogrammi di
+    // corsa) per DUE eventi consecutivi prima di fermare.
+    let ourScrollAt = -1;
+    let farCount = 0;
     const onScroll = () => {
-      // scroll non nostro (scrollbar, tasti, gesture): il play si ferma dov'e'
-      if (player.playing && expectedY >= 0 && Math.abs(window.scrollY - expectedY) > 3) player.interrupt("scroll");
+      if (!player.playing || expectedY < 0) return;
+      const now = performance.now();
+      if (ourScrollAt >= 0 && now - ourScrollAt < 250) {
+        farCount = 0;
+        return;
+      }
+      const tol = Math.max(48, Math.abs(lastStepPx) * 3);
+      if (Math.abs(window.scrollY - expectedY) > tol) {
+        if (++farCount >= 2) {
+          farCount = 0;
+          player.interrupt("scroll");
+        }
+      } else farCount = 0;
+    };
+    // Trascinare la barra di scorrimento del browser (mousedown fuori dall'area della pagina).
+    const onMouseDown = (e: MouseEvent) => {
+      if (player.playing && e.clientX >= document.documentElement.clientWidth) player.interrupt("barra di scorrimento");
     };
     window.addEventListener("wheel", onWheel, { passive: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -397,6 +420,7 @@ export function Film() {
     window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKey);
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("mousedown", onMouseDown, { passive: true });
     const unErrors = installErrorCapture();
 
     let raf = 0;
@@ -416,9 +440,12 @@ export function Film() {
     let allFrames = 0;
     let allSeconds = 0;
     let diagAt = 0;
+    let lastStepPx = 0;
     const setScrollP = (s: number) => {
       const y = trackTop + clamp01(s) * scrollLen;
+      if (expectedY >= 0) lastStepPx = Math.round(y) - expectedY;
       expectedY = Math.round(y);
+      ourScrollAt = performance.now();
       try {
         html.scrollTo({ top: y, behavior: "instant" });
       } catch {
@@ -674,6 +701,7 @@ export function Film() {
       window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousedown", onMouseDown);
       unErrors();
       unPlayer();
       html.style.scrollBehavior = prevBehavior;
