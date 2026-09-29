@@ -4,13 +4,14 @@ export const SITE_NAME = "Portfolio Algo Manager";
 /** COPY.md v2 (sez. 2, versione "tre strategie"). */
 export const TITLE = "Strategie algoritmiche su oro, Nasdaq e USDJPY: il metodo";
 export const DESCRIPTION =
-  "Tre strategie su oro, Nasdaq e USDJPY: criteri fissati prima del test, fuori campione, correlazioni e drawdown. Sono backtest, non risultati reali.";
+  "Tre strategie su oro, Nasdaq e USDJPY: criteri fissati prima del test, correlazioni e drawdown. Risultati validati fuori campione, non garantiti.";
 export const DETTAGLI_TITLE = "Tre strategie algoritmiche: metodo, numeri e rischio";
 
 /** L'unico h1 (COPY.md 3.1) e le due frasi del film (COPY.md 3.2 e footer): il film non ha altro testo. */
 export const FILM_H1 = "Tre strategie algoritmiche, misurate e raccontate senza ritocchi";
 export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
-export const FILM_PHRASE_B = "Backtest, non risultati reali.";
+/** Frase B del film (una sola costante: se Davide manda la sua versione, si cambia qui). */
+export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
 
 /**
  * La frase sul rischio (COPY.md, "Navigazione e barra fissa" e 3.9; fonte:

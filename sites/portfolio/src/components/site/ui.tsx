@@ -56,7 +56,7 @@ export function SceneHeader({
 }
 
 /** Etichetta su ogni grafico o tabella di risultati (COPY.md, microcopy). */
-export function BacktestTag({ children = "Backtest · non è un risultato reale" }: { children?: ReactNode }) {
+export function BacktestTag({ children = "Backtest · validato fuori campione" }: { children?: ReactNode }) {
   return <span className="tag">{children}</span>;
 }
 

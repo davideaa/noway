@@ -251,7 +251,8 @@ export function Film({ panel }: { panel: ReactNode }) {
     const setScrollP = (s: number) => {
       const y = trackTop() + clamp01(s) * scrollLen();
       expectedY = Math.round(y);
-      window.scrollTo(0, y);
+      // "instant": html ha scroll-behavior: smooth, e uno scroll animato sarebbe letto come input dell'utente
+      window.scrollTo({ top: y, behavior: "instant" });
     };
 
     const loop = (now: number) => {

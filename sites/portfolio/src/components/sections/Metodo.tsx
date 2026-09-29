@@ -3,7 +3,7 @@ import { BacktestTag, Reveal, RiskNote, SceneHeader, TableScroll, Term } from "@
 const GLOSSARIO: [string, string][] = [
   ["XAUUSD", "il prezzo dell’oro in dollari."],
   ["Trend following", "seguire il movimento del prezzo invece di scommettere sul suo ritorno."],
-  ["Backtest", "simulazione di una strategia sui dati del passato. Non è un risultato reale."],
+  ["Backtest", "simulazione di una strategia sui dati del passato, qui validata fuori campione. Non garantisce rendimenti futuri."],
   [
     "R",
     "l’unità di misura dei risultati. 1 R è il rischio corso in quell’operazione: se in un’operazione si rischiano 100 €, +2 R vuol dire +200 €. Rende i risultati confrontabili qualunque sia il rischio scelto.",

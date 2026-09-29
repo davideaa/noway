@@ -1,5 +1,5 @@
 import { PauseButton } from "@/components/motion/PauseButton";
-import { EMAIL_SHOWN, MAILTO } from "@/lib/site";
+import { EMAIL_SHOWN, MAILTO, RISK_SHORT } from "@/lib/site";
 
 /** Footer (COPY.md, "Footer"). Righe con [DA COMPLETARE] omesse: vedi DA-COMPLETARE.md. */
 export function SiteFooter() {
@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="border-t border-line bg-bg py-8">
       <div className="wrap flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2 text-sm">
-          <p className="text-ink">Backtest, non risultati reali. Trading ad alto rischio. Non è consulenza finanziaria.</p>
+          <p className="text-ink">{RISK_SHORT}.</p>
           <p className="text-mut">
             <a href={MAILTO} className="mono py-3 text-ink underline underline-offset-4 hover:text-acc">
               {EMAIL_SHOWN}

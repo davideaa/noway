@@ -31,7 +31,8 @@ export function Hero() {
         <Reveal i={2}>
           <p className="hero__lead mt-6">
             Un portafoglio di tre sistemi automatici su oro (XAUUSD), Nasdaq e USDJPY. Ogni criterio è dichiarato prima
-            del test. Ogni numero scomodo resta sul tavolo. E i risultati sono di backtest: non sono risultati reali.
+            del test. Ogni numero scomodo resta sul tavolo. E i risultati sono di backtest validati fuori campione: non
+            garantiscono rendimenti futuri.
           </p>
         </Reveal>
         <Reveal i={3} className="mt-8 flex flex-wrap items-center gap-3">
@@ -57,7 +58,7 @@ export function Hero() {
 
       <Reveal i={5} className="mt-10 space-y-3 md:mt-14">
         <div className="flex flex-wrap items-center gap-3">
-          <BacktestTag>Backtest · non è un risultato reale</BacktestTag>
+          <BacktestTag />
           <span className="chip-solid t-note">Periodo 2019.01–2026.09, 93 mesi (il 2026 arriva a settembre)</span>
         </div>
         <ul className="stats">

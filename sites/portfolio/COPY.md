@@ -453,7 +453,8 @@ Le risposte hanno carattere informativo sul metodo. Non è consulenza finanziari
 
 ### Footer
 
-Riga 1: `Backtest, non risultati reali. Trading ad alto rischio. Non è consulenza finanziaria.`
+Riga 1: `Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria.`
+> Fonte: richiesta di Davide, riformulata (v3): stessa versione breve della barra fissa (`RISK_SHORT`).
 Riga 2: `© [DA COMPLETARE: anno e titolare] · PORTFOLIOALGOMANAGER21@gmail.com · Avviso sul rischio`
 Riga 3 (se servono): `[DA COMPLETARE: informativa sulla privacy, se il sito usa analisi o cookie; con il solo pulsante email non c'è modulo di raccolta dati]`
 
@@ -494,7 +495,7 @@ Oggetto precompilato: `Domanda sul metodo`. Corpo: "Ciao, vorrei chiedere:" (l'u
 | Regole di una strategia non pubblicate | `Le regole di questa strategia sono descritte nel simulatore e non sono ancora riportate in questa pagina.` |
 | Sezione live senza risultati | `Nessun risultato in tempo reale da mostrare. Il demo non è ancora iniziato.` (solo se confermato) `[DA COMPLETARE]` |
 | Link a "avviso" nella barra fissa | `Leggi l'avviso completo` |
-| Etichetta su ogni grafico o tabella di risultati | `Backtest · non è un risultato reale` |
+| Etichetta su ogni grafico o tabella di risultati | `Backtest · validato fuori campione` (v3, richiesta di Davide riformulata; prima: `Backtest · non è un risultato reale`) |
 | Etichetta sull'anno 2026 in ogni tabella | `2026: anno parziale, fino a settembre` |
 | Tooltip su "fuori campione" | `Dati tenuti chiusi durante la costruzione e usati una sola volta per la verifica.` |
 | Tooltip su "correlazione mensile" | `Quanto i risultati mensili di due strategie si muovono insieme: +1 sempre insieme, 0 indipendenti, −1 opposti. Su 93 mesi il margine di errore è circa ±0,2.` |
