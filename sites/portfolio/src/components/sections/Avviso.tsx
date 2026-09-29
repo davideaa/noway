@@ -20,10 +20,12 @@ export function Avviso() {
             </li>
             <li>
               <strong>
-                I risultati di questa pagina sono simulazioni (backtest) su dati storici. Non sono risultati reali.
+                Risultati di backtest validati fuori campione con metodo quantitativo: criteri fissati prima del test,
+                dati mai visti, bootstrap a blocchi.
               </strong>{" "}
-              Non possono riprodurre tutto quello che succede su un conto reale: slittamenti, differenze di esecuzione,
-              costi diversi da quelli simulati, comportamento di chi opera.
+              Non garantiscono rendimenti futuri: indicano la mediana di cosa aspettarsi, e il suo intervallo, se il
+              vantaggio esiste e non si è rotto. Non possono riprodurre tutto quello che succede su un conto reale:
+              slittamenti, differenze di esecuzione, costi diversi da quelli simulati, comportamento di chi opera.
             </li>
             <li>
               <strong>I risultati passati non garantiscono quelli futuri.</strong> I parametri sono stati scelti

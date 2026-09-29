@@ -5,9 +5,15 @@
 
 /**
  * UN canvas, UNA scena, sei atti. Ogni useFrame legge `film` (state.ts) e scrive
- * la scena come funzione pura di p: niente state, niente molle. L'ordine dei
- * useFrame e' per priorita' (negativa = prima), il post chain ha priorita' 1 e
- * disegna lui (R3F non disegna piu' da solo).
+ * la scena come funzione pura di p (+ il respiro G(t) e il puntatore H(m), gia'
+ * smussato all'ingresso): niente state, niente molle. L'ordine dei useFrame e'
+ * per priorita' (negativa = prima), il post chain ha priorita' 1 e disegna lui
+ * (R3F non disegna piu' da solo).
+ *
+ * Costi dichiarati (desktop): figura 1 draw call istanziato (40k), gabbia 1,
+ * stanza 3 shell + 1 nube di particelle (900 segmenti), fili 1 (LineSegments2),
+ * orizzonte 1; post: bloom (5 mip) + lente/frangia (1 pass, 15 tap al picco,
+ * SPENTO a riposo) + vignette + output + grana.
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
@@ -32,13 +38,18 @@ import {
   figureGate,
   film,
   fogFar,
+  fringeAmount,
   horizonGate,
   latticeBuild,
+  lensAmount,
   limeInFrame,
   mix,
   roomGate,
   smoothstep,
+  speedNorm,
+  spine,
   strandAnchor,
+  wormGate,
   type Pose,
 } from "./state";
 
@@ -61,12 +72,19 @@ const BEAD_SCALE = 0.13;
 /** Segmenti per filo: meno su telefono, MAI meno fili. */
 const SEG_DESKTOP = 28;
 const SEG_MOBILE = 12;
+/** Particelle del wormhole: meno su telefono. */
+const DUST_DESKTOP = 900;
+const DUST_MOBILE = 350;
 /** Guadagno del bone dei fili: sopra la soglia di bloom (1.15) in spazio lineare. */
 const STRAND_GAIN = 1.5;
 const LIME_HUE = 82 / 360;
 
 /* --------------------------------------------------------------------------
-   FIGURA: nuvola di perle istanziate, ombreggiatura bake in instanceColor
+   FIGURA: nuvola di perle istanziate, ombreggiatura bake in instanceColor.
+   E4: respiro G(t) a tre frequenze incommensurabili (non si ripete a vista),
+   che si calma con p (il moto appartiene all'ingresso, nel corridoio c'e' gia'
+   lo swing); inclinazione H(m) dal puntatore smussato, attorno al proprio
+   centro (traslazione compensativa). Una matrice per frame: le perle sono ferme.
    -------------------------------------------------------------------------- */
 function Figure() {
   const ref = useRef<THREE.InstancedMesh>(null!);
@@ -121,12 +139,17 @@ function Figure() {
     m.visible = g > 0.002;
     if (!m.visible) return;
     const still = film.reduced || film.paused;
-    // idle: float di tutta la figura (solo tempo, mai la camera) + tilt dal cursore
-    const floatY = still ? 0 : Math.sin(film.t * 0.6) * 0.22;
-    const tiltX = film.reduced ? 0 : -film.my * 0.12;
+    // G(t): tre frequenze, ampiezze del 2,5% di una figura di 14 unita'; si calma con p
+    const calm = 1 / (1 + film.p * 4);
+    const t = film.t;
+    const floatY = still ? 0 : 0.35 * Math.sin(t * 0.9) * calm;
+    const gy = still ? 0 : 0.04 * Math.sin(t * 0.37) * calm;
+    const gz = still ? 0 : 0.015 * Math.sin(t * 0.61 + 1.3) * calm;
+    // H(m): +-8 / +-10 gradi dal puntatore gia' smussato (zero su touch e reduced)
+    const tiltX = film.reduced ? 0 : -film.my * 0.14;
     const tiltY = film.reduced ? 0 : film.mx * 0.18;
     const s = 1 + (1 - g) * 0.3; // passando attraverso, si apre
-    rot.set(tiltX, tiltY, 0);
+    rot.set(tiltX, tiltY + gy, gz);
     m.rotation.copy(rot);
     m.scale.setScalar(s);
     // traslazione compensativa: il perno resta al centro della figura, non all'origine
@@ -244,10 +267,15 @@ function Lattice({ palette }: { palette: Palette }) {
 }
 
 /* --------------------------------------------------------------------------
-   STANZA: tre cilindri wireframe annidati (r 9 / 13.95 / 19.8), asse lungo -Z,
-   camera dentro. Deriva 0.055 / -0.03 / 0.014: la shell lontana CONTROruota,
-   altrimenti le tre si leggono come un solo tubo. Niente pavimento: dove
-   starebbe, c'e' la nebbia. Il colore e' oro SOLO quando il lime non e' in scena.
+   STANZA -> WORMHOLE: tre cilindri wireframe annidati (r 9 / 13.95 / 19.8),
+   asse lungo -Z, camera dentro. Deriva 0.055 / -0.03 / 0.014: la shell lontana
+   CONTROruota. Niente pavimento: dove starebbe, c'e' la nebbia.
+   Nel wormhole (atti 2-3) le shell si TORCONO a elica lungo Z con la velocita'
+   della camera (dz/dsp analitica: niente stato), le longitudinali diventano
+   eliche; bande luminose scorrono verso la camera (sopra la soglia di bloom);
+   un respiro radiale G(t) piccolissimo. Tutto nel vertex shader, funzione di
+   (p, t): la geometria non si tocca mai. Il colore e' oro SOLO quando il lime
+   non e' in scena.
    -------------------------------------------------------------------------- */
 const ROOM = [
   { r: 9, drift: 0.055 },
@@ -256,6 +284,42 @@ const ROOM = [
 ];
 const ROOM_Z0 = 8;
 const ROOM_Z1 = -262;
+
+const SHELL_VERT = /* glsl */ `
+  uniform float uTwist;     // rad per unita' di z, relativo alla camera
+  uniform float uCamZ;
+  uniform float uBandPhase; // fase delle bande (funzione di camZ)
+  uniform float uWorm;      // gate del wormhole 0..1
+  uniform float uBreath;    // G(t): respiro radiale
+  uniform float uFogNear;
+  uniform float uFogFar;
+  varying float vBand;
+  varying float vFog;
+  void main() {
+    float dz = position.z - uCamZ;
+    float a = uTwist * dz;
+    float c = cos(a), s = sin(a);
+    vec2 xy = vec2(position.x * c - position.y * s, position.x * s + position.y * c);
+    xy *= 1.0 + 0.03 * uWorm * sin(position.z * 0.11 + uBreath);
+    vec3 p = vec3(xy, position.z);
+    float band = pow(0.5 + 0.5 * sin(position.z * 0.45 + uBandPhase), 14.0);
+    vBand = band * uWorm;
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vFog = smoothstep(uFogNear, uFogFar, -mv.z);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const SHELL_FRAG = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  varying float vBand;
+  varying float vFog;
+  void main() {
+    // le bande vanno sopra la soglia di bloom (1.15): e' il post a farle brillare
+    vec3 col = uColor * (1.0 + 1.6 * vBand);
+    gl_FragColor = vec4(col, uOpacity * (1.0 + 1.2 * vBand) * (1.0 - vFog));
+  }
+`;
 
 function ringsGeometry(r: number) {
   const step = 6;
@@ -273,12 +337,149 @@ function ringsGeometry(r: number) {
     if (zi < n)
       for (let a = 0; a < longs; a++) {
         const t = (a / longs) * Math.PI * 2;
-        pts.push(Math.cos(t) * r, Math.sin(t) * r, z, Math.cos(t) * r, Math.sin(t) * r, z - step);
+        // le longitudinali sono spezzate in 3 per lasciarsi torcere a elica
+        for (let k = 0; k < 3; k++) {
+          const za = z - (step * k) / 3;
+          const zb = z - (step * (k + 1)) / 3;
+          pts.push(Math.cos(t) * r, Math.sin(t) * r, za, Math.cos(t) * r, Math.sin(t) * r, zb);
+        }
       }
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
   return g;
+}
+
+function makeShellMaterial(color: string) {
+  return new THREE.ShaderMaterial({
+    vertexShader: SHELL_VERT,
+    fragmentShader: SHELL_FRAG,
+    uniforms: {
+      uTwist: { value: 0 },
+      uCamZ: { value: 0 },
+      uBandPhase: { value: 0 },
+      uWorm: { value: 0 },
+      uBreath: { value: 0 },
+      uFogNear: { value: 18 },
+      uFogFar: { value: 95 },
+      uColor: { value: new THREE.Color(color) },
+      uOpacity: { value: 0.22 },
+    },
+    transparent: true,
+    depthWrite: false,
+  });
+}
+
+/* Particelle: segmenti (punto + scia) distribuiti in un cilindro attorno all'asse.
+   z = f(camZ, p, t) nel vertex shader: fisse nel mondo piu' una corrente verso
+   la camera proporzionale al gate; la SCIA si allunga con la velocita' della
+   spina (derivata analitica). Nessuno stato: scrub avanti = scrub indietro. */
+const DUST_VERT = /* glsl */ `
+  attribute vec3 aSeed;   // z0 (0..span), raggio, angolo
+  attribute float aEnd;   // 0 = punto, 1 = coda della scia
+  uniform float uCamZ;
+  uniform float uSpan;
+  uniform float uFollow;  // 1 = ferme nel mondo; >1 = scorrono verso la camera
+  uniform float uFlow;    // G(t): deriva lenta
+  uniform float uStreak;  // lunghezza della scia (velocita')
+  uniform float uFogFar;
+  varying float vA;
+  void main() {
+    float u = mod(aSeed.x + uCamZ * uFollow + uFlow, uSpan);
+    float z = uCamZ + 0.12 * uSpan - u + aEnd * uStreak;
+    vec3 p = vec3(cos(aSeed.z) * aSeed.y, sin(aSeed.z) * aSeed.y, z);
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    float fog = smoothstep(uFogFar * 0.25, uFogFar, -mv.z);
+    float k = u / uSpan;
+    vA = smoothstep(0.0, 0.08, k) * (1.0 - smoothstep(0.6, 1.0, k)) * (1.0 - fog) * (1.0 - 0.75 * aEnd);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+const DUST_FRAG = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  varying float vA;
+  void main() {
+    gl_FragColor = vec4(uColor, uOpacity * vA);
+  }
+`;
+const DUST_SPAN = 120;
+
+function Dust({ palette }: { palette: Palette }) {
+  const { geo, mat } = useMemo(() => {
+    const n = film.mobile ? DUST_MOBILE : DUST_DESKTOP;
+    const seed = new Float32Array(n * 2 * 3);
+    const end = new Float32Array(n * 2);
+    let s = 23;
+    const rand = () => {
+      s = (s * 16807) % 2147483647;
+      return s / 2147483647;
+    };
+    for (let i = 0; i < n; i++) {
+      const z0 = rand() * DUST_SPAN;
+      const r = 1.5 + Math.sqrt(rand()) * 16.5;
+      const th = rand() * Math.PI * 2;
+      for (let e = 0; e < 2; e++) {
+        const o = (i * 2 + e) * 3;
+        seed[o] = z0;
+        seed[o + 1] = r;
+        seed[o + 2] = th;
+        end[i * 2 + e] = e;
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(n * 2 * 3), 3));
+    geo.setAttribute("aSeed", new THREE.BufferAttribute(seed, 3));
+    geo.setAttribute("aEnd", new THREE.BufferAttribute(end, 1));
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: DUST_VERT,
+      fragmentShader: DUST_FRAG,
+      uniforms: {
+        uCamZ: { value: 0 },
+        uSpan: { value: DUST_SPAN },
+        uFollow: { value: 1 },
+        uFlow: { value: 0 },
+        uStreak: { value: 0 },
+        uFogFar: { value: 95 },
+        uColor: { value: new THREE.Color(palette.gold) },
+        uOpacity: { value: 0 },
+      },
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    return { geo, mat };
+  }, [palette.gold]);
+  useEffect(
+    () => () => {
+      geo.dispose();
+      mat.dispose();
+    },
+    [geo, mat],
+  );
+  const ref = useRef<THREE.LineSegments>(null!);
+  const gold = useMemo(() => new THREE.Color(palette.gold).multiplyScalar(0.9), [palette.gold]);
+  const lime = useMemo(() => new THREE.Color(palette.lime).lerp(new THREE.Color(palette.bone), 0.45).multiplyScalar(0.9), [palette.lime, palette.bone]);
+  const cam = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
+  useFrame(() => {
+    const worm = wormGate(film.sp);
+    const on = worm > 0.002;
+    if (ref.current) ref.current.visible = on;
+    if (!on) return;
+    spine(film.sp, cam);
+    const speed = speedNorm(film.sp);
+    const still = film.reduced || film.paused;
+    const u = mat.uniforms;
+    u.uCamZ.value = cam.z;
+    u.uFollow.value = 1 + 0.8 * worm;
+    u.uFlow.value = still ? 0 : -film.t * 0.6;
+    u.uStreak.value = film.reduced ? 0 : (0.3 + 9 * speed * speed) * worm;
+    u.uFogFar.value = fogFar(film.p);
+    u.uOpacity.value = 0.55 * worm;
+    // bone/lime nella fase dei fili, oro nella stanza: mai i due insieme
+    (u.uColor.value as THREE.Color).copy(gold).lerp(lime, limeInFrame(film.sp));
+  }, -1);
+  return <lineSegments ref={ref} args={[geo, mat]} frustumCulled={false} />;
 }
 
 function Room({ palette }: { palette: Palette }) {
@@ -287,7 +488,7 @@ function Room({ palette }: { palette: Palette }) {
     () =>
       ROOM.map((s) => ({
         geo: ringsGeometry(s.r),
-        mat: new THREE.LineBasicMaterial({ color: palette.gold, transparent: true, opacity: 0.22, depthWrite: false, fog: true }),
+        mat: makeShellMaterial(palette.gold),
         drift: s.drift,
       })),
     [palette.gold],
@@ -295,6 +496,7 @@ function Room({ palette }: { palette: Palette }) {
   const gold = useMemo(() => new THREE.Color(palette.gold), [palette.gold]);
   const dim = useMemo(() => new THREE.Color(palette.boneDim), [palette.boneDim]);
   const tmp = useMemo(() => new THREE.Color(), []);
+  const cam = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
   useEffect(
     () => () => {
       shells.forEach((s) => {
@@ -314,13 +516,27 @@ function Room({ palette }: { palette: Palette }) {
     const lime = limeInFrame(film.sp);
     tmp.copy(gold).lerp(dim, lime);
     const par = film.reduced ? 0 : 1;
-    // parallasse dal mouse: SOLO posizione
+    // parallasse dal puntatore (gia' smussato): SOLO posizione
     g.position.set(FIG_C.x + film.mx * 0.8 * par, FIG_C.y + film.my * 0.5 * par, 0);
+    spine(film.sp, cam);
+    const worm = wormGate(film.sp);
+    const speed = speedNorm(film.sp);
+    const still = film.reduced || film.paused;
+    const fog = fogFar(film.p);
     g.children.forEach((child, i) => {
+      if (i >= shells.length) return;
       child.rotation.z = shells[i].drift * film.sp * 40;
-      const m = shells[i].mat;
-      m.color.copy(tmp);
-      m.opacity = 0.22 * gate;
+      const u = shells[i].mat.uniforms;
+      (u.uColor.value as THREE.Color).copy(tmp);
+      u.uOpacity.value = 0.22 * gate;
+      // torsione: cresce con la velocita', segno alterno per shell (contro-elica)
+      u.uTwist.value = film.reduced ? 0 : (i % 2 ? -1 : 1) * 0.022 * worm * (0.25 + 0.75 * speed);
+      u.uCamZ.value = cam.z;
+      // bande verso la camera: fase = camZ * k (k > 0), 1.3x la velocita' della camera
+      u.uBandPhase.value = cam.z * 0.14 + i * 2.1;
+      u.uWorm.value = worm;
+      u.uBreath.value = still ? 0 : film.t * 0.7;
+      u.uFogFar.value = fog;
     });
   }, -1);
 
@@ -329,22 +545,60 @@ function Room({ palette }: { palette: Palette }) {
       {shells.map((s, i) => (
         <lineSegments key={i} args={[s.geo, s.mat]} frustumCulled={false} />
       ))}
+      <Dust palette={palette} />
     </group>
   );
 }
 
 /* --------------------------------------------------------------------------
    ORIZZONTE: UNA barra sottile, lontana, sopra la soglia di bloom (atto 5).
+   E6: una luce la percorre UNA volta all'ingresso dell'atto (funzione di sp,
+   finestra 0.04): stesso scroll, stessa fase.
    -------------------------------------------------------------------------- */
+const HORIZON_VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+`;
+const HORIZON_FRAG = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  uniform float uPulseX;  // -1..1 lungo la barra; fuori = parcheggiata
+  uniform float uPulseA;
+  varying vec2 vUv;
+  void main() {
+    float x = vUv.x * 2.0 - 1.0;
+    float d = x - uPulseX;
+    float pulse = exp(-d * d / 0.004) * uPulseA;
+    gl_FragColor = vec4(uColor * (1.0 + 1.4 * pulse), uOpacity);
+  }
+`;
 function Horizon({ palette }: { palette: Palette }) {
-  const mat = useMemo(() => {
-    const c = new THREE.Color(palette.bone).multiplyScalar(1.6);
-    return new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0, fog: false, depthWrite: false, toneMapped: true });
-  }, [palette.bone]);
+  const mat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        vertexShader: HORIZON_VERT,
+        fragmentShader: HORIZON_FRAG,
+        uniforms: {
+          uColor: { value: new THREE.Color(palette.bone).multiplyScalar(1.6) },
+          uOpacity: { value: 0 },
+          uPulseX: { value: -2 },
+          uPulseA: { value: 0 },
+        },
+        transparent: true,
+        depthWrite: false,
+      }),
+    [palette.bone],
+  );
+  useEffect(() => () => mat.dispose(), [mat]);
   const ref = useRef<THREE.Mesh>(null!);
   useFrame(() => {
     const g = horizonGate(film.sp, film.p);
-    mat.opacity = g;
+    mat.uniforms.uOpacity.value = g;
+    // la luce corre sulla barra fra sp 0.86 e 0.90: da -0.6 a +0.6 (il resto e' fuori inquadratura)
+    const u = (film.sp - 0.86) / 0.04;
+    const on = !film.reduced && u > 0 && u < 1;
+    mat.uniforms.uPulseX.value = on ? -0.6 + 1.2 * u : -2;
+    mat.uniforms.uPulseA.value = on ? Math.sin(Math.PI * u) : 0;
     if (ref.current) ref.current.visible = g > 0.002;
   }, -1);
   return (
@@ -359,9 +613,16 @@ function Horizon({ palette }: { palette: Palette }) {
    Un solo buffer interlacciato [x1,y1,z1,x2,y2,z2] scritto in place ogni frame,
    mai riallocato. Colore bone sopra soglia; l'impulso lime si MESCOLA (mix),
    non si somma. Blending additivo: il fade per filo vive nei colori dei vertici.
+   E1: il campo si piega attorno al puntatore. Ogni vertice, in spazio camera,
+   riceve una deflessione TANGENZIALE w*A*perp(d) (le linee CURVANO attorno al
+   puntatore, non si aprono a buco), w = smoothstep(R,0,r)^2, R = 22% del lato
+   corto dell'inquadratura a quella profondita'. Zero senza puntatore (touch,
+   reduced): il termine collassa esattamente a zero. Costo: ~340 vertici x 2
+   trasformazioni per frame.
    -------------------------------------------------------------------------- */
 function Strands({ palette }: { palette: Palette }) {
   const size = useThree((s) => s.size);
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const seg = film.mobile ? SEG_MOBILE : SEG_DESKTOP;
   const N = STRANDS.length * seg;
   const { geo, mat } = useMemo(() => {
@@ -395,6 +656,7 @@ function Strands({ palette }: { palette: Palette }) {
   const lime = useMemo(() => new THREE.Color(palette.lime).multiplyScalar(1.7), [palette.lime]);
   const pose = useMemo<Pose>(() => ({ x: 0, y: 0, z: 0, tx: 0, ty: 0, tz: 0, bank: 0 }), []);
   const anchor = useMemo(() => ({ x: 0, y: 0, z: 0 }), []);
+  const v = useMemo(() => new THREE.Vector3(), []);
   const ref = useRef<LineSegments2>(null!);
 
   useFrame(() => {
@@ -404,6 +666,11 @@ function Strands({ palette }: { palette: Palette }) {
     const C = colAttr.data.array as Float32Array;
     const sp = film.sp;
     cameraPose(sp, film.aspect, film.reduced, pose);
+    // E1: parametri del puntatore in spazio camera (la camera e' gia' posata: CameraRig ha priorita' -2)
+    const bendOn = !film.reduced && film.min > 0.001;
+    const tanH = Math.tan((camera.fov * Math.PI) / 360);
+    const mx = film.mx;
+    const my = film.my;
     let any = false;
     for (let k = 0; k < STRANDS.length; k++) {
       const s = STRANDS[k];
@@ -448,9 +715,35 @@ function Strands({ palette }: { palette: Palette }) {
           const u = (i + e) / seg;
           const su = Math.sin(Math.PI * u);
           const w = wave * su * Math.sin(2 * Math.PI * (3 * u - phase));
-          P[o + e * 3] = mix(nx, tx, u) + px * w;
-          P[o + e * 3 + 1] = mix(ny, ty, u) - sag * su;
-          P[o + e * 3 + 2] = mix(nz, tz, u) + pz * w;
+          let X = mix(nx, tx, u) + px * w;
+          let Y = mix(ny, ty, u) - sag * su;
+          let Z = mix(nz, tz, u) + pz * w;
+          if (bendOn && u > 0.02) {
+            // in spazio camera: il puntatore alla profondita' del vertice
+            v.set(X, Y, Z).applyMatrix4(camera.matrixWorldInverse);
+            const depth = -v.z;
+            if (depth > 0.5) {
+              const hh = depth * tanH;
+              const hw = hh * film.aspect;
+              const ddx = v.x - mx * hw;
+              const ddy = v.y + my * hh;
+              const r = Math.hypot(ddx, ddy) || 1e-6;
+              const R = 0.44 * Math.min(hw, hh);
+              const wgt = smoothstep(R, 0, r);
+              if (wgt > 0) {
+                const A = 0.06 * hh * wgt * wgt * film.min * su;
+                v.x += (-ddy / r) * A;
+                v.y += (ddx / r) * A;
+                v.applyMatrix4(camera.matrixWorld);
+                X = v.x;
+                Y = v.y;
+                Z = v.z;
+              }
+            }
+          }
+          P[o + e * 3] = X;
+          P[o + e * 3 + 1] = Y;
+          P[o + e * 3 + 2] = Z;
           // impulso lime al capo che spara: MIX verso il lime, poi il fade nei colori
           const spot = Math.exp(-Math.pow((1 - u) * 4.5, 2)) * impulse;
           C[o + e * 3] = mix(bone.r, lime.r, spot) * alpha;
@@ -471,7 +764,8 @@ function Strands({ palette }: { palette: Palette }) {
 /* --------------------------------------------------------------------------
    CAMERA: posa pura da state.ts; bank ruotando l'UP VECTOR attorno all'asse di
    vista (Rodrigues), mai un roll pieno; rotation.order 'YXZ'; nebbia che si
-   chiude per il wipe.
+   apre nel wormhole e si chiude per il wipe. Aggiorna le matrici subito, cosi'
+   i useFrame successivi (i fili, E1) vedono la posa di QUESTO frame.
    -------------------------------------------------------------------------- */
 function CameraRig() {
   const camera = useThree((s) => s.camera);
@@ -502,21 +796,69 @@ function CameraRig() {
       .addScaledVector(d, d.dot(up0) * (1 - c));
     camera.up.copy(up);
     camera.lookAt(target);
+    camera.updateMatrixWorld();
+    camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
     const fog = scene.fog as THREE.Fog | null;
     if (fog) {
       fog.far = fogFar(film.p);
-      fog.near = Math.min(fog.near, fog.far * 0.5);
+      fog.near = Math.min(18, fog.far * 0.5);
     }
   }, -2);
   return null;
 }
 
 /* --------------------------------------------------------------------------
-   POST CHAIN: bloom -> vignette -> OutputPass (tone map) -> grana.
+   POST CHAIN: bloom -> lente/frangia/smear -> vignette -> OutputPass (tone map) -> grana.
    La grana DOPO il tone map, in spazio display. Vignette darkness 1.0 e NON
    di piu' (sopra, prima del tone map su target float, i canali negativi
    tornano positivi per canale e gli angoli virano). Falloff con offset 1.3.
+   LENTE (wormhole, E7): warp UV verso il centro (gaussiana, la luce si piega),
+   frangia RGB radiale e smear radiale a 5 tap, tutti funzione di p SOLO nel
+   picco di velocita'; a riposo il pass e' DISABILITATO (zero costo).
    -------------------------------------------------------------------------- */
+const LENS = {
+  uniforms: {
+    tDiffuse: { value: null },
+    uWarp: { value: 0 },
+    uFringe: { value: 0 },
+    uSmear: { value: 0 },
+    uAspect: { value: 1.6 },
+  },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    uniform float uWarp;
+    uniform float uFringe;
+    uniform float uSmear;
+    uniform float uAspect;
+    varying vec2 vUv;
+    void main() {
+      vec2 c = vec2(0.5, 0.5);
+      vec2 d = vUv - c;
+      vec2 da = vec2(d.x * uAspect, d.y);
+      float r = length(da);
+      // lente: il centro si ingrandisce (si campiona piu' vicino al centro)
+      float g = exp(-r * r / 0.18);
+      vec2 uv = c + d * (1.0 - uWarp * g);
+      vec3 acc = vec3(0.0);
+      float wsum = 0.0;
+      for (int i = -2; i <= 2; i++) {
+        float fi = float(i);
+        vec2 off = d * (fi * uSmear * 0.014 * r);
+        float k = uFringe * r * 0.02;
+        float w = 1.0 - 0.3 * abs(fi);
+        acc.r += texture2D(tDiffuse, uv + off + d * k).r * w;
+        acc.g += texture2D(tDiffuse, uv + off).g * w;
+        acc.b += texture2D(tDiffuse, uv + off - d * k).b * w;
+        wsum += w;
+      }
+      gl_FragColor = vec4(acc / wsum, 1.0);
+    }
+  `,
+};
 const GRAIN = {
   uniforms: { tDiffuse: { value: null }, time: { value: 0 }, amount: { value: 0.045 }, res: { value: new THREE.Vector2(1, 1) } },
   vertexShader: /* glsl */ `
@@ -550,6 +892,9 @@ function Post() {
     const bloom = new UnrealBloomPass(new THREE.Vector2(size.width, size.height), 0.55, 0.45, 1.15);
     (bloom.highPassUniforms as Record<string, THREE.IUniform>).smoothWidth.value = 0.35;
     composer.addPass(bloom);
+    const lens = new ShaderPass(LENS);
+    lens.enabled = false;
+    composer.addPass(lens);
     const vignette = new ShaderPass(VignetteShader);
     vignette.uniforms.offset.value = 1.3;
     vignette.uniforms.darkness.value = 1.0;
@@ -557,7 +902,7 @@ function Post() {
     composer.addPass(new OutputPass());
     const grain = new ShaderPass(GRAIN);
     composer.addPass(grain);
-    return { composer, bloom, grain };
+    return { composer, bloom, lens, grain };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gl, scene, camera]);
   useEffect(() => {
@@ -565,11 +910,22 @@ function Post() {
     chain.composer.setSize(size.width, size.height);
     chain.bloom.setSize(size.width, size.height);
     chain.grain.uniforms.res.value.set(size.width * dpr, size.height * dpr);
+    chain.lens.uniforms.uAspect.value = size.width / Math.max(1, size.height);
   }, [chain, size.width, size.height, dpr]);
   useEffect(() => () => chain.composer.dispose(), [chain]);
   useFrame(() => {
     // grana ferma con meno movimento o in pausa; altrimenti vive di tempo
     chain.grain.uniforms.time.value = film.reduced || film.paused ? 0.37 : film.t;
+    // lente: funzione di sp; frangia e smear solo nel picco di velocita', mai su reduced
+    const lensA = film.reduced ? 0 : lensAmount(film.sp);
+    const fr = film.reduced ? 0 : fringeAmount(film.sp);
+    const on = lensA > 0.002 || fr > 0.002;
+    chain.lens.enabled = on;
+    if (on) {
+      chain.lens.uniforms.uWarp.value = 0.14 * lensA;
+      chain.lens.uniforms.uFringe.value = fr;
+      chain.lens.uniforms.uSmear.value = fr;
+    }
     chain.composer.render();
   }, 1);
   return null;

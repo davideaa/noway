@@ -1,5 +1,5 @@
 import { Film } from "@/components/film/Film";
-import { FilmTopBar } from "@/components/film/FilmTopBar";
+import { FilmDataPanel } from "@/components/film/FilmDataPanel";
 import { DESCRIPTION, SITE_NAME, SITE_URL, TITLE } from "@/lib/site";
 
 // JSON-LD minimo (COPY.md sez. 2): solo WebSite e WebPage. Gli url si
@@ -20,7 +20,8 @@ function jsonLd() {
 
 /**
  * Home = il film a scroll (SPEC-FILM.md). Nessuna sezione: una traccia, una
- * stage, un canvas. Titolo e due frasi; tutto il resto e' in /dettagli.
+ * stage, un canvas. Titolo, due frasi e, nell'ultimo atto, il pannello dei dati
+ * (server component passato al film: i numeri arrivano gia' scritti).
  */
 export default function Home() {
   return (
@@ -29,9 +30,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()).replace(/</g, "\\u003c") }}
       />
-      <FilmTopBar />
       <main id="contenuto" className="flex-1">
-        <Film />
+        <Film panel={<FilmDataPanel />} />
       </main>
     </>
   );

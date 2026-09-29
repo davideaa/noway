@@ -13,6 +13,13 @@ const nextConfig: NextConfig = staticExport
       trailingSlash: true,
       images: { unoptimized: true },
     }
-  : {};
+  : {
+      // /simulatore/ e' un HTML autonomo di Davide in public/simulatore/index.html:
+      // Next non serve l'indice di una cartella, quindi la rotta si riscrive sul file.
+      // Nell'export statico non serve: l'host serve index.html da solo.
+      async rewrites() {
+        return [{ source: "/simulatore", destination: "/simulatore/index.html" }];
+      },
+    };
 
 export default nextConfig;

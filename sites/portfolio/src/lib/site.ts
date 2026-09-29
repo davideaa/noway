@@ -12,6 +12,15 @@ export const FILM_H1 = "Tre strategie algoritmiche, misurate e raccontate senza 
 export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
 export const FILM_PHRASE_B = "Backtest, non risultati reali.";
 
+/**
+ * La frase sul rischio (COPY.md, "Navigazione e barra fissa" e 3.9; fonte:
+ * richiesta di Davide, riformulata). Versione completa (avviso, finale del film)
+ * e versione breve (barra fissa). Mai "machine learning", mai "alta probabilita'".
+ */
+export const RISK_STATEMENT =
+  "Risultati di backtest validati fuori campione con metodo quantitativo: criteri fissati prima del test, dati mai visti, bootstrap a blocchi. Non garantiscono rendimenti futuri: indicano la mediana di cosa aspettarsi, e il suo intervallo, se il vantaggio esiste e non si è rotto.";
+export const RISK_SHORT = "Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria";
+
 /** Testo alternativo dell'immagine social (COPY.md sez. 5). */
 export const OG_ALT = "Portfolio Algo Manager: strategie algoritmiche su XAUUSD, backtest e rischio dichiarati.";
 
