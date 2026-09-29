@@ -2,129 +2,1050 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* ==========================================================================
+   TOKEN - UNICA FONTE DELLO STILE
+   Tutto quello che si cambia "a tentativi" sta in questo blocco :root.
+   Nessun altro file contiene colori, spaziature o tempi scritti a mano.
+   Valori iniziali da DESIGN.md (sezioni 4-9).
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+
+  /* --- palette (DESIGN.md sez. 4) --- */
+  --bg: #080b0e;
+  --surf: #10151a;
+  --surf2: #151c22;
+  --ink: #f1f4ee;
+  --mut: #939fa9;
+  --mut2: #818e94; /* solo testo grande */
+  --acc: #c8fa72; /* accento unico */
+  --acc-ink: #15200c; /* testo sopra --acc */
+  --acc2: #1b2820; /* fondo tenue verde */
+  --acc-mid: #3c5727; /* SOLO gradiente e alone, mai testo */
+  --line: #252e34; /* filetti decorativi */
+  --line2: #39454d; /* filetti in evidenza, decorativi */
+  --line3: #5f6e78; /* bordi di campi e controlli (3:1) */
+  --st-oro: #e5b966; /* identita' strategia oro (XAUUSD) */
+  --st-nas: #72baff; /* nasdaq: non usato finche' non ci sono dati */
+  --st-usdjpy: #b59aff; /* usdjpy: idem */
+  --ok: #c8fa72;
+  --warn: #efbd68;
+  --bad: #fa8c82;
+
+  /* --- effetti derivati (tutti dai token sopra) --- */
+  --glow-panel: 0 25px 75px -55px color-mix(in srgb, var(--acc) 40%, transparent);
+  --glow-cta: 0 0 30px -12px color-mix(in srgb, var(--acc) 40%, transparent);
+  --hero-glow: #2f4521; /* centro del fallback statico dello shader */
+
+  /* --- tipografia: corpi fissi + 4 fluidi (DESIGN.md sez. 5) --- */
+  --fs-display: clamp(2.5rem, 1.2rem + 6vw, 6rem);
+  --fs-scene: clamp(30px, 4vw, 54px);
+  --fs-fig-xl: clamp(32px, 4.2vw, 58px);
+  --fs-fig-l: clamp(24px, 2.8vw, 40px);
+
+  /* --- spaziatura (passi fissi) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sp-10: 128px;
+  --gutter: 16px; /* margine pagina, cresce con i breakpoint sotto */
+  --scene-pad: var(--sp-7); /* respiro sopra/sotto ogni scena */
+  --header-h: 64px;
+
+  /* --- raggi --- */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 14px;
+
+  /* --- movimento (DESIGN.md sez. 9, MOTION.md) --- */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 200ms;
+  --dur-base: 300ms;
+  --dur-enter: 850ms;
+  --dur-scene: 1200ms;
+  --persp: 1200px;
+  --z-from: -140px; /* punto di partenza in profondita' */
+  --z-from-scene: -300px; /* titoli di scena e monitor */
+  --rx-from: 4deg;
+
+  /* --- shader hero (letti da ShaderLayer.tsx con getComputedStyle) --- */
+  --shader-color1: var(--acc2);
+  --shader-color2: var(--acc-mid); /* domina l'inquadratura: max #3c5727 */
+  --shader-color3: var(--bg);
+  --shader-brightness: 1; /* max 1,0 (DESIGN.md sez. 8) */
+  --shader-speed: 0.2;
+  --shader-strength: 1.5;
+  --shader-density: 1.2;
+  --shader-pixel-desktop: 1;
+  --shader-pixel-phone: 0.7;
+
+  /* --- mappatura shadcn (tema solo scuro, tutto in :root) --- */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surf);
+  --card-foreground: var(--ink);
+  --popover: var(--surf2);
+  --popover-foreground: var(--ink);
+  --primary: var(--acc);
+  --primary-foreground: var(--acc-ink);
+  --secondary: var(--surf2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surf2);
+  --muted-foreground: var(--mut);
+  --accent: var(--acc2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--bad);
+  --border: var(--line);
+  --input: var(--line3);
+  --ring: var(--acc);
+  --radius: var(--r-3);
+  --chart-1: var(--st-oro);
+  --chart-2: var(--st-nas);
+  --chart-3: var(--st-usdjpy);
+  --chart-4: var(--acc);
+  --chart-5: var(--bad);
+  --sidebar: var(--surf);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--acc);
+  --sidebar-primary-foreground: var(--acc-ink);
+  --sidebar-accent: var(--surf2);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--acc);
+}
+
+@media (min-width: 600px) {
+  :root {
+    --gutter: 20px;
+    --scene-pad: var(--sp-8);
+  }
+}
+@media (min-width: 950px) {
+  :root {
+    --gutter: 24px;
+    --scene-pad: var(--sp-9);
+  }
+}
+@media (min-width: 1200px) {
+  :root {
+    --gutter: 36px;
+  }
+}
+@media (min-width: 1650px) {
+  :root {
+    --gutter: 52px;
+  }
+}
+
+/* ==========================================================================
+   Tailwind: nomi dei token (i valori restano in :root)
+   ========================================================================== */
+@theme {
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 950px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1650px;
+  --breakpoint-2xl: initial;
+}
 
 @theme inline {
+  /* FIX: prima --font-sans puntava a se stessa (testo in Times New Roman) */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-heading: var(--font-sans);
+
+  --color-bg: var(--bg);
+  --color-surf: var(--surf);
+  --color-surf2: var(--surf2);
+  --color-ink: var(--ink);
+  --color-mut: var(--mut);
+  --color-mut2: var(--mut2);
+  --color-acc: var(--acc);
+  --color-acc-ink: var(--acc-ink);
+  --color-acc2: var(--acc2);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-line3: var(--line3);
+  --color-oro: var(--st-oro);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* raggi 4 / 8 / 14 (DESIGN.md sez. 3) */
+  --radius-sm: var(--r-1);
+  --radius-md: var(--r-2);
+  --radius-lg: var(--r-3);
+  --radius-xl: var(--r-3);
+  --radius-2xl: var(--r-3);
+  --radius-3xl: var(--r-3);
+  --radius-4xl: var(--r-3);
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
+/* ==========================================================================
+   Base
+   ========================================================================== */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+    @apply border-border;
   }
   html {
     @apply font-sans;
+    background: var(--bg);
+    scroll-padding-top: calc(var(--header-h) + var(--sp-4));
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.6;
+    font-feature-settings: "ss01" 0;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--acc);
+    color: var(--acc-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 5px;
+  }
+  a {
+    color: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* ==========================================================================
+   Layout e tipografia (scala: 12, 14, 16, 20, 24 + 4 fluidi)
+   ========================================================================== */
+.wrap {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.scene {
+  position: relative;
+  padding-block: var(--scene-pad);
+}
+.stack > * + * {
+  margin-top: var(--sp-6);
+}
+.stack-s > * + * {
+  margin-top: var(--sp-4);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+.eyebrow b {
+  color: var(--acc);
+  font-weight: 500;
+}
+.t-display {
+  font-size: var(--fs-display);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.t-scene {
+  font-size: var(--fs-scene);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+.t-scene > span {
+  display: block;
+}
+.t-scene > span + span {
+  color: var(--mut2); /* firma dei titoli: seconda riga --mut2 */
+}
+.t-h2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+.t-h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+.t-lead {
+  font-size: 20px;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+.t-sec {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--mut);
+}
+.t-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--mut);
+}
+.fig-xl {
+  font-size: var(--fs-fig-xl);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.055em;
+}
+.fig-l {
+  font-size: var(--fs-fig-l);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.04em;
+}
+.num,
+.fig-xl,
+.fig-l {
+  font-variant-numeric: tabular-nums;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.measure {
+  max-width: 68ch;
+}
+
+/* testo lungo: corpo 16, colore pieno */
+.prose p,
+.prose li {
+  max-width: 68ch;
+}
+.prose p + p {
+  margin-top: var(--sp-4);
+}
+.prose strong {
+  font-weight: 600;
+}
+.prose a,
+.textlink {
+  color: var(--acc);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.prose a:hover,
+.textlink:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* elenchi puntati "da strumento" */
+.ticks {
+  list-style: none;
+  padding: 0;
+}
+.ticks > li {
+  position: relative;
+  padding-left: var(--sp-5);
+}
+.ticks > li + li {
+  margin-top: var(--sp-3);
+}
+.ticks > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 10px;
+  height: 1px;
+  background: var(--acc);
+}
+.count {
+  list-style: none;
+  padding: 0;
+  counter-reset: c;
+}
+.count > li {
+  position: relative;
+  padding-left: var(--sp-6);
+  counter-increment: c;
+}
+.count > li + li {
+  margin-top: var(--sp-4);
+}
+.count > li::before {
+  content: counter(c, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--acc);
+}
+
+/* ==========================================================================
+   Superfici: carta, callout, riquadro apribile
+   ========================================================================== */
+.card {
+  position: relative;
+  background: var(--surf);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  padding: var(--sp-4);
+}
+@media (min-width: 600px) {
+  .card {
+    padding: 20px;
+  }
+}
+@media (min-width: 950px) {
+  .card {
+    padding: var(--sp-5);
+  }
+}
+/* filo di luce sul bordo alto */
+.card--lit::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--acc), transparent);
+}
+.card--lit {
+  box-shadow: var(--glow-panel);
+}
+.callout {
+  border-left: 2px solid var(--acc);
+  background: var(--acc2);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: 0 var(--r-2) var(--r-2) 0;
+}
+.callout p {
+  max-width: 68ch;
+}
+.callout p + p {
+  margin-top: var(--sp-3);
+}
+.disclosure {
+  border: 1px solid var(--line2);
+  border-radius: var(--r-3);
+  background: var(--surf);
+}
+.disclosure > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  min-height: 48px;
+  padding: var(--sp-3) var(--sp-5);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure > summary::after {
+  content: "+";
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--acc);
+  line-height: 1;
+}
+.disclosure[open] > summary::after {
+  content: "\2212";
+}
+.disclosure > .disclosure__body {
+  padding: 0 var(--sp-5) var(--sp-5);
+}
+
+/* etichetta "Backtest" + rischio accanto */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+  border-radius: var(--r-1);
+  background: var(--surf2);
+  color: var(--warn);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.risknote {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px dashed var(--line3);
+  border-radius: var(--r-2);
+  background: var(--surf2);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.risknote svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--bad);
+}
+.risknote b {
+  font-weight: 600;
+  color: var(--bad);
+}
+
+/* ==========================================================================
+   Tabelle e barre-dato
+   ========================================================================== */
+.tscroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: var(--surf);
+}
+.tscroll:focus-visible {
+  outline-offset: 2px;
+}
+.dtable {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.dtable caption {
+  text-align: left;
+  padding: var(--sp-4) var(--sp-4) var(--sp-2);
+  color: var(--mut);
+  font-size: 14px;
+}
+.dtable th,
+.dtable td {
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.dtable thead th {
+  color: var(--mut);
+  font-weight: 500;
+  border-bottom-color: var(--line2);
+  white-space: nowrap;
+}
+.dtable tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.dtable .r {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dtable tr.emph > * {
+  font-weight: 600;
+  background: var(--surf2);
+}
+.dtable th[scope="row"] {
+  font-weight: 400;
+}
+.hint-scroll {
+  font-size: 12px;
+  color: var(--mut);
+  margin-bottom: var(--sp-2);
+}
+@media (min-width: 950px) {
+  .hint-scroll {
+    display: none;
+  }
+}
+
+/* barra-dato: la larghezza e' statica (nessuna animazione di layout) */
+.bar {
+  display: block;
+  position: relative;
+  height: 6px;
+  min-width: 96px;
+  border-radius: 3px;
+  background: var(--line);
+}
+.bar > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: var(--mut);
+}
+.bar > i.neg {
+  background: var(--bad);
+}
+.bar > i.hi {
+  background: var(--acc);
+}
+.bar > u {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--line3);
+}
+
+/* tooltip da tastiera e da tocco */
+.term {
+  position: relative;
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+}
+.term > [role="tooltip"] {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 20;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line3);
+  border-radius: var(--r-2);
+  background: var(--surf2);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
+  text-decoration: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-fast) var(--ease);
+  pointer-events: none;
+}
+.term:hover > [role="tooltip"],
+.term:focus-visible > [role="tooltip"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
+   Ingressi di blocco: verso l'interno lungo Z, mai dal basso.
+   Lo stato "nascosto" esiste solo se JS e' attivo (classe .js aggiunta
+   da uno script inline nell'head) e l'utente non ha chiesto meno movimento.
+   ========================================================================== */
+.reveal {
+  transition:
+    opacity var(--dur-enter) var(--ease),
+    transform var(--dur-enter) var(--ease);
+  transition-delay: calc(min(var(--i, 0), 5) * 60ms);
+}
+.js .reveal:not(.in) {
+  opacity: 0;
+  transform: perspective(var(--persp)) translateZ(var(--z-from)) rotateX(var(--rx-from));
+  will-change: transform, opacity;
+}
+.js .reveal--scene:not(.in) {
+  transform: perspective(var(--persp)) translateZ(var(--z-from-scene));
+}
+/* "si accende": il monitor (MOTION.md atto 3) */
+.js .reveal--monitor:not(.in) {
+  transform: perspective(var(--persp)) translateZ(-200px) scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal:not(.in) {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+/* ==========================================================================
+   Bottoni di controllo minori (pausa, copia)
+   ========================================================================== */
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--line3);
+  border-radius: var(--r-2);
+  background: var(--surf);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    border-color var(--dur-base) var(--ease),
+    background-color var(--dur-base) var(--ease);
+}
+.chip-btn:hover {
+  border-color: var(--acc);
+  background: var(--acc2);
+}
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  padding-top: calc(var(--header-h) + var(--sp-7));
+  padding-bottom: var(--sp-7);
+  overflow: clip;
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg);
+}
+/* fallback statico = anche l'immagine mostrata mentre lo shader carica */
+.hero__fallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 90% at 30% 35%, var(--hero-glow) 0%, var(--acc2) 55%, var(--bg) 100%);
+}
+.hero__shader {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s var(--ease);
+}
+.hero__shader.on {
+  opacity: 1;
+}
+/* velo: garantisce il contrasto del testo qualunque cosa faccia lo shader */
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--bg) 82%, transparent) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 55%, color-mix(in srgb, var(--bg) 25%, transparent) 100%),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 22%);
+}
+/* reticolo tecnico, statico, bassa opacita' */
+.hero__reticle {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 62% 40%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 70% at 62% 40%, #000 0%, transparent 78%);
+}
+/* gli ultimi 25% sfumano a --bg: nessuno stacco con la scena dopo */
+.hero__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 25%;
+  background: linear-gradient(180deg, transparent, var(--bg));
+}
+.hero__persp {
+  width: 100%;
+  perspective: 1000px;
+  perspective-origin: 50% 40%;
+}
+.hero__content {
+  position: relative;
+  will-change: transform, opacity;
+}
+.hero__lead {
+  font-size: clamp(18px, 1.1rem + 0.5vw, 22px);
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 62ch;
+}
+.chip-solid {
+  display: inline-block;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-2);
+  background: color-mix(in srgb, var(--surf) 92%, transparent);
+  border: 1px solid var(--line);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+  list-style: none;
+  padding: 0;
+}
+@media (min-width: 950px) {
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-4);
+  }
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--surf) 94%, transparent);
+}
+.stat .fig-xl {
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   Strategie: volo attraverso i livelli (camera lungo Z)
+   ========================================================================== */
+.zscene {
+  position: relative;
+  height: 360svh;
+}
+.zstage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--bg);
+}
+.zpersp {
+  position: absolute;
+  inset: 0;
+  perspective: 1000px;
+  perspective-origin: 50% 50%;
+}
+.zlayer {
+  position: absolute;
+  inset: calc(var(--header-h) + var(--sp-2)) 0 88px;
+  display: grid;
+  place-items: center;
+  will-change: transform, opacity;
+}
+.zframe {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70vmin;
+  height: 70vmin;
+  translate: -50% -50%;
+  border: 1px solid color-mix(in srgb, var(--acc) 40%, transparent);
+  will-change: transform, opacity;
+}
+.zbar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--acc);
+  transform-origin: left;
+}
+.zcard {
+  width: min(84vw, 560px);
+  padding: var(--sp-5);
+  border: 1px solid color-mix(in srgb, var(--st-oro) 40%, transparent);
+  border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--surf) 94%, transparent);
+  box-shadow: 0 25px 75px -55px color-mix(in srgb, var(--st-oro) 40%, transparent);
+}
+
+/* Versione statica: reduced-motion, senza JS, schermi bassi. Nessun transform,
+   nessuno sticky. Il contenuto e' lo stesso: cambia solo l'impaginazione. */
+@media (prefers-reduced-motion: reduce), (max-height: 560px) {
+  .zscene {
+    height: auto;
+  }
+  .zstage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .zpersp {
+    position: static;
+    perspective: none;
+    display: grid;
+    gap: var(--sp-5);
+    justify-items: center;
+  }
+  .zlayer {
+    position: static;
+    inset: auto;
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto;
+  }
+  .zcard {
+    width: 100%;
+  }
+  .zframe,
+  .zbar {
+    display: none;
+  }
+}
+html:not(.js) .zscene {
+  height: auto;
+}
+html:not(.js) .zstage {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+html:not(.js) .zpersp {
+  position: static;
+  perspective: none;
+  display: grid;
+  gap: var(--sp-5);
+  justify-items: center;
+}
+html:not(.js) .zlayer {
+  position: static;
+  inset: auto;
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  transform: none !important;
+  opacity: 1 !important;
+}
+html:not(.js) .zcard {
+  width: 100%;
+}
+html:not(.js) .zframe,
+html:not(.js) .zbar {
+  display: none;
+}
+/* hero: senza JS e con meno movimento il contenuto resta fermo e pieno */
+@media (prefers-reduced-motion: reduce) {
+  .hero__content {
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto;
+  }
+}
+html:not(.js) .hero__content {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   Contatti: la camera si ferma, le cornici restano come cornice (ferme)
+   ========================================================================== */
+.frames-still {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1000px;
+}
+.frames-still > i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70vmin;
+  height: 70vmin;
+  translate: -50% -50%;
+  border: 1px solid var(--line);
+}
+.frames-still > i:nth-child(1) {
+  transform: translateZ(-1200px);
+  opacity: 0.5;
+}
+.frames-still > i:nth-child(2) {
+  transform: translateZ(-700px);
+  opacity: 0.75;
+}
+.frames-still > i:nth-child(3) {
+  transform: translateZ(-250px);
+  border-color: var(--line2);
+}
+.frames-still > i:nth-child(4) {
+  transform: translateZ(150px);
+  border-color: var(--line2);
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   Barra rischio fissa in fondo (sticky nel flusso: non copre il footer)
+   ========================================================================== */
+.riskbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 60;
+  border-top: 1px solid var(--line2);
+  background: var(--surf2);
+}
+.skip {
+  position: absolute;
+  left: var(--sp-4);
+  top: var(--sp-2);
+  z-index: 100;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-2);
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+.skip:focus-visible {
+  transform: none;
 }
