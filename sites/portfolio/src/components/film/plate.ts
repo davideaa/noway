@@ -105,8 +105,8 @@ export function buildFan(count: number, curves: number, width: number, height: n
     return c[i] + (c[i + 1] - c[i]) * t;
   };
 
-  // ripartizione delle perle: la mediana e' il 22% (cuore luminoso), il resto in parti uguali
-  const nMed = Math.round(count * 0.22);
+  // ripartizione delle perle: la mediana e' il 12% (cuore luminoso), il resto in parti uguali
+  const nMed = Math.round(count * 0.12);
   const nEach = Math.floor((count - nMed) / (K - 1));
   const total = nMed + nEach * (K - 1);
   const pos = new Float32Array(total * 3);
@@ -146,8 +146,8 @@ export function buildFan(count: number, curves: number, width: number, height: n
     n++;
   };
 
-  // MEDIANA: tubo r 0.22; cuore quasi bianco, mantello lime chiaro; perle piu' grandi
-  const rMed = 0.22;
+  // MEDIANA: tubo r 0.14; cuore quasi bianco, mantello lime chiaro; perle piu' grandi
+  const rMed = 0.14;
   for (let i = 0; i < nMed; i++) {
     const u = rand();
     const q = Math.pow(rand(), 0.6);
@@ -155,14 +155,14 @@ export function buildFan(count: number, curves: number, width: number, height: n
     const theta = rand() * Math.PI * 2;
     const core = 1 - q; // 1 al centro
     const rgb = hslToRgb(82 - 2 * core, 0.85 - 0.55 * core, 0.7 + 0.25 * core);
-    put(0, u, toX(u), toY(sample(median, u)), 0, rho, theta, 0.6 + rand() * 0.55 + core * 0.35, rgb);
+    put(0, u, toX(u), toY(sample(median, u)), 0, rho, theta, 0.5 + rand() * 0.45 + core * 0.3, rgb);
   }
   // FASCIO: tubi sottili; piu' lontani dalla mediana = piu' scuri, piu' sottili, piu' piccoli
   for (let k = 1; k < K; k++) {
     const f = far[k];
     const hue = 70 + (k % 7) * 6 + f * 40;
     const light = 0.52 - f * 0.26;
-    const rgb = hslToRgb(hue, 0.62, light);
+    const rgb = hslToRgb(hue, 0.55, light);
     const rk = 0.11 - f * 0.05;
     const size = 0.42 + (1 - f) * 0.3;
     for (let i = 0; i < nEach; i++) {

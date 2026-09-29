@@ -338,12 +338,13 @@ export function Film() {
         const w = OVERLAY_WINDOWS[j];
         if (!w) continue;
         const v = w.axis === "sp" ? film.sp : p;
-        const wIn = smoothstep(w.in0, w.in1, v);
-        const wOut = smoothstep(w.out0, w.out1, v);
+        // quantizzati a 1/200: si scrive il DOM solo quando cambia qualcosa, e con i valori
+        // QUANTIZZATI, cosi' lo stile e' funzione pura del gradino e non del lato da cui lo si raggiunge
+        const wIn = Math.round(smoothstep(w.in0, w.in1, v) * 200) / 200;
+        const wOut = Math.round(smoothstep(w.out0, w.out1, v) * 200) / 200;
         const total = wIn * (1 - wOut);
         const ov = ovs[j];
-        // chiave quantizzata: si scrive il DOM solo quando cambia qualcosa
-        const key = total < 0.01 ? "off" : `${Math.round(wIn * 200)}:${Math.round(wOut * 200)}`;
+        const key = total < 0.01 ? "off" : `${wIn * 200}:${wOut * 200}`;
         if (key === ov.key) continue;
         ov.key = key;
         if (key === "off") {
