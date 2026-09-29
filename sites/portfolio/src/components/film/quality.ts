@@ -16,8 +16,9 @@
  * fotogramma) e la DIAGNOSTICA (?diag=1), fuori da React: il ciclo li legge.
  */
 
-export type Tier = "alta" | "media" | "lite";
-export const TIERS: Tier[] = ["alta", "media", "lite"];
+export type Tier = "alta" | "media" | "lite" | "eco";
+/** In ordine di costo: la correzione a runtime scende lungo questa lista. */
+export const TIERS: Tier[] = ["alta", "media", "lite", "eco"];
 
 export type Profile = {
   /** limite del device pixel ratio */
@@ -45,12 +46,17 @@ export type Profile = {
    */
   domBlur: boolean;
   perLetter: boolean;
+  /** false (eco): il blocco di testo entra intero, un layer per overlay */
+  perWord: boolean;
 };
 
 export const PROFILES: Record<Tier, Profile> = {
-  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true },
-  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true },
-  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false },
+  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true, perWord: true },
+  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true, perWord: true },
+  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false, perWord: true },
+  // eco: solo a runtime (o ?quality=eco), quando lite misura ancora pochi fps: mezza risoluzione,
+  // una shell, 1200 perle, testi che entrano interi. Brutto il giusto, ma scorre.
+  eco: { dpr: 0.75, beads: 1200, curves: 25, dust: 0, post: "none", fringe: false, seg: 8, shells: 1, domBlur: false, perLetter: false, perWord: false },
 };
 
 export type Probe = { ok: boolean; renderer: string; vendor: string; webgl2: boolean };
@@ -99,7 +105,7 @@ export function readSignals(search: string): Signals {
     memoryGB: typeof nav.deviceMemory === "number" ? nav.deviceMemory : null,
     cores: typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : null,
     touch: window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0,
-    forced: q === "alta" || q === "media" || q === "lite" ? q : null,
+    forced: q === "alta" || q === "media" || q === "lite" || q === "eco" ? q : null,
   };
 }
 
@@ -157,8 +163,9 @@ export const quality = {
   },
   snapshot: () => quality.tier,
   /**
-   * Correzione a runtime, UNA volta: media mobile degli fps nei primi 2 s dopo
-   * l'avvio del play. < 20 -> lite; < 30 -> un livello in meno. Mai su.
+   * Correzione a runtime, UNA volta: media degli fps nei primi 2 s dopo l'avvio
+   * del play. Da alta/media: < 20 -> lite, < 30 -> un livello in meno. Da lite
+   * (telefoni): < 45 -> eco. Mai su.
    */
   adjust(fpsAvg: number) {
     if (quality.settled) return;
@@ -166,8 +173,12 @@ export const quality = {
     quality.fpsMeasured = fpsAvg;
     const i = TIERS.indexOf(quality.tier);
     let next = quality.tier;
-    if (fpsAvg < 20) next = "lite";
-    else if (fpsAvg < 30) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
+    if (quality.tier === "lite") {
+      if (fpsAvg < 45) next = "eco";
+    } else if (quality.tier !== "eco") {
+      if (fpsAvg < 20) next = "lite";
+      else if (fpsAvg < 30) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
+    }
     if (next === quality.tier) {
       quality.reason += ` · confermato a runtime (${fpsAvg.toFixed(0)} fps)`;
       return;

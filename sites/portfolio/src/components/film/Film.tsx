@@ -24,7 +24,7 @@ import type { Palette } from "./FilmCanvas";
 import { FilmFallback } from "./FilmFallback";
 import { FilmTopBar } from "./FilmTopBar";
 import { player, ui } from "./player";
-import { PROFILES, boot, diag, installErrorCapture, probeWebGL, quality, readSignals } from "./quality";
+import { PROFILES, boot, diag, installErrorCapture, probeWebGL, quality, readSignals, type Profile } from "./quality";
 import {
   OVERLAY_WINDOWS,
   actAxis,
@@ -120,12 +120,13 @@ type Ov = {
   /** unita' animate: lettere (alta/media) o parole (lite) — vedi Profile.perLetter */
   letters: HTMLElement[];
   words: HTMLElement[];
-  /** quale delle due e' in uso ora (l'altra viene ripulita al cambio) */
-  perLetter: boolean;
+  /** unita' in uso ora: lettere, parole o il blocco intero (le altre si ripuliscono al cambio) */
+  mode: "letter" | "word" | "whole";
   key: string;
   whole: boolean;
   stagger: number;
 };
+const ovMode = (prof: Profile): Ov["mode"] => (prof.perLetter ? "letter" : prof.perWord ? "word" : "whole");
 type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null; diag: boolean };
 
 /**
@@ -303,15 +304,20 @@ export function Film() {
         el,
         letters,
         words,
-        perLetter: quality.profile.perLetter,
+        mode: ovMode(quality.profile),
         key: "",
         whole: el.hasAttribute("data-ov-whole"),
         stagger: Number(el.dataset.stagger || STAGGER),
       };
     });
-    // Livello lite (telefoni): un layer per PAROLA e niente blur (globals.css, html.film-lite).
-    // Il livello puo' scendere UNA volta a runtime: si segue con la stessa classe.
-    const applyTierClass = () => document.documentElement.classList.toggle("film-lite", quality.tier === "lite");
+    // Livello lite (telefoni): un layer per PAROLA e niente blur (globals.css, html.film-lite);
+    // eco: blocchi interi, niente ombra del testo (html.film-eco). Il livello puo' scendere
+    // UNA volta a runtime: si segue con le stesse classi.
+    const applyTierClass = () => {
+      const cl = document.documentElement.classList;
+      cl.toggle("film-lite", quality.tier === "lite" || quality.tier === "eco");
+      cl.toggle("film-eco", quality.tier === "eco");
+    };
     applyTierClass();
     const unsubTier = quality.subscribe(applyTierClass);
 
@@ -464,6 +470,7 @@ export function Film() {
     let allFrames = 0;
     let allSeconds = 0;
     let diagAt = 0;
+    let statAt = 0;
     let lastStepPx = 0;
     const setScrollP = (s: number) => {
       const y = trackTop + clamp01(s) * scrollLen;
@@ -596,7 +603,17 @@ export function Film() {
         ov.el.style.visibility = "visible";
         const prof = quality.profile;
         const blurOn = !film.reduced && prof.domBlur;
-        if (ov.whole) {
+        const mode = ov.whole ? "whole" : ovMode(prof);
+        if (ov.mode !== mode) {
+          // il livello e' sceso a runtime: le unita' di prima restano com'erano (opacita' compresa), si ripuliscono
+          ov.mode = mode;
+          for (const el of [...ov.letters, ...ov.words]) {
+            el.style.opacity = "";
+            el.style.filter = "";
+            el.style.transform = "";
+          }
+        }
+        if (mode === "whole") {
           // il pannello dei dati: entra intero (front-to-back non ha senso su una tabella)
           const blur = blurOn ? (1 - wIn) * BLUR_PX : 0;
           ov.el.style.opacity = wIn.toFixed(3);
@@ -604,16 +621,7 @@ export function Film() {
           ov.el.style.transform = `translate3d(0,0,0) scale(${(0.96 + 0.04 * wIn).toFixed(4)})`;
           continue;
         }
-        if (ov.perLetter !== prof.perLetter) {
-          // il livello e' sceso a runtime: le lettere restano com'erano (opacita' compresa), si ripuliscono
-          ov.perLetter = prof.perLetter;
-          for (const el of prof.perLetter ? ov.words : ov.letters) {
-            el.style.opacity = "";
-            el.style.filter = "";
-            el.style.transform = "";
-          }
-        }
-        const units = ov.perLetter ? ov.letters : ov.words;
+        const units = mode === "letter" ? ov.letters : ov.words;
         const n = units.length || 1;
         const stagger = ov.stagger;
         for (let i = 0; i < n; i++) {
@@ -714,6 +722,13 @@ export function Film() {
           if (t) t.textContent = label;
           ui.resume.setAttribute("aria-label", `${label} il film da qui`);
         }
+      }
+
+      /* --- riga dei numeri nel finale (anteprima): livello, fps medi, secondi all'avvio --- */
+      if (ui.stat && film.sp > 0.97 && now - statAt > 1000) {
+        statAt = now;
+        const gpu = (quality.probe.renderer || "").replace(/^ANGLE \((.*)\)$/, "$1").split(",").slice(0, 2).join(",").slice(0, 40);
+        ui.stat.textContent = `${quality.tier} · ${diag.fpsAvg.toFixed(0)} fps${quality.fpsMeasured !== null ? ` (${quality.fpsMeasured.toFixed(0)} nei primi 2 s)` : ""} · avvio ${boot.readyMs === null ? "—" : (boot.readyMs / 1000).toFixed(1)} s · ${window.innerWidth}x${window.innerHeight}${film.reduced ? " · meno movimento" : ""}${gpu ? ` · ${gpu}` : ""}`;
       }
 
       /* --- diagnostica (?diag=1): testo riscritto 4 volte al secondo --- */
@@ -864,6 +879,8 @@ export function Film() {
               >
                 Rivedi
               </button>
+              {/* anteprima: i numeri del dispositivo (livello, fps medi, avvio), da leggere a voce a chi corregge il film */}
+              <p className="film-end__stat mono" ref={(el) => void (ui.stat = el)} aria-hidden="true" />
             </div>
           </div>
         </div>

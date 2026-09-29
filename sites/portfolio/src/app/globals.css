@@ -1284,6 +1284,20 @@ html:not(.js) .hero__content {
 .film-end__again:hover {
   color: var(--film-accent-figure);
 }
+/* anteprima: la riga dei numeri sotto "Rivedi" (livello, fps, avvio) */
+.film-end__stat {
+  margin-top: var(--sp-2);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--film-type-mute);
+  opacity: 0.8;
+  max-width: 90vw;
+  overflow-wrap: anywhere;
+}
+/* livello eco: niente ombra sul testo (un raster in meno per layer) */
+html.film-eco .film-line {
+  text-shadow: none;
+}
 .film-ov--low {
   align-content: end;
   padding-bottom: calc(var(--film-riskbar-h) + 14vh);

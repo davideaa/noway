@@ -90,6 +90,8 @@ export const ui: {
   loaderText: HTMLElement | null;
   /** il pannello ?diag=1 */
   diag: HTMLElement | null;
+  /** riga dei numeri nel finale (anteprima) */
+  stat: HTMLElement | null;
 } = {
   top: null,
   bar: null,
@@ -105,4 +107,5 @@ export const ui: {
   loaderBar: null,
   loaderText: null,
   diag: null,
+  stat: null,
 };

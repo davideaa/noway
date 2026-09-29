@@ -1177,7 +1177,7 @@ export default function FilmCanvas({ palette, onReady }: { palette: Palette; onR
   }, []);
   return (
     <Canvas
-      dpr={[1, Q.dpr]}
+      dpr={Q.dpr < 1 ? Q.dpr : [1, Q.dpr]}
       camera={{ fov: portrait ? 64 : 50, near: 0.1, far: 400, position: [0, 9, 34] }}
       gl={{ antialias: false, alpha: false, stencil: false, powerPreference: "high-performance" }}
       frameloop={loop}
