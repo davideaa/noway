@@ -104,10 +104,18 @@ Sitemap: [DA COMPLETARE: URL]/sitemap.xml
 Voci: `Metodo` · `Strategie` · `Portafoglio` · `Rischio` · `Monitoraggio` · `Contatti`
 Pulsante in barra: `Scrivi via email`
 
-**Barra fissa in fondo allo schermo (sempre visibile, con link a #avviso):**
-> Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria. [Leggi l'avviso completo](#avviso)
+**Barra fissa in fondo allo schermo (sempre visibile, mono piccola, con link a #avviso):**
+> V2 · BACKTEST SU DATI STORICI · TRADING AD ALTO RISCHIO · NON È CONSULENZA FINANZIARIA — [Avviso completo](#avviso)
 
-> Fonte: richiesta di Davide, riformulata (v3, 29/09/2026). Sostituisce "Backtest su dati storici, non risultati reali. Trading ad alto rischio." È la versione breve della frase completa in 3.9. Mai "machine learning", mai "alta probabilità".
+> Fonte: brief di Davide (29/09/2026), testo esatto. La versione breve riformulata (`RISK_SHORT`: "Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria") resta nel footer di /dettagli; la frase completa in 3.9 resta nell'avviso e nel Riepilogo. Mai "machine learning", mai "alta probabilità".
+
+**Prologo e finale del film (brief di Davide, testi esatti):**
+- S1 (h1 della home): `Tre strategie algoritmiche validate attraverso modelli quantitativi.` — sottotitolo mono: `USDJPY · NASDAQ · XAUUSD`
+- S2: `Analisi quantitativa, IA e conoscenza dei mercati trasformano ipotesi di trading in sistemi statistici verificabili.`
+- S3: `OSSERVIAMO → VERIFICHIAMO → COSTRUIAMO` e sotto `Dal comportamento del mercato all'ipotesi. Dall'ipotesi ai dati. Dai dati a un sistema replicabile.`
+- Finale: `I risultati vengono dopo il metodo.` + un solo bottone `ESPLORA IL PORTFOLIO →` (verso /dettagli)
+- Frasi ricorrenti degli atti 2-5: `Si decide prima, si misura dopo.` e `Misurato fuori campione. Non promesso.` (la seconda sostituisce "Backtest, non risultati reali.")
+> Fonte: brief di Davide; la frase B riformulata su richiesta (una sola costante `FILM_PHRASE_B` in `src/lib/site.ts`, se Davide manda la sua versione si cambia lì).
 
 ---
 

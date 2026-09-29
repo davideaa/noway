@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Metodo } from "@/components/sections/Metodo";
 import { Monitoraggio } from "@/components/sections/Monitoraggio";
 import { Portafoglio } from "@/components/sections/Portafoglio";
+import { Riepilogo } from "@/components/sections/Riepilogo";
 import { Rischio } from "@/components/sections/Rischio";
 import { Scartate } from "@/components/sections/Scartate";
 import { Strategie } from "@/components/sections/Strategie";
@@ -41,6 +42,7 @@ export default function Dettagli() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()).replace(/</g, "\\u003c") }}
       />
       <Hero />
+      <Riepilogo />
       <Metodo />
       <Strategie />
       <Portafoglio />

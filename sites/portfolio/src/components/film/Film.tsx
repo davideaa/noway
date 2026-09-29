@@ -13,9 +13,11 @@
  * modo puro dalla scena. Mai un lerp dentro la scena.
  */
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
-import { FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B } from "@/lib/site";
+import { buttonVariants } from "@/components/ui/button";
+import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, FILM_S2, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
+import { MagneticCta } from "./MagneticCta";
 import type { Palette } from "./FilmCanvas";
 import { FilmFallback } from "./FilmFallback";
 import { FilmTopBar } from "./FilmTopBar";
@@ -46,10 +48,10 @@ const FilmCanvas = dynamic(() => import("./FilmCanvas"), { ssr: false });
  * e parte solo dopo il secondo fotogramma disegnato. In pausa non avanza (B4).
  */
 const ENTRY = 0.06;
-const ENTRY_MS = 2500;
+const ENTRY_MS = 1200; // la figura si compone in poco piu' di un secondo, poi il play parte da solo
 const ENTRY_DT_MAX = 0.05;
 /** Partenza dolce del play (ms) e frenata sull'ultimo tratto. */
-const PLAY_EASE_MS = 900;
+const PLAY_EASE_MS = 500;
 /** Sfalsamento tra le lettere (0 = tutte insieme). */
 const STAGGER = 0.7;
 const BLUR_PX = 9;
@@ -110,7 +112,7 @@ function Letters({ text }: { text: string }) {
   );
 }
 
-type Ov = { el: HTMLElement; letters: HTMLElement[]; key: string; whole: boolean };
+type Ov = { el: HTMLElement; letters: HTMLElement[]; key: string; whole: boolean; stagger: number };
 type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null };
 
 /** Scelta iniziale, UNA volta e fuori da React: WebGL si' (film) o no (fallback). */
@@ -126,7 +128,7 @@ function getClient(): Client {
 }
 const noopSubscribe = () => () => {};
 
-export function Film({ panel }: { panel: ReactNode }) {
+export function Film() {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const { reduced } = useMotionPrefs();
@@ -175,9 +177,9 @@ export function Film({ panel }: { panel: ReactNode }) {
 
     const ovs: Ov[] = Array.from(stage.querySelectorAll<HTMLElement>("[data-ov]")).map((el) => {
       const letters = Array.from(el.querySelectorAll<HTMLElement>(".film-l"));
-      return { el, letters, key: "", whole: el.hasAttribute("data-ov-whole") };
+      // data-stagger: sfalsamento maggiore (S3: le tre parole si accendono in sequenza)
+      return { el, letters, key: "", whole: el.hasAttribute("data-ov-whole"), stagger: Number(el.dataset.stagger || STAGGER) };
     });
-    const panelEl = stage.querySelector<HTMLElement>(".film-panel");
 
     // Se la pagina si apre gia' scrollata (ricarica a meta'), niente ingresso e niente play automatico.
     const rect0 = track.getBoundingClientRect();
@@ -354,19 +356,18 @@ export function Film({ panel }: { panel: ReactNode }) {
           const blur = blurOn ? (1 - wIn) * BLUR_PX : 0;
           ov.el.style.opacity = wIn.toFixed(3);
           ov.el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none";
-          ov.el.style.transform = `translate3d(0,${((1 - wIn) * 24).toFixed(1)}px,0) scale(${(0.96 + 0.04 * wIn).toFixed(4)})`;
-          // E8: alone tinto delle carte = f(focus)
-          if (panelEl) panelEl.style.setProperty("--focus", wIn.toFixed(3));
+          ov.el.style.transform = `translate3d(0,0,0) scale(${(0.96 + 0.04 * wIn).toFixed(4)})`;
           continue;
         }
         const n = ov.letters.length || 1;
+        const stagger = ov.stagger;
         for (let i = 0; i < n; i++) {
           const L = ov.letters[i];
           if (!L) break;
           // chiusura che arriva FRONT-TO-BACK (prime lettere prima), risolvendosi dal blur
-          const ei = clamp01(wIn * (1 + STAGGER) - (i / n) * STAGGER);
+          const ei = clamp01(wIn * (1 + stagger) - (i / n) * stagger);
           // apertura che se ne va BACK-TO-FRONT (ultime lettere prima), sfocando
-          const xi = clamp01(wOut * (1 + STAGGER) - ((n - 1 - i) / n) * STAGGER);
+          const xi = clamp01(wOut * (1 + stagger) - ((n - 1 - i) / n) * stagger);
           const op = ei * (1 - xi);
           const blur = blurOn ? (1 - ei) * BLUR_PX + xi * BLUR_PX : 0;
           const sc = 0.94 + 0.06 * ei + 0.08 * xi;
@@ -479,22 +480,30 @@ export function Film({ panel }: { panel: ReactNode }) {
             />
           )}
 
-          {/* Overlay: assoluti, pointer-events none, finestre sull'ASSE DEGLI ATTI. */}
+          {/* Overlay: assoluti, pointer-events none, finestre sull'ASSE DEGLI ATTI.
+              PROLOGO (S1-S3, brief di Davide): molto vuoto, testo bone, a fuoco da dietro, mai dal basso. */}
           <div className="film-ov film-ov--title" data-ov="0" style={{ visibility: "visible" }}>
             <h1 className="film-h1" aria-label={FILM_H1}>
               <Letters text={FILM_H1} />
             </h1>
-          </div>
-          <div className="film-ov film-ov--low" data-ov="1">
-            <p className="film-line" aria-label={FILM_PHRASE_A}>
-              <Letters text={FILM_PHRASE_A} />
+            <p className="film-sub mono" aria-label={FILM_SUB}>
+              <Letters text={FILM_SUB} />
             </p>
           </div>
-          <div className="film-ov film-ov--low" data-ov="2">
-            <p className="film-line" aria-label={FILM_PHRASE_B}>
-              <Letters text={FILM_PHRASE_B} />
+          <div className="film-ov film-ov--pro" data-ov="1">
+            <p className="film-line film-line--pro" aria-label={FILM_S2}>
+              <Letters text={FILM_S2} />
             </p>
           </div>
+          <div className="film-ov film-ov--pro" data-ov="2" data-stagger="1.4">
+            <p className="film-steps mono" aria-label={FILM_S3_WORDS.join(", ")}>
+              <Letters text={FILM_S3_WORDS.join(" → ")} />
+            </p>
+            <p className="film-line film-line--s film-line--pro" aria-label={FILM_S3}>
+              <Letters text={FILM_S3} />
+            </p>
+          </div>
+          {/* le due frasi ricorrenti degli atti 2-5 */}
           <div className="film-ov film-ov--low" data-ov="3">
             <p className="film-line" aria-label={FILM_PHRASE_A}>
               <Letters text={FILM_PHRASE_A} />
@@ -505,9 +514,35 @@ export function Film({ panel }: { panel: ReactNode }) {
               <Letters text={FILM_PHRASE_B} />
             </p>
           </div>
-          {/* Atto 6: la camera si ferma e si apre il pannello dei dati (scorrevole al suo interno). */}
-          <div className="film-ov film-ov--end" data-ov="5" data-ov-whole>
-            {panel}
+          <div className="film-ov film-ov--low" data-ov="5">
+            <p className="film-line" aria-label={FILM_PHRASE_A}>
+              <Letters text={FILM_PHRASE_A} />
+            </p>
+          </div>
+          <div className="film-ov film-ov--low" data-ov="6">
+            <p className="film-line" aria-label={FILM_PHRASE_B}>
+              <Letters text={FILM_PHRASE_B} />
+            </p>
+          </div>
+          {/* Atto 6: la camera si ferma sulla schermata finale: un titolo, UN bottone (-> /dettagli), "Rivedi". */}
+          <div className="film-ov film-ov--end" data-ov="7" data-ov-whole>
+            <div className="film-end">
+              <h2 className="film-line film-line--end">{FILM_END}</h2>
+              <MagneticCta href="/dettagli" className={`${buttonVariants()} film-end__cta`}>
+                {FILM_CTA}
+              </MagneticCta>
+              <button
+                type="button"
+                className="film-end__again"
+                data-cursor="link"
+                onClick={() => {
+                  ui.seekTo = 0;
+                  player.play();
+                }}
+              >
+                Rivedi
+              </button>
+            </div>
           </div>
         </div>
       </div>

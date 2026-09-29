@@ -1,15 +1,17 @@
 import { TriangleAlert } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { EMAIL_SHOWN, FILM_PHRASE_A, FILM_PHRASE_B, MAILTO_LOWER, RISK_STATEMENT } from "@/lib/site";
+import { EMAIL_SHOWN, MAILTO, RISK_STATEMENT } from "@/lib/site";
 import dati from "../../../data/strategie.json";
-import { MagneticCta } from "./MagneticCta";
+import { MagneticCta } from "@/components/film/MagneticCta";
+import { BacktestTag, SceneHeader } from "@/components/site/ui";
 
 /**
- * L'ultimo atto: la camera si ferma e si apre il pannello dei dati, DENTRO il
- * film (overlay sull'asse degli atti, scorrevole al suo interno). Server
- * component: legge data/strategie.json in build, nel bundle del browser
- * arrivano solo i numeri gia' scritti. Etichetta "Backtest · validato fuori
- * campione" e il rischio accanto a ogni rendimento (DESIGN.md sez. 12).
+ * RIEPILOGO (in cima a /dettagli, subito dopo l'hero): per ciascuna strategia
+ * dentro/fuori campione e il portafoglio, da data/strategie.json (letto in
+ * build: nel bundle arrivano solo i numeri gia' scritti). Etichetta "Backtest ·
+ * validato fuori campione" e il rischio accanto a ogni rendimento (DESIGN.md
+ * sez. 12). Era il pannello finale del film; Davide ha voluto il film che finisce
+ * su un solo bottone verso questa pagina.
  */
 type Blocco = { n: number; somma_R: number; R_per_op: number; t: number; vinte_pct: number };
 type Strat = {
@@ -133,20 +135,13 @@ function Card({ id, nome, mercato, colore }: (typeof META)[number]) {
   );
 }
 
-export function FilmDataPanel() {
+export function Riepilogo() {
   const mi = mesiInsieme();
   return (
-    <div className="film-panel" tabIndex={-1} aria-label="I dati delle tre strategie">
-      <div className="film-panel__in">
-        <header className="film-panel__head">
-          <p className="film-line film-line--s" aria-label={FILM_PHRASE_A}>
-            {FILM_PHRASE_A}
-          </p>
-          <p className="film-line film-line--s film-line--mute" aria-label={FILM_PHRASE_B}>
-            {FILM_PHRASE_B}
-          </p>
-          <span className="tag">Backtest · validato fuori campione</span>
-        </header>
+    <section id="riepilogo" data-scene className="scene" aria-labelledby="riepilogo-t">
+      <div className="wrap riepilogo">
+        <SceneHeader n="02" label="Riepilogo" id="riepilogo-t" title={["Tre strategie,", "una pagina di numeri"]} />
+        <BacktestTag />
 
         <div className="film-cards">
           {META.map((m) => (
@@ -189,19 +184,15 @@ export function FilmDataPanel() {
           <span>{RISK_STATEMENT}</span>
         </p>
 
-        <div className="film-cta">
+        <div className="film-cta riepilogo__cta">
           <MagneticCta href="/simulatore/" className={buttonVariants()}>
             Apri il simulatore
           </MagneticCta>
-          <a href="/dettagli" className={buttonVariants({ variant: "outline" })} data-cursor="link">
-            Tutti i dettagli
-          </a>
-          <a href={MAILTO_LOWER} className={buttonVariants({ variant: "outline" })} aria-label={`Scrivi via email a ${EMAIL_SHOWN}`} data-cursor="link">
+          <a href={MAILTO} className={buttonVariants({ variant: "outline" })} aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}>
             Scrivi via email
           </a>
         </div>
-        <p className="film-mail mono">{EMAIL_SHOWN}</p>
       </div>
-    </div>
+    </section>
   );
 }

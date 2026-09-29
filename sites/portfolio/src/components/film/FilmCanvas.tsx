@@ -44,6 +44,7 @@ import {
   lensAmount,
   limeInFrame,
   mix,
+  prologueText,
   roomGate,
   smoothstep,
   speedNorm,
@@ -155,7 +156,8 @@ function Figure() {
     // traslazione compensativa: il perno resta al centro della figura, non all'origine
     cv.copy(FIG_C).applyEuler(rot).multiplyScalar(s);
     m.position.set(FIG_C.x - cv.x, FIG_C.y - cv.y + floatY, FIG_C.z - cv.z);
-    mat.opacity = g;
+    // sotto un testo del prologo la figura si attenua (bianco sul lime: QA-FILM C4)
+    mat.opacity = g * (1 - 0.45 * prologueText(film.sp));
   }, -1);
 
   if (!beads.count) return null;
@@ -260,6 +262,7 @@ function Lattice({ palette }: { palette: Palette }) {
   useFrame(() => {
     const b = latticeBuild(film.sp);
     mat.uniforms.uBuild.value = b;
+    mat.uniforms.uOpacity.value = 0.55 * (1 - 0.4 * prologueText(film.sp));
     mat.uniforms.uFogFar.value = fogFar(film.p);
     if (ref.current) ref.current.visible = b > 0.001;
   }, -1);

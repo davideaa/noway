@@ -1,18 +1,17 @@
-import { TriangleAlert } from "lucide-react";
-import { RISK_SHORT } from "@/lib/site";
+import { RISK_BAR } from "@/lib/site";
 
-/** Barra fissa in fondo allo schermo, sempre visibile (COPY.md, "Navigazione e barra fissa"). */
+/**
+ * Barra fissa in fondo allo schermo, sempre visibile (brief di Davide: testo
+ * esatto, mono piccola, discreta). Il link porta all'avviso completo.
+ */
 export function RiskBar() {
   return (
     <div className="riskbar" role="region" aria-label="Avviso breve sul rischio">
-      <div className="wrap flex items-start gap-3 py-2 text-xs leading-[1.5] text-ink md:items-center md:py-3 md:text-sm">
-        <TriangleAlert size={18} strokeWidth={1.6} className="mt-[1px] shrink-0 text-warn md:mt-0" aria-hidden />
-        <p>
-          {RISK_SHORT}.{" "}
-          <a href="/dettagli#avviso" className="textlink whitespace-nowrap py-2 font-semibold">
-            Leggi l&rsquo;avviso completo
-          </a>
-        </p>
+      <div className="wrap riskbar__in">
+        <p className="riskbar__text mono">{RISK_BAR}</p>
+        <a href="/dettagli#avviso" className="riskbar__link mono">
+          Avviso completo
+        </a>
       </div>
     </div>
   );

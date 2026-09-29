@@ -18,6 +18,7 @@ Home = film a scroll su una sola tela (`/`, vedi `SPEC-FILM.md`); contenuti ones
 npm run dev     # sviluppo
 npm run lint
 npm run build && npm start
+npm run export  # anteprima statica in out-export/ (poi CANCELLA .next: per next start serve un nuovo build)
 ```
 
 Variabile opzionale, da impostare **prima della build** quando l'URL e' deciso:
@@ -35,7 +36,8 @@ Tutto in `:root` di `src/app/globals.css`: colori, spaziature, raggi, tempi, dis
 
 ## Struttura
 
-- `src/app/page.tsx` — il film (`src/components/film/`: `Film.tsx` traccia + overlay, `FilmCanvas.tsx` scena R3F, `state.ts` la funzione pura di p, `plate.ts` la figura); `layout.tsx` — font, metadata, barra fissa del rischio
+- `src/app/page.tsx` — il film (`src/components/film/`: `Film.tsx` traccia + overlay + ciclo (autoplay, puntatore), `FilmCanvas.tsx` scena R3F (figura, gabbia, wormhole, fili, post), `state.ts` la funzione pura di p (gate, spina, ritmo del play), `player.ts` il play fuori da React, `FilmTopBar.tsx` barra a pillola con Riproduci/Pausa e avanzamento, `plate.ts` la figura); `layout.tsx` — font, metadata, barra fissa del rischio
+- `public/simulatore/index.html` — il simulatore di Davide, servito a `/simulatore/` (rewrite in `next.config.ts`; non si modifica)
 - `src/app/dettagli/` — la pagina con le otto scene, header e footer
 - `src/components/sections/` — una scena per file (Hero, Metodo, Strategie, Scartate, Rischio, Monitoraggio, Contatti, Avviso)
 - `src/components/motion/` — `HeroScene` (recede in Z), `HeroBackground` + `ShaderLayer` (shader caricato dopo il primo

@@ -1143,6 +1143,32 @@ html:not(.js) .hero__content {
   border-top: 1px solid var(--line2);
   background: var(--surf2);
 }
+/* testo esatto di Davide: mono, piccola, discreta; il link all'avviso resta */
+.riskbar__in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-4);
+  min-height: 44px;
+  padding-block: var(--sp-2); /* solo verticale: il padding laterale e' quello di .wrap */
+}
+.riskbar__text {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.riskbar__link {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--acc);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: var(--sp-2) 0;
+  white-space: nowrap;
+}
 .skip {
   position: absolute;
   left: var(--sp-4);
@@ -1198,18 +1224,73 @@ html:not(.js) .hero__content {
 .film-ov button {
   pointer-events: auto;
 }
-.film-ov--title {
-  align-content: end;
-  justify-items: start;
-  text-align: left;
+/* PROLOGO: schermate pulitissime, centrate, molto vuoto, testo bone */
+.film-ov--title,
+.film-ov--pro {
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  row-gap: var(--sp-4);
+}
+.film-sub {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--film-type-mute);
+}
+.film-line--pro {
+  max-width: 30ch;
+  font-weight: 500;
+}
+.film-steps {
+  font-size: clamp(15px, 0.6rem + 1.4vw, 24px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--film-type);
+  text-shadow: 0 2px 24px color-mix(in srgb, var(--film-field) 80%, transparent);
+}
+.film-ov--pro .film-line--s {
+  max-width: 42ch;
+  color: var(--film-type-mute);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+/* FINALE: un titolo, un bottone, "Rivedi" */
+.film-ov--end {
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  will-change: transform, filter, opacity;
+}
+.film-line--end {
+  max-width: 20ch;
+}
+.film-end__cta {
+  height: 52px;
+  padding: 0 var(--sp-6);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+.film-end__again {
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: 13px;
+  color: var(--film-type-mute);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  background: transparent;
+  pointer-events: auto;
+}
+.film-end__again:hover {
+  color: var(--film-accent-figure);
 }
 .film-ov--low {
   align-content: end;
   padding-bottom: calc(var(--film-riskbar-h) + 14vh);
 }
 .film-h1 {
-  max-width: 16ch;
-  font-size: var(--fs-display);
+  max-width: 20ch;
+  font-size: clamp(2rem, 0.9rem + 4.4vw, 4.6rem);
   font-weight: 500;
   line-height: 1.02;
   letter-spacing: -0.045em;
@@ -1533,55 +1614,20 @@ html:not(.js) .hero__content {
 }
 
 /* --------------------------------------------------------------------------
-   Atto 6: il pannello dei dati, dentro il film. L'overlay resta pointer-events
-   none; il pannello e' l'unico figlio che li riabilita, e scorre al suo interno.
-   E8: ogni carta ha dietro un alone del proprio colore (--zc), opacita' =
-   0.08 + 0.10 * --focus (scritto dal ciclo, funzione della finestra) + hover.
+   RIEPILOGO (/dettagli, dopo l'hero): le carte dentro/fuori campione e il
+   portafoglio. E8: ogni carta ha dietro un alone del proprio colore (--zc),
+   piu' forte al passaggio del puntatore (solo opacity, mai box-shadow animata).
    -------------------------------------------------------------------------- */
-.film-ov--end {
-  align-content: center;
-  padding-top: calc(var(--header-h) + var(--sp-6));
-  padding-bottom: calc(var(--film-riskbar-h) + var(--sp-4));
-  will-change: transform, filter, opacity;
-}
-.film-panel {
-  --focus: 0;
-  width: min(100%, 1120px);
-  max-height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  pointer-events: auto;
-  text-align: left;
-  border: 1px solid var(--line);
-  border-radius: var(--r-3);
-  background: color-mix(in srgb, var(--film-field-2) 88%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-@media (pointer: coarse) {
-  .film-panel {
-    background: var(--film-field-2);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
-.film-panel__in {
+.riepilogo {
+  --focus: 1;
   display: grid;
   gap: var(--sp-5);
-  padding: var(--sp-5) var(--sp-4) var(--sp-6);
-}
-@media (min-width: 950px) {
-  .film-panel__in {
-    padding: var(--sp-6) var(--sp-6) var(--sp-7);
-  }
-}
-.film-panel__head {
-  display: grid;
-  gap: var(--sp-2);
   justify-items: start;
 }
-.film-panel__head .tag {
-  margin-top: var(--sp-2);
+.riepilogo .film-cards,
+.riepilogo .film-card--port,
+.riepilogo .film-panel__risk {
+  justify-self: stretch;
 }
 .film-cards {
   display: grid;
@@ -1607,10 +1653,10 @@ html:not(.js) .hero__content {
 .film-card::before {
   content: "";
   position: absolute;
-  inset: -20%;
+  inset: 0; /* dentro la carta: un alone che sborda creava 71 px di scroll orizzontale a 390 */
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(60% 50% at 50% 30%, var(--zc, var(--st-oro)) 0%, transparent 70%);
+  background: radial-gradient(90% 70% at 50% 20%, var(--zc, var(--st-oro)) 0%, transparent 70%);
   opacity: calc(0.08 + 0.1 * var(--focus));
   transition: opacity 180ms var(--ease);
   pointer-events: none;
@@ -1742,12 +1788,9 @@ html:not(.js) .hero__content {
   line-height: 1.55;
   color: var(--film-type);
 }
-.film-panel .film-cta {
+.riepilogo__cta {
   justify-content: flex-start;
   margin-top: 0;
-}
-.film-panel .film-mail {
-  margin-top: calc(-1 * var(--sp-3));
 }
 
 /* --------------------------------------------------------------------------
@@ -1814,8 +1857,8 @@ html:not(.js) .hero__content {
   perspective: var(--persp);
 }
 .js .film-ov--title .film-l {
-  animation: film-focus-in 700ms var(--ease) both;
-  animation-delay: calc(150ms + var(--w, 0) * 60ms + var(--i, 0) * 14ms);
+  animation: film-focus-in 600ms var(--ease) both;
+  animation-delay: calc(80ms + var(--w, 0) * 45ms + var(--i, 0) * 9ms);
 }
 @keyframes film-focus-in {
   from {

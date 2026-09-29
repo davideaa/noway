@@ -38,6 +38,10 @@ export function Metodo() {
             I numeri di questa pagina vengono dalla misura più recente del portafoglio (settembre 2026). La ricerca
             documentata nel repo è una versione precedente del sistema oro.
           </p>
+          <p className="t-sec">
+            L’IA è stata usata come strumento di analisi e di scrittura del codice nella ricerca; le strategie sono
+            regole esplicite, non modelli di apprendimento automatico.
+          </p>
         </Reveal>
 
         <div className="mt-12 space-y-16 md:space-y-24">

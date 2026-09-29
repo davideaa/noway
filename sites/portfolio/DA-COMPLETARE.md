@@ -52,5 +52,6 @@ Sono mostrati come in COPY.md. Se Davide conferma un valore diverso, va cambiato
 - **Menu su telefono senza JavaScript**: il pulsante "Menu" richiede JS. Il resto del sito funziona senza JS.
 - **Informativa privacy / cookie**: il sito non usa analisi ne' cookie; se si aggiungono, serve.
 - **Export statico**: `npm run export` (= `EXPORT_STATIC=1 next build`) scrive `out-export/` e poi **cancella `.next`**, perche' Next 16 salva comunque in `.next` la configurazione dell'export e un successivo `next start` servirebbe /dettagli senza CSS/JS (QA-FILM A1). Dopo un export, per `next start` serve un `npm run build` normale.
+- **Riepilogo in /dettagli**: le carte dentro/fuori campione stavano nel finale del film (v3 intermedia); Davide ha voluto il film che finisce su un solo bottone, quindi sono in cima a /dettagli (`src/components/sections/Riepilogo.tsx`). I numeri vengono da `data/strategie.json` in build.
 - **Barra alta nel finale del film**: RIFERIMENTI E9 la farebbe sparire nel wipe (translateZ -300, opacita' 0); qui recede e si attenua al 50% ma resta usabile, perche' porta il tasto Riproduci/Pausa (WCAG 2.2.2) e il link ai dettagli.
 - **Prodotto commerciale di partenza**: non nominato e nessun suo numero (COPY.md sez. 8, punto 15).
