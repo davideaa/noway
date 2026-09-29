@@ -19,13 +19,22 @@ export const film = {
   sp: 0,
   /** solo scroll, senza ingresso */
   scrollP: 0,
-  /** mouse normalizzato -1..1 (tilt figura, parallasse stanza) */
+  /**
+   * Puntatore H(m): normalizzato -1..1 e GIA' SMUSSATO all'ingresso (tau 0.15 s,
+   * calcolato con dt in Film.tsx). Si smussa solo l'input, mai un valore di
+   * scena: un secondo lerp dentro la scena sarebbe stato nascosto (isteresi).
+   * `min` = presenza del puntatore fine (0 su touch, 0 fuori dalla finestra).
+   */
   mx: 0,
   my: 0,
-  /** secondi: idle float e grana, nient'altro */
+  min: 0,
+  /** secondi: respiro G(t) (float della figura, deriva delle particelle) e grana. Mai la camera. */
   t: 0,
   reduced: false,
+  /** Pausa esplicita dell'utente: G(t) ferma (respiro, grana). */
   paused: false,
+  /** Il play automatico sta muovendo lo scroll (informativo: la scena non lo legge). */
+  playing: false,
   mobile: false,
   /** larghezza/altezza della finestra: scala laterale dei fili e dello swing */
   aspect: 1.6,
@@ -158,6 +167,37 @@ export function spine(sp: number, out: { x: number; y: number; z: number }) {
   out.x = 0;
   return out;
 }
+
+/**
+ * dz/dsp ANALITICA della spina (derivata dell'Hermite): la "velocita'" della
+ * camera senza stato, senza differenze fra frame. Serve al wormhole: torsione,
+ * scia delle particelle, frangia RGB e smear crescono con questa, e sono zero
+ * a riposo. Normalizzata sulla marcia piu' alta (360).
+ */
+export function spineSpeed(sp: number) {
+  const s = clamp01(sp);
+  let i = 0;
+  while (i < SPINE.length - 2 && s > SPINE[i + 1].sp) i++;
+  const a = SPINE[i];
+  const b = SPINE[i + 1];
+  const L = b.sp - a.sp;
+  const t = clamp01((s - a.sp) / L);
+  const t2 = t * t;
+  const dz = (6 * t2 - 6 * t) * a.z + (3 * t2 - 4 * t + 1) * L * a.m0 + (-6 * t2 + 6 * t) * b.z + (3 * t2 - 2 * t) * L * a.m1;
+  return Math.abs(dz / L);
+}
+export const speedNorm = (sp: number) => clamp01(spineSpeed(sp) / 360);
+
+/**
+ * WORMHOLE (atti 2-3): la stanza a tre cilindri smette di essere un tubo.
+ * Gate sull'asse degli atti: entra con il corridoio, esce nella valle.
+ * Le intensita' (torsione, bande, particelle, lente) sono gate x velocita'.
+ */
+export const wormGate = (sp: number) => smoothstep(0.22, 0.36, sp) * (1 - smoothstep(0.7, 0.8, sp));
+/** Frangia RGB + smear: SOLO nel picco di velocita' (marce 300 e 360), mai a riposo. */
+export const fringeAmount = (sp: number) => wormGate(sp) * smoothstep(0.5, 0.95, speedNorm(sp));
+/** Lente al centro: si apre con il wormhole, un po' di piu' con la velocita'. */
+export const lensAmount = (sp: number) => wormGate(sp) * (0.45 + 0.55 * speedNorm(sp));
 
 export type Pose = { x: number; y: number; z: number; tx: number; ty: number; tz: number; bank: number };
 const tmpA = { x: 0, y: 0, z: 0 };
