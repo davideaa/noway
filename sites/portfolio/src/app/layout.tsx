@@ -6,7 +6,7 @@ import { RevealObserver } from "@/components/motion/RevealObserver";
 import { RiskBar } from "@/components/site/RiskBar";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { DESCRIPTION, SITE_NAME, SITE_URL, TITLE } from "@/lib/site";
+import { DESCRIPTION, OG_ALT, SITE_NAME, SITE_URL, TITLE } from "@/lib/site";
 
 // Font self-hosted da next/font: nessuna chiamata a Google dal visitatore.
 const manrope = Manrope({
@@ -26,15 +26,30 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: SITE_URL ? { canonical: "/" } : undefined,
+  // Icone dal kit di brand (public/). favicon.ico di Next rimosso: prevaleva sull'SVG.
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
     locale: "it_IT",
     siteName: SITE_NAME,
     title: TITLE,
     description: DESCRIPTION,
-    // Immagine social: [DA COMPLETARE] in COPY.md, quindi omessa.
+    // og:image deve essere assoluta. Senza NEXT_PUBLIC_SITE_URL Next scriverebbe
+    // http://localhost:3000/og.png: meglio nessuna immagine che un indirizzo sbagliato.
+    images: SITE_URL ? [{ url: "/og.png", width: 1200, height: 630, alt: OG_ALT }] : undefined,
   },
-  twitter: { card: "summary", title: TITLE, description: DESCRIPTION },
+  twitter: {
+    card: SITE_URL ? "summary_large_image" : "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: SITE_URL ? ["/og.png"] : undefined,
+  },
 };
 
 export const viewport: Viewport = {

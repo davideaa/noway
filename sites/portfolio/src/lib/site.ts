@@ -5,6 +5,9 @@ export const TITLE = "Strategie algoritmiche sull'oro (XAUUSD): metodo e rischio
 export const DESCRIPTION =
   "Strategie trend following su XAUUSD con criteri fissati prima del test, fuori campione, scarti e drawdown vero. Sono backtest, non risultati reali.";
 
+/** Testo alternativo dell'immagine social (COPY.md sez. 5). */
+export const OG_ALT = "Portfolio Algo Manager: strategie algoritmiche su XAUUSD, backtest e rischio dichiarati.";
+
 /** Indirizzo come scritto nel mailto; in pagina si mostra in minuscolo (DESIGN.md sez. 7). */
 export const EMAIL = "PORTFOLIOALGOMANAGER21@gmail.com";
 export const EMAIL_SHOWN = EMAIL.toLowerCase();

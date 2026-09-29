@@ -12,6 +12,14 @@ import { useMotionPrefs } from "./MotionPrefs";
 
 const ShaderLayer = dynamic(() => import("./ShaderLayer"), { ssr: false });
 
+/**
+ * Attesa dopo il caricamento della pagina prima di scaricare lo shader (~290 kB gzip
+ * di three.js, con parsing e compilazione che occupano il thread principale).
+ * Il fallback CSS ha lo stesso aspetto, quindi i primi secondi restano liberi per
+ * il testo e per i tocchi. Da regolare.
+ */
+const SHADER_DELAY_MS = 3000;
+
 export function HeroBackground() {
   const { canAnimate, paused, reportSlow } = useMotionPrefs();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -23,12 +31,15 @@ export function HeroBackground() {
     let cancelled = false;
     let idle = 0;
     let timer = 0;
+    let wait = 0;
     const go = () => {
       if (!cancelled) setReady(true);
     };
     const schedule = () => {
-      if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(go, { timeout: 2500 });
-      else timer = window.setTimeout(go, 800);
+      wait = window.setTimeout(() => {
+        if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(go, { timeout: 2000 });
+        else timer = window.setTimeout(go, 300);
+      }, SHADER_DELAY_MS);
     };
     if (document.readyState === "complete") schedule();
     else window.addEventListener("load", schedule, { once: true });
@@ -37,6 +48,7 @@ export function HeroBackground() {
       window.removeEventListener("load", schedule);
       if (idle) window.cancelIdleCallback(idle);
       if (timer) window.clearTimeout(timer);
+      if (wait) window.clearTimeout(wait);
     };
   }, []);
 
