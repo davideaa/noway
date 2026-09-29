@@ -26,4 +26,5 @@ Refero (abbonamento), Cult Pro, Scrolltide (239 $, ma ha un prompt gratuito), Ma
 - Sito: https://portfolio-algo-manager.netlify.app (team `davide-abbattista04`, site id `1752b1ac-4249-4c5e-bd64-8bf4587cccd3`).
 - Come si aggiorna: `cd sites/portfolio && npm run export:host`, poi in `out-host/` aggiungere `netlify.toml` (`[build] publish = "."`) e deploy con il connettore Netlify (`deploy-site` → comando `npx @netlify/mcp`).
 - Marcato `noindex` + `robots.txt` Disallow: condivisibile via link, non indicizzato. Togliere quando diventa il sito ufficiale.
-- Nota: il `<meta name="robots">` è inserito a mano nell'HTML esportato e produce un avviso React #418 (idratazione) in console, innocuo; da spostare nei metadata di Next.
+- Il noindex sta nei metadata di Next (attivo con `EXPORT_HOST=1`). L'errore React #418 visto in produzione era causato dal commento che Netlify inietta nell'`<head>` unito a un nostro script inline nell'head: risolto spostando lo script nel `<body>` (layout.tsx).
+- Su iOS: il simulatore non si incorpora piu' da solo in /dettagli (crash di Safari per memoria); su touch si apre in una scheda a parte.
