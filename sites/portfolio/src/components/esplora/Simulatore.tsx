@@ -1,66 +1,123 @@
 "use client";
 
 /**
- * SIMULATORE MONTE CARLO (Davide): chi guarda sceglie la strategia (o tutte e
- * tre insieme, consigliato) e la discesa massima che accetta; il simulatore
- * trova quanto rischiare su ciascuna perche', in 95 simulazioni su 100 e con il
- * piu' severo dei quattro metodi, la discesa resti entro quel limite (rischi
- * arrotondati per eccesso a passi dello 0,10%). Mostra il ventaglio delle
- * simulazioni (fasce 5–95% e 25–75%, mediana, storico vero), l'istogramma
- * delle discese e la tabella dei metodi. Si ricalcola a ogni scelta; "Avvia la
- * simulazione" rifa' tutto con estrazioni nuove. Metodo e ipotesi: mc.ts.
+ * SIMULATORE MONTE CARLO (Davide). Si sceglie tutto: capitale iniziale,
+ * strategia (o tutte e tre, consigliato), discesa massima accettata, anni, e su
+ * quali dati simulare. Al clic su "Avvia la simulazione" si apre sotto lo
+ * spazio della simulazione e il grafico SI COSTRUISCE davanti a chi guarda (le
+ * simulazioni avanzano fino alla fine in qualche secondo); poi si legge
+ * passando sopra, con i valori scritti sulle linee. Sotto: gli scenari (5%,
+ * mediana, 95%), anno per anno, la discesa di ogni simulazione, i metodi.
+ * La misura (rischio composto, fisso, R) e il capitale cambiano la lettura
+ * subito, senza rifare la simulazione. Metodo e ipotesi: mc.ts.
  */
-import { ArrowLeft, CircleHelp, Play, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ChevronDown, CircleHelp, FastForward, Play, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
-import { it, signed } from "@/lib/format";
-import { N, simula, type Esito, type MetodoId } from "./mc";
-import { DisceseChart, VentaglioChart } from "./SimCharts";
+import { int, it, signed } from "@/lib/format";
+import { N, simula, type Esito, type MetodoId, type Misura, type Periodo } from "./mc";
+import { DisceseChart, formato, GraficoMC } from "./SimCharts";
 
 type Scelta = "tutte" | Id;
+type Param = { scelta: Scelta; limite: number; anni: number; periodo: Periodo };
+type Run = { e: Esito; p: Param; giro: number };
 
 const METODI: Record<MetodoId, { nome: string; cosa: string }> = {
   permutazione: { nome: "Rimescolamento", cosa: "Stesse operazioni, in un ordine diverso: l’ordine è stato fortunato?" },
   bootstrap: { nome: "Ripescaggio", cosa: "Operazioni ripescate a caso, anche due volte la stessa: il campione è stato fortunato?" },
   blocchi: { nome: "Ripescaggio a blocchi", cosa: "Come sopra, ma a blocchi di 20 di fila: le serie di perdite restano intere." },
-  rimozione: { nome: "Senza un’operazione su dieci", cosa: "Tolta a caso un’operazione ogni dieci: dipende da poche operazioni fortunate?" },
+  rimozione: { nome: "Senza un’operazione su dieci", cosa: "Un tratto vero, in ordine, con un’operazione su dieci tolta: dipende da poche operazioni fortunate?" },
 };
 
+const PERIODI: { v: Periodo; t: string; sub: string; tag?: string }[] = [
+  { v: "senza", t: "Senza l’anno migliore", sub: "A ogni strategia si toglie il suo anno più bello: la scelta più prudente.", tag: "prudente" },
+  { v: "tutto", t: "Tutto, 2019–2026", sub: "Tutte le operazioni, 7 anni e 9 mesi." },
+  { v: "dentro", t: "Solo 2019–2023", sub: "Gli anni su cui le strategie sono state ottimizzate: lì i risultati sono gonfiati per costruzione." },
+  { v: "fuori", t: "Solo 2024–2026", sub: "Fuori campione: dati mai visti durante l’ottimizzazione. È stato un periodo molto favorevole." },
+];
+const MISURE: { v: Misura; t: string }[] = [
+  { v: "composto", t: "Rischio composto" },
+  { v: "fisso", t: "Rischio fisso" },
+  { v: "R", t: "In R" },
+];
+const CAPITALI = [1000, 10000, 50000, 100000];
+
 const pc = (x: number, d = 1) => it(x * 100, d);
+const stesso = (a: Param, b: Param) => a.scelta === b.scelta && a.limite === b.limite && a.anni === b.anni && a.periodo === b.periodo;
+
+function Aiuto({ id, label, aperto, onToggle }: { id: string; label: string; aperto: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="xp-help" aria-expanded={aperto} aria-controls={id} aria-label={label} onClick={onToggle}>
+      <CircleHelp size={16} strokeWidth={1.8} aria-hidden />
+    </button>
+  );
+}
 
 export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => void }) {
+  const [capitale, setCapitale] = useState(10000);
+  const [capTxt, setCapTxt] = useState("10000");
   const [scelta, setScelta] = useState<Scelta>("tutte");
   const [limite, setLimite] = useState(20);
-  const [aiuto, setAiuto] = useState(false);
-  const [seme, setSeme] = useState(1);
-  const [esito, setEsito] = useState<{ e: Esito; scelta: Scelta; limite: number; giro: number } | null>(null);
+  const [anni, setAnni] = useState(3);
+  const [periodo, setPeriodo] = useState<Periodo>("senza");
+  const [misura, setMisura] = useState<Misura>("composto");
+  const [aiuto, setAiuto] = useState({ dd: false, misura: false, perche: false });
+  const [run, setRun] = useState<Run | null>(null);
+  const [stato, setStato] = useState<"fermo" | "calcolo" | "costruzione" | "pronto">("fermo");
   const [avanz, setAvanz] = useState(0);
-  const [calcolo, setCalcolo] = useState(true);
+  const [salta, setSalta] = useState(false);
   const giro = useRef(0);
+  const stage = useRef<HTMLElement>(null);
+  const grafico = useRef<HTMLDivElement>(null);
 
-  // a ogni scelta si ricalcola (un attimo di attesa mentre si trascina il cursore);
-  // un calcolo nuovo fa abbandonare quello vecchio
-  useEffect(() => {
+  const param: Param = { scelta, limite, anni, periodo };
+  const cambiato = run !== null && !stesso(run.p, param);
+
+  const avvia = async () => {
     const mio = ++giro.current;
     const fermo = () => giro.current !== mio;
-    const on = data.ids.map((id) => scelta === "tutte" || scelta === id);
-    const t = window.setTimeout(async () => {
-      setCalcolo(true);
-      setAvanz(0);
-      const e = await simula({ r: data.r, s: data.s, on, limite: limite / 100, seme }, (x) => !fermo() && setAvanz(x), fermo);
-      if (!e || fermo()) return;
-      setEsito({ e, scelta, limite, giro: mio });
-      setCalcolo(false);
-    }, 250);
-    return () => window.clearTimeout(t);
-  }, [data, scelta, limite, seme]);
+    const p = { ...param };
+    setStato("calcolo");
+    setAvanz(0);
+    setSalta(false);
+    const on = data.ids.map((id) => p.scelta === "tutte" || p.scelta === id);
+    const e = await simula(
+      { r: data.r, s: data.s, m: data.m, mesi: data.mesi, on, limite: p.limite / 100, anni: p.anni, periodo: p.periodo, seme: mio },
+      (x) => !fermo() && setAvanz(x),
+      fermo,
+    );
+    if (!e || fermo()) return;
+    setRun({ e, p, giro: mio });
+    setStato("costruzione");
+  };
+
+  // al clic si va allo spazio della simulazione: il grafico si costruisce davanti a chi guarda
+  // prima allo spazio (si vede il calcolo), poi al grafico appena comincia a costruirsi
+  useEffect(() => {
+    if (stato !== "calcolo" && stato !== "costruzione") return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = stato === "calcolo" ? stage.current : grafico.current;
+    el?.scrollIntoView({ block: stato === "calcolo" ? "start" : "center", behavior: reduced ? "auto" : "smooth" });
+  }, [stato]);
+
+  const setCap = (v: number) => {
+    const x = Math.min(10_000_000, Math.max(100, Math.round(v)));
+    setCapitale(x);
+    setCapTxt(String(x));
+  };
 
   const colore = scelta === "tutte" ? "var(--acc)" : data.base[scelta].colore;
-  const anni = data.mesi.length / 12;
-  const E = esito?.e;
-  const sopra = E && esito ? E.p95 > esito.limite / 100 + 1e-9 : false;
+  const coloreRun = run ? (run.p.scelta === "tutte" ? "var(--acc)" : data.base[run.p.scelta].colore) : colore;
   const corrMax = Math.max(...data.port.corr.map((c) => Math.abs(c.r)));
+  const F = formato(misura, capitale);
+  const E = run?.e;
+  const S = E?.serie[misura];
+  const L = S ? S.p50.length - 1 : 0;
+  const medioAnno = (v: number, a: number) =>
+    misura === "composto" ? `${signed((Math.pow(Math.max(0, 1 + v / 100), 1 / a) - 1) * 100, 1)}% all’anno` : misura === "fisso" ? `${signed(v / a, 1)}% all’anno` : `${signed(v / a, 1)} R all’anno`;
+  const sopra = E && run ? E.p95 > run.p.limite / 100 + 1e-9 : false;
+  const nomeScelta = (s: Scelta) => (s === "tutte" ? "tutte e tre" : data.base[s].nome);
 
   const opzioni: { v: Scelta; t: string; sub: string; c: string }[] = [
     { v: "tutte", t: "Tutte e tre", sub: "consigliato", c: "var(--acc)" },
@@ -82,200 +139,389 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
           Simulatore Monte Carlo
         </h2>
         <p className="xp-view__frase">
-          Scegli la strategia e quanto sei disposto a perdere al massimo. Il simulatore rimescola migliaia di volte le operazioni e ti dice
-          quanto rischiare su ognuna perché, in 95 casi su 100, la discesa resti entro quel limite.
+          Scegli quanto investire, su cosa, per quanti anni e quanto sei disposto a perdere al massimo. Il simulatore crea migliaia di futuri
+          possibili rimescolando le operazioni vere, e ti dice quanto rischiare e cosa aspettarti.
         </p>
       </header>
 
+      {/* ---------------- LE SCELTE ---------------- */}
       <section className="xp-block xp-sim__in" aria-label="Le tue scelte">
         <div className="xp-sim__col">
-          <p className="xp-seg__l mono" id="xp-sim-q1">
-            1 · Su cosa investire
-          </p>
-          <div className="xp-pick" role="radiogroup" aria-labelledby="xp-sim-q1">
-            {opzioni.map((o) => (
-              <button
-                key={o.v}
-                type="button"
-                role="radio"
-                aria-checked={scelta === o.v}
-                className={`xp-pick__o${o.v === "tutte" ? " xp-pick__o--all" : ""}`}
-                style={{ "--cc": o.c } as React.CSSProperties}
-                onClick={() => setScelta(o.v)}
-              >
-                <span className="xp-pick__t">
-                  <i aria-hidden="true" />
-                  {o.t}
-                </span>
-                <small>{o.sub}</small>
-              </button>
-            ))}
+          <div className="xp-field">
+            <label htmlFor="xp-cap" className="xp-seg__l mono">
+              1 · Capitale iniziale
+            </label>
+            <div className="xp-cap">
+              <input
+                id="xp-cap"
+                inputMode="numeric"
+                value={capTxt}
+                onChange={(e) => {
+                  const t = e.target.value.replace(/[^\d]/g, "");
+                  setCapTxt(t);
+                  if (t) setCapitale(Math.min(10_000_000, Math.max(100, Number(t))));
+                }}
+                onBlur={() => setCap(capitale)}
+                aria-describedby="xp-cap-h"
+              />
+              <span aria-hidden="true">€</span>
+            </div>
+            <div className="xp-quick" role="group" aria-label="Capitali veloci">
+              {CAPITALI.map((c) => (
+                <button key={c} type="button" aria-pressed={capitale === c} onClick={() => setCap(c)}>
+                  {int(c)} €
+                </button>
+              ))}
+            </div>
+            <p id="xp-cap-h" className="xp-sim__hint">
+              Serve per leggere i risultati in euro. Non cambia i rischi: si ragiona in percentuale.
+            </p>
+          </div>
+
+          <div className="xp-field">
+            <p className="xp-seg__l mono" id="xp-sim-q2">
+              2 · Su cosa investire
+            </p>
+            <div className="xp-pick" role="radiogroup" aria-labelledby="xp-sim-q2">
+              {opzioni.map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  role="radio"
+                  aria-checked={scelta === o.v}
+                  className={`xp-pick__o${o.v === "tutte" ? " xp-pick__o--all" : ""}`}
+                  style={{ "--cc": o.c } as React.CSSProperties}
+                  onClick={() => setScelta(o.v)}
+                >
+                  <span className="xp-pick__t">
+                    <i aria-hidden="true" />
+                    {o.t}
+                  </span>
+                  <small>{o.sub}</small>
+                </button>
+              ))}
+            </div>
+            <div className="xp-why">
+              <p>
+                <b>Consigliato: tutte e tre.</b> Tre mercati e tre modi di lavorare diversi: le perdite di una sono spesso coperte dalle altre.{" "}
+                <button type="button" className="xp-more-l" aria-expanded={aiuto.perche} onClick={() => setAiuto((a) => ({ ...a, perche: !a.perche }))}>
+                  Perché? <ChevronDown size={14} aria-hidden />
+                </button>
+              </p>
+              {aiuto.perche && (
+                <p className="xp-why__more">
+                  XAUUSD, Nasdaq e USDJPY sono mercati diversi, e le strategie lavorano in modi diversi (seguire il trend, lo slancio
+                  dell’apertura, la rottura). La loro correlazione mensile non supera {it(corrMax, 2)} in valore assoluto, e nello storico tutte e
+                  tre in perdita nello stesso mese è successo {data.port.tutteNeg} volte su {data.port.mesiComuni}. Così ognuna rischia un po’ meno
+                  che da sola, ma a parità di discesa il conto cresce di più e in modo più regolare. Prova: stesse scelte, prima una strategia
+                  sola e poi tutte e tre.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="xp-sim__col">
-          <div className="xp-sim__lab">
-            <label htmlFor="xp-lim" className="xp-seg__l mono">
-              2 · Discesa massima che accetti
-            </label>
-            <button
-              type="button"
-              className="xp-help"
-              aria-expanded={aiuto}
-              aria-controls="xp-help-dd"
-              aria-label="Che cos’è la discesa massima (drawdown)?"
-              onClick={() => setAiuto((a) => !a)}
-            >
-              <CircleHelp size={16} strokeWidth={1.8} aria-hidden />
-            </button>
-          </div>
-          <output htmlFor="xp-lim" className="xp-sim__val mono">
-            {limite}%
-          </output>
-          <input id="xp-lim" type="range" min={5} max={50} step={1} value={limite} onChange={(e) => setLimite(Number(e.target.value))} />
-          <div className="xp-sim__scale mono" aria-hidden="true">
-            <span>5%</span>
-            <span>50%</span>
-          </div>
-          <p className="xp-sim__hint">
-            La <b>discesa massima</b> (in inglese <i>drawdown</i>) è quanto scende il conto dal suo punto più alto prima di risalire.
-          </p>
-          {aiuto && (
-            <p id="xp-help-dd" className="xp-help__t">
-              Esempio: il conto arriva a 10.000 € e poi scende fino a 8.000 € prima di risalire: la discesa è del 20%. Qui scegli la
-              discesa più grande che sei disposto a sopportare se investi in queste strategie. Più è alta, più puoi rischiare a ogni
-              operazione, e più il conto può crescere, ma anche scendere.
-            </p>
-          )}
-          <button type="button" className="xp-go" onClick={() => setSeme((x) => x + 1)} disabled={calcolo}>
-            <Play size={16} strokeWidth={2} aria-hidden />
-            {calcolo ? "Simulazione in corso…" : "Avvia la simulazione"}
-          </button>
-          <div className={`xp-prog${calcolo ? " is-on" : ""}`} aria-hidden="true">
-            <i style={{ transform: `scaleX(${avanz})` }} />
-          </div>
-          <p className="xp-sim__hint mono">Si ricalcola da solo a ogni scelta · il tasto rifà tutto con {N * 4} nuove simulazioni</p>
-        </div>
-          <div className="xp-why">
-            <b>Perché tutte e tre insieme è consigliato.</b> Sono tre mercati diversi (XAUUSD, Nasdaq, USDJPY) e tre modi diversi di
-            lavorare (seguire il trend, lo slancio dell’apertura, la rottura). Perdono in momenti diversi: la loro correlazione mensile non
-            supera {it(corrMax, 2)} in valore assoluto, e nello storico tutte e tre in perdita nello stesso mese è successo{" "}
-            {data.port.tutteNeg} volte su {data.port.mesiComuni}. Le perdite di una sono spesso coperte dalle altre: ognuna rischia un po’
-            meno che da sola, ma a parità di discesa il conto cresce di più e in modo più regolare. Prova: stesso limite, prima una
-            strategia sola e poi tutte e tre, e guarda il ventaglio.
-          </div>
-      </section>
-
-      {!E || !esito ? (
-        <section className="xp-block" aria-live="polite">
-          <p className="xp-sim__wait mono">Simulazione in corso… {Math.round(avanz * 100)}%</p>
-        </section>
-      ) : (
-        <div className={`xp-sim__res${calcolo ? " is-busy" : ""}`} aria-busy={calcolo}>
-          <section className="xp-block" aria-labelledby="xp-sim-r" aria-live="polite">
-            <h3 id="xp-sim-r" className="xp-block__t">
-              Quanto rischiare su ogni operazione
-            </h3>
-            <ul className="xp-sim__risks">
-              {data.ids.map((id: Id, k: number) =>
-                esito.scelta === "tutte" || esito.scelta === id ? (
-                  <li key={id} style={{ "--cc": data.base[id].colore } as React.CSSProperties}>
-                    <span className="xp-sim__rn">
-                      <i aria-hidden="true" />
-                      {data.base[id].nome}
-                    </span>
-                    <b className="mono">{it(E.rischi[k] * 100, 2)}%</b>
-                    <small>del capitale a operazione · calcolato {it(E.esatti[k] * 100, 2)}%, arrotondato per eccesso</small>
-                  </li>
-                ) : null,
-              )}
-            </ul>
-            <div className={`xp-sim__verdict${sopra ? " is-over" : ""}`}>
-              <p>
-                Con questi rischi, <b>in 95 simulazioni su 100 la discesa resta sotto il {pc(E.p95)}%</b>
-                {sopra ? (
-                  <>
-                    . È un po’ sopra il tuo limite del {esito.limite}% perché i rischi sono arrotondati per eccesso, a passi dello 0,10%.
-                  </>
-                ) : (
-                  <>: dentro il tuo limite del {esito.limite}%.</>
-                )}
-              </p>
-              <p className="t-sec">
-                Nel metodo più severo superano il {esito.limite}% {it(E.oltre * 100, 0)} simulazioni su 100. Nello storico vero, in
-                ordine, con questi rischi la discesa più grande è stata del {pc(E.storicoDD)}%.
-              </p>
+          <div className="xp-field">
+            <div className="xp-sim__lab">
+              <label htmlFor="xp-lim" className="xp-seg__l mono">
+                3 · Discesa massima che accetti
+              </label>
+              <Aiuto id="xp-help-dd" label="Che cos’è la discesa massima (drawdown)?" aperto={aiuto.dd} onToggle={() => setAiuto((a) => ({ ...a, dd: !a.dd }))} />
             </div>
-          </section>
-
-          <section className="xp-block" aria-labelledby="xp-sim-f">
-            <h3 id="xp-sim-f" className="xp-block__t">
-              {N} futuri possibili
-            </h3>
-            <p className="xp-block__s">
-              Ogni linea sottile è una simulazione: le stesse operazioni ripescate a blocchi, con i rischi qui sopra. La fascia chiara
-              contiene 90 simulazioni su 100 (dal 5% al 95%), quella più scura la metà centrale; la linea piena è la mediana, quella
-              tratteggiata è com’è andata davvero. Passa sopra il grafico per leggere ogni momento.
+            <div className="xp-sim__valrow">
+              <output htmlFor="xp-lim" className="xp-sim__val mono">
+                {limite}%
+              </output>
+              <span className="xp-sim__eur mono">= {int(Math.round((capitale * limite) / 100))} € dal punto più alto</span>
+            </div>
+            <input id="xp-lim" type="range" min={5} max={50} step={1} value={limite} onChange={(e) => setLimite(Number(e.target.value))} />
+            <p className="xp-sim__hint">
+              La <b>discesa massima</b> (<i>drawdown</i>) è quanto scende il conto dal suo punto più alto prima di risalire.
             </p>
-            <VentaglioChart v={E.ventaglio} colore={colore} anni={anni} giro={esito.giro} />
-            <ul className="xp-legend mono" aria-hidden="true">
-              <li>
-                <i style={{ background: colore, opacity: 0.25 }} /> 5–95%
-              </li>
-              <li>
-                <i style={{ background: colore, opacity: 0.5 }} /> 25–75%
-              </li>
-              <li>
-                <i style={{ background: colore }} className="is-line" /> mediana
-              </li>
-              <li>
-                <i className="is-dash" /> storico vero
-              </li>
-            </ul>
-          </section>
+            {aiuto.dd && (
+              <p id="xp-help-dd" className="xp-help__t">
+                Esempio: il conto arriva a 10.000 € e poi scende fino a 8.000 € prima di risalire: la discesa è del 20%. Qui scegli la discesa
+                più grande che sei disposto a sopportare. Il simulatore sceglie i rischi perché in 95 simulazioni su 100 non venga superata
+                negli anni scelti. Più è alta, più si rischia a ogni operazione: il conto può crescere di più, ma anche scendere di più.
+              </p>
+            )}
+          </div>
 
-          <section className="xp-block" aria-labelledby="xp-sim-h">
-            <h3 id="xp-sim-h" className="xp-block__t">
-              La discesa di ogni simulazione
-            </h3>
-            <p className="xp-block__s">
-              Quanto è sceso il conto, al peggio, in ognuna delle {N} simulazioni del metodo più severo ({METODI[E.peggiore].nome.toLowerCase()}). In rosso quelle
-              oltre il tuo limite.
+          <div className="xp-field">
+            <p className="xp-seg__l mono" id="xp-sim-q4">
+              4 · Per quanti anni
             </p>
-            <DisceseChart discese={E.discese} limite={esito.limite / 100} p95={E.p95} colore={colore} />
-          </section>
-
-          <section className="xp-block" aria-labelledby="xp-sim-m">
-            <h3 id="xp-sim-m" className="xp-block__t">
-              I quattro metodi
-            </h3>
-            <div className="xp-sim__tab" role="table" aria-label="La discesa per ogni metodo Monte Carlo">
-              <div role="row" className="xp-sim__tr xp-sim__th mono">
-                <span role="columnheader">Metodo</span>
-                <span role="columnheader">Discesa tipica</span>
-                <span role="columnheader">In 95 casi su 100</span>
-              </div>
-              {E.metodi.map((m) => (
-                <div role="row" key={m.chiave} className={`xp-sim__tr${m.chiave === E.peggiore ? " is-worst" : ""}`}>
-                  <span role="cell">
-                    <b>{METODI[m.chiave].nome}</b>
-                    <small>{METODI[m.chiave].cosa}</small>
-                  </span>
-                  <span role="cell" className="mono">
-                    {pc(m.p50)}%
-                  </span>
-                  <span role="cell" className="mono">
-                    {pc(m.p95)}%{m.chiave === E.peggiore ? " ◂" : ""}
-                  </span>
-                </div>
+            <div className="xp-seg__b xp-years-seg" role="radiogroup" aria-labelledby="xp-sim-q4">
+              {[1, 2, 3, 4, 5, 6, 7].map((a) => (
+                <button key={a} type="button" role="radio" aria-checked={anni === a} onClick={() => setAnni(a)}>
+                  {a}
+                </button>
               ))}
             </div>
-            <p className="xp-sim__foot mono">
-              ◂ il metodo più severo: è quello che decide i rischi · {it(E.n, 0)} operazioni per simulazione, {N} simulazioni per metodo
-              · mediana finale {signed(E.ventaglio.p.p50[E.ventaglio.p.p50.length - 1], 0)}%
+          </div>
+
+          <div className="xp-field">
+            <p className="xp-seg__l mono" id="xp-sim-q5">
+              5 · Su quali dati
             </p>
-          </section>
+            <div className="xp-periodi" role="radiogroup" aria-labelledby="xp-sim-q5">
+              {PERIODI.map((o) => (
+                <button key={o.v} type="button" role="radio" aria-checked={periodo === o.v} className="xp-periodo" onClick={() => setPeriodo(o.v)}>
+                  <span className="xp-periodo__t">
+                    {o.t}
+                    {o.tag && <em className="mono">{o.tag}</em>}
+                  </span>
+                  <small>{o.sub}</small>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <div className="xp-sim__go">
+          <button type="button" className="xp-go" onClick={avvia} disabled={stato === "calcolo"}>
+            <Play size={18} strokeWidth={2} aria-hidden />
+            {stato === "calcolo" ? `Simulazione in corso… ${Math.round(avanz * 100)}%` : run ? "Avvia di nuovo la simulazione" : "Avvia la simulazione"}
+          </button>
+          <p className="xp-sim__hint mono">
+            {N * 4} simulazioni · {nomeScelta(scelta)} · discesa {limite}% · {anni} {anni === 1 ? "anno" : "anni"} · {PERIODI.find((x) => x.v === periodo)?.t.toLowerCase()}
+          </p>
+        </div>
+      </section>
+
+      {/* ---------------- LO SPAZIO DELLA SIMULAZIONE (si apre al clic) ---------------- */}
+      {stato !== "fermo" && (
+        <section ref={stage} className={`xp-block xp-stage${cambiato ? " is-stale" : ""}`} aria-labelledby="xp-stage-t" style={{ "--zc": coloreRun } as React.CSSProperties}>
+          <div className="xp-stage__head">
+            <div>
+              <h3 id="xp-stage-t" className="xp-block__t">
+                {stato === "calcolo" ? "Sto creando i futuri possibili…" : `${N} futuri possibili`}
+              </h3>
+              {run && (
+                <p className="xp-stage__sum mono">
+                  {int(capitale)} € · {nomeScelta(run.p.scelta)} · discesa {run.p.limite}% · {run.p.anni} {run.p.anni === 1 ? "anno" : "anni"} ·{" "}
+                  {PERIODI.find((x) => x.v === run.p.periodo)?.t.toLowerCase()}
+                </p>
+              )}
+            </div>
+            {run && (
+              <div className="xp-stage__show">
+                <div className="xp-seg" role="group" aria-label="Come leggere i risultati">
+                  <span className="xp-seg__l mono">
+                    Mostra
+                    <Aiuto id="xp-help-mis" label="Differenza fra rischio composto, fisso e R" aperto={aiuto.misura} onToggle={() => setAiuto((a) => ({ ...a, misura: !a.misura }))} />
+                  </span>
+                  <div className="xp-seg__b">
+                    {MISURE.map((m) => (
+                      <button key={m.v} type="button" aria-pressed={misura === m.v} onClick={() => setMisura(m.v)}>
+                        {m.t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {aiuto.misura && run && (
+            <div id="xp-help-mis" className="xp-help__t xp-help__t--wide">
+              <p>
+                <b>Rischio composto</b>: ogni operazione rischia la stessa percentuale del capitale di quel momento. Quando il conto cresce
+                crescono anche le operazioni (l’interesse composto): si va più lontano, ma anche le discese pesano di più in euro.
+              </p>
+              <p>
+                <b>Rischio fisso</b>: ogni operazione rischia sempre la stessa cifra, calcolata sul capitale iniziale. Il conto cresce in linea
+                retta: più lento, più facile da reggere.
+              </p>
+              <p>
+                <b>In R</b>: il risultato di ogni operazione diviso quanto rischiava (1 R = la perdita se va male). Non dipende né dal capitale
+                né dal rischio scelto: è la misura “pura” delle strategie.
+              </p>
+            </div>
+          )}
+
+          {stato === "calcolo" && (
+            <div className="xp-stage__wait" aria-live="polite">
+              <p className="mono">
+                Rimescolo le operazioni in quattro modi e cerco i rischi giusti per la tua discesa… {Math.round(avanz * 100)}%
+              </p>
+              <div className="xp-prog is-on xp-prog--big" aria-hidden="true">
+                <i style={{ transform: `scaleX(${avanz})` }} />
+              </div>
+            </div>
+          )}
+
+          {run && E && S && (
+            <>
+              {cambiato && (
+                <div className="xp-stale" role="status">
+                  <span>Hai cambiato le scelte: questa è ancora la simulazione di prima.</span>
+                  <button type="button" className="xp-go xp-go--sm" onClick={avvia} disabled={stato === "calcolo"}>
+                    <Play size={15} strokeWidth={2} aria-hidden /> Rifai la simulazione
+                  </button>
+                </div>
+              )}
+
+              <ul className="xp-sim__risks xp-sim__risks--row">
+                {data.ids.map((id: Id, k: number) =>
+                  run.p.scelta === "tutte" || run.p.scelta === id ? (
+                    <li key={id} style={{ "--cc": data.base[id].colore } as React.CSSProperties}>
+                      <span className="xp-sim__rn">
+                        <i aria-hidden="true" />
+                        {data.base[id].nome}
+                      </span>
+                      <b className="mono">{it(E.rischi[k] * 100, 2)}%</b>
+                      <small>
+                        a operazione{misura !== "R" ? ` · ${int(Math.round(capitale * E.rischi[k]))} €` : ""}
+                        <span className="xp-hide-s">
+                          {" "}
+                          · calcolato {it(E.esatti[k] * 100, 2)}%{E.tolti[k] ? ` · senza il ${E.tolti[k]}` : ""}
+                        </span>
+                      </small>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+
+              <div className="xp-stage__chart" ref={grafico}>
+                <GraficoMC
+                  key={`${run.giro}`}
+                  serie={S}
+                  misura={misura}
+                  capitale={capitale}
+                  anni={run.p.anni}
+                  colore={coloreRun}
+                  salta={salta}
+                  onFine={() => setStato((s) => (s === "costruzione" ? "pronto" : s))}
+                />
+                {stato === "costruzione" && !salta && (
+                  <button type="button" className="xp-skip mono" onClick={() => setSalta(true)}>
+                    <FastForward size={14} aria-hidden /> Salta
+                  </button>
+                )}
+              </div>
+              <ul className="xp-legend mono" aria-hidden="true">
+                <li>
+                  <i style={{ background: coloreRun, opacity: 0.25 }} /> 90 casi su 100 (5–95%)
+                </li>
+                <li>
+                  <i style={{ background: coloreRun, opacity: 0.5 }} /> metà centrale (25–75%)
+                </li>
+                <li>
+                  <i style={{ background: coloreRun }} className="is-line" /> mediana
+                </li>
+                <li>
+                  <i className="is-dash" /> storico vero dei dati scelti
+                </li>
+                <li>linee sottili: singole simulazioni</li>
+              </ul>
+              {E.anni > E.anniDati + 0.01 && (
+                <p className="xp-sim__hint">
+                  Stai simulando {E.anni} anni con {it(E.anniDati, 1)} anni di dati: le operazioni vengono ripescate più volte, e lo storico vero si
+                  ferma dove finiscono i dati.
+                </p>
+              )}
+
+              {(stato === "pronto" || salta) && (
+                <div className="xp-stage__after">
+                  <div className="xp-scen" role="list" aria-label="Scenari alla fine">
+                    {(
+                      [
+                        { k: "p5", t: "Scenario prudente", sub: "5 simulazioni su 100 vanno peggio" },
+                        { k: "p50", t: "Scenario tipico", sub: "metà vanno meglio, metà peggio" },
+                        { k: "p95", t: "Scenario favorevole", sub: "5 simulazioni su 100 vanno meglio" },
+                      ] as const
+                    ).map((sc) => (
+                      <div key={sc.k} role="listitem" className={`xp-scen__c${sc.k === "p50" ? " is-mid" : ""}`}>
+                        <span className="xp-seg__l mono">{sc.t}</span>
+                        <b className="mono">{misura === "R" ? F.lungo(S[sc.k][L]) : `${int(Math.round(F.u(S[sc.k][L])))} €`}</b>
+                        {misura !== "R" && <span className="xp-scen__pct mono">{signed(S[sc.k][L], 0)}% in {run.p.anni} {run.p.anni === 1 ? "anno" : "anni"}</span>}
+                        <span className="xp-scen__avg">{medioAnno(S[sc.k][L], run.p.anni)}</span>
+                        <small>{sc.sub}</small>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="xp-sim__hint">
+                    Finisce sotto il capitale iniziale: <b>{it(S.perdita * 100, 0)} simulazioni su 100</b>.
+                  </p>
+
+                  <div className={`xp-sim__verdict${sopra ? " is-over" : ""}`}>
+                    <p>
+                      Con questi rischi, <b>in 95 simulazioni su 100 la discesa resta sotto il {pc(E.p95)}%</b>
+                      {sopra ? (
+                        <>. È un po’ sopra il tuo limite del {run.p.limite}% perché i rischi sono arrotondati per eccesso, a passi dello 0,10%.</>
+                      ) : (
+                        <>: dentro il tuo limite del {run.p.limite}%.</>
+                      )}
+                    </p>
+                    <p className="t-sec">Nel metodo più severo superano il {run.p.limite}% {it(E.oltre * 100, 0)} simulazioni su 100.</p>
+                  </div>
+
+                  {run.p.anni > 1 && (
+                    <div className="xp-sim__tab xp-anni-tab" role="table" aria-label="Anno per anno">
+                      <div role="row" className="xp-sim__tr xp-sim__th mono">
+                        <span role="columnheader">Dopo</span>
+                        <span role="columnheader">Prudente (5%)</span>
+                        <span role="columnheader">Tipico</span>
+                        <span role="columnheader">Favorevole (95%)</span>
+                      </div>
+                      {Array.from({ length: run.p.anni }, (_, i) => i + 1).map((a) => (
+                        <div role="row" key={a} className="xp-sim__tr">
+                          <span role="cell">
+                            <b>
+                              {a} {a === 1 ? "anno" : "anni"}
+                            </b>
+                          </span>
+                          {(["p5", "p50", "p95"] as const).map((k) => (
+                            <span role="cell" key={k} className="mono">
+                              {F.lungo(S[k][a * 12])}
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <details className="xp-det">
+                    <summary>
+                      La discesa di ogni simulazione e i quattro metodi <ChevronDown size={16} aria-hidden />
+                    </summary>
+                    <p className="xp-block__s">
+                      Quanto è sceso il conto, al peggio, in ognuna delle {N} simulazioni del metodo più severo ({METODI[E.peggiore].nome.toLowerCase()}), a
+                      rischio composto. In rosso quelle oltre il tuo limite.
+                    </p>
+                    <DisceseChart discese={E.discese} limite={run.p.limite / 100} p95={E.p95} colore={coloreRun} />
+                    <div className="xp-sim__tab" role="table" aria-label="La discesa per ogni metodo Monte Carlo">
+                      <div role="row" className="xp-sim__tr xp-sim__th mono">
+                        <span role="columnheader">Metodo</span>
+                        <span role="columnheader">Discesa tipica</span>
+                        <span role="columnheader">In 95 casi su 100</span>
+                      </div>
+                      {E.metodi.map((m) => (
+                        <div role="row" key={m.chiave} className={`xp-sim__tr${m.chiave === E.peggiore ? " is-worst" : ""}`}>
+                          <span role="cell">
+                            <b>{METODI[m.chiave].nome}</b>
+                            <small>{METODI[m.chiave].cosa}</small>
+                          </span>
+                          <span role="cell" className="mono">
+                            {pc(m.p50)}%
+                          </span>
+                          <span role="cell" className="mono">
+                            {pc(m.p95)}%{m.chiave === E.peggiore ? " ◂" : ""}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="xp-sim__foot mono">
+                      ◂ il metodo più severo: è quello che decide i rischi · {int(E.nOrizzonte)} operazioni per simulazione ({E.anni}{" "}
+                      {E.anni === 1 ? "anno" : "anni"}) · {int(E.nDati)} operazioni nei dati scelti · {N} simulazioni per metodo
+                    </p>
+                  </details>
+                </div>
+              )}
+            </>
+          )}
+        </section>
       )}
 
       <section className="xp-block" aria-labelledby="xp-sim-come">
@@ -286,30 +532,29 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
           <div className="xp-ex">
             <h4>Monte Carlo</h4>
             <p>
-              Il passato è successo una volta sola, in un ordine solo. Il simulatore lo rimescola in quattro modi diversi (la tabella
-              sopra) e ogni volta misura la discesa più grande: così si vede quanto poteva andare peggio, non solo com’è andata.
+              Il passato è successo una volta sola, in un ordine solo. Il simulatore lo rimescola in quattro modi diversi e crea migliaia di
+              futuri possibili: così si vede quanto poteva andare meglio o peggio, non solo com’è andata.
             </p>
           </div>
           <div className="xp-ex">
             <h4>Il 95%</h4>
             <p>
-              Per ogni metodo si guarda la discesa che viene superata solo in 5 simulazioni su 100, e si prende il metodo più severo. I
-              rischi sono i più alti che tengono quella discesa entro il tuo limite.
+              Per ogni metodo si guarda la discesa che viene superata solo in 5 simulazioni su 100, e si prende il metodo più severo. I rischi
+              sono i più alti che tengono quella discesa entro il tuo limite, negli anni scelti.
             </p>
           </div>
           <div className="xp-ex">
             <h4>Rischi diversi</h4>
             <p>
-              Ogni strategia rischia in proporzione inversa alle sue discese: chi scende di più rischia meno. Poi i rischi salgono tutti
-              insieme fino al limite, e si arrotondano per eccesso a passi dello 0,10%.
+              Ogni strategia rischia in proporzione inversa alle sue discese: chi scende di più rischia meno. Poi i rischi salgono tutti insieme
+              fino al limite, e si arrotondano per eccesso a passi dello 0,10%.
             </p>
           </div>
           <div className="xp-ex">
             <h4>I limiti</h4>
             <p>
-              Tutto parte da operazioni di backtest del 2019–2026, su un periodo lungo come lo storico. Sul 2019–2023 le strategie sono
-              state ottimizzate, quindi lì i risultati sono gonfiati per costruzione. Il futuro può andare peggio di ogni simulazione: il
-              limite scelto non è una garanzia.
+              Tutto parte da operazioni di backtest 2019–2026. Sul 2019–2023 le strategie sono state ottimizzate, e il 2024–2026 è stato molto
+              favorevole: per questo la scelta iniziale toglie a ognuna il suo anno migliore. Il futuro può andare peggio di ogni simulazione.
             </p>
           </div>
         </div>
@@ -318,8 +563,8 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
       <p className="xp-risk">
         <TriangleAlert size={16} strokeWidth={1.6} aria-hidden />
         <span>
-          Simulazioni su risultati di backtest su dati storici. Non garantiscono rendimenti futuri né che la discesa resti entro il limite.
-          Il trading comporta un alto rischio di perdita.
+          Simulazioni su risultati di backtest su dati storici. Non garantiscono rendimenti futuri né che la discesa resti entro il limite. Il
+          trading comporta un alto rischio di perdita.
         </span>
       </p>
       <button type="button" className="xp-back xp-back--end" onClick={onBack}>
