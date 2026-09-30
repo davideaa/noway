@@ -2,9 +2,9 @@
 export const SITE_NAME = "Portfolio Algo Manager";
 
 /** COPY.md v2 (sez. 2, versione "tre strategie"). */
-export const TITLE = "Strategie algoritmiche su oro, Nasdaq e USDJPY: il metodo";
+export const TITLE = "Strategie algoritmiche su XAUUSD, Nasdaq e USDJPY: il metodo";
 export const DESCRIPTION =
-  "Tre strategie su oro, Nasdaq e USDJPY: criteri fissati prima del test, correlazioni e drawdown. Risultati validati fuori campione, non garantiti.";
+  "Tre strategie su XAUUSD, Nasdaq e USDJPY: criteri fissati prima del test, correlazioni e drawdown. Risultati validati fuori campione, non garantiti.";
 export const DETTAGLI_TITLE = "Tre strategie algoritmiche: metodo, numeri e rischio";
 
 /**
@@ -28,8 +28,8 @@ export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
  * lungo). Il 2023 non va in entrambi i periodi: sarebbe falso.
  */
 export const FILM_S5 = "Ottimizzato su un arco temporale 2019–2023,\nvalidato su un altro: 2024–2026.";
-/** Scena 6 (Davide): il nome, al posto della vecchia frase B. */
-export const FILM_S6 = `Questo è ${SITE_NAME}.`;
+/** Scena 6 (Davide): "Questo è" piccolo e sotto, in grande e su UNA riga, il nome. */
+export const FILM_S6_PRE = "Questo è";
 
 /**
  * La frase sul rischio (COPY.md, "Navigazione e barra fissa" e 3.9; fonte:
@@ -38,7 +38,6 @@ export const FILM_S6 = `Questo è ${SITE_NAME}.`;
  */
 export const RISK_STATEMENT =
   "Risultati di backtest validati fuori campione con metodo quantitativo: criteri fissati prima del test, dati mai visti, bootstrap a blocchi. Non garantiscono rendimenti futuri: indicano la mediana di cosa aspettarsi, e il suo intervallo, se il vantaggio esiste e non si è rotto.";
-export const RISK_SHORT = "Backtest validati fuori campione · non garantiscono rendimenti futuri · non è consulenza finanziaria";
 /** La barra fissa in basso (brief di Davide, testo esatto): mono, piccola, sempre visibile. */
 export const RISK_BAR = "V2 · BACKTEST SU DATI STORICI · TRADING AD ALTO RISCHIO · NON È CONSULENZA FINANZIARIA";
 

@@ -73,15 +73,15 @@ export function RiskNote() {
     <p className="risknote">
       <TriangleAlert size={16} strokeWidth={1.6} aria-hidden />
       <span>
-        <b>Rischio accanto:</b> drawdown massimo del backtest, in R, su una sola sequenza: oro{" "}
+        <b>Rischio accanto:</b> drawdown massimo del backtest, in R, su una sola sequenza: XAUUSD{" "}
         <b>{it(o.periodi.tutto.dd_max_R, 1)} R</b> ({o.periodi.tutto.perdite_consecutive_max} perdite di fila), Nasdaq{" "}
         <b>{it(n.periodi.tutto.dd_max_R, 1)} R</b> ({n.periodi.tutto.perdite_consecutive_max}), USDJPY{" "}
         <b>{it(u.periodi.tutto.dd_max_R, 1)} R</b> ({u.periodi.tutto.perdite_consecutive_max}). Con il bootstrap a blocchi di
-        20, in una sequenza su dieci il drawdown supera: oro {it(o.bootstrap_dd.p90, 1)} R, Nasdaq {it(n.bootstrap_dd.p90, 1)} R,
+        20, in una sequenza su dieci il drawdown supera: XAUUSD {it(o.bootstrap_dd.p90, 1)} R, Nasdaq {it(n.bootstrap_dd.p90, 1)} R,
         USDJPY {it(u.bootstrap_dd.p90, 1)} R; la somma a pari rischio {it(PORT.bootstrap_dd.p90, 1)} R. A rischio 1% per
         operazione, {it(o.bootstrap_dd.p90, 1)} R vuol dire circa il {it(o.bootstrap_dd.p90, 0)}% dal massimo. Vedi{" "}
         <a href="#avviso" className="textlink">
-          Il rischio
+          Avviso sul rischio
         </a>
         .
       </span>

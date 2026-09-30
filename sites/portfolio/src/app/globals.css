@@ -56,7 +56,7 @@
   --film-fg: var(--film-type);
   --film-top-bg: color-mix(in srgb, var(--film-field-2) 72%, transparent);
   --film-track-h: 2800vh; /* quarto giro: il tunnel (atti 2-3) e' il 60% della traccia, +60% di scroll rispetto a 2200 */
-  --film-riskbar-h: 56px; /* spazio lasciato in basso agli overlay */
+  --film-riskbar-h: 40px; /* spazio lasciato in basso agli overlay */
 }
 
 /* ==========================================================================
@@ -114,7 +114,7 @@
   --gutter: 16px; /* margine pagina, cresce con i breakpoint sotto */
   --scene-pad: var(--sp-7); /* respiro sopra/sotto ogni scena */
   --header-h: 64px;
-  --riskbar-h: 72px; /* barra fissa del rischio: due righe sotto 950 px (QA B2) */
+  --riskbar-h: 36px; /* barra fissa del rischio, sottile: due righe sotto 950 px (QA B2) */
 
   /* --- raggi --- */
   --r-1: 4px;
@@ -188,7 +188,7 @@
   :root {
     --gutter: 24px;
     --scene-pad: var(--sp-9);
-    --riskbar-h: 48px;
+    --riskbar-h: 22px;
   }
 }
 @media (min-width: 1200px) {
@@ -1170,25 +1170,46 @@ html:not(.js) .hero__content {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-1) var(--sp-4);
-  min-height: 44px;
-  padding-block: var(--sp-2); /* solo verticale: il padding laterale e' quello di .wrap */
+  gap: 0 var(--sp-3);
+  /* Davide: "occupa troppo dello schermo" -> sottile: una riga su PC, due al massimo su telefono */
+  padding-block: 3px; /* solo verticale: il padding laterale e' quello di .wrap */
 }
 .riskbar__text {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  line-height: 1.5;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
   color: var(--ink);
+  opacity: 0.85;
 }
 .riskbar__link {
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
   text-transform: uppercase;
   color: var(--acc);
   text-decoration: underline;
-  text-underline-offset: 4px;
-  padding: var(--sp-2) 0;
+  text-underline-offset: 3px;
   white-space: nowrap;
+}
+/* telefono: testo e link di seguito, due righe in tutto (non tre) */
+@media (max-width: 949px) {
+  .riskbar__in {
+    display: block;
+    font-size: 9.5px; /* la riga del contenitore, non quella del corpo (16 px x 1,6) */
+    line-height: 1.45;
+  }
+  .riskbar__text {
+    display: inline;
+  }
+  .riskbar__link {
+    margin-left: var(--sp-2);
+  }
+}
+@media (min-width: 950px) {
+  .riskbar__text,
+  .riskbar__link {
+    font-size: 10px;
+  }
 }
 .skip {
   position: absolute;
@@ -1285,6 +1306,21 @@ html:not(.js) .hero__content {
 }
 .film-line--end {
   max-width: 24ch;
+}
+/* scena 6: "Questo e'" piccolo, sotto il nome grande su una riga sola (anche su telefono) */
+.film-ov--name {
+  row-gap: var(--sp-2);
+}
+.film-line.film-line--pre {
+  font-size: calc(var(--fs-scene) * 0.55);
+  letter-spacing: -0.02em;
+  color: var(--film-type-mute);
+}
+.film-line.film-line--name {
+  max-width: none;
+  font-size: min(calc(var(--fs-scene) * 1.45), 7.6vw);
+  line-height: 1.02;
+  white-space: nowrap;
 }
 /* scena 5: frase lunga su due righe volute (a capo nel testo), non a 22ch */
 .film-line.film-line--wide {
@@ -1738,6 +1774,33 @@ html:not(.js) .film-load,
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
   .film-torch {
     display: none;
+  }
+}
+
+/* Contatti: l'indirizzo in grande, nel carattere dei titoli (non mono) */
+.mail-big {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: clamp(19px, 4.9vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+.mail-big__dom {
+  color: var(--mut);
+  font-weight: 500;
+}
+.mail-big:hover,
+.mail-big:hover .mail-big__dom {
+  color: var(--acc);
+}
+@media (min-width: 1024px) {
+  .mail-big {
+    font-size: clamp(22px, 2.1vw, 34px);
   }
 }
 

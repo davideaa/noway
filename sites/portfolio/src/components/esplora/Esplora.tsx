@@ -112,7 +112,7 @@ function Scheda({
         </span>
         <span className="xp-card__mkt mono">{port ? "3 strategie" : data.base[chi].mercato}</span>
       </span>
-      <span className="xp-card__tipo">{port ? "Oro, Nasdaq e USDJPY insieme" : data.base[chi].tipo}</span>
+      <span className="xp-card__tipo">{port ? "XAUUSD, Nasdaq e USDJPY insieme" : data.base[chi].tipo}</span>
       <Mini v={c.v} colore={colore} />
       <span className="xp-card__nums">
         <span>
@@ -140,6 +140,8 @@ export function Esplora({ data, hero, rest }: { data: EsploraData; hero: ReactNo
   const [picking, setPicking] = useState<Chi | null>(null);
   const reduced = useRef(false);
   const tornando = useRef(false);
+  // un'ancora della pagina (#avviso, #contatti) chiesta da dentro una scheda: ci si va dopo averla chiusa
+  const vaiA = useRef<string | null>(null);
 
   // l'indirizzo decide la vista: #oro apre l'oro, niente (o altro) torna alle schede
   useEffect(() => {
@@ -148,7 +150,11 @@ export function Esplora({ data, hero, rest }: { data: EsploraData; hero: ReactNo
       const c = daHash(window.location.hash);
       setSel((prima) => {
         // si torna alle schede solo se prima c'era una scheda aperta (tasto indietro del browser)
-        if (daEvento && !c && prima) tornando.current = true;
+        if (daEvento && !c && prima) {
+          const h = window.location.hash.replace(/^#/, "");
+          if (h && document.getElementById(h)) vaiA.current = h;
+          else tornando.current = true;
+        }
         return c;
       });
       setPicking(null);
@@ -163,7 +169,11 @@ export function Esplora({ data, hero, rest }: { data: EsploraData; hero: ReactNo
   // tornando indietro si riparte dalle schede, non dall'intestazione
   useEffect(() => {
     if (sel) window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-    else if (tornando.current) {
+    else if (vaiA.current) {
+      const h = vaiA.current;
+      vaiA.current = null;
+      requestAnimationFrame(() => document.getElementById(h)?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior }));
+    } else if (tornando.current) {
       tornando.current = false;
       requestAnimationFrame(() =>
         document.getElementById("esplora")?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior }),

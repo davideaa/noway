@@ -20,7 +20,7 @@ export function Hero() {
       <div className="max-w-[1100px]">
         <Reveal variant="scene">
           <p className="eyebrow chip-solid">
-            <b>01</b> &mdash; Ingresso &nbsp;·&nbsp; Oro · Nasdaq · USDJPY · Backtest 2019–2026
+            <b>01</b> &mdash; Ingresso &nbsp;·&nbsp; XAUUSD · Nasdaq · USDJPY · Backtest 2019–2026
           </p>
         </Reveal>
         <Reveal variant="scene" i={1}>
@@ -30,7 +30,7 @@ export function Hero() {
         </Reveal>
         <Reveal i={2}>
           <p className="hero__lead mt-6">
-            Un portafoglio di tre sistemi automatici su oro (XAUUSD), Nasdaq e USDJPY. Qui ci sono i loro risultati, spiegati
+            Un portafoglio di tre sistemi automatici su XAUUSD, Nasdaq e USDJPY. Qui ci sono i loro risultati, spiegati
             in modo semplice: sono di backtest validati fuori campione e non garantiscono rendimenti futuri.
           </p>
         </Reveal>
@@ -45,10 +45,10 @@ export function Hero() {
           <a
             href={MAILTO}
             className={buttonVariants({ variant: "outline" })}
-            aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}
+            aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}
           >
             <Mail size={16} strokeWidth={1.6} aria-hidden />
-            Scrivi via email
+            Contattaci
           </a>
         </Reveal>
         <Reveal i={4}>

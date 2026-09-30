@@ -18,8 +18,8 @@ export function FilmFallback() {
           <Link href="/dettagli" className={buttonVariants()}>
             {FILM_CTA}
           </Link>
-          <a href={MAILTO_LOWER} className={buttonVariants({ variant: "outline" })} aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}>
-            Scrivi via email
+          <a href={MAILTO_LOWER} className={buttonVariants({ variant: "outline" })} aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}>
+            Contattaci
           </a>
         </div>
         <p className="film-mail mono">{EMAIL_SHOWN}</p>

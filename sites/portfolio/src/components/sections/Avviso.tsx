@@ -28,17 +28,28 @@ export function Avviso() {
               slittamenti, differenze di esecuzione, costi diversi da quelli simulati, comportamento di chi opera.
             </li>
             <li>
+              <strong>I risultati mostrati sono simulati, non ottenuti su un conto reale.</strong> Un backtest applica le
+              regole ai prezzi del passato, sapendo già come sono andati: ha limiti che nessuna verifica elimina del
+              tutto, e i risultati reali possono essere molto diversi, anche in peggio.
+            </li>
+            <li>
               <strong>I risultati passati non garantiscono quelli futuri.</strong> I parametri sono stati scelti
               guardando i dati passati: il risultato in quel periodo è gonfiato per costruzione, e il fuori campione è già
               stato usato.
             </li>
             <li>
               <strong>Le strategie possono andare in perdita per un anno intero, e più.</strong> Lo storico stesso
-              contiene, per l’oro, un anno in perdita e uno quasi a zero su otto; per USDJPY, nove mesi del 2026 a zero.
+              contiene, per XAUUSD, un anno in perdita e uno quasi a zero su otto; per USDJPY, nove mesi del 2026 a zero.
             </li>
             <li>
               <strong>Tre strategie insieme non eliminano il rischio.</strong> Nello storico hanno perso tutte e tre
               nello stesso mese sei volte su 93. Può succedere di nuovo, e più spesso.
+            </li>
+            <li>
+              <strong>Strumenti a leva: le perdite possono essere rapide.</strong> Oro, indici e valute si negoziano
+              spesso con prodotti a leva come i CFD, che sono strumenti complessi: la leva amplifica sia i guadagni sia
+              le perdite, e una parte rilevante dei conti dei piccoli investitori perde denaro con questi prodotti.
+              Valuta se hai capito come funzionano e se puoi permetterti di correre questo rischio.
             </li>
             <li>
               <strong>
@@ -47,6 +58,11 @@ export function Avviso() {
               </strong>{" "}
               Nessuna informazione qui tiene conto della tua situazione personale. Per decisioni che riguardano il tuo
               denaro, rivolgiti a un professionista abilitato.
+            </li>
+            <li>
+              <strong>Ogni decisione è solo tua.</strong> Le informazioni sono fornite così come sono, a scopo informativo
+              e didattico, possono contenere errori e cambiare senza preavviso. Chi le pubblica non risponde di perdite o
+              danni che derivino dal loro uso.
             </li>
           </ul>
         </Reveal>

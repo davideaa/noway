@@ -12,7 +12,7 @@ const NAV = SCENES.filter((s) => s.nav);
 
 /**
  * Barra in alto: marchio, voci (Metodo, Strategie, Rischio, Monitoraggio,
- * Contatti), contatore di scena, pulsante "Scrivi via email" e filo di
+ * Contatti), contatore di scena, pulsante "Contattaci" e filo di
  * avanzamento (scaleX). Sotto 950 px le voci stanno in un menu.
  */
 export function SiteHeader() {
@@ -78,9 +78,9 @@ export function SiteHeader() {
           <span className="mono hidden text-xs text-mut lg:inline" aria-hidden="true">
             <b className="font-medium text-acc">{current.n}</b> / {SCENES.length.toString().padStart(2, "0")}
           </span>
-          <a href={MAILTO} className={buttonVariants({ size: "sm" })} aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}>
+          <a href={MAILTO} className={buttonVariants({ size: "sm" })} aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}>
             <Mail size={16} strokeWidth={1.6} aria-hidden />
-            <span>Scrivi via email</span>
+            <span>Contattaci</span>
           </a>
           <button
             type="button"

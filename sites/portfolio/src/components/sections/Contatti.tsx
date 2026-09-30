@@ -21,14 +21,13 @@ export function Contatti() {
           n="03"
           label="Contatti"
           id="contatti-t"
-          title={["Scrivi,", "anche per dire che c’è un errore"]}
+          title={["Hai un dubbio?", "Scrivici."]}
         />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <Reveal className="prose space-y-4 lg:col-span-6">
             <p className="t-lead">
-              Per domande sul metodo, sui numeri o su come sono stati calcolati, scrivi via email. Se trovi un errore nei
-              conti, scrivi lo stesso: correggere gli errori è il modo in cui questo lavoro è migliorato.
+              Se hai un dubbio sul metodo, sui numeri o su come sono stati calcolati, scrivici: rispondiamo volentieri.
             </p>
             <p>
               Le risposte hanno carattere informativo sul metodo. Non è consulenza finanziaria, e non si danno indicazioni
@@ -38,20 +37,21 @@ export function Contatti() {
 
           <Reveal i={1} className="card card--lit space-y-5 lg:col-span-6">
             <p className="eyebrow">Indirizzo</p>
-            <a
-              href={MAILTO}
-              className="mono block break-all text-xl text-ink underline decoration-line3 underline-offset-8 hover:text-acc hover:decoration-acc md:text-2xl"
-            >
-              <span className="select-all">{EMAIL_SHOWN}</span>
+            {/* in grande, nel carattere dei titoli (non mono): il nome davanti, il dominio piu' tenue */}
+            <a href={MAILTO} className="mail-big">
+              <span className="select-all">
+                {EMAIL_SHOWN.split("@")[0]}
+                <span className="mail-big__dom">@{EMAIL_SHOWN.split("@")[1]}</span>
+              </span>
             </a>
             <div className="flex flex-wrap items-start gap-3">
               <a
                 href={MAILTO}
                 className={buttonVariants()}
-                aria-label={`Scrivi via email a ${EMAIL_SHOWN}`}
+                aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}
               >
                 <Mail size={16} strokeWidth={1.6} aria-hidden />
-                Scrivi via email
+                Contattaci
               </a>
               <CopyEmail />
             </div>

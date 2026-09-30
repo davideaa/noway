@@ -46,13 +46,13 @@ export type EsploraData = {
 
 const TESTI: Record<Id, Pick<Base, "nome" | "mercato" | "colore" | "tipo" | "timeframe" | "frase">> = {
   oro: {
-    nome: "Oro",
+    nome: "XAUUSD",
     mercato: "XAUUSD",
     colore: "var(--st-oro)",
     tipo: "Segue il trend",
     timeframe: "grafico a 1 ora",
     frase:
-      "Entra quando l’oro ha già preso una direzione e prova a seguirla finché dura. Poche operazioni, tenute più a lungo.",
+      "Entra quando XAUUSD ha già preso una direzione e prova a seguirla finché dura. Poche operazioni, tenute più a lungo.",
   },
   nasdaq: {
     nome: "Nasdaq",

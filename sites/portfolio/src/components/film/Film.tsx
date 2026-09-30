@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
-import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_S2, FILM_S5, FILM_S6, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
+import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_S2, FILM_S5, FILM_S6_PRE, FILM_S3, FILM_S3_WORDS, FILM_SUB, SITE_NAME } from "@/lib/site";
 import { MagneticCta } from "./MagneticCta";
 import { bakeFan, fanParams } from "./bake";
 import type { Palette } from "./FilmCanvas";
@@ -837,9 +837,12 @@ export function Film() {
               <Letters text={FILM_PHRASE_A} />
             </p>
           </div>
-          <div className="film-ov film-ov--low" data-ov="6">
-            <p className="film-line" aria-label={FILM_S6}>
-              <Letters text={FILM_S6} />
+          <div className="film-ov film-ov--low film-ov--name" data-ov="6">
+            <p className="film-line film-line--pre" aria-label={`${FILM_S6_PRE} ${SITE_NAME}`}>
+              <Letters text={FILM_S6_PRE} />
+            </p>
+            <p className="film-line film-line--name" aria-hidden="true">
+              <Letters text={SITE_NAME} />
             </p>
           </div>
           {/* Atto 6: la camera si ferma sulla schermata finale: un titolo e UN bottone (-> /dettagli). Davide: nient'altro. */}

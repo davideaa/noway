@@ -31,8 +31,8 @@ export function FilmTopBar({ controls }: { controls: boolean }) {
           <Link href="/dettagli" className="film-top__link" data-cursor="link">
             Dettagli
           </Link>
-          <a href={MAILTO_LOWER} className="film-top__link film-top__link--mail" aria-label={`Scrivi via email a ${EMAIL_SHOWN}`} data-cursor="link">
-            Scrivi via email
+          <a href={MAILTO_LOWER} className="film-top__link film-top__link--mail" aria-label={`Contattaci via email a ${EMAIL_SHOWN}`} data-cursor="link">
+            Contattaci
           </a>
         </nav>
         {controls && <ProgressBar />}
