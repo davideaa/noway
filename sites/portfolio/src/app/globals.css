@@ -1754,53 +1754,8 @@ html:not(.js) .film-load,
   mix-blend-mode: screen;
   will-change: transform, opacity;
 }
-.film-cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 70;
-  pointer-events: none;
-  border-radius: 50%;
-  opacity: 0;
-  transition:
-    opacity 180ms var(--ease),
-    width 180ms var(--ease),
-    height 180ms var(--ease),
-    margin 180ms var(--ease),
-    border-width 180ms var(--ease);
-  will-change: transform;
-}
-.film-cursor--dot {
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  background: var(--acc);
-}
-.film-cursor--ring {
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border: 1px solid color-mix(in oklab, var(--acc) 70%, transparent);
-}
-.film-cursor[data-state="on"],
-.film-cursor[data-state="link"],
-.film-cursor[data-state="drag"] {
-  opacity: 0.9;
-}
-.film-cursor--ring[data-state="link"] {
-  width: 60px;
-  height: 60px;
-  margin: -30px 0 0 -30px;
-  border-width: 1.5px;
-}
-.film-cursor--ring[data-state="drag"] {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-}
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .film-torch,
-  .film-cursor {
+  .film-torch {
     display: none;
   }
 }

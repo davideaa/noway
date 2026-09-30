@@ -4,7 +4,7 @@
  * Il film a scroll: una traccia di 2200vh, UNA stage sticky, UN canvas.
  * Qui vive l'unico ciclo rAF che scrive `film.p` (state.ts), muove lo scroll
  * quando il play e' acceso, smussa l'input del puntatore e aggiorna gli overlay
- * DOM per lettera, la barra alta, la torcia e il cursore. React non
+ * DOM per lettera, la barra alta e la torcia. React non
  * ri-renderizza mai dallo scroll: l'unico setState e' la scelta iniziale
  * film / fallback (WebGL si' o no) e il tasto Riproduci/Pausa.
  *
@@ -59,10 +59,9 @@ const PLAY_EASE_MS = 500;
 /** Sfalsamento tra le lettere (0 = tutte insieme). */
 const STAGGER = 0.7;
 const BLUR_PX = 9;
-/** Costanti di tempo dello smussamento dell'input (s): scena, torcia, anello del cursore. */
+/** Costanti di tempo dello smussamento dell'input (s): scena, torcia. */
 const TAU_SCENE = 0.15;
 const TAU_TORCH = 0.12;
-const TAU_RING = 0.06;
 
 /** Palette del canvas letta dai token in :root (DESIGN.md: nessuna seconda lista). */
 function readPalette(): Palette {
@@ -333,8 +332,7 @@ export function Film() {
     const finePointer = window.matchMedia("(pointer: fine)").matches;
 
     /* ---------------- input del puntatore: si smussa QUI, e solo qui ---------------- */
-    const ptr = { x: 0, y: 0, in: 0, sx: 0, sy: 0, sin: 0, tx: 0, ty: 0, rx: 0, ry: 0, seen: false };
-    let cursorState = "";
+    const ptr = { x: 0, y: 0, in: 0, sx: 0, sy: 0, sin: 0, tx: 0, ty: 0, seen: false };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse" && e.pointerType !== "pen") {
         ptr.in = 0; // touch: H(m) = 0, resta solo il respiro G(t)
@@ -346,15 +344,11 @@ export function Film() {
       if (!ptr.seen) {
         // primo evento: niente rincorsa dal centro
         ptr.seen = true;
-        ptr.sx = ptr.tx = ptr.rx = ptr.x;
-        ptr.sy = ptr.ty = ptr.ry = ptr.y;
+        ptr.sx = ptr.tx = ptr.x;
+        ptr.sy = ptr.ty = ptr.y;
       }
     };
     const onLeave = () => void (ptr.in = 0);
-    const onOver = (e: PointerEvent) => {
-      const t = (e.target as Element | null)?.closest?.("[data-cursor], a, button, input") as HTMLElement | null;
-      cursorState = t ? t.dataset.cursor || (t.tagName === "INPUT" ? "drag" : "link") : "";
-    };
     /* ---------------- geometria dello scroll: misurata UNA volta e su resize, mai per frame ----------------
        (niente getBoundingClientRect / offsetHeight nel ciclo: su telefono, con la barra degli
        indirizzi che cambia altezza, ogni lettura di layout dopo uno scrollTo e' un layout thrash) */
@@ -371,7 +365,6 @@ export function Film() {
     ro?.observe(track);
     window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
-    document.addEventListener("pointerover", onOver, { passive: true });
     window.addEventListener("resize", onResize);
     window.addEventListener("orientationchange", onResize);
     // lo scroll programmatico deve essere istantaneo: html ha scroll-behavior: smooth, e uno
@@ -468,7 +461,6 @@ export function Film() {
     let actShown = 0;
     let pulseKey = "";
     let navOutKey = "";
-    let cursorShown = "";
     let resumeShown: boolean | null = null;
     let resumeLabel = "";
     let fpsEma = 0;
@@ -519,15 +511,12 @@ export function Film() {
       /* --- smussamento dell'input (H(m)): esponenziale con dt, identico a 30 e 120 fps --- */
       const k = 1 - Math.exp(-dt / TAU_SCENE);
       const kt = 1 - Math.exp(-dt / TAU_TORCH);
-      const kr = 1 - Math.exp(-dt / TAU_RING);
       const inT = finePointer && !film.reduced ? ptr.in : 0;
       ptr.sin += (inT - ptr.sin) * k;
       ptr.sx += (ptr.x - ptr.sx) * k;
       ptr.sy += (ptr.y - ptr.sy) * k;
       ptr.tx += (ptr.x - ptr.tx) * kt;
       ptr.ty += (ptr.y - ptr.ty) * kt;
-      ptr.rx += (ptr.x - ptr.rx) * kr;
-      ptr.ry += (ptr.y - ptr.ry) * kr;
       film.mx = ((ptr.sx / window.innerWidth) * 2 - 1) * ptr.sin;
       film.my = ((ptr.sy / window.innerHeight) * 2 - 1) * ptr.sin;
       film.min = ptr.sin;
@@ -687,7 +676,7 @@ export function Film() {
         }
       }
 
-      /* --- torcia (E2) e cursore (E3): solo puntatore fine, mai reduced; DOM fisso, solo transform/opacity --- */
+      /* --- torcia (E2): solo puntatore fine (il cursore e' quello di sistema, Davide: niente anello), mai reduced; DOM fisso, solo transform/opacity --- */
       if (ui.torch) {
         // lime: si spegne dove comanda l'oro (stanza), a meta' nel wormhole (li' la luce e' dei fili:
         // la foschia verde al centro della v2 era questa), del tutto nel wipe
@@ -697,20 +686,6 @@ export function Film() {
           ui.torch.style.transform = `translate3d(${(ptr.tx - 320).toFixed(1)}px,${(ptr.ty - 320).toFixed(1)}px,0)`;
         } else if (ui.torch.style.opacity !== "0") ui.torch.style.opacity = "0";
       }
-      if (ui.dot && ui.ring) {
-        const show = ptr.sin > 0.02;
-        if (show) {
-          ui.dot.style.transform = `translate3d(${ptr.x.toFixed(1)}px,${ptr.y.toFixed(1)}px,0)`;
-          ui.ring.style.transform = `translate3d(${ptr.rx.toFixed(1)}px,${ptr.ry.toFixed(1)}px,0)`;
-        }
-        const cs = show ? cursorState || "on" : "";
-        if (cs !== cursorShown) {
-          cursorShown = cs;
-          ui.dot.dataset.state = cs;
-          ui.ring.dataset.state = cs;
-        }
-      }
-
       /* --- il tasto grande "Riprendi": quando il play e' fermo il film non deve sembrare bloccato --- */
       if (ui.resume) {
         const idle = !player.playing && (player.everPlayed || startedScrolled || film.reduced);
@@ -751,7 +726,6 @@ export function Film() {
       ro?.disconnect();
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
-      document.removeEventListener("pointerover", onOver);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onResize);
       window.removeEventListener("wheel", onWheel);
@@ -892,10 +866,8 @@ export function Film() {
           </div>
         </div>
       </div>
-      {/* E2 torcia ed E3 cursore: layer fissi fuori dalla stage (un antenato con transform romperebbe il fixed) */}
+      {/* E2 torcia: layer fisso fuori dalla stage (un antenato con transform romperebbe il fixed) */}
       <div className="film-torch" aria-hidden="true" ref={(el) => void (ui.torch = el)} />
-      <div className="film-cursor film-cursor--dot" aria-hidden="true" ref={(el) => void (ui.dot = el)} />
-      <div className="film-cursor film-cursor--ring" aria-hidden="true" ref={(el) => void (ui.ring = el)} />
     </>
   );
 }

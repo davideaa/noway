@@ -8,13 +8,15 @@
  * quella strategia, al posto di tutto il resto (non si scorre giu' a una
  * sezione). "Tutte le strategie" o il tasto indietro del browser tornano qui.
  * L'indirizzo porta #oro, #nasdaq, #usdjpy, #portafoglio: un link porta dritto
- * alla scheda giusta.
+ * alla scheda giusta. Nella pagina di una strategia il fluido al mouse prende
+ * il suo colore (oro ambra, Nasdaq blu, USDJPY viola; portafoglio verde).
  */
 import { ArrowUpRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
 import { it, signed } from "@/lib/format";
+import { setFluidTint } from "@/components/motion/FluidCursor";
 import { curva, statistiche, totale } from "./calc";
 import { Vista } from "./Vista";
 
@@ -168,6 +170,12 @@ export function Esplora({ data, hero, rest }: { data: EsploraData; hero: ReactNo
       );
     }
   }, [sel]);
+
+  // il fluido al mouse prende il colore della strategia aperta (portafoglio e schede: verde del sito)
+  useEffect(() => {
+    setFluidTint(sel === "oro" || sel === "nasdaq" || sel === "usdjpy" ? sel : "sito");
+  }, [sel]);
+  useEffect(() => () => setFluidTint("sito"), []);
 
   const pushed = useRef(false);
   const pick = useCallback((c: Chi) => {

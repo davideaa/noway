@@ -228,11 +228,12 @@ void main() {
 const FRAG_DISPLAY =
   HEAD +
   `uniform sampler2D uDye; uniform vec2 uTexel; uniform float uGain;
+uniform vec3 uPal[6];
 vec3 ramp(float t, float h) {
-  vec3 c0 = vec3(0.071, 0.290, 0.133);                                  // smeraldo scuro
-  vec3 c1 = mix(vec3(0.247, 0.682, 0.227), vec3(0.424, 0.769, 0.227), h); // verde
-  vec3 c2 = mix(vec3(0.784, 0.980, 0.447), vec3(0.902, 0.965, 0.416), h); // lime (--acc) -> lime giallo
-  vec3 c3 = vec3(0.957, 1.0, 0.800);                                    // lime quasi bianco
+  vec3 c0 = uPal[0];                    // scuro
+  vec3 c1 = mix(uPal[1], uPal[2], h);   // pieno
+  vec3 c2 = mix(uPal[3], uPal[4], h);   // accento
+  vec3 c3 = uPal[5];                    // quasi bianco
   if (t < 0.33) return mix(c0, c1, t / 0.33);
   if (t < 0.72) return mix(c1, c2, (t - 0.33) / 0.39);
   return mix(c2, c3, (t - 0.72) / 0.28);
@@ -303,7 +304,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
     scale: program(FRAG_SCALE, ["uTex", "uValue"]),
     press: program(FRAG_PRESSURE, ["uPressure", "uDivergence"]),
     grad: program(FRAG_GRADIENT, ["uPressure", "uVelocity"]),
-    show: program(FRAG_DISPLAY, ["uDye", "uGain"]),
+    show: program(FRAG_DISPLAY, ["uDye", "uGain", "uPal"]),
   };
 
   // quad a schermo intero
@@ -483,10 +484,11 @@ function makeFluid(canvas: HTMLCanvasElement) {
     dye.swap();
   };
 
-  const render = (gain: number) => {
+  const render = (gain: number, pal: Float32Array) => {
     bind(P.show, dye.tx, dye.ty);
     gl.uniform1i(P.show.u.uDye, tex(0, dye.read.tex));
     gl.uniform1f(P.show.u.uGain, gain);
+    gl.uniform3fv(P.show.u.uPal, pal);
     draw(null);
   };
 
@@ -509,6 +511,45 @@ function makeFluid(canvas: HTMLCanvasElement) {
   };
 
   return { splat, step, render, clearScreen, resize, destroy, aspect };
+}
+
+/* ---------------- tinte ----------------
+ * La scala di colore segue la pagina aperta (Davide): verde del sito sulle schede e
+ * sul portafoglio, ambra/oro sulla pagina dell'oro, blu sul Nasdaq, viola su USDJPY
+ * (gli stessi --st-* delle schede). Sei colori: scuro, pieno (due varianti), accento
+ * (due varianti), quasi bianco. Al cambio si sfuma in TINT_MS, senza scatti. */
+export type Tinta = "sito" | "oro" | "nasdaq" | "usdjpy";
+const PALETTE: Record<Tinta, number[]> = {
+  sito: [
+    0.071, 0.290, 0.133, // smeraldo scuro
+    0.247, 0.682, 0.227, 0.424, 0.769, 0.227, // verde
+    0.784, 0.980, 0.447, 0.902, 0.965, 0.416, // lime (--acc) -> lime giallo
+    0.957, 1.0, 0.8, // lime quasi bianco
+  ],
+  oro: [
+    0.290, 0.150, 0.030, // bruno ambrato
+    0.800, 0.450, 0.080, 0.870, 0.560, 0.110, // ambra
+    0.898, 0.725, 0.400, 0.980, 0.800, 0.380, // oro (--st-oro) -> oro caldo
+    1.0, 0.930, 0.760, // oro chiarissimo
+  ],
+  nasdaq: [
+    0.030, 0.110, 0.300, // blu notte
+    0.130, 0.400, 0.860, 0.180, 0.500, 0.930, // blu
+    0.447, 0.729, 1.0, 0.520, 0.820, 1.0, // azzurro (--st-nas)
+    0.860, 0.935, 1.0, // azzurro quasi bianco
+  ],
+  usdjpy: [
+    0.150, 0.060, 0.330, // viola scuro
+    0.440, 0.270, 0.880, 0.540, 0.320, 0.930, // viola
+    0.710, 0.604, 1.0, 0.800, 0.640, 1.0, // lilla (--st-usdjpy)
+    0.940, 0.900, 1.0, // lilla quasi bianco
+  ],
+};
+const TINT_MS = 500;
+let tinta: Tinta = "sito";
+/** La pagina dice quale tinta usare (Esplora, alla scheda aperta). */
+export function setFluidTint(t: Tinta) {
+  tinta = t;
 }
 
 /* ---------------- componente ---------------- */
@@ -550,6 +591,22 @@ export function FluidCursor() {
     let lastInput = performance.now();
     let hue = Math.random() * 2;
     const ptr = { x: -1, y: -1, has: false };
+    // tavolozza corrente, sfumata verso quella della tinta richiesta
+    const pal = new Float32Array(PALETTE[tinta]);
+    let palDa = new Float32Array(pal);
+    let palVerso: Tinta = tinta;
+    let palT0 = 0;
+    const aggiornaTinta = (now: number) => {
+      if (tinta !== palVerso) {
+        palDa = new Float32Array(pal);
+        palVerso = tinta;
+        palT0 = now;
+      }
+      const dst = PALETTE[palVerso];
+      const k = palT0 ? Math.min(1, (now - palT0) / TINT_MS) : 1;
+      const e = k * k * (3 - 2 * k);
+      for (let i = 0; i < pal.length; i++) pal[i] = palDa[i] + (dst[i] - palDa[i]) * e;
+    };
     const queue: { x: number; y: number; dx: number; dy: number; c: [number, number, number]; r?: number; rv?: number }[] = [];
 
     const frame = (now: number) => {
@@ -564,7 +621,8 @@ export function FluidCursor() {
       const k = Math.min(1, Math.max(0, (window.scrollY - window.innerHeight * 0.3) / (window.innerHeight * 0.7)));
       // dissolvenza nell'ultimo tratto prima dello stop: niente "scatto" quando la tela si pulisce
       const fade = Math.min(1, Math.max(0, (IDLE_MS - (now - lastInput)) / IDLE_FADE_MS));
-      F.render((GAIN_TOP + (GAIN_READ - GAIN_TOP) * k * k * (3 - 2 * k)) * fade);
+      aggiornaTinta(now);
+      F.render((GAIN_TOP + (GAIN_READ - GAIN_TOP) * k * k * (3 - 2 * k)) * fade, pal);
       if (now - lastInput > IDLE_MS) {
         running = false;
         F.clearScreen();
@@ -659,7 +717,10 @@ export function FluidCursor() {
           F.step(1 / 60);
         }
         for (let i = 0; i < after; i++) F.step(1 / 60);
-        F.render(GAIN_TOP);
+        // la simulazione e' istantanea: la sfumatura della tinta si porta subito alla fine
+        aggiornaTinta(performance.now());
+        aggiornaTinta(performance.now() + TINT_MS);
+        F.render(GAIN_TOP, pal);
       };
     }
 

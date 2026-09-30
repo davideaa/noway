@@ -76,8 +76,6 @@ export const ui: {
   counter: HTMLElement | null;
   pulse: HTMLElement | null;
   torch: HTMLElement | null;
-  dot: HTMLElement | null;
-  ring: HTMLElement | null;
   /** la barra e' trascinata: il ciclo non le scrive il valore */
   dragging: boolean;
   /** richiesta di scroll dalla barra (p): il ciclo la esegue */
@@ -98,8 +96,6 @@ export const ui: {
   counter: null,
   pulse: null,
   torch: null,
-  dot: null,
-  ring: null,
   dragging: false,
   seekTo: null,
   resume: null,
