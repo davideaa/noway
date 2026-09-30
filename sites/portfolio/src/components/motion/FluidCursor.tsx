@@ -36,13 +36,17 @@ const SIM_RES = 128;
 const DYE_RES = 256;
 const PRESSURE_ITER = 20;
 const PRESSURE_KEEP = 0.8;
-/** riccioli: una via di mezzo fra liquido (4) e fumo (14) */
-const CURL = 8;
+/**
+ * riccioli: ZERO. Davide: "togli i riccioli, lo voglio come il video: unito,
+ * spumoso, fluido, pannoso". Il rinforzo dei vortici e il galleggiamento del
+ * fumo li creavano; senza, la scia resta un nastro unico e cremoso.
+ */
+const CURL = 0;
 /**
  * dissipazione per secondo. Come nel riferimento la massa RESTA e si allarga mentre
  * la si mescola (~6 s per svanire), e il moto dura: pieghe lunghe e larghe.
  */
-const VEL_DISS = 0.2;
+const VEL_DISS = 1.2; // il moto si calma in ~1 s: niente spirali in fondo alla scia, solo un'ansa morbida
 const DYE_DISS = 0.35;
 /**
  * FUMO (Davide: "come il fumo della sigaretta elettronica, piu' nuvoloso che liquido"):
@@ -50,29 +54,29 @@ const DYE_DISS = 0.35;
  *  - diffusione: il colore si allarga ogni fotogramma, bordi di nebbia invece di lamine;
  *  - resa opaca, senza riflesso lucido (era quello a dare il "liquido").
  */
-/** galleggiamento: appena accennato (il fumo tende a salire, senza scappare via) */
-const BUOYANCY = 2.5;
+/** galleggiamento: spento (faceva salire e sfilacciare la scia come fumo) */
+const BUOYANCY = 0;
 /** diffusione del colore (per secondo): bordi di nebbia, senza sciogliere le pieghe */
-const DIFFUSE = 2;
+const DIFFUSE = 3;
 /** raggio dell'emissione di colore attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
-const SPLAT_RADIUS = 0.0006;
+const SPLAT_RADIUS = 0.0012;
 /**
  * raggio della SPINTA: un po' piu' largo del colore. Davide: "attorno alla freccia e'
  * enorme, il loro e' molto piu' piccolo" -> raggi ~6 volte piu' piccoli di prima
  * e soprattutto spinta molto piu' bassa (sotto): era lei a allargare tutto.
  */
-const SPLAT_RADIUS_VEL = 0.0012;
+const SPLAT_RADIUS_VEL = 0.0025;
 /**
  * spinta: bassa. Misurato a 60 fps esatti (?fluid-debug=1): a 6000 il fumo veniva
  * "sparato" 300-400 px avanti alla freccetta e li' si gonfiava in una nuvola grande;
- * a 1600 resta una scia sottile (~50 px) che finisce dove sta la freccetta e dopo
- * 2 s si rompe in riccioli e svanisce.
+ * a 1600 una scia sottile (~50 px), "troppo piccola"; a 2600, con raggi doppi, un
+ * nastro di ~110 px che finisce dove sta la freccetta.
  */
-const SPLAT_FORCE = 1600;
+const SPLAT_FORCE = 2600;
 /** densita' emessa per movimento: la massa cresce dove il mouse insiste */
 const DYE_AMOUNT = 0.9;
 /** valori in uso: le costanti sopra; solo la prova (?fluid-debug=1) li puo' cambiare dall'indirizzo */
-const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount: DYE_AMOUNT, buoy: BUOYANCY };
+const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount: DYE_AMOUNT, buoy: BUOYANCY, curl: CURL, diffuse: DIFFUSE, velDiss: VEL_DISS };
 /**
  * Luminosita' massima a schermo: piena nell'intestazione (come nel riferimento),
  * piu' tenue scendendo nella pagina, dove ci sono testi e tabelle da leggere.
@@ -421,7 +425,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform1i(P.vort.u.uVelocity, tex(0, vel.read.tex));
     gl.uniform1i(P.vort.u.uCurl, tex(1, curl.tex));
     gl.uniform1i(P.vort.u.uDye, tex(2, dye.read.tex));
-    gl.uniform1f(P.vort.u.uCurlK, CURL);
+    gl.uniform1f(P.vort.u.uCurlK, CFG.curl);
     gl.uniform1f(P.vort.u.uDt, dt);
     gl.uniform1f(P.vort.u.uBuoy, CFG.buoy);
     draw(vel.write);
@@ -456,7 +460,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform1f(P.advect.u.uDt, dt);
     gl.uniform1i(P.advect.u.uVelocity, tex(0, vel.read.tex));
     gl.uniform1i(P.advect.u.uSource, tex(0, vel.read.tex));
-    gl.uniform1f(P.advect.u.uDiss, VEL_DISS);
+    gl.uniform1f(P.advect.u.uDiss, CFG.velDiss);
     draw(vel.write);
     vel.swap();
 
@@ -470,7 +474,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
 
     bind(P.diffuse, dye.tx, dye.ty);
     gl.uniform1i(P.diffuse.u.uDye, tex(0, dye.read.tex));
-    gl.uniform1f(P.diffuse.u.uK, 1 - Math.exp(-DIFFUSE * dt));
+    gl.uniform1f(P.diffuse.u.uK, 1 - Math.exp(-CFG.diffuse * dt));
     draw(dye.write);
     dye.swap();
   };
@@ -626,6 +630,9 @@ export function FluidCursor() {
       if (num("fv") !== null) CFG.rv = num("fv")!;
       if (num("fa") !== null) CFG.amount = num("fa")!;
       if (num("fb") !== null) CFG.buoy = num("fb")!;
+      if (num("fc") !== null) CFG.curl = num("fc")!;
+      if (num("fd") !== null) CFG.diffuse = num("fd")!;
+      if (num("fvd") !== null) CFG.velDiss = num("fvd")!;
       (window as unknown as { __fluidSim: (path: [number, number][], after: number) => void }).__fluidSim = (path, after) => {
         let px = -1;
         let py = -1;
