@@ -4,7 +4,7 @@ import { Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { BrandMark } from "@/components/site/BrandMark";
-import { EMAIL_SHOWN, MAILTO_LOWER, SITE_NAME } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 import { player, ui } from "./player";
 
 /**
@@ -31,7 +31,7 @@ export function FilmTopBar({ controls }: { controls: boolean }) {
           <Link href="/dettagli" className="film-top__link" data-cursor="link">
             Dettagli
           </Link>
-          <a href={MAILTO_LOWER} className="film-top__link film-top__link--mail" aria-label={`Contattaci via email a ${EMAIL_SHOWN}`} data-cursor="link">
+          <a href="/dettagli/#contatti" className="film-top__link film-top__link--mail" aria-label="Contattaci: vai ai contatti" data-cursor="link">
             Contattaci
           </a>
         </nav>

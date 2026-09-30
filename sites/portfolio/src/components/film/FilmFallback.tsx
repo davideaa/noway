@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { EMAIL_SHOWN, FILM_CTA, FILM_END, FILM_H1, FILM_S2, FILM_SUB, MAILTO_LOWER } from "@/lib/site";
+import { EMAIL_SHOWN, FILM_CTA, FILM_END, FILM_H1, FILM_S2, FILM_SUB } from "@/lib/site";
 
 /** Senza WebGL: niente film, stessa pagina, stesso testo, stessi bottoni. Sobrio. */
 export function FilmFallback() {
@@ -18,7 +18,7 @@ export function FilmFallback() {
           <Link href="/dettagli" className={buttonVariants()}>
             {FILM_CTA}
           </Link>
-          <a href={MAILTO_LOWER} className={buttonVariants({ variant: "outline" })} aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}>
+          <a href="/dettagli/#contatti" className={buttonVariants({ variant: "outline" })} aria-label="Contattaci: vai ai contatti">
             Contattaci
           </a>
         </div>

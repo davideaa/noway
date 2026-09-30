@@ -18,6 +18,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
 import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_S2, FILM_S5, FILM_S6_PRE, FILM_S3, FILM_S3_WORDS, FILM_SUB, SITE_NAME } from "@/lib/site";
+import logoGrande from "./logo-grande.webp";
 import { MagneticCta } from "./MagneticCta";
 import { bakeFan, fanParams } from "./bake";
 import type { Palette } from "./FilmCanvas";
@@ -847,6 +848,15 @@ export function Film() {
           </div>
           {/* Atto 6: la camera si ferma sulla schermata finale: un titolo e UN bottone (-> /dettagli). Davide: nient'altro. */}
           <div className="film-ov film-ov--end" data-ov="7" data-ov-whole>
+            {/* il logo grande che gira piano dietro la frase finale (Davide): due facce, cosi' non si vede mai rovesciato */}
+            <div className="film-end__logo" aria-hidden="true">
+              <div className="film-end__spin">
+                {/* eslint-disable-next-line @next/next/no-img-element -- esportazione statica, immagine gia' ridotta */}
+                <img src={logoGrande.src} width={logoGrande.width} height={logoGrande.height} alt="" decoding="async" />
+                {/* eslint-disable-next-line @next/next/no-img-element -- la faccia dietro */}
+                <img className="is-back" src={logoGrande.src} width={logoGrande.width} height={logoGrande.height} alt="" decoding="async" />
+              </div>
+            </div>
             <div className="film-end">
               <h2 className="film-line film-line--end">{FILM_END}</h2>
               {/* navigazione piena: il film (WebGL, 20-40k perle, bloom) va liberato del tutto prima di /dettagli, su iPhone la somma crashava Safari */}

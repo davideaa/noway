@@ -3,7 +3,7 @@ import { HeroScene } from "@/components/motion/HeroScene";
 import { PauseButton } from "@/components/motion/PauseButton";
 import { BacktestTag, Reveal, RiskNote } from "@/components/site/ui";
 import { buttonVariants } from "@/components/ui/button";
-import { EMAIL_SHOWN, FILM_H1, MAILTO } from "@/lib/site";
+import { FILM_H1 } from "@/lib/site";
 
 // Cifre della fascia (COPY.md v2, 3.1; fonte data/strategie.json). La cifra "mesi di
 // risultati in tempo reale" e' [DA COMPLETARE]: non si mostra (vedi DA-COMPLETARE.md).
@@ -42,11 +42,7 @@ export function Hero() {
           <a href="#simulatore" className={buttonVariants({ variant: "outline" })}>
             Apri il simulatore
           </a>
-          <a
-            href={MAILTO}
-            className={buttonVariants({ variant: "outline" })}
-            aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}
-          >
+          <a href="#contatti" className={buttonVariants({ variant: "outline" })} aria-label="Contattaci: vai ai contatti">
             <Mail size={16} strokeWidth={1.6} aria-hidden />
             Contattaci
           </a>

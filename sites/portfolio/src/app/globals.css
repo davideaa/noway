@@ -1393,6 +1393,47 @@ html.film-lite .film-w {
   justify-items: center;
   gap: var(--sp-3);
   max-width: 640px;
+  position: relative;
+  z-index: 1;
+}
+/* il logo dietro la frase finale: grande, semitrasparente, gira piano su se stesso (24 s a giro) */
+.film-end__logo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  perspective: 1400px;
+  pointer-events: none;
+  /* l'opacita' qui e non su chi gira: opacity/filter sull'elemento 3D lo appiattirebbero (retro rovesciato) */
+  opacity: 0.3;
+}
+.film-end__spin {
+  position: relative;
+  height: min(62vh, 78vw);
+  aspect-ratio: 432 / 560;
+  transform-style: preserve-3d;
+  animation: film-logo-gira 24s linear infinite;
+}
+.film-end__spin img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+.film-end__spin img.is-back {
+  transform: rotateY(180deg);
+}
+@keyframes film-logo-gira {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-end__spin {
+    animation: none;
+  }
 }
 .film-end .film-line--s + .film-line--s {
   margin-top: calc(-1 * var(--sp-1));

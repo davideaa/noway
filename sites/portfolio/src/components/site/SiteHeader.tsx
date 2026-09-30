@@ -5,7 +5,7 @@ import { motion as m } from "framer-motion";
 import { Mail, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
-import { EMAIL_SHOWN, MAILTO, SCENES, SITE_NAME } from "@/lib/site";
+import { SCENES, SITE_NAME } from "@/lib/site";
 import { BrandMark } from "./BrandMark";
 
 const NAV = SCENES.filter((s) => s.nav);
@@ -78,7 +78,8 @@ export function SiteHeader() {
           <span className="mono hidden text-xs text-mut lg:inline" aria-hidden="true">
             <b className="font-medium text-acc">{current.n}</b> / {SCENES.length.toString().padStart(2, "0")}
           </span>
-          <a href={MAILTO} className={buttonVariants({ size: "sm" })} aria-label={`Contattaci via email a ${EMAIL_SHOWN}`}>
+          {/* ai contatti della pagina (Davide): un mailto qui apriva una pagina bianca nell'anteprima */}
+          <a href="#contatti" className={buttonVariants({ size: "sm" })} aria-label="Contattaci: vai ai contatti">
             <Mail size={16} strokeWidth={1.6} aria-hidden />
             <span>Contattaci</span>
           </a>
