@@ -47,7 +47,11 @@ const CURL = 0;
  * la si mescola (~6 s per svanire), e il moto dura: pieghe lunghe e larghe.
  */
 const VEL_DISS = 1.2; // il moto si calma in ~1 s: niente spirali in fondo alla scia, solo un'ansa morbida
-const DYE_DISS = 0.35;
+/**
+ * Davide: "nel video la scia dura meno di 1 secondo se muovo e poi sto fermo".
+ * Con 4 per secondo il colore scende sotto la soglia visibile in ~0,75 s.
+ */
+const DYE_DISS = 4;
 /**
  * FUMO (Davide: "come il fumo della sigaretta elettronica, piu' nuvoloso che liquido"):
  *  - galleggiamento: dove c'e' fumo la velocita' prende una spinta verso l'alto;
@@ -59,24 +63,24 @@ const BUOYANCY = 0;
 /** diffusione del colore (per secondo): bordi di nebbia, senza sciogliere le pieghe */
 const DIFFUSE = 3;
 /** raggio dell'emissione di colore attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
-const SPLAT_RADIUS = 0.0012;
+const SPLAT_RADIUS = 0.0017;
 /**
  * raggio della SPINTA: un po' piu' largo del colore. Davide: "attorno alla freccia e'
  * enorme, il loro e' molto piu' piccolo" -> raggi ~6 volte piu' piccoli di prima
  * e soprattutto spinta molto piu' bassa (sotto): era lei a allargare tutto.
  */
-const SPLAT_RADIUS_VEL = 0.0025;
+const SPLAT_RADIUS_VEL = 0.0035;
 /**
  * spinta: bassa. Misurato a 60 fps esatti (?fluid-debug=1): a 6000 il fumo veniva
  * "sparato" 300-400 px avanti alla freccetta e li' si gonfiava in una nuvola grande;
  * a 1600 una scia sottile (~50 px), "troppo piccola"; a 2600, con raggi doppi, un
  * nastro di ~110 px che finisce dove sta la freccetta.
  */
-const SPLAT_FORCE = 2600;
+const SPLAT_FORCE = 3000;
 /** densita' emessa per movimento: la massa cresce dove il mouse insiste */
 const DYE_AMOUNT = 0.9;
 /** valori in uso: le costanti sopra; solo la prova (?fluid-debug=1) li puo' cambiare dall'indirizzo */
-const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount: DYE_AMOUNT, buoy: BUOYANCY, curl: CURL, diffuse: DIFFUSE, velDiss: VEL_DISS };
+const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount: DYE_AMOUNT, buoy: BUOYANCY, curl: CURL, diffuse: DIFFUSE, velDiss: VEL_DISS, dyeDiss: DYE_DISS };
 /**
  * Luminosita' massima a schermo: piena nell'intestazione (come nel riferimento),
  * piu' tenue scendendo nella pagina, dove ci sono testi e tabelle da leggere.
@@ -84,8 +88,8 @@ const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount:
 const GAIN_TOP = 0.95;
 const GAIN_READ = 0.4;
 /** stop del ciclo dopo l'ultimo movimento (con dissolvenza nell'ultimo secondo e mezzo) */
-const IDLE_MS = 10000;
-const IDLE_FADE_MS = 1500;
+const IDLE_MS = 2500;
+const IDLE_FADE_MS = 800;
 /** risoluzione della tela rispetto ai pixel CSS: il contenuto e' morbido, basta meno */
 const CANVAS_SCALE = 0.75;
 
@@ -468,7 +472,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform2f(P.advect.u.uSimTexel, vel.tx, vel.ty);
     gl.uniform1i(P.advect.u.uVelocity, tex(0, vel.read.tex));
     gl.uniform1i(P.advect.u.uSource, tex(1, dye.read.tex));
-    gl.uniform1f(P.advect.u.uDiss, DYE_DISS);
+    gl.uniform1f(P.advect.u.uDiss, CFG.dyeDiss);
     draw(dye.write);
     dye.swap();
 
@@ -633,6 +637,7 @@ export function FluidCursor() {
       if (num("fc") !== null) CFG.curl = num("fc")!;
       if (num("fd") !== null) CFG.diffuse = num("fd")!;
       if (num("fvd") !== null) CFG.velDiss = num("fvd")!;
+      if (num("fdd") !== null) CFG.dyeDiss = num("fdd")!;
       (window as unknown as { __fluidSim: (path: [number, number][], after: number) => void }).__fluidSim = (path, after) => {
         let px = -1;
         let py = -1;
