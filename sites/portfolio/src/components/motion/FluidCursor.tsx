@@ -12,8 +12,9 @@
  *   si risolve con 20 iterazioni di Jacobi e si toglie dal campo, cosi' il
  *   fluido non si comprime. Ogni movimento del mouse aggiunge una "spinta" e
  *   una macchia di colore gaussiana nel punto del puntatore.
- *   A schermo: il colore, con un'ombreggiatura presa dal gradiente di
- *   luminosita' (da' il volume) e un riflesso speculare (la lucentezza).
+ *   Comportamento da FUMO (svapo), non da liquido: il fumo galleggia (sale),
+ *   si diffonde (bordi di nebbia) e si arriccia; a schermo e' opaco, senza
+ *   riflessi, con un volume appena accennato.
  *
  * Costi e limiti:
  *   - solo puntatore fine (mouse/penna): su telefono non c'e' mouse, e dopo i
@@ -34,21 +35,31 @@ const SIM_RES = 128;
 const DYE_RES = 256;
 const PRESSURE_ITER = 20;
 const PRESSURE_KEEP = 0.8;
-const CURL = 4;
-/** dissipazione per secondo: il colore svanisce in ~3 s, il moto un po' prima */
-const VEL_DISS = 0.5;
-const DYE_DISS = 1.1;
-/** raggio della macchia (in unita' uv^2 dell'altezza): grande = morbido come nel riferimento */
-const SPLAT_RADIUS = 0.018;
+/** riccioli: piu' alti del "liquido" (4), il fumo si arriccia */
+const CURL = 10;
+/** dissipazione per secondo: il moto dura (il fumo continua a salire), il colore svanisce in ~3 s */
+const VEL_DISS = 0.3;
+const DYE_DISS = 0.75;
+/**
+ * FUMO (Davide: "come il fumo della sigaretta elettronica, piu' nuvoloso che liquido"):
+ *  - galleggiamento: dove c'e' fumo la velocita' prende una spinta verso l'alto;
+ *  - diffusione: il colore si allarga ogni fotogramma, bordi di nebbia invece di lamine;
+ *  - resa opaca, senza riflesso lucido (era quello a dare il "liquido").
+ */
+const BUOYANCY = 9;
+/** diffusione del colore (per secondo): piu' alta = nuvola piu' morbida e larga */
+const DIFFUSE = 8;
+/** raggio dell'emissione attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
+const SPLAT_RADIUS = 0.0032;
 const SPLAT_FORCE = 4200;
-/** colore aggiunto per movimento: il fluido si accumula dove il mouse insiste */
-const DYE_AMOUNT = 0.32;
+/** densita' emessa per movimento: il fumo si accumula dove il mouse insiste */
+const DYE_AMOUNT = 0.55;
 /**
  * Luminosita' massima a schermo: piena nell'intestazione (come nel riferimento),
  * piu' tenue scendendo nella pagina, dove ci sono testi e tabelle da leggere.
  */
-const GAIN_TOP = 0.92;
-const GAIN_READ = 0.45;
+const GAIN_TOP = 0.9;
+const GAIN_READ = 0.34;
 /** stop del ciclo dopo l'ultimo movimento */
 const IDLE_MS = 5000;
 /** risoluzione della tela rispetto ai pixel CSS: il contenuto e' morbido, basta meno */
@@ -57,14 +68,15 @@ const CANVAS_SCALE = 0.75;
 /**
  * Tavolozza del sito, lungo la quale il colore scorre man mano che il mouse si
  * muove: la scia diventa una sfumatura, come quella viola-blu del riferimento.
- * Verde -> lime (--acc) -> lime chiaro -> oro (--st-oro). Niente verdi scuri:
- * mescolati facevano "marmo" fangoso.
+ * Fumo chiaro tinto di lime: lime (--acc) -> lime chiaro -> bianco del testo
+ * (--ink) -> verde brillante. Niente oro ne' verdi scuri: a bassa densita'
+ * diventavano oliva, fuori tono sul fondo quasi nero del sito.
  */
 const PALETTE: [number, number, number][] = [
-  [0x6f / 255, 0xc0 / 255, 0x3a / 255],
   [0xc8 / 255, 0xfa / 255, 0x72 / 255],
-  [0xee / 255, 0xff / 255, 0xb0 / 255],
-  [0xe5 / 255, 0xb9 / 255, 0x66 / 255],
+  [0xe2 / 255, 0xfc / 255, 0xb4 / 255],
+  [0xf1 / 255, 0xf4 / 255, 0xee / 255],
+  [0x9c / 255, 0xe6 / 255, 0x6a / 255],
 ];
 function paletteAt(t: number, out: [number, number, number]) {
   // andata e ritorno lungo la tavolozza (niente salto oro -> verde scuro)
@@ -125,7 +137,7 @@ void main() {
 }`;
 const FRAG_VORTICITY =
   HEAD +
-  `uniform sampler2D uVelocity; uniform sampler2D uCurl; uniform float uCurlK; uniform float uDt;
+  `uniform sampler2D uVelocity; uniform sampler2D uCurl; uniform sampler2D uDye; uniform float uCurlK; uniform float uDt; uniform float uBuoy;
 void main() {
   float L = texture(uCurl, vL).x;
   float R = texture(uCurl, vR).x;
@@ -137,6 +149,9 @@ void main() {
   f *= uCurlK * C;
   f.y *= -1.0;
   vec2 v = texture(uVelocity, vUv).xy + f * uDt;
+  // galleggiamento: il fumo sale, piu' dove e' denso
+  float d = min(1.0, max(texture(uDye, vUv).r, max(texture(uDye, vUv).g, texture(uDye, vUv).b)));
+  v.y += uBuoy * d * uDt;
   o = vec4(clamp(v, -1000.0, 1000.0), 0.0, 1.0);
 }`;
 const FRAG_DIVERGENCE =
@@ -180,31 +195,33 @@ void main() {
   vec2 v = texture(uVelocity, vUv).xy - vec2(R - L, T - B);
   o = vec4(v, 0.0, 1.0);
 }`;
-/* A schermo: saturazione morbida, volume dal gradiente di luminosita', riflesso lucido. */
+/* Diffusione del colore: ogni fotogramma un po' verso i vicini (bordi di nebbia). */
+const FRAG_DIFFUSE =
+  HEAD +
+  `uniform sampler2D uDye; uniform float uK;
+void main() {
+  vec4 c = texture(uDye, vUv);
+  vec4 n = 0.25 * (texture(uDye, vL) + texture(uDye, vR) + texture(uDye, vT) + texture(uDye, vB));
+  o = mix(c, n, uK);
+}`;
+/* A schermo: FUMO. Densita' -> opacita' morbida, colore della tavolozza, un volume
+   appena accennato (luce dall'alto), nessun riflesso lucido. */
 const FRAG_DISPLAY =
   HEAD +
   `uniform sampler2D uDye; uniform vec2 uTexel; uniform float uGain;
 void main() {
   vec3 c = texture(uDye, vUv).rgb;
-  // vicini a 2,5 texel: il rilievo segue le forme grandi, non il rumore fine
-  vec2 ox = vec2(uTexel.x * 2.5, 0.0);
-  vec2 oy = vec2(0.0, uTexel.y * 2.5);
-  float lL = length(texture(uDye, vUv - ox).rgb);
-  float lR = length(texture(uDye, vUv + ox).rgb);
-  float lT = length(texture(uDye, vUv + oy).rgb);
-  float lB = length(texture(uDye, vUv - oy).rgb);
-  vec3 n = normalize(vec3(lR - lL, lT - lB, length(uTexel) * 14.0));
-  float diffuse = clamp(dot(n, vec3(0.0, 0.0, 1.0)) + 0.72, 0.72, 1.0);
-  vec3 h = normalize(normalize(vec3(-0.35, 0.55, 0.75)) + vec3(0.0, 0.0, 1.0));
-  float spec = pow(max(dot(n, h), 0.0), 36.0);
-  // saturazione morbida SUL MASSIMO, non per canale: il lime resta lime anche pieno
-  // (per canale i colori forti sbiadivano verso il bianco, i deboli verso l'oliva)
-  float m = max(c.r, max(c.g, c.b));
-  c *= (1.0 - exp(-m * 1.8)) / max(m, 1e-4);
-  float a = max(c.r, max(c.g, c.b));
-  c = c * diffuse + spec * 0.45 * a * vec3(1.0, 1.0, 0.92);
-  a = max(a, max(c.r, max(c.g, c.b)));
-  o = vec4(min(c, vec3(a)) * uGain, a * uGain);
+  float d = max(c.r, max(c.g, c.b));
+  vec3 hue = c / max(d, 1e-4);
+  // volume leggero: il bordo alto della nuvola prende un po' piu' luce
+  vec2 oy = vec2(0.0, uTexel.y * 3.0);
+  float up = max(texture(uDye, vUv + oy).r, max(texture(uDye, vUv + oy).g, texture(uDye, vUv + oy).b));
+  float lit = 1.0 + 0.08 * clamp((d - up) * 6.0, -1.0, 1.0);
+  // opacita' morbida: il fumo sottile e' velo, quello denso e' nuvola piena
+  float a = (1.0 - exp(-d * 3.0)) * uGain;
+  // dove e' densa la nuvola "si accende" verso il lime pieno (niente salvia)
+  vec3 col = min(hue * lit * (1.0 + 0.35 * a), vec3(1.0));
+  o = vec4(col * a, a);
 }`;
 
 /* ---------------- WebGL: programmi e framebuffer ---------------- */
@@ -248,7 +265,8 @@ function makeFluid(canvas: HTMLCanvasElement) {
     splat: program(FRAG_SPLAT, ["uTarget", "uAspect", "uColor", "uPoint", "uRadius"]),
     advect: program(FRAG_ADVECT, ["uVelocity", "uSource", "uSimTexel", "uDt", "uDiss"]),
     curl: program(FRAG_CURL, ["uVelocity"]),
-    vort: program(FRAG_VORTICITY, ["uVelocity", "uCurl", "uCurlK", "uDt"]),
+    vort: program(FRAG_VORTICITY, ["uVelocity", "uCurl", "uDye", "uCurlK", "uDt", "uBuoy"]),
+    diffuse: program(FRAG_DIFFUSE, ["uDye", "uK"]),
     div: program(FRAG_DIVERGENCE, ["uVelocity"]),
     scale: program(FRAG_SCALE, ["uTex", "uValue"]),
     press: program(FRAG_PRESSURE, ["uPressure", "uDivergence"]),
@@ -356,7 +374,9 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform1f(P.splat.u.uAspect, aspect());
     gl.uniform2f(P.splat.u.uPoint, x, y);
     gl.uniform3f(P.splat.u.uColor, dx, dy, 0);
-    gl.uniform1f(P.splat.u.uRadius, SPLAT_RADIUS * (aspect() > 1 ? aspect() : 1));
+    // raggio in unita' dell'altezza, uguale su ogni schermo (prima si moltiplicava per
+    // l'aspetto: sul monitor ultralargo di Davide, 3440x1440, la macchia era 2,4 volte piu' grande)
+    gl.uniform1f(P.splat.u.uRadius, SPLAT_RADIUS);
     draw(vel.write);
     vel.swap();
     bind(P.splat, dye.tx, dye.ty);
@@ -375,8 +395,10 @@ function makeFluid(canvas: HTMLCanvasElement) {
     bind(P.vort, vel.tx, vel.ty);
     gl.uniform1i(P.vort.u.uVelocity, tex(0, vel.read.tex));
     gl.uniform1i(P.vort.u.uCurl, tex(1, curl.tex));
+    gl.uniform1i(P.vort.u.uDye, tex(2, dye.read.tex));
     gl.uniform1f(P.vort.u.uCurlK, CURL);
     gl.uniform1f(P.vort.u.uDt, dt);
+    gl.uniform1f(P.vort.u.uBuoy, BUOYANCY);
     draw(vel.write);
     vel.swap();
 
@@ -418,6 +440,12 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform1i(P.advect.u.uVelocity, tex(0, vel.read.tex));
     gl.uniform1i(P.advect.u.uSource, tex(1, dye.read.tex));
     gl.uniform1f(P.advect.u.uDiss, DYE_DISS);
+    draw(dye.write);
+    dye.swap();
+
+    bind(P.diffuse, dye.tx, dye.ty);
+    gl.uniform1i(P.diffuse.u.uDye, tex(0, dye.read.tex));
+    gl.uniform1f(P.diffuse.u.uK, 1 - Math.exp(-DIFFUSE * dt));
     draw(dye.write);
     dye.swap();
   };
@@ -568,11 +596,11 @@ export function FluidCursor() {
         const ang = Math.random() * Math.PI * 2;
         paletteAt(i * 0.35 + 0.4, col);
         queue.push({
-          x: 0.62 + Math.random() * 0.25,
-          y: 0.55 + Math.random() * 0.3,
-          dx: Math.cos(ang) * 900,
-          dy: Math.sin(ang) * 900,
-          c: [col[0] * 0.5, col[1] * 0.5, col[2] * 0.5],
+          x: 0.66 + Math.random() * 0.16,
+          y: 0.35 + Math.random() * 0.2,
+          dx: Math.cos(ang) * 500,
+          dy: Math.sin(ang) * 500 + 300,
+          c: [col[0] * 0.9, col[1] * 0.9, col[2] * 0.9],
         });
       }
       wake();
