@@ -905,7 +905,7 @@
   inset: 0;
   /* piu' leggero di prima: copriva uno shader sempre acceso, ora c'e' il fluido che passa e svanisce */
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--bg) 45%, transparent) 0%, color-mix(in srgb, var(--bg) 20%, transparent) 55%, transparent 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--bg) 28%, transparent) 0%, color-mix(in srgb, var(--bg) 10%, transparent) 55%, transparent 100%),
     linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 22%);
 }
 /* reticolo tecnico, statico, bassa opacita' */

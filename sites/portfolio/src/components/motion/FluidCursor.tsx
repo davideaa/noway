@@ -12,9 +12,10 @@
  *   si risolve con 20 iterazioni di Jacobi e si toglie dal campo, cosi' il
  *   fluido non si comprime. Ogni movimento del mouse aggiunge una "spinta" e
  *   una macchia di colore gaussiana nel punto del puntatore.
- *   Comportamento da FUMO (svapo), non da liquido: il fumo galleggia (sale),
- *   si diffonde (bordi di nebbia) e si arriccia; a schermo e' opaco, senza
- *   riflessi, con un volume appena accennato.
+ *   Via di mezzo fra il liquido del riferimento e il fumo di svapo: la massa
+ *   resta e si allarga mentre la si mescola, sale appena, ha bordi di nebbia.
+ *   A schermo: la densita' passa per una scala di colore del sito (mai bianco
+ *   sbiadito), le pieghe in luce salgono di un gradino; niente riflesso lucido.
  *
  * Costi e limiti:
  *   - solo puntatore fine (mouse/penna): su telefono non c'e' mouse, e dopo i
@@ -35,58 +36,55 @@ const SIM_RES = 128;
 const DYE_RES = 256;
 const PRESSURE_ITER = 20;
 const PRESSURE_KEEP = 0.8;
-/** riccioli: piu' alti del "liquido" (4), il fumo si arriccia */
-const CURL = 10;
-/** dissipazione per secondo: il moto dura (il fumo continua a salire), il colore svanisce in ~3 s */
-const VEL_DISS = 0.3;
-const DYE_DISS = 0.75;
+/** riccioli: una via di mezzo fra liquido (4) e fumo (14) */
+const CURL = 8;
+/**
+ * dissipazione per secondo. Come nel riferimento la massa RESTA e si allarga mentre
+ * la si mescola (~6 s per svanire), e il moto dura: pieghe lunghe e larghe.
+ */
+const VEL_DISS = 0.2;
+const DYE_DISS = 0.35;
 /**
  * FUMO (Davide: "come il fumo della sigaretta elettronica, piu' nuvoloso che liquido"):
  *  - galleggiamento: dove c'e' fumo la velocita' prende una spinta verso l'alto;
  *  - diffusione: il colore si allarga ogni fotogramma, bordi di nebbia invece di lamine;
  *  - resa opaca, senza riflesso lucido (era quello a dare il "liquido").
  */
-const BUOYANCY = 9;
-/** diffusione del colore (per secondo): piu' alta = nuvola piu' morbida e larga */
-const DIFFUSE = 8;
-/** raggio dell'emissione attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
-const SPLAT_RADIUS = 0.0032;
-const SPLAT_FORCE = 4200;
-/** densita' emessa per movimento: il fumo si accumula dove il mouse insiste */
-const DYE_AMOUNT = 0.55;
+/** galleggiamento: appena accennato (il fumo tende a salire, senza scappare via) */
+const BUOYANCY = 2.5;
+/** diffusione del colore (per secondo): bordi di nebbia, senza sciogliere le pieghe */
+const DIFFUSE = 3;
+/** raggio dell'emissione di colore attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
+const SPLAT_RADIUS = 0.0035;
+/** raggio della SPINTA: piu' largo del colore, il mouse trascina una zona ampia (le grandi pieghe del riferimento) */
+const SPLAT_RADIUS_VEL = 0.01;
+const SPLAT_FORCE = 5000;
+/** densita' emessa per movimento: la massa cresce dove il mouse insiste */
+const DYE_AMOUNT = 0.5;
 /**
  * Luminosita' massima a schermo: piena nell'intestazione (come nel riferimento),
  * piu' tenue scendendo nella pagina, dove ci sono testi e tabelle da leggere.
  */
-const GAIN_TOP = 0.9;
-const GAIN_READ = 0.34;
-/** stop del ciclo dopo l'ultimo movimento */
-const IDLE_MS = 5000;
+const GAIN_TOP = 0.95;
+const GAIN_READ = 0.4;
+/** stop del ciclo dopo l'ultimo movimento (con dissolvenza nell'ultimo secondo e mezzo) */
+const IDLE_MS = 10000;
+const IDLE_FADE_MS = 1500;
 /** risoluzione della tela rispetto ai pixel CSS: il contenuto e' morbido, basta meno */
 const CANVAS_SCALE = 0.75;
 
 /**
- * Tavolozza del sito, lungo la quale il colore scorre man mano che il mouse si
- * muove: la scia diventa una sfumatura, come quella viola-blu del riferimento.
- * Fumo chiaro tinto di lime: lime (--acc) -> lime chiaro -> bianco del testo
- * (--ink) -> verde brillante. Niente oro ne' verdi scuri: a bassa densita'
- * diventavano oliva, fuori tono sul fondo quasi nero del sito.
+ * COLORE. Come nel riferimento il colore non sbiadisce mai verso il bianco: la
+ * densita' passa per una SCALA del sito (shader FRAG_DISPLAY): verde smeraldo
+ * scuro ai bordi -> verde -> lime (--acc) -> lime quasi bianco solo sulle pieghe
+ * in luce. Il colore trasportato e' (densita', densita' x tinta): la tinta scorre
+ * con la strada fatta dal mouse fra un lime piu' verde e uno piu' giallo, cosi'
+ * la scia e' sfumata come quella viola-blu del riferimento.
  */
-const PALETTE: [number, number, number][] = [
-  [0xc8 / 255, 0xfa / 255, 0x72 / 255],
-  [0xe2 / 255, 0xfc / 255, 0xb4 / 255],
-  [0xf1 / 255, 0xf4 / 255, 0xee / 255],
-  [0x9c / 255, 0xe6 / 255, 0x6a / 255],
-];
-function paletteAt(t: number, out: [number, number, number]) {
-  // andata e ritorno lungo la tavolozza (niente salto oro -> verde scuro)
-  const u = 1 - Math.abs(((t % 2) + 2) % 2 - 1); // 0..1..0
-  const x = u * (PALETTE.length - 1);
-  const i = Math.min(PALETTE.length - 2, Math.floor(x));
-  const f = x - i;
-  const s = f * f * (3 - 2 * f);
-  for (let k = 0; k < 3; k++) out[k] = PALETTE[i][k] + (PALETTE[i + 1][k] - PALETTE[i][k]) * s;
-  return out;
+function hueAt(t: number) {
+  // andata e ritorno 0..1..0, morbida
+  const u = 1 - Math.abs(((t % 2) + 2) % 2 - 1);
+  return u * u * (3 - 2 * u);
 }
 
 /* ---------------- shader ---------------- */
@@ -204,23 +202,37 @@ void main() {
   vec4 n = 0.25 * (texture(uDye, vL) + texture(uDye, vR) + texture(uDye, vT) + texture(uDye, vB));
   o = mix(c, n, uK);
 }`;
-/* A schermo: FUMO. Densita' -> opacita' morbida, colore della tavolozza, un volume
-   appena accennato (luce dall'alto), nessun riflesso lucido. */
+/* A schermo: densita' -> SCALA di colore del sito (mai bianco sbiadito), con le pieghe
+   in luce che salgono di un gradino nella scala (il volume del riferimento, senza
+   riflesso lucido). Opacita' morbida: i bordi sono nebbia. */
 const FRAG_DISPLAY =
   HEAD +
   `uniform sampler2D uDye; uniform vec2 uTexel; uniform float uGain;
+vec3 ramp(float t, float h) {
+  vec3 c0 = vec3(0.071, 0.290, 0.133);                                  // smeraldo scuro
+  vec3 c1 = mix(vec3(0.247, 0.682, 0.227), vec3(0.424, 0.769, 0.227), h); // verde
+  vec3 c2 = mix(vec3(0.784, 0.980, 0.447), vec3(0.902, 0.965, 0.416), h); // lime (--acc) -> lime giallo
+  vec3 c3 = vec3(0.957, 1.0, 0.800);                                    // lime quasi bianco
+  if (t < 0.33) return mix(c0, c1, t / 0.33);
+  if (t < 0.72) return mix(c1, c2, (t - 0.33) / 0.39);
+  return mix(c2, c3, (t - 0.72) / 0.28);
+}
 void main() {
-  vec3 c = texture(uDye, vUv).rgb;
-  float d = max(c.r, max(c.g, c.b));
-  vec3 hue = c / max(d, 1e-4);
-  // volume leggero: il bordo alto della nuvola prende un po' piu' luce
-  vec2 oy = vec2(0.0, uTexel.y * 3.0);
-  float up = max(texture(uDye, vUv + oy).r, max(texture(uDye, vUv + oy).g, texture(uDye, vUv + oy).b));
-  float lit = 1.0 + 0.08 * clamp((d - up) * 6.0, -1.0, 1.0);
-  // opacita' morbida: il fumo sottile e' velo, quello denso e' nuvola piena
-  float a = (1.0 - exp(-d * 3.0)) * uGain;
-  // dove e' densa la nuvola "si accende" verso il lime pieno (niente salvia)
-  vec3 col = min(hue * lit * (1.0 + 0.35 * a), vec3(1.0));
+  vec4 s = texture(uDye, vUv);
+  float d = max(s.r, 0.0);
+  float h = clamp(s.g / max(d, 1e-4), 0.0, 1.0);
+  vec2 ox = vec2(uTexel.x * 2.5, 0.0);
+  vec2 oy = vec2(0.0, uTexel.y * 2.5);
+  float dL = texture(uDye, vUv - ox).r;
+  float dR = texture(uDye, vUv + ox).r;
+  float dT = texture(uDye, vUv + oy).r;
+  float dB = texture(uDye, vUv - oy).r;
+  vec3 n = normalize(vec3(dR - dL, dT - dB, length(uTexel) * 10.0));
+  float lit = dot(n, normalize(vec3(-0.4, 0.6, 0.7)));
+  float t = 1.0 - exp(-d * 1.5);
+  float tc = clamp(t + 0.22 * (lit - 0.7), 0.0, 1.0);
+  vec3 col = ramp(tc, h);
+  float a = smoothstep(0.0, 0.45, t) * uGain;
   o = vec4(col * a, a);
 }`;
 
@@ -367,21 +379,22 @@ function makeFluid(canvas: HTMLCanvasElement) {
   const aspect = () => gl.drawingBufferWidth / Math.max(1, gl.drawingBufferHeight);
 
   /** una spinta + una macchia di colore nel punto (x, y in 0..1, y verso l'alto) */
-  const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number]) => {
+  const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number], r = SPLAT_RADIUS, rv = SPLAT_RADIUS_VEL) => {
     gl.disable(gl.BLEND);
     bind(P.splat, vel.tx, vel.ty);
     gl.uniform1i(P.splat.u.uTarget, tex(0, vel.read.tex));
     gl.uniform1f(P.splat.u.uAspect, aspect());
     gl.uniform2f(P.splat.u.uPoint, x, y);
     gl.uniform3f(P.splat.u.uColor, dx, dy, 0);
-    // raggio in unita' dell'altezza, uguale su ogni schermo (prima si moltiplicava per
+    // raggi in unita' dell'altezza, uguali su ogni schermo (prima si moltiplicava per
     // l'aspetto: sul monitor ultralargo di Davide, 3440x1440, la macchia era 2,4 volte piu' grande)
-    gl.uniform1f(P.splat.u.uRadius, SPLAT_RADIUS);
+    gl.uniform1f(P.splat.u.uRadius, rv);
     draw(vel.write);
     vel.swap();
     bind(P.splat, dye.tx, dye.ty);
     gl.uniform1i(P.splat.u.uTarget, tex(0, dye.read.tex));
     gl.uniform3f(P.splat.u.uColor, color[0], color[1], color[2]);
+    gl.uniform1f(P.splat.u.uRadius, r);
     draw(dye.write);
     dye.swap();
   };
@@ -516,21 +529,22 @@ export function FluidCursor() {
     let last = 0;
     let lastInput = performance.now();
     let hue = Math.random() * 2;
-    const col: [number, number, number] = [0, 0, 0];
     const ptr = { x: -1, y: -1, has: false };
-    const queue: { x: number; y: number; dx: number; dy: number; c: [number, number, number] }[] = [];
+    const queue: { x: number; y: number; dx: number; dy: number; c: [number, number, number]; r?: number; rv?: number }[] = [];
 
     const frame = (now: number) => {
       const dt = Math.min(1 / 30, last ? (now - last) / 1000 : 1 / 60);
       last = now;
       while (queue.length) {
         const s = queue.shift()!;
-        F.splat(s.x, s.y, s.dx, s.dy, s.c);
+        F.splat(s.x, s.y, s.dx, s.dy, s.c, s.r, s.rv);
       }
       F.step(dt);
       // piena nell'intestazione, piu' tenue dove si legge
       const k = Math.min(1, Math.max(0, (window.scrollY - window.innerHeight * 0.3) / (window.innerHeight * 0.7)));
-      F.render(GAIN_TOP + (GAIN_READ - GAIN_TOP) * k * k * (3 - 2 * k));
+      // dissolvenza nell'ultimo tratto prima dello stop: niente "scatto" quando la tela si pulisce
+      const fade = Math.min(1, Math.max(0, (IDLE_MS - (now - lastInput)) / IDLE_FADE_MS));
+      F.render((GAIN_TOP + (GAIN_READ - GAIN_TOP) * k * k * (3 - 2 * k)) * fade);
       if (now - lastInput > IDLE_MS) {
         running = false;
         F.clearScreen();
@@ -566,8 +580,8 @@ export function FluidCursor() {
       if (a > 1) dy /= a;
       // il colore scorre lungo la tavolozza con la strada fatta: la scia e' una sfumatura
       hue += Math.hypot(dx, dy) * 1.2;
-      paletteAt(hue, col);
-      queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, c: [col[0] * DYE_AMOUNT, col[1] * DYE_AMOUNT, col[2] * DYE_AMOUNT] });
+      const h = hueAt(hue);
+      queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, c: [DYE_AMOUNT, DYE_AMOUNT * h, 0] });
       wake();
     };
     const onLeave = () => {
@@ -589,18 +603,19 @@ export function FluidCursor() {
       }, 200);
     };
 
-    // all'arrivo, se si e' in cima alla pagina: una prima macchia a destra del titolo,
-    // cosi' l'effetto si vede prima ancora di muovere il mouse (poi svanisce da solo)
+    // all'arrivo, se si e' in cima alla pagina: una massa gia' presente a destra del titolo
+    // (il riferimento ne ha una prima ancora di muovere il mouse), poi la si mescola
     if (window.scrollY < window.innerHeight * 0.5) {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 9; i++) {
         const ang = Math.random() * Math.PI * 2;
-        paletteAt(i * 0.35 + 0.4, col);
         queue.push({
-          x: 0.66 + Math.random() * 0.16,
-          y: 0.35 + Math.random() * 0.2,
-          dx: Math.cos(ang) * 500,
-          dy: Math.sin(ang) * 500 + 300,
-          c: [col[0] * 0.9, col[1] * 0.9, col[2] * 0.9],
+          x: 0.58 + Math.random() * 0.28,
+          y: 0.4 + Math.random() * 0.3,
+          dx: Math.cos(ang) * 350,
+          dy: Math.sin(ang) * 350,
+          c: [0.55, 0.55 * hueAt(i * 0.3), 0],
+          r: 0.012,
+          rv: 0.02,
         });
       }
       wake();
