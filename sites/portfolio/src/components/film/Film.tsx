@@ -14,7 +14,7 @@
  */
 import { Play } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
 import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_S2, FILM_S5, FILM_S6_PRE, FILM_S3, FILM_S3_WORDS, FILM_SUB, SITE_NAME } from "@/lib/site";
@@ -91,6 +91,8 @@ const TAP_PX = 10;
  */
 const FPS_WARMUP_MS = 1000;
 const FPS_WINDOW_MS = 3000;
+/** Durata dell'entrata nel pianeta prima di andare ai dettagli (ms). */
+const ENTRA_MS = 1300;
 /** Se il film non e' pronto entro questo tempo, il caricamento lo dice invece di restare muto. */
 const SLOW_BOOT_MS = 12000;
 
@@ -250,6 +252,39 @@ export function Film() {
   // Il canvas (three.js, ~240 kB) si monta dopo il primo disegno dell'h1: LCP e
   // TBT non aspettano il film (QA-FILM C3). Un solo setState, una volta.
   const [canvasOn, setCanvasOn] = useState(false);
+
+  /* ENTRARE NEL PIANETA (Davide): al clic su "Esplora il portfolio" le scritte svaniscono,
+     il pianeta con il logo viene incontro fino a entrarci dentro, un lampo si chiude nel
+     fondo del sito, e solo allora si va ai dettagli. Nell'anteprima di Claude il clic lo
+     prende prima lo script dell'anteprima: per questo la stessa funzione e' anche su window. */
+  const finale = useRef<HTMLDivElement>(null);
+  const entra = useCallback((vai: () => void) => {
+    const el = finale.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return vai();
+    el.classList.add("is-entra");
+    window.setTimeout(vai, ENTRA_MS);
+  }, []);
+  useEffect(() => {
+    const w = window as unknown as { __transizione?: (vai: () => void) => void; __transizioneReset?: () => void };
+    const via = () => finale.current?.classList.remove("is-entra");
+    w.__transizione = entra;
+    w.__transizioneReset = via;
+    // tornando indietro col browser la pagina puo' riaprirsi dalla cache: non deve restare "dentro"
+    window.addEventListener("pageshow", via);
+    return () => {
+      delete w.__transizione;
+      delete w.__transizioneReset;
+      window.removeEventListener("pageshow", via);
+    };
+  }, [entra]);
+  const onVai = (e: React.MouseEvent) => {
+    const a = (e.target as Element).closest?.("a[href]") as HTMLAnchorElement | null;
+    if (!a || !/dettagli/.test(a.getAttribute("href") || "")) return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const href = a.href;
+    entra(() => window.location.assign(href));
+  };
   useEffect(() => {
     if (mode !== "film") return;
     let raf2 = 0;
@@ -847,7 +882,8 @@ export function Film() {
             </p>
           </div>
           {/* Atto 6: la camera si ferma sulla schermata finale: un titolo e UN bottone (-> /dettagli). Davide: nient'altro. */}
-          <div className="film-ov film-ov--end" data-ov="7" data-ov-whole>
+          <div className="film-ov film-ov--end" data-ov="7" data-ov-whole data-transizione ref={finale} onClickCapture={onVai}>
+            <div className="film-varco" aria-hidden="true" />
             {/* il finale (Davide): la Terra in 3D che gira con il nostro logo davanti e il nome, poi la frase e il bottone */}
             <div className="film-emblema">
               <Globo />
