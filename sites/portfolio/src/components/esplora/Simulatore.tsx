@@ -16,12 +16,12 @@ import { useEffect, useRef, useState } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
 import { int, it, signed } from "@/lib/format";
-import { benchmarkMediane, N, simula, type Esito, type MetodoId, type Misura, type Periodo } from "./mc";
+import { benchmarkStorico, N, simula, type Esito, type MetodoId, type Misura, type Periodo } from "./mc";
 import { DisceseChart, formato, GraficoMC, type Bench } from "./SimCharts";
 
 type Scelta = "tutte" | Id;
 type Param = { scelta: Scelta; limite: number; anni: number; periodo: Periodo };
-type Run = { e: Esito; p: Param; giro: number; bench: (Bench & { tolto: string | null })[] };
+type Run = { e: Esito; p: Param; giro: number; bench: (Bench & { fino: string })[] };
 /** i due benchmark, in colori diversi da quelli delle strategie */
 const COLORI_BENCH = ["#f3efe2", "#4fd1c5"];
 
@@ -158,11 +158,11 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
       fermo,
     );
     if (!e || fermo()) return;
-    const bench = benchmarkMediane(data.bench.etf, data.mesi, p.periodo, p.anni, mio).map((b, i) => ({
+    const bench = benchmarkStorico(data.bench.etf, data.mesi, p.anni).map((b, i) => ({
       nome: `Benchmark ${b.nome}`,
       colore: COLORI_BENCH[i] ?? "var(--mut)",
       v: b.v,
-      tolto: b.tolto,
+      fino: b.fino,
     }));
     setRun({ e, p, giro: mio, bench });
     setStato("costruzione");
@@ -528,13 +528,9 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                     ))}
                   </ul>
                   <p className="xp-sim__hint">
-                    Benchmark (indici di riferimento): S&amp;P 500 e Nasdaq-100 simulati con lo stesso metodo, ripescando a blocchi di 3 mesi i
-                    loro rendimenti mensili sugli stessi dati scelti
-                    {run.p.periodo === "senza"
-                      ? `, anche loro senza l’anno migliore (${run.bench.map((b) => `${b.nome.replace("Benchmark ", "")} ${b.tolto}`).join(", ")})`
-                      : ""}
-                    . Si confrontano le mediane: il caso tipico di ognuno. Gli indici sono senza dividendi e senza costi; le strategie senza i
-                    costi del broker.
+                    Benchmark (indici di riferimento): l’andamento <b>vero</b> di S&amp;P 500 e Nasdaq-100 dal 1° gennaio 2019, come se il
+                    capitale fosse stato investito quel giorno e lasciato lì: {run.p.anni === 1 ? "tutto il 2019." : `dal 2019 a fine ${2018 + run.p.anni}.`} Le strategie invece sono la mediana delle simulazioni (il caso tipico), nello scenario scelto. Indici senza dividendi e senza
+                    costi; strategie senza i costi del broker.
                   </p>
                 </>
               ) : (

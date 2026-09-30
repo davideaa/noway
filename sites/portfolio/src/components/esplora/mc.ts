@@ -505,58 +505,23 @@ export async function simula(
 }
 
 /**
- * I BENCHMARK nel simulatore (Davide: "confronto con benchmark, tre linee, nella
- * mediana"): S&P 500 e Nasdaq-100 simulati con lo stesso criterio delle strategie,
- * cosi' si confrontano mediane con mediane. Rendimenti MENSILI degli indici sugli
- * stessi dati scelti (scenario prudente: senza l'anno migliore dell'indice),
- * ripescati a blocchi di 3 mesi, per gli anni scelti; si tiene la mediana.
- * Valori in % rispetto all'inizio, mese per mese (stessa griglia del ventaglio).
+ * I BENCHMARK nel simulatore (Davide): l'andamento VERO degli indici S&P 500 e
+ * Nasdaq-100 dal 1° gennaio 2019, per gli anni scelti (1 anno = 2019, 2 anni =
+ * 2019–2020, … 7 anni = 2019–2025), come se il capitale fosse stato investito
+ * il primo giorno. Niente rimescolamento: e' quello che e' successo davvero.
+ * Valori in % rispetto all'inizio, a fine mese (stessa griglia del ventaglio).
  */
-export function benchmarkMediane(
-  etf: { nome: string; c: number[]; n: number[] }[],
-  mesi: string[],
-  periodo: Periodo,
-  anni: number,
-  seme: number,
-) {
-  const i2024 = mesi.indexOf("2024-01");
+export function benchmarkStorico(etf: { nome: string; c: number[]; n: number[] }[], mesi: string[], anni: number) {
   const punti = Math.round(anni * 12) + 1;
-  return etf.map((e, ei) => {
-    // rendimento di ogni mese: fine mese / fine del mese prima (c[0] = base 31/12/2018)
-    const ret: number[] = [];
+  return etf.map((e) => {
+    const v = new Float32Array(punti).fill(NaN);
+    v[0] = 0;
     let acc = 0;
-    let prima = 0;
-    for (const n of e.n) {
-      acc += n;
-      ret.push(e.c[acc] / e.c[prima] - 1);
-      prima = acc;
+    for (let k = 1; k < punti && k - 1 < e.n.length; k++) {
+      acc += e.n[k - 1];
+      v[k] = (e.c[acc] / e.c[0] - 1) * 100; // c[0] = chiusura del 31/12/2018
     }
-    let tolto: string | null = null;
-    if (periodo === "senza") {
-      const anno = new Map<string, number>();
-      ret.forEach((x, j) => anno.set(mesi[j].slice(0, 4), (anno.get(mesi[j].slice(0, 4)) ?? 1) * (1 + x)));
-      anno.forEach((v, a) => {
-        if (tolto === null || v > (anno.get(tolto) ?? 0)) tolto = a;
-      });
-    }
-    const uso = ret.filter((_, j) =>
-      periodo === "fuori" ? j >= i2024 : periodo === "dentro" ? j < i2024 : periodo === "senza" ? mesi[j].slice(0, 4) !== tolto : true,
-    );
-    const rnd = rng(seme * 977 + ei * 31 + 5);
-    const curve: Float32Array[] = [];
-    for (let p = 0; p < N; p++) {
-      const v = new Float32Array(punti);
-      let cap = 1;
-      let k = 1;
-      while (k < punti) {
-        const s0 = Math.floor(rnd() * uso.length);
-        for (let b = 0; b < 3 && k < punti; b++, k++) {
-          cap *= 1 + uso[(s0 + b) % uso.length];
-          v[k] = (cap - 1) * 100;
-        }
-      }
-      curve.push(v);
-    }
-    return { nome: e.nome, v: percentili(curve, punti).p50, tolto };
+    const ultimo = Math.min(punti - 1, e.n.length);
+    return { nome: e.nome, v, fino: mesi[ultimo - 1] };
   });
 }
