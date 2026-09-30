@@ -23,7 +23,7 @@ export function FilmTopBar({ controls }: { controls: boolean }) {
     <header className="film-top" ref={(el) => void (ui.top = el)}>
       <div className="film-top__in">
         <Link href="/" className="film-top__brand" aria-label={`${SITE_NAME}, inizio`} data-cursor="link">
-          <BrandMark />
+          <BrandMark size={28} />
           <span className="hidden text-sm font-semibold tracking-tight sm:block">{SITE_NAME}</span>
         </Link>
         <nav aria-label="Pagine" className="film-top__nav">
@@ -58,7 +58,7 @@ function PlayControl() {
         onClick={player.toggle}
         data-cursor="link"
       >
-        {s.playing ? <Pause size={16} strokeWidth={1.6} aria-hidden /> : <Play size={16} strokeWidth={1.6} aria-hidden />}
+        {s.playing ? <Pause size={14} strokeWidth={1.6} aria-hidden /> : <Play size={14} strokeWidth={1.6} aria-hidden />}
         <span className="film-play__label">{s.playing ? "Pausa" : "Riproduci"}</span>
       </button>
       <span className="film-play__act mono" ref={(el) => void (ui.counter = el)} aria-live="off">

@@ -1554,7 +1554,7 @@ html.film-lite .film-w {
   align-items: center;
   gap: 0 var(--sp-3);
   max-width: 1216px;
-  min-height: var(--header-h);
+  min-height: 46px; /* piu' sottile della barra del sito (64): resta sopra il film per tutto il tempo */
   margin: 0 auto;
   padding: 0 var(--sp-2);
   border: 1px solid transparent;
@@ -1569,7 +1569,7 @@ html.film-lite .film-w {
   opacity: calc(1 - 0.5 * var(--nav-out));
 }
 .film-top.is-pill .film-top__in {
-  margin-top: var(--sp-3);
+  margin-top: var(--sp-2);
   background: var(--film-top-bg);
   border-color: var(--line);
   backdrop-filter: blur(20px) saturate(1.1);
@@ -1585,8 +1585,8 @@ html.film-lite .film-w {
 .film-top__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-3);
-  min-height: 44px;
+  gap: var(--sp-2);
+  min-height: 36px;
   padding: 0 var(--sp-2);
   color: var(--acc);
 }
@@ -1602,9 +1602,9 @@ html.film-lite .film-w {
 .film-top__link {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 34px;
   padding: 0 var(--sp-3);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--film-type);
   border-radius: 999px;
@@ -1623,8 +1623,8 @@ html.film-lite .film-w {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  min-height: 40px;
-  min-width: 44px;
+  min-height: 30px;
+  min-width: 38px;
   padding: 0 var(--sp-3);
   border: 1px solid var(--line3);
   border-radius: 999px;
@@ -1646,13 +1646,13 @@ html.film-lite .film-w {
   color: var(--film-type-mute);
   font-variant-numeric: tabular-nums;
 }
-/* barra di avanzamento = p: traccia 2 px, area di presa 20 px, tutta la larghezza */
+/* barra di avanzamento = p: traccia 2 px, area di presa 12 px, tutta la larghezza */
 .film-seek {
   flex: 1 0 100%;
   order: 10;
   width: 100%;
-  height: 20px;
-  margin: 0;
+  height: 12px;
+  margin: 0 0 2px;
   appearance: none;
   -webkit-appearance: none;
   background: transparent;

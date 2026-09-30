@@ -55,6 +55,8 @@ const FilmCanvas = dynamic(() => import("./FilmCanvas"), { ssr: false });
 const ENTRY = 0.06;
 const ENTRY_MS = 1200; // la figura si compone in poco piu' di un secondo, poi il play parte da solo
 const ENTRY_DT_MAX = 0.05;
+/** dopo uno scroll/tocco dell'utente il play riparte da solo dopo questa pausa (Davide: "fa tutto da solo") */
+const RIPARTE_MS = 2500;
 /** Partenza dolce del play (ms) e frenata sull'ultimo tratto. */
 const PLAY_EASE_MS = 500;
 /** Sfalsamento tra le lettere (0 = tutte insieme). */
@@ -371,7 +373,18 @@ export function Film() {
     applyTierClass();
     const unsubTier = quality.subscribe(applyTierClass);
 
-    // Se la pagina si apre gia' scrollata (ricarica a meta'), niente ingresso e niente play automatico.
+    // Il film parte SEMPRE dall'inizio e da solo (Davide): una pagina riaperta a meta' torna in cima.
+    // Resta il caso di un link con #ancora, che non si tocca.
+    if (!window.location.hash && window.scrollY > 2) {
+      try {
+        history.scrollRestoration = "manual";
+      } catch {}
+      try {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+    }
     const rect0 = track.getBoundingClientRect();
     const startedScrolled = -rect0.top > 2;
     const finePointer = window.matchMedia("(pointer: fine)").matches;
@@ -432,7 +445,10 @@ export function Film() {
       if (player.playing) expectedY = -1;
     });
     const isControl = (e: Event) => !!(e.target as Element | null)?.closest?.("[data-film-controls]");
+    // ultimo input dell'utente: il play riparte da solo RIPARTE_MS dopo
+    let inputAt = 0;
     const onWheel = (e: Event) => {
+      inputAt = performance.now();
       if (!isControl(e)) player.interrupt("rotellina");
     };
     const touch = { x: 0, y: 0, t: 0, on: false };
@@ -447,6 +463,7 @@ export function Film() {
       if (!touch.on || !e.touches.length) return;
       const dx = e.touches[0].clientX - touch.x;
       const dy = e.touches[0].clientY - touch.y;
+      inputAt = performance.now();
       if (dx * dx + dy * dy >= TAP_PX * TAP_PX) {
         touch.on = false;
         player.interrupt("touchmove");
@@ -458,6 +475,7 @@ export function Film() {
     };
     const onKey = (e: KeyboardEvent) => {
       if (isControl(e)) return;
+      inputAt = performance.now();
       if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " ", "Spacebar"].includes(e.key)) player.interrupt("tasti");
     };
     // Scroll non nostro (scrollbar, gesture del touchpad senza wheel, tasti del browser).
@@ -469,8 +487,9 @@ export function Film() {
     let ourScrollAt = -1;
     let farCount = 0;
     const onScroll = () => {
-      if (!player.playing || expectedY < 0) return;
       const now = performance.now();
+      if (!player.playing && (ourScrollAt < 0 || now - ourScrollAt > 250)) inputAt = now;
+      if (!player.playing || expectedY < 0) return;
       if (ourScrollAt >= 0 && now - ourScrollAt < 250) {
         farCount = 0;
         return;
@@ -485,6 +504,7 @@ export function Film() {
     };
     // Trascinare la barra di scorrimento del browser (mousedown fuori dall'area della pagina).
     const onMouseDown = (e: MouseEvent) => {
+      if (e.clientX >= document.documentElement.clientWidth) inputAt = performance.now();
       if (player.playing && e.clientX >= document.documentElement.clientWidth) player.interrupt("barra di scorrimento");
     };
     window.addEventListener("wheel", onWheel, { passive: true });
@@ -570,11 +590,27 @@ export function Film() {
       if (entryOn && !player.paused && entryS.current < ENTRY_MS / 1000) entryS.current += Math.min(dt, ENTRY_DT_MAX);
       const entryNow = entryOn ? ENTRY * easeOutCubic(entryS.current / (ENTRY_MS / 1000)) : 0;
       const entryDone = entryOn && entryS.current >= ENTRY_MS / 1000;
-      // play automatico: UNA volta, dopo l'ingresso; mai con meno movimento, mai se si e' aperti a meta'
-      if (entryDone && !autoStarted && !noAuto && pin === null) {
+      // play automatico: SEMPRE, dopo l'ingresso (con meno movimento l'ingresso non c'e': si aspetta
+      // lo stesso tempo dal primo fotogramma). Poi, se l'utente scorre a mano, riparte da solo dopo
+      // RIPARTE_MS da dove l'ha lasciato; solo il tasto Pausa o la fine del film lo fermano davvero.
+      const autoReady = entryOn ? entryDone : ready.current && now - readyAt.current > ENTRY_MS;
+      if (autoReady && !autoStarted && !noAuto && pin === null) {
         autoStarted = true;
         if (!player.paused) player.play();
       }
+      if (ui.dragging || ui.seekTo !== null) inputAt = now;
+      if (
+        autoStarted &&
+        !player.playing &&
+        !player.paused &&
+        !noAuto &&
+        pin === null &&
+        player.reason !== "fine corsa" &&
+        film.scrollP < 0.985 &&
+        film.gates[5] < 0.5 &&
+        now - inputAt > RIPARTE_MS
+      )
+        player.play();
 
       /* --- richiesta dalla barra di avanzamento: e' un input dell'utente --- */
       if (ui.seekTo !== null) {
