@@ -11,7 +11,7 @@
  * La misura (rischio composto, fisso, R) e il capitale cambiano la lettura
  * subito, senza rifare la simulazione. Metodo e ipotesi: mc.ts.
  */
-import { ArrowLeft, ChevronDown, CircleHelp, FastForward, Play, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ChevronDown, CircleHelp, FastForward, Info, Play, TriangleAlert, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
@@ -54,6 +54,67 @@ function Aiuto({ id, label, aperto, onToggle }: { id: string; label: string; ape
   );
 }
 
+/**
+ * "Spiegazione del risultato" (Davide): perche' i numeri sono un'approssimazione.
+ * Simulazione su migliaia di casi (non cio' che e' successo una volta sola), costi
+ * che cambiano da broker a broker (ridurre i guadagni di circa il 15–20%),
+ * strategie algoritmiche che nel tempo vanno aggiornate o cambiate.
+ */
+function Spiegazione({ apri, onClose }: { apri: boolean; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (apri && !d.open) d.showModal();
+    if (!apri && d.open) d.close();
+  }, [apri]);
+  return (
+    <dialog
+      ref={ref}
+      className="xp-modal"
+      aria-labelledby="xp-modal-t"
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose(); // clic fuori dal riquadro
+      }}
+    >
+      <div className="xp-modal__in">
+        <div className="xp-modal__head">
+          <h3 id="xp-modal-t">Come leggere il risultato</h3>
+          <button type="button" className="xp-modal__x" onClick={onClose} aria-label="Chiudi la spiegazione">
+            <X size={18} aria-hidden />
+          </button>
+        </div>
+        <ol className="xp-modal__list">
+          <li>
+            <b>È una simulazione, non una previsione.</b> Il simulatore prende le operazioni di backtest delle strategie (2019–2026) e le
+            rimescola in migliaia di combinazioni diverse. Non mostra solo quello che è successo una volta, ma la gamma di quello che poteva
+            succedere: per questo dice più di un singolo backtest. Resta però un’approssimazione, costruita sul passato.
+          </li>
+          <li>
+            <b>I costi cambiano da broker a broker.</b> Commissioni, spread e costi di mantenimento (swap) dipendono da dove sono depositati i
+            soldi, e possono essere più alti o più bassi di quelli del backtest. Per un’idea più realistica conviene ridurre i guadagni finali
+            di circa il 15–20%: negli scenari trovi già anche il valore ridotto.
+          </li>
+          <li>
+            <b>Le strategie possono cambiare.</b> Sono strategie algoritmiche: sfruttano un vantaggio statistico verificato sui dati passati e su
+            anni mai usati per costruirle, ma nessun vantaggio dura per sempre. Può indebolirsi o sparire, domani come fra un anno o fra cinque.
+            Per questo le strategie vengono controllate nel tempo e, quando serve, aggiornate o sostituite; gli eventuali aggiornamenti verranno
+            comunicati.
+          </li>
+          <li>
+            <b>Come usarli.</b> Anche se tutto va bene e le strategie mantengono il loro vantaggio, prendi questi numeri come un’indicazione di
+            cosa aspettarsi, non come una promessa. Il futuro può andare peggio di ogni simulazione, e si può perdere denaro.
+          </li>
+        </ol>
+        <button type="button" className="xp-go xp-go--sm" onClick={onClose}>
+          Ho capito
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
 export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => void }) {
   const [capitale, setCapitale] = useState(10000);
   const [capTxt, setCapTxt] = useState("10000");
@@ -67,6 +128,7 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
   const [stato, setStato] = useState<"fermo" | "calcolo" | "costruzione" | "pronto">("fermo");
   const [avanz, setAvanz] = useState(0);
   const [salta, setSalta] = useState(false);
+  const [spiega, setSpiega] = useState(false);
   const giro = useRef(0);
   const stage = useRef<HTMLElement>(null);
   const grafico = useRef<HTMLDivElement>(null);
@@ -116,6 +178,12 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
   const L = S ? S.p50.length - 1 : 0;
   const medioAnno = (v: number, a: number) =>
     misura === "composto" ? `${signed((Math.pow(Math.max(0, 1 + v / 100), 1 / a) - 1) * 100, 1)}% all’anno` : misura === "fisso" ? `${signed(v / a, 1)}% all’anno` : `${signed(v / a, 1)} R all’anno`;
+  // i guadagni ridotti del 15–20% per i costi del broker (Davide); una perdita i costi la peggiorano soltanto
+  const netto = (v: number) => {
+    if (v <= 0) return "con i costi del broker: un po’ peggio";
+    if (misura === "R") return `con i costi del broker: ${signed(v * 0.8, 0)}–${signed(v * 0.85, 0)} R`;
+    return `con i costi del broker (−15/20%): ${int(Math.round(F.u(v * 0.8)))}–${int(Math.round(F.u(v * 0.85)))} €`;
+  };
   const sopra = E && run ? E.p95 > run.p.limite / 100 + 1e-9 : false;
   const nomeScelta = (s: Scelta) => (s === "tutte" ? "tutte e tre" : data.base[s].nome);
 
@@ -280,10 +348,16 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
         </div>
 
         <div className="xp-sim__go">
-          <button type="button" className="xp-go" onClick={avvia} disabled={stato === "calcolo"}>
-            <Play size={18} strokeWidth={2} aria-hidden />
-            {stato === "calcolo" ? `Simulazione in corso… ${Math.round(avanz * 100)}%` : run ? "Avvia di nuovo la simulazione" : "Avvia la simulazione"}
-          </button>
+          <div className="xp-sim__gorow">
+            <button type="button" className="xp-go" onClick={avvia} disabled={stato === "calcolo"}>
+              <Play size={18} strokeWidth={2} aria-hidden />
+              {stato === "calcolo" ? `Simulazione in corso… ${Math.round(avanz * 100)}%` : run ? "Avvia di nuovo la simulazione" : "Avvia la simulazione"}
+            </button>
+            <button type="button" className="xp-explain-b" onClick={() => setSpiega(true)}>
+              <Info size={18} strokeWidth={1.8} aria-hidden />
+              Spiegazione del risultato
+            </button>
+          </div>
           <p className="xp-sim__hint mono">
             {N * 4} simulazioni · {nomeScelta(scelta)} · discesa {limite}% · {anni} {anni === 1 ? "anno" : "anni"} · {PERIODI.find((x) => x.v === periodo)?.t.toLowerCase()}
           </p>
@@ -307,6 +381,10 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
             </div>
             {run && (
               <div className="xp-stage__show">
+                <button type="button" className="xp-explain-b xp-explain-b--sm" onClick={() => setSpiega(true)}>
+                  <Info size={15} strokeWidth={1.8} aria-hidden />
+                  Spiegazione del risultato
+                </button>
                 <div className="xp-seg" role="group" aria-label="Come leggere i risultati">
                   <span className="xp-seg__l mono">
                     Mostra
@@ -437,12 +515,18 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                         <b className="mono">{misura === "R" ? F.lungo(S[sc.k][L]) : `${int(Math.round(F.u(S[sc.k][L])))} €`}</b>
                         {misura !== "R" && <span className="xp-scen__pct mono">{signed(S[sc.k][L], 0)}% in {run.p.anni} {run.p.anni === 1 ? "anno" : "anni"}</span>}
                         <span className="xp-scen__avg">{medioAnno(S[sc.k][L], run.p.anni)}</span>
+                        <span className="xp-scen__net">{netto(S[sc.k][L])}</span>
                         <small>{sc.sub}</small>
                       </div>
                     ))}
                   </div>
                   <p className="xp-sim__hint">
-                    Finisce sotto il capitale iniziale: <b>{it(S.perdita * 100, 0)} simulazioni su 100</b>.
+                    Finisce sotto il capitale iniziale: <b>{it(S.perdita * 100, 0)} simulazioni su 100</b>. I risultati sono
+                    un’approssimazione:{" "}
+                    <button type="button" className="xp-more-l" onClick={() => setSpiega(true)}>
+                      leggi perché
+                    </button>
+                    .
                   </p>
 
                   <div className={`xp-sim__verdict${sopra ? " is-over" : ""}`}>
@@ -570,6 +654,7 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
       <button type="button" className="xp-back xp-back--end" onClick={onBack}>
         <ArrowLeft size={16} strokeWidth={1.8} aria-hidden /> Torna a tutte le strategie
       </button>
+      <Spiegazione apri={spiega} onClose={() => setSpiega(false)} />
     </article>
   );
 }

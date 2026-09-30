@@ -3703,6 +3703,131 @@ html:not(.js) .film-load,
   color: var(--mut);
 }
 
+/* SIMULATORE: "Spiegazione del risultato", accanto al tasto principale */
+.xp-sim__gorow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.xp-sim__gorow .xp-go {
+  flex: 1 1 320px;
+  width: auto;
+}
+.xp-explain-b {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 var(--sp-5);
+  border: 1.5px solid var(--zc);
+  border-radius: var(--r-2);
+  background: color-mix(in srgb, var(--zc) 8%, transparent);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.xp-explain-b:hover {
+  background: color-mix(in srgb, var(--zc) 16%, transparent);
+}
+.xp-explain-b svg {
+  color: var(--zc);
+}
+.xp-explain-b--sm {
+  min-height: 38px;
+  padding: 0 var(--sp-3);
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .xp-explain-b {
+    flex: 1 1 100%;
+    min-height: 48px;
+  }
+}
+.xp-stage__show {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3);
+}
+.xp-scen__net {
+  font-size: 12.5px;
+  color: var(--warn);
+}
+.xp-modal {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--acc) 40%, var(--line2));
+  border-radius: var(--r-3);
+  background: var(--surf);
+  color: var(--ink);
+  box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.8);
+}
+.xp-modal::backdrop {
+  background: rgba(4, 6, 8, 0.72);
+  backdrop-filter: blur(3px);
+}
+.xp-modal[open] {
+  animation: xp-in 260ms var(--ease) both;
+}
+.xp-modal__in {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+}
+.xp-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.xp-modal__head h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.xp-modal__x {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--mut);
+  cursor: pointer;
+}
+.xp-modal__x:hover {
+  color: var(--ink);
+  background: var(--line);
+}
+.xp-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-left: 1.3em;
+  list-style: decimal;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--mut);
+}
+.xp-modal__list li::marker {
+  color: var(--acc);
+  font-weight: 700;
+}
+.xp-modal__list b {
+  display: block;
+  color: var(--ink);
+}
+.xp-modal .xp-go {
+  align-self: flex-start;
+  background: var(--acc);
+}
+
 /* SIMULATORE: lo spazio della simulazione (si apre al clic) */
 .xp-stage {
   scroll-margin-top: calc(var(--header-h) + var(--sp-3));

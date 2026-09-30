@@ -42,6 +42,15 @@ export function Avviso() {
               contiene, per XAUUSD, un anno in perdita e uno quasi a zero su otto; per USDJPY, nove mesi del 2026 a zero.
             </li>
             <li>
+              <strong>Le strategie algoritmiche cambiano nel tempo.</strong> Sfruttano un vantaggio statistico verificato sul passato, ma
+              nessun vantaggio dura per sempre: può indebolirsi o sparire, domani come fra qualche anno. Per questo vengono controllate e, quando
+              serve, aggiornate o sostituite.
+            </li>
+            <li>
+              <strong>I costi reali dipendono dal broker.</strong> Commissioni, spread e swap possono essere diversi da quelli del backtest: i
+              risultati reali possono essere più bassi, indicativamente del 15–20% sui guadagni, o anche di più.
+            </li>
+            <li>
               <strong>Tre strategie insieme non eliminano il rischio.</strong> Nello storico hanno perso tutte e tre
               nello stesso mese sei volte su 93. Può succedere di nuovo, e più spesso.
             </li>
