@@ -1,7 +1,7 @@
 /**
  * QUALITA' ADATTIVA del film: tre livelli (alta / media / lite) scelti UNA volta
  * all'avvio dai segnali del dispositivo, e al massimo ABBASSATI una volta a
- * runtime (media degli fps nei primi 2 s di play). Mai risaliti: niente
+ * runtime (media degli fps fra 1 e 4 s di play). Mai risaliti: niente
  * oscillazioni. Il livello e' una costante letta dai componenti al montaggio,
  * non stato per frame: la scena resta funzione pura di p.
  *
@@ -11,7 +11,7 @@
  *  - deviceMemory <= 4 GB o hardwareConcurrency <= 4 -> media
  *  - touch -> media (misurato su iPhone: lite girava a 60 fps fissi, ma senza
  *    particelle, bloom e bande il tunnel SEMBRAVA lento; media ha tutto, e se il
- *    telefono non regge la correzione a runtime scende, con soglie piu' severe)
+ *    telefono non regge davvero (< 27 fps misurati dopo il riscaldamento) scende)
  *  - ?quality=alta|media|lite forza il livello (per le prove di Davide)
  *
  * Qui vivono anche lo stato del CARICAMENTO (bake, compilazione, primo
@@ -175,32 +175,31 @@ export const quality = {
   },
   snapshot: () => quality.tier,
   /**
-   * Correzione a runtime, UNA volta: media degli fps nei primi 2 s dopo l'avvio
-   * del play. Da alta/media: < 20 -> lite, < 30 -> un livello in meno; su touch
-   * le soglie salgono (< 30 -> lite, < 48 -> un livello in meno: un telefono e'
-   * tappato a 60, sotto i 50 sta gia' faticando). Da lite: < 45 -> eco. Mai su.
+   * Correzione a runtime, UNA volta: media degli fps fra 1 e 4 s dopo l'avvio
+   * del play (Film.tsx). Da alta/media: < 20 -> lite, < 30 -> un livello in meno.
+   * Da lite: < 28 -> eco. Mai su.
+   * Le soglie sono sotto i 30 apposta: iOS in risparmio energetico tappa il
+   * rAF a 30 fps esatti, e scendere di livello li' non da' un fotogramma in
+   * piu', toglie solo particelle e bloom (Davide: "e' tornato lento" = lite).
    */
   adjust(fpsAvg: number) {
     if (quality.settled) return;
     quality.settled = true;
     quality.fpsMeasured = fpsAvg;
     const i = TIERS.indexOf(quality.tier);
-    const touch = !!quality.signals?.touch;
-    const lo = touch ? 48 : 30;
-    const veryLo = touch ? 30 : 20;
     let next = quality.tier;
     if (quality.tier === "lite") {
-      if (fpsAvg < 45) next = "eco";
+      if (fpsAvg < 28) next = "eco";
     } else if (quality.tier !== "eco") {
-      if (fpsAvg < veryLo) next = "lite";
-      else if (fpsAvg < lo) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
+      if (fpsAvg < 20) next = "lite";
+      else if (fpsAvg < 27) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
     }
     if (next === quality.tier) {
       quality.reason += ` · confermato a runtime (${fpsAvg.toFixed(0)} fps)`;
       return;
     }
     quality.tier = next;
-    quality.reason += ` · abbassato a runtime: ${fpsAvg.toFixed(0)} fps medi nei primi 2 s`;
+    quality.reason += ` · abbassato a runtime: ${fpsAvg.toFixed(0)} fps medi (1-4 s di play)`;
     quality.listeners.forEach((l) => l());
   },
 };
@@ -243,7 +242,7 @@ export const diag = {
   errors: [] as string[],
   fpsNow: 0,
   fpsAvg: 0,
-  /** finestra di misura del play: frame e secondi accumulati nei primi 2 s */
+  /** finestra di misura del play: frame e secondi accumulati fra 1 e 4 s */
   frames: 0,
   seconds: 0,
   pushError(msg: string) {

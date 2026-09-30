@@ -83,8 +83,14 @@ function readPalette(): Palette {
  * pressione lunga) la pagina non scorre e il play non si ferma mai.
  */
 const TAP_PX = 10;
-/** Finestra di misura degli fps dopo l'avvio del play (quality.adjust). */
-const FPS_WINDOW_MS = 2000;
+/**
+ * Misura degli fps per quality.adjust: si SALTA il primo secondo di play (il
+ * telefono sta ancora compilando shader e scaricando chunk: un calo li' e'
+ * normale, e una volta preso per buono abbassava il livello per sempre), poi
+ * si misura per 3 s.
+ */
+const FPS_WARMUP_MS = 1000;
+const FPS_WINDOW_MS = 3000;
 /** Se il film non e' pronto entro questo tempo, il caricamento lo dice invece di restare muto. */
 const SLOW_BOOT_MS = 12000;
 
@@ -164,7 +170,7 @@ function diagText(extra: { entry: number; autoStarted: boolean; measuring: boole
     `qualita: ${q.tier} — ${q.reason}`,
     `renderer: ${q.probe.renderer || "?"}${q.probe.vendor ? ` · ${q.probe.vendor}` : ""} · webgl${q.probe.webgl2 ? 2 : 1}`,
     `dpr: schermo ${window.devicePixelRatio} · canvas ${Math.min(window.devicePixelRatio, PROFILES[q.tier].dpr)}`,
-    `fps: ${diag.fpsNow.toFixed(0)} ora · ${diag.fpsAvg.toFixed(0)} media${q.fpsMeasured !== null ? ` · finestra 2 s: ${q.fpsMeasured.toFixed(0)}` : extra.measuring ? " · misura in corso" : ""}`,
+    `fps: ${diag.fpsNow.toFixed(0)} ora · ${diag.fpsAvg.toFixed(0)} media${q.fpsMeasured !== null ? ` · finestra 1-4 s: ${q.fpsMeasured.toFixed(0)}` : extra.measuring ? " · misura in corso" : ""}`,
     `bake: ${ms(boot.bakeMs)} (${boot.bakeWhere || "—"}) · compile: ${ms(boot.compileMs)} · primo frame: ${ms(boot.firstFrameMs)} · pronto: ${ms(boot.readyMs)}`,
     `p: ${film.p.toFixed(3)} · sp ${film.sp.toFixed(3)} · atto ${currentAct(film.gates)} · ingresso ${extra.entry.toFixed(2)} s · autoplay ${extra.autoStarted ? "partito" : "no"}`,
     `player: ${st}${player.reason ? ` (${player.reason})` : ""} · fase boot: ${boot.stage} · scroll ${Math.round(window.scrollY)}${extra.expectedY >= 0 ? ` (atteso ${extra.expectedY})` : ""}`,
@@ -489,7 +495,7 @@ export function Film() {
       const dt = Math.min(0.1, rawDt);
       last = now;
 
-      /* --- fps: istantanei (EMA) e media; nei primi 2 s di play decidono il livello (una volta, solo in giu') --- */
+      /* --- fps: istantanei (EMA) e media; fra 1 e 4 s di play decidono il livello (una volta, solo in giu') --- */
       if (rawDt > 0 && rawDt < 0.5 && !document.hidden) {
         fpsEma += (1 / rawDt - fpsEma) * Math.min(1, rawDt * 4);
         if (ready.current) {
@@ -500,10 +506,10 @@ export function Film() {
           if (measureT0 < 0) {
             // parte con il play; se il play non parte (reduced, pagina aperta a meta') 3 s dopo il ready
             if (player.playing || (ready.current && now - readyAt.current > 3000)) measureT0 = now;
-          } else {
+          } else if (now - measureT0 >= FPS_WARMUP_MS) {
             diag.frames++;
             diag.seconds += rawDt;
-            if (now - measureT0 >= FPS_WINDOW_MS && diag.seconds > 0.5) quality.adjust(diag.frames / diag.seconds);
+            if (now - measureT0 >= FPS_WARMUP_MS + FPS_WINDOW_MS && diag.seconds > 0.5) quality.adjust(diag.frames / diag.seconds);
           }
         }
       }
@@ -728,7 +734,7 @@ export function Film() {
       if (ui.stat && film.sp > 0.97 && now - statAt > 1000) {
         statAt = now;
         const gpu = (quality.probe.renderer || "").replace(/^ANGLE \((.*)\)$/, "$1").split(",").slice(0, 2).join(",").slice(0, 40);
-        ui.stat.textContent = `${quality.tier} · ${diag.fpsAvg.toFixed(0)} fps${quality.fpsMeasured !== null ? ` (${quality.fpsMeasured.toFixed(0)} nei primi 2 s)` : ""} · avvio ${boot.readyMs === null ? "—" : (boot.readyMs / 1000).toFixed(1)} s · ${window.innerWidth}x${window.innerHeight}${film.reduced ? " · meno movimento" : ""}${gpu ? ` · ${gpu}` : ""}`;
+        ui.stat.textContent = `${quality.tier} · ${diag.fpsAvg.toFixed(0)} fps${quality.fpsMeasured !== null ? ` (${quality.fpsMeasured.toFixed(0)} misurati)` : ""} · avvio ${boot.readyMs === null ? "—" : (boot.readyMs / 1000).toFixed(1)} s · ${window.innerWidth}x${window.innerHeight}${film.reduced ? " · meno movimento" : ""}${gpu ? ` · ${gpu}` : ""}`;
       }
 
       /* --- diagnostica (?diag=1): testo riscritto 4 volte al secondo --- */
