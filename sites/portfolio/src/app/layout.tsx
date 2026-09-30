@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: SITE_URL ? { canonical: "/" } : undefined,
   robots: NOINDEX ? { index: false, follow: false } : undefined,
-  // Icone dal kit di brand (public/). favicon.ico di Next rimosso: prevaleva sull'SVG.
+  // Icone dal logo di Davide (public/, generate da assets/logo/logo-davide-originale.webp).
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
     ],
     apple: "/apple-touch-icon.png",
   },
