@@ -296,7 +296,9 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    background: var(--bg);
+    /* trasparente: il colore di fondo lo da' html. Se body avesse il suo, coprirebbe
+       il fluido al mouse di /dettagli (tela fissa a z-index -1, sopra il fondo di html). */
+    background: transparent;
     color: var(--ink);
     font-size: 16px;
     line-height: 1.6;
@@ -874,13 +876,19 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--bg);
+  /* trasparente: sotto passa il fluido al mouse (FluidCursor); il fondo e' quello di html */
+  background: transparent;
 }
-/* fallback statico = anche l'immagine mostrata mentre lo shader carica */
+/* bagliore statico, semitrasparente: il fluido si vede attraverso */
 .hero__fallback {
   position: absolute;
   inset: 0;
-  background: radial-gradient(70% 90% at 30% 35%, var(--hero-glow) 0%, var(--acc2) 55%, var(--bg) 100%);
+  background: radial-gradient(
+    70% 90% at 30% 35%,
+    color-mix(in srgb, var(--hero-glow) 60%, transparent) 0%,
+    color-mix(in srgb, var(--acc2) 45%, transparent) 55%,
+    transparent 100%
+  );
 }
 .hero__shader {
   position: absolute;
@@ -895,8 +903,9 @@
 .hero__veil {
   position: absolute;
   inset: 0;
+  /* piu' leggero di prima: copriva uno shader sempre acceso, ora c'e' il fluido che passa e svanisce */
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--bg) 82%, transparent) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 55%, color-mix(in srgb, var(--bg) 25%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--bg) 45%, transparent) 0%, color-mix(in srgb, var(--bg) 20%, transparent) 55%, transparent 100%),
     linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 22%);
 }
 /* reticolo tecnico, statico, bassa opacita' */
@@ -918,7 +927,8 @@
   right: 0;
   bottom: 0;
   height: 25%;
-  background: linear-gradient(180deg, transparent, var(--bg));
+  /* a meta' intensita': il bagliore sfuma gia' da solo, e un fondo pieno qui coprirebbe il fluido */
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 50%, transparent));
 }
 .hero__persp {
   width: 100%;
@@ -2563,4 +2573,14 @@ html:not(.js) .film-load,
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+}
+
+/* Fluido al mouse di /dettagli (FluidCursor): tela fissa DIETRO a tutto il contenuto. */
+.fluid-cursor {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
 }
