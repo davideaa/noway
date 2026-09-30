@@ -17,12 +17,10 @@ export const FILM_S2 = "Analisi quantitativa, IA e conoscenza dei mercati trasfo
 export const FILM_S3_WORDS = ["OSSERVIAMO", "VERIFICHIAMO", "COSTRUIAMO"];
 export const FILM_S3 = "Dal comportamento del mercato all'ipotesi. Dall'ipotesi ai dati. Dai dati a un sistema replicabile.";
 /** La schermata finale: un titolo, UN bottone (porta a /dettagli). */
-export const FILM_END = "I risultati vengono dopo il metodo.";
+export const FILM_END = "L’innovazione è il nostro modo di procedere.";
 export const FILM_CTA = "ESPLORA IL PORTFOLIO →";
 /** Le due frasi ricorrenti degli atti 2-5 (COPY.md 3.2). */
 export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
-/** Frase B del film (una sola costante: se Davide manda la sua versione, si cambia qui). */
-export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
 /**
  * Scena 5 (Davide): al posto della frase B, i due periodi. "\n" = a capo voluto
  * (due righe centrate). Anni dai dati: oro e Nasdaq ottimizzati 2019-2023 e
@@ -30,6 +28,8 @@ export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
  * lungo). Il 2023 non va in entrambi i periodi: sarebbe falso.
  */
 export const FILM_S5 = "Ottimizzato su un arco temporale 2019–2023,\nvalidato su un altro: 2024–2026.";
+/** Scena 6 (Davide): il nome, al posto della vecchia frase B. */
+export const FILM_S6 = `Questo è ${SITE_NAME}.`;
 
 /**
  * La frase sul rischio (COPY.md, "Navigazione e barra fissa" e 3.9; fonte:

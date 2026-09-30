@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
-import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, FILM_S2, FILM_S5, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
+import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_S2, FILM_S5, FILM_S6, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
 import { MagneticCta } from "./MagneticCta";
 import { bakeFan, fanParams } from "./bake";
 import type { Palette } from "./FilmCanvas";
@@ -477,7 +477,6 @@ export function Film() {
     let allFrames = 0;
     let allSeconds = 0;
     let diagAt = 0;
-    let statAt = 0;
     let lastStepPx = 0;
     const setScrollP = (s: number) => {
       const y = trackTop + clamp01(s) * scrollLen;
@@ -714,13 +713,6 @@ export function Film() {
         }
       }
 
-      /* --- riga dei numeri nel finale (anteprima): livello, fps medi, secondi all'avvio --- */
-      if (ui.stat && film.sp > 0.97 && now - statAt > 1000) {
-        statAt = now;
-        const gpu = (quality.probe.renderer || "").replace(/^ANGLE \((.*)\)$/, "$1").split(",").slice(0, 2).join(",").slice(0, 40);
-        ui.stat.textContent = `${quality.tier} · ${diag.fpsAvg.toFixed(0)} fps${quality.fpsMeasured !== null ? ` (${quality.fpsMeasured.toFixed(0)} misurati)` : ""} · avvio ${boot.readyMs === null ? "—" : (boot.readyMs / 1000).toFixed(1)} s · ${window.innerWidth}x${window.innerHeight}${film.reduced ? " · meno movimento" : ""}${gpu ? ` · ${gpu}` : ""}`;
-      }
-
       /* --- diagnostica (?diag=1): testo riscritto 4 volte al secondo --- */
       if (ui.diag && now - diagAt > 250) {
         diagAt = now;
@@ -846,11 +838,11 @@ export function Film() {
             </p>
           </div>
           <div className="film-ov film-ov--low" data-ov="6">
-            <p className="film-line" aria-label={FILM_PHRASE_B}>
-              <Letters text={FILM_PHRASE_B} />
+            <p className="film-line" aria-label={FILM_S6}>
+              <Letters text={FILM_S6} />
             </p>
           </div>
-          {/* Atto 6: la camera si ferma sulla schermata finale: un titolo, UN bottone (-> /dettagli), "Rivedi". */}
+          {/* Atto 6: la camera si ferma sulla schermata finale: un titolo e UN bottone (-> /dettagli). Davide: nient'altro. */}
           <div className="film-ov film-ov--end" data-ov="7" data-ov-whole>
             <div className="film-end">
               <h2 className="film-line film-line--end">{FILM_END}</h2>
@@ -858,19 +850,6 @@ export function Film() {
               <MagneticCta href="/dettagli/" reload className={`${buttonVariants()} film-end__cta`}>
                 {FILM_CTA}
               </MagneticCta>
-              <button
-                type="button"
-                className="film-end__again"
-                data-cursor="link"
-                onClick={() => {
-                  ui.seekTo = 0;
-                  player.play();
-                }}
-              >
-                Rivedi
-              </button>
-              {/* anteprima: i numeri del dispositivo (livello, fps medi, avvio), da leggere a voce a chi corregge il film */}
-              <p className="film-end__stat mono" ref={(el) => void (ui.stat = el)} aria-hidden="true" />
             </div>
           </div>
         </div>

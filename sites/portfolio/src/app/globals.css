@@ -1284,7 +1284,7 @@ html:not(.js) .hero__content {
   will-change: transform, filter, opacity;
 }
 .film-line--end {
-  max-width: 20ch;
+  max-width: 24ch;
 }
 /* scena 5: frase lunga su due righe volute (a capo nel testo), non a 22ch */
 .film-line.film-line--wide {
@@ -1295,29 +1295,6 @@ html:not(.js) .hero__content {
   padding: 0 var(--sp-6);
   font-size: 15px;
   letter-spacing: 0.06em;
-}
-.film-end__again {
-  margin-top: var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
-  font-size: 13px;
-  color: var(--film-type-mute);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  background: transparent;
-  pointer-events: auto;
-}
-.film-end__again:hover {
-  color: var(--film-accent-figure);
-}
-/* anteprima: la riga dei numeri sotto "Rivedi" (livello, fps, avvio) */
-.film-end__stat {
-  margin-top: var(--sp-2);
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--film-type-mute);
-  opacity: 0.8;
-  max-width: 90vw;
-  overflow-wrap: anywhere;
 }
 /* livello eco: niente ombra sul testo (un raster in meno per layer) */
 html.film-eco .film-line {
