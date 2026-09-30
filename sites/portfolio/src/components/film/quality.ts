@@ -89,7 +89,7 @@ export function probeWebGL(): Probe {
 }
 
 /** Renderer che dicono "software" o "GPU vecchia": lite senza discutere. */
-const LITE_RENDERERS = /swiftshader|llvmpipe|softpipe|software|intel\(r\) hd graphics [2345]\d{3}|intel hd graphics [2345]\d{3}|mali-4\d\d|mali-t6[02]|adreno \(tm\) [23]\d\d|powervr sgx/i;
+const LITE_RENDERERS = /swiftshader|llvmpipe|softpipe|software rasterizer/i;
 
 export type Signals = {
   renderer: string;
@@ -175,32 +175,16 @@ export const quality = {
   },
   snapshot: () => quality.tier,
   /**
-   * Correzione a runtime, UNA volta: media degli fps fra 1 e 4 s dopo l'avvio
-   * del play (Film.tsx). Da alta/media: < 20 -> lite, < 30 -> un livello in meno.
-   * Da lite: < 28 -> eco. Mai su.
-   * Le soglie sono sotto i 30 apposta: iOS in risparmio energetico tappa il
-   * rAF a 30 fps esatti, e scendere di livello li' non da' un fotogramma in
-   * piu', toglie solo particelle e bloom (Davide: "e' tornato lento" = lite).
+   * Registra gli fps misurati fra 1 e 4 s di play (solo per la riga dei numeri
+   * nel finale e per ?diag=1). NON cambia piu' il livello: Davide ha chiesto
+   * che su telefono il film resti sempre in "media", senza scendere a lite da
+   * solo (un calo momentaneo all'avvio lo spogliava per tutto il film).
    */
   adjust(fpsAvg: number) {
     if (quality.settled) return;
     quality.settled = true;
     quality.fpsMeasured = fpsAvg;
-    const i = TIERS.indexOf(quality.tier);
-    let next = quality.tier;
-    if (quality.tier === "lite") {
-      if (fpsAvg < 28) next = "eco";
-    } else if (quality.tier !== "eco") {
-      if (fpsAvg < 20) next = "lite";
-      else if (fpsAvg < 27) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
-    }
-    if (next === quality.tier) {
-      quality.reason += ` · confermato a runtime (${fpsAvg.toFixed(0)} fps)`;
-      return;
-    }
-    quality.tier = next;
-    quality.reason += ` · abbassato a runtime: ${fpsAvg.toFixed(0)} fps medi (1-4 s di play)`;
-    quality.listeners.forEach((l) => l());
+    quality.reason += ` · misurato ${fpsAvg.toFixed(0)} fps (livello fisso)`;
   },
 };
 
