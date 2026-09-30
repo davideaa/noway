@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMotionPrefs } from "@/components/motion/MotionPrefs";
 import { buttonVariants } from "@/components/ui/button";
-import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, FILM_S2, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
+import { FILM_CTA, FILM_END, FILM_H1, FILM_PHRASE_A, FILM_PHRASE_B, FILM_S2, FILM_S5, FILM_S3, FILM_S3_WORDS, FILM_SUB } from "@/lib/site";
 import { MagneticCta } from "./MagneticCta";
 import { bakeFan, fanParams } from "./bake";
 import type { Palette } from "./FilmCanvas";
@@ -100,20 +100,29 @@ const SLOW_BOOT_MS = 12000;
  * sfalsamento per lettera farebbe atterrare la coda dopo 1 s).
  */
 function Letters({ text }: { text: string }) {
-  const words = text.split(" ");
+  // "\n" = a capo voluto; l'indice di parola (--w) continua fra le righe per lo sfalsamento
+  let wi = 0;
+  const lines = text.split("\n").map((line) =>
+    line.split(" ").map((w, k, all) => ({ w, id: wi++, last: k === all.length - 1 })),
+  );
   return (
     <span aria-hidden="true">
-      {words.map((w, wi) => (
-        <span key={wi}>
-          <span className="film-w">
-            {Array.from(w).map((ch, ci) => (
-              <span key={ci} className="film-l" style={{ "--w": wi, "--i": ci } as React.CSSProperties}>
-                {ch}
+      {lines.map((words, li) => (
+        <span key={li}>
+          {li > 0 ? <br /> : null}
+          {words.map(({ w, id, last }) => (
+            <span key={id}>
+              <span className="film-w">
+                {Array.from(w).map((ch, ci) => (
+                  <span key={ci} className="film-l" style={{ "--w": id, "--i": ci } as React.CSSProperties}>
+                    {ch}
+                  </span>
+                ))}
               </span>
-            ))}
-          </span>
-          {/* lo spazio sta FUORI dall'inline-block, altrimenti viene tolto in fondo alla parola */}
-          {wi < words.length - 1 ? " " : null}
+              {/* lo spazio sta FUORI dall'inline-block, altrimenti viene tolto in fondo alla parola */}
+              {last ? null : " "}
+            </span>
+          ))}
         </span>
       ))}
     </span>
@@ -827,8 +836,8 @@ export function Film() {
             </p>
           </div>
           <div className="film-ov film-ov--low" data-ov="4">
-            <p className="film-line" aria-label={FILM_PHRASE_B}>
-              <Letters text={FILM_PHRASE_B} />
+            <p className="film-line film-line--wide" aria-label={FILM_S5.replace("\n", " ")}>
+              <Letters text={FILM_S5} />
             </p>
           </div>
           <div className="film-ov film-ov--low" data-ov="5">

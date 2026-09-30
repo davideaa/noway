@@ -1286,6 +1286,10 @@ html:not(.js) .hero__content {
 .film-line--end {
   max-width: 20ch;
 }
+/* scena 5: frase lunga su due righe volute (a capo nel testo), non a 22ch */
+.film-line.film-line--wide {
+  max-width: min(92vw, 64ch);
+}
 .film-end__cta {
   height: 52px;
   padding: 0 var(--sp-6);

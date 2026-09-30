@@ -23,6 +23,13 @@ export const FILM_CTA = "ESPLORA IL PORTFOLIO →";
 export const FILM_PHRASE_A = "Si decide prima, si misura dopo.";
 /** Frase B del film (una sola costante: se Davide manda la sua versione, si cambia qui). */
 export const FILM_PHRASE_B = "Misurato fuori campione. Non promesso.";
+/**
+ * Scena 5 (Davide): al posto della frase B, i due periodi. "\n" = a capo voluto
+ * (due righe centrate). Anni dai dati: oro e Nasdaq ottimizzati 2019-2023 e
+ * validati da gen 2024; USDJPY validata gia' da gen 2023 (fuori campione piu'
+ * lungo). Il 2023 non va in entrambi i periodi: sarebbe falso.
+ */
+export const FILM_S5 = "Ottimizzato su un arco temporale 2019–2023,\nvalidato su un altro: 2024–2026.";
 
 /**
  * La frase sul rischio (COPY.md, "Navigazione e barra fissa" e 3.9; fonte:
