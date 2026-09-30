@@ -165,11 +165,14 @@ const FAN_FRAG = /* glsl */ `
  * bake e' mescolato, quindi un prefisso di instanceCount e' un campione uniforme
  * di tutte le curve, e abbassare la qualita' non richiede un nuovo bake.
  */
-function Figure({ fan, beads }: { fan: Fan; beads: number }) {
+function Figure({ fan, beads, lowPoly }: { fan: Fan; beads: number; lowPoly: boolean }) {
   const ref = useRef<THREE.Mesh>(null!);
   const camera = useThree((s) => s.camera);
   const { geo, mat } = useMemo(() => {
-    const sphere = new THREE.SphereGeometry(BEAD_R * BEAD_SCALE, 8, 6);
+    // lowPoly (telefoni): icosaedro, 20 triangoli; altrimenti sfera 8x6 (~80). Il ventaglio e' vertex-bound.
+    const sphere = lowPoly
+      ? new THREE.IcosahedronGeometry(BEAD_R * BEAD_SCALE, 0)
+      : new THREE.SphereGeometry(BEAD_R * BEAD_SCALE, 8, 6);
     const geo = new THREE.InstancedBufferGeometry();
     geo.index = sphere.index;
     geo.setAttribute("position", sphere.attributes.position);
@@ -198,7 +201,7 @@ function Figure({ fan, beads }: { fan: Fan; beads: number }) {
     });
     return { geo, mat };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- beads si applica sotto senza ricostruire
-  }, [fan]);
+  }, [fan, lowPoly]);
   useEffect(() => {
     geo.instanceCount = Math.min(fan.count, beads);
   }, [geo, fan, beads]);
@@ -1035,7 +1038,7 @@ function Ready({ onReady }: { onReady?: () => void }) {
  * "bloom" = bloom -> output (vignette, grana e lente disabilitate: due passate
  * a schermo intero in meno). `fringe` accende frangia e smear (solo alta).
  */
-function Post({ mode, fringe, onReady }: { mode: "full" | "bloom"; fringe: boolean; onReady?: () => void }) {
+function Post({ mode, fringe, bloomScale, onReady }: { mode: "full" | "bloom"; fringe: boolean; bloomScale: number; onReady?: () => void }) {
   const frames = useRef(0);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -1064,10 +1067,10 @@ function Post({ mode, fringe, onReady }: { mode: "full" | "bloom"; fringe: boole
   useEffect(() => {
     chain.composer.setPixelRatio(dpr);
     chain.composer.setSize(size.width, size.height);
-    chain.bloom.setSize(size.width, size.height);
+    chain.bloom.setSize(size.width * bloomScale, size.height * bloomScale);
     chain.grain.uniforms.res.value.set(size.width * dpr, size.height * dpr);
     chain.lens.uniforms.uAspect.value = size.width / Math.max(1, size.height);
-  }, [chain, size.width, size.height, dpr]);
+  }, [chain, size.width, size.height, dpr, bloomScale]);
   useEffect(() => {
     // "bloom": solo bloom + output. Le passate disabilitate non costano nulla (EffectComposer le salta).
     chain.vignette.enabled = mode === "full";
@@ -1200,12 +1203,12 @@ export default function FilmCanvas({ palette, onReady }: { palette: Palette; onR
       <color attach="background" args={[palette.field]} />
       <fog attach="fog" args={[palette.field, 18, 95]} />
       <CameraRig />
-      {fan && <Figure fan={fan} beads={Q.beads} />}
+      {fan && <Figure fan={fan} beads={Q.beads} lowPoly={Q.lowPolyBeads} />}
       <Lattice palette={palette} />
       <Room palette={palette} shells={Q.shells} dust={Q.dust} />
       <Strands palette={palette} seg={Q.seg} />
       <Horizon palette={palette} />
-      {Q.post !== "none" ? <Post mode={Q.post} fringe={Q.fringe} onReady={onReady} /> : <Ready onReady={onReady} />}
+      {Q.post !== "none" ? <Post mode={Q.post} fringe={Q.fringe} bloomScale={Q.bloomScale} onReady={onReady} /> : <Ready onReady={onReady} />}
       <Boot fan={fan} onBooted={onBooted} />
     </Canvas>
   );

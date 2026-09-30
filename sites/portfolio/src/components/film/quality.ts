@@ -18,9 +18,9 @@
  * fotogramma) e la DIAGNOSTICA (?diag=1), fuori da React: il ciclo li legge.
  */
 
-export type Tier = "alta" | "media" | "lite" | "eco";
-/** In ordine di costo: la correzione a runtime scende lungo questa lista. */
-export const TIERS: Tier[] = ["alta", "media", "lite", "eco"];
+export type Tier = "alta" | "media" | "tel" | "lite" | "eco";
+/** In ordine di costo. "tel" e' il livello dei telefoni (touch): tutto presente, ma perle e bagliore leggeri. */
+export const TIERS: Tier[] = ["alta", "media", "tel", "lite", "eco"];
 
 export type Profile = {
   /** limite del device pixel ratio */
@@ -50,15 +50,23 @@ export type Profile = {
   perLetter: boolean;
   /** false (eco): il blocco di testo entra intero, un layer per overlay */
   perWord: boolean;
+  /** risoluzione del bagliore rispetto al canvas (0.5 = un quarto dei pixel) */
+  bloomScale: number;
+  /** perla low-poly (icosaedro, 20 triangoli invece di ~80): a pochi pixel di diametro non si distingue */
+  lowPolyBeads: boolean;
 };
 
 export const PROFILES: Record<Tier, Profile> = {
-  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true, perWord: true },
-  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true, perWord: true },
-  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false, perWord: true },
+  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true, perWord: true, bloomScale: 1, lowPolyBeads: false },
+  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true, perWord: true, bloomScale: 1, lowPolyBeads: false },
+  // tel: telefoni. Misurato (software, relativo): all'inizio pesano le perle, nel tunnel il bagliore a
+  // risoluzione piena. Qui 8000 perle e bagliore a mezza risoluzione; dust, bande e 3 shell restano,
+  // perche' sono cio' che da' la sensazione di velocita'.
+  tel: { dpr: 1.25, beads: 8000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: false, perLetter: false, perWord: true, bloomScale: 0.5, lowPolyBeads: true },
+  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false, perWord: true, bloomScale: 0.5, lowPolyBeads: true },
   // eco: solo a runtime (o ?quality=eco), quando lite misura ancora pochi fps: mezza risoluzione,
   // una shell, 1200 perle, testi che entrano interi. Brutto il giusto, ma scorre.
-  eco: { dpr: 0.75, beads: 1200, curves: 25, dust: 0, post: "none", fringe: false, seg: 8, shells: 1, domBlur: false, perLetter: false, perWord: false },
+  eco: { dpr: 0.75, beads: 1200, curves: 25, dust: 0, post: "none", fringe: false, seg: 8, shells: 1, domBlur: false, perLetter: false, perWord: false, bloomScale: 0.5, lowPolyBeads: true },
 };
 
 export type Probe = { ok: boolean; renderer: string; vendor: string; webgl2: boolean };
@@ -107,7 +115,7 @@ export function readSignals(search: string): Signals {
     memoryGB: typeof nav.deviceMemory === "number" ? nav.deviceMemory : null,
     cores: typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : null,
     touch: window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0,
-    forced: q === "alta" || q === "media" || q === "lite" || q === "eco" ? q : null,
+    forced: q === "alta" || q === "media" || q === "tel" || q === "lite" || q === "eco" ? q : null,
   };
 }
 
@@ -125,8 +133,8 @@ export function pickTier(s: Signals): { tier: Tier; reason: string } {
     tier = "media";
     why.push(`${s.cores} core`);
   }
-  if (s.touch && tier === "alta") {
-    tier = "media";
+  if (s.touch) {
+    tier = "tel";
     why.push("touch");
   }
   return { tier, reason: why.length ? why.join(", ") : "nessun segnale di limite" };
@@ -147,6 +155,23 @@ export const quality = {
   listeners: new Set<Listener>(),
   init(probe: Probe, signals: Signals) {
     signals.renderer = probe.renderer;
+    // solo debug (?film-debug=1): ?pb= perle, ?pd= particelle, ?ps= shell, ?pp=full|bloom|none, ?pdpr= dpr
+    // sul livello scelto, per misurare quale pezzo costa di piu'. Non esiste in produzione.
+    const q = new URLSearchParams(window.location.search);
+    if (q.has("film-debug")) {
+      const pick0 = pickTier(signals).tier;
+      const t = (signals.forced || pick0) as Tier;
+      const n = (k: string) => (q.get(k) !== null && q.get(k) !== "" ? Number(q.get(k)) : null);
+      const P = PROFILES[t];
+      if (n("pb") !== null) P.beads = n("pb")!;
+      if (n("pd") !== null) P.dust = n("pd")!;
+      if (n("ps") !== null) P.shells = n("ps")!;
+      if (n("pdpr") !== null) P.dpr = n("pdpr")!;
+      if (n("pbs") !== null) P.bloomScale = n("pbs")!;
+      if (q.get("plp") === "0" || q.get("plp") === "1") P.lowPolyBeads = q.get("plp") === "1";
+      const pp = q.get("pp");
+      if (pp === "full" || pp === "bloom" || pp === "none") P.post = pp;
+    }
     const pick = pickTier(signals);
     quality.probe = probe;
     quality.signals = signals;
