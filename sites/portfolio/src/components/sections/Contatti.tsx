@@ -18,7 +18,7 @@ export function Contatti() {
 
       <div className="wrap relative">
         <SceneHeader
-          n="10"
+          n="03"
           label="Contatti"
           id="contatti-t"
           title={["Scrivi,", "anche per dire che c’è un errore"]}

@@ -80,7 +80,7 @@ export function RiskNote() {
         20, in una sequenza su dieci il drawdown supera: oro {it(o.bootstrap_dd.p90, 1)} R, Nasdaq {it(n.bootstrap_dd.p90, 1)} R,
         USDJPY {it(u.bootstrap_dd.p90, 1)} R; la somma a pari rischio {it(PORT.bootstrap_dd.p90, 1)} R. A rischio 1% per
         operazione, {it(o.bootstrap_dd.p90, 1)} R vuol dire circa il {it(o.bootstrap_dd.p90, 0)}% dal massimo. Vedi{" "}
-        <a href="#rischio" className="textlink">
+        <a href="#avviso" className="textlink">
           Il rischio
         </a>
         .

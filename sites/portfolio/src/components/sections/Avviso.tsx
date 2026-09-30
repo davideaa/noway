@@ -10,7 +10,7 @@ export function Avviso() {
   return (
     <section id="avviso" data-scene className="scene" aria-labelledby="avviso-t">
       <div className="wrap">
-        <SceneHeader n="11" label="Avviso" id="avviso-t" title={["Avviso sul rischio"]} />
+        <SceneHeader n="04" label="Avviso" id="avviso-t" title={["Avviso sul rischio"]} />
         <Reveal className="card card--lit max-w-[900px]">
           <TriangleAlert size={24} strokeWidth={1.6} className="mb-4 text-warn" aria-hidden />
           <ul className="ticks space-y-4 text-ink">

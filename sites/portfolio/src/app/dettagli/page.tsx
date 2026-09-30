@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
+import { Esplora } from "@/components/esplora/Esplora";
 import { Avviso } from "@/components/sections/Avviso";
 import { Contatti } from "@/components/sections/Contatti";
 import { Hero } from "@/components/sections/Hero";
-import { Metodo } from "@/components/sections/Metodo";
-import { Monitoraggio } from "@/components/sections/Monitoraggio";
-import { Portafoglio } from "@/components/sections/Portafoglio";
-import { Riepilogo } from "@/components/sections/Riepilogo";
-import { Rischio } from "@/components/sections/Rischio";
-import { Scartate } from "@/components/sections/Scartate";
-import { Simulatore } from "@/components/sections/Simulatore";
-import { Strategie } from "@/components/sections/Strategie";
+import { esploraData } from "@/lib/esplora";
 import { DESCRIPTION, DETTAGLI_TITLE, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -34,7 +28,12 @@ function jsonLd() {
   };
 }
 
-/** La pagina onesta: tabelle, grafici, metodo, portafoglio, simulatore, scarti, rischio e avviso completo. */
+/**
+ * La pagina dei risultati (Davide): corta. In cima l'ingresso, poi le quattro
+ * schede da scegliere (Oro, Nasdaq, USDJPY, Portafoglio): ognuna apre la sua
+ * pagina di soli risultati. In fondo contatti e avviso sul rischio.
+ * Niente regole, niente storia del metodo, niente prove scartate.
+ */
 export default function Dettagli() {
   return (
     <>
@@ -42,17 +41,16 @@ export default function Dettagli() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()).replace(/</g, "\\u003c") }}
       />
-      <Hero />
-      <Riepilogo />
-      <Metodo />
-      <Strategie />
-      <Portafoglio />
-      <Simulatore />
-      <Scartate />
-      <Rischio />
-      <Monitoraggio />
-      <Contatti />
-      <Avviso />
+      <Esplora
+        data={esploraData()}
+        hero={<Hero />}
+        rest={
+          <>
+            <Contatti />
+            <Avviso />
+          </>
+        }
+      />
     </>
   );
 }

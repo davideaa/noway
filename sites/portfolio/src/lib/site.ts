@@ -57,14 +57,7 @@ export type Scene = { id: string; n: string; label: string; nav?: boolean };
 /** Ordine delle scene di /dettagli (COPY.md v2, sezioni 3.1-3.9, piu' il simulatore incorporato). `nav` = compare nel menu. */
 export const SCENES: Scene[] = [
   { id: "ingresso", n: "01", label: "Ingresso" },
-  { id: "riepilogo", n: "02", label: "Riepilogo", nav: true },
-  { id: "metodo", n: "03", label: "Metodo", nav: true },
-  { id: "strategie", n: "04", label: "Strategie", nav: true },
-  { id: "portafoglio", n: "05", label: "Portafoglio", nav: true },
-  { id: "simulatore", n: "06", label: "Simulatore" }, // non in barra: otto voci non stanno sotto i 1200 px; si arriva dal bottone del Riepilogo
-  { id: "scartate", n: "07", label: "Scartate" },
-  { id: "rischio", n: "08", label: "Rischio", nav: true },
-  { id: "monitoraggio", n: "09", label: "Monitoraggio", nav: true },
-  { id: "contatti", n: "10", label: "Contatti", nav: true },
-  { id: "avviso", n: "11", label: "Avviso" },
+  { id: "esplora", n: "02", label: "Strategie", nav: true },
+  { id: "contatti", n: "03", label: "Contatti", nav: true },
+  { id: "avviso", n: "04", label: "Avviso", nav: true },
 ];

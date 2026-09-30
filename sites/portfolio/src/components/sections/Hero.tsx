@@ -30,15 +30,17 @@ export function Hero() {
         </Reveal>
         <Reveal i={2}>
           <p className="hero__lead mt-6">
-            Un portafoglio di tre sistemi automatici su oro (XAUUSD), Nasdaq e USDJPY. Ogni criterio è dichiarato prima
-            del test. Ogni numero scomodo resta sul tavolo. E i risultati sono di backtest validati fuori campione: non
-            garantiscono rendimenti futuri.
+            Un portafoglio di tre sistemi automatici su oro (XAUUSD), Nasdaq e USDJPY. Qui ci sono i loro risultati, spiegati
+            in modo semplice: sono di backtest validati fuori campione e non garantiscono rendimenti futuri.
           </p>
         </Reveal>
         <Reveal i={3} className="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#metodo" className={buttonVariants()}>
-            Vedi come si misura
+          <a href="#esplora" className={buttonVariants()}>
+            Scegli una strategia
             <ArrowRight size={16} strokeWidth={1.6} aria-hidden />
+          </a>
+          <a href="/simulatore/" className={buttonVariants({ variant: "outline" })} target="_blank" rel="noopener">
+            Apri il simulatore
           </a>
           <a
             href={MAILTO}
