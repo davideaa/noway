@@ -48,7 +48,7 @@ export function SiteHeader() {
   const current = SCENES[active];
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] backdrop-blur-[20px]">
+    <header className="site-header fixed inset-x-0 top-0 z-50 border-b border-line">
       <div className="wrap flex h-16 items-center gap-4">
         <a href="#ingresso" className="flex items-center gap-3 text-acc" aria-label={`${SITE_NAME}, torna all'inizio`}>
           <BrandMark />

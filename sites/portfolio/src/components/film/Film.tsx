@@ -865,7 +865,8 @@ export function Film() {
           <div className="film-ov film-ov--end" data-ov="7" data-ov-whole>
             <div className="film-end">
               <h2 className="film-line film-line--end">{FILM_END}</h2>
-              <MagneticCta href="/dettagli" className={`${buttonVariants()} film-end__cta`}>
+              {/* navigazione piena: il film (WebGL, 20-40k perle, bloom) va liberato del tutto prima di /dettagli, su iPhone la somma crashava Safari */}
+              <MagneticCta href="/dettagli/" reload className={`${buttonVariants()} film-end__cta`}>
                 {FILM_CTA}
               </MagneticCta>
               <button

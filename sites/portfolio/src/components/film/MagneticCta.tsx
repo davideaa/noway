@@ -11,7 +11,20 @@ import { useRef, type ReactNode } from "react";
  * (il wrapper con padding). Touch e reduced-motion: niente offset, niente sweep
  * (CSS). Un solo bottone per schermo lo fa. Costo: un listener sul bottone, 0 kB.
  */
-export function MagneticCta({ href, className, children, ariaLabel }: { href: string; className: string; children: ReactNode; ariaLabel?: string }) {
+export function MagneticCta({
+  href,
+  className,
+  children,
+  ariaLabel,
+  reload = false,
+}: {
+  href: string;
+  className: string;
+  children: ReactNode;
+  ariaLabel?: string;
+  /** navigazione piena (<a>) invece di quella client di Next: libera tutta la memoria della pagina di partenza (il film con WebGL) */
+  reload?: boolean;
+}) {
   const btn = useRef<HTMLAnchorElement>(null);
   const move = (e: React.PointerEvent<HTMLElement>) => {
     const el = btn.current;
@@ -37,7 +50,7 @@ export function MagneticCta({ href, className, children, ariaLabel }: { href: st
     void el.offsetWidth; // riavvia l'animazione dello sweep
     el.classList.add("is-sweep");
   };
-  const external = href.startsWith("http") || href.endsWith(".html") || href.startsWith("/simulatore");
+  const external = reload || href.startsWith("http") || href.endsWith(".html") || href.startsWith("/simulatore");
   const props = {
     ref: btn,
     className: `cta-lux ${className}`,
