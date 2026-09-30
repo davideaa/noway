@@ -5,10 +5,11 @@
  *
  * GraficoMC (Davide): alla partenza il grafico SI COSTRUISCE davanti a chi
  * guarda: in qualche secondo le simulazioni avanzano da sinistra a destra fino
- * alla fine, con una testina che porta con se' i valori del 95%, della mediana
- * e del 5%. Finita la costruzione, passando sopra (o toccando) ogni linea mostra
- * il suo valore SUL GRAFICO: etichette accanto alle linee e guide tratteggiate
- * fino all'asse. Fasce 5–95% e 25–75%, mediana, simulazioni intere, storico vero.
+ * alla fine, con una testina che porta con se' i valori. Poi, passando sopra (o
+ * toccando), i valori sono scritti SUL GRAFICO accanto alle linee. Solo la fascia
+ * 5–95% e la mediana in evidenza (Davide: "il resto no, niente pallini"), le
+ * simulazioni appena accennate. "Confronto con benchmark": tre linee soltanto,
+ * la mediana della strategia e quelle di S&P 500 e Nasdaq-100.
  *
  * DisceseChart: la discesa massima di ogni simulazione, con il limite scelto e il 95%.
  */
@@ -50,13 +51,6 @@ export function formato(misura: Misura, capitale: number) {
 }
 
 const DURATA = 6500; // ms della costruzione
-const LINEE = [
-  { k: "p95", t: "95%", forte: false },
-  { k: "p75", t: "75%", forte: false },
-  { k: "p50", t: "mediana", forte: true },
-  { k: "p25", t: "25%", forte: false },
-  { k: "p5", t: "5%", forte: false },
-] as const;
 
 const annoMesi = (m: number) => {
   const a = Math.floor(m / 12);
@@ -64,6 +58,11 @@ const annoMesi = (m: number) => {
   if (!a) return `${r} ${r === 1 ? "mese" : "mesi"}`;
   return `${a} ${a === 1 ? "anno" : "anni"}${r ? ` e ${r} ${r === 1 ? "mese" : "mesi"}` : ""}`;
 };
+
+/** una linea del grafico: la mediana, i bordi della fascia, o un benchmark */
+type Linea = { k: string; t: string; v: ArrayLike<number>; colore: string; forte: boolean };
+
+export type Bench = { nome: string; colore: string; v: Float32Array };
 
 export function GraficoMC({
   serie,
@@ -73,6 +72,9 @@ export function GraficoMC({
   colore,
   onFine,
   salta = false,
+  confronto = false,
+  bench = [],
+  nome,
 }: {
   serie: Serie;
   misura: Misura;
@@ -82,23 +84,27 @@ export function GraficoMC({
   onFine?: () => void;
   /** "Salta": la costruzione si mostra gia' finita */
   salta?: boolean;
+  /** "Confronto con benchmark": solo tre linee, la mediana della strategia e quelle degli indici */
+  confronto?: boolean;
+  bench?: Bench[];
+  /** nome della linea della strategia nel confronto */
+  nome: string;
 }) {
   const { ref, W } = useLarghezza<HTMLElement>();
   const narrow = W < 640;
-  const H = narrow ? 420 : 560;
+  const H = narrow ? 420 : 540;
   const PL = narrow ? 58 : 84;
-  const PR = narrow ? 12 : 170;
+  const PR = narrow ? 12 : 180;
   const PT = 34;
   const PB = 46;
   const svg = useRef<SVGSVGElement>(null);
   const [hover, setHover] = useState<number | null>(null);
-  // il componente riparte da zero a ogni simulazione (key={giro} nel genitore)
+  // il componente riparte da zero a ogni simulazione (key nel genitore)
   const [tCorsa, setT] = useState(() => (window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 0));
   const t = salta ? 1 : tCorsa;
   const P = serie.p50.length;
   const F = useMemo(() => formato(misura, capitale), [misura, capitale]);
 
-  // la costruzione: da 0 a 1 in DURATA ms (subito finita con meno movimento)
   const fine = useRef(onFine);
   useEffect(() => {
     fine.current = onFine;
@@ -112,8 +118,7 @@ export function GraficoMC({
     const t0 = performance.now();
     const passo = (now: number) => {
       const x = Math.min(1, (now - t0) / DURATA);
-      // parte svelta e rallenta verso la fine: si vedono le linee "arrivare"
-      setT(1 - Math.pow(1 - x, 2.2));
+      setT(1 - Math.pow(1 - x, 2.2)); // parte svelta e rallenta: si vedono le linee "arrivare"
       if (x < 1) raf = requestAnimationFrame(passo);
       else fine.current?.();
     };
@@ -122,13 +127,28 @@ export function GraficoMC({
   }, []);
   const finito = t >= 1;
 
+  // le linee da leggere: fascia (95% e 5%) e mediana, oppure mediana e benchmark
+  const linee: Linea[] = useMemo(
+    () =>
+      confronto
+        ? [
+            { k: "med", t: nome, v: serie.p50, colore, forte: true },
+            ...bench.map((b) => ({ k: b.nome, t: b.nome, v: b.v, colore: b.colore, forte: false })),
+          ]
+        : [
+            { k: "p95", t: "95%", v: serie.p95, colore, forte: false },
+            { k: "p50", t: "mediana", v: serie.p50, colore, forte: true },
+            { k: "p5", t: "5%", v: serie.p5, colore, forte: false },
+          ],
+    [confronto, bench, serie, colore, nome],
+  );
+
   const g = useMemo(() => {
     let lo = Infinity;
     let hi = -Infinity;
-    for (const arr of [serie.p5, serie.p95, serie.storico])
-      for (const v of arr) {
-        if (!Number.isFinite(v)) continue;
-        const u = F.u(v);
+    for (const l of linee)
+      for (let j = 0; j < l.v.length; j++) {
+        const u = F.u(l.v[j]);
         if (u < lo) lo = u;
         if (u > hi) hi = u;
       }
@@ -141,21 +161,8 @@ export function GraficoMC({
     const x = (j: number) => PL + (j / (P - 1)) * (W - PL - PR);
     const y = (v: number) => PT + (1 - (F.u(v) - lo) / (hi - lo)) * (H - PT - PB);
     const yU = (u: number) => PT + (1 - (u - lo) / (hi - lo)) * (H - PT - PB);
-    const linea = (a: ArrayLike<number>) => {
-      let d = "";
-      let su = false;
-      for (let j = 0; j < a.length; j++) {
-        if (!Number.isFinite(a[j])) {
-          su = false;
-          continue;
-        }
-        d += `${su ? "L" : "M"}${x(j).toFixed(1)},${y(a[j]).toFixed(1)}`;
-        su = true;
-      }
-      return d;
-    };
-    const fascia = (a: Float32Array, b: Float32Array) =>
-      linea(b) + Array.from(a, (_, k) => a.length - 1 - k).map((j) => `L${x(j).toFixed(1)},${y(a[j]).toFixed(1)}`).join("") + "Z";
+    const linea = (a: ArrayLike<number>) => Array.from(a, (v, j) => `${j ? "L" : "M"}${x(j).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    const fascia = linea(serie.p95) + Array.from(serie.p5, (_, k) => P - 1 - k).map((j) => `L${x(j).toFixed(1)},${y(serie.p5[j]).toFixed(1)}`).join("") + "Z";
     const anniT: number[] = [];
     for (let a = 1; a <= anni; a++) anniT.push(a);
     return {
@@ -163,15 +170,13 @@ export function GraficoMC({
       y,
       yU,
       base,
-      b95: fascia(serie.p5, serie.p95),
-      b75: fascia(serie.p25, serie.p75),
-      linee: Object.fromEntries(LINEE.map((l) => [l.k, linea(serie[l.k])])) as Record<(typeof LINEE)[number]["k"], string>,
-      sto: linea(serie.storico),
+      fascia,
+      tracce: Object.fromEntries(linee.map((l) => [l.k, linea(l.v)])) as Record<string, string>,
       camp: serie.campioni.map(linea),
       ticks: tacche(lo, hi, narrow ? 5 : 7),
       anniT,
     };
-  }, [serie, W, H, P, anni, narrow, PL, PR, PT, PB, F]);
+  }, [linee, serie, W, H, P, anni, narrow, PL, PR, PT, PB, F]);
 
   const onMove = (e: React.PointerEvent) => {
     if (!finito) return;
@@ -189,24 +194,14 @@ export function GraficoMC({
   const mostraEtichette = !finito || hover !== null;
   const xClip = PL + t * (W - PL - PR);
 
-  // etichette accanto alle linee, senza sovrapporsi (almeno 19 px fra una e l'altra)
+  // etichette accanto alle linee, senza sovrapporsi
   const etichette = (() => {
-    const voci = [
-      ...LINEE.filter((l) => finito || l.k === "p95" || l.k === "p50" || l.k === "p5").map((l) => ({
-        k: l.k as string,
-        t: l.t,
-        v: serie[l.k][j],
-        forte: l.forte,
-        sto: false,
-      })),
-      ...(finito && Number.isFinite(serie.storico[j]) ? [{ k: "sto", t: "storico", v: serie.storico[j], forte: false, sto: true }] : []),
-    ].map((e) => {
-      const txt = F.lungo(e.v);
-      return { ...e, txt, w: (e.t.length + txt.length + 1) * 7.1 + 18, y0: g.y(e.v), y: g.y(e.v) };
+    const voci = linee.map((l) => {
+      const txt = F.lungo(l.v[j]);
+      return { ...l, txt, w: (l.t.length + txt.length + 1) * 7.1 + 18, y0: g.y(l.v[j]), y: g.y(l.v[j]) };
     });
     voci.sort((a, b) => a.y0 - b.y0);
-    // sul bordo destro (a fine costruzione) le etichette sono su due righe: piu' spazio fra una e l'altra
-    const gap = finito && hover === null ? 31 : 19;
+    const gap = finito && hover === null ? 31 : 20; // sul bordo destro sono su due righe
     for (let i = 1; i < voci.length; i++) if (voci[i].y - voci[i - 1].y < gap) voci[i].y = voci[i - 1].y + gap;
     const over = voci.length ? voci[voci.length - 1].y - (H - PB - 6) : 0;
     if (over > 0) for (const v of voci) v.y -= over;
@@ -214,7 +209,6 @@ export function GraficoMC({
   })();
   const xj = g.x(j);
   const aSinistra = xj > PL + (W - PL - PR) * 0.62;
-  // tutte le etichette dallo stesso lato: quello in cui ci sta la piu' larga
   const wMax = Math.max(0, ...etichette.map((e) => e.w));
   const lato = !aSinistra && xj + 10 + wMax <= W - 2 ? "dx" : xj - 10 - wMax >= 2 ? "sx" : "dx";
   const xChip = (w: number) => Math.max(2, Math.min(W - w - 2, lato === "dx" ? xj + 10 : xj - 10 - w));
@@ -227,7 +221,11 @@ export function GraficoMC({
         width={W}
         height={H}
         role="img"
-        aria-label={`Simulazioni del capitale per ${anni} anni: a metà dei casi ${F.lungo(serie.p50[P - 1])}, in 5 casi su 100 sotto ${F.lungo(serie.p5[P - 1])}, in 5 su 100 sopra ${F.lungo(serie.p95[P - 1])}`}
+        aria-label={
+          confronto
+            ? `Mediane dopo ${anni} anni: ${linee.map((l) => `${l.t} ${F.lungo(l.v[P - 1])}`).join(", ")}`
+            : `Simulazioni del capitale per ${anni} anni: a metà dei casi ${F.lungo(serie.p50[P - 1])}, in 5 casi su 100 sotto ${F.lungo(serie.p5[P - 1])}, in 5 su 100 sopra ${F.lungo(serie.p95[P - 1])}`
+        }
         onPointerMove={onMove}
         onPointerDown={onMove}
         onPointerLeave={(e) => e.pointerType === "mouse" && setHover(null)}
@@ -237,7 +235,6 @@ export function GraficoMC({
             <rect x={PL} y={PT - 2} width={Math.max(0, xClip - PL)} height={H - PT - PB + 4} />
           </clipPath>
         </defs>
-        {/* griglia e assi */}
         {g.ticks.map((u) => (
           <g key={u}>
             <line x1={PL} x2={W - PR} y1={g.yU(u)} y2={g.yU(u)} className="xp-chart__grid" />
@@ -267,18 +264,33 @@ export function GraficoMC({
           tempo →
         </text>
 
-        {/* le simulazioni: tutto quello che e' a destra della testina non esiste ancora */}
+        {/* le simulazioni: a destra della testina non esiste ancora niente */}
         <g clipPath="url(#xp-mc-clip)">
-          <path d={g.b95} fill={colore} opacity={0.12} />
-          <path d={g.b75} fill={colore} opacity={0.2} />
-          {g.camp.map((d, k) => (
-            <path key={k} d={d} fill="none" stroke={colore} strokeWidth={1} opacity={0.2} />
-          ))}
-          {LINEE.filter((l) => !l.forte).map((l) => (
-            <path key={l.k} d={g.linee[l.k]} fill="none" stroke={colore} strokeWidth={1.2} strokeDasharray="2 4" opacity={0.9} />
-          ))}
-          <path d={g.sto} fill="none" stroke="var(--ink)" strokeWidth={1.6} strokeDasharray="6 5" opacity={0.85} />
-          <path d={g.linee.p50} fill="none" stroke={colore} strokeWidth={3} />
+          {!confronto && (
+            <>
+              <path d={g.fascia} fill={colore} opacity={0.14} />
+              {g.camp.map((d, k) => (
+                <path key={k} d={d} fill="none" stroke={colore} strokeWidth={1} opacity={0.13} />
+              ))}
+            </>
+          )}
+          {linee
+            .filter((l) => !l.forte)
+            .map((l) => (
+              <path
+                key={l.k}
+                d={g.tracce[l.k]}
+                fill="none"
+                stroke={l.colore}
+                strokeWidth={confronto ? 2.4 : 1.2}
+                opacity={confronto ? 1 : 0.7}
+              />
+            ))}
+          {linee
+            .filter((l) => l.forte)
+            .map((l) => (
+              <path key={l.k} d={g.tracce[l.k]} fill="none" stroke={l.colore} strokeWidth={3.4} />
+            ))}
         </g>
 
         {/* a fine costruzione: le etichette fisse sul bordo destro (solo schermi larghi) */}
@@ -286,8 +298,8 @@ export function GraficoMC({
           <g className="xp-mc__end">
             {etichette.map((e) => (
               <g key={e.k} transform={`translate(${W - PR + 10},${e.y})`}>
-                <line x1={-10} x2={-2} y1={e.y0 - e.y} y2={0} stroke={e.sto ? "var(--ink)" : colore} opacity={0.6} />
-                <text x={0} y={-3} className={`xp-mc__lt${e.forte ? " is-strong" : ""}`} fill={e.sto ? "var(--ink)" : colore}>
+                <line x1={-10} x2={-2} y1={e.y0 - e.y} y2={0} stroke={e.colore} opacity={0.6} />
+                <text x={0} y={-3} className={`xp-mc__lt${e.forte ? " is-strong" : ""}`} fill={e.colore}>
                   {e.t}
                 </text>
                 <text x={0} y={11} className="xp-mc__lv">
@@ -298,7 +310,7 @@ export function GraficoMC({
           </g>
         )}
 
-        {/* testina (costruzione) o cursore (dopo): guida verticale, punti, guide orizzontali, etichette */}
+        {/* testina (costruzione) o cursore (dopo): guida verticale ed etichette sulle linee */}
         {mostraEtichette && (
           <g className="xp-mc__cur">
             <line x1={xj} x2={xj} y1={PT} y2={H - PB} className={finito ? "xp-chart__cursor" : "xp-mc__head"} stroke={finito ? undefined : colore} />
@@ -306,24 +318,12 @@ export function GraficoMC({
               {j === 0 ? "inizio" : `dopo ${annoMesi(j)}`}
             </text>
             {etichette.map((e) => (
-              <g key={e.k}>
-                {finito && <line x1={PL} x2={xj} y1={e.y0} y2={e.y0} className="xp-mc__guide" stroke={e.sto ? "var(--ink)" : colore} />}
-                <circle cx={xj} cy={e.y0} r={e.forte ? 5 : 3.5} fill={e.sto ? "var(--ink)" : colore} className="xp-chart__dot" />
-                <g transform={`translate(${xChip(e.w)},${e.y})`}>
-                  <rect
-                    x={0}
-                    y={-11}
-                    width={e.w}
-                    height={22}
-                    rx={5}
-                    className="xp-mc__chip"
-                    stroke={e.sto ? "var(--ink)" : colore}
-                  />
-                  <text x={8} y={4} className={`xp-mc__cv${e.forte ? " is-strong" : ""}`}>
-                    <tspan fill={e.sto ? "var(--ink)" : colore}>{e.t}</tspan>
-                    <tspan dx={6}>{e.txt}</tspan>
-                  </text>
-                </g>
+              <g key={e.k} transform={`translate(${xChip(e.w)},${e.y})`}>
+                <rect x={0} y={-11} width={e.w} height={22} rx={5} className="xp-mc__chip" stroke={e.colore} />
+                <text x={8} y={4} className={`xp-mc__cv${e.forte ? " is-strong" : ""}`}>
+                  <tspan fill={e.colore}>{e.t}</tspan>
+                  <tspan dx={6}>{e.txt}</tspan>
+                </text>
               </g>
             ))}
           </g>
@@ -333,22 +333,13 @@ export function GraficoMC({
         <span className="xp-chart__when">
           {!finito ? `Sto costruendo le simulazioni… ${annoMesi(jTesta)}` : hover === null ? `Alla fine, dopo ${annoMesi(P - 1)}` : `Dopo ${annoMesi(j)}`}
         </span>
-        {finito && (
-          <>
-            <span className="xp-chart__val">
-              <i style={{ background: colore, opacity: 0.45 }} aria-hidden="true" />
-              95% <b>{F.lungo(serie.p95[j])}</b>
+        {finito &&
+          linee.map((l) => (
+            <span key={l.k} className="xp-chart__val">
+              <i style={{ background: l.colore, opacity: l.forte ? 1 : 0.6 }} aria-hidden="true" />
+              {l.t} <b>{F.lungo(l.v[j])}</b>
             </span>
-            <span className="xp-chart__val">
-              <i style={{ background: colore }} aria-hidden="true" />
-              mediana <b>{F.lungo(serie.p50[j])}</b>
-            </span>
-            <span className="xp-chart__val">
-              <i style={{ background: colore, opacity: 0.45 }} aria-hidden="true" />
-              5% <b>{F.lungo(serie.p5[j])}</b>
-            </span>
-          </>
-        )}
+          ))}
       </figcaption>
     </figure>
   );

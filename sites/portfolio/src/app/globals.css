@@ -4070,7 +4070,50 @@ html:not(.js) .film-load,
   }
 }
 
-/* CONTRO IL MERCATO (pagine strategia) */
+/* CONFRONTO CON BENCHMARK (pagine strategia) */
+.xp-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.xp-dd-att {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid color-mix(in srgb, var(--bad) 30%, var(--line));
+  border-radius: var(--r-3);
+  background: color-mix(in srgb, var(--bad) 5%, var(--bg));
+}
+.xp-dd-att > p {
+  grid-column: 1 / -1;
+}
+.xp-dd-att > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.xp-dd-att b {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--bad);
+  font-variant-numeric: tabular-nums;
+}
+.xp-dd-att > div:last-child b {
+  color: var(--ink);
+}
+.xp-dd-att span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--mut);
+}
+@media (max-width: 760px) {
+  .xp-dd-att {
+    grid-template-columns: 1fr;
+  }
+}
 .xp-mkt-tab .xp-sim__tr {
   grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
 }

@@ -16,12 +16,14 @@ import { useEffect, useRef, useState } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
 import { int, it, signed } from "@/lib/format";
-import { N, simula, type Esito, type MetodoId, type Misura, type Periodo } from "./mc";
-import { DisceseChart, formato, GraficoMC } from "./SimCharts";
+import { benchmarkMediane, N, simula, type Esito, type MetodoId, type Misura, type Periodo } from "./mc";
+import { DisceseChart, formato, GraficoMC, type Bench } from "./SimCharts";
 
 type Scelta = "tutte" | Id;
 type Param = { scelta: Scelta; limite: number; anni: number; periodo: Periodo };
-type Run = { e: Esito; p: Param; giro: number };
+type Run = { e: Esito; p: Param; giro: number; bench: (Bench & { tolto: string | null })[] };
+/** i due benchmark, in colori diversi da quelli delle strategie */
+const COLORI_BENCH = ["#f3efe2", "#4fd1c5"];
 
 const METODI: Record<MetodoId, { nome: string; cosa: string }> = {
   permutazione: { nome: "Rimescolamento", cosa: "Stesse operazioni, in un ordine diverso: l’ordine è stato fortunato?" },
@@ -31,7 +33,12 @@ const METODI: Record<MetodoId, { nome: string; cosa: string }> = {
 };
 
 const PERIODI: { v: Periodo; t: string; sub: string; tag?: string }[] = [
-  { v: "senza", t: "Senza l’anno migliore", sub: "A ogni strategia si toglie il suo anno più bello: la scelta più prudente.", tag: "prudente" },
+  {
+    v: "senza",
+    t: "Scenario prudente",
+    sub: "A ogni strategia si toglie il suo anno migliore: il meno ottimista, la base su cui ragionare. Se poi va meglio, tanto meglio.",
+    tag: "consigliato",
+  },
   { v: "tutto", t: "Tutto, 2019–2026", sub: "Tutte le operazioni, 7 anni e 9 mesi." },
   { v: "dentro", t: "Solo 2019–2023", sub: "Gli anni su cui le strategie sono state ottimizzate: lì i risultati sono gonfiati per costruzione." },
   { v: "fuori", t: "Solo 2024–2026", sub: "Fuori campione: dati mai visti durante l’ottimizzazione. È stato un periodo molto favorevole." },
@@ -128,6 +135,7 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
   const [stato, setStato] = useState<"fermo" | "calcolo" | "costruzione" | "pronto">("fermo");
   const [avanz, setAvanz] = useState(0);
   const [salta, setSalta] = useState(false);
+  const [confronto, setConfronto] = useState(false);
   const [spiega, setSpiega] = useState(false);
   const giro = useRef(0);
   const stage = useRef<HTMLElement>(null);
@@ -150,7 +158,13 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
       fermo,
     );
     if (!e || fermo()) return;
-    setRun({ e, p, giro: mio });
+    const bench = benchmarkMediane(data.bench.etf, data.mesi, p.periodo, p.anni, mio).map((b, i) => ({
+      nome: `Benchmark ${b.nome}`,
+      colore: COLORI_BENCH[i] ?? "var(--mut)",
+      v: b.v,
+      tolto: b.tolto,
+    }));
+    setRun({ e, p, giro: mio, bench });
     setStato("costruzione");
   };
 
@@ -185,6 +199,9 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
     return `con i costi del broker (−15/20%): ${int(Math.round(F.u(v * 0.8)))}–${int(Math.round(F.u(v * 0.85)))} €`;
   };
   const sopra = E && run ? E.p95 > run.p.limite / 100 + 1e-9 : false;
+  const A = E ? E.attese[misura] : { p50: 0, p95: 0, volte: 0, soglia: 10 };
+  // in % dal punto piu' alto del conto (non dal capitale iniziale: niente euro, sarebbero sbagliati)
+  const ddTxt = (x: number) => (misura === "R" ? `−${it(x, 1)} R` : `−${it(x, 1)}%`);
   const nomeScelta = (s: Scelta) => (s === "tutte" ? "tutte e tre" : data.base[s].nome);
 
   const opzioni: { v: Scelta; t: string; sub: string; c: string }[] = [
@@ -331,7 +348,7 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
 
           <div className="xp-field">
             <p className="xp-seg__l mono" id="xp-sim-q5">
-              5 · Su quali dati
+              5 · Scenario (su quali dati)
             </p>
             <div className="xp-periodi" role="radiogroup" aria-labelledby="xp-sim-q5">
               {PERIODI.map((o) => (
@@ -381,6 +398,23 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
             </div>
             {run && (
               <div className="xp-stage__show">
+                <div className="xp-seg" role="group" aria-label="Cosa mostra il grafico">
+                  <span className="xp-seg__l mono">Grafico</span>
+                  <div className="xp-seg__b">
+                    <button type="button" aria-pressed={!confronto || misura === "R"} onClick={() => setConfronto(false)}>
+                      Simulazioni
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={confronto && misura !== "R"}
+                      disabled={misura === "R"}
+                      title={misura === "R" ? "Il confronto si fa in euro e in percentuale: scegli rischio composto o fisso" : undefined}
+                      onClick={() => setConfronto(true)}
+                    >
+                      Confronto con benchmark
+                    </button>
+                  </div>
+                </div>
                 <button type="button" className="xp-explain-b xp-explain-b--sm" onClick={() => setSpiega(true)}>
                   <Info size={15} strokeWidth={1.8} aria-hidden />
                   Spiegazione del risultato
@@ -470,6 +504,9 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                   anni={run.p.anni}
                   colore={coloreRun}
                   salta={salta}
+                  confronto={confronto && misura !== "R"}
+                  bench={run.bench}
+                  nome={run.p.scelta === "tutte" ? "Strategie" : data.base[run.p.scelta].nome}
                   onFine={() => setStato((s) => (s === "costruzione" ? "pronto" : s))}
                 />
                 {stato === "costruzione" && !salta && (
@@ -478,25 +515,42 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                   </button>
                 )}
               </div>
-              <ul className="xp-legend mono" aria-hidden="true">
-                <li>
-                  <i style={{ background: coloreRun, opacity: 0.25 }} /> 90 casi su 100 (5–95%)
-                </li>
-                <li>
-                  <i style={{ background: coloreRun, opacity: 0.5 }} /> metà centrale (25–75%)
-                </li>
-                <li>
-                  <i style={{ background: coloreRun }} className="is-line" /> mediana
-                </li>
-                <li>
-                  <i className="is-dash" /> storico vero dei dati scelti
-                </li>
-                <li>linee sottili: singole simulazioni</li>
-              </ul>
+              {confronto && misura !== "R" ? (
+                <>
+                  <ul className="xp-legend mono" aria-hidden="true">
+                    <li>
+                      <i style={{ background: coloreRun }} className="is-line" /> mediana delle strategie
+                    </li>
+                    {run.bench.map((b) => (
+                      <li key={b.nome}>
+                        <i style={{ background: b.colore }} className="is-line" /> {b.nome}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="xp-sim__hint">
+                    Benchmark (indici di riferimento): S&amp;P 500 e Nasdaq-100 simulati con lo stesso metodo, ripescando a blocchi di 3 mesi i
+                    loro rendimenti mensili sugli stessi dati scelti
+                    {run.p.periodo === "senza"
+                      ? `, anche loro senza l’anno migliore (${run.bench.map((b) => `${b.nome.replace("Benchmark ", "")} ${b.tolto}`).join(", ")})`
+                      : ""}
+                    . Si confrontano le mediane: il caso tipico di ognuno. Gli indici sono senza dividendi e senza costi; le strategie senza i
+                    costi del broker.
+                  </p>
+                </>
+              ) : (
+                <ul className="xp-legend mono" aria-hidden="true">
+                  <li>
+                    <i style={{ background: coloreRun, opacity: 0.3 }} /> 90 casi su 100 (dal 5% al 95%)
+                  </li>
+                  <li>
+                    <i style={{ background: coloreRun }} className="is-line" /> mediana (il caso tipico)
+                  </li>
+                  <li>linee sottili: singole simulazioni</li>
+                </ul>
+              )}
               {E.anni > E.anniDati + 0.01 && (
                 <p className="xp-sim__hint">
-                  Stai simulando {E.anni} anni con {it(E.anniDati, 1)} anni di dati: le operazioni vengono ripescate più volte, e lo storico vero si
-                  ferma dove finiscono i dati.
+                  Stai simulando {E.anni} anni con {it(E.anniDati, 1)} anni di dati: le operazioni vengono ripescate più volte.
                 </p>
               )}
 
@@ -505,9 +559,9 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                   <div className="xp-scen" role="list" aria-label="Scenari alla fine">
                     {(
                       [
-                        { k: "p5", t: "Scenario prudente", sub: "5 simulazioni su 100 vanno peggio" },
-                        { k: "p50", t: "Scenario tipico", sub: "metà vanno meglio, metà peggio" },
-                        { k: "p95", t: "Scenario favorevole", sub: "5 simulazioni su 100 vanno meglio" },
+                        { k: "p5", t: "Se va male", sub: "5 simulazioni su 100 vanno peggio" },
+                        { k: "p50", t: "Caso tipico", sub: "metà vanno meglio, metà peggio" },
+                        { k: "p95", t: "Se va bene", sub: "5 simulazioni su 100 vanno meglio" },
                       ] as const
                     ).map((sc) => (
                       <div key={sc.k} role="listitem" className={`xp-scen__c${sc.k === "p50" ? " is-mid" : ""}`}>
@@ -529,6 +583,25 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                     .
                   </p>
 
+                  <div className="xp-dd-att" role="list" aria-label="Le discese da aspettarsi">
+                    <p className="xp-seg__l mono">Le discese da aspettarsi in {run.p.anni} {run.p.anni === 1 ? "anno" : "anni"}</p>
+                    <div role="listitem">
+                      <b className="mono">{ddTxt(A.p50)}</b>
+                      <span>la discesa più grande, di solito</span>
+                    </div>
+                    <div role="listitem">
+                      <b className="mono">{ddTxt(A.p95)}</b>
+                      <span>la discesa più grande, in 95 casi su 100 non oltre</span>
+                    </div>
+                    <div role="listitem">
+                      <b className="mono">{it(A.volte, 1)}</b>
+                      <span>
+                        volte, in media, il conto scende di oltre {misura === "R" ? `${A.soglia} R` : `il ${A.soglia}%`} prima di tornare al suo
+                        massimo
+                      </span>
+                    </div>
+                  </div>
+
                   <div className={`xp-sim__verdict${sopra ? " is-over" : ""}`}>
                     <p>
                       Con questi rischi, <b>in 95 simulazioni su 100 la discesa resta sotto il {pc(E.p95)}%</b>
@@ -545,9 +618,9 @@ export function Simulatore({ data, onBack }: { data: EsploraData; onBack: () => 
                     <div className="xp-sim__tab xp-anni-tab" role="table" aria-label="Anno per anno">
                       <div role="row" className="xp-sim__tr xp-sim__th mono">
                         <span role="columnheader">Dopo</span>
-                        <span role="columnheader">Prudente (5%)</span>
+                        <span role="columnheader">Se va male (5%)</span>
                         <span role="columnheader">Tipico</span>
-                        <span role="columnheader">Favorevole (95%)</span>
+                        <span role="columnheader">Se va bene (95%)</span>
                       </div>
                       {Array.from({ length: run.p.anni }, (_, i) => i + 1).map((a) => (
                         <div role="row" key={a} className="xp-sim__tr">

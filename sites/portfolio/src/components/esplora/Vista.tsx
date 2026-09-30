@@ -58,6 +58,8 @@ export function Vista({ data, chi, onBack }: { data: EsploraData; chi: Id | "por
   const [rischio, setRischio] = useState(0.01);
   const [anniOff, setAnniOff] = useState<string[]>([]);
   const [stratOff, setStratOff] = useState<Id[]>([]);
+  // "Confronto con benchmark" (Davide): lo stesso grafico con S&P 500 e Nasdaq-100 accanto
+  const [bench, setBench] = useState(false);
 
   const colore = port ? "var(--acc)" : data.base[chi].colore;
   const nome = port ? "Portafoglio" : data.base[chi].nome;
@@ -287,13 +289,42 @@ export function Vista({ data, chi, onBack }: { data: EsploraData; chi: Id | "por
       </dl>
 
       <section className="xp-block" aria-labelledby="xp-c1">
-        <h3 id="xp-c1" className="xp-block__t">Come è cresciuto il capitale</h3>
-        <p className="xp-block__s">
-          {misura === "R"
-            ? "Ogni punto è la somma dei risultati fino a quel momento, in R."
-            : `Partendo da 100, rischiando il ${rischioT}% a operazione. La linea tratteggiata è l’altro modo di rischiare, per confronto.`}
-        </p>
-        <Chart serie={serie} mesiOp={mesiOp} fmt={fmt} fmtAsse={fmtAsse} fuoriDa={fuoriDa} titolo={`Curva di ${nome}`} />
+        <div className="xp-block__head">
+          <h3 id="xp-c1" className="xp-block__t">
+            {bench ? "Confronto con benchmark" : "Come è cresciuto il capitale"}
+          </h3>
+          <div className="xp-seg" role="group" aria-label="Cosa mostra il grafico">
+            <div className="xp-seg__b">
+              <button type="button" aria-pressed={!bench} onClick={() => setBench(false)}>
+                {nome}
+              </button>
+              <button type="button" aria-pressed={bench} onClick={() => setBench(true)}>
+                Confronto con benchmark
+              </button>
+            </div>
+          </div>
+        </div>
+        {bench ? (
+          <Mercato
+            data={data}
+            r={mercatoOps.r}
+            m={mercatoOps.m}
+            rischio={rischio}
+            composto={misura !== "fisso"}
+            nome={nome}
+            colore={colore}
+            incorporato
+          />
+        ) : (
+          <>
+            <p className="xp-block__s">
+              {misura === "R"
+                ? "Ogni punto è la somma dei risultati fino a quel momento, in R."
+                : `Partendo da 100, rischiando il ${rischioT}% a operazione. La linea tratteggiata è l’altro modo di rischiare, per confronto.`}
+            </p>
+            <Chart serie={serie} mesiOp={mesiOp} fmt={fmt} fmtAsse={fmtAsse} fuoriDa={fuoriDa} titolo={`Curva di ${nome}`} />
+          </>
+        )}
       </section>
 
       <section className="xp-block" aria-labelledby="xp-c2">
@@ -315,15 +346,6 @@ export function Vista({ data, chi, onBack }: { data: EsploraData; chi: Id | "por
         />
       </section>
 
-      <Mercato
-        data={data}
-        r={mercatoOps.r}
-        m={mercatoOps.m}
-        rischio={rischio}
-        composto={misura !== "fisso"}
-        nome={nome}
-        colore={colore}
-      />
 
       <section className="xp-block" aria-labelledby="xp-c3">
         <h3 id="xp-c3" className="xp-block__t">Anno per anno</h3>

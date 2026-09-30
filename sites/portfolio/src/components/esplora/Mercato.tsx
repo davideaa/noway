@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * CONTRO IL MERCATO (Davide): la strategia (o il portafoglio) accanto a chi avesse
+ * CONFRONTO CON BENCHMARK (Davide): la strategia (o il portafoglio) accanto a chi avesse
  * semplicemente comprato e tenuto l'S&P 500 o il Nasdaq-100, sugli stessi mesi,
  * per guadagno e per discesa. Un solo riquadro: grafico + tabella.
  *
@@ -28,6 +28,7 @@ export function Mercato({
   composto,
   nome,
   colore,
+  incorporato = false,
 }: {
   data: EsploraData;
   /** operazioni del periodo scelto, in ordine (R e mese) */
@@ -37,6 +38,8 @@ export function Mercato({
   composto: boolean;
   nome: string;
   colore: string;
+  /** dentro il grafico principale della pagina (tasto "Confronto con benchmark"): senza riquadro e titolo propri */
+  incorporato?: boolean;
 }) {
   const calc = useMemo(() => {
     if (!m.length) return null;
@@ -71,7 +74,7 @@ export function Mercato({
     const serie: Serie[] = [{ v, colore, nome }];
 
     // mercato: indice del giorno di fine mese, base = fine del mese prima di m0
-    const colori = ["var(--ink)", "var(--mut)"];
+    const colori = ["#f3efe2", "#4fd1c5"]; // benchmark in colori diversi da quelli delle strategie
     data.bench.etf.forEach((e, i) => {
       const fine: number[] = [];
       let acc = 0;
@@ -89,8 +92,8 @@ export function Mercato({
         if (e.c[d] > pk) pk = e.c[d];
         else ddb = Math.max(ddb, 1 - e.c[d] / pk);
       }
-      righe.push(riga(e.nome, colori[i] ?? "var(--mut)", vb[mesi], ddb));
-      serie.push({ v: vb, colore: colori[i] ?? "var(--mut)", nome: e.nome, tratteggio: i === 0 });
+      righe.push(riga(`Benchmark ${e.nome}`, colori[i] ?? "var(--mut)", vb[mesi], ddb));
+      serie.push({ v: vb, colore: colori[i] ?? "var(--mut)", nome: `Benchmark ${e.nome}` });
     });
 
     const etichette = [`inizio ${meseIt(data.mesi[m0])}`, ...Array.from({ length: mesi }, (_, j) => meseIt(data.mesi[m0 + j]))];
@@ -112,15 +115,12 @@ export function Mercato({
   const ultimo = data.bench.etf[0]?.ultimo ?? "";
   const rT = it(rischio * 100, rischio * 100 < 1 ? 1 : 0).replace(",0", "");
 
-  return (
-    <section className="xp-block" aria-labelledby="xp-mkt">
-      <h3 id="xp-mkt" className="xp-block__t">
-        Contro il mercato
-      </h3>
+  const Corpo = (
+    <>
       <p className="xp-block__s">
-        Stessi mesi ({calc.da} – {calc.a}): {nome} rischiando il {rT}% a operazione ({composto ? "rischio composto" : "rischio fisso"}), contro
-        l’andamento degli indici S&amp;P 500 e Nasdaq-100 (come se si fossero comprati e tenuti). Guarda sia quanto rende sia quanto
-        scende.
+        Benchmark = indice di riferimento. Stessi mesi ({calc.da} – {calc.a}): {nome} rischiando il {rT}% a operazione{" "}
+        {composto ? "(rischio composto)" : "(rischio fisso)"}, contro gli indici S&amp;P 500 e Nasdaq-100, come se si fossero comprati e
+        tenuti. Guarda sia quanto rende sia quanto scende.
       </p>
       <div className="xp-seg xp-mkt__scala" role="group" aria-label="Scala del grafico">
         <span className="xp-seg__l mono">Scala</span>
@@ -184,6 +184,15 @@ export function Mercato({
         La colonna a destra mette insieme le due cose: quanto si è guadagnato per ogni punto di discesa sopportato. Indici S&amp;P 500 e
         Nasdaq-100, chiusure giornaliere ufficiali senza dividendi, fino al {ultimo.split("-").reverse().join("/")} (fonte Yahoo Finance).
       </p>
+    </>
+  );
+  if (incorporato) return Corpo;
+  return (
+    <section className="xp-block" aria-labelledby="xp-mkt">
+      <h3 id="xp-mkt" className="xp-block__t">
+        Confronto con benchmark
+      </h3>
+      {Corpo}
     </section>
   );
 }

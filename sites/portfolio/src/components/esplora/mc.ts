@@ -61,6 +61,15 @@ export type Serie = {
   /** quota di simulazioni che finiscono sotto zero */
   perdita: number;
 };
+/** le discese da aspettarsi sugli anni scelti (simulazioni a blocchi), nella misura */
+export type Discese = {
+  /** discesa massima tipica (mediana) e al 95%: % dal punto piu' alto (in R per R) */
+  p50: number;
+  p95: number;
+  /** quante volte, in media, si scende oltre la soglia (10% o 10 R) prima di tornare al massimo */
+  volte: number;
+  soglia: number;
+};
 export type Esito = {
   esatti: number[];
   rischi: number[];
@@ -79,6 +88,7 @@ export type Esito = {
   nDati: number;
   /** l'anno tolto per ogni strategia (solo "senza") */
   tolti: (string | null)[];
+  attese: Record<Misura, Discese>;
 };
 
 /* generatore con seme */
@@ -410,6 +420,70 @@ export async function simula(
     return { ...percentili(curve, punti), campioni: curve.slice(0, NCAMPIONI), storico, perdita: sotto / curve.length };
   };
   const serie = { composto: fa(cc, sto.c), fisso: fa(ff, sto.f), R: fa(rr, sto.r) };
+
+  // le discese da aspettarsi, operazione per operazione, nelle tre misure
+  const dd = { composto: [] as number[], fisso: [] as number[], R: [] as number[] };
+  const volte = { composto: 0, fisso: 0, R: 0 };
+  const SOGLIA = { composto: 0.1, fisso: 0.1, R: 10 };
+  for (const idx of P.blocchi) {
+    let c = 1;
+    let pc = 1;
+    let f = 1;
+    let pf = 1;
+    let r = 0;
+    let pr = 0;
+    let dc = 0;
+    let df = 0;
+    let dr = 0;
+    const dentro = { composto: false, fisso: false, R: false };
+    for (let i = 0; i < idx.length; i++) {
+      const x = idx[i];
+      c *= 1 + rwFin[x];
+      f += rwFin[x];
+      r += R[x];
+      if (c > pc) {
+        pc = c;
+        dentro.composto = false;
+      }
+      if (f > pf) {
+        pf = f;
+        dentro.fisso = false;
+      }
+      if (r > pr) {
+        pr = r;
+        dentro.R = false;
+      }
+      const ec = 1 - c / pc;
+      const ef = 1 - f / pf;
+      const er = pr - r;
+      if (ec > dc) dc = ec;
+      if (ef > df) df = ef;
+      if (er > dr) dr = er;
+      // una discesa oltre la soglia conta una volta, finche' non si torna al massimo
+      if (!dentro.composto && ec > SOGLIA.composto) {
+        dentro.composto = true;
+        volte.composto++;
+      }
+      if (!dentro.fisso && ef > SOGLIA.fisso) {
+        dentro.fisso = true;
+        volte.fisso++;
+      }
+      if (!dentro.R && er > SOGLIA.R) {
+        dentro.R = true;
+        volte.R++;
+      }
+    }
+    dd.composto.push(dc * 100);
+    dd.fisso.push(df * 100);
+    dd.R.push(dr);
+  }
+  const attesa = (k: Misura): Discese => ({
+    p50: quantile(dd[k], 0.5),
+    p95: quantile(dd[k], PCT),
+    volte: volte[k] / P.blocchi.length,
+    soglia: k === "R" ? SOGLIA.R : SOGLIA[k] * 100,
+  });
+  const attese = { composto: attesa("composto"), fisso: attesa("fisso"), R: attesa("R") };
   avanzamento(1);
 
   return {
@@ -426,5 +500,63 @@ export async function simula(
     nOrizzonte: len,
     nDati: n,
     tolti,
+    attese,
   };
+}
+
+/**
+ * I BENCHMARK nel simulatore (Davide: "confronto con benchmark, tre linee, nella
+ * mediana"): S&P 500 e Nasdaq-100 simulati con lo stesso criterio delle strategie,
+ * cosi' si confrontano mediane con mediane. Rendimenti MENSILI degli indici sugli
+ * stessi dati scelti (scenario prudente: senza l'anno migliore dell'indice),
+ * ripescati a blocchi di 3 mesi, per gli anni scelti; si tiene la mediana.
+ * Valori in % rispetto all'inizio, mese per mese (stessa griglia del ventaglio).
+ */
+export function benchmarkMediane(
+  etf: { nome: string; c: number[]; n: number[] }[],
+  mesi: string[],
+  periodo: Periodo,
+  anni: number,
+  seme: number,
+) {
+  const i2024 = mesi.indexOf("2024-01");
+  const punti = Math.round(anni * 12) + 1;
+  return etf.map((e, ei) => {
+    // rendimento di ogni mese: fine mese / fine del mese prima (c[0] = base 31/12/2018)
+    const ret: number[] = [];
+    let acc = 0;
+    let prima = 0;
+    for (const n of e.n) {
+      acc += n;
+      ret.push(e.c[acc] / e.c[prima] - 1);
+      prima = acc;
+    }
+    let tolto: string | null = null;
+    if (periodo === "senza") {
+      const anno = new Map<string, number>();
+      ret.forEach((x, j) => anno.set(mesi[j].slice(0, 4), (anno.get(mesi[j].slice(0, 4)) ?? 1) * (1 + x)));
+      anno.forEach((v, a) => {
+        if (tolto === null || v > (anno.get(tolto) ?? 0)) tolto = a;
+      });
+    }
+    const uso = ret.filter((_, j) =>
+      periodo === "fuori" ? j >= i2024 : periodo === "dentro" ? j < i2024 : periodo === "senza" ? mesi[j].slice(0, 4) !== tolto : true,
+    );
+    const rnd = rng(seme * 977 + ei * 31 + 5);
+    const curve: Float32Array[] = [];
+    for (let p = 0; p < N; p++) {
+      const v = new Float32Array(punti);
+      let cap = 1;
+      let k = 1;
+      while (k < punti) {
+        const s0 = Math.floor(rnd() * uso.length);
+        for (let b = 0; b < 3 && k < punti; b++, k++) {
+          cap *= 1 + uso[(s0 + b) % uso.length];
+          v[k] = (cap - 1) * 100;
+        }
+      }
+      curve.push(v);
+    }
+    return { nome: e.nome, v: percentili(curve, punti).p50, tolto };
+  });
 }
