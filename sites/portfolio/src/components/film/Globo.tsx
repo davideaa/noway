@@ -12,6 +12,10 @@
  * quando il finale e' visibile e la scheda e' in primo piano; appena il finale
  * compare, il pianeta "esce" dal centro del tunnel (da piccolo a pieno).
  * Con "meno movimento": fermo.
+ *
+ * Lo stesso pianeta torna nella sezione Contatti (Davide: "interattivo, che
+ * gira, sulla destra, solo in quella sezione"): li' si accende quando la
+ * sezione ha la classe .is-in e si puo' trascinare per farlo girare.
  */
 import { useEffect, useRef } from "react";
 import punti from "./globo-punti.json";
@@ -54,7 +58,7 @@ const vettore = (lat: number, lon: number) => {
   return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)] as const;
 };
 
-export function Globo() {
+export function Globo({ interattivo = false }: { interattivo?: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const logo = useRef<HTMLImageElement>(null);
 
@@ -64,6 +68,8 @@ export function Globo() {
     const ctx = cv.getContext("2d");
     if (!ctx) return;
     const ov = cv.closest("[data-ov]") as HTMLElement | null;
+    // fuori dal film: si accende solo quando la sezione che lo contiene e' in vista (.is-in)
+    const sezione = ov ? null : (cv.closest("[data-globo]") as HTMLElement | null);
     const fermo = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // i puntini come vettori sulla sfera
@@ -108,8 +114,8 @@ export function Globo() {
 
     const rgba = (a: number) => `rgba(${ACC[0]},${ACC[1]},${ACC[2]},${a.toFixed(3)})`;
     // ruota (angolo th attorno all'asse, poi inclinazione) e proietta
-    const cosI = Math.cos(INCLINA);
-    const sinI = Math.sin(INCLINA);
+    let cosI = Math.cos(INCLINA);
+    let sinI = Math.sin(INCLINA);
 
     let raf = 0;
     let visto = false;
@@ -117,9 +123,51 @@ export function Globo() {
     let tPrec = performance.now();
     let th = 0;
 
+    /* trascinare: il pianeta segue il dito o il mouse, poi rallenta e torna al suo giro */
+    let presa: { id: number; x: number; t: number } | null = null;
+    let spinta = 0; // radianti al secondo in piu' (o in meno) del giro normale
+    let inclinaExtra = 0;
+    let inclinaOra = 0;
+    const giu = (e: PointerEvent) => {
+      presa = { id: e.pointerId, x: e.clientX, t: performance.now() };
+      spinta = 0;
+      cv.setPointerCapture?.(e.pointerId);
+      cv.classList.add("is-presa");
+    };
+    const muovi = (e: PointerEvent) => {
+      // con il mouse sopra, il pianeta si piega appena verso il puntatore
+      if (e.pointerType === "mouse") {
+        const r = cv.getBoundingClientRect();
+        inclinaExtra = ((e.clientY - r.top) / Math.max(1, r.height) - 0.5) * 0.35;
+      }
+      if (!presa || e.pointerId !== presa.id) return;
+      const now = performance.now();
+      const ang = ((e.clientX - presa.x) / Math.max(1, cv.clientWidth)) * Math.PI * 1.6;
+      th += ang;
+      spinta = spinta * 0.5 + (ang / Math.max(0.008, (now - presa.t) / 1000)) * 0.5;
+      presa.x = e.clientX;
+      presa.t = now;
+    };
+    const su = (e: PointerEvent) => {
+      if (!presa || e.pointerId !== presa.id) return;
+      presa = null;
+      spinta = Math.max(-9, Math.min(9, spinta));
+      cv.classList.remove("is-presa");
+    };
+    const via = () => void (inclinaExtra = 0);
+    if (interattivo) {
+      cv.addEventListener("pointerdown", giu);
+      cv.addEventListener("pointermove", muovi);
+      cv.addEventListener("pointerup", su);
+      cv.addEventListener("pointercancel", su);
+      cv.addEventListener("pointerleave", via);
+    }
+
     const disegna = (now: number) => {
       raf = requestAnimationFrame(disegna);
-      const vis = !ov || (ov.style.visibility !== "hidden" && Number(ov.style.opacity || 1) > 0.02);
+      const vis = ov
+        ? ov.style.visibility !== "hidden" && Number(ov.style.opacity || 1) > 0.02
+        : !sezione || sezione.classList.contains("is-in");
       if (!vis || document.hidden) {
         visto = false;
         tPrec = now;
@@ -131,7 +179,13 @@ export function Globo() {
       }
       const dt = Math.min(0.1, (now - tPrec) / 1000);
       tPrec = now;
-      if (!fermo) th += (dt * 2 * Math.PI) / GIRO_S;
+      if (!fermo && !presa) th += (dt * 2 * Math.PI) / GIRO_S;
+      if (!presa && spinta !== 0) {
+        th += spinta * dt;
+        spinta *= Math.exp(-dt * 1.8);
+        if (Math.abs(spinta) < 0.01) spinta = 0;
+      }
+      inclinaOra += (inclinaExtra - inclinaOra) * Math.min(1, dt * 4);
 
       // uscita dal buco nero: da piccolo a pieno, con un filo di rimbalzo
       const u = fermo ? 1 : Math.min(1, (now - t0Uscita) / USCITA_MS);
@@ -148,6 +202,8 @@ export function Globo() {
       ctx.clearRect(0, 0, W, W);
       ctx.globalAlpha = Math.min(1, u * 1.6);
 
+      cosI = Math.cos(INCLINA + inclinaOra);
+      sinI = Math.sin(INCLINA + inclinaOra);
       const cosT = Math.cos(th);
       const sinT = Math.sin(th);
       const proietta = (x: number, y: number, z: number) => {
@@ -161,7 +217,7 @@ export function Globo() {
       };
 
       // atmosfera: alone largo dietro la sfera
-      const alone = ctx.createRadialGradient(c, c, R * 0.85, c, c, R * 1.55);
+      const alone = ctx.createRadialGradient(c, c, R * 0.85, c, c, R * 1.38); // entro il bordo del canvas: niente quadrato visibile
       alone.addColorStop(0, rgba(0.2));
       alone.addColorStop(0.35, rgba(0.07));
       alone.addColorStop(1, rgba(0));
@@ -301,11 +357,16 @@ export function Globo() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      cv.removeEventListener("pointerdown", giu);
+      cv.removeEventListener("pointermove", muovi);
+      cv.removeEventListener("pointerup", su);
+      cv.removeEventListener("pointercancel", su);
+      cv.removeEventListener("pointerleave", via);
     };
-  }, []);
+  }, [interattivo]);
 
   return (
-    <div className="globo" aria-hidden="true">
+    <div className={interattivo ? "globo globo--mano" : "globo"} aria-hidden="true">
       <canvas ref={canvas} className="globo__cv" />
       {/* eslint-disable-next-line @next/next/no-img-element -- esportazione statica, immagine gia' ridotta */}
       <img ref={logo} className="globo__logo" src={logoGrande.src} width={logoGrande.width} height={logoGrande.height} alt="" decoding="async" />

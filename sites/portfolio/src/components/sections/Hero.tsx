@@ -1,7 +1,7 @@
 import { ArrowRight, Mail } from "lucide-react";
 import { HeroScene } from "@/components/motion/HeroScene";
 import { PauseButton } from "@/components/motion/PauseButton";
-import { BacktestTag, Reveal, RiskNote } from "@/components/site/ui";
+import { BacktestTag, Reveal } from "@/components/site/ui";
 import { buttonVariants } from "@/components/ui/button";
 import { FILM_H1 } from "@/lib/site";
 
@@ -67,7 +67,6 @@ export function Hero() {
             </li>
           ))}
         </ul>
-        <RiskNote />
         <div className="pt-1">
           <PauseButton />
         </div>

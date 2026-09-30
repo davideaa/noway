@@ -43,3 +43,5 @@ next-env.d.ts
 # export statico per anteprime
 out-export/
 out-host/
+out-offline/
+*-offline.zip

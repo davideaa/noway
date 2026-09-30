@@ -1,5 +1,7 @@
 import { TriangleAlert } from "lucide-react";
 import { Reveal, SceneHeader } from "@/components/site/ui";
+import { D, PORT } from "@/lib/dati";
+import { it } from "@/lib/format";
 
 /**
  * Avviso sul rischio (COPY.md v2, 3.9): testo completo, su superficie piena, sempre
@@ -7,6 +9,9 @@ import { Reveal, SceneHeader } from "@/components/site/ui";
  * Paese del titolare e "Titolare del sito" (vedi DA-COMPLETARE.md).
  */
 export function Avviso() {
+  const o = D.oro;
+  const n = D.nasdaq;
+  const u = D.usdjpy;
   return (
     <section id="avviso" data-scene className="scene" aria-labelledby="avviso-t">
       <div className="wrap">
@@ -40,6 +45,17 @@ export function Avviso() {
             <li>
               <strong>Le strategie possono andare in perdita per un anno intero, e più.</strong> Lo storico stesso
               contiene, per XAUUSD, un anno in perdita e uno quasi a zero su otto; per USDJPY, nove mesi del 2026 a zero.
+            </li>
+            <li>
+              {/* i numeri del riquadro "Rischio accanto", tolto dalla cima della pagina (Davide): restano qui */}
+              <strong>Le perdite dal massimo (drawdown) possono essere profonde.</strong> Nel backtest, su una sola
+              sequenza, il drawdown massimo è stato di {it(o.periodi.tutto.dd_max_R, 1)} R per XAUUSD (
+              {o.periodi.tutto.perdite_consecutive_max} perdite di fila), {it(n.periodi.tutto.dd_max_R, 1)} R per il
+              Nasdaq e {it(u.periodi.tutto.dd_max_R, 1)} R per USDJPY. Con il bootstrap a blocchi di 20, in una
+              sequenza su dieci va oltre: XAUUSD {it(o.bootstrap_dd.p90, 1)} R, Nasdaq {it(n.bootstrap_dd.p90, 1)} R,
+              USDJPY {it(u.bootstrap_dd.p90, 1)} R; la somma a pari rischio {it(PORT.bootstrap_dd.p90, 1)} R. A rischio
+              1% per operazione, {it(o.bootstrap_dd.p90, 1)} R vuol dire circa il {it(o.bootstrap_dd.p90, 0)}% dal
+              massimo.
             </li>
             <li>
               <strong>Le strategie algoritmiche cambiano nel tempo.</strong> Sfruttano un vantaggio statistico verificato sul passato, ma

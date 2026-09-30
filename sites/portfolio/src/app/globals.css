@@ -599,27 +599,6 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.risknote {
-  display: flex;
-  gap: var(--sp-3);
-  align-items: flex-start;
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px dashed var(--line3);
-  border-radius: var(--r-2);
-  background: var(--surf2);
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--ink);
-}
-.risknote svg {
-  flex: none;
-  margin-top: 3px;
-  color: var(--bad);
-}
-.risknote b {
-  font-weight: 600;
-  color: var(--bad);
-}
 
 /* ==========================================================================
    Tabelle e barre-dato
@@ -1396,6 +1375,77 @@ html.film-lite .film-w {
   position: relative;
   z-index: 1;
 }
+/* Contatti (Davide): il pianeta con il logo, a destra, interattivo; c'e' solo mentre si e'
+   in questa sezione (.is-in dall'IntersectionObserver di GloboContatti), poi si dissolve */
+.contatti__testo {
+  position: relative;
+  z-index: 1;
+}
+.contatti-globo {
+  position: relative;
+  width: min(80vw, 360px);
+  margin: calc(-1 * var(--sp-4)) auto;
+  opacity: 0;
+  scale: 0.82;
+  transition:
+    opacity 700ms var(--ease),
+    scale 900ms var(--ease);
+  pointer-events: none;
+}
+.contatti.is-in .contatti-globo {
+  opacity: 1;
+  scale: 1;
+  pointer-events: auto;
+}
+.contatti-globo .globo {
+  width: 100%;
+  margin: 0;
+}
+.globo--mano .globo__cv {
+  cursor: grab;
+  touch-action: pan-y;
+}
+.globo--mano .globo__cv.is-presa {
+  cursor: grabbing;
+}
+.globo--mano .globo__logo {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.contatti-globo__hint {
+  margin-top: calc(-1 * var(--sp-3));
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mut);
+  opacity: 0.7;
+}
+@media (min-width: 1024px) {
+  .contatti__testo {
+    position: static;
+    max-width: 58%;
+  }
+  .contatti-globo {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: min(38%, 520px);
+    margin: 0;
+    translate: 0 -50%;
+  }
+  .contatti .card {
+    z-index: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contatti-globo {
+    transition: opacity 300ms linear;
+    scale: 1;
+  }
+}
+
 /* il finale: la Terra che gira con il logo davanti, il nome, poi frase e bottone */
 .film-ov--end:has(.film-emblema) {
   align-content: center;
