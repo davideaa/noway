@@ -241,6 +241,24 @@ export const speedNorm = (sp: number) => clamp01(spineSpeed(sp) / 360);
  * Le intensita' (torsione, bande, particelle, lente) sono gate x velocita'.
  */
 export const wormGate = (sp: number) => smoothstep(0.2, 0.32, sp) * (1 - smoothstep(0.8, 0.88, sp));
+/**
+ * Campo visivo VERTICALE della camera (gradi), funzione di (sp, aspetto).
+ * Fuori dal tunnel: 64 in verticale (telefono), 50 altrimenti, come sempre.
+ * Nel tunnel si allarga finche' il campo ORIZZONTALE arriva a 72 gradi (tetto
+ * 100 in verticale): la velocita' si sente dalle pareti che sfrecciano ai lati,
+ * e un iPhone in verticale ne vedeva 38 contro i 101 del PC di Davide ("sul
+ * telefono e' lento" anche a 60 fps). Sul PC il bisogno e' sotto la base:
+ * nessun cambiamento. Con meno movimento: niente allargamento (e' uno zoom).
+ */
+export const FOV_TUNNEL_H = 72;
+export const FOV_V_MAX = 100;
+export function filmFov(sp: number, aspect: number, reduced: boolean) {
+  const base = aspect < 0.75 ? 64 : 50;
+  if (reduced) return base;
+  const need = (2 * Math.atan(Math.tan((FOV_TUNNEL_H * Math.PI) / 360) / Math.max(0.2, aspect)) * 180) / Math.PI;
+  const wide = Math.min(FOV_V_MAX, Math.max(base, need));
+  return mix(base, wide, wormGate(sp));
+}
 /** Frangia RGB + smear: SOLO nel picco di velocita' (marce 300 e 360), mai a riposo. */
 export const fringeAmount = (sp: number) => wormGate(sp) * smoothstep(0.5, 0.95, speedNorm(sp));
 /** Lente al centro: si apre con il wormhole, un po' di piu' con la velocita'. */

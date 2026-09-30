@@ -64,6 +64,7 @@ import {
   spine,
   strandAnchor,
   wormGate,
+  filmFov,
   type Pose,
 } from "./state";
 
@@ -921,6 +922,13 @@ function CameraRig() {
   }, [camera]);
   useFrame(() => {
     cameraPose(film.sp, film.aspect, film.reduced, pose);
+    // campo visivo: si allarga nel tunnel sugli schermi stretti (state.ts, filmFov)
+    const cam = camera as THREE.PerspectiveCamera;
+    const fov = filmFov(film.sp, film.aspect, film.reduced);
+    if (Math.abs(cam.fov - fov) > 0.01) {
+      cam.fov = fov;
+      cam.updateProjectionMatrix();
+    }
     camera.position.set(pose.x, pose.y, pose.z);
     target.set(pose.tx, pose.ty, pose.tz);
     d.subVectors(target, camera.position).normalize();
