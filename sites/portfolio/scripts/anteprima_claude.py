@@ -114,7 +114,7 @@ for p in walk():
     parts = rel.split("/")
     if any(x.startswith("_") for x in parts):
         continue
-    if rel.startswith("404") or rel.endswith(".txt") and rel != "robots.txt":
+    if rel.startswith("404") or rel.endswith(".map") or rel.endswith(".txt") and rel != "robots.txt":
         continue
     files.append(rel)
 files.sort()

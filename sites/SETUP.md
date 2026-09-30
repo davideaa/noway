@@ -30,3 +30,9 @@ Refero (abbonamento), Cult Pro, Scrolltide (239 $, ma ha un prompt gratuito), Ma
 - Su iOS: il simulatore non si incorpora piu' da solo in /dettagli (crash di Safari per memoria); su touch si apre in una scheda a parte.
 - Su telefono il film parte in livello `media` (quality.ts): misurato su iPhone, `lite` girava a 60 fps fissi ma senza particelle e bloom il tunnel sembrava lento. Su touch i testi restano per parola e senza blur CSS. Se i primi 2 s misurano meno di 48 fps si scende a `lite`, sotto 30 a `eco`. La riga sotto "Rivedi" nel finale mostra livello, fps e avvio del dispositivo; `?diag=1` da' tutto il resto.
 - /dettagli su iPhone (30/09): Safari chiudeva la pagina per memoria grafica: ~110 blocchi `.reveal` con transform 3D + `will-change` erano 110 layer compositi. Ora niente will-change, 2D su touch, intestazione senza backdrop blur su touch, e il CTA del film fa una navigazione piena (libera il WebGL). Layer: da 111 a 6.
+
+## Anteprima su Claude (dal 30/09: Netlify non si usa piu', su richiesta di Davide)
+- Link: https://claude.ai/artifact/2dEfLUnR1YFKRGPeWFCWN1 (condiviso "chiunque abbia il link").
+- Come si aggiorna: `cd sites/portfolio && npm run export && python3 scripts/anteprima_claude.py > files.json`, poi Artifact con `url` = il link sopra, `file_path` = out-export/index.html, `root` = out-export e i file della lista (quelli vecchi che non ci sono piu' si tolgono passandoli a `null`).
+- Lo script aggira i limiti dell'hosting degli Artifact: `_next` -> `nx`, link a file veri (`.../index.html`), Dettagli e Simulatore in un pannello a schermo intero sopra il film.
+- Il sito su Netlify resta com'era all'ultimo deploy, ma non si aggiorna piu'.
