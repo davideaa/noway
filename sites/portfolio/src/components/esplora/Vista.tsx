@@ -13,6 +13,7 @@ import type { EsploraData } from "@/lib/esplora";
 import { it, meseIt, signed } from "@/lib/format";
 import { Chart, type Serie } from "./Chart";
 import { curva, statistiche, tempi, totale, type Misura, type Periodo } from "./calc";
+import { Mercato } from "./Mercato";
 
 const RISCHI = [0.005, 0.01, 0.02];
 const pct = (x: number) => it(x * 100, x * 100 < 1 ? 1 : 0).replace(",0", "");
@@ -95,6 +96,19 @@ export function Vista({ data, chi, onBack }: { data: EsploraData; chi: Id | "por
     }
     return { r, m, fuori };
   }, [baseOps, periodo, anniOff, data.mesi]);
+
+  /* per il confronto col mercato: il periodo scelto, senza il filtro anni (il mercato non salta gli anni) */
+  const mercatoOps = useMemo(() => {
+    const r: number[] = [];
+    const m: number[] = [];
+    for (let i = 0; i < baseOps.r.length; i++) {
+      if (periodo === "dentro" && baseOps.fuori[i]) continue;
+      if (periodo === "fuori" && !baseOps.fuori[i]) continue;
+      r.push(baseOps.r[i]);
+      m.push(baseOps.m[i]);
+    }
+    return { r, m };
+  }, [baseOps, periodo]);
 
   const c = useMemo(() => curva(ops.r, misura, rischio), [ops, misura, rischio]);
   const altra = useMemo(
@@ -300,6 +314,16 @@ export function Vista({ data, chi, onBack }: { data: EsploraData; chi: Id | "por
           titolo={`Drawdown di ${nome}`}
         />
       </section>
+
+      <Mercato
+        data={data}
+        r={mercatoOps.r}
+        m={mercatoOps.m}
+        rischio={rischio}
+        composto={misura !== "fisso"}
+        nome={nome}
+        colore={colore}
+      />
 
       <section className="xp-block" aria-labelledby="xp-c3">
         <h3 id="xp-c3" className="xp-block__t">Anno per anno</h3>

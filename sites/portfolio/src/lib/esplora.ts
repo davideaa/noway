@@ -10,6 +10,7 @@
  * strategia in una riga (dal suo simulatore). Niente regole, niente prove
  * scartate, niente storia del metodo.
  */
+import benchmark from "../../data/benchmark.json";
 import operazioni from "../../data/operazioni.json";
 import { D, IDS, MESI, PORT, type Id } from "./dati";
 
@@ -42,6 +43,8 @@ export type EsploraData = {
     tuttePos: number;
     mesiComuni: number;
   };
+  /** il mercato per il confronto (scripts/benchmark.py): chiusure giornaliere aggiustate, c[0] = base 31/12/2018, n = giorni di borsa per mese */
+  bench: { fonte: string; etf: { sym: string; nome: string; ultimo: string; c: number[]; n: number[] }[] };
 };
 
 const TESTI: Record<Id, Pick<Base, "nome" | "mercato" | "colore" | "tipo" | "timeframe" | "frase">> = {
@@ -100,6 +103,10 @@ export function esploraData(): EsploraData {
       tutteNeg: PORT.mesi_tutte_negative.n,
       tuttePos: PORT.mesi_tutte_positive.n,
       mesiComuni: PORT.correlazioni[0]?.n ?? MESI.length,
+    },
+    bench: {
+      fonte: benchmark.fonte,
+      etf: Object.entries(benchmark.etf).map(([sym, e]) => ({ sym, nome: e.nome, ultimo: e.ultimo, c: e.c, n: e.n })),
     },
   };
 }

@@ -4070,6 +4070,37 @@ html:not(.js) .film-load,
   }
 }
 
+/* CONTRO IL MERCATO (pagine strategia) */
+.xp-mkt-tab .xp-sim__tr {
+  grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr));
+}
+.xp-mkt__n {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.xp-mkt__n i {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.xp-mkt__dd {
+  color: var(--bad);
+}
+@media (max-width: 760px) {
+  .xp-mkt-tab .xp-sim__tr {
+    grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: var(--sp-3) var(--sp-2);
+    font-size: 12px;
+  }
+  .xp-mkt-tab .xp-sim__th {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+}
+
 .xp-explain {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
@@ -4119,4 +4150,7 @@ html:not(.js) .film-load,
   .xp-block {
     padding: var(--sp-4);
   }
+}
+.xp-mkt__scala {
+  align-self: flex-start;
 }
