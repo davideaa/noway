@@ -24,7 +24,7 @@ import type { Palette } from "./FilmCanvas";
 import { FilmFallback } from "./FilmFallback";
 import { FilmTopBar } from "./FilmTopBar";
 import { player, ui } from "./player";
-import { PROFILES, boot, diag, installErrorCapture, probeWebGL, quality, readSignals, type Profile } from "./quality";
+import { PROFILES, boot, diag, installErrorCapture, probeWebGL, quality, readSignals } from "./quality";
 import {
   OVERLAY_WINDOWS,
   actAxis,
@@ -126,7 +126,7 @@ type Ov = {
   whole: boolean;
   stagger: number;
 };
-const ovMode = (prof: Profile): Ov["mode"] => (prof.perLetter ? "letter" : prof.perWord ? "word" : "whole");
+const ovMode = (d: { perLetter: boolean; perWord: boolean }): Ov["mode"] => (d.perLetter ? "letter" : d.perWord ? "word" : "whole");
 type Client = { mode: "ssr" | "film" | "fallback"; palette: Palette | null; diag: boolean };
 
 /**
@@ -304,18 +304,18 @@ export function Film() {
         el,
         letters,
         words,
-        mode: ovMode(quality.profile),
+        mode: ovMode(quality.dom),
         key: "",
         whole: el.hasAttribute("data-ov-whole"),
         stagger: Number(el.dataset.stagger || STAGGER),
       };
     });
-    // Livello lite (telefoni): un layer per PAROLA e niente blur (globals.css, html.film-lite);
+    // Touch o livello lite: un layer per PAROLA e niente blur (globals.css, html.film-lite);
     // eco: blocchi interi, niente ombra del testo (html.film-eco). Il livello puo' scendere
     // UNA volta a runtime: si segue con le stesse classi.
     const applyTierClass = () => {
       const cl = document.documentElement.classList;
-      cl.toggle("film-lite", quality.tier === "lite" || quality.tier === "eco");
+      cl.toggle("film-lite", !quality.dom.perLetter);
       cl.toggle("film-eco", quality.tier === "eco");
     };
     applyTierClass();
@@ -601,9 +601,9 @@ export function Film() {
           continue;
         }
         ov.el.style.visibility = "visible";
-        const prof = quality.profile;
-        const blurOn = !film.reduced && prof.domBlur;
-        const mode = ov.whole ? "whole" : ovMode(prof);
+        const dom = quality.dom;
+        const blurOn = !film.reduced && dom.blur;
+        const mode = ov.whole ? "whole" : ovMode(dom);
         if (ov.mode !== mode) {
           // il livello e' sceso a runtime: le unita' di prima restano com'erano (opacita' compresa), si ripuliscono
           ov.mode = mode;

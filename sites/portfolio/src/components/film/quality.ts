@@ -9,7 +9,9 @@
  *  - renderer WebGL (WEBGL_debug_renderer_info): SwiftShader / llvmpipe /
  *    Intel HD / Mali-4xx -> lite (rendering software o GPU molto vecchia)
  *  - deviceMemory <= 4 GB o hardwareConcurrency <= 4 -> media
- *  - touch -> lite (telefoni e tablet: 20 s di WebGL a schermo intero, niente bloom)
+ *  - touch -> media (misurato su iPhone: lite girava a 60 fps fissi, ma senza
+ *    particelle, bloom e bande il tunnel SEMBRAVA lento; media ha tutto, e se il
+ *    telefono non regge la correzione a runtime scende, con soglie piu' severe)
  *  - ?quality=alta|media|lite forza il livello (per le prove di Davide)
  *
  * Qui vivono anche lo stato del CARICAMENTO (bake, compilazione, primo
@@ -123,8 +125,8 @@ export function pickTier(s: Signals): { tier: Tier; reason: string } {
     tier = "media";
     why.push(`${s.cores} core`);
   }
-  if (s.touch) {
-    tier = "lite";
+  if (s.touch && tier === "alta") {
+    tier = "media";
     why.push("touch");
   }
   return { tier, reason: why.length ? why.join(", ") : "nessun segnale di limite" };
@@ -155,6 +157,16 @@ export const quality = {
   get profile(): Profile {
     return PROFILES[quality.tier];
   },
+  /**
+   * Opzioni DOM degli overlay. Su touch niente blur CSS e un layer per PAROLA
+   * qualunque sia il livello: su iOS decine di layer sfocati sopra il canvas
+   * costano piu' della scena, e la scena e' quella che si vede.
+   */
+  get dom(): { blur: boolean; perLetter: boolean; perWord: boolean } {
+    const p = PROFILES[quality.tier];
+    const touch = !!quality.signals?.touch;
+    return { blur: p.domBlur && !touch, perLetter: p.perLetter && !touch, perWord: p.perWord };
+  },
   subscribe(cb: Listener) {
     quality.listeners.add(cb);
     return () => {
@@ -164,20 +176,24 @@ export const quality = {
   snapshot: () => quality.tier,
   /**
    * Correzione a runtime, UNA volta: media degli fps nei primi 2 s dopo l'avvio
-   * del play. Da alta/media: < 20 -> lite, < 30 -> un livello in meno. Da lite
-   * (telefoni): < 45 -> eco. Mai su.
+   * del play. Da alta/media: < 20 -> lite, < 30 -> un livello in meno; su touch
+   * le soglie salgono (< 30 -> lite, < 48 -> un livello in meno: un telefono e'
+   * tappato a 60, sotto i 50 sta gia' faticando). Da lite: < 45 -> eco. Mai su.
    */
   adjust(fpsAvg: number) {
     if (quality.settled) return;
     quality.settled = true;
     quality.fpsMeasured = fpsAvg;
     const i = TIERS.indexOf(quality.tier);
+    const touch = !!quality.signals?.touch;
+    const lo = touch ? 48 : 30;
+    const veryLo = touch ? 30 : 20;
     let next = quality.tier;
     if (quality.tier === "lite") {
       if (fpsAvg < 45) next = "eco";
     } else if (quality.tier !== "eco") {
-      if (fpsAvg < 20) next = "lite";
-      else if (fpsAvg < 30) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
+      if (fpsAvg < veryLo) next = "lite";
+      else if (fpsAvg < lo) next = TIERS[Math.min(TIERS.length - 1, i + 1)];
     }
     if (next === quality.tier) {
       quality.reason += ` · confermato a runtime (${fpsAvg.toFixed(0)} fps)`;
