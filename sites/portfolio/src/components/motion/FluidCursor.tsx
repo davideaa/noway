@@ -53,14 +53,26 @@ const DYE_DISS = 0.35;
 /** galleggiamento: appena accennato (il fumo tende a salire, senza scappare via) */
 const BUOYANCY = 2.5;
 /** diffusione del colore (per secondo): bordi di nebbia, senza sciogliere le pieghe */
-const DIFFUSE = 3;
+const DIFFUSE = 2;
 /** raggio dell'emissione di colore attorno alla freccetta (unita' uv^2 dell'altezza): piccolo, come nel riferimento */
-const SPLAT_RADIUS = 0.0035;
-/** raggio della SPINTA: piu' largo del colore, il mouse trascina una zona ampia (le grandi pieghe del riferimento) */
-const SPLAT_RADIUS_VEL = 0.01;
-const SPLAT_FORCE = 5000;
+const SPLAT_RADIUS = 0.0006;
+/**
+ * raggio della SPINTA: un po' piu' largo del colore. Davide: "attorno alla freccia e'
+ * enorme, il loro e' molto piu' piccolo" -> raggi ~6 volte piu' piccoli di prima
+ * e soprattutto spinta molto piu' bassa (sotto): era lei a allargare tutto.
+ */
+const SPLAT_RADIUS_VEL = 0.0012;
+/**
+ * spinta: bassa. Misurato a 60 fps esatti (?fluid-debug=1): a 6000 il fumo veniva
+ * "sparato" 300-400 px avanti alla freccetta e li' si gonfiava in una nuvola grande;
+ * a 1600 resta una scia sottile (~50 px) che finisce dove sta la freccetta e dopo
+ * 2 s si rompe in riccioli e svanisce.
+ */
+const SPLAT_FORCE = 1600;
 /** densita' emessa per movimento: la massa cresce dove il mouse insiste */
-const DYE_AMOUNT = 0.5;
+const DYE_AMOUNT = 0.9;
+/** valori in uso: le costanti sopra; solo la prova (?fluid-debug=1) li puo' cambiare dall'indirizzo */
+const CFG = { force: SPLAT_FORCE, r: SPLAT_RADIUS, rv: SPLAT_RADIUS_VEL, amount: DYE_AMOUNT, buoy: BUOYANCY };
 /**
  * Luminosita' massima a schermo: piena nell'intestazione (come nel riferimento),
  * piu' tenue scendendo nella pagina, dove ci sono testi e tabelle da leggere.
@@ -379,7 +391,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
   const aspect = () => gl.drawingBufferWidth / Math.max(1, gl.drawingBufferHeight);
 
   /** una spinta + una macchia di colore nel punto (x, y in 0..1, y verso l'alto) */
-  const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number], r = SPLAT_RADIUS, rv = SPLAT_RADIUS_VEL) => {
+  const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number], r = CFG.r, rv = CFG.rv) => {
     gl.disable(gl.BLEND);
     bind(P.splat, vel.tx, vel.ty);
     gl.uniform1i(P.splat.u.uTarget, tex(0, vel.read.tex));
@@ -411,7 +423,7 @@ function makeFluid(canvas: HTMLCanvasElement) {
     gl.uniform1i(P.vort.u.uDye, tex(2, dye.read.tex));
     gl.uniform1f(P.vort.u.uCurlK, CURL);
     gl.uniform1f(P.vort.u.uDt, dt);
-    gl.uniform1f(P.vort.u.uBuoy, BUOYANCY);
+    gl.uniform1f(P.vort.u.uBuoy, CFG.buoy);
     draw(vel.write);
     vel.swap();
 
@@ -581,7 +593,7 @@ export function FluidCursor() {
       // il colore scorre lungo la tavolozza con la strada fatta: la scia e' una sfumatura
       hue += Math.hypot(dx, dy) * 1.2;
       const h = hueAt(hue);
-      queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, c: [DYE_AMOUNT, DYE_AMOUNT * h, 0] });
+      queue.push({ x, y, dx: dx * CFG.force, dy: dy * CFG.force, c: [CFG.amount, CFG.amount * h, 0] });
       wake();
     };
     const onLeave = () => {
@@ -603,9 +615,45 @@ export function FluidCursor() {
       }, 200);
     };
 
+    // solo prova (?fluid-debug=1): simulazione a 60 fps esatti su un percorso sintetico,
+    // indipendente dalla velocita' del browser di prova. Niente massa iniziale, niente mouse.
+    const qs = new URLSearchParams(window.location.search);
+    const debug = qs.has("fluid-debug");
+    if (debug) {
+      const num = (k: string) => (qs.get(k) ? Number(qs.get(k)) : null);
+      if (num("ff") !== null) CFG.force = num("ff")!;
+      if (num("fr") !== null) CFG.r = num("fr")!;
+      if (num("fv") !== null) CFG.rv = num("fv")!;
+      if (num("fa") !== null) CFG.amount = num("fa")!;
+      if (num("fb") !== null) CFG.buoy = num("fb")!;
+      (window as unknown as { __fluidSim: (path: [number, number][], after: number) => void }).__fluidSim = (path, after) => {
+        let px = -1;
+        let py = -1;
+        for (const [cx, cy] of path) {
+          const x = cx / window.innerWidth;
+          const y = 1 - cy / window.innerHeight;
+          if (px >= 0) {
+            let dx = x - px;
+            let dy = y - py;
+            const a = F.aspect();
+            if (a < 1) dx *= a;
+            if (a > 1) dy /= a;
+            hue += Math.hypot(dx, dy) * 1.2;
+            const h = hueAt(hue);
+            F.splat(x, y, dx * CFG.force, dy * CFG.force, [CFG.amount, CFG.amount * h, 0]);
+          }
+          px = x;
+          py = y;
+          F.step(1 / 60);
+        }
+        for (let i = 0; i < after; i++) F.step(1 / 60);
+        F.render(GAIN_TOP);
+      };
+    }
+
     // all'arrivo, se si e' in cima alla pagina: una massa gia' presente a destra del titolo
     // (il riferimento ne ha una prima ancora di muovere il mouse), poi la si mescola
-    if (window.scrollY < window.innerHeight * 0.5) {
+    if (!debug && window.scrollY < window.innerHeight * 0.5) {
       for (let i = 0; i < 9; i++) {
         const ang = Math.random() * Math.PI * 2;
         queue.push({
@@ -621,7 +669,7 @@ export function FluidCursor() {
       wake();
     }
 
-    window.addEventListener("pointermove", onMove, { passive: true });
+    if (!debug) window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("resize", onResize);
