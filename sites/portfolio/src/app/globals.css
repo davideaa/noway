@@ -1396,44 +1396,72 @@ html.film-lite .film-w {
   position: relative;
   z-index: 1;
 }
-/* il logo dietro la frase finale: grande, semitrasparente, gira piano su se stesso (24 s a giro) */
-.film-end__logo {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+/* il finale: la Terra che gira con il logo davanti, il nome, poi frase e bottone */
+.film-ov--end:has(.film-emblema) {
+  align-content: center;
+  row-gap: var(--sp-3);
+}
+.film-emblema {
   display: grid;
-  place-items: center;
-  perspective: 1400px;
-  pointer-events: none;
-  /* l'opacita' qui e non su chi gira: opacity/filter sull'elemento 3D lo appiattirebbero (retro rovesciato) */
-  opacity: 0.3;
+  justify-items: center;
+  gap: var(--sp-2);
 }
-.film-end__spin {
+.globo {
   position: relative;
-  height: min(62vh, 78vw);
-  aspect-ratio: 432 / 560;
-  transform-style: preserve-3d;
-  animation: film-logo-gira 24s linear infinite;
+  width: min(46vh, 80vw);
+  aspect-ratio: 1;
+  margin: calc(-1 * min(4vh, 6vw)) 0;
 }
-.film-end__spin img {
-  position: absolute;
-  inset: 0;
+.globo__cv {
+  display: block;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden;
 }
-.film-end__spin img.is-back {
-  transform: rotateY(180deg);
+.globo__logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 33%;
+  height: auto;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--acc) 45%, transparent));
+  will-change: transform, opacity;
 }
-@keyframes film-logo-gira {
-  to {
-    transform: rotateY(360deg);
-  }
+.film-emblema__nome {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  line-height: 1;
 }
-@media (prefers-reduced-motion: reduce) {
-  .film-end__spin {
-    animation: none;
-  }
+.film-emblema__p {
+  font-size: clamp(30px, 4.6vw, 58px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: linear-gradient(90deg, #f4f6ef 0%, #f4f6ef 62%, var(--acc) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 28px color-mix(in srgb, var(--acc) 22%, transparent);
+}
+.film-emblema__sub {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: clamp(11px, 1.2vw, 15px);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  margin-right: -0.5em; /* la spaziatura dell'ultima lettera non sposta il centro */
+  color: var(--acc);
+}
+.film-emblema__sub::before,
+.film-emblema__sub::after {
+  content: "";
+  width: clamp(24px, 5vw, 70px);
+  height: 1px;
+  background: color-mix(in srgb, var(--acc) 70%, transparent);
+}
+.film-emblema + .film-end .film-line--end {
+  font-size: clamp(20px, 2.4vw, 32px);
 }
 .film-end .film-line--s + .film-line--s {
   margin-top: calc(-1 * var(--sp-1));
