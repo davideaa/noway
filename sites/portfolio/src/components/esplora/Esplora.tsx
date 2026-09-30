@@ -11,17 +11,18 @@
  * alla scheda giusta. Nella pagina di una strategia il fluido al mouse prende
  * il suo colore (oro ambra, Nasdaq blu, USDJPY viola; portafoglio verde).
  */
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Dices } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Id } from "@/lib/dati";
 import type { EsploraData } from "@/lib/esplora";
-import { it, signed } from "@/lib/format";
 import { setFluidTint } from "@/components/motion/FluidCursor";
-import { curva, statistiche, totale } from "./calc";
+import { curva } from "./calc";
+import { Simulatore } from "./Simulatore";
 import { Vista } from "./Vista";
 
-type Chi = Id | "port";
-const HASH: Record<Chi, string> = { oro: "oro", nasdaq: "nasdaq", usdjpy: "usdjpy", port: "portafoglio" };
+type Chi = Id | "port" | "sim";
+const HASH: Record<Chi, string> = { oro: "oro", nasdaq: "nasdaq", usdjpy: "usdjpy", port: "portafoglio", sim: "simulatore" };
+type Scheda = Exclude<Chi, "sim">;
 const daHash = (h: string): Chi | null => {
   const k = h.replace(/^#/, "");
   return (Object.keys(HASH) as Chi[]).find((c) => HASH[c] === k) ?? null;
@@ -54,7 +55,7 @@ function Scheda({
   onPick,
   picking,
 }: {
-  chi: Chi;
+  chi: Scheda;
   data: EsploraData;
   onPick: (c: Chi, el: HTMLElement) => void;
   picking: Chi | null;
@@ -67,10 +68,8 @@ function Scheda({
     const k = data.ids.indexOf(chi);
     return data.r.filter((_, i) => data.s[i] === k);
   }, [data, chi, port]);
-  const c = useMemo(() => curva(r, "composto", 0.01), [r]);
-  const st = useMemo(() => statistiche(r), [r]);
-  const comp = useMemo(() => totale(r, "composto", 0.01), [r]);
-  const dd = useMemo(() => Math.min(...curva(r, "R", 0.01).dd), [r]);
+  // solo l'andamento, senza numeri (Davide: niente rendimenti sulle schede); in R, che non dipende dal rischio scelto
+  const c = useMemo(() => curva(r, "R", 0.01), [r]);
 
   // inclinazione verso il puntatore (solo mouse): --rx / --ry in gradi, --gx / --gy per la luce
   const onMove = (e: React.PointerEvent) => {
@@ -102,7 +101,7 @@ function Scheda({
       onPointerMove={onMove}
       onPointerLeave={onLeave}
       onClick={() => ref.current && onPick(chi, ref.current)}
-      aria-label={`Apri ${nome}: ${signed(comp, 0)}% a rischio composto dell’1%, ${st.n} operazioni`}
+      aria-label={`Apri i risultati di ${nome}`}
     >
       <span className="xp-card__glow" aria-hidden="true" />
       <span className="xp-card__head">
@@ -114,20 +113,6 @@ function Scheda({
       </span>
       <span className="xp-card__tipo">{port ? "XAUUSD, Nasdaq e USDJPY insieme" : data.base[chi].tipo}</span>
       <Mini v={c.v} colore={colore} />
-      <span className="xp-card__nums">
-        <span>
-          <b className="mono">{signed(comp, 0)}%</b>
-          <small>rischio composto 1%</small>
-        </span>
-        <span>
-          <b className="mono">{it(st.vinte, 0)}%</b>
-          <small>operazioni vinte</small>
-        </span>
-        <span>
-          <b className="mono">{it(dd, 1)} R</b>
-          <small>discesa massima</small>
-        </span>
-      </span>
       <span className="xp-card__go">
         Scopri i risultati <ArrowUpRight size={16} strokeWidth={1.8} aria-hidden />
       </span>
@@ -226,16 +211,22 @@ export function Esplora({ data, hero, rest }: { data: EsploraData; hero: ReactNo
               <span>Guarda solo i suoi risultati.</span>
             </h2>
             <div className="xp-grid" data-picking={picking ? "1" : undefined}>
-              {(["oro", "nasdaq", "usdjpy", "port"] as Chi[]).map((c) => (
+              {(["oro", "nasdaq", "usdjpy", "port"] as Scheda[]).map((c) => (
                 <Scheda key={c} chi={c} data={data} onPick={pick} picking={picking} />
               ))}
             </div>
             <p className="xp-hint mono">Backtest 2019–2026 · 4.206 operazioni · passa sopra una scheda e cliccala</p>
+            <div className="xp-more">
+              <button type="button" className="chip-btn h-11" onClick={() => pick("sim")}>
+                <Dices size={16} strokeWidth={1.6} aria-hidden />
+                Apri il simulatore Monte Carlo
+              </button>
+            </div>
           </div>
         </section>
       ) : (
         <div className="wrap xp-view-wrap">
-          <Vista key={sel} data={data} chi={sel} onBack={back} />
+          {sel === "sim" ? <Simulatore data={data} onBack={back} /> : <Vista key={sel} data={data} chi={sel} onBack={back} />}
         </div>
       )}
       <div hidden={sel !== null}>{rest}</div>

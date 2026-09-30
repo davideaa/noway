@@ -39,7 +39,7 @@ export function Hero() {
             Scegli una strategia
             <ArrowRight size={16} strokeWidth={1.6} aria-hidden />
           </a>
-          <a href="/simulatore/" className={buttonVariants({ variant: "outline" })} target="_blank" rel="noopener">
+          <a href="#simulatore" className={buttonVariants({ variant: "outline" })}>
             Apri il simulatore
           </a>
           <a
