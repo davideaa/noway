@@ -1,0 +1,260 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Stile «noir» di Macro & Algo — bozza 1 (18 s, 100 bpm).
+// Regola: render(t) è una funzione pura del tempo. Niente stato fra un fotogramma e l'altro.
+// Zone sicure Instagram: testo tra y 14% e 76%, x tra 5% e 90%.
+const W = 1080, H = 1920, B = 0.6, DUR = 18.0;
+const C = { bg: '#050607', ink: '#F1F4EE', muted: '#8B958F', lime: '#C8FA72', red: '#FF5A4E',
+            light: '#E9ECE6', dark: '#0B0D0C', grey: '#59615C' };
+const cv = document.getElementById('c'), x = cv.getContext('2d');
+window.DUR = DUR;
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const oC = (k) => 1 - Math.pow(1 - k, 3);
+const ioC = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const oB = (k, s = 1.7) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2);
+const iC = (k) => k * k * k;
+
+function txt(s, px, py, o = {}) {
+  const { size = 40, weight = 800, color = C.ink, align = 'center', fam = 'Manrope', alpha = 1, blur = 0, ls = 0, base = 'middle' } = o;
+  if (alpha <= 0.001 || !s) return;
+  x.save(); x.globalAlpha *= alpha; x.font = `${weight} ${size}px ${fam === 'mono' ? '"IBM Plex Mono"' : 'Manrope'}`;
+  x.letterSpacing = ls + 'px'; x.textAlign = align; x.textBaseline = base; x.fillStyle = color;
+  if (blur > 0.2) x.filter = `blur(${blur}px)`;
+  x.fillText(s, px, py); x.restore();
+}
+function width(s, size, weight = 800, fam = 'Manrope', ls = 0) {
+  x.save(); x.font = `${weight} ${size}px ${fam === 'mono' ? '"IBM Plex Mono"' : 'Manrope'}`; x.letterSpacing = ls + 'px';
+  const w = x.measureText(s).width; x.restore(); return w;
+}
+const money = (v) => '$' + Math.round(v).toLocaleString('en-US');
+
+// grana deterministica
+const grain = (() => { const g = document.createElement('canvas'); g.width = 540; g.height = 960; const gx = g.getContext('2d');
+  const id = gx.createImageData(540, 960); let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < id.data.length; i += 4) { const v = r() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gx.putImageData(id, 0, 0); return g; })();
+
+function bgDark(spot = 1) {
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(540, -150, 0, 540, -150, 1500);
+  g.addColorStop(0, `rgba(42,50,45,${0.9 * spot})`); g.addColorStop(1, 'rgba(5,6,7,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+}
+function bgLight() {
+  x.fillStyle = C.light; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(540, 200, 0, 540, 200, 1300);
+  g.addColorStop(0, 'rgba(255,255,255,0.75)'); g.addColorStop(1, 'rgba(233,236,230,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+}
+function finish(t, dark = true) {
+  // vignetta + grana
+  const v = x.createRadialGradient(540, 960, 500, 540, 960, 1250);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, dark ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.10)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  const f = Math.floor(t * 60); x.save(); x.globalAlpha = dark ? 0.06 : 0.045; x.globalCompositeOperation = 'overlay';
+  x.drawImage(grain, -(f * 37) % 540, -(f * 61) % 960, 1080 * 2, 1920 * 2); x.restore();
+}
+
+// sottotitolo a una parola (in alto, y 16%)
+function caption(t, words, dark = true) {
+  let cur = null;
+  for (const [w, a, b] of words) if (t >= a && t < b) cur = [w, a];
+  if (!cur) return;
+  const k = oC(seg(t, cur[1], cur[1] + 0.08));
+  txt(cur[0], 540, 307 + (1 - k) * 8, { size: 40, weight: 600, color: dark ? C.ink : C.dark, alpha: k });
+}
+
+// una banconota "di vetro" vista di tre quarti; pila con riflesso
+function bill(cx, cy, w, h, alpha, tint) {
+  const sk = h * 0.55;
+  x.save(); x.globalAlpha *= alpha;
+  // lato
+  x.fillStyle = '#0d110f'; x.beginPath();
+  x.moveTo(cx - w / 2, cy); x.lineTo(cx + w / 2 - sk, cy); x.lineTo(cx + w / 2 - sk, cy + 9); x.lineTo(cx - w / 2, cy + 9); x.closePath(); x.fill();
+  // faccia superiore (parallelogramma)
+  const g = x.createLinearGradient(cx - w / 2, cy - h, cx + w / 2, cy);
+  g.addColorStop(0, '#1e2620'); g.addColorStop(0.55, '#121713'); g.addColorStop(1, '#0a0d0b');
+  x.fillStyle = g; x.beginPath();
+  x.moveTo(cx - w / 2 + sk, cy - h); x.lineTo(cx + w / 2, cy - h); x.lineTo(cx + w / 2 - sk, cy); x.lineTo(cx - w / 2, cy); x.closePath(); x.fill();
+  // filo di luce sul bordo alto-sinistro
+  x.strokeStyle = tint; x.lineWidth = 2.2; x.globalAlpha *= 0.9;
+  x.beginPath(); x.moveTo(cx - w / 2, cy); x.lineTo(cx - w / 2 + sk, cy - h); x.lineTo(cx + w / 2 - 40, cy - h); x.stroke();
+  x.restore();
+}
+function topFace(cx, cy, w, h, alpha) {
+  // simbolo inciso sulla banconota in cima
+  const sk = h * 0.55;
+  x.save(); x.globalAlpha *= alpha; x.translate(cx + sk * -0.0, cy - h / 2); x.transform(1, 0, -0.55 * 0.9, 0.42, 0, 0);
+  x.strokeStyle = 'rgba(200,250,114,0.35)'; x.lineWidth = 3; x.beginPath(); x.ellipse(0, 0, 70, 70, 0, 0, Math.PI * 2); x.stroke();
+  x.font = '800 96px Manrope'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = 'rgba(200,250,114,0.55)'; x.fillText('$', 0, 4);
+  x.restore();
+}
+function stack(cx, floorY, n, nShow, t, enter, lostTint) {
+  // n = banconote totali disegnabili, nShow (float) = quante restano; quelle oltre volano via
+  const w = 540, h = 130, gap = 9;
+  const drawSet = (mirror) => {
+    for (let i = 0; i < n; i++) {
+      const born = clamp((enter - i * 0.025) / 0.35); if (born <= 0) continue;
+      const e = oC(born);
+      let y = floorY - i * gap - (1 - e) * 60, a = e, tint = C.lime, dx = 0;
+      const lostK = clamp(i + 1 - nShow); // 0 = resta, 1 = persa
+      if (lostK > 0) { y -= oC(lostK) * 60; dx = oC(lostK) * (i % 2 ? 300 : -300); a *= 1 - lostK; tint = lostTint; }
+      if (a <= 0.01) continue;
+      if (mirror) { x.save(); x.translate(0, floorY * 2 + 22); x.scale(1, -1); bill(cx + dx, y, w, h, a * 0.16, tint); x.restore(); }
+      else { bill(cx + dx, y, w, h, a, tint); if (i === Math.min(n, Math.ceil(nShow)) - 1 || (i === n - 1 && nShow >= n)) topFace(cx + dx, y, w, h, a); }
+    }
+  };
+  drawSet(true);
+  const fade = x.createLinearGradient(0, floorY + 10, 0, floorY + 260);
+  fade.addColorStop(0, 'rgba(5,6,7,0.2)'); fade.addColorStop(1, 'rgba(5,6,7,1)');
+  x.fillStyle = fade; x.fillRect(0, floorY + 10, W, 260);
+  drawSet(false);
+  // alone lime sotto la pila
+  const gl = x.createRadialGradient(cx, floorY + 6, 0, cx, floorY + 6, 420);
+  gl.addColorStop(0, `rgba(200,250,114,${0.10 * clamp(enter * 2)})`); gl.addColorStop(1, 'rgba(200,250,114,0)');
+  x.fillStyle = gl; x.fillRect(cx - 450, floorY - 200, 900, 400);
+}
+
+function typed(s, t, a, cps = 32) { return s.slice(0, Math.max(0, Math.floor((t - a) * cps))); }
+
+// ---------- SCENE ----------
+function S12(t) { // 0–7.2: contanti fermi, il potere d'acquisto scende
+  bgDark();
+  const z = lerp(1.10, 0.97, oC(seg(t, 0, 7.2)));
+  x.save(); x.translate(540, 1000); x.scale(z, z); x.translate(-540, -1000);
+  // etichetta mono
+  const lab1 = 'CASH · SAVED IN JANUARY 2020', lab2 = 'SAME CASH · AUGUST 2026';
+  if (t < 3.0) txt(typed(lab1, t, 0.25), 540, 560, { fam: 'mono', size: 30, weight: 600, color: C.lime, ls: 4 });
+  else txt(typed(lab2, t, 3.05), 540, 560, { fam: 'mono', size: 30, weight: 600, color: C.lime, ls: 4 });
+  // numero
+  const kIn = oC(seg(t, 0.0, 0.6));
+  const val = lerp(10000, 7755, ioC(seg(t, 3.6, 6.0)));
+  const drop = seg(t, 3.6, 6.0);
+  const col = drop > 0 ? `rgb(${Math.round(lerp(241, 255, drop))},${Math.round(lerp(244, 214, drop))},${Math.round(lerp(238, 208, drop))})` : C.ink;
+  txt(money(val), 540, 760 - (1 - kIn) * 40, { size: 230, weight: 800, color: col, blur: (1 - kIn) * 18, alpha: kIn, ls: -6 });
+  // chip della perdita
+  const kc = seg(t, 6.0, 6.45);
+  if (kc > 0) {
+    const s = oB(kc); const label = '−$2,245 of buying power';
+    const w = width(label, 36, 700) + 60;
+    x.save(); x.translate(540, 930); x.scale(s, s); x.globalAlpha = clamp(kc * 3);
+    x.fillStyle = 'rgba(255,90,78,0.14)'; x.strokeStyle = C.red; x.lineWidth = 2.5;
+    x.beginPath(); x.roundRect(-w / 2, -34, w, 68, 34); x.fill(); x.stroke();
+    txt(label, 0, 2, { size: 36, weight: 700, color: C.red });
+    x.restore();
+  }
+  // pila
+  const nShow = lerp(20, 15.5, ioC(seg(t, 3.6, 6.0)));
+  stack(540, 1400, 20, nShow, t, seg(t, 0.35, 1.6) * 1.5, C.red);
+  x.restore();
+  caption(t, [['you', 0.6, 0.9], ['saved', 0.9, 1.5], ['it', 1.5, 1.8], ['in', 1.8, 2.1], ['cash.', 2.1, 3.0],
+              ['you', 3.0, 3.3], ["didn't", 3.3, 3.6], ['spend', 3.6, 3.9], ['a', 3.9, 4.2], ['dollar.', 4.2, 5.4],
+              ['it', 5.4, 5.7], ['still', 5.7, 6.0], ['shrank.', 6.0, 7.2]]);
+  finish(t);
+}
+
+let CPI = null;
+function S3(t) { // 7.2–11.4: grafico dei prezzi, fondo chiaro
+  bgLight();
+  const lt = t - 7.2;
+  const z = lerp(1.04, 1.0, oC(seg(lt, 0, 4.2)));
+  x.save(); x.translate(540, 960); x.scale(z, z); x.translate(-540, -960);
+  txt(typed('US CONSUMER PRICES · JAN 2020 → AUG 2026', t, 7.25, 40), 540, 470, { fam: 'mono', size: 26, weight: 600, color: '#4A524D', ls: 3 });
+  const kL = ioC(seg(t, 7.6, 9.8));
+  const pct = 28.9 * kL;
+  const kN = oC(seg(t, 7.3, 7.8));
+  txt('+' + pct.toFixed(1) + '%', 540, 650 - (1 - kN) * 30, { size: 220, weight: 800, color: C.dark, alpha: kN, blur: (1 - kN) * 14, ls: -6 });
+  // grafico
+  const P = CPI.punti, n = P.length, X0 = 130, X1 = 950, Y0 = 1290, Y1 = 830, lo = 255, hi = 338;
+  const px = (i) => X0 + (X1 - X0) * i / (n - 1), py = (v) => Y0 - (v - lo) / (hi - lo) * (Y0 - Y1);
+  const kA = oC(seg(t, 7.4, 7.9));
+  x.save(); x.globalAlpha = kA; x.strokeStyle = '#BCC2BB'; x.lineWidth = 2; x.beginPath(); x.moveTo(X0, Y0); x.lineTo(X1, Y0); x.stroke(); x.restore();
+  const upto = kL * (n - 1); const m = Math.floor(upto);
+  if (upto > 0) {
+    // area
+    x.beginPath(); x.moveTo(px(0), Y0);
+    for (let i = 0; i <= m; i++) x.lineTo(px(i), py(P[i][1]));
+    const fr = upto - m, ex = m < n - 1 ? lerp(P[m][1], P[m + 1][1], fr) : P[m][1], exX = m < n - 1 ? lerp(px(m), px(m + 1), fr) : px(m);
+    x.lineTo(exX, py(ex)); x.lineTo(exX, Y0); x.closePath();
+    const ga = x.createLinearGradient(0, Y1, 0, Y0); ga.addColorStop(0, 'rgba(11,13,12,0.10)'); ga.addColorStop(1, 'rgba(11,13,12,0)');
+    x.fillStyle = ga; x.fill();
+    // linea
+    x.beginPath(); for (let i = 0; i <= m; i++) { i ? x.lineTo(px(i), py(P[i][1])) : x.moveTo(px(i), py(P[i][1])); }
+    x.lineTo(exX, py(ex)); x.strokeStyle = C.dark; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round'; x.stroke();
+    // punto di testa
+    x.fillStyle = kL >= 1 ? C.red : C.dark; x.beginPath(); x.arc(exX, py(ex), 11, 0, Math.PI * 2); x.fill();
+    if (kL >= 1) { const pk = ((t - 9.8) % 0.6) / 0.6; x.strokeStyle = `rgba(255,90,78,${1 - pk})`; x.lineWidth = 3; x.beginPath(); x.arc(exX, py(ex), 11 + pk * 34, 0, Math.PI * 2); x.stroke(); }
+  }
+  txt('2020', X0, 1340, { fam: 'mono', size: 26, weight: 500, color: C.grey, align: 'left', alpha: kA });
+  txt('2026', X1, 1340, { fam: 'mono', size: 26, weight: 500, color: C.grey, align: 'right', alpha: kA });
+  txt('SOURCE: BLS VIA FRED · CPI-U, SEASONALLY ADJUSTED', 540, 1410, { fam: 'mono', size: 20, weight: 500, color: '#7A827D', ls: 1.5, alpha: oC(seg(t, 9.9, 10.3)) });
+  x.restore();
+  caption(t, [['everything', 7.2, 7.8], ['got', 7.8, 8.1], ['pricier.', 8.1, 9.0], ['every', 9.0, 9.3], ['single', 9.3, 9.6], ['month.', 9.6, 11.4]], false);
+  finish(t, false);
+}
+
+function S4(t) { // 11.4–15.0: la frase
+  bgDark(0.7);
+  const z = lerp(1.06, 1.0, oC(seg(t, 11.4, 15.0)));
+  x.save(); x.translate(540, 980); x.scale(z, z); x.translate(-540, -980);
+  const L = [
+    [[['Inflation', 11.5], ["doesn't", 11.8]], 820, C.ink],
+    [[['take', 12.1], ['your', 12.4], ['money.', 12.7]], 925, C.ink],
+    [[['It', 13.2], ['takes', 13.5]], 1085, C.ink],
+    [[['what', 13.8], ['it', 14.1], ['buys.', 14.4]], 1190, C.lime],
+  ];
+  const dim = 1 - 0.55 * oC(seg(t, 13.1, 13.5));
+  L.forEach(([words, y, col], li) => {
+    const sz = 92, sp = width(' ', sz);
+    const tot = words.reduce((s, [w]) => s + width(w, sz), 0) + sp * (words.length - 1);
+    let cx = 540 - tot / 2;
+    for (const [w, a] of words) {
+      const k = oC(seg(t, a, a + 0.32)); const ww = width(w, sz);
+      txt(w, cx + ww / 2, y + (1 - k) * 34, { size: sz, weight: 800, color: col, alpha: k * (li < 2 ? dim : 1), blur: (1 - k) * 12, ls: -2 });
+      cx += ww + sp;
+    }
+  });
+  x.restore();
+  finish(t);
+}
+
+function S5(t) { // 15.0–18.0: chiusura
+  bgDark();
+  const h = '@macro.algo.desk';
+  txt(typed(h, t, 15.1, 28), 540, 820, { size: 62, weight: 800, color: C.ink, ls: -1 });
+  txt('Macro, explained with real data.', 540, 905, { size: 38, weight: 500, color: C.muted, alpha: oC(seg(t, 15.7, 16.1)) });
+  const kp = oC(seg(t, 15.8, 16.2)), kf = seg(t, 16.5, 16.85);
+  if (kp > 0) {
+    const s = (kf > 0 ? oB(kf, 2.2) * 0.08 + 0.92 + (1 - kf) * 0.08 : 1) * lerp(0.85, 1, kp);
+    const on = kf > 0.25, w = on ? 330 : 280;
+    x.save(); x.translate(540, 1035); x.scale(s, s); x.globalAlpha = kp;
+    x.beginPath(); x.roundRect(-w / 2, -48, w, 96, 48);
+    if (on) { x.fillStyle = C.lime; x.fill(); } else { x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke(); }
+    txt(on ? 'Following' : 'Follow', 0, 2, { size: 40, weight: 700, color: on ? '#15200C' : C.ink });
+    x.restore();
+  }
+  txt('EDUCATIONAL · NOT FINANCIAL ADVICE', 540, 1330, { fam: 'mono', size: 22, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, 16.0, 16.4)) });
+  finish(t);
+}
+
+function flash(t, a, d = 0.16) { const k = seg(t, a - d / 2, a + d / 2); if (k <= 0 || k >= 1) return; x.fillStyle = `rgba(255,255,255,${Math.sin(k * Math.PI) * 0.85})`; x.fillRect(0, 0, W, H); }
+
+window.render = function (t) {
+  if (!CPI) CPI = window.CPI;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
+  if (t < 7.2) S12(t); else if (t < 11.4) S3(t); else if (t < 15.0) S4(t); else S5(t);
+  flash(t, 7.2); flash(t, 11.4, 0.1);
+  // ingresso dal nero e uscita
+  const fi = 1 - seg(t, 0, 0.2), fo = seg(t, DUR - 0.25, DUR);
+  if (fi > 0) { x.fillStyle = `rgba(0,0,0,${fi})`; x.fillRect(0, 0, W, H); }
+  if (fo > 0) { x.fillStyle = `rgba(0,0,0,${fo})`; x.fillRect(0, 0, W, H); }
+};
+</script></body></html>
