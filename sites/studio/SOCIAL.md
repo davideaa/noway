@@ -14,7 +14,7 @@ Stato scritto il 01/10/2026. Leggere insieme a `STUDIO.md`.
   controllata da TikTok, quindi all'inizio su TikTok carica lui l'mp4 a mano.
 
 ## Regole
-- Mai password o token in chat. Il token sta nelle variabili d'ambiente (`META_ACCESS_TOKEN`).
+- Mai password o token in chat. Il token sta nelle variabili d'ambiente (`IG_ACCESS_TOKEN` (e `IG_USER_ID`)).
 - Niente scraping né login con password: solo API ufficiali.
 - Si studiano solo account indicati da lui (Business Discovery); si copia la **struttura**, non il contenuto.
 - Riga fissa nei reel: «Backtest su dati storici · Trading ad alto rischio · Non è consulenza finanziaria».
@@ -27,7 +27,10 @@ Tempo di visione e rivisioni > condivisioni in DM (le «sends») > like; origina
 Gancio nei primi 2 secondi.
 
 ## Da fare
-1. Davide: app sviluppatore Meta + token (guida passo passo in chat) → variabili d'ambiente.
+1. FATTO: app Meta «MacroAlgo Studio» (caso d'uso Instagram API with Instagram Login), tester accettato.
+   IG user id 17841425810972500 (non segreto). Resta: Davide genera il token («Genera token») e lo mette in `IG_ACCESS_TOKEN`.
+   Il token dura ~60 giorni, si rinnova con graph.instagram.com/refresh_access_token (basta il token, niente app secret).
+   Per leggere account altrui (Business Discovery) servirà il percorso Facebook Login: da valutare dopo.
 2. Test: lettura account → lettura di un account esterno → reel di prova pubblicato.
 3. Davide manda screenshot di chi segue + 5–10 account modello → classifica per visualizzazioni/follower,
    scomposizione dei fotogrammi → documento di stile unico (lime `#c8fa72` su `#080b0e`, wormhole, iPhone 3D…).
