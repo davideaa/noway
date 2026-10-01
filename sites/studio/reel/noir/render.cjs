@@ -7,7 +7,7 @@ const { chromium } = require('../node_modules/playwright-core'); const fs = requ
   const exe = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
   const b = await chromium.launch({ executablePath: fs.existsSync(exe) ? exe : undefined, args: ['--no-sandbox', '--allow-file-access-from-files'] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } }); p.on('pageerror', (e) => console.log('ERR', e.message));
-  await p.goto('file://' + path.join(__dirname, 'comp.html'));
+  await p.goto('file://' + path.join(__dirname, process.env.COMP || 'comp.html'));
   await p.evaluate((c) => { window.CPI = c; }, cpi);
   await p.evaluate(() => Promise.all(['800 50px Manrope', '700 50px Manrope', '600 50px Manrope', '500 50px Manrope', '600 50px "IBM Plex Mono"', '500 50px "IBM Plex Mono"'].map((f) => document.fonts.load(f))));
   await p.evaluate(() => document.fonts.ready);
