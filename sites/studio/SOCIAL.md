@@ -14,7 +14,7 @@ Stato scritto il 01/10/2026. Leggere insieme a `STUDIO.md`.
   controllata da TikTok, quindi all'inizio su TikTok carica lui l'mp4 a mano.
 
 ## Regole
-- Mai password o token in chat. Il token sta nelle variabili d'ambiente (`META_ACCESS_TOKEN`).
+- Mai password o token in chat. Il token sta nelle variabili d'ambiente (`IG_ACCESS_TOKEN` (e `IG_USER_ID`)).
 - Niente scraping né login con password: solo API ufficiali.
 - Si studiano solo account indicati da lui (Business Discovery); si copia la **struttura**, non il contenuto.
 - Riga fissa nei reel: «Backtest su dati storici · Trading ad alto rischio · Non è consulenza finanziaria».
@@ -26,8 +26,29 @@ Stato scritto il 01/10/2026. Leggere insieme a `STUDIO.md`.
 Tempo di visione e rivisioni > condivisioni in DM (le «sends») > like; originalità premiata, repost penalizzati.
 Gancio nei primi 2 secondi.
 
+## Stato collegamento (01/10/2026)
+- Token Instagram (Instagram API with Instagram Login) inserito da Davide come **credenziale dell'ambiente** («Aggiungi credenziale»,
+  Bearer, sito consentito `graph.instagram.com`). Non è una variabile: il proxy aggiunge l'intestazione da solo, quindi si chiama
+  `curl https://graph.instagram.com/v23.0/...` **senza token**. Il token non si vede mai.
+- Provato: `GET /me` → `macro.algo.desk`, BUSINESS, 0 follower, 0 post. Lettura funziona.
+- Per pubblicare serve un video su un URL pubblico (o upload a `rupload.facebook.com`, che andrebbe aggiunto ai siti consentiti).
+- Scade dopo ~60 giorni: rinnovo con `graph.instagram.com/refresh_access_token`.
+
+## Studio account altrui — FUNZIONA (01/10/2026)
+- Seconda credenziale: `FB_ACCESS_TOKEN` (Facebook Login, ~60 giorni, scade 30/11/2026), sito consentito `graph.facebook.com`.
+  Permessi: instagram_basic, instagram_manage_insights, pages_show_list, pages_read_engagement.
+  (`me/accounts` risulta vuoto ma non serve.) Il token lungo è finito in uno screenshot in chat: da revocare e rigenerare a lavoro finito.
+- Chiamata che funziona (account Business/Creator pubblici), con id IG di Davide `17841425810972500`:
+  `curl -G https://graph.facebook.com/v23.0/17841425810972500 --data-urlencode "fields=business_discovery.username(NOME){username,followers_count,media_count,media.limit(50){timestamp,media_product_type,view_count,like_count,comments_count,caption,permalink,thumbnail_url}}"`
+- `view_count` c'è per i reel (include le visualizzazioni a pagamento). `media_url` del video NON viene restituito: niente fotogrammi dall'API,
+  solo copertina (`thumbnail_url`). Per scomporre i video servono le registrazioni schermo di Davide.
+- Non ci sono tempo di visione, condivisioni, salvataggi degli altri.
+
 ## Da fare
-1. Davide: app sviluppatore Meta + token (guida passo passo in chat) → variabili d'ambiente.
+1. FATTO: app Meta «MacroAlgo Studio» (caso d'uso Instagram API with Instagram Login), tester accettato.
+   IG user id 17841425810972500 (non segreto). Resta: Davide genera il token («Genera token») e lo mette in `IG_ACCESS_TOKEN`.
+   Il token dura ~60 giorni, si rinnova con graph.instagram.com/refresh_access_token (basta il token, niente app secret).
+   Per leggere account altrui (Business Discovery) servirà il percorso Facebook Login: da valutare dopo.
 2. Test: lettura account → lettura di un account esterno → reel di prova pubblicato.
 3. Davide manda screenshot di chi segue + 5–10 account modello → classifica per visualizzazioni/follower,
    scomposizione dei fotogrammi → documento di stile unico (lime `#c8fa72` su `#080b0e`, wormhole, iPhone 3D…).
