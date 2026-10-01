@@ -1,345 +1,372 @@
-# «Dalla teoria alla realtà» — un anno di reel (programma v3, 01/10/2026)
+# «Dalla teoria alla realtà» — un anno di reel (programma v4, 01/10/2026)
 
-**Pubblico:** universitari e giovani che vogliono capire come gira davvero l'economia e come muove i mercati.
-**Livello:** non da principianti assoluti: si spiega tutto, ma si va in profondità (meccanismi, numeri veri, casi reali).
-**Formula:** concetto → meccanismo (come funziona davvero) → caso reale di oggi → dato con fonte → cosa significa per i mercati / per te.
-**Lingua:** italiano · **Durata:** 90–120 s · **Ritmo:** ~25 reel al mese, 12 moduli, 300 lezioni · le notizie forti entrano come «Extra».
-
-## Formato fisso
-1. **0–3 s** «Lezione N · …» + una domanda che incuriosisce («Perché le banche ti prestano soldi che non hanno?»)
-2. **Il meccanismo** in 2–3 passaggi animati
-3. **Il caso reale** con numero vero e fonte a schermo
-4. **Cosa cambia per i mercati / per te** + «Prossima lezione: …» + Segui · «Contenuto educativo · Non è consulenza finanziaria»
-
-## Fonti
-Spiegazioni: Banca d'Italia, BCE, Fed, Consob, FMI, BRI (BIS). Dati: ISTAT, Eurostat, BCE, Banca d'Italia, FRED, EIA, World Gold Council, FMI.
-Ogni numero con fonte e data; testo sempre nostro; visuali disegnati nel motore noir, nessuna persona reale.
+**Struttura:** 12 capitoli (1 al mese) × 4 sottocapitoli (1 a settimana) × 5 lezioni (lun–ven) = **240 reel**.
+**Calendario:** da lunedì 5 ottobre 2026 a fine settembre 2027. I giorni feriali in più del mese (1–3) restano per gli **Extra** (notizie forti) e per i recuperi.
+**Pubblico:** universitari e giovani · **Lingua:** italiano · **Durata:** 90–120 s.
+**Formula:** domanda che incuriosisce → meccanismo (2–3 passaggi animati) → caso reale con dato e fonte → cosa cambia per i mercati / per te → «Prossima lezione» + Segui.
+**Fonti:** Banca d'Italia, BCE, Fed, Consob, FMI, BRI; dati ISTAT, Eurostat, FRED, EIA, World Gold Council. Testo nostro, visuali noir, nessuna persona reale.
 
 ---
 
-## Mese 1 · Come gira l'economia
-1. Il circuito: famiglie, imprese, Stato, banche, resto del mondo
-2. Il PIL davvero: cosa misura e cosa no
-3. Da dove viene la crescita: lavoro, capitale, produttività
-4. Il problema della produttività italiana in un grafico (dati OCSE)
-5. Il ciclo economico: espansione, picco, recessione, ripresa
-6. Recessione: come si riconosce (e perché i mercati la anticipano)
-7. Consumi: il motore principale dell'economia
-8. Investimenti delle imprese: perché dipendono dai tassi
-9. Risparmio: gli italiani risparmiano tanto? (dati Banca d'Italia)
-10. Lo Stato nell'economia: spesa, tasse, trasferimenti
-11. Deficit e debito: la differenza con una carta di credito
-12. Moltiplicatore: quanto rende 1 € di spesa pubblica
-13. Export: cosa vende l'Italia al mondo
-14. Disoccupazione: occupati, disoccupati, inattivi
-15. Salari reali: perché in Italia crescono poco
-16. Mercato del lavoro e inflazione: la curva di Phillips oggi
-17. Indicatori anticipatori: PMI, fiducia, ordini
-18. Shock di offerta: Covid ed energia
-19. Shock di domanda: crisi 2008
-20. Stagflazione: il peggio di due mondi (anni '70)
-21. Disuguaglianza e crescita: Gini e dati Eurostat
-22. Demografia ed economia: meno giovani, quali conseguenze
-23. IA e produttività: cosa dicono i primi dati
-24. Come leggere un dato macro il giorno dell'uscita
-25. Ripasso del mese
+## Capitolo 1 · Come gira l'economia — ottobre 2026
+**1.1 Il circuito**
+1. Il circuito dell'economia: famiglie, imprese, Stato, banche, estero
+2. Il PIL: cosa misura e cosa no
+3. PIL nominale e reale
+4. PIL pro capite: Italia contro il mondo
+5. Da dove viene la crescita: lavoro, capitale, produttività
 
-## Mese 2 · Il debito: pubblico, privato, aziendale
-26. Perché esiste il debito: spostare soldi nel tempo
-27. Come le banche creano moneta prestando
-28. Il mutuo: perché esiste e come ti permette di comprare casa
-29. Come si calcola una rata: l'ammortamento alla francese
-30. Mutuo fisso o variabile: simulazione con tassi veri
-31. Euribor e IRS: da dove viene il tuo tasso
-32. Leva immobiliare: guadagni e rischi
-33. TAN e TAEG: il costo vero di un prestito
-34. Debito buono e cattivo: studio, casa, consumi
-35. Carte revolving e BNPL: il costo nascosto
-36. Merito creditizio: come la banca decide se prestarti
-37. Debito delle aziende: perché le imprese si indebitano
-38. Leva finanziaria aziendale e fallimenti
-39. Obbligazioni societarie e high yield
-40. Debito pubblico italiano: chi lo possiede (Banca d'Italia)
-41. Sostenibilità del debito: crescita contro tassi
-42. Spread BTP-Bund: il termometro della fiducia
-43. Crisi del debito: Grecia 2010, Italia 2011
-44. Default sovrani: Argentina
-45. Debito USA: il tetto del debito e i downgrade
-46. Debito globale: quanto deve il mondo (FMI, BIS)
-47. Bolla immobiliare 2008: i mutui subprime
-48. Cina ed Evergrande: il debito immobiliare
-49. Inflazione e debitori: chi ci guadagna
-50. Ripasso del mese
+**1.2 I motori**
+6. Consumi: il motore principale
+7. Investimenti delle imprese
+8. Spesa pubblica e tasse
+9. Export e import: cosa vende l'Italia al mondo
+10. Risparmio: dove finiscono i soldi delle famiglie
 
-## Mese 3 · Inflazione a fondo
-51. Cos'è e come si misura: il paniere ISTAT
-52. Inflazione headline e core: perché si tolgono energia e cibo
-53. Da domanda e da costi: il 2022 spiegato
-54. Spirale prezzi-salari: mito o rischio?
-55. Aspettative di inflazione: perché contano più dei dati
-56. Breakeven inflation: come la misura il mercato
-57. Potere d'acquisto: 1.000 € del 2020 oggi
-58. Tasso nominale e reale: il conto deposito che perde
-59. Inflazione e azioni: chi protegge e chi no
-60. Inflazione e obbligazioni: le peggiori nemiche
-61. Inflazione e oro: la copertura storica funziona?
-62. Inflazione e immobili
-63. BTP Italia e TIPS: titoli legati all'inflazione
-64. Iperinflazione: Weimar, Zimbabwe, Argentina
-65. Deflazione: il caso Giappone
-66. Shrinkflation: quando la confezione si rimpicciolisce
-67. Inflazione per categorie: cosa è salito di più
-68. Inflazione percepita e misurata
-69. Energia e inflazione in Europa
-70. Inflazione USA vs euro: perché diverse
-71. Inflazione e stipendi dei giovani
-72. Inflazione e debito pubblico: «l'eutanasia del creditore»
-73. Cosa guarda la BCE: il 2% spiegato
-74. Previsioni di inflazione: quanto sbagliano
-75. Ripasso del mese
+**1.3 Il ciclo**
+11. Il ciclo economico
+12. Recessione: come si riconosce
+13. Shock di domanda: la crisi del 2008
+14. Shock di offerta: Covid ed energia
+15. Stagflazione: il peggio di due mondi
 
-## Mese 4 · Fed e BCE: chi decide il prezzo dei soldi
-76. Cos'è una banca centrale e perché è indipendente
-77. BCE: mandato, strumenti, consiglio direttivo
-78. Fed: doppio mandato e FOMC
-79. Il tasso ufficiale e il corridoio dei tassi
-80. Meccanismo di trasmissione: tassi → credito → spesa → prezzi
-81. Perché alzare i tassi frena l'inflazione (2022–2023)
-82. Perché tagliarli: crescita e rischi
-83. Quantitative easing: comprare titoli per abbassare i tassi lunghi
-84. Quantitative tightening: il processo inverso
-85. Forward guidance: quando le parole muovono i mercati
-86. Il dot plot della Fed: come leggerlo
-87. La riunione BCE in 90 secondi: cosa guardare
-88. Curva dei rendimenti: tassi a breve e a lungo
-89. Curva invertita: perché anticipa le recessioni (dati FRED)
-90. Tassi e dollaro: dove corrono i capitali
-91. Tassi e Borsa: perché le tech soffrono quando salgono
-92. Tassi e oro: il costo opportunità di un asset senza cedola
-93. Banca del Giappone e tassi negativi
-94. Volcker e gli anni '70: la lezione
-95. Lo «scudo» anti-spread della BCE (TPI)
-96. Riserve, liquidità e repo: l'idraulica dei mercati
-97. Crisi bancarie e banche centrali: SVB 2023
-98. Mercati dei future sui tassi: come si prevede la prossima mossa
-99. Banche centrali e oro: chi compra (World Gold Council)
-100. Ripasso del mese
+**1.4 Lavoro e produttività**
+16. Disoccupazione: occupati, disoccupati, inattivi
+17. Salari reali: perché in Italia crescono poco
+18. La produttività italiana in un grafico
+19. Demografia: meno giovani, quali conseguenze
+20. Come leggere un dato macro il giorno dell'uscita
 
-## Mese 5 · Come la macro muove i mercati
-101. Mercati e attese: perché conta la sorpresa, non il dato
-102. Il calendario macro: i giorni che muovono tutto
-103. CPI USA: perché i mercati lo temono
-104. Payrolls: il venerdì del lavoro americano
-105. PIL e PMI: crescita e sentiment
-106. Riunioni Fed e BCE: cosa succede minuto per minuto
-107. Rendimenti dei Treasury: il prezzo di riferimento del mondo
-108. Dollaro: chi vince e chi perde quando sale
-109. Rischio «on» e rischio «off»
-110. Rotazioni settoriali nel ciclo economico
-111. Azioni cicliche e difensive
-112. Utili aziendali e macro: il legame
-113. Valutazioni e tassi: perché un P/E «alto» può essere giustificato
-114. Volatilità e VIX: la paura misurata
-115. Correlazione azioni-obbligazioni: perché nel 2022 sono scese insieme
-116. Recessione e Borsa: cosa è successo storicamente
-117. Banche e tassi: perché guadagnano quando i tassi salgono
-118. Immobiliare quotato e tassi
-119. Mercati emergenti e dollaro forte
-120. Spread e Borsa italiana
-121. Come leggere una giornata di mercato
-122. Notizie che «non contano»: il rumore
-123. Prezzato o non prezzato: il concetto chiave
-124. Casi storici: 2008, 2020, 2022 in 90 secondi l'uno
-125. Ripasso del mese
+## Capitolo 2 · Il debito — novembre 2026
+**2.1 Come nasce il credito**
+21. Perché esiste il debito: spostare soldi nel tempo
+22. Le banche creano moneta prestando
+23. Riserva frazionaria e corsa agli sportelli
+24. Merito creditizio: come la banca decide
+25. TAN e TAEG: il costo vero di un prestito
 
-## Mese 6 · Le classi di attivo e le loro curiosità
-126. Cos'è un asset e perché rende
-127. Azioni: rendimenti storici dal 1900
-128. Obbligazioni: rendimenti storici e rischi
-129. Liquidità e monetario
-130. Oro: perché vale, chi lo compra, quanto ne esiste
-131. Argento: oro dei poveri o metallo industriale?
-132. Petrolio: dal barile alla pompa
-133. Gas naturale: il prezzo più volatile
-134. Rame: «Dr. Copper», il metallo che prevede l'economia
-135. Litio e metalli della transizione
-136. Grano e cibo: clima e geopolitica
-137. Caffè e cacao: perché sono esplosi
-138. Valute: il mercato più grande del mondo
-139. Franco svizzero e yen: le valute rifugio
-140. Immobili: mattone diretto vs REIT
-141. Private equity e venture capital
-142. Crypto: Bitcoin come asset
-143. Stablecoin e tokenizzazione
-144. Arte e collezionismo come asset
-145. Obbligazioni indicizzate e TIPS
-146. Correlazioni tra asset: chi si muove insieme
-147. Asset rifugio: cosa funziona davvero nelle crisi
-148. Rendimento reale per asset nell'ultimo secolo
-149. Liquidità degli asset: quanto è facile vendere
-150. Ripasso del semestre
+**2.2 Il mutuo**
+26. Perché esiste il mutuo
+27. La rata: come si calcola l'ammortamento
+28. Fisso o variabile: simulazione con tassi veri
+29. Euribor e IRS: da dove viene il tuo tasso
+30. Leva immobiliare: guadagni e rischi
 
-## Mese 7 · Obbligazioni in profondità
-151. Come funziona un'obbligazione
-152. Prezzo e rendimento: l'altalena
-153. Cedola, scadenza, rendimento a scadenza
-154. Duration: la sensibilità ai tassi
-155. Convessità in parole semplici
-156. BTP: come si comprano e come si tassano (12,5%)
-157. Aste dei titoli di Stato
-158. Bund, OAT, Treasury: il confronto
-159. Rating e agenzie: AAA, BBB, junk
-160. Spread di credito
-161. Obbligazioni zero coupon
-162. Obbligazioni callable e perpetue
-163. High yield: rendimento alto, rischio alto
-164. ETF obbligazionari: come funzionano
-165. Comprare obbligazioni quando i tassi sono alti: cosa succede dopo
-166. Curva dei rendimenti: ripida, piatta, invertita
-167. La crisi dei gilt inglesi 2022
-168. Silicon Valley Bank: una crisi di duration
-169. Rendimenti negativi: com'era possibile
-170. Obbligazioni e inflazione 2022: l'anno peggiore
-171. Obbligazioni green
-172. Debito emergente
-173. Il bond più grande del mondo: i Treasury
-174. Chi compra il debito USA (Cina, Giappone, Fed)
-175. Ripasso del mese
+**2.3 Debito di famiglie e aziende**
+31. Debito buono e debito cattivo
+32. Carte revolving e «compra ora, paga dopo»
+33. Perché le aziende si indebitano
+34. Obbligazioni societarie e high yield
+35. I mutui subprime e la crisi del 2008
 
-## Mese 8 · Geopolitica e mercati
-176. Perché la geopolitica entra nei prezzi
-177. Petrolio e Medio Oriente
-178. Stretto di Hormuz: il collo di bottiglia del mondo
-179. Mar Rosso e Suez: noli e prezzi
-180. OPEC+: come si decide l'offerta
-181. Russia, gas ed Europa
-182. Sanzioni economiche: funzionano?
-183. USA-Cina: dazi e guerra commerciale
-184. Taiwan e i semiconduttori
-185. Terre rare: chi le controlla
-186. Dazi: chi li paga davvero
-187. Dollaro come arma: SWIFT e riserve congelate
-188. BRICS e de-dollarizzazione: mito o realtà
-189. Oro e banche centrali dopo il 2022
-190. Spesa militare e titoli della difesa
-191. Elezioni USA e mercati
-192. Elezioni europee e spread
-193. Guerre e Borsa: cosa dice la storia
-194. Cibo e geopolitica: grano e Mar Nero
-195. Canale di Panama e siccità
-196. Energia nucleare: il ritorno
-197. Catene di fornitura: reshoring e friend-shoring
-198. FMI e Banca Mondiale: chi salva chi
-199. Rischio geopolitico: come lo prezzano i mercati
-200. Ripasso del mese
+**2.4 Debito pubblico**
+36. Deficit e debito: la differenza
+37. Il debito italiano: chi lo possiede
+38. Lo spread BTP-Bund
+39. Crisi del debito: Grecia 2010, Italia 2011
+40. Debito USA e tetto del debito
 
-## Mese 9 · Aziende, utili e Borsa
-201. Come funziona la Borsa: dal click al regolato (T+1)
-202. Ordini, bid/ask, liquidità
-203. Indici: FTSE MIB, S&P 500, Nasdaq
-204. Bilancio in 90 secondi: conto economico, stato patrimoniale, cassa
-205. Margini: perché Apple guadagna più di un supermercato
-206. EBITDA ed EPS
-207. Trimestrali: attese vs risultati
-208. P/E e multipli
-209. Crescita vs valore
-210. Dividendi e buyback
-211. ROE e ROIC
-212. Vantaggio competitivo
-213. DCF: un'azienda vale i flussi futuri
-214. IPO
-215. Fusioni e acquisizioni
-216. Le «Magnifiche 7» e la concentrazione dell'S&P 500
-217. Bolle: dot-com 2000
-218. Bolle: IA oggi? I numeri
-219. Analisti e target price
-220. Insider e short seller
-221. Notizie che fanno scendere un titolo «buono»
-222. Settori: banche, energia, tech, lusso
-223. Piazza Affari: com'è fatta
-224. ESG: cosa misura davvero
-225. Ripasso del mese
+## Capitolo 3 · Inflazione — dicembre 2026
+**3.1 Misurarla**
+41. Cos'è l'inflazione e il paniere ISTAT
+42. Inflazione generale e «core»
+43. Potere d'acquisto: 1.000 € del 2020 oggi
+44. Tassi nominali e reali
+45. Inflazione percepita e misurata
 
-## Mese 10 · Investire: breve, medio, lungo termine
-226. Investire vs speculare
-227. Orizzonte temporale: cosa cambia tra 1, 5 e 20 anni
-228. Rischio e rendimento
-229. Premio per il rischio azionario
-230. Interesse composto applicato
-231. Diversificazione e correlazione
-232. ETF: come funzionano davvero
-233. Fondi comuni e costi
-234. L'1% di costi che si mangia un quarto del capitale
-235. Gestione attiva vs passiva (dati SPIVA)
-236. PAC: investire ogni mese
-237. Asset allocation per orizzonte
-238. Ribilanciamento
-239. Timing del mercato: perdere i 10 giorni migliori
-240. Drawdown: quanto devi saper sopportare
-241. Bias comportamentali
-242. Fondo di emergenza prima di investire
-243. Fondi pensione e vantaggi fiscali
-244. Tasse sugli investimenti in Italia
-245. Investire in oro: modi e costi
-246. Investire in obbligazioni: singoli titoli o ETF
-247. Valute e investimenti esteri: coprire il cambio?
-248. Portafogli classici: 60/40, all weather
-249. Costruire un primo portafoglio didattico
-250. Ripasso del mese
+**3.2 Le cause**
+46. Da domanda e da costi: il 2022 spiegato
+47. Energia e prezzi
+48. Spirale prezzi-salari
+49. Aspettative di inflazione
+50. Shrinkflation
 
-## Mese 11 · Trading e strategie quantitative
-251. Cos'è il trading e in cosa differisce dall'investimento
-252. Strumenti: azioni, future, CFD, opzioni
-253. Leva e margine
-254. CFD: perché la maggioranza dei conti perde (avvertenze ufficiali)
-255. Timeframe e stili: scalping, intraday, swing
-256. Trend e medie mobili: la regola dei 200 giorni testata
-257. Momentum: funziona?
-258. Mean reversion: funziona?
-259. Breakout: la nostra strategia sull'oro
-260. Stop loss e dimensione della posizione
-261. Rischio per operazione: perché l'1% conta più della strategia
-262. Perdite di fila: quante aspettarsene
-263. Psicologia del trader
-264. Diario di trading
-265. Backtest: provare una regola sul passato
-266. Dentro e fuori campione
-267. Overfitting: quando il backtest mente
-268. Monte Carlo: mille futuri possibili
-269. Sharpe, t-statistica, profit factor
-270. Costi e slippage
-271. Strategie che smettono di funzionare
-272. Portafoglio di strategie
-273. «+800% in 7 anni»: come leggere una pubblicità
-274. Trading algoritmico e alta frequenza
-275. Ripasso del mese
+**3.3 Gli estremi**
+51. Iperinflazione: Weimar, Zimbabwe, Argentina
+52. Deflazione: il caso Giappone
+53. Stagflazione: gli anni '70
+54. Inflazione USA ed euro a confronto
+55. Inflazione e debito pubblico
 
-## Mese 12 · Gestione di portafoglio e del rischio
-276. Cos'è la gestione di portafoglio
-277. Markowitz e frontiera efficiente
-278. Correlazioni che cambiano nelle crisi
-279. Beta e CAPM
-280. Alpha
-281. Fattori: value, size, momentum, quality
-282. Risk parity
-283. Volatility targeting
-284. Rischio di coda e cigni neri
-285. Coperture con derivati
-286. Rischio di cambio
-287. Liquidità come strategia
-288. Stress test di portafoglio
-289. Misurare la performance e il benchmark
-290. Drawdown massimo e tempo di recupero
-291. Come investono i fondi pensione
-292. Il modello Yale
-293. Fondi sovrani: Norvegia
-294. Il 60/40 è morto?
-295. Portafogli per scenari: inflazione, recessione, crescita
-296. Politica d'investimento personale
-297. Errori più comuni dei giovani investitori
-298. Come continuare a imparare
-299. Cosa abbiamo imparato in un anno
-300. Ripasso finale
+**3.4 Inflazione e investimenti**
+56. Inflazione e azioni
+57. Inflazione e obbligazioni
+58. Inflazione e oro
+59. Inflazione e immobili
+60. BTP Italia, TIPS e inflazione attesa dal mercato
 
-## Produzione
-Copione (io) → fonti verificate → approvazione di Davide (all'inizio) → voce italiana con controllo pronuncia (Whisper, più tentativi, frasi corte) → animazione noir → pubblicazione → misura a 24 h / 3 giorni / settimana / mese.
+## Capitolo 4 · Fed e BCE — gennaio 2027
+**4.1 Chi sono**
+61. Cos'è una banca centrale
+62. La BCE: mandato e consiglio direttivo
+63. La Fed: doppio mandato e FOMC
+64. Perché le banche centrali sono indipendenti
+65. Perché l'obiettivo è il 2%
+
+**4.2 Gli strumenti**
+66. Il tasso ufficiale
+67. Il meccanismo di trasmissione
+68. Quantitative easing
+69. Quantitative tightening
+70. Forward guidance: quando le parole muovono i mercati
+
+**4.3 Tassi e curva**
+71. La curva dei rendimenti
+72. La curva invertita e le recessioni
+73. Il «dot plot» della Fed
+74. La riunione BCE: cosa guardare
+75. Come il mercato prevede la prossima mossa
+
+**4.4 Storie di banche centrali**
+76. Volcker e gli anni '70
+77. Giappone e tassi negativi
+78. Lo scudo anti-spread della BCE
+79. Silicon Valley Bank 2023
+80. Repo e liquidità: l'idraulica dei mercati
+
+## Capitolo 5 · Come la macro muove i mercati — febbraio 2027
+**5.1 Le attese**
+81. Conta la sorpresa, non il dato
+82. Il calendario macro della settimana
+83. «Già prezzato»: il concetto chiave
+84. L'inflazione USA (CPI) e i mercati
+85. I dati sul lavoro USA del venerdì
+
+**5.2 I canali**
+86. Tassi e Borsa
+87. Il dollaro: chi vince quando sale
+88. I rendimenti dei Treasury
+89. «Risk on» e «risk off»
+90. La volatilità e il VIX
+
+**5.3 Ciclo e settori**
+91. Rotazioni settoriali
+92. Titoli ciclici e difensivi
+93. Utili aziendali e macroeconomia
+94. Banche e tassi
+95. Mercati emergenti e dollaro
+
+**5.4 Casi storici**
+96. 2008 in 90 secondi
+97. 2020 in 90 secondi
+98. 2022: azioni e obbligazioni giù insieme
+99. Recessioni e Borsa nella storia
+100. Come leggere una giornata di mercato
+
+## Capitolo 6 · Le classi di attivo — marzo 2027
+**6.1 Le basi**
+101. Cos'è un asset e perché rende
+102. Azioni: rendimenti dal 1900
+103. Obbligazioni: rendimenti e rischi storici
+104. Liquidità e monetario
+105. Correlazioni: chi si muove insieme
+
+**6.2 Oro e metalli**
+106. L'oro: perché vale
+107. Chi compra l'oro: le banche centrali
+108. Argento: metallo prezioso o industriale?
+109. Rame, il «dottore» dell'economia
+110. Litio e metalli della transizione
+
+**6.3 Energia e agricoli**
+111. Petrolio: dal barile alla pompa
+112. Gas naturale
+113. Grano
+114. Caffè e cacao: perché sono esplosi
+115. Uranio e il ritorno del nucleare
+
+**6.4 Gli altri asset**
+116. Yen e franco svizzero: le valute rifugio
+117. Immobili e REIT
+118. Private equity e venture capital
+119. Bitcoin come asset
+120. Asset rifugio: cosa funziona nelle crisi
+
+## Capitolo 7 · Obbligazioni — aprile 2027
+**7.1 La meccanica**
+121. Come funziona un'obbligazione
+122. Prezzo e rendimento: l'altalena
+123. Rendimento a scadenza
+124. Duration
+125. Convessità in parole semplici
+
+**7.2 Titoli di Stato**
+126. BTP: come si comprano e come si tassano
+127. Le aste dei titoli di Stato
+128. Bund, OAT, Treasury a confronto
+129. Chi compra il debito americano
+130. I rendimenti negativi: com'era possibile
+
+**7.3 Il credito**
+131. Rating e agenzie
+132. Spread di credito
+133. High yield
+134. Zero coupon, callable, perpetue
+135. Obbligazioni green
+
+**7.4 Crisi e strategie**
+136. La crisi dei titoli di Stato inglesi 2022
+137. SVB: una crisi di duration
+138. 2022, l'anno peggiore per le obbligazioni
+139. ETF obbligazionari
+140. Comprare obbligazioni con tassi alti
+
+## Capitolo 8 · Geopolitica e mercati — maggio 2027
+**8.1 Energia**
+141. Perché la geopolitica entra nei prezzi
+142. Lo Stretto di Hormuz
+143. OPEC+
+144. Mar Rosso e Suez
+145. Russia, gas ed Europa
+
+**8.2 Commercio**
+146. Dazi: chi li paga davvero
+147. USA-Cina
+148. Taiwan e i semiconduttori
+149. Terre rare
+150. Reshoring e catene di fornitura
+
+**8.3 Soldi e potere**
+151. Il dollaro come arma
+152. Le sanzioni funzionano?
+153. BRICS e de-dollarizzazione
+154. L'oro delle banche centrali dopo il 2022
+155. FMI e Banca Mondiale
+
+**8.4 Rischi e mercati**
+156. Guerre e Borsa: cosa dice la storia
+157. Elezioni USA e mercati
+158. Elezioni europee e spread
+159. Spesa militare e titoli della difesa
+160. Cibo e geopolitica
+
+## Capitolo 9 · Aziende e Borsa — giugno 2027
+**9.1 La Borsa**
+161. Dal click al regolato
+162. Ordini, bid e ask
+163. Gli indici
+164. Piazza Affari
+165. Le IPO
+
+**9.2 I bilanci**
+166. Il conto economico
+167. Stato patrimoniale e cassa
+168. I margini
+169. EBITDA ed EPS
+170. Le trimestrali
+
+**9.3 Valutare un'azienda**
+171. P/E e multipli
+172. Crescita contro valore
+173. Dividendi e buyback
+174. ROE, ROIC e vantaggio competitivo
+175. DCF: l'intuizione
+
+**9.4 Storie di Borsa**
+176. Le «Magnifiche 7» e la concentrazione
+177. La bolla dot-com
+178. Bolla dell'IA? I numeri
+179. Fusioni e acquisizioni
+180. Gli short seller
+
+## Capitolo 10 · Investire — luglio 2027
+**10.1 Le basi**
+181. Investire contro speculare
+182. Orizzonte: 1, 5 o 20 anni
+183. Rischio, rendimento e premio per il rischio
+184. Interesse composto applicato
+185. Prima il fondo di emergenza
+
+**10.2 Gli strumenti**
+186. ETF
+187. Fondi comuni e costi
+188. L'1% di costi che pesa tantissimo
+189. Gestione attiva contro passiva
+190. PAC
+
+**10.3 Costruire il portafoglio**
+191. Asset allocation per orizzonte
+192. Diversificazione
+193. Ribilanciamento
+194. Coprire il cambio?
+195. Portafogli classici: 60/40 e «all weather»
+
+**10.4 Comportamento e fisco**
+196. Market timing: perdere i 10 giorni migliori
+197. Il drawdown che devi saper sopportare
+198. I bias dell'investitore
+199. Le tasse sugli investimenti in Italia
+200. Fondi pensione
+
+## Capitolo 11 · Trading e quant — agosto 2027
+**11.1 Il trading**
+201. Cos'è il trading
+202. Future, CFD e opzioni
+203. Leva e margine
+204. CFD: perché la maggioranza perde
+205. Stili: scalping, intraday, swing
+
+**11.2 Le regole**
+206. Trend e la regola dei 200 giorni
+207. Momentum
+208. Mean reversion
+209. Breakout: la nostra strategia sull'oro
+210. Stop loss e dimensione della posizione
+
+**11.3 Il rischio**
+211. Perché l'1% per operazione conta più della strategia
+212. Perdite di fila: quante aspettarsene
+213. La psicologia del trader
+214. Il diario di trading
+215. Costi e slippage
+
+**11.4 Quant**
+216. Il backtest
+217. Dentro e fuori campione
+218. Overfitting
+219. Monte Carlo
+220. «+800% in 7 anni»: come leggere una pubblicità
+
+## Capitolo 12 · Gestione di portafoglio — settembre 2027
+**12.1 La teoria**
+221. Cos'è la gestione di portafoglio
+222. Markowitz e la frontiera efficiente
+223. Correlazioni che cambiano nelle crisi
+224. Beta e CAPM
+225. Alpha
+
+**12.2 Fattori e rischio**
+226. I fattori: value, size, momentum, quality
+227. Risk parity
+228. Volatility targeting
+229. Cigni neri e rischio di coda
+230. Coperture con i derivati
+
+**12.3 Come investono i grandi**
+231. I fondi pensione
+232. Il modello Yale
+233. Il fondo sovrano norvegese
+234. Il 60/40 è morto?
+235. Portafogli per scenari
+
+**12.4 Il tuo piano**
+236. Misurare la performance
+237. Lo stress test
+238. La tua politica d'investimento
+239. Gli errori più comuni dei giovani
+240. Cosa abbiamo imparato in un anno
+
+---
+
+## Esempio: Lezione 1 — «Il circuito dell'economia» (copione, ~100 s)
+*Da verificare prima della produzione: le quote del PIL con i conti nazionali ISTAT più recenti.*
+
+1. **Gancio (0–4 s):** «Ogni euro che spendi è lo stipendio di qualcun altro.» → moneta che passa di mano.
+2. **Le famiglie:** lavorano per le imprese e ricevono salari; con i salari comprano beni e servizi → frecce che girano.
+3. **Le imprese:** vendono, pagano stipendi, investono in macchinari e persone.
+4. **Lo Stato:** preleva tasse, restituisce servizi, pensioni, stipendi pubblici.
+5. **Le banche:** prendono i risparmi di chi non spende e li prestano a chi investe (o compra casa).
+6. **L'estero:** compriamo petrolio e tecnologia, vendiamo macchinari, moda, cibo.
+7. **Il dato (caso reale):** quanta parte del PIL italiano sono i consumi delle famiglie, gli investimenti, la spesa pubblica, l'export (ISTAT) → torta animata.
+8. **Perché conta:** se un pezzo si inceppa — le famiglie spendono meno, le banche prestano meno — rallenta tutto il giro. Così iniziano le recessioni, ed è per questo che i mercati guardano ogni giorno i dati su consumi e credito.
+9. **Chiusura:** «L'economia non è una cosa astratta: è un giro di soldi, e tu ci sei dentro.» → «Prossima lezione: il PIL, cosa misura davvero (e cosa no).» + Segui.
