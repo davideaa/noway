@@ -26,6 +26,14 @@ Stato scritto il 01/10/2026. Leggere insieme a `STUDIO.md`.
 Tempo di visione e rivisioni > condivisioni in DM (le «sends») > like; originalità premiata, repost penalizzati.
 Gancio nei primi 2 secondi.
 
+## Stato collegamento (01/10/2026)
+- Token Instagram (Instagram API with Instagram Login) inserito da Davide come **credenziale dell'ambiente** («Aggiungi credenziale»,
+  Bearer, sito consentito `graph.instagram.com`). Non è una variabile: il proxy aggiunge l'intestazione da solo, quindi si chiama
+  `curl https://graph.instagram.com/v23.0/...` **senza token**. Il token non si vede mai.
+- Provato: `GET /me` → `macro.algo.desk`, BUSINESS, 0 follower, 0 post. Lettura funziona.
+- Per pubblicare serve un video su un URL pubblico (o upload a `rupload.facebook.com`, che andrebbe aggiunto ai siti consentiti).
+- Scade dopo ~60 giorni: rinnovo con `graph.instagram.com/refresh_access_token`.
+
 ## Da fare
 1. FATTO: app Meta «MacroAlgo Studio» (caso d'uso Instagram API with Instagram Login), tester accettato.
    IG user id 17841425810972500 (non segreto). Resta: Davide genera il token («Genera token») e lo mette in `IG_ACCESS_TOKEN`.
