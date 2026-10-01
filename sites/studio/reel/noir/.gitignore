@@ -7,3 +7,5 @@ out2/
 miss*.txt
 enc.log
 *.wav
+out3/
+*.m4a

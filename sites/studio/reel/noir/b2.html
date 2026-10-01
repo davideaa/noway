@@ -329,7 +329,12 @@ function s14(t) { bg();
   finish(t); }
 
 function flash(t, a, d = 0.14) { const k = seg(t, a - d / 2, a + d / 2); if (k <= 0 || k >= 1) return; x.fillStyle = `rgba(255,255,255,${Math.sin(k * Math.PI) * 0.7})`; x.fillRect(0, 0, W, H); }
-window.render = function (t) {
+// riallineamento alla voce: window.WARP = [[tempo_nuovo, tempo_vecchio], ...] (iniettato da render.cjs)
+function warp(t) { const Wp = window.WARP; if (!Wp) return t; if (t <= Wp[0][0]) return Wp[0][1];
+  for (let i = 1; i < Wp.length; i++) if (t <= Wp[i][0]) { const [a0, b0] = Wp[i - 1], [a1, b1] = Wp[i]; return b0 + (b1 - b0) * (t - a0) / (a1 - a0); }
+  return Wp[Wp.length - 1][1]; }
+window.render = function (tReal) {
+  const t = warp(tReal);
   x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
   const s = SC.find(([a, b]) => t >= a && t < b) || SC[SC.length - 1]; s[2](t);
   [25.2, 49.2, 59.4].forEach((a) => flash(t, a));
