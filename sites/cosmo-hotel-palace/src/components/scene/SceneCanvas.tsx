@@ -11,7 +11,9 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type {
+  ConfigurazioneSala,
   Hotspot,
+  OpzioniConfigurazione,
   Posizione3D,
   Proiezione,
   SceneDef,
@@ -55,6 +57,12 @@ export class SceneController {
   /** true dopo che l'utente (o un hotspot) ha mosso la camera: serve a «Ripristina vista». */
   vistaModificata = false;
   dimensioni: Dimensioni = { larghezza: 0, altezza: 0 };
+  /**
+   * Ultima configurazione chiesta alla scena della sala congressi (modulo 10), oppure null.
+   * Come luce e progresso, esiste prima della scena e le viene riapplicata alla costruzione.
+   */
+  configurazione: ConfigurazioneSala | null = null;
+  private opzioniConfigurazione: OpzioniConfigurazione | undefined;
   /** La scena viva, oppure null. Solo lo Stage la scrive. */
   handle: SceneHandle | null = null;
   /** Sveglia il loop a richiesta dello Stage. Solo lo Stage la scrive. */
@@ -107,6 +115,10 @@ export class SceneController {
   collega(handle: SceneHandle | null): void {
     this.handle = handle;
     if (!handle) return;
+    // la configurazione va prima di tutto il resto, senza tween: la scena nasce già nello stato giusto
+    if (this.configurazione) {
+      handle.configura?.(this.configurazione, { ...this.opzioniConfigurazione, istantaneo: true });
+    }
     handle.setLuce(this.luce);
     handle.setProgresso(this.progresso);
     handle.vaiA(this.vistaRichiesta, true);
@@ -146,6 +158,18 @@ export class SceneController {
   /** true se la luce è nella metà "sera" (>= 0,5). Decide quali hotspot `visibileIn` si vedono. */
   get sera(): boolean {
     return this.luce >= 0.5;
+  }
+
+  /**
+   * Scena della sala congressi (modulo 10): sala, disposizione, partecipanti, pareti. Si può chiamare
+   * prima che la scena esista. Senza `opzioni.k` la scena anima da sola (720 ms); con `k` la guida
+   * `setProgresso(k)`. Le altre scene non hanno `configura` e la ignorano.
+   */
+  configura(config: ConfigurazioneSala, opzioni?: OpzioniConfigurazione): void {
+    this.configurazione = config;
+    this.opzioniConfigurazione = opzioni;
+    this.handle?.configura?.(config, opzioni);
+    this.sveglia();
   }
 
   /** Avanzamento 0..1 (scroll della scena fissata, tappa, tween). */
