@@ -1,0 +1,97 @@
+/*
+ * Stili degli effetti di scroll (lib/motion-fx.ts). Classi globali con prefisso `fx-`.
+ * Solo `transform` e `opacity` (più il testo del contatore). Nessun will-change, nessun
+ * backdrop-filter. Le durate e le curve sono i token di tokens.css.
+ *
+ * Senza JavaScript, con prefers-reduced-motion e per ciò che è già nel primo schermo non c'è
+ * nessuno stato nascosto: l'hook decide, e solo allora aggiunge `html.fx-ready`.
+ */
+
+/* ───────── Rivelazione: .fx-reveal  (sfalsamento: style="--i:2", 60 ms, massimo 5) ───────── */
+.fx-reveal {
+  transition:
+    opacity var(--d-in) var(--e-in),
+    transform var(--d-in) var(--e-in);
+  transition-delay: calc(min(var(--i, 0), 5) * 60ms);
+}
+html.fx-ready .fx-reveal:not([data-in]) {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+/* ───────── Titoli per riga: .fx-lines > .fx-w > span ───────── */
+.fx-lines .fx-w {
+  display: inline-block;
+  vertical-align: top;
+  overflow: clip;
+  /* i discendenti (g, p, y) non vengono tagliati */
+  padding-block-end: 0.14em;
+  margin-block-end: -0.14em;
+}
+.fx-lines .fx-w > span {
+  display: block;
+  transition: transform var(--d-in) var(--e-in);
+  transition-delay: calc(min(var(--l, 0), 4) * 80ms);
+}
+html.fx-ready .fx-lines:not([data-in]) .fx-w > span {
+  transform: translateY(108%);
+}
+
+/* ───────── Contatore: cifre tabulari, larghezza riservata (min-width in ch dal componente) ───────── */
+.fx-count {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  text-align: start;
+}
+
+/* ───────── Filo che si disegna: la variabile --draw (0..1) la scrive useScrollDraw ───────── */
+.fx-thread {
+  transform-origin: top;
+  transform: scaleY(var(--draw, 1));
+}
+.fx-thread-x {
+  transform-origin: left;
+  transform: scaleX(var(--draw, 1));
+}
+
+/* ───────── Parallasse leggera: solo decorativa, sul compositor, solo dove il browser sa farla ─────────
+   Non su testo, pulsanti, hotspot, diorami. Massimo 2 elementi per schermata.
+   `--depth`: 24 px su desktop, 14 px su telefono. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fx-plx {
+      --depth: 24px;
+      animation: fx-plx linear both;
+      animation-timeline: view();
+    }
+    @media (max-width: 1023px) {
+      .fx-plx {
+        --depth: 14px;
+      }
+    }
+    @keyframes fx-plx {
+      from {
+        transform: translateY(calc(var(--depth) * -1));
+      }
+      to {
+        transform: translateY(var(--depth));
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-reveal {
+    transition: none;
+  }
+  html.fx-ready .fx-reveal:not([data-in]) {
+    opacity: 1;
+    transform: none;
+  }
+  .fx-lines .fx-w > span {
+    transition: none;
+  }
+  html.fx-ready .fx-lines:not([data-in]) .fx-w > span {
+    transform: none;
+  }
+}

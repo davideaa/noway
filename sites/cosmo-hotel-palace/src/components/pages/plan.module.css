@@ -1,0 +1,314 @@
+/*
+ * Il 6° piano: illustrazione isometrica con punti e il percorso in tre tappe (modulo 14).
+ * Solo token. Si anima solo `opacity`.
+ */
+.scheda {
+  display: grid;
+  gap: var(--s-7);
+  align-items: start;
+}
+
+.figura {
+  margin: 0;
+  display: grid;
+  gap: var(--s-2);
+  min-inline-size: 0;
+}
+
+/* il quadro ha il rapporto dell'SVG (800 × 560): i punti in % cadono dove devono */
+.quadro {
+  position: relative;
+  aspect-ratio: 800 / 560;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg-alt);
+}
+
+.quadro > svg:first-child {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100% !important;
+}
+
+.velo {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--d-ui) linear;
+}
+
+.quadro:not([data-tappa=""]) .velo {
+  opacity: 0.72;
+}
+
+.nota {
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+/* ───────── Punti-bottone sopra l'SVG (DESIGN 4.5) ───────── */
+.punti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.punto {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+  transition: opacity var(--d-ui) linear;
+}
+
+.punto[data-fuori="1"] {
+  opacity: 0.4;
+}
+
+.punto[data-aperto="1"] {
+  z-index: 2;
+}
+
+.pulsante {
+  position: absolute;
+  inset-inline-start: -22px;
+  inset-block-start: -22px;
+  display: grid;
+  place-items: center;
+  inline-size: var(--tap);
+  block-size: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pulsante:focus-visible {
+  outline: var(--focus-w) solid transparent;
+  box-shadow: var(--focus-ring-double);
+}
+
+.alone,
+.dot {
+  grid-area: 1 / 1;
+  border-radius: 50%;
+}
+
+.alone {
+  inline-size: 28px;
+  block-size: 28px;
+  background: var(--hotspot-halo);
+  opacity: 0.7;
+}
+
+.dot {
+  box-sizing: border-box;
+  inline-size: 14px;
+  block-size: 14px;
+  border: 2px solid var(--hotspot-ring);
+  background: var(--hotspot-dot);
+}
+
+.pillola {
+  position: absolute;
+  inset-block-end: 28px;
+  inset-inline-start: -22px;
+  inline-size: max-content;
+  max-inline-size: min(15rem, 62vw);
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: min(var(--r-pill), 24px);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--sh-1);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--d-micro) linear,
+    visibility 0s linear var(--d-micro);
+}
+
+.punto[data-lato="sx"] .pillola {
+  inset-inline-start: auto;
+  inset-inline-end: -22px;
+}
+
+.punto[data-sotto="1"] .pillola {
+  inset-block-end: auto;
+  inset-block-start: 28px;
+}
+
+.punto[data-aperto="1"] .pillola {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--d-micro) linear;
+}
+
+.pillTitolo {
+  display: block;
+  font-weight: var(--w-strong);
+}
+
+.pillDato {
+  display: block;
+  color: var(--text-muted);
+}
+
+/* ───────── Il percorso: un filo con tre nodi ───────── */
+.percorso {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+}
+
+.aiuto {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.filo {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.passo {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--s-4);
+  padding: var(--s-4);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-3);
+}
+
+/* il filo che unisce i nodi */
+.passo:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(var(--s-4) + 1.25rem - 1px);
+  inset-block-start: calc(var(--s-4) + 2.5rem);
+  inset-block-end: calc(var(--s-2) * -1 - var(--s-4));
+  inline-size: 2px;
+  background: var(--border-strong);
+}
+
+.passo[data-attiva="1"] {
+  border-color: var(--text);
+  background: var(--bg-alt);
+}
+
+.nodo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--bg);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: var(--w-strong);
+  line-height: 1;
+}
+
+.passo[data-attiva="1"] .nodo {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-brand);
+}
+
+.passoCorpo {
+  display: grid;
+  gap: var(--s-1);
+  align-content: start;
+}
+
+.passoTitolo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: var(--w-h3);
+  line-height: var(--lh-h3);
+}
+
+.passoTitolo svg {
+  flex: none;
+  color: var(--brand);
+}
+
+.passoTesto {
+  color: var(--text-muted);
+}
+
+/* tutta la riga è il pulsante che evidenzia la zona (area di tocco ben oltre 44 px) */
+.passoBtn {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-3);
+  background: transparent;
+  cursor: pointer;
+}
+
+.passoBtn:focus-visible {
+  outline: var(--focus-w) solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .passo:has(.passoBtn:hover):not([data-attiva="1"]) {
+    background: var(--bg-alt);
+  }
+}
+
+.tutto {
+  justify-self: start;
+  min-block-size: var(--tap);
+  padding-inline: var(--s-4);
+  border: 1.5px solid var(--btn-outline-border);
+  border-radius: var(--r-2);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: var(--w-button);
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .scheda {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+
+  .figura {
+    grid-column: 6 / -1;
+    grid-row: 1;
+    position: sticky;
+    inset-block-start: calc(var(--header-h) + var(--s-5));
+  }
+
+  .percorso {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+}

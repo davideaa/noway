@@ -1,6 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
+import { BookingBar } from "@/components/booking/BookingBar";
+import { BookingPill } from "@/components/booking/BookingPill";
+import { BookingProvider } from "@/components/booking/BookingProvider";
+import { BookingSheet } from "@/components/booking/BookingSheet";
+import { Footer } from "@/components/shell/Footer";
+import { Header } from "@/components/shell/Header";
+import { MAIN_ID, SkipLink } from "@/components/shell/SkipLink";
+import { siteBase } from "@/lib/seo/metadata";
 
 /*
  * Font (DESIGN 3). Self-hosted da next/font: nessuna richiesta a Google a runtime.
@@ -42,15 +50,18 @@ export const viewport: Viewport = {
   themeColor: "#FAF6EE",
 };
 
-// Titolo e descrizione di ripiego (da COPY 14, home). Le pagine li sostituiscono
-// (modulo 15 «SEO e statico»).
+// Titolo e descrizione di ripiego (da COPY 14, home): ogni pagina li sostituisce con
+// `pageMetadata(chiave)` (lib/seo/metadata). `metadataBase` c'è solo se NEXT_PUBLIC_SITE_URL è impostata.
+const base = siteBase();
 export const metadata: Metadata = {
+  ...(base ? { metadataBase: base } : {}),
   title: {
     default: "Hotel a 2 km da Milano con parcheggio | Cosmo Hotel Palace",
     template: "%s | Cosmo Hotel Palace",
   },
   description:
     "Hotel e Centro Congressi a Cinisello Balsamo, a 2 km da Milano. 201 camere, Cosmo Grill, wellness e 200 posti auto gratuiti.",
+  applicationName: "Cosmo Hotel Palace",
 };
 
 export default function RootLayout({
@@ -62,20 +73,26 @@ export default function RootLayout({
       className={`${fraunces.variable} ${frauncesItalic.variable} ${hanken.variable}`}
     >
       <body>
-        {/* SLOT skip-link: primo elemento tabulabile. Il modulo 7 (SkipLink.tsx) può sostituirlo. */}
-        <a className="skip-link" href="#contenuto">
-          Vai al contenuto
-        </a>
+        {/* Stato della prenotazione condiviso fra tutte le pagine (modulo 4); header, barra, pillola e
+            foglio lo leggono. Gli attributi data-booking-hero, data-booking-hero-cta e data-site-footer
+            sono descritti in BookingProvider.tsx. */}
+        <BookingProvider>
+          {/* Primo elemento tabulabile (UX 3.1) */}
+          <SkipLink />
 
-        {/* SLOT header: modulo 7 (components/shell/Header) */}
+          <Header />
 
-        {/* Unico <main> del sito: le pagine NON ne rendono un altro. */}
-        <main id="contenuto" tabIndex={-1}>
-          {children}
-        </main>
+          {/* Unico <main> del sito: le pagine NON ne rendono un altro. */}
+          <main id={MAIN_ID} tabIndex={-1}>
+            {children}
+          </main>
 
-        {/* SLOT footer: modulo 7 (components/shell/Footer)
-            SLOT barra/pillola prenotazione: modulo 4 (BookingProvider, BookingBar, BookingPill) */}
+          <Footer />
+
+          <BookingBar />
+          <BookingPill />
+          <BookingSheet />
+        </BookingProvider>
 
         {/* Regioni aria-live (lib/a11y.ts → announce()). Presenti fin dal primo HTML:
             i lettori di schermo registrano meglio una regione che esiste già. */}

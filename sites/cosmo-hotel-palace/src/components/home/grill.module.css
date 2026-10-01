@@ -1,0 +1,294 @@
+/*
+ * Cosmo Grill & Lounge. Sezione in tono sera: i token (data-tono="sera") cambiano da soli fondo,
+ * testo, pulsanti e focus. Telefono: titolo, diorama, cursore, poi testo del momento (il testo non
+ * sta mai sulla scena). Desktop ≥ 1024: testo a sinistra, diorama a destra, scena fissata 140 svh.
+ */
+.grill {
+  position: relative;
+  /* il bordo della sezione ritaglia l'alone; lo stage può crescere (il pannello «Prenota un tavolo» si apre) */
+  overflow: clip;
+  --travel: 0px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.stage {
+  position: relative;
+  padding-block: var(--s-8);
+}
+
+/* alone di lampada: un cerchio radiale miele, statico, dietro l'arco */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 10%;
+  inset-inline-end: -25%;
+  inline-size: 90vw;
+  max-inline-size: 900px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(242 178 92 / 0.22) 0%, transparent 66%);
+  pointer-events: none;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  gap: var(--s-6);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.testa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+.h2 {
+  max-inline-size: 14ch;
+}
+.sotto {
+  color: var(--text-muted);
+  max-inline-size: 34em;
+}
+
+/* ───────── Scena ───────── */
+.scena {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-inline-size: 0;
+}
+
+.arcoBox {
+  inline-size: 100%;
+}
+
+.arco {
+  overflow: hidden;
+  border-radius: var(--r-arco);
+  outline: 1.5px solid var(--border-strong);
+  outline-offset: 8px;
+  aspect-ratio: 4 / 3;
+}
+.arco [data-poster] svg {
+  inline-size: 100%;
+  block-size: 100% !important;
+}
+
+.controlli {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-4);
+  margin-block-start: var(--s-3);
+}
+.controlli > :first-child {
+  flex: none;
+}
+
+.nota {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+/* ───────── Testo del momento ───────── */
+.dettagli {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+  min-inline-size: 0;
+}
+
+.pannelli {
+  display: grid;
+  gap: var(--s-5);
+  align-self: stretch;
+}
+
+/* senza JS: tutti i momenti in elenco. Con JS: sovrapposti, uno solo visibile (dissolvenza 240 ms) */
+[data-js] .pannelli {
+  gap: 0;
+}
+[data-js] .pannello {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--d-ui) var(--e-in),
+    visibility 0s linear var(--d-ui);
+}
+[data-js] .pannello[data-attivo="1"] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--d-ui) var(--e-in);
+}
+
+.pannello {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.momentoTitolo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  font-size: var(--t-h3);
+}
+.momentoNome {
+  font-family: var(--font-body);
+  font-size: var(--t-label);
+  font-weight: var(--w-label);
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--link);
+}
+.momentoTesto {
+  margin: 0;
+  color: var(--text-muted);
+  max-inline-size: 36em;
+}
+
+.orari {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+}
+
+.azioni {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  align-self: stretch;
+  gap: var(--s-3);
+}
+
+.punti {
+  align-self: stretch;
+  border-block: 1px solid var(--border);
+}
+.punti summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--control-h);
+  font-size: var(--t-small);
+  font-weight: var(--w-strong);
+  cursor: pointer;
+  list-style: none;
+}
+.punti summary::-webkit-details-marker {
+  display: none;
+}
+.punti summary::after {
+  content: "+";
+  font-size: 1.5em;
+  font-weight: var(--w-body);
+  line-height: 1;
+}
+.punti[open] summary::after {
+  content: "\2212";
+}
+.punti ul {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0 0 var(--s-4);
+  list-style: none;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+.punti strong {
+  color: var(--text);
+}
+
+@media (min-width: 600px) {
+  .stage {
+    padding-block: var(--s-9);
+  }
+  .azioni {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-self: flex-start;
+  }
+  .scena {
+    max-inline-size: 640px;
+    inline-size: 100%;
+    margin-inline: auto;
+  }
+}
+
+/* ───────── Desktop ───────── */
+@media (min-width: 1024px) {
+  /* la barra di prenotazione (72 px + 16) sta in basso: lo stage le lascia il posto */
+  .grill {
+    --riserva: 96px;
+  }
+  .stage {
+    block-size: calc(100svh - var(--header-h) - var(--riserva));
+    min-block-size: 560px;
+    padding-block: var(--s-4);
+    display: flex;
+    align-items: center;
+  }
+  .grid {
+    inline-size: 100%;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    column-gap: var(--gutter);
+    row-gap: var(--s-5);
+    align-items: start;
+    align-content: center;
+  }
+  .testa {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+    align-self: end;
+  }
+  .dettagli {
+    grid-column: 1 / span 5;
+    grid-row: 2;
+    align-self: start;
+  }
+  .scena {
+    grid-column: 7 / span 6;
+    grid-row: 1 / span 2;
+    align-self: center;
+    max-inline-size: none;
+    margin-inline: 0;
+  }
+  .arco {
+    /* altezza concessa: stage − bordi − riga dei comandi − cursore */
+    margin-inline: auto;
+    aspect-ratio: 4 / 3;
+    inline-size: auto;
+    block-size: max(300px, calc(100svh - var(--header-h) - var(--riserva) - 32px - 226px));
+    max-inline-size: 100%;
+  }
+  .arcoBox {
+    display: flex;
+    justify-content: center;
+  }
+  .controlli {
+    flex-wrap: nowrap;
+  }
+}
+
+/* con movimento normale lo stage si fissa sotto l'header per 140 svh */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .grill {
+    --travel: 140svh;
+    block-size: calc(100svh - var(--header-h) - var(--riserva) + var(--travel));
+  }
+  .stage {
+    position: sticky;
+    inset-block-start: var(--header-h);
+  }
+}

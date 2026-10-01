@@ -51,7 +51,10 @@ type Props = Pick<ArtProps, "decorativo" | "titolo" | "className" | "arco"> & {
 
 /** Cerchio di luce: unico gradiente ammesso (DESIGN 6 «macchia di luce»). */
 export function Alone({ id, cx, cy, r, op = 1 }: { id: string; cx: number; cy: number; r: number; op?: number }) {
-  return <circle cx={cx} cy={cy} r={r} fill={`url(#${id}h)`} opacity={op} />;
+  // arrotondati: sin/cos di Node e del browser differiscono nell'ultima cifra e React segnalerebbe
+  // un errore di idratazione (le coordinate vengono dalla proiezione di `proj.tsx`)
+  const q = (n: number) => Math.round(n * 100) / 100;
+  return <circle cx={q(cx)} cy={q(cy)} r={r} fill={`url(#${id}h)`} opacity={op} />;
 }
 
 export function ArtSvg({ w, h, tono, tavolozze, alt, decorativo = true, titolo, className, arco, archi = 1, gap = 0, fit = "slice", children }: Props) {

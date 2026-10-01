@@ -1,0 +1,124 @@
+/*
+ * Chiusura: prenota e contatti. Telefono: testo, poi il modulo. Desktop: testo a sinistra, modulo in
+ * un pannello a destra. Il modulo è un pannello pieno (fondo --bg, bordo): nessuna ombra.
+ */
+.sezione {
+  position: relative;
+  background: var(--bg);
+  border-block-start: 1px solid var(--border);
+  padding-block: var(--section-y);
+  overflow: clip;
+}
+
+/* macchia di luce miele, statica, dietro il modulo */
+.sezione::before {
+  content: "";
+  position: absolute;
+  inset-block-end: -10%;
+  inset-inline-end: -15%;
+  inline-size: 80vw;
+  max-inline-size: 900px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--miele-300) 34%, transparent) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  gap: var(--s-6);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.testa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+
+.h2 {
+  font-size: var(--t-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--tr-h1);
+  max-inline-size: 12ch;
+}
+
+.corpo {
+  color: var(--text-muted);
+  max-inline-size: 30em;
+}
+
+.umano {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding-block-start: var(--s-5);
+  border-block-start: 1px solid var(--border-strong);
+  align-self: stretch;
+  color: var(--text-muted);
+}
+.umanoTitolo {
+  color: var(--text);
+}
+.contatti {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: var(--s-3);
+  margin-block-start: var(--s-2);
+}
+
+.pannello {
+  padding: var(--s-5);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-3);
+  background: var(--bg);
+  min-inline-size: 0;
+}
+
+.cerca {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.note {
+  margin-block-start: var(--s-5);
+}
+
+@media (min-width: 600px) {
+  .contatti {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-self: flex-start;
+  }
+  .pannello {
+    padding: var(--s-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+  }
+  .testa {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+    align-self: end;
+  }
+  .pannello {
+    grid-column: 7 / span 6;
+    grid-row: 1 / span 2;
+  }
+  .umano {
+    grid-column: 1 / span 5;
+    grid-row: 2;
+    align-self: start;
+    max-inline-size: 30rem;
+  }
+}

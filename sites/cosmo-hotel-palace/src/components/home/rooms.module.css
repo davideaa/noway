@@ -1,0 +1,284 @@
+/*
+ * Camere. Telefono: binario orizzontale con aggancio, la scheda successiva spunta (circa 12%).
+ * Tablet 600–1023: Classic e Suite su una riga, Family sotto. Desktop: 3 + 5 + 4 colonne, gli
+ * archi poggiano sulla stessa linea di base (come un portico) e le schede hanno altezze diverse.
+ * Ogni scheda usa le righe della griglia (subgrid) per allineare arco e testi.
+ */
+.sezione {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--bg);
+  padding-block: var(--section-y);
+}
+
+.alone {
+  inset-inline-start: -14vw;
+  inset-block-start: 30%;
+}
+
+.testa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+  margin-block-end: var(--s-6);
+}
+
+.h2 {
+  max-inline-size: 14ch;
+}
+.sotto {
+  color: var(--text-muted);
+  max-inline-size: 36em;
+}
+
+/* ───────── Consigliere compatto ───────── */
+.consigliere {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-block-size: 140px; /* spazio riservato: il consigliere compare dopo l'idratazione, nessun salto */
+  margin-block-end: var(--s-5);
+}
+.consigliere:has(noscript:only-child) {
+  min-block-size: 0;
+}
+
+.consigliereRiga {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.consigliereTitolo {
+  margin: 0;
+  font-weight: var(--w-strong);
+}
+
+.risposta {
+  min-block-size: 3.2em;
+  max-inline-size: 60ch;
+  color: var(--text);
+}
+.risposta p {
+  max-inline-size: none;
+}
+.chiusura {
+  color: var(--text-muted);
+}
+.vediLink {
+  font-weight: var(--w-strong);
+}
+
+/* ───────── Binario / griglia ───────── */
+.binarioWrap {
+  padding-inline: 0;
+  max-inline-size: none;
+}
+
+.binario {
+  display: grid;
+  grid-template-columns: 64% 92% 84%;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  column-gap: var(--s-5);
+  align-items: end;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--margin-l);
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-inline: var(--margin-l) var(--margin-r);
+  padding-block-end: var(--s-2);
+}
+.binario::-webkit-scrollbar {
+  display: none;
+}
+
+.scheda {
+  position: relative;
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: var(--s-5);
+  scroll-snap-align: start;
+  min-inline-size: 0;
+}
+
+.arcoCella {
+  display: flex;
+  flex-direction: column;
+  align-self: end;
+  gap: var(--s-2);
+}
+
+/* «Consigliata per te»: sempre nel DOM, visibile solo sulla scheda scelta (spunta + testo) */
+.consigliata {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  min-block-size: 24px;
+  color: var(--brand);
+  font-size: var(--t-small);
+  font-weight: var(--w-strong);
+  opacity: 0;
+  transition: opacity var(--d-micro) linear;
+}
+.consigliata[data-on="1"] {
+  opacity: 1;
+}
+
+.arco {
+  position: relative;
+  inline-size: 100%;
+}
+.arco > svg:first-child {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* anello di evidenza: sempre nel DOM, trasparente finché la scheda non è consigliata */
+.anello {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  color: transparent;
+  pointer-events: none;
+  transition: color var(--d-micro) linear;
+}
+.scheda[data-consigliata="1"] .anello {
+  color: var(--brand);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-3);
+  align-self: start;
+}
+
+.nome {
+  font-size: var(--t-h3);
+}
+
+.mq {
+  margin: 0;
+  font-family: var(--font-display);
+  font-variation-settings: var(--fvs-display);
+  font-size: var(--t-h3);
+  line-height: var(--lh-num);
+  color: var(--text-muted);
+}
+.mqNum {
+  font-size: var(--t-num);
+  letter-spacing: var(--tr-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.dati {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+}
+.dati li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+.dati svg {
+  flex: none;
+  color: var(--text);
+}
+
+.vai {
+  margin-block-start: var(--s-2);
+}
+.stira::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.piede {
+  display: flex;
+  margin-block-start: var(--s-7);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scheda:hover .nome {
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 6px;
+  }
+}
+
+/* il focus della scheda sta sul link: l'anello circonda tutta la scheda (il ::after) */
+.stira:focus-visible {
+  outline: none;
+}
+.scheda:has(.stira:focus-visible) {
+  outline: var(--focus-w) solid var(--focus);
+  outline-offset: var(--s-2);
+  border-radius: var(--r-2);
+}
+
+/* ───────── Tablet ───────── */
+@media (min-width: 600px) {
+  .consigliere {
+    margin-block-end: var(--s-7);
+  }
+  .binarioWrap {
+    padding-inline: var(--margin-l) var(--margin-r);
+    max-inline-size: calc(var(--container) + var(--margin-l) + var(--margin-r));
+  }
+  .binario {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+    column-gap: var(--gutter);
+    row-gap: var(--s-7);
+    overflow: visible;
+    padding-inline: 0;
+  }
+  .scheda[data-camera="classic"] {
+    grid-column: 1 / span 3;
+  }
+  .scheda[data-camera="suite"] {
+    grid-column: 4 / span 5;
+  }
+  .scheda[data-camera="family"] {
+    grid-column: 2 / span 6;
+  }
+  .consigliereRiga {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+  }
+}
+
+/* ───────── Desktop ───────── */
+@media (min-width: 1024px) {
+  .binario {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: 0;
+  }
+  .scheda[data-camera="classic"] {
+    grid-column: 1 / span 3;
+  }
+  .scheda[data-camera="suite"] {
+    grid-column: 4 / span 5;
+  }
+  .scheda[data-camera="family"] {
+    grid-column: 9 / span 4;
+  }
+}

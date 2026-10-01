@@ -1,0 +1,172 @@
+/*
+ * La sezione «sera» della pagina Ristorazione (UX 8: tono sera nella sezione della scena; il resto è
+ * sabbia). Solo token. Si anima solo `opacity`.
+ */
+.sera {
+  padding-block: var(--section-y);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.griglia {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.scenaCol {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.testoCol {
+  display: grid;
+  gap: var(--s-5);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.testoCol h2 {
+  max-inline-size: 18ch;
+}
+
+.intro {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* diorama ad arco (DESIGN 4.3, `--r-arco`): il segno del sito */
+.arco {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-block-end: 0;
+  border-radius: var(--r-arco);
+  background: var(--bg-alt);
+}
+
+/* rapporto della scena: alta sul telefono, più larga da tablet in su (nessun CLS) */
+.cornice {
+  aspect-ratio: 4 / 5;
+}
+
+@media (min-width: 600px) {
+  .cornice {
+    aspect-ratio: 6 / 5;
+  }
+}
+
+.nota,
+.istruzioni {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+.cursore {
+  display: grid;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg-alt);
+}
+
+/* testo del momento: altezza riservata per non spostare i pulsanti a ogni cambio (nessun CLS) */
+.momento {
+  min-block-size: 8.5rem;
+}
+
+.momentoTesto {
+  display: grid;
+  gap: var(--s-2);
+  justify-items: start;
+  animation: dissolve var(--d-ui) var(--e-in) both;
+}
+
+.momentoTesto h3 {
+  margin: 0;
+}
+
+.momentoTesto p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@keyframes dissolve {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.senzaJs {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding-inline-start: var(--s-5);
+}
+
+.senzaJs p {
+  margin: var(--s-1) 0 0;
+  color: var(--text-muted);
+}
+
+.azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: flex-start;
+}
+
+@media (max-width: 599px) {
+  .azioni > * {
+    flex: 1 1 100%;
+  }
+}
+
+/* elenco testuale dei dettagli della sala: 1 colonna sul telefono, 2–3 più su */
+.punti {
+  margin-block-start: var(--s-7);
+}
+
+.punti ul {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .punti ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .punti ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .griglia {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+
+  .scenaCol {
+    grid-column: 1 / span 7;
+  }
+
+  .testoCol {
+    grid-column: 9 / -1;
+  }
+}
+
+/* il poster (SVG con `height: auto` in linea) riempie il riquadro anche quando è più alto di 4:3 */
+.arco svg {
+  block-size: 100% !important;
+}
+
+.momento {
+  min-block-size: 8.5rem;
+}
