@@ -1,6 +1,7 @@
 # Crea programma.html (A4) da lezioni.json + schema.md; poi pdf.cjs lo stampa in PDF con Chromium.
 import json, re, html
 L = json.load(open('lezioni.json'))
+WK = json.load(open('weekend.json'))
 S = open('schema.md').read().splitlines()
 caps, weeks = [], {}
 for line in S:
@@ -46,10 +47,12 @@ table.ov th {{ font-family: "IBM Plex Mono", monospace; font-size: 8pt; color: v
 .r b {{ font-family: "IBM Plex Mono", monospace; font-size: 7.6pt; color: var(--mut); letter-spacing: .6pt; font-weight: 600; display: inline-block; min-width: 20mm; }}
 </style></head><body>''')
 out.append('''<div class="cover"><div class="tag">MACRO &amp; ALGO · @macro.algo.desk</div><h1>Dalla teoria<br>alla realtà</h1>
-<p>Il programma completo dei reel: <b>240 lezioni</b> in un anno, dal circuito dell'economia alla gestione di un portafoglio. Per universitari e giovani che vogliono capire come gira davvero l'economia e come muove i mercati.</p>
-<p class="mono" style="font-size:9pt">12 capitoli · 48 settimane · 5 reel a settimana · ottobre 2026 → settembre 2027</p></div>''')
+<p>Il programma completo dei reel: <b>264 reel</b> in un anno (240 lezioni + 24 speciali del weekend), dal circuito dell'economia alla gestione di un portafoglio. Per universitari e giovani che vogliono capire come gira davvero l'economia e come muove i mercati.</p>
+<p class="mono" style="font-size:9pt">12 capitoli · 5 reel a settimana + 1 weekend speciale al mese · ogni giorno alle 12:00 · ottobre 2026 → settembre 2027</p></div>''')
 out.append('''<h2>Come funziona</h2><div class="box"><b>Struttura.</b> 12 capitoli, uno al mese. Ogni capitolo ha 4 settimane; ogni settimana 5 reel, dal lunedì al venerdì. Il <b>venerdì è sempre un «Caso reale»</b>: la teoria della settimana applicata a un fatto vero (per esempio: cosa hanno fatto le banche centrali con i tassi durante il Covid). Totale 240 reel. I giorni feriali in più di ogni mese restano per gli «Extra» sulle notizie forti.</div>
-<div class="box"><b>Ogni reel (80–100 secondi, voce sempre presente).</b><br>1. <b>Gancio</b> (primi 3 secondi): una frase o una domanda che riguarda chi guarda.<br>2. <b>Di cosa parliamo e dove siamo</b>: «Lezione 27, capitolo Soldi e banche: oggi l'interesse composto», e perché serve saperlo.<br>3. <b>Spiegazione</b> in 3 passaggi, ognuno con la sua animazione: l'immagine fa vedere quello che dice la voce.<br>4. <b>Caso o esempio reale</b> con un dato vero e la fonte a schermo.<br>5. <b>Cosa ti porti a casa</b> in una frase, poi «Prossima lezione» e Segui.</div>
+<div class="box"><b>Weekend speciale «Investimenti e trading» (1 al mese).</b> A metà mese, il sabato e la domenica della seconda settimana: <b>sabato</b> una spiegazione pratica sul mondo degli investimenti e del trading; <b>domenica</b> un caso reale in cui quello che si è visto sabato si poteva applicare (con orizzonte, rischi e numeri veri). 12 weekend = 24 reel. Sempre educazione, mai consigli personali.</div>
+<div class="box"><b>Uscita.</b> Ogni giorno alle <b>12:00</b>, sempre alla stessa ora, per creare l'abitudine: si guarda tra una lezione e l'altra o si recupera nel pomeriggio.</div>
+<div class="box"><b>Ogni reel (80–100 secondi, voce sempre presente).</b><br>1. <b>Gancio</b> (primi 3 secondi): una frase o una domanda che riguarda chi guarda.<br>2. <b>Di cosa parliamo e dove siamo</b>: «Lezione 27, capitolo Soldi e banche: oggi l'interesse composto», e perché serve saperlo.<br>3. <b>Spiegazione</b> in 3 passaggi, ognuno con la sua animazione: l'immagine fa vedere quello che dice la voce.<br>4. <b>Caso o esempio reale</b> con un dato vero e la fonte a schermo.<br>5. <b>Cosa ti porti a casa</b> in una frase.<br>6. <b>Chiusura fissa</b>: «Oggi è mercoledì: lezione 3 di 5 della settimana» (nel weekend: «Speciale weekend, parte 1 di 2»), poi «Domani: …» e Segui.</div>
 <div class="box"><b>Regole.</b> Ordine rigoroso: ogni lezione usa solo cose già spiegate prima (vedi «Collega»). Numeri solo da fonti ufficiali (ISTAT, Eurostat, Banca d'Italia, BCE, Fed, FRED, EIA, Agenzia delle Entrate, ESMA, OCSE), con data; dove una scheda dice «da verificare», il dato si controlla al momento di produrre il reel. Contenuto educativo, mai consigli d'investimento personali. Grafica nello stile noir del canale, nessuna persona reale.</div>
 <div class="box"><b>Come leggere ogni scheda.</b> <span class="mono">GANCIO</span> la frase d'apertura · <span class="mono">SPIEGA</span> i 3 punti che chi guarda deve capire · <span class="mono">ESEMPIO</span> il caso reale o il dato · <span class="mono">TI SERVE</span> perché è utile · <span class="mono">VISUAL</span> l'animazione principale · <span class="mono">COLLEGA</span> le lezioni precedenti su cui si appoggia.</div>''')
 out.append('<h2 style="margin-top:6mm">I 12 capitoli</h2><table class="ov"><tr><th>CAP.</th><th>MESE</th><th>TITOLO</th><th>LE 4 SETTIMANE</th></tr>')
@@ -61,6 +64,14 @@ for c, t, m in caps:
     out.append(f'<div class="chap"><div class="chaphead"><div class="m">CAPITOLO {c} · {e(MESI[m].upper())} · LEZIONI {(c-1)*20+1}–{c*20}</div><h2>{e(t)}</h2></div>')
     for s in range(1, 5):
         out.append(f'<h3>Settimana {s} · {e(weeks[(c, s)])}</h3>')
+        if s == 3:
+            w = WK[c - 1]
+            out.append('<h3>Weekend speciale · Investimenti e trading</h3>')
+            for gi, key in ((0, 'sab'), (1, 'dom')):
+                l = w[key]
+                out.append(f'''<div class="les caso"><div class="top"><span class="n">W{c:02d}{'ab'[gi]}</span><span class="t">{e(l['titolo'])}<span class="badge">WEEKEND</span></span><span class="d">{['SABATO','DOMENICA'][gi]}</span></div>
+<div class="g">«{e(l['gancio'])}»</div><ul>{''.join(f'<li>{e(p)}</li>' for p in l['spiega'])}</ul>
+<div class="r"><b>ESEMPIO</b>{e(l['esempio'])}</div><div class="r"><b>TI SERVE</b>{e(l['ti_serve'])}</div><div class="r"><b>VISUAL</b>{e(l['visual'])}</div></div>''')
         for d in range(5):
             n = (c - 1) * 20 + (s - 1) * 5 + d + 1; l = L[n - 1]; caso = l['caso_reale']
             col = ', '.join(str(v) for v in l.get('collega', [])) or '—'
