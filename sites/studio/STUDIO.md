@@ -253,4 +253,5 @@ Resa media per operazione, dentro → fuori campione:
 | `sites/portfolio/RIFERIMENTI.md`, `DESIGN.md`, `MOTION.md`, `SPEC-FILM.md` | approfondimenti (solo se servono) |
 | `sites/studio/reel/` | motore dei reel |
 | `sites/studio/reel/dati/` | dati dei reel: curve, MC, storia, extra, globo, `dati2` (candele e mesi), `dati3` (dentro/fuori campione) |
+| `sites/studio/SOCIAL.md` | piano e regole dell'account Instagram/TikTok «Macro & Algo» |
 | `sites/studio/reel/esempi/` | sceneggiature a tempo: il campionario per sincronizzare con la musica |
