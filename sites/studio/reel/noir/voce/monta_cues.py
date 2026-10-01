@@ -14,7 +14,12 @@ cues = {}; out = []; t = 0.0; sr0 = None
 for i, (s, key, fi) in enumerate(R):
     a, sr = load(f"{D}/r{fi:02d}.wav"); sr0 = sr
     env = np.convolve(np.abs(a), np.ones(int(sr * 0.02)) / (sr * 0.02), mode='same')
-    idx = np.where(env > 0.01)[0]; a = a[max(0, idx[0] - int(0.03 * sr)): idx[-1] + int(0.08 * sr)]
+    idx = np.where(env > 0.01)[0]; e = idx[-1]
+    # la coda della parola che si spegne non va troncata: la si segue finché scende sotto 0,0025 (max 150 ms)
+    while e < len(a) - 1 and e - idx[-1] < int(0.15 * sr) and env[e] > 0.0025: e += 1
+    a = a[max(0, idx[0] - int(0.03 * sr)): e + int(0.04 * sr)].copy()
+    fi, fo = int(0.008 * sr), min(int(0.05 * sr), len(a))   # dissolvenze: niente "clic" ai bordi
+    a[:fi] *= np.linspace(0, 1, fi); a[-fo:] *= np.cos(np.linspace(0, np.pi / 2, fo)) ** 2
     gap = 0 if i == 0 else (0.20 if key in SUB else 0.45)
     st = 0.0 if i == 0 else math.ceil((t + gap) / P - 1e-6) * P
     if i == 0: st = float(__import__('os').environ.get('FIRST', P))   # primo attacco della voce (default: secondo battito)
