@@ -1,0 +1,53 @@
+/* Wellness (modulo 14): badge «aperto ora» e illustrazione isometrica con punti. Solo token. */
+
+.badgeBox {
+  display: grid;
+  gap: var(--s-2);
+  justify-items: start;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-block-size: var(--tap);
+  margin: 0;
+  padding: var(--s-2) var(--s-4);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  font-weight: var(--w-strong);
+  line-height: var(--lh-small);
+}
+
+.badge svg {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.badge[data-stato="aperto"],
+.badge[data-stato="chiude-presto"] {
+  border-color: var(--ok);
+}
+
+.pallino {
+  flex: none;
+  box-sizing: border-box;
+  inline-size: 12px;
+  block-size: 12px;
+  border: 2px solid var(--text-muted);
+  border-radius: 50%;
+}
+
+/* aperto = pieno, chiuso = vuoto: la forma dice lo stato anche senza colore */
+.pallino[data-aperto="1"] {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+
+.badgeNota {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}

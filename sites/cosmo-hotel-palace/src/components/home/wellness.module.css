@@ -1,0 +1,279 @@
+/*
+ * Wellness. Telefono: titolo, illustrazione, poi il percorso in elenco. Desktop: testo a sinistra,
+ * illustrazione a destra che resta in vista mentre le tre tappe scorrono.
+ */
+.sezione {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--bg);
+  padding-block: var(--section-y);
+}
+
+.alone {
+  inset-inline-end: -16vw;
+  inset-block-start: 12%;
+}
+
+.grid {
+  display: grid;
+  gap: var(--s-6);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.testa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+  min-inline-size: 0;
+}
+
+.percorsoBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-6);
+  min-inline-size: 0;
+}
+
+.h2 {
+  max-inline-size: 14ch;
+}
+.intro {
+  color: var(--text-muted);
+  max-inline-size: 30em;
+}
+
+/* ───────── «Aperto ora» ───────── */
+.stato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  min-block-size: 40px;
+  padding-inline: var(--s-4);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  font-weight: var(--w-strong);
+  font-size: var(--t-small);
+}
+.punto {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--text);
+  background: transparent;
+}
+.punto[data-aperto="1"] {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+.badgeTesto {
+  animation: compare var(--d-micro) linear;
+}
+.badge[data-stato="fisso"] .badgeTesto {
+  animation: none;
+}
+@keyframes compare {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.badgeNota {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+  max-inline-size: 38ch;
+}
+
+/* ───────── Percorso con il filo ───────── */
+.percorso {
+  position: relative;
+  align-self: stretch;
+}
+
+/* il filo corre dietro i nodi: parte dal centro del primo e arriva al centro dell'ultimo */
+.filo {
+  position: absolute;
+  inset-inline-start: 17px;
+  inset-block: 18px 18px;
+  inline-size: 2px;
+  background: var(--text);
+  border-radius: 1px;
+}
+
+.tappe {
+  display: grid;
+  gap: var(--s-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tappa {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+
+.nodo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: var(--w-strong);
+  line-height: 1;
+  transition:
+    background-color var(--d-ui) var(--e-in),
+    color var(--d-ui) var(--e-in);
+}
+.tappa[data-attiva] .nodo {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.tappaTesto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding-block-start: 3px;
+  color: var(--text-muted);
+}
+.tappaTesto p {
+  max-inline-size: 34ch;
+}
+.tappaTitolo {
+  font-size: var(--t-h3);
+  color: var(--text);
+  font-weight: var(--w-body);
+}
+.tappa[data-attiva] .tappaTitolo {
+  font-weight: 600;
+}
+
+.piede {
+  margin-block-start: 0;
+}
+
+/* ───────── Illustrazione ───────── */
+.figura {
+  position: relative;
+  margin: 0;
+  min-inline-size: 0;
+}
+
+.arco {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-arco);
+  outline: 1.5px solid var(--border-strong);
+  outline-offset: 8px;
+}
+
+.segnaposti {
+  position: absolute;
+  inset: 0;
+}
+
+.segnaposto {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  transform: translate(-50%, -50%);
+}
+.segnapostoNum {
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-small);
+  font-weight: var(--w-strong);
+  line-height: 1;
+  transition:
+    background-color var(--d-ui) var(--e-in),
+    color var(--d-ui) var(--e-in);
+}
+.segnaposto[data-attivo="1"] .segnapostoNum {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* l'etichetta (pannello pieno) compare solo sul segnaposto attivo */
+.segnapostoEtichetta {
+  display: none;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-small);
+  font-weight: var(--w-strong);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--d-micro) linear;
+}
+.segnaposto[data-attivo="1"] .segnapostoEtichetta {
+  display: block;
+  opacity: 1;
+}
+
+.nota {
+  margin-block-start: var(--s-3);
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+@media (min-width: 600px) {
+  .figura {
+    max-inline-size: 640px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+  .testa {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+  .percorsoBox {
+    grid-column: 1 / span 5;
+    grid-row: 2;
+  }
+  .figura {
+    grid-column: 7 / span 6;
+    grid-row: 1 / span 2;
+    max-inline-size: none;
+    position: sticky;
+    inset-block-start: calc(var(--header-h) + var(--s-6));
+  }
+  .tappe {
+    gap: var(--s-7);
+  }
+}

@@ -1,0 +1,92 @@
+/* Pagina Ristorazione: solo la parte sabbia (la sezione sera è in components/pages/grill.module.css). */
+
+.testa {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.orariTesto,
+.menuNota {
+  margin: 0;
+}
+
+.menuNota {
+  color: var(--text-muted);
+}
+
+/* due locali, non due «card»: titolo, filetto, righe di fatti */
+.locali {
+  display: grid;
+  gap: var(--s-7);
+  margin-block-start: var(--s-8);
+}
+
+.locale {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+}
+
+.localeTitolo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-block-end: var(--s-3);
+}
+
+.localeTitolo svg {
+  flex: none;
+  color: var(--brand);
+}
+
+.fatti {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fatti li {
+  padding-block: var(--s-3);
+  border-block-start: 1px solid var(--border);
+}
+
+.fatti li:last-child {
+  border-block-end: 1px solid var(--border);
+}
+
+.contatto {
+  display: grid;
+  gap: var(--s-6);
+  max-inline-size: 36rem;
+}
+
+@media (min-width: 1024px) {
+  .testa {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+
+  .testa > :first-child {
+    grid-column: 1 / span 7;
+  }
+
+  .testa > aside {
+    grid-column: 9 / -1;
+    margin-block-start: var(--s-9);
+  }
+
+  .locali {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+
+  .locale:first-child {
+    grid-column: 1 / span 5;
+  }
+
+  .locale:last-child {
+    grid-column: 8 / -1;
+  }
+}

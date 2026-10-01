@@ -1,0 +1,23 @@
+/* Pagina Privacy: testo lungo a 65 caratteri per riga (modulo 14). Solo token. */
+.colonna {
+  display: grid;
+  gap: var(--s-7);
+  max-inline-size: calc(var(--measure) + var(--s-5));
+}
+
+.testo {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.testo h2 {
+  margin-block-start: var(--s-5);
+}
+
+.testo p {
+  max-inline-size: var(--measure);
+}
+
+.daConfermare {
+  max-inline-size: var(--measure);
+}

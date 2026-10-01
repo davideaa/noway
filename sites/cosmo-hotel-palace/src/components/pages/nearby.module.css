@@ -1,0 +1,85 @@
+/* Nei dintorni (modulo 14). Solo token. Nessuna animazione. */
+.nearby {
+  display: grid;
+  gap: var(--s-6);
+}
+
+.filtri {
+  flex-wrap: wrap;
+}
+
+.gruppi {
+  display: grid;
+  gap: var(--s-7);
+  align-items: start;
+}
+
+.gruppo {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+  min-inline-size: 0;
+}
+
+.gruppo[hidden] {
+  display: none;
+}
+
+.zona {
+  margin: 0;
+  padding-block-end: var(--s-3);
+  border-block-end: 2px solid var(--text);
+}
+
+.luoghi {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.luogo {
+  padding-block: var(--s-3);
+  border-block-end: 1px solid var(--border);
+}
+
+.nome {
+  margin: 0;
+  font-weight: var(--w-strong);
+}
+
+.testo {
+  margin: var(--s-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+/* un solo gruppo scelto: le voci vanno su due colonne, senza lasciare la pagina vuota */
+@media (min-width: 600px) {
+  .gruppi[data-filtro="milano"] .luoghi,
+  .gruppi[data-filtro="monza"] .luoghi,
+  .gruppi[data-filtro="como"] .luoghi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gruppi[data-filtro="tutto"] {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+  }
+
+  .gruppi[data-filtro="tutto"] .gruppo:nth-child(1) {
+    grid-column: 1 / span 5;
+  }
+
+  .gruppi[data-filtro="tutto"] .gruppo:nth-child(2) {
+    grid-column: 6 / span 4;
+  }
+
+  .gruppi[data-filtro="tutto"] .gruppo:nth-child(3) {
+    grid-column: 10 / span 3;
+  }
+}

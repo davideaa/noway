@@ -1,0 +1,886 @@
+/*
+ * Stili del modulo Camere (hub e pagine camera). Solo token (tokens.css): nessun valore magico.
+ * Si anima solo `opacity`, `transform` e il colore del fondo dell'arco (giorno -> sera, 600 ms).
+ * Niente will-change, niente backdrop-filter. Mobile-first: 600 / 1024 sono i breakpoint di DESIGN 4.1.
+ */
+
+/* ═════════════════════ Pagina camera: griglia del layout ═════════════════════
+ * Ordine nel DOM (= ordine di tabulazione): tab, riquadro con controlli, testata, punti, scheda.
+ * Sul telefono la testata sta sopra al diorama (come UX 5.2): si sposta con la griglia; non ha
+ * elementi attivabili, quindi l'ordine di tabulazione resta quello visivo. */
+.room {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "tabs"
+    "testa"
+    "stage"
+    "punti"
+    "spec";
+  row-gap: var(--s-6);
+  padding-block: var(--s-4) var(--s-8);
+}
+
+.tabs {
+  grid-area: tabs;
+}
+.testa {
+  grid-area: testa;
+}
+.stage {
+  grid-area: stage;
+}
+.areaPunti {
+  grid-area: punti;
+}
+.areaSpec {
+  grid-area: spec;
+}
+
+@media (min-width: 1024px) {
+  .room {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-areas: none;
+    column-gap: var(--gutter);
+    grid-template-rows: auto auto auto 1fr auto;
+    padding-block: var(--s-5) var(--s-9);
+  }
+  /* diorama a sinistra (7 colonne), testata e scheda a destra (5 colonne) */
+  .tabs {
+    grid-area: auto;
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .stage {
+    grid-area: auto;
+    grid-column: 1 / 8;
+    grid-row: 2 / 5;
+  }
+  .testa {
+    grid-area: auto;
+    grid-column: 8 / -1;
+    grid-row: 2;
+    align-self: start;
+  }
+  .areaSpec {
+    grid-area: auto;
+    grid-column: 8 / -1;
+    grid-row: 3 / 6;
+    align-self: start;
+  }
+  .areaPunti {
+    grid-area: auto;
+    grid-column: 1 / 8;
+    grid-row: 5;
+  }
+}
+
+/* la scheda resta fissa solo se lo schermo è abbastanza alto da mostrarla tutta */
+@media (min-width: 1024px) and (min-height: 880px) {
+  .areaSpec {
+    position: sticky;
+    inset-block-start: calc(var(--header-h) + var(--s-4));
+  }
+}
+
+/* ═════════════════════ Testata (h1) ═════════════════════ */
+.testa {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+}
+
+.testaLead {
+  max-inline-size: 40ch;
+}
+
+.testaCorpo {
+  color: var(--text-muted);
+}
+
+@media (min-width: 1024px) {
+  /* colonna da 5: l'h1 a corpo pieno andrebbe a capo su tre righe */
+  .testa h1 {
+    font-size: var(--t-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: var(--tr-h2);
+  }
+}
+
+/* ═════════════════════ Riquadro del diorama ═════════════════════ */
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+/* L'arco è il segno del sito (DESIGN 4.3). Giorno e sera cambiano il fondo e il filetto con la
+   stessa dissolvenza della luce (--d-scene: 600 ms; 200 ms con movimento ridotto). Il testo
+   NON sta qui dentro: non cambia mai colore (MOTION 4.5). */
+.arco {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-arco);
+  background-color: var(--bg-alt);
+  transition:
+    background-color var(--d-scene) var(--e-in),
+    border-color var(--d-scene) var(--e-in);
+}
+
+/* la Family e la Suite sono larghe il doppio: sul telefono l'arco è più basso (le sotto-viste fanno il resto) */
+.arco[data-tipo="family"],
+.arco[data-tipo="suite"] {
+  aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 600px) {
+  .arco,
+  .arco[data-tipo="family"],
+  .arco[data-tipo="suite"] {
+    aspect-ratio: 6 / 5;
+  }
+}
+
+@media (min-width: 1024px) {
+  .arco,
+  .arco[data-tipo="family"],
+  .arco[data-tipo="suite"] {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* telefono in orizzontale: il diorama non supera il 70% dell'altezza (UX 10) */
+@media (orientation: landscape) and (max-height: 520px) {
+  .arco {
+    max-block-size: 70svh;
+    inline-size: min(100%, 70svh * 1.2);
+    margin-inline: auto;
+  }
+}
+
+.figura {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* il poster riempie l'arco anche se il suo rapporto è diverso (ritaglia, non lascia bande) */
+.arco :global([data-poster]) > svg {
+  height: 100% !important;
+}
+
+/* ───── Pianta ───── */
+.pianta {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 0;
+  padding: var(--s-5) var(--s-3) var(--s-4);
+  background-color: var(--bg);
+  transition: background-color var(--d-scene) var(--e-in);
+}
+
+.pianteMq {
+  margin: 0;
+  max-inline-size: none;
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: var(--fvs-display);
+  font-size: var(--t-h2);
+  font-weight: var(--w-display);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--tr-h2);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.pianteDisegno {
+  position: relative;
+  inline-size: 100%;
+  min-height: 0;
+}
+
+.pianteDisegno[data-tipo="classic"] {
+  inline-size: min(100%, 360px);
+}
+
+@media (min-width: 1024px) {
+  .pianteDisegno[data-tipo="classic"] {
+    inline-size: min(100%, 440px);
+  }
+  .pianteDisegno:not([data-tipo="classic"]) {
+    inline-size: min(100%, 620px);
+  }
+}
+
+.pianteLivello {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.puntoPianta {
+  position: absolute;
+  inline-size: 0;
+  block-size: 0;
+}
+
+/* la pillola aperta sta sopra gli altri punti */
+.puntoPianta:has([data-aperto="1"]) {
+  z-index: 2;
+}
+
+/* ───── Controlli ───── */
+.controlli {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.rigaVista,
+.rigaCamera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--s-3) var(--s-4);
+}
+
+.rigaCamera {
+  align-items: center;
+}
+
+/* in Pianta questi controlli spariscono ma lasciano il loro spazio (niente salti, UX 5.2);
+   `visibility` li toglie anche dall'ordine di tabulazione */
+.luce[data-nascosto="1"],
+.rigaCamera[data-nascosto="1"],
+.rigaCamera[data-nascosto="1"] * {
+  visibility: hidden !important; /* «Ripristina vista» ha una visibilità sua: qui vince questa */
+}
+
+.rig {
+  flex: 0 0 auto;
+}
+
+.sotto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/* le scorciatoie «Camera 1 / Camera 2» servono dove la stanza intera è piccola */
+@media (min-width: 1024px) {
+  .sotto {
+    display: none;
+  }
+}
+
+.didascalia {
+  min-block-size: 72px; /* fissa: il passaggio 3D <-> Pianta non sposta il resto (UX 5.2) */
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+.didascalia p {
+  margin: 0;
+}
+
+.didascalia p + p {
+  margin-block-start: var(--s-1);
+}
+
+/* i comandi da tastiera hanno senso solo con un puntatore preciso */
+.soloTastiera {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .soloTastiera {
+    display: block;
+  }
+}
+
+/* ═════════════════════ Punti della camera ═════════════════════ */
+.punti {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+}
+
+@media (min-width: 600px) {
+  .punti :global(ul) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ═════════════════════ Scheda tecnica ═════════════════════ */
+.spec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg);
+}
+
+.mq {
+  margin: 0;
+  max-inline-size: none;
+}
+
+.mqUnita {
+  font-size: 0.45em;
+  letter-spacing: 0;
+}
+
+.mqParti {
+  display: block;
+  margin-block-start: var(--s-1);
+  font-family: var(--font-body);
+  font-size: var(--t-small);
+  font-weight: var(--w-body);
+  font-variation-settings: normal;
+  letter-spacing: 0;
+  line-height: var(--lh-small);
+  color: var(--text-muted);
+}
+
+.dati {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.dato {
+  display: grid;
+  gap: var(--s-1);
+  padding-block: var(--s-3);
+  border-block-start: 1px solid var(--border);
+}
+
+.dato dt {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--t-label);
+  font-weight: var(--w-label);
+  letter-spacing: var(--tr-label);
+  line-height: var(--lh-label);
+  text-transform: uppercase;
+}
+
+.dato dd {
+  margin: 0;
+  padding-inline-start: calc(24px + var(--s-2));
+}
+
+.azioni {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.dotazioniTitolo {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--t-label);
+  font-weight: var(--w-label);
+  letter-spacing: var(--tr-label);
+  line-height: var(--lh-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dotazioni {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dotazioni li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+}
+
+.dotazioni svg {
+  flex: none;
+  margin-block-start: 2px;
+  color: var(--brand);
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .dati {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-5);
+  }
+  .dotazioni {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-5);
+  }
+}
+
+/* ═════════════════════ Hub ═════════════════════ */
+.hub {
+  display: grid;
+  gap: var(--s-8);
+  padding-block: var(--s-7) var(--s-8);
+}
+
+@media (min-width: 1024px) {
+  .hub {
+    gap: var(--s-9);
+    padding-block: var(--s-8) var(--s-9);
+  }
+}
+
+.hubTesta {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+}
+
+.hubLead {
+  max-inline-size: 44ch;
+}
+
+.hubCorpo {
+  color: var(--text-muted);
+}
+
+/* ───── Consigliere ───── */
+.consigliere {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  scroll-margin-block-start: var(--scroll-pad-top);
+}
+
+.consigliereSotto {
+  color: var(--text-muted);
+}
+
+.chips {
+  margin-block-start: var(--s-1);
+}
+
+.risposta {
+  display: grid;
+  gap: var(--s-3);
+  max-inline-size: 640px;
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg-alt);
+}
+
+/* regione sempre nel DOM (aria-live), ma senza scatola finché non c'è una risposta */
+.risposta[data-vuota="1"] {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.rispostaNome {
+  margin: 0;
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: var(--fvs-display);
+  font-size: var(--t-h3);
+  font-weight: var(--w-h3);
+  line-height: var(--lh-h3);
+}
+
+.rispostaNota {
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+.rispostaAzioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.rispostaAzioni > * {
+  flex: 1 1 160px;
+}
+
+@media (min-width: 600px) {
+  .rispostaAzioni > * {
+    flex: 0 0 auto;
+  }
+}
+
+/* ───── Schede camera: tre forme ───── */
+.schede {
+  display: flex;
+  gap: var(--s-4);
+  margin: 0 calc(-1 * var(--margin-r)) 0 calc(-1 * var(--margin-l));
+  padding: 2px var(--margin-r) var(--s-3) var(--margin-l);
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--margin-l);
+  scrollbar-width: thin;
+}
+
+.schedaVoce {
+  flex: 0 0 82%; /* la scheda successiva spunta */
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 600px) {
+  .schede {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: var(--s-5) var(--gutter);
+    align-items: start;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .schedaVoce {
+    flex: none;
+  }
+  /* Classic + Suite in prima riga, Family sotto (UX 10) */
+  .schedaVoce[data-tipo="classic"] {
+    grid-column: 1 / span 3;
+    grid-row: 1;
+  }
+  .schedaVoce[data-tipo="suite"] {
+    grid-column: 4 / span 5;
+    grid-row: 1;
+  }
+  .schedaVoce[data-tipo="family"] {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .schede {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  /* 3 + 5 + 4 colonne (UX 10) */
+  .schedaVoce[data-tipo="classic"] {
+    grid-column: 1 / span 3;
+  }
+  .schedaVoce[data-tipo="family"] {
+    grid-column: 4 / span 5;
+    grid-row: 1;
+  }
+  .schedaVoce[data-tipo="suite"] {
+    grid-column: 9 / span 4;
+    grid-row: 1;
+  }
+}
+
+.scheda {
+  position: relative;
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  block-size: 100%;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg);
+  transition: border-color var(--d-micro) var(--e-in);
+}
+
+/* consigliata: bordo da 2 px (il secondo px è un'ombra piena, così la scheda non cambia misura) */
+.scheda[data-consigliata="1"] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scheda:hover {
+    border-color: var(--text);
+  }
+}
+
+/* l'anello di focus sta sulla scheda intera (è un link) */
+.scheda:has(:focus-visible) {
+  outline: var(--focus-w) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+
+.schedaPoster {
+  display: block;
+}
+
+.schedaPoster svg {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/* la Classic è un arco stretto e alto: non si allarga oltre una certa misura */
+.schedaVoce[data-tipo="classic"] .schedaPoster {
+  max-inline-size: 280px;
+  margin-inline: auto;
+}
+
+.schedaCorpo {
+  display: grid;
+  gap: var(--s-3);
+  align-content: start;
+}
+
+.schedaBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  min-block-size: 24px;
+  font-size: var(--t-small);
+  font-weight: var(--w-strong);
+  line-height: var(--lh-small);
+  color: var(--brand);
+}
+
+.schedaBadge[data-visibile="0"] {
+  display: none;
+}
+
+.schedaDati {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.schedaDati li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.schedaDati svg {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.schedaLink {
+  justify-self: start;
+  margin-block-start: var(--s-2);
+}
+
+/* il link copre tutta la scheda */
+.schedaLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-3);
+}
+
+/* ───── Confronto ───── */
+.confronto {
+  display: grid;
+  gap: var(--s-5);
+  align-content: start;
+  scroll-margin-block-start: var(--scroll-pad-top);
+}
+
+/* telefono: due camere a scelta */
+.coppie {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.coppieSotto {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.coppieChip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-2);
+}
+
+.coppieGriglia {
+  display: grid;
+}
+
+.coppieTesta,
+.coppieRiga {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-1) var(--s-4);
+}
+
+.coppieTesta {
+  padding-block-end: var(--s-3);
+  border-block-end: 2px solid var(--text);
+}
+
+.coppieNome {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-variation-settings: var(--fvs-display);
+  font-size: var(--t-h3);
+  font-weight: var(--w-h3);
+  line-height: var(--lh-h3);
+}
+
+.coppieRiga {
+  padding-block: var(--s-3);
+  border-block-end: 1px solid var(--border);
+}
+
+.coppieEtichetta {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: var(--t-label);
+  font-weight: var(--w-label);
+  letter-spacing: var(--tr-label);
+  line-height: var(--lh-label);
+  text-transform: uppercase;
+}
+
+.coppieValore {
+  min-width: 0;
+}
+
+.coppieAzioni {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.tabella {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .coppie {
+    display: none;
+  }
+  .tabella {
+    display: table;
+    inline-size: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .tabella th,
+  .tabella td {
+    padding: var(--s-3) var(--s-4);
+    text-align: start;
+    vertical-align: top;
+  }
+  .tabella thead th {
+    padding-block: 0 var(--s-3);
+    border-block-end: 2px solid var(--text);
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: var(--fvs-display);
+    font-size: var(--t-h3);
+    font-weight: var(--w-h3);
+    line-height: var(--lh-h3);
+  }
+  .tabella thead td {
+    border-block-end: 2px solid var(--text);
+  }
+  .tabella tbody th {
+    color: var(--text-muted);
+    font-size: var(--t-label);
+    font-weight: var(--w-label);
+    letter-spacing: var(--tr-label);
+    line-height: var(--lh-label);
+    text-transform: uppercase;
+  }
+  .tabella tbody th,
+  .tabella tbody td {
+    border-block-end: 1px solid var(--border);
+  }
+  .tabella thead :is(th, td):first-child,
+  .tabella tbody th,
+  .tabella tfoot td:first-child {
+    inline-size: 16%;
+    padding-inline-start: 0;
+  }
+  .tabella tfoot td {
+    padding-block-start: var(--s-4);
+  }
+}
+
+.piantaConfronto {
+  display: grid;
+  gap: var(--s-3);
+  margin: 0;
+  justify-items: start;
+}
+
+.piantaConfrontoSvg {
+  inline-size: min(100%, 480px);
+}
+
+.piantaConfronto figcaption {
+  color: var(--text-muted);
+  font-size: var(--t-small);
+  line-height: var(--lh-small);
+}
+
+@media (min-width: 1024px) {
+  /* a scala comune ma più comoda: tre piante di fila in una colonna alta 700 px sono troppe */
+  .piantaConfrontoSvg {
+    inline-size: min(100%, 420px);
+  }
+}
+
+/* ───── In ogni camera ───── */
+.comuni {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  padding-block-start: var(--s-6);
+  border-block-start: 1px solid var(--border);
+}
+
+.comuniLista {
+  display: grid;
+  gap: var(--s-3) var(--s-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comuniLista li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.comuniLista svg {
+  flex: none;
+  color: var(--brand);
+}
+
+@media (min-width: 600px) {
+  .comuniLista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .comuniLista {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

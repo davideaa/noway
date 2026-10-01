@@ -385,3 +385,14 @@
     box-shadow: var(--focus-ring-double);
   }
 }
+
+/* ───────── Barra e pillola di prenotazione: nascoste mentre il modulo è nello schermo ───────── */
+html[data-home-prenota] [data-booking-dock] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--d-micro) var(--e-in),
+    visibility 0s linear var(--d-micro);
+}
+

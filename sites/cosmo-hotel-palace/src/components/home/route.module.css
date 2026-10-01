@@ -1,0 +1,151 @@
+/*
+ * Percorso verso Milano. Telefono: titolo e tappe, poi lo schema (che si disegna con lo scroll) a
+ * larghezza 300 px: a meno non si leggono i numeri. Desktop: schema a sinistra, testo a destra.
+ */
+.sezione {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--bg-alt);
+  border-block: 1px solid var(--border);
+  padding-block: var(--section-y);
+}
+
+/* dietro il testo, non dietro lo schema (che ha il suo fondo pieno) */
+.alone {
+  inset-inline-end: -18vw;
+  inset-block-end: 3%;
+}
+
+.grid {
+  display: grid;
+  gap: var(--s-7);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* nel DOM lo schema viene dopo il testo (il titolo prima di tutto); sul telefono si vede prima. Non ha
+   elementi focalizzabili: l'ordine di tabulazione non cambia. */
+.mappa {
+  order: -1;
+  inline-size: min(100%, 340px);
+  margin-inline: auto;
+}
+
+/* le tappe non ancora raggiunte sono più tenui (opacità: non solo colore, c'è anche il numero) */
+.mappa :global([data-stop]) {
+  transition: opacity var(--d-ui) var(--e-in);
+}
+
+.testo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+
+.h2 {
+  max-inline-size: 14ch;
+}
+
+.corpo {
+  color: var(--text-muted);
+  max-inline-size: 34em;
+}
+
+.tappe {
+  align-self: stretch;
+  display: grid;
+  gap: 0;
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: tappa;
+  border-block-start: 1px solid var(--border-strong);
+}
+
+.tappa {
+  border-block-end: 1px solid var(--border);
+}
+
+.tappaBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  inline-size: 100%;
+  min-block-size: 64px;
+  padding: var(--s-3) var(--s-2);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: color var(--d-micro) var(--e-in);
+}
+.tappaBtn:focus-visible {
+  outline-offset: -2px;
+}
+
+/* tappa attuale: numero pieno + peso del testo (mai solo il colore) */
+.num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-weight: var(--w-strong);
+  line-height: 1;
+  transition:
+    background-color var(--d-micro) var(--e-in),
+    color var(--d-micro) var(--e-in);
+}
+
+.etichetta {
+  font-size: var(--t-lead);
+  line-height: var(--lh-h3);
+}
+
+.tappa[data-attiva] .tappaBtn {
+  color: var(--text);
+  font-weight: var(--w-strong);
+}
+.tappa[data-attiva] .num {
+  background: var(--text);
+  color: var(--bg-alt);
+}
+
+.piede {
+  margin-block-start: var(--s-4);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tappaBtn:hover {
+    color: var(--text);
+  }
+}
+
+@media (min-width: 1024px) {
+  .alone {
+    inset-block: 8% auto;
+  }
+  .grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+  }
+  .mappa {
+    order: 0;
+    grid-column: 2 / span 4;
+    grid-row: 1;
+    inline-size: 100%;
+    margin-inline: 0;
+  }
+  .testo {
+    grid-column: 7 / span 5;
+    grid-row: 1;
+  }
+}
