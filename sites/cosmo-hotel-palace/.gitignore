@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# anteprima come Artifact (scripts/anteprima_claude.py)
+/out-anteprima/
+
+# foto del cliente: non nel repo pubblico (scripts/scarica-foto.py)
+/public/foto/
