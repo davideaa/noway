@@ -26,7 +26,8 @@ const mono = (s, px, py, t, a, o = {}) => txt(typed(s, t, a), px, py, { fam: 'mo
 // --- frase grande: righe di parole che entrano una alla volta (sfocate → nitide, dal basso) ---
 // lines: [[testo, colore], ...]; parole sfalsate di `st` secondi a partire da a
 function phrase(t, a, lines, y0, o = {}) {
-  const { size = 96, lh = 1.12, st = 0.13, out = null, align = 'center', x0 = 540 } = o;
+  let { size = 96, lh = 1.12, st = 0.13, out = null, align = 'center', x0 = 540, maxW = 960 } = o;
+  const widest = Math.max(...lines.map(([s]) => tw(s, size))); if (widest > maxW) size = Math.floor(size * maxW / widest);
   let wi = 0, y = y0;
   const ko = out ? oC(seg(t, out, out + 0.25)) : 0;
   for (const [s, col] of lines) {
