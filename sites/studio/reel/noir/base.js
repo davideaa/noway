@@ -139,21 +139,21 @@ function refinery(cx, by, s, k, lit = 1, col = '200,250,114') {
   if (lit > 0.05) { glow(4, -580, 70, col, 0.55 * lit); x.fillStyle = `rgba(${col},${0.9 * lit})`; x.beginPath(); x.ellipse(4, -585, 10 * fl, 26 * fl, 0, 0, Math.PI * 2); x.fill(); }
   x.restore();
 }
-function sack(cx, by, s, k) {
+function sack(cx, by, s, k, label = 'CRUDE') {
   x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k;
   const g = x.createLinearGradient(-120, 0, 120, 0); g.addColorStop(0, '#d8d3c4'); g.addColorStop(0.5, '#f4f0e4'); g.addColorStop(1, '#b9b3a3');
   x.fillStyle = g; x.beginPath(); x.moveTo(-100, -300); x.quadraticCurveTo(0, -270, 100, -300); x.lineTo(130, -20); x.quadraticCurveTo(0, 10, -130, -20); x.closePath(); x.fill();
   x.fillStyle = '#c9c3b2'; x.beginPath(); x.moveTo(-100, -300); x.quadraticCurveTo(-60, -345, 0, -330); x.quadraticCurveTo(60, -345, 100, -300); x.quadraticCurveTo(0, -270, -100, -300); x.fill();
-  txt('CRUDE', 0, -150, { fam: 'mono', size: 34, weight: 600, color: '#3a3528', ls: 6 });
+  txt(label, 0, -150, { fam: 'mono', size: 34, weight: 600, color: '#3a3528', ls: 6 });
   x.restore();
 }
-function loaf(cx, by, s, k) {
+function loaf(cx, by, s, k, label = 'GASOLINE') {
   x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k;
   const g = x.createLinearGradient(0, -230, 0, 0); g.addColorStop(0, '#e6a85a'); g.addColorStop(1, '#8a5524');
   x.fillStyle = g; x.beginPath(); x.moveTo(-170, 0); x.bezierCurveTo(-190, -220, 190, -220, 170, 0); x.closePath(); x.fill();
   x.strokeStyle = 'rgba(255,230,190,0.6)'; x.lineWidth = 6; x.lineCap = 'round';
   for (const dx of [-80, 0, 80]) { x.beginPath(); x.moveTo(dx - 30, -120); x.lineTo(dx + 30, -160); x.stroke(); }
-  txt('GASOLINE', 0, -60, { fam: 'mono', size: 30, weight: 600, color: '#2b1806', ls: 5 });
+  txt(label, 0, -60, { fam: 'mono', size: 30, weight: 600, color: '#2b1806', ls: 5 });
   x.restore();
 }
 function gauge(cx, cy, r, v, k) { // v 0..100
