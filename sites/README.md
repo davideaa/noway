@@ -2,6 +2,8 @@
 
 Cartella separata dalla ricerca sull'oro. Ogni sito sta in `sites/<nome-progetto>/`.
 
+**Da leggere per primo: `studio/STUDIO.md`** (memoria unica di siti e reel). Il motore dei reel è in `studio/reel/`.
+
 ## Il team (in `.claude/agents/`)
 
 | Agente | Quando |
