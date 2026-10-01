@@ -5,6 +5,41 @@ Scritta il 01/10/2026 dopo la Puntata 1 (approvata da Davide: «perfetto, bellis
 Davide ha dato il via libera a produrre e pubblicare da solo, a una condizione: **ogni puntata deve uscire perfetta**
 (niente sfarfallii, parole mangiate, voce rotta, dati sbagliati). Se un controllo fallisce la puntata non esce.
 
+## Divisione del lavoro (dal 01/10/2026, chiesta da Davide: più veloce, zero errori)
+Quando Davide chiede «fammi la puntata N» (o «fammi N, N+1, … in ordine»), l'orchestratore (la sessione principale)
+**non scrive tutto da solo**: distribuisce a cinque agenti con un compito ciascuno (definiti in `.claude/agents/`),
+e tiene per sé solo il coordinamento, la macchina (`produci.sh`) e il giudizio finale.
+
+| Passo | Chi | Modello | Consegna | Tempo |
+|---|---|---|---|---|
+| 1. Dati verificati | `reel-ricercatore` | Sonnet | `pN-fonti.md` | 5–8 min |
+| 2. Copione fluido | `reel-autore` | Opus | `voce/righe-pN.json` (+ `controlla_copione.py` a zero errori) | 4–6 min |
+| 3a. Voce e video | orchestratore → `produci.sh` | nessun modello (macchina) | `PuntataN.mp4` + verifica finale | 15–25 min |
+| 3b. Scene (in parallelo a 3a) | `reel-regista` | Opus | `pN.html` + foglio provini | 8–12 min |
+| 4. Controllo con occhi nuovi | `reel-controllo` | Sonnet | PASSA / BOCCIA con difetti | 3–5 min |
+| 5. Caption, calendario, prova | `reel-pubblicazione` | Haiku | voce in calendario + `--prova` OK | 1–2 min |
+
+Perché questi modelli: Opus dove serve gusto e giudizio (il testo parlato, che Davide giudica per primo, e le animazioni,
+che sono ciò che gli piace); Sonnet dove serve precisione su un compito chiaro (fonti, controllo con elenco);
+Haiku per il lavoro meccanico. La voce e il render non usano modelli: è la macchina, e lì nessun agente accelera.
+
+Come si incastra:
+- **Una puntata**: 1 → 2 → (3a voce | 3b scene insieme) → render e verifica → 4 → 5. Circa **35–45 minuti** dall'ordine al video pronto.
+  Il render parte solo quando ci sono sia la voce (tempi veri) sia `pN.html`: per questo `produci.sh` va lanciato con il
+  file delle scene già pronto, oppure con `DA=2` subito dopo la consegna del regista se la voce è già stata generata a parte.
+- **Più puntate in ordine**: passi 1 e 2 di tutte le puntate in parallelo (un agente per puntata); poi la macchina fa le voci
+  **una alla volta** (4 core: due voci insieme non vanno più veloci) mentre i registi lavorano tutti in parallelo; render e controlli
+  a catena. Stima: settimana di 5 puntate in **circa 2 ore** invece di 5–6.
+- Il passo 2 aspetta il passo 1 (il copione usa solo dati verificati). Il controllo (4) non lo fa mai chi ha prodotto.
+- Se `reel-controllo` boccia: si rifà solo il pezzo difettoso (una frase: `rigenera2.py N` e `DA=2`; una scena: frame mirati
+  con `LIST=` e ricodifica), poi di nuovo il controllo.
+- Le stime sono da misurare alla prima settimana fatta così e da scrivere qui sotto con i tempi veri.
+
+## Stile del testo parlato (richiesta di Davide, 01/10/2026)
+Discorsivo e fluido, come una persona che racconta: frasi legate tra loro, nessun elenco «Primo / Secondo / Terzo», nessuna
+frase telegrafica («al mulino: un euro»). Dettagli e vincoli della voce nel file dell'agente `reel-autore`.
+`voce/controlla_copione.py` blocca gli elenchi, le sigle, le cifre, «Pil» a fine riga e le frasi troppo corte; `produci.sh` non parte se fallisce.
+
 ## Calendario
 - Lunedì–venerdì alle **12:00 ora italiana** (`TZ=Europe/Rome date` prima di tutto: il giorno conta per «Oggi è …»).
 - Puntata 1 = lunedì 5/10/2026. Il venerdì è sempre il caso reale della settimana.

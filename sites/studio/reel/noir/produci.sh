@@ -6,6 +6,7 @@
 set -e
 N=$1; NN=$(printf %02d $N); NOIR=$(cd "$(dirname "$0")" && pwd); W=${LAVORO:-$HOME/reel-lavoro}/p$N; PY=$HOME/tts/bin/python
 RUN=${RUN_WAV:-$HOME/reel-lavoro/run.wav}   # base «Run!» (mandata da Davide, non nel repository)
+python3 "$NOIR/voce/controlla_copione.py" "$NOIR/voce/righe-p$N.json" || { echo "STOP: il copione ha errori (vedi sopra)"; exit 3; }
 mkdir -p "$W" && cp "$NOIR/voce/righe-p$N.json" "$W/righe.json" && cp "$NOIR/voce/rigenera2.py" "$W/"
 cd "$W"   # DA=2 riparte dal taglio (voce già pronta in $W, es. dopo aver rifatto una sola frase con rigenera2.py N)
 if [ "${DA:-1}" -le 1 ]; then echo "== 1. voce $(date +%T)"; $PY rigenera2.py tutte 2>&1 | grep -E "seed|SCELTA|CACHE|FATTO"; fi
