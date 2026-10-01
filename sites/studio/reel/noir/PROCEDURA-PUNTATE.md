@@ -21,7 +21,11 @@ Davide ha dato il via libera a produrre e pubblicare da solo, a una condizione: 
   → `cta` («Se ti è piaciuto, lascia un like, un commento, e seguici.»).
 - **Lunghezza: ~215 parole ≈ 80 s** (misurato: 2,72 parole/s pause comprese).
 - Regole di scrittura per la voce (Chatterbox italiano):
-  - «PIL» si scrive **«Pil»** (maiuscolo intero lo legge «IP»/«più»; «Pil» testato 2 su 2 corretto).
+  - «PIL» si scrive **«Pil»** (maiuscolo intero lo legge «IP»/«più»). «Pil» funziona circa una volta su due a metà frase
+    (la selezione scarta le altre), ma **a fine frase fallisce sempre** («PIN», «pillo»: 8 su 8 nella Puntata 2):
+    lì si scrive «prodotto interno lordo».
+  - Il confronto col copione ignora i numeri (Whisper li scrive in cifre: «7», «1 euro», «137 %»). Un «!!» con
+    somiglianza 0,96–0,97 e solo numeri diversi è un falso allarme; con parole diverse («PIN», «Gano») è un errore vero.
   - Numeri **in lettere** («duemilaventicinque», «centotrentasette per cento»).
   - Niente frasi di due parole (le sbaglia: «Puntata uno» → «Contata 1»).
   - Parole difficili: grafia fonetica nel copione (es. «tochenizzato»).

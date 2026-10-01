@@ -155,7 +155,7 @@ function sCasa(t, a, b) { bg('30,44,26'); x.save(); const d = b - a;
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 300, { size: 70, out: a + 0.3 * d });
   phrase(t, a + 0.32 * d, [['Conta solo ciò che', C.ink], ['arriva alla fine.', C.lime]], 300, { size: 88 });
   const kg = seg(t, a + 0.45 * d, a + 0.45 * d + 0.6); x.save(); rows(t, { ghost: kg > 0.5 ? ['grano', 'farina'] : [], y0: 700, gap: 250 }); x.restore();
-  if (kg > 0) { glow(540, 1200, 360, '200,250,114', 0.22 * kg); check(880, 1200, 34, kg); }
+  if (kg > 0) { glow(540, 1200, 360, '200,250,114', 0.22 * kg); check(690, 1200, 34, kg); }
   x.restore(); finish(t); }
 
 serie({ hook: sHook, ieri: sIeri, def: sDef, grano: (t, a, b) => sFiliera(t, a, b, 'grano'), farina: (t, a, b) => sFiliera(t, a, b, 'farina'), pane: (t, a, b) => sFiliera(t, a, b, 'pane'),

@@ -6,7 +6,7 @@ from faster_whisper import WhisperModel
 D, MIX = sys.argv[1], sys.argv[2]
 m = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 C = json.load(open(f"{D}/cues.json"))["cues"]; R = {k: s for s, k in json.load(open(f"{D}/righe.json"))}
-NUM = r"\b(duemilaventicinque|duemiladuecento|centotrentasette|cinque|sei|sette|dieci|venti|duecento|due|tre|quattro|uno|un terzo)\b"
+NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
 def norm(s):
     s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s)); return re.sub(r"[^a-zàéìòù ]", " ", s).split()

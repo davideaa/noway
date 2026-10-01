@@ -7,7 +7,8 @@ set -e
 N=$1; NN=$(printf %02d $N); NOIR=$(cd "$(dirname "$0")" && pwd); W=${LAVORO:-$HOME/reel-lavoro}/p$N; PY=$HOME/tts/bin/python
 RUN=${RUN_WAV:-$HOME/reel-lavoro/run.wav}   # base «Run!» (mandata da Davide, non nel repository)
 mkdir -p "$W" && cp "$NOIR/voce/righe-p$N.json" "$W/righe.json" && cp "$NOIR/voce/rigenera2.py" "$W/"
-cd "$W"; echo "== 1. voce $(date +%T)"; $PY rigenera2.py tutte 2>&1 | grep -E "seed|SCELTA|CACHE|FATTO"
+cd "$W"   # DA=2 riparte dal taglio (voce già pronta in $W, es. dopo aver rifatto una sola frase con rigenera2.py N)
+if [ "${DA:-1}" -le 1 ]; then echo "== 1. voce $(date +%T)"; $PY rigenera2.py tutte 2>&1 | grep -E "seed|SCELTA|CACHE|FATTO"; fi
 echo "== 2. taglio $(date +%T)"; $PY "$NOIR/voce/taglia.py" "$W" $(python3 -c "import json;print(' '.join(str(i) for i,(s,k) in enumerate(json.load(open('righe.json'))) if k!='num'))") | grep "^r"
 cp righe.json pulite/; [ -f pulite/r00.wav ] || cp r00.wav pulite/ 2>/dev/null || true
 echo "== 3. montaggio $(date +%T)"; SKIP=num FIRST=${FIRST:-1.2412} python3 "$NOIR/voce/monta_cues.py" "$W/pulite" 0.6206; cp pulite/cues.json "$NOIR/cues-p$N.json"

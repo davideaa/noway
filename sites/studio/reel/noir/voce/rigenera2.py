@@ -14,9 +14,9 @@ idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tu
 # cache delle frasi GIÀ promosse (stesso testo → stesso file, niente rigenerazione): ~/reel-lavoro/cache/<sha1>.wav
 CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=True)
 chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
-NUM = r"\b(duemilaventicinque|duemiladuecento|cinque|sei|dieci|due|uno|un terzo)\b"
+NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
 def norm(s, heard=False):
-    s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ")
+    s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ").replace("%", " per cento ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))     # numeri tolti da ENTRAMBI i lati ("ci sei dentro")
     return re.sub(r"[^a-zàéìòù ]", " ", s).split()
 def coda(f, last_end):
