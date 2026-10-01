@@ -24,7 +24,10 @@ Una riga = una scena del video (le chiavi le decidi tu, brevi e minuscole: servo
 Una frase può continuare nella riga dopo (riga che finisce con la virgola): il video cambia scena, la voce no.
 
 ## Vincoli della voce sintetica (Chatterbox italiano) — non negoziabili
-- Numeri **in lettere**; sigle mai in maiuscolo («Pil», «Bce», «Fed» va bene come parola); «Pil» mai in fondo alla riga.
+- Numeri **in lettere**; sigle mai in maiuscolo.
+- **«Pil» a voce è instabile** (Puntate 1–2: «PIN», «pillo», «Pilo», «il P»). Evitalo quando puoi: la scritta PIL è già sullo schermo,
+  a voce basta «il prodotto interno lordo» la prima volta e poi frasi che non lo nominano («conta solo il pane»).
+  Se proprio serve: a metà frase e **seguito da consonante** («il Pil conta»), mai in fondo alla riga, mai davanti a vocale.
 - Righe tra 6 e 30 parole; niente righe di 3 parole o meno. Totale 190–235 parole (≈ 75–85 s).
 - Parole straniere o difficili: grafia come si pronunciano in italiano (es. «tochenizzato»).
 - Usa solo i dati di `pN-fonti.md`, detti come lì suggerito. Nessun dato in più.

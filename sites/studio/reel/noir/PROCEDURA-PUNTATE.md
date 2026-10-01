@@ -144,9 +144,24 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 01/10 | 1 | Un tentativo PASSATO veniva scartato per uno bocciato con «punteggio» più alto (frase dell'estero con la «e» saltata) | `rigenera2.py`: chi passa è sempre la scelta |
 | 01/10 | 1 | Soglia 0,97 lasciava passare una parola mancante nelle frasi lunghe | soglia 0,985 |
 | 01/10 | 1 | Frase difettosa finita nella cache delle frasi promosse | quando si scopre un difetto si cancella anche la sua voce in `~/reel-lavoro/cache` |
+| 01/10 | 2 | «Pil invece» → «Pilo invece»; riscritta «Invece il Pil conta» → «il P conta» | «Pil» a voce si evita (regola in `reel-autore`); `controlla_copione.py` blocca «Pil» davanti a vocale |
+| 01/10 | 1–2 | `reel-controllo` ha impiegato 13 minuti (analisi dei formanti) | tempo massimo ~5 minuti, solo la lista di controlli |
+| 02/10 | 2 | Gancio «conta nel Pil» capito «contiene il peel» sulla voce da sola | anche nel gancio niente «Pil»: «finisce nel prodotto interno lordo» |
+| 02/10 | 1–2 | Cambiando il testo, la grafica con tempi fissi («prezzo a +0,9 s», «carte al 62%») arriva fino a 1,5 s prima delle parole | i tempi interni delle scene si misurano sulle parole vere (Whisper con timestamp) e si scrivono in pN.html |
+| 02/10 | 1 | Lavoro di riavvio: il risultato di un agente può andare perso | i controlli brevi (3 punti) li fa l'orchestratore da sé; agli agenti i lavori lunghi |
+| 02/10 | 2 | Un commento `//` inserito a metà di una riga lunga ha cancellato i prezzi della filiera; trovato solo guardando la fine di ogni scena | commenti `/* */`; dopo ogni modifica a pN.html si guarda il foglio provini a fine scena prima di consegnare |
+
+### Prossimo miglioramento (il più utile per velocità e zero errori)
+Far leggere alle scene i **tempi delle parole** (`window.WORDS`, da Whisper sulla narrazione, prodotto da `produci.sh` prima del render):
+ogni elemento che la voce nomina compare su quella parola, senza tempi scritti a mano. Toglie la causa dei difetti di sincronia
+trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correzione → nuovo render».
 
 ### Tempi veri
 | Data | Lavoro | Agenti | Tempo |
 |---|---|---|---|
 | 01/10 | P2 prima versione (tutto a mano + costruzione di pubblicazione automatica) | nessuno | ~80 min |
 | 01/10 | Copioni fluidi P1 e P2 | 2 × reel-autore (Opus) in parallelo | 2 min |
+| 01/10 | Voce P1 (17 frasi, disco freddo) / P2 (16 frasi) | macchina | 21 min / 17 min |
+| 01/10 | Montaggio + video + mix + verifica, per puntata | macchina | 7–9 min |
+| 01/10 | Controllo completo con occhi nuovi | reel-controllo (Sonnet) | 11–13 min (oltre il limite di 5: da accorciare) |
+| 01/10–02/10 | Rifacimento P1+P2 con testo fluido, dall'ordine ai video approvati | tutto | ~2 h, di cui ~45 min persi per errori della catena ora corretti |

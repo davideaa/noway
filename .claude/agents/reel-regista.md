@@ -27,6 +27,8 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 - Titolo `phrase` su 2 righe a size 92: y di partenza ≥ 345 (a 320 la prima riga esce dalla zona sicura).
 - Nessuna scritta sotto 22 px; etichette vicine mai a contatto (misurarle con `tw`); linee e frecce mai sopra le scritte.
 - Più etichette sulle stesse curve (es. flussi del circuito): posizioni diverse lungo la curva, non tutte a metà.
+- Commenti nel codice delle scene solo `/* … */` o a fine riga: un `//` in mezzo a una riga lunga commenta tutto quello che segue
+  (Puntata 2: spariti i prezzi della filiera).
 - Elementi elencati dalla voce (righe di un calendario, carte, pillole) compaiono quando la voce li nomina: tempi dalla scena, non fissi ogni 0,5 s.
 
 ## Output
