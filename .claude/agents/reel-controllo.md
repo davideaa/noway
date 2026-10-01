@@ -22,5 +22,10 @@ Numero N e cartella di lavoro `~/reel-lavoro/pN/` (video `PuntataN.mp4`, `mix.wa
    like/commento/segui, firma col numero, riga «Contenuto educativo · Non è consulenza finanziaria».
 6. **Stile del testo**: `voce/controlla_copione.py` senza errori; il testo letto di fila scorre (niente elenchi «Primo/Secondo»).
 
+## Tempo
+Massimo ~5 minuti. Niente analisi oltre la lista (niente formanti o spettrogrammi): un dubbio di pronuncia confermato sulla voce
+da sola basta per BOCCIA su quella frase. Un solo processo Whisper alla volta; mai il modello vocale (memoria).
+I difetti della grafica già approvata da Davide si elencano a parte come «preesistenti», separati da quelli nuovi.
+
 ## Output
 Prima riga `PASSA` oppure `BOCCIA`. Poi l'elenco dei difetti: secondo · scena · cosa · come si corregge. Nessuna correzione fatta da te.

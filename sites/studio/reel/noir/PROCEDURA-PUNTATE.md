@@ -126,3 +126,27 @@ print(' '.join(str(int((a+0.8*(b-a))*60)) for a,b in c.values()))
 E
 CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs /tmp/anteprima
 ```
+
+## Registro di ciò che si è imparato (aggiornarlo a ogni puntata: è la memoria che fa andare più veloci)
+| Data | Puntata | Cosa è successo | Regola che ne viene |
+|---|---|---|---|
+| 01/10 | 1 | Code della voce oltre la frase (fino a 0 dBFS) incluse nel montaggio = «sfarfallii» | `taglia.py`: taglio al primo silenzio dopo l'ultima parola |
+| 01/10 | 1 | Volume −16 LUFS, Davide lo sente basso | mix finale −14 LUFS, picco ≤ −1 |
+| 01/10 | 2 | «Pil» a fine riga → «PIN» 8 volte su 8 | mai «Pil» in fondo: «prodotto interno lordo» (bloccato da `controlla_copione.py`) |
+| 01/10 | 2 | Confronto col copione: «sette» ≠ «7», «un» ≠ «1», «per cento» ≠ «%» → scarti finti, 10 minuti persi | numeri ignorati da entrambi i lati in `rigenera2.py` e `verifica_finale.py` |
+| 01/10 | 2 | Spunta disegnata sopra il prezzo «4 €» | il regista non mette mai icone sopra i numeri; il controllo guarda la fine di ogni scena |
+| 01/10 | 2 | Attesa scritta con `ps | grep render.cjs` dentro un comando che contiene «render.cjs»: ciclo infinito | mai attese basate sul testo del comando: controllare i file prodotti |
+| 01/10 | 1–2 | Davide: testo «a elenco» (Primo, Secondo…) e frasi telegrafiche → vuole un racconto fluido | agente `reel-autore` (Opus) + `controlla_copione.py` |
+| 01/10 | 1–2 | Righe che continuano la frase (finiscono con «,» o «:») partivano sul battito dopo = pausa a metà frase | `monta_cues.py`: riga che continua attacca dopo 0,12 s, senza aspettare il battito |
+| 01/10 | 1–2 | «Secondo l'Istat» scambiato per un elenco dal controllo | il controllo blocca solo «Secondo:» / «Secondo,» a inizio riga |
+| 01/10 | 1–2 | Macchina spostata: primo caricamento del modello voce da disco freddo, 5–10 min | normale; non è un errore, aspettare |
+| 01/10 | 1–2 | Due voci generate insieme (~6,5 GB l'una su 15): il sistema le ha uccise, e `produci.sh` ha proseguito con le frasi VECCHIE rimaste nella cartella | `produci.sh`: `pipefail`, cartella ripulita prima della voce, conteggio delle frasi fatte, `flock` (una voce alla volta). Mai lanciare `rigenera2.py` a mano mentre gira `produci.sh` |
+| 01/10 | 1 | Un tentativo PASSATO veniva scartato per uno bocciato con «punteggio» più alto (frase dell'estero con la «e» saltata) | `rigenera2.py`: chi passa è sempre la scelta |
+| 01/10 | 1 | Soglia 0,97 lasciava passare una parola mancante nelle frasi lunghe | soglia 0,985 |
+| 01/10 | 1 | Frase difettosa finita nella cache delle frasi promosse | quando si scopre un difetto si cancella anche la sua voce in `~/reel-lavoro/cache` |
+
+### Tempi veri
+| Data | Lavoro | Agenti | Tempo |
+|---|---|---|---|
+| 01/10 | P2 prima versione (tutto a mano + costruzione di pubblicazione automatica) | nessuno | ~80 min |
+| 01/10 | Copioni fluidi P1 e P2 | 2 × reel-autore (Opus) in parallelo | 2 min |

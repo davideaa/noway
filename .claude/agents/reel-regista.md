@@ -23,6 +23,12 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 3. Anteprima con tempi finti (blocco «Anteprima» in `noir/PROCEDURA-PUNTATE.md`): un fotogramma all'80% di ogni scena,
    più uno a fine scena per i contatori. Guardi il foglio provini e correggi finché è pulito.
 
+## Regole nate dai controlli (non ripetere)
+- Titolo `phrase` su 2 righe a size 92: y di partenza ≥ 345 (a 320 la prima riga esce dalla zona sicura).
+- Nessuna scritta sotto 22 px; etichette vicine mai a contatto (misurarle con `tw`); linee e frecce mai sopra le scritte.
+- Più etichette sulle stesse curve (es. flussi del circuito): posizioni diverse lungo la curva, non tutte a metà.
+- Elementi elencati dalla voce (righe di un calendario, carte, pillole) compaiono quando la voce li nomina: tempi dalla scena, non fissi ogni 0,5 s.
+
 ## Output
 `noir/pN.html` + il foglio provini (percorso del jpg). Rispondi con: elenco scene (chiave → cosa si vede) e cosa hai corretto.
 Non avviare il render vero e non toccare altri file.

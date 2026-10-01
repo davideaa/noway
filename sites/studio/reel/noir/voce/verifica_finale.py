@@ -8,7 +8,7 @@ m = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 C = json.load(open(f"{D}/cues.json"))["cues"]; R = {k: s for s, k in json.load(open(f"{D}/righe.json"))}
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
 def norm(s):
-    s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ")
+    s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ").replace("€", " euro ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s)); return re.sub(r"[^a-zàéìòù ]", " ", s).split()
 bad = 0; seg = f"{D}/_seg.wav"
 for k, (a, b) in C.items():

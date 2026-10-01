@@ -1,6 +1,6 @@
 # Selezione severa (v2). Per ogni frase indicata prova fino a 8 seed e tiene la prima che passa TUTTI i controlli,
 # giudicata da Whisper large-v3-turbo (più severo dello "small"):
-#   1. tutte le parole del copione, nessuna in più (somiglianza >= 0,97, numeri esclusi dal confronto)
+#   1. tutte le parole del copione, nessuna in più (somiglianza >= 0,985: anche una sola «e» saltata fa scartare; numeri esclusi)
 #   2. nessuna parola incerta (probabilità >= 0,45): una parola biascicata è uno "sfarfallio"
 #   3. finale pulito: dopo l'ultima parola il suono si spegne (niente fine forzata a metà parola)
 #   4. durata ragionevole (niente frasi a vanvera dopo il copione)
@@ -16,7 +16,7 @@ CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=T
 chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
 def norm(s, heard=False):
-    s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ").replace("%", " per cento ")
+    s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ").replace("%", " per cento ").replace("€", " euro ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))     # numeri tolti da ENTRAMBI i lati ("ci sei dentro")
     return re.sub(r"[^a-zàéìòù ]", " ", s).split()
 def coda(f, last_end):
@@ -39,11 +39,11 @@ for i in idx:
         pmin = min((w.probability for w in W), default=0)
         fine, minimo = coda(f, W[-1].end if W else dur)
         ok_fine = fine < -30 or minimo < -38
-        passa = sim >= 0.97 and pmin >= 0.45 and ok_fine and dur <= 1.6 * exp + 1
+        passa = sim >= 0.985 and pmin >= 0.45 and ok_fine and dur <= 1.6 * exp + 1
         score = sim + 0.3 * pmin + (0.2 if ok_fine else 0) - (1 if dur > 1.6 * exp + 1 else 0)
         print(f"{i:02d} seed {seed:3d} {'PASSA' if passa else 'no   '} sim {sim:.2f} pmin {pmin:.2f} fine {fine:5.0f}dB min {minimo:5.0f}dB {dur:.1f}s | {got}", flush=True)
+        if passa: best = (9, f); break          # chi passa tutti i controlli è SEMPRE la scelta (prima vinceva il punteggio più alto, anche se bocciato)
         if score > best[0]: best = (score, f)
-        if passa: break
     shutil.copy(best[1], f"r{i:02d}.wav")
     if passa: shutil.copy(best[1], chiave(R[i][0]))
     print(f"{i:02d} SCELTA {best[1]}{'' if passa else '  !! nessuno passa tutti i controlli'}", flush=True)

@@ -16,10 +16,11 @@ for s, k in R:
     if re.search(r"\b[A-Z]{2,}\b", s): out("ERRORE", k, f"sigla maiuscola {re.findall(r'[A-Z]{2,}', s)}: la voce la legge lettera per lettera (scrivere «Pil», «Bce» o per esteso)")
     if re.search(r"\bPil\b[^,;:]{0,12}[.?!]\s*$", s): out("ERRORE", k, "«Pil» in fondo alla riga: fallisce sempre («PIN»); scrivere «prodotto interno lordo»")
     elif re.search(r"\bPil\s*[.?!]", s): out("AVVISO", k, "«Pil» prima di un punto: a rischio, meglio a metà frase")
+    if re.search(r"\bPil\s+[aeiouàèéìòù]", s, re.I): out("ERRORE", k, "«Pil» seguito da vocale: la voce dice «Pilo» («Pil invece» → «Pilo invece»); metti dopo una consonante («il Pil conta»)")
     if len(w) <= 3: out("ERRORE", k, "frase di 3 parole o meno: la voce le sbaglia spesso")
     if len(w) > 30: out("AVVISO", k, f"{len(w)} parole: oltre 30 la voce tende a inventare una coda")
     if k not in FISSE:
-        if re.match(r"^(Primo|Secondo|Terzo|Quarto|Quinto|Punto)\b", s): out("ERRORE", k, "elenco «Primo / Secondo…»: Davide vuole un discorso fluido, non punti")
+        if re.match(r"^(Primo|Secondo|Terzo|Quarto|Quinto)\s*[:,]|^Punto\b", s): out("ERRORE", k, "elenco «Primo / Secondo…»: Davide vuole un discorso fluido, non punti")
         if re.search(r":\s*(un|due|tre|quattro|cinque|sei|sette|otto|nove|dieci)\s+euro\.?$", s): out("AVVISO", k, "frase telegrafica «…: un euro.»: renderla discorsiva")
         if s.count(".") >= 3: out("AVVISO", k, "tante frasi brevi nella stessa scena: suona a scatti, unirle con «e», «ma», «perché», «così»")
 print(f"\n{parole} parole → durata stimata {parole / 2.72:.0f} s (obiettivo 75–85 s)")

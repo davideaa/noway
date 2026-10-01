@@ -137,7 +137,7 @@ function sMercati(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   const kc = oC(seg(t, a + 0.4, a + 0.9)); glass(540, 920, 820, 520, 40, kc);
   mono('CALENDARIO MACRO', 540, 720, t, a + 0.6, { size: 24, color: C.lime });
   const R2 = [['Vendite al dettaglio', 'CONSUMI'], ['Fiducia dei consumatori', 'CONSUMI'], ['Prestiti bancari', 'CREDITO']];
-  R2.forEach(([s, tag], i) => { const k = oC(seg(t, a + 1.0 + i * 0.5, a + 1.4 + i * 0.5)), y = 820 + i * 120; if (k <= 0) return;
+  R2.forEach(([s, tag], i) => { const t0 = a + [1.2, 2.2, 3.7][i], k = oC(seg(t, t0, t0 + 0.4)), y = 820 + i * 120; if (k <= 0) return; // a tempo con la voce (fluida)
     txt(s, 190 + (1 - k) * 20, y, { size: 40, weight: 700, align: 'left', alpha: k }); txt(tag, 890, y, { fam: 'mono', size: 20, weight: 600, color: C.muted, align: 'right', alpha: k, ls: 2 });
     x.save(); x.globalAlpha = k * 0.25; x.fillStyle = C.ink; x.fillRect(190, y + 50, 700, 2); x.restore(); });
   tap(820, 940, t, a + 2.4);

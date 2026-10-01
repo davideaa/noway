@@ -22,6 +22,8 @@ for i, (s, key, fi) in enumerate(R):
     a[:fi] *= np.linspace(0, 1, fi); a[-fo:] *= np.cos(np.linspace(0, np.pi / 2, fo)) ** 2
     gap = 0 if i == 0 else (0.20 if key in SUB else 0.45)
     st = 0.0 if i == 0 else math.ceil((t + gap) / P - 1e-6) * P
+    # la frase continua dalla riga prima (che finisce con «,» o «:»): niente attesa del battito, solo un respiro
+    if i > 0 and R[i - 1][0].rstrip().endswith((",", ":")): st = t + 0.12
     if i == 0: st = float(__import__('os').environ.get('FIRST', P))   # primo attacco della voce (default: secondo battito)
     cues[key] = [round(st, 3), round(st + len(a) / sr, 3)]; out.append((st, a)); t = st + len(a) / sr
 end = math.ceil((t + 0.5) / P) * P; cues["end"] = [round(end, 3), round(end + 6 * P, 3)]; DUR = round(end + 6 * P, 3)
