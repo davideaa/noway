@@ -44,6 +44,11 @@ Gancio nei primi 2 secondi.
   solo copertina (`thumbnail_url`). Per scomporre i video servono le registrazioni schermo di Davide.
 - Non ci sono tempo di visione, condivisioni, salvataggi degli altri.
 
+## Pubblicazioni
+Registro in `sites/studio/social/registro.json` (serve per i recap: 24 h, 3 giorni, settimana, mese).
+Primo reel: «Tokenization», 01/10/2026 15:58 ora italiana — https://www.instagram.com/reel/Dd9EfP1AaEO/
+Pubblicazione: video committato in `social/pubblicati/` → URL raw GitHub (per commit) → `POST /media` (REELS, thumb_offset) → attesa FINISHED → `POST /media_publish`.
+
 ## Da fare
 1. FATTO: app Meta «MacroAlgo Studio» (caso d'uso Instagram API with Instagram Login), tester accettato.
    IG user id 17841425810972500 (non segreto). Resta: Davide genera il token («Genera token») e lo mette in `IG_ACCESS_TOKEN`.
