@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# anteprima come Artifact (scripts/anteprima_claude.py)
+/out-anteprima/
