@@ -1,0 +1,60 @@
+/*
+ * Classi dei poster (modulo 6). Una lettera = un colore della tavolozza locale del poster
+ * (variabili --a … --Z scritte sull'<svg> da base.tsx, che puntano ai token di tokens.css).
+ * Il tono giorno/sera cambia solo i valori delle variabili, non queste regole: due poster di
+ * tono diverso nella stessa pagina non si disturbano. Le linee si scrivono con gli attributi
+ * stroke="var(--x)", che qui non vengono sovrascritti.
+ */
+.art{display:block}
+.art .a{fill:var(--a)}
+.art .b{fill:var(--b)}
+.art .c{fill:var(--c)}
+.art .d{fill:var(--d)}
+.art .e{fill:var(--e)}
+.art .f{fill:var(--f)}
+.art .g{fill:var(--g)}
+.art .h{fill:var(--h)}
+.art .i{fill:var(--i)}
+.art .j{fill:var(--j)}
+.art .k{fill:var(--k)}
+.art .l{fill:var(--l)}
+.art .m{fill:var(--m)}
+.art .n{fill:var(--n)}
+.art .o{fill:var(--o)}
+.art .p{fill:var(--p)}
+.art .q{fill:var(--q)}
+.art .r{fill:var(--r)}
+.art .s{fill:var(--s)}
+.art .t{fill:var(--t)}
+.art .u{fill:var(--u)}
+.art .v{fill:var(--v)}
+.art .w{fill:var(--w)}
+.art .x{fill:var(--x)}
+.art .y{fill:var(--y)}
+.art .z{fill:var(--z)}
+.art .A{fill:var(--A)}
+.art .B{fill:var(--B)}
+.art .C{fill:var(--C)}
+.art .D{fill:var(--D)}
+.art .E{fill:var(--E)}
+.art .F{fill:var(--F)}
+.art .G{fill:var(--G)}
+.art .H{fill:var(--H)}
+.art .I{fill:var(--I)}
+.art .J{fill:var(--J)}
+.art .K{fill:var(--K)}
+.art .L{fill:var(--L)}
+.art .M{fill:var(--M)}
+.art .N{fill:var(--N)}
+.art .O{fill:var(--O)}
+.art .P{fill:var(--P)}
+.art .Q{fill:var(--Q)}
+.art .R{fill:var(--R)}
+.art .S{fill:var(--S)}
+.art .T{fill:var(--T)}
+.art .U{fill:var(--U)}
+.art .V{fill:var(--V)}
+.art .W{fill:var(--W)}
+.art .X{fill:var(--X)}
+.art .Y{fill:var(--Y)}
+.art .Z{fill:var(--Z)}
