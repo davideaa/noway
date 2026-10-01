@@ -34,6 +34,16 @@ Gancio nei primi 2 secondi.
 - Per pubblicare serve un video su un URL pubblico (o upload a `rupload.facebook.com`, che andrebbe aggiunto ai siti consentiti).
 - Scade dopo ~60 giorni: rinnovo con `graph.instagram.com/refresh_access_token`.
 
+## Studio account altrui — FUNZIONA (01/10/2026)
+- Seconda credenziale: `FB_ACCESS_TOKEN` (Facebook Login, ~60 giorni, scade 30/11/2026), sito consentito `graph.facebook.com`.
+  Permessi: instagram_basic, instagram_manage_insights, pages_show_list, pages_read_engagement.
+  (`me/accounts` risulta vuoto ma non serve.) Il token lungo è finito in uno screenshot in chat: da revocare e rigenerare a lavoro finito.
+- Chiamata che funziona (account Business/Creator pubblici), con id IG di Davide `17841425810972500`:
+  `curl -G https://graph.facebook.com/v23.0/17841425810972500 --data-urlencode "fields=business_discovery.username(NOME){username,followers_count,media_count,media.limit(50){timestamp,media_product_type,view_count,like_count,comments_count,caption,permalink,thumbnail_url}}"`
+- `view_count` c'è per i reel (include le visualizzazioni a pagamento). `media_url` del video NON viene restituito: niente fotogrammi dall'API,
+  solo copertina (`thumbnail_url`). Per scomporre i video servono le registrazioni schermo di Davide.
+- Non ci sono tempo di visione, condivisioni, salvataggi degli altri.
+
 ## Da fare
 1. FATTO: app Meta «MacroAlgo Studio» (caso d'uso Instagram API with Instagram Login), tester accettato.
    IG user id 17841425810972500 (non segreto). Resta: Davide genera il token («Genera token») e lo mette in `IG_ACCESS_TOKEN`.
