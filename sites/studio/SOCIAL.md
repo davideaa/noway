@@ -4,7 +4,7 @@ Stato scritto il 01/10/2026. Leggere insieme a `STUDIO.md`.
 
 ## Decisioni di Davide
 - Account Instagram: **@macro.algo.desk** (Business, 2FA attiva, Pagina Facebook collegata). Creato da lui.
-- Lingua dei reel: **inglese** (pubblico italiano + inglese).
+- Lingua dei reel: ~~inglese~~ → **italiano** dal 01/10/2026: serie educativa «Dalla teoria alla realtà» per universitari (vedi sotto).
 - Contenuti: Portfolio Algo Manager (il sito non è ancora online, quindi nessun link in bio) + macroeconomia
   (Fed, tassi, Hormuz, Trump…), 30–40 s, motion graphic come in `reel/`.
 - Ritmo: **1–2 reel al giorno**, pubblicati solo tra le **10:00 e le 22:00 ora italiana**
@@ -58,3 +58,18 @@ Pubblicazione: video committato in `social/pubblicati/` → URL raw GitHub (per 
 3. Davide manda screenshot di chi segue + 5–10 account modello → classifica per visualizzazioni/follower,
    scomposizione dei fotogrammi → documento di stile unico (lime `#c8fa72` su `#080b0e`, wormhole, iPhone 3D…).
 4. Primo reel di prova in inglese (tema C: «cos'è un drawdown», senza numeri da verificare).
+
+## Serie «Dalla teoria alla realtà» — stato al 01/10/2026 (via libera di Davide)
+- Davide ha dato il via libera a produrre e pubblicare da solo, **a patto che ogni puntata esca perfetta**.
+  Metodo e controlli: `reel/noir/PROCEDURA-PUNTATE.md` (va seguita alla lettera).
+- Uscite: lunedì–venerdì alle **12:00 ora italiana**. Puntata 1 lunedì 05/10/2026, Puntata 2 martedì 06/10, e così via.
+- Pubblicazione automatica: routine «Macro & Algo — pubblicazione reel 12:00» (`trig_01RW7ryeWBk55egkxLS9LhVk`),
+  cron `CRON_TZ=Europe/Rome 52 11 * * 1-5`, apre ogni volta una sessione nuova che lancia `social/pubblica.py`.
+  Lo script pubblica **solo** ciò che è in `social/calendario.json` con stato `programmato` per quel giorno, aspetta le 12:00,
+  evita i doppioni (confronta la prima riga della caption con gli ultimi post) e aggiorna calendario e registro.
+  Prova senza pubblicare: `python3 sites/studio/social/pubblica.py --prova --data AAAA-MM-GG`.
+- Produzione: va fatta in una sessione che ha la voce installata (`~/tts`) e la base `run.wav`: la routine pubblica, non produce.
+  Le puntate vanno quindi preparate in anticipo e messe in calendario.
+- Profilo (da sistemare a mano da Davide): nome «Macro & Algo · Economia in 90 secondi», categoria Istruzione,
+  bio in 3 righe (spiegazioni semplici con dati veri · una puntata al giorno alle 12:00 · inizia dalla puntata 1), post fissato = Puntata 1.
+  Il reel inglese «Tokenization» va archiviato a mano (l'API non può archiviare).

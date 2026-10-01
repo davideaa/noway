@@ -4,11 +4,16 @@
 #   2. nessuna parola incerta (probabilità >= 0,45): una parola biascicata è uno "sfarfallio"
 #   3. finale pulito: dopo l'ultima parola il suono si spegne (niente fine forzata a metà parola)
 #   4. durata ragionevole (niente frasi a vanvera dopo il copione)
-# Se nessun seed passa tiene il migliore e lo segnala con !!.  Uso (dalla cartella delle frasi): python rigenera2.py 1 2 5
+# Se nessun seed passa tiene il migliore e lo segnala con !!.  Uso (dalla cartella delle frasi): python rigenera2.py 1 2 5  |  python rigenera2.py tutte
 import json, re, sys, difflib, shutil, wave, numpy as np, torch, torchaudio as ta
 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 from faster_whisper import WhisperModel
-R = json.load(open("righe.json")); idx = [int(v) for v in sys.argv[1:]]
+import os, hashlib
+R = json.load(open("righe.json")); SKIP = set(os.environ.get("SKIP", "num").split(","))
+idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tutte"] else [int(v) for v in sys.argv[1:]]
+# cache delle frasi GIÀ promosse (stesso testo → stesso file, niente rigenerazione): ~/reel-lavoro/cache/<sha1>.wav
+CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=True)
+chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
 NUM = r"\b(duemilaventicinque|duemiladuecento|cinque|sei|dieci|due|uno|un terzo)\b"
 def norm(s, heard=False):
     s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ")
@@ -23,6 +28,7 @@ def coda(f, last_end):
     return fine, minimo
 tts = ChatterboxMultilingualTTS.from_pretrained(device="cpu"); asr = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 for i in idx:
+    if os.path.exists(chiave(R[i][0])): shutil.copy(chiave(R[i][0]), f"r{i:02d}.wav"); print(f"{i:02d} DALLA CACHE (già verificata)", flush=True); continue
     best = (-9, None); exp = len(R[i][0].split()) / 2.4
     for seed in (11, 23, 42, 77, 101, 202, 303, 404):
         torch.manual_seed(seed); wav = tts.generate(R[i][0], language_id="it", exaggeration=0.35, cfg_weight=0.4)
@@ -38,5 +44,7 @@ for i in idx:
         print(f"{i:02d} seed {seed:3d} {'PASSA' if passa else 'no   '} sim {sim:.2f} pmin {pmin:.2f} fine {fine:5.0f}dB min {minimo:5.0f}dB {dur:.1f}s | {got}", flush=True)
         if score > best[0]: best = (score, f)
         if passa: break
-    shutil.copy(best[1], f"r{i:02d}.wav"); print(f"{i:02d} SCELTA {best[1]}{'' if passa else '  !! nessuno passa tutti i controlli'}", flush=True)
+    shutil.copy(best[1], f"r{i:02d}.wav")
+    if passa: shutil.copy(best[1], chiave(R[i][0]))
+    print(f"{i:02d} SCELTA {best[1]}{'' if passa else '  !! nessuno passa tutti i controlli'}", flush=True)
 print("FATTO", flush=True)

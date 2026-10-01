@@ -1,24 +1,9 @@
 [
  {
   "n": 1,
-  "titolo": "Perché studiare economia (e cosa imparerai qui)",
+  "titolo": "Come gira l'economia",
   "caso_reale": false,
-  "gancio": "Affitto, stipendio, mutuo, bollette: l'economia decide già metà della tua vita.",
-  "spiega": [
-   "L'economia studia come persone, imprese e Stato scelgono usando risorse scarse: soldi, tempo, lavoro.",
-   "Il corso parte dal circuito dell'economia e arriva al portafoglio: 240 lezioni, un passo alla volta, nessun salto.",
-   "Ogni venerdì un caso reale: la teoria dei tuoi esami applicata a fatti veri e verificabili."
-  ],
-  "esempio": "Una giornata qualunque: caffè, abbonamento del treno, rata del telefono. Ogni prezzo nasconde scelte di imprese, banche e Stato che vedremo nel corso.",
-  "ti_serve": "Capire notizie, contratti e scelte di soldi; e dare un senso concreto a micro e macro.",
-  "visual": "Mappa 3D in vetro di dodici tappe che si accendono una dopo l'altra, dal circuito al portafoglio.",
-  "collega": []
- },
- {
-  "n": 2,
-  "titolo": "Il circuito dell'economia",
-  "caso_reale": false,
-  "gancio": "Il tuo stipendio è la spesa di qualcun altro. Ecco il giro completo.",
+  "gancio": "Ogni euro che spendi è lo stipendio di qualcun altro.",
   "spiega": [
    "Famiglie e imprese si scambiano due flussi: lavoro contro salari, beni contro spesa.",
    "Ogni euro speso è il reddito di qualcun altro: spesa totale e reddito totale coincidono.",
@@ -27,29 +12,28 @@
   "esempio": "Paghi 10 € in pizzeria: diventano salario del pizzaiolo, incasso del fornitore di farina, IVA allo Stato. Lo stesso euro gira più volte.",
   "ti_serve": "È lo schema base della macroeconomia: tutto il resto del corso lo arricchisce.",
   "visual": "Due anelli di vetro con monete luminose che scorrono in un verso e beni nel verso opposto.",
+  "collega": [],
+  "nota": "Pubblicata il 05/10/2026: unisce le schede «Perché studiare economia» e «Il circuito dell'economia» (percorso + circuito dei 5 attori)."
+ },
+ {
+  "n": 2,
+  "titolo": "Il PIL: cosa misura",
+  "caso_reale": false,
+  "gancio": "Il pane che compri conta nel Pil. La farina con cui è fatto, no.",
+  "spiega": [
+   "Il PIL è il valore di mercato dei beni e servizi finali prodotti in un Paese in un anno.",
+   "Si conta solo il prodotto finale, non i beni intermedi, per non contare due volte la stessa cosa.",
+   "Si misura in tre modi equivalenti: produzione, spesa e redditi. È il circuito visto da tre lati."
+  ],
+  "esempio": "Filiera del pane (grano 1 €, farina 2 €, pane 4 €); PIL Italia 2025 2.265 mld (Eurostat); attività illegali ~20 mld e sommerso+illegale 217,5 mld (Istat 2023); debito 137,1% del PIL (Istat apr. 2026).",
+  "ti_serve": "Ogni notizia su crescita, debito o deficit è espressa in rapporto al PIL.",
+  "visual": "Grano, farina e pane in vetro: si somma solo il pane, gli intermedi si dissolvono.",
   "collega": [
    1
   ]
  },
  {
   "n": 3,
-  "titolo": "Il PIL: cosa misura",
-  "caso_reale": false,
-  "gancio": "Un solo numero per dire quanto produce un Paese intero. Come si calcola?",
-  "spiega": [
-   "Il PIL è il valore di mercato dei beni e servizi finali prodotti in un Paese in un anno.",
-   "Si conta solo il prodotto finale, non i beni intermedi, per non contare due volte la stessa cosa.",
-   "Si misura in tre modi equivalenti: produzione, spesa e redditi. È il circuito visto da tre lati."
-  ],
-  "esempio": "Il PIL dell'Italia supera i 2.000 miliardi di euro l'anno: prendere il valore esatto dell'ultimo anno dai conti nazionali ISTAT.",
-  "ti_serve": "Ogni notizia su crescita, debito o deficit è espressa in rapporto al PIL.",
-  "visual": "Grano, farina e pane in vetro: si somma solo il pane, gli intermedi si dissolvono.",
-  "collega": [
-   2
-  ]
- },
- {
-  "n": 4,
   "titolo": "Cosa il PIL non misura",
   "caso_reale": false,
   "gancio": "Se butti giù un ponte e lo ricostruisci, il PIL sale. Strano, no?",
@@ -62,6 +46,24 @@
   "ti_serve": "Ti insegna a non confondere crescita e benessere quando leggi classifiche tra Paesi.",
   "visual": "Bilancia di vetro: da un lato il PIL, dall'altro salute, ambiente, tempo libero che si accendono.",
   "collega": [
+   2
+  ]
+ },
+ {
+  "n": 4,
+  "titolo": "PIL nominale e PIL reale",
+  "caso_reale": false,
+  "gancio": "Se tutti i prezzi salgono del 10%, il Pil sale del 10%. Ma non hai prodotto niente in più.",
+  "spiega": [
+   "Il PIL nominale usa i prezzi di ogni anno: cresce anche solo perché cresce l'inflazione.",
+   "Il PIL reale usa i prezzi fissi di un anno base: misura se si producono davvero più cose.",
+   "La «crescita» dei telegiornali è quasi sempre quella reale, in percentuale sull'anno prima."
+  ],
+  "esempio": "Italia 2025: crescita reale +0,6% (Istat, revisione settembre 2026) contro una crescita nominale più alta per effetto dei prezzi; verificare il dato nominale sui conti Istat.",
+  "ti_serve": "Capire se un Paese cresce davvero o se è solo inflazione; serve per leggere il crollo del 2020 di venerdì.",
+  "visual": "Due colonne di vetro: una gonfiata dai prezzi, l'altra con le sole quantità.",
+  "collega": [
+   2,
    3
   ]
  },
