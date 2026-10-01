@@ -105,6 +105,12 @@ export type SceneHandle = {
   setLuce(t: number): void;
   /** Avanzamento 0..1 (scroll della scena fissata, tappa del wellness, tween del configuratore). */
   setProgresso(p: number): void;
+  /**
+   * OPZIONALE, solo la scena della sala congressi (modulo 10): riceve sala, disposizione,
+   * partecipanti e stato delle pareti mobili e anima (720 ms) il passaggio dalla disposizione
+   * attuale alla nuova. Vedi `ConfigurazioneSala` e `OpzioniConfigurazione`.
+   */
+  configura?(config: ConfigurazioneSala, opzioni?: OpzioniConfigurazione): void;
   /** Porta la camera su una posa (hotspot, preset). `null` = vista di partenza. */
   vaiA(vista: VistaCamera | null, istantaneo?: boolean): void;
   /** Ruota l'orbita di `gradi` in azimut (pulsanti ◀ ▶: 15, frecce: 10). Rispetta `limiti`. */
@@ -193,6 +199,35 @@ export type Room = {
 /* ------------------------------------------------------------------ */
 
 export type Disposizione = "platea" | "banchi" | "ferro" | "banchetto";
+
+/**
+ * Ciò che il configuratore chiede alla scena della sala (`SceneHandle.configura`, modulo 10).
+ * Funzione pura dei quattro valori: stessa configurazione, stesso disegno.
+ */
+export type ConfigurazioneSala = {
+  /** `CongressHall.id`. Un id sconosciuto si ignora (resta la sala attuale). */
+  sala: string;
+  /** Se la sala non la prevede (`cap` null) la scena mostra la platea. */
+  disposizione: Disposizione;
+  /**
+   * Partecipanti. `null` o <= 0: si disegna la capienza della tabella. Altrimenti si disegnano
+   * `min(ospiti, capienza)` sedie (il tetto è sempre la capienza della tabella).
+   */
+  ospiti: number | null;
+  /** Pareti mobili chiuse. Vale solo per le sale con `divisibleInto`; per le altre è ignorato. */
+  divisa: boolean;
+};
+
+export type OpzioniConfigurazione = {
+  /** Niente tween: primo disegno, link profondo, `prefers-reduced-motion` (la scena lo applica da sola). */
+  istantaneo?: boolean;
+  /**
+   * Pilota esterno (teaser in home, MOTION 5.4): la scena NON anima da sola. `k` (0..1) è
+   * l'avanzamento del passaggio dallo stato attuale a quello nuovo; poi lo si muove con
+   * `setProgresso(k)`. Senza questa opzione `setProgresso` è ignorato dalla scena della sala.
+   */
+  k?: number;
+};
 
 export type CongressHall = {
   /** 'costellazioni', 'sole-plenaria', … come in COPY sez. 15. */

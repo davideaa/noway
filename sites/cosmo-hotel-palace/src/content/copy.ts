@@ -582,6 +582,13 @@ export const copy = {
         oggettoEmail: "Richiesta di proposta · {sala} · {disposizione}",
         // NUOVO TESTO (UX 7.3: per chi non ha un programma di posta; l'indirizzo è in contacts.ts)
         indirizzoAlternativo: "Non si apre la posta? Scrivi a events@cosmohotelpalace.it.",
+        // NUOVO TESTO (modulo 10, lib/congress/mailto.ts): righe fisse del corpo della email precompilata.
+        corpoEmail: {
+          saluto: "Buongiorno,",
+          intro: "vorrei ricevere una proposta per un evento al Centro Congressi.",
+          altro: "Altro da sapere:",
+          chiusura: "Grazie.",
+        },
       },
       /**
        * NON USARE finché HAS_BACKEND=false (COPY 8.3, UX 7.3): il sito è statico e non deve mai
@@ -877,3 +884,30 @@ export const copy = {
 } as const;
 
 export type Copy = typeof copy;
+
+/* ------------------------------------------------------------------ */
+/* Prenotazione: testi aggiunti dal modulo 4 (UX 6, 12)               */
+/* In coda e separati da `copy`: il resto del file non è stato toccato. */
+/* ------------------------------------------------------------------ */
+
+export const copyPrenotazione = {
+  // NUOVO TESTO (UX 12: il nome accessibile di un link esterno dice «si apre in una nuova scheda»)
+  ariaCerca: "Cerca disponibilità (si apre in una nuova scheda)",
+  // NUOVO TESTO (idem, per il link di ripiego e per il link semplice senza JavaScript)
+  ariaApriMotore: "Apri il motore di prenotazione (si apre in una nuova scheda)",
+  // NUOVO TESTO (UX 9: stepper al minimo o al massimo, annunciato se si preme comunque)
+  limiteMax: "Hai raggiunto il massimo: {n}.",
+  limiteMin: "Hai raggiunto il minimo: {n}.",
+  // NUOVO TESTO (nomi per i lettori di schermo degli stepper: «2 camere»)
+  unita: {
+    camere: { uno: "camera", altro: "camere" },
+    adulti: { uno: "adulto", altro: "adulti" },
+    bambini: { uno: "bambino", altro: "bambini" },
+  },
+  // NUOVO TESTO (UX 6.3: /prenota/ senza JavaScript mostra il link semplice, telefono ed email)
+  senzaJs: "Senza JavaScript il modulo non funziona: apri il motore di prenotazione da qui e scegli le date lì.",
+  // NUOVO TESTO (singolare del riepilogo errori: `copy.prenota.errori.riepilogo` dice «Ci sono {n} campi…»)
+  riepilogoUno: "C'è 1 campo da controllare.",
+  // NUOVO TESTO (nome del gruppo dei campi, per i lettori di schermo)
+  nomeGruppo: "Date e ospiti del soggiorno",
+} as const;
