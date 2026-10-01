@@ -129,8 +129,17 @@ export type SceneDef = {
   poster: ReactNode;
   hotspots: readonly Hotspot[];
   /** Limiti dell'orbita in gradi (UX 5.2: az ±35 attorno alla posa iniziale). */
+  /**
+   * Limiti dell'orbita in gradi, ASSOLUTI (stessa convenzione di `VistaCamera`: az 0 = frontale).
+   * Esempio: posa iniziale az 10 con ±35 -> `az: [-25, 45]`.
+   */
   limiti: { az: readonly [number, number]; pol: readonly [number, number] };
-  costruisci(ctx: SceneContext): SceneHandle;
+  /**
+   * Costruisce la scena. Può essere asincrona (CORREZIONE del modulo 5): così la definizione
+   * (id, aria, poster, hotspot, limiti) resta senza `three` nel JS iniziale e `costruisci`
+   * fa `await import("./build")` del codice che importa `three`. Lo Stage fa `await`.
+   */
+  costruisci(ctx: SceneContext): SceneHandle | Promise<SceneHandle>;
 };
 
 /* ------------------------------------------------------------------ */
