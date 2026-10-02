@@ -9,7 +9,7 @@ const { chromium } = require('../node_modules/playwright-core'); const fs = requ
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } }); p.on('pageerror', (e) => console.log('ERR', e.message));
   await p.goto('file://' + path.join(__dirname, process.env.COMP || 'comp.html'));
   await p.evaluate((c) => { window.CPI = c; }, cpi);
-  if (process.env.CUES) { const cj = JSON.parse(fs.readFileSync(process.env.CUES, 'utf8')); await p.evaluate((c) => { window.CUES = c.cues; window.DUR = c.DUR; }, cj); }
+  if (process.env.CUES) { const cj = JSON.parse(fs.readFileSync(process.env.CUES, 'utf8')); await p.evaluate((c) => { window.CUES = c.cues; window.DUR = c.DUR; window.WORDS = c.words || {}; }, cj); }
   if (process.env.WARP) { const wp = JSON.parse(fs.readFileSync(process.env.WARP, 'utf8')); await p.evaluate((w) => { window.WARP = w; window.DUR = w[w.length - 1][0]; }, wp); }
   await p.evaluate(() => Promise.all(['800 50px Manrope', '700 50px Manrope', '600 50px Manrope', '500 50px Manrope', '600 50px "IBM Plex Mono"', '500 50px "IBM Plex Mono"'].map((f) => document.fonts.load(f))));
   await p.evaluate(() => document.fonts.ready);

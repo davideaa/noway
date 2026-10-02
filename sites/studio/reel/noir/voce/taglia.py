@@ -13,5 +13,7 @@ for i in only:
     last = W[-1].end if W else len(a) / sr; win = int(0.10 * sr); cut = len(a)
     for k in range(int((last - 0.15) * sr), len(a) - win, int(0.01 * sr)):   # primo tratto di 100 ms sotto -38 dB (le consonanti come la "t" fanno pause più brevi)
         if k > 0 and 20 * np.log10(np.sqrt((a[k:k + win] ** 2).mean()) / ref + 1e-9) < -38: cut = k + win // 2; break
+    json.dump([[x.word.strip(), round(x.start, 3), round(x.end, 3)] for x in W if x.end <= cut / sr + 0.05],
+              open(f"{D}/pulite/r{i:02d}.parole.json", "w"), ensure_ascii=False)   # tempi delle parole: le scene si agganciano qui
     with wave.open(f"{D}/pulite/r{i:02d}.wav", "wb") as o: o.setnchannels(1); o.setsampwidth(2); o.setframerate(sr); o.writeframes(raw[:cut * 2])
     print(f"r{i:02d} ultima parola {last:.2f}s  taglio {cut / sr:.2f}s  di {len(a) / sr:.2f}s  ({len(a) / sr - cut / sr:.2f}s tolti)", flush=True)

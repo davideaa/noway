@@ -3,6 +3,13 @@
 // poi chiama serie(FN, ORDER, FLASH). Scene fisse: num (numero gigante), dove (sentiero dei 12 capitoli), fine («Oggi è …»),
 // cta (like · commento · segui), end (firma col numero). Il circuito dei 5 attori serve a tutto il capitolo 1.
 const S = (k) => ((window.CUES || {})[k] || [0, 1])[0], E = (k) => ((window.CUES || {})[k] || [0, 1])[1];
+// WT('grano', 'euro', 1, 2.0): secondo assoluto in cui la voce dice la n-esima parola che inizia con «euro» nella scena «grano».
+// I tempi vengono da Whisper sulla voce vera (cues.json → window.WORDS). Senza voce (anteprima) usa S(scena) + riserva.
+// Meglio agganciarsi a parole, non a numeri (Whisper scrive «4» per «quattro»): WT accetta anche le cifre ('4').
+const _nw = (w) => w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+const WT = (k, w, n = 1, riserva = 0.8) => { const L = ((window.WORDS || {})[k]) || []; let c = 0;
+  for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t;
+  return S(k) + riserva; };
 const zoom = (t, a, b, z0 = 1.06) => { const z = lerp(z0, 1, oC(seg(t, a, b))); x.translate(540, 1000); x.scale(z, z); x.translate(-540, -1000); };
 
 // ---------- il circuito ----------

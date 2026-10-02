@@ -29,7 +29,10 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 - Più etichette sulle stesse curve (es. flussi del circuito): posizioni diverse lungo la curva, non tutte a metà.
 - Commenti nel codice delle scene solo `/* … */` o a fine riga: un `//` in mezzo a una riga lunga commenta tutto quello che segue
   (Puntata 2: spariti i prezzi della filiera).
-- Elementi elencati dalla voce (righe di un calendario, carte, pillole) compaiono quando la voce li nomina: tempi dalla scena, non fissi ogni 0,5 s.
+- Elementi elencati dalla voce (righe di un calendario, carte, pillole, prezzi, numeri) compaiono **sulla parola**: usa
+  `WT('chiave', 'parola', n, riserva)` di serie.js, che restituisce il secondo in cui la voce dice la n-esima parola che inizia così
+  nella scena (tempi veri da Whisper; in anteprima usa S(chiave)+riserva). Esempio: `const t0 = WT('grano', 'euro', 1, 2.3) - 0.15;`
+  Aggancia a parole, non a numeri (Whisper scrive «4» per «quattro»). Mai più tempi fissi o percentuali della scena per ciò che la voce nomina.
 
 ## Output
 `noir/pN.html` + il foglio provini (percorso del jpg). Rispondi con: elenco scene (chiave → cosa si vede) e cosa hai corretto.
