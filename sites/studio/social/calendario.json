@@ -1,0 +1,26 @@
+[
+ {
+  "puntata": 1,
+  "titolo": "Come gira l'economia",
+  "data": "2026-10-05",
+  "ora": "12:00",
+  "stato": "programmato",
+  "file": "sites/studio/social/pubblicati/2026-10-05-p01.mp4",
+  "thumb_offset": 600,
+  "durata_s": 80.1,
+  "fonti": "sites/studio/reel/noir/l1-fonti.md",
+  "caption": "Ogni euro che spendi è lo stipendio di qualcun altro. 💶\nPuntata 1 di «Dalla teoria alla realtà»: come gira l'economia, in 80 secondi.\n\n• Famiglie, imprese, Stato, banche, estero: chi paga chi\n• Italia 2025: oltre 2.200 miliardi di PIL, e quasi 6 euro su 10 sono consumi delle famiglie\n• Se un pezzo si inceppa rallenta tutto il giro: è così che inizia una recessione\n\nDomani, puntata 2: cosa misura davvero il PIL.\nUna puntata al giorno, dal lunedì al venerdì, alle 12:00.\n\nFonti: Eurostat, conti nazionali Italia 2025.\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #macroeconomia #pil #università #studenti #educazionefinanziaria #economiaitaliana"
+ },
+ {
+  "puntata": 2,
+  "titolo": "Il PIL: cosa misura",
+  "data": "2026-10-06",
+  "ora": "12:00",
+  "stato": "programmato",
+  "file": "sites/studio/social/pubblicati/2026-10-06-p02.mp4",
+  "thumb_offset": 600,
+  "durata_s": 76.3,
+  "fonti": "sites/studio/reel/noir/p2-fonti.md",
+  "caption": "Il pane che compri conta nel PIL. La farina con cui è fatto, no. 🍞\nPuntata 2 di «Dalla teoria alla realtà»: cosa misura davvero il PIL.\n\n• Si contano solo i prodotti finali: grano 1 €, farina 2 €, pane 4 € → nel PIL vanno 4 €, non 7\n• Si misura in tre modi (produzione, spesa, redditi) e il totale è lo stesso\n• Per le regole UE dentro ci sono anche droga, prostituzione e contrabbando: circa 20 miliardi l'anno in Italia (Istat)\n• Quando senti «debito al 137%», è il debito diviso per il PIL\n\nDomani, puntata 3: cosa il PIL non misura.\nUna puntata al giorno, dal lunedì al venerdì, alle 12:00.\n\nFonti: Eurostat (PIL 2025), Istat (economia non osservata 2023, debito 2025).\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #pil #macroeconomia #università #studenti #educazionefinanziaria #economiaitaliana"
+ }
+]
