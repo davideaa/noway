@@ -1,5 +1,9 @@
 // Fotografa a pagina intera i siti "prima" (quelli originali dei clienti), da computer e da telefono.
 // Uso: node scripts/cattura.cjs <cartella-uscita> <url> [<url> ...]
+// Da computer la foto è a 2x (schermi retina): <nome>-pc@2x.png, 2880 px di larghezza. PC_DPR=1 per la vecchia <nome>-pc.png.
+// Da telefono 390 px a 2x: <nome>-tel@2x.png (780 px; le vecchie <nome>-tel.png sono anch'esse a 2x). SOLO=pc oppure SOLO=tel per fare solo una delle due.
+// ALTO=1 per le pagine che mostrano le foto solo quando sono nello schermo.
+// Prima dello scatto accetta il banner dei cookie del sito, se c'è: altrimenti resta stampato in mezzo alla foto.
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const path = require('path');
 const { execFile } = require('child_process');
@@ -20,8 +24,10 @@ function scarica(url) {
 (async () => {
   const [out, ...urls] = process.argv.slice(2);
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-  for (const [w, h, tag, mobile] of [[1440, 900, 'pc', false], [390, 844, 'tel', true]]) {
-    const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile, ignoreHTTPSErrors: true, locale: 'it-IT',
+  const DPR_PC = +(process.env.PC_DPR || 2);
+  const tipi = [[1440, 900, 'pc', false], [390, 844, 'tel', true]].filter(t => !process.env.SOLO || process.env.SOLO === t[2]);
+  for (const [w, h, tag, mobile] of tipi) {
+    const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: mobile ? 2 : DPR_PC, isMobile: mobile, hasTouch: mobile, ignoreHTTPSErrors: true, locale: 'it-IT',
       userAgent: mobile ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' : undefined });
     await ctx.route('**/*', async route => {
       const u = route.request().url();
@@ -34,6 +40,8 @@ function scarica(url) {
     const pg = await ctx.newPage();
     for (const u of urls) {
       await pg.goto(u, { waitUntil: 'load', timeout: 90000 }).catch(e => console.log('timeout', u));
+      // anche le foto dei caroselli (fuori schermo di lato) si caricano subito
+      await pg.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach(i => { i.loading = 'eager'; })).catch(() => {});
       // scorre tutta la pagina per caricare le immagini pigre
       await pg.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 450) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 350)); } window.scrollTo(0, 0); });
       await pg.waitForTimeout(4000);
@@ -45,8 +53,22 @@ function scarica(url) {
         await pg.setViewportSize({ width: w, height: Math.min(H, 12000) });
         await pg.waitForTimeout(5000);
       }
+      // banner dei cookie del sito: si accetta, così non copre il contenuto nella foto
+      const consenso = await pg.evaluate(() => {
+        const re = /^\s*(sono d.accordo|accetta(re)?( tutti| tutto)?|accetto|ho capito|consenti( tutti)?|accept( all)?|i agree|ok)\s*$/i;
+        const el = [...document.querySelectorAll('button, a, [role=button], input[type=button], input[type=submit]')]
+          .find(e => re.test(e.innerText || e.value || '') && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
+        if (el) { el.click(); return (el.innerText || el.value).trim(); }
+        return '';
+      }).catch(() => '');
+      if (consenso) { console.log('cookie accettati:', consenso); await pg.waitForTimeout(1200); }
+      // decodifica sincrona: senza, nello scatto a pagina intera alcune foto restano vuote
+      await pg.evaluate(async () => { const im = [...document.images]; im.forEach(i => { i.decoding = 'sync'; }); await Promise.all(im.map(i => i.decode ? i.decode().catch(() => {}) : 0)); }).catch(() => {});
+      await pg.waitForTimeout(800);
       const nome = new URL(u).pathname.replace(/\//g, '_').replace(/^_|_$/g, '') || 'home';
-      await pg.screenshot({ path: path.join(out, `${nome}-${tag}.png`), fullPage: true, timeout: 90000 });
+      const dpr = mobile ? 2 : DPR_PC;
+      const file = `${nome}-${tag}${dpr !== 1 ? '@' + dpr + 'x' : ''}.png`;
+      await pg.screenshot({ path: path.join(out, file), fullPage: true, timeout: 180000 });
       console.log('ok', tag, nome);
       if (process.env.ALTO) await pg.setViewportSize({ width: w, height: h });
     }

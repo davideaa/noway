@@ -88,27 +88,57 @@
   }
 
   /* ---------------------------------------------------------------- dati pesanti di un lavoro: solo quando servono */
-  function datiDi(prog) {
-    if (prog.sito) return Promise.resolve(prog);
-    if (prog._carica) return prog._carica;
-    var t0 = ora();
-    prog._carica = new Promise(function (ok, ko) {
-      function unisci(d) { for (var k in d) if (d.hasOwnProperty(k)) prog[k] = d[k]; M.dati.push({ lavoro: prog.id, ms: Math.round(ora() - t0) }); ok(prog); }
-      var el = D.getElementById("cf-dati-" + prog.id);
+  /* Ogni lavoro ha fino a tre parti: "dopo" (il sito vivo), "pc" e "tel" (foto del prima). Nel file offline sono blocchi
+     <script type="application/json" id="cf-dati-<id>-<parte>">, nell'artifact file a parte (prog.parti[parte]).
+     Un telefono non legge mai le foto da computer. */
+  function partiServono(prog) {
+    var p = prog.parti || {}, out = ["dopo"];
+    if ("tel" in p) out.push("tel");
+    if ("pc" in p && !stretto()) out.push("pc");
+    return out;
+  }
+  function leggiParte(prog, t) {
+    prog._parti = prog._parti || {};
+    if (prog._parti[t]) return prog._parti[t];
+    var chiave = prog.id + "-" + t;
+    prog._parti[t] = new Promise(function (ok, ko) {
+      var el = D.getElementById("cf-dati-" + chiave);
       if (el) {
-        try { var d = JSON.parse(el.textContent); el.textContent = ""; unisci(d); } catch (e) { ko(e); }
+        try { var d = JSON.parse(el.textContent); el.textContent = ""; ok(d); } catch (e) { ko(e); }
         return;
       }
       var C = W.CF_DATI || {};
-      if (C[prog.id]) { unisci(C[prog.id]); delete C[prog.id]; return; }
-      if (!prog.dati) { ko(new Error("dati mancanti: " + prog.id)); return; }
+      if (C[chiave]) { ok(C[chiave]); delete C[chiave]; return; }
+      var file = prog.parti && prog.parti[t];
+      if (!file) { ko(new Error("dati mancanti: " + chiave)); return; }
       var s = D.createElement("script");
-      s.src = prog.dati; s.async = true;
-      s.onload = function () { var C2 = W.CF_DATI || {}; if (C2[prog.id]) { unisci(C2[prog.id]); delete C2[prog.id]; } else ko(new Error("dati vuoti")); };
-      s.onerror = function () { prog._carica = null; ko(new Error("non riesco a leggere " + prog.dati)); };
+      s.src = file; s.async = true;
+      s.onload = function () { var C2 = W.CF_DATI || {}; if (C2[chiave]) { ok(C2[chiave]); delete C2[chiave]; } else ko(new Error("dati vuoti: " + file)); };
+      s.onerror = function () { prog._parti[t] = null; ko(new Error("non riesco a leggere " + file)); };
       D.head.appendChild(s);
     });
-    return prog._carica;
+    return prog._parti[t];
+  }
+  function datiDi(prog) {
+    var tipi = partiServono(prog), t0 = ora();
+    prog._unite = prog._unite || {};
+    var mancano = tipi.filter(function (t) { return !prog._unite[t]; });
+    if (!mancano.length) return Promise.resolve(prog);
+    return Promise.all(tipi.map(function (t) { return leggiParte(prog, t); })).then(function (dd) {
+      tipi.forEach(function (t, k) {                    // prima il sito, poi le foto (vanno nelle sue pagine)
+        if (prog._unite[t]) return;
+        var d = dd[k];
+        if (t === "dopo") { for (var x in d) if (d.hasOwnProperty(x)) prog[x] = d[x]; }
+        else (d["prima_" + t] || []).forEach(function (f, i) {
+          var pg = prog.pagine[i]; if (!pg) return;
+          pg.prima = pg.prima || {};
+          if (f) pg.prima[t] = f;
+        });
+        prog._unite[t] = true;
+      });
+      M.dati.push({ lavoro: prog.id, parti: mancano.join("+"), ms: Math.round(ora() - t0) });
+      return prog;
+    });
   }
 
   /* ---------------------------------------------------------------- risorse: blob una volta sola */
@@ -330,9 +360,9 @@
   }
 
   /* ---------------------------------------------------------------- fotografie del "prima" a pagina intera, a fette */
-  function haPc(prog, i) { return !!prog.pagine[i].prima.pc; }
   function pila(prog, i, tipo) {
-    if (!prog.pagine[i].prima[tipo]) tipo = "tel";
+    var pr = prog.pagine[i].prima || {};
+    if (!pr[tipo]) tipo = tipo === "pc" ? "tel" : "pc";
     var r = ris(prog), k = i + tipo;
     if (r.pile[k]) return r.pile[k];
     var dati = prog.pagine[i].prima[tipo], el = D.createElement("div"), imgs = [], y = 0;
@@ -341,10 +371,10 @@
       var im = new Image();
       im.alt = ""; im.decoding = "async"; im.draggable = false;
       im.src = url(f[0]);
-      im.cfY = y; im.cfH = f[1]; y += f[1];
+      im.cfY = y; im.cfH = f[2] || f[1]; y += f[1];     // f[1] = passo, f[2] = altezza vera (con le righe in comune)
       el.appendChild(im); imgs.push(im);
     });
-    return (r.pile[k] = { el: el, imgs: imgs, w: dati.w, h: dati.h, tipo: tipo, largo: 0, alto: 0, pronta: null });
+    return (r.pile[k] = { el: el, imgs: imgs, w: dati.w, h: dati.h, css: dati.css || (tipo === "pc" ? 1440 : 390), tipo: tipo, largo: 0, alto: 0, pronta: null });
   }
   function disponi(p, largo) {
     if (p.largo === largo) return;
@@ -352,29 +382,40 @@
     p.largo = largo; p.alto = Math.round(p.h * sc);
     p.el.style.width = largo + "px"; p.el.style.height = p.alto + "px";
     p.imgs.forEach(function (im) {
-      var a = Math.round(im.cfY * sc), b = Math.round((im.cfY + im.cfH) * sc);
-      im.style.top = a + "px"; im.style.height = (b - a + 1) + "px";    // 1 px di sovrapposizione: niente righe fra le fette
+      // stessa scala della larghezza, mai stirata: a 1:1 il testo resta nitido. Le righe in comune con la fetta
+      // successiva (che sta sopra) coprono la giuntura anche quando la scala non cade su pixel interi.
+      im.style.top = (im.cfY * sc) + "px"; im.style.height = (im.cfH * sc) + "px";
     });
   }
-  function decodifica(p) {
-    if (p.pronta) return p.pronta;
-    var dec = function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); };
-    p.pronta = Promise.all(p.imgs.slice(0, 2).map(dec));
-    p.pronta.then(function () {                      // le altre fette una alla volta, senza fretta
-      p.decodificata = true;
-      var resto = p.imgs.slice(2);
-      (function prossima() { var im = resto.shift(); if (im) dec(im).then(prossima); })();
-    });
-    return p.pronta;
+  /* q = punto (0..1) che si sta guardando: prima si decodificano le fette lì intorno, poi le altre una alla volta */
+  function decodifica(p, q) {
+    var n = p.imgs.length, c = Math.min(n - 1, Math.floor(limita(q || 0, 0, 1) * n));
+    var dec = function (im) {
+      if (!im.cfDec) im.cfDec = im.decode ? im.decode().catch(function () {}) : Promise.resolve();
+      return im.cfDec;
+    };
+    var vicine = [c, c + 1, c - 1].filter(function (k) { return k >= 0 && k < n; });
+    var pronte = Promise.all(vicine.map(function (k) { return dec(p.imgs[k]); }));
+    if (!p.inCoda) {
+      p.inCoda = true;
+      pronte.then(function () {
+        p.decodificata = true;
+        (function prossima() {
+          var im = p.imgs.filter(function (x) { return !x.cfDec; })[0];
+          if (im) dec(im).then(prossima);
+        })();
+      });
+    }
+    return pronte;
   }
 
   /* ---------------------------------------------------------------- modi */
   function soloPrima(m) { return m === "prima"; }
-  function affianca(m) { return m === "affiancati" || (m === "telefono" && stretto()); }
+  function affianca(m) { return m === "affiancati" && !stretto(); }
   function tipoPrima(m) { return m === "telefono" || stretto() ? "tel" : "pc"; }
   function modoPossibile(m) {
     if (m === "affiancati") return !stretto();
-    if (m === "telefono") return stretto() || geo.possibile;
+    if (m === "telefono") return !stretto() && geo.possibile;
     return m === "prima" || m === "dopo";
   }
   function modoIniziale() { return stretto() ? "dopo" : "affiancati"; }
@@ -409,12 +450,14 @@
       montaSeguace();
       if (attivo) {
         var p = S.p, s = attivo;
+        if (prima === "prima" || prima === m) manda(s, { cf: "scorri-a", p: p });   // stessa misura: subito, prima della dissolvenza
         // dopo che l'iframe ha preso la misura nuova, lo riporto allo stesso punto
         requestAnimationFrame(function () { requestAnimationFrame(function () { if (attivo === s) manda(s, { cf: "scorri-a", p: p }); }); });
         if (!s.pronto) { radice.classList.add("cf-carica-su"); quandoPronto(s).then(function () { radice.classList.remove("cf-carica-su"); if (attivo === s) manda(s, { cf: "scorri-a", p: p }); }); }
       }
     }
-    if (prima !== m && !ridotto() && da !== "avvio" && scena.animate) {
+    var dissolve = (prima === "prima" && m === "dopo") || (prima === "dopo" && m === "prima");   // lì basta la dissolvenza
+    if (prima !== m && !dissolve && !ridotto() && da !== "avvio" && scena.animate) {
       scena.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
     }
     if (m === "dopo" && attivo && da === "vivo") { try { attivo.ifr.focus(); } catch (e) {} }
@@ -424,20 +467,21 @@
   }
 
   /* il sito vivo dentro una colonna: zoom sull'iframe, così dentro ha la larghezza da computer (o da telefono) */
+  var LARGO_PC = 1440;                       // larghezza vera delle foto da computer (e del dopo accanto, alla stessa scala)
   function impostaZoom() {
-    var z = 1;
-    if (affianca(S.modo) && ZOOM) {
-      var col = Math.floor((scenaW - 2) / 2), voluta = stretto() ? 390 : Math.max(1100, scenaW);
-      z = limita(col / voluta, 0.3, 1);
-    }
+    var z = 1, col = Math.floor((scenaW - 2) / 2), cw = Math.min(col, LARGO_PC);
+    if (affianca(S.modo) && ZOOM) z = limita(cw / LARGO_PC, 0.3, 1);
+    else if (affianca(S.modo)) cw = col;      // senza zoom: il sito vivo nella larghezza della colonna
     schermo.style.setProperty("--cf-zoom", z.toFixed(4));
+    schermo.style.setProperty("--cf-dx", (col + 2 + Math.floor((col - cw) / 2)) + "px");
+    schermo.style.setProperty("--cf-dw", cw + "px");
     S.zoom = z;
   }
   function controllaZoom(s) {
     // se il browser non passa lo zoom al documento interno (larghezza rimasta quella della colonna) si torna a 1
     if (!ZOOM || !affianca(S.modo) || S.zoom >= 0.99 || !s.w) return;
     var col = Math.floor((scenaW - 2) / 2);
-    if (s.w < col * 1.25) { ZOOM = false; impostaZoom(); annuncio.textContent = "Il sito nuovo nella colonna è in versione ridotta."; }
+    if (s.w < Math.min(col, LARGO_PC) * 1.25) { ZOOM = false; impostaZoom(); annuncio.textContent = "Il sito nuovo nella colonna è in versione ridotta."; }
   }
 
   /* ---------------------------------------------------------------- Solo prima: la foto scorre da sola (compositore) */
@@ -445,13 +489,13 @@
   var foto = { pile: [], V: 0, R: 0, anim: [], guidaH: 0 };
   function annullaAnim() { foto.anim.forEach(function (a) { try { a.cancel(); } catch (e) {} }); foto.anim = []; }
   function montaPilaColonna(tipo, Wc) {
-    var p = pila(S.prog, S.i, tipo), stretta = p.tipo === "tel" && !stretto() && Wc > 480;
-    var largo = stretta ? Math.min(Wc, 430) : Wc;
-    disponi(p, largo); decodifica(p);
+    var p = pila(S.prog, S.i, tipo);
+    var largo = stretto() ? Wc : Math.min(Wc, p.css);        // mai più largo del sito vero
+    disponi(p, largo); decodifica(p, S.p);
     [].slice.call(slot.children).forEach(function (x) { if (x !== p.el) slot.removeChild(x); });
     if (p.el.parentNode !== slot) slot.appendChild(p.el);
-    slot.style.left = stretta ? Math.round((Wc - largo) / 2) + "px" : "0";
-    radice.classList.toggle("cf-prima-stretta", stretta);
+    slot.style.left = Math.floor((Wc - largo) / 2) + "px";
+    radice.classList.toggle("cf-prima-stretta", largo < Wc);
     etPrima.textContent = p.tipo === "tel" && !stretto() ? "il sito di oggi, da telefono (manca la versione da computer)" : "il sito di oggi";
     return p;
   }
@@ -528,9 +572,16 @@
     if (!s) return;
     aggiornaVivo(s, y, max, w);
   };
+  var tScalda = 0;
+  function scaldaPrima() {
+    // in Solo dopo, quando si smette di scorrere, si decodificano le fette del prima in quel punto: il cambio è istantaneo
+    if (!S.aperto || S.modo !== "dopo" || !S.prog || !(S.prog.pagine[S.i] || {}).prima) return;
+    decodifica(pila(S.prog, S.i, tipoPrima("prima")), progressoVivo());
+  }
   function aggiornaVivo(s, y, max, w) {
     s.y = +y || 0; s.max = +max || 0; if (w) s.w = +w;
     if (!S.aperto || s !== attivo || soloPrima(S.modo)) return;
+    if (S.modo === "dopo") { clearTimeout(tScalda); tScalda = setTimeout(scaldaPrima, 300); }
     segui();
     fps(S.modo);
     controllaZoom(s);
@@ -815,7 +866,7 @@
     if (memo("cf-suggerito-3")) return;
     memo("cf-suggerito-3", "1");
     var t = stretto()
-      ? "Questo è il sito nuovo, <b>vero</b>: provalo. In alto <em>prima</em> mostra il sito di oggi, e i due telefoni li mettono uno accanto all'altro."
+      ? "Questo è il sito nuovo, <b>vero</b>: provalo. Tocca <em>prima</em> in alto per vedere com'era, nello stesso punto."
       : "A destra il sito nuovo <b>vero</b>, a sinistra quello di <em>prima</em>: scorri e si muovono insieme. <b>Prova dal vivo</b> lo apre a tutto schermo.";
     sugg.innerHTML = (stretto() ? "" : '<span class="cf-sugg-icona" aria-hidden="true"></span>') + "<span>" + t + "</span>";
     sugg.classList.add("cf-su");
@@ -1127,7 +1178,7 @@
               // se sono file a parte (artifact) si scaricano solo quando ci si avvicina al loro riquadro
               (function prossimo(k) {
                 if (k >= tutti.length) return;
-                if (tutti[k].dati && !D.getElementById("cf-dati-" + tutti[k].id)) { prossimo(k + 1); return; }
+                if (aParte(tutti[k])) { prossimo(k + 1); return; }
                 quandoFermo(function () { datiDi(tutti[k]).then(function () { prossimo(k + 1); }, function () { prossimo(k + 1); }); }, 8000);
               })(1);
             }, function () {});
@@ -1137,11 +1188,12 @@
     }, 4000);
   }
   if (D.readyState === "complete") presto(); else W.addEventListener("load", presto);
+  function aParte(p) { return !!(p.parti && p.parti.dopo); }          // dati in file separati (artifact)
   function avvicina(e) {
     var c = e.target && e.target.closest && e.target.closest("[data-id]");
     if (!c || S.aperto) return;
     var p = pronti().filter(function (x) { return x.id === c.getAttribute("data-id"); })[0];
-    if (p && p.dati && !p.sito && !p._carica) datiDi(p).catch(function () {});   // solo file a parte: si scarica in anticipo
+    if (p && aParte(p) && !p._avvicinato) { p._avvicinato = true; datiDi(p).catch(function () { p._avvicinato = false; }); }   // si scarica in anticipo
   }
   D.addEventListener("pointerover", avvicina, { passive: true });
   D.addEventListener("focusin", avvicina);
@@ -1154,7 +1206,7 @@
       return {
         blob: BLOB, scorrimento_dal_compositore: TL, zoom_colonna: ZOOM ? S.zoom : "spento",
         affiancati: riassunto(M.affiancati), telefono: riassunto(M.telefono), solo_prima: riassunto(M.prima), solo_dopo: riassunto(M.dopo),
-        campioni: { affiancati: M.affiancati.slice(), dopo: M.dopo.slice() },
+        campioni: { affiancati: M.affiancati.slice(), dopo: M.dopo.slice(), prima: M.prima.slice() },
         cambio_pagina_ms: { mediana: c.length ? c[c.length >> 1] : null, massimo: c.length ? c[c.length - 1] : null, tutti: M.cambi.slice() },
         lettura_dati_ms: M.dati.slice()
       };
