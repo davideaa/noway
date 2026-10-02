@@ -41,8 +41,10 @@
   function ridotto() { return mqRidotto.matches; }
   function ora() { return W.performance ? performance.now() : Date.now(); }
   function limita(v, a, b) { return v < a ? a : v > b ? b : v; }
+  var memoria = {};                                   // se localStorage non c'è (sandbox, privata) vale per la visita
   function memo(k, v) {
-    try { if (v === undefined) return W.localStorage.getItem(k); W.localStorage.setItem(k, v); } catch (e) { /* senza memoria va bene lo stesso */ }
+    try { if (v === undefined) return W.localStorage.getItem(k) || memoria[k] || null; W.localStorage.setItem(k, v); } catch (e) { if (v === undefined) return memoria[k] || null; }
+    memoria[k] = v;
     return null;
   }
   function attendi(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
@@ -104,6 +106,8 @@
   function sonda() {
     if (sondaP) return sondaP;
     sondaP = new Promise(function (fatto) {
+      // pagina in sandbox senza origine (anteprime ospitate): i blob non passano ai figli, inutile provare
+      if (W.origin === "null" && location.protocol !== "file:") { fatto(false); return; }
       var ifr = null, finito = false, u;
       try { u = aBlob("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="); }
       catch (e) { fatto(false); return; }
@@ -159,10 +163,10 @@
       var se = d.scrollingElement || d.documentElement;
       manda({ cf: "s", y: se.scrollTop, max: Math.max(0, se.scrollHeight - window.innerHeight) });
     }
-    function vaiHash(h) {
+    function vaiHash(h, subito) {
       var id = decodeURIComponent((h || "").slice(1)), t = id && d.getElementById(id);
       if (!t) { window.scrollTo({ top: 0, behavior: "instant" }); return; }
-      t.scrollIntoView({ behavior: ridotto ? "instant" : "smooth", block: "start" });
+      t.scrollIntoView({ behavior: ridotto || subito ? "instant" : "smooth", block: "start" });
       if (!t.matches("a,button,input,select,textarea,[tabindex]")) t.setAttribute("tabindex", "-1");
       try { t.focus({ preventScroll: true }); } catch (e) {}
     }
@@ -234,7 +238,7 @@
     window.addEventListener("message", function (e) {
       if (e.source !== su || !e.data) return;
       var m = e.data;
-      if (m.cf === "vai-a") { if (m.hash) vaiHash(m.hash); else window.scrollTo({ top: 0, behavior: "instant" }); stato(); }
+      if (m.cf === "vai-a") { if (m.hash) vaiHash(m.hash, true); else window.scrollTo({ top: 0, behavior: "instant" }); stato(); }
       else if (m.cf === "scorri") { window.scrollBy({ top: m.dy, behavior: "instant" }); }
       else if (m.cf === "reset") {
         [].forEach.call(d.querySelectorAll("dialog[open]"), function (x) { x.close(); });
@@ -310,7 +314,7 @@
 
   /* ---------------------------------------------------------------- fotografia "prima" a fette */
   var pilaOra = null;
-  function tipoPrima() { return (S.modo === "telefono" || scenaW < 700) ? "tel" : "pc"; }
+  function tipoPrima() { return (S.modo === "telefono" || (scenaW || innerWidth) < 700) ? "tel" : "pc"; }
   function pila(prog, i, tipo) {
     var r = ris(prog), k = i + tipo;
     if (r.pile[k]) return r.pile[k];
@@ -366,7 +370,7 @@
   var sporco = false, senzaPrima = null, senzaDopo = null;
   function segna() { if (!sporco) { sporco = true; requestAnimationFrame(disegna); } }
   function tendaX() {
-    if (S.tieni) return scenaW;
+    if (S.tieni || S.rilascio) return scenaW;
     if (S.svela != null) return S.svela * scenaW;
     return S.tenda * scenaW;
   }
@@ -381,7 +385,7 @@
     var off = Math.round(prog * Math.max(0, p.alto - vista));
     var dove = p.el.parentNode;
     if (dove === lenteVetro) {
-      p.el.style.transform = "translate3d(" + Math.round(R - S.mx) + "px," + Math.round(R - S.my - off) + "px,0)";
+      p.el.style.transform = "translate(" + Math.round(R - S.mx) + "px," + Math.round(R - S.my - off) + "px)";
       lente.style.transform = "translate3d(" + Math.round(S.mx) + "px," + Math.round(S.my) + "px,0)";
     } else if (dove === tendaDentro) {
       var x = Math.round(tendaX());
@@ -392,7 +396,7 @@
         var xs = Math.round(S.tenda * scenaW);
         maniglia.style.transform = "translate3d(" + xs + "px,0,0)";
         presa.style.transform = "translate3d(" + (limita(xs, 30, scenaW - 30) - xs) + "px,0,0)";
-        var sp = xs < 96, sd = xs > scenaW - 96;
+        var sp = xs < 96, sd = xs > scenaW - 96 || xs < 40;     // tenda chiusa a sinistra: solo la presa
         if (sp !== senzaPrima) { senzaPrima = sp; maniglia.classList.toggle("cf-senza-prima", sp); }
         if (sd !== senzaDopo) { senzaDopo = sd; maniglia.classList.toggle("cf-senza-dopo", sd); }
       }
@@ -676,6 +680,7 @@
     if (S.aperto) { if (prog !== S.prog) cambiaLavoro(prog); return true; }
     S.aperto = true; S.chiusura = false; S.el = el || D.activeElement; S.prog = prog;
     var r = ridotto() ? null : rettangolo(el), q = anteprime(prog);
+    D.documentElement.classList.add("cf-aperto");
     var dec = [].map.call(q.querySelectorAll("img"), function (im) { return im.decode && im.src ? im.decode().catch(function () {}) : 0; });
     Promise.all([sonda(), Promise.race([Promise.all(dec), attendi(150)])]).then(function () { avvia(prog, r); });
     return true;
@@ -735,7 +740,7 @@
     S.svela = 1; radice.classList.add("cf-svela"); montaPila(); disegna();
     setTimeout(function () {
       if (!S.aperto) return;
-      anima(1.05);
+      anima(0.9);
       S.svela = fine; segna();
       setTimeout(function () {
         if (!S.aperto) return;
@@ -744,8 +749,8 @@
         montaPila();
         lenteSu(S.dentro);
         suggerisci();
-      }, 1100);
-    }, 260);
+      }, 940);
+    }, 120);
   }
 
   function chiudi() {
@@ -761,6 +766,7 @@
       fantasma.classList.remove("cf-su");
       fantasma.querySelector(".cf-fantasma-fondo").style.transition = "";
       radice.hidden = true;
+      finestra.style.transition = "";
       radice.classList.remove("cf-nascosta", "cf-svela", "cf-tieni-su", "cf-carica-su", "cf-chiude", "cf-lente-su");
       lenteAccesa = false;
       S.aperto = false; S.chiusura = false; S.svela = null;
@@ -774,6 +780,7 @@
     q.style.transition = "none"; q.style.transform = "translate3d(0,0,0) scale(1)"; q.style.opacity = "1";
     dopoImg.style.opacity = "1"; fondo.style.transition = "none"; fondo.style.opacity = "1";
     radice.classList.add("cf-chiude");               // il fantasma sta SOTTO la finestra che sfuma
+    finestra.style.transition = "opacity .14s ease-out";
     fantasma.classList.add("cf-su");
     radice.classList.add("cf-nascosta");
     void q.offsetWidth;
@@ -975,9 +982,9 @@
 
   /* trappola del fuoco */
   [].forEach.call(radice.querySelectorAll(".cf-sentinella"), function (s) {
-    s.addEventListener("focus", function () {
-      if (s.dataset.cfVerso === "inizio") $("cf-chiudi").focus();
-      else if (attivo) attivo.ifr.focus(); else $("cf-chiudi").focus();
+    s.addEventListener("focus", function (e) {
+      var indietro = s.dataset.cfVerso === "fine" && e.relatedTarget === $("cf-chiudi");   // Maiusc+Tab dal primo tasto
+      if (indietro && attivo) attivo.ifr.focus(); else $("cf-chiudi").focus();
     });
   });
 
@@ -994,8 +1001,22 @@
     });
   });
 
-  /* la sonda parte quando la vetrina è ferma, così al clic è già pronta */
-  function presto() { (W.requestIdleCallback || function (f) { setTimeout(f, 1200); })(function () { sonda(); }, { timeout: 4000 }); }
+  /* quando la vetrina è ferma: sonda dei blob e prima pagina del primo lavoro già caricata (al clic si apre subito) */
+  function quandoFermo(f, t) { (W.requestIdleCallback || function (g) { setTimeout(g, 1200); })(f, { timeout: t }); }
+  function presto() {
+    quandoFermo(function () {
+      sonda().then(function () {
+        setTimeout(function () {
+          quandoFermo(function () {
+            var p = pronti()[0];
+            if (!p || S.aperto || pool.length) return;
+            slotPer(p, S.ultima[p.id] || 0, true);
+            preparaPila(p, S.ultima[p.id] || 0);
+          }, 6000);
+        }, 1500);
+      });
+    }, 4000);
+  }
   if (D.readyState === "complete") presto(); else W.addEventListener("load", presto);
 
   W.Confronto = {

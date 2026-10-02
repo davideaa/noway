@@ -124,6 +124,13 @@ h1 em, h2 em, h3 em { font-style: italic; }
 .su-foto .testata:not(.piena) .nav .tendina a { color: var(--inchiostro); }
 .testata.piena { background: var(--carta); border-bottom-color: var(--pietra); top: env(safe-area-inset-top, 0px) !important; box-shadow: 0 6px 24px rgba(31, 28, 24, .06); }
 
+.nav a, .nav .altro > button { white-space: nowrap; }
+@media (max-width: 1360px) and (min-width: 1121px) {
+  .nav { gap: 18px; }
+  .nav a, .nav .altro > button { letter-spacing: 0.1em; font-size: 12.5px; }
+  .lingua { display: none; }
+  .logo { width: 180px; }
+}
 @media (max-width: 1120px) {
   .nav, .lingua { display: none; }
   .btn-menu { display: block; }

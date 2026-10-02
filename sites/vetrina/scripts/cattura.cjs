@@ -40,9 +40,15 @@ function scarica(url) {
       await pg.evaluate(() => Promise.race([new Promise(r => setTimeout(r, 15000)),
         Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })))]));
       await pg.waitForTimeout(1500);
+      if (process.env.ALTO) {   // pagine che mostrano le foto solo quando sono nello schermo
+        const H = await pg.evaluate(() => document.documentElement.scrollHeight);
+        await pg.setViewportSize({ width: w, height: Math.min(H, 12000) });
+        await pg.waitForTimeout(5000);
+      }
       const nome = new URL(u).pathname.replace(/\//g, '_').replace(/^_|_$/g, '') || 'home';
       await pg.screenshot({ path: path.join(out, `${nome}-${tag}.png`), fullPage: true, timeout: 90000 });
       console.log('ok', tag, nome);
+      if (process.env.ALTO) await pg.setViewportSize({ width: w, height: h });
     }
     await ctx.close();
   }

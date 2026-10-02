@@ -36,7 +36,8 @@
   -webkit-tap-highlight-color: transparent;
 }
 .cf[hidden] { display: none; }
-html.cf-aperto, html.cf-aperto body { overflow: hidden; }
+html.cf-aperto { overflow: hidden; scrollbar-gutter: stable; }
+html.cf-aperto body { overflow: hidden; }
 .cf *, .cf *::before, .cf *::after { box-sizing: border-box; }
 :where(.cf) button { font: inherit; color: inherit; margin: 0; }
 :where(.cf) p { margin: 0; }
@@ -214,7 +215,9 @@ html.cf-aperto, html.cf-aperto body { overflow: hidden; }
 @keyframes cf-appari { from { opacity: 0; } }
 
 /* fotografia del sito di prima, a fette */
-.cf-pila { position: absolute; left: 0; top: 0; background: var(--cf-bianco); will-change: transform; transform: translate3d(0, 0, 0); }
+.cf-pila { position: absolute; left: 0; top: 0; background: var(--cf-bianco); will-change: transform; }
+/* nella lente la foto NON è uno strato a sé: si ridisegna solo il cerchio, senza buchi bianchi quando il mouse corre */
+.cf-lente-vetro .cf-pila { will-change: auto; }
 .cf-pila img { position: absolute; left: 0; width: 100%; max-width: none; display: block; user-select: none; -webkit-user-drag: none; }
 
 /* tenda: a sinistra prima, a destra dopo */
