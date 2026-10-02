@@ -105,7 +105,7 @@ function ambulance(cx, by, s, k, t) { if (k <= 0) return; x.save(); x.translate(
   x.restore(); }
 const qb = (p0, c, p1, u) => [(1 - u) * (1 - u) * p0[0] + 2 * u * (1 - u) * c[0] + u * u * p1[0], (1 - u) * (1 - u) * p0[1] + 2 * u * (1 - u) * c[1] + u * u * p1[1]];
 /* il contatore con le cose che entrano: usato in kennedy e all'inizio di citazione (tempi tutti della scena kennedy) */
-function kStuff(t) { const a = S('kennedy'), tpr = WT('kennedy', 'prodotto', 1, 2.4), ti = WA('kennedy', ['linquin', 'inquin'], 1, 4.1) - 0.15, ta = WT('kennedy', 'ambulanz', 1, 5.2) - 0.1;
+function kStuff(t) { const a = S('kennedy'), tpr = WT('kennedy', 'prodotto', 1, 2.4), ti = WA('kennedy', ['linquin', 'inquin'], 1, 4.1) - 0.15, ta = WT('kennedy', 'ambulanz', 1, 5.2) - 0.4;
   const kbx = oC(seg(t, a + 0.3, a + 0.8)), fin = [ti + 1.1, ta + 1.0];
   glass(540, 990, 520, 300, 34, kbx); x.save(); x.globalAlpha *= kbx; x.fillStyle = '#020302'; rr(460, 833, 160, 14, 7); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.6)'; x.lineWidth = 2; x.stroke(); x.restore();
   mono('PRODOTTO NAZIONALE LORDO', 540, 892, t, tpr - 0.1, { size: 26, color: C.lime, ls: 2 });
@@ -213,9 +213,9 @@ function pie(k, o = {}) { const { hatch = 0, cut = 0, open = 0, q = 0, t = 0 } =
     txt('1/3', Math.cos(a3) * (PR + 72), Math.sin(a3) * (PR + 72) + 10, { size: 40, weight: 800, color: C.ink, alpha: clamp(hatch * 2) }); }
   x.restore(); }
 function sTerzo(t, a, b) { bg(); x.save();
-  const tg = WT('terzo', 'gia', 1, 1.7) - 0.15, tt = WT('terzo', 'terzo', 1, 5.5) - 0.1, kx = ioC(seg(t, tg, tg + 0.5));
+  const tg = WA('terzo', ['listat', 'istat'], 1, 3.1) - 0.15, tv = WT('terzo', 'valeva', 1, 3.3) - 0.05, tt = WT('terzo', 'terzo', 1, 5.5) - 0.1, kx = ioC(seg(t, tg, tg + 0.5));
   phrase(t, a + 0.05, [['Più del doppio.', C.amber]], 360, { size: 92, out: tg });
-  phrase(t, tg + 0.25, [['Vale più di', C.ink], ['un terzo del PIL.', C.amber]], 345, { size: 92 });
+  phrase(t, tv, [['Vale più di', C.ink], ['un terzo del PIL.', C.amber]], 345, { size: 92 }); /* il titolo su «valeva», non prima */
   if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; x.translate(0, -120 * kx); oreRows(t, { final: true });
     const kg = oC(seg(t, a + 0.15, a + 0.6)), yb = 1130, x0 = BAR0 + 114 * PXM; x.save(); x.globalAlpha *= kg; x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.setLineDash([8, 8]);
     rr(x0 + 4, yb - 28, 114 * PXM * kg - 4, 56, 14); x.stroke(); x.beginPath(); x.moveTo(BAR0 + 261 * PXM, 835); x.lineTo(BAR0 + 261 * PXM, yb - 36); x.strokeStyle = 'rgba(245,165,36,0.8)'; x.stroke(); x.restore();
@@ -271,13 +271,13 @@ function balance(t, o) { const { k = 1, phi = 0, lit = [], bes = 0, pil = 1 } = 
       txt('BES', ex, pyy + 62, { fam: 'mono', size: 28, weight: 600, color: C.lime, alpha: bes, ls: 4 }); } });
   x.restore(); }
 function sBenessere(t, a, b) { bg(); x.save();
-  const tb = WT('benessere', 'benessere', 1, 2.4) - 0.1, ti = WT('benessere', 'indicatori', 1, 4.5) - 0.25, td = WT('benessere', 'domini', 1, 5.5) - 0.15;
+  const tb = WT('benessere', 'benessere', 1, 2.4) - 0.1, ti = WT('benessere', '152', 1, 4.4) - 0.1, tin = WT('benessere', 'indicatori', 1, 5.0) - 0.25, td = WT('benessere', 'domini', 1, 5.5) - 0.15;
   phrase(t, a + 0.05, [['Misurare', C.ink]], 345, { size: 92 });
   phrase(t, tb, [['il benessere.', C.lime]], 448, { size: 92 });
   const lit = [...Array(12).keys()].map((j) => oC(seg(t, td + j * 0.04, td + j * 0.04 + 0.25))), phi = lerp(-0.13, 0, oB(seg(t, td + 0.1, td + 0.8)));
   balance(t, { k: oC(seg(t, a + 0.2, a + 0.7)), phi, lit, bes: oC(seg(t, tb, tb + 0.4)) });
   const kc = seg(t, ti, ti + 0.7); txt(String(Math.round(152 * ioC(kc))), 330, 615, { size: 110, weight: 800, color: C.lime, alpha: oC(seg(t, ti, ti + 0.2)) });
-  txt('indicatori', 330, 695, { fam: 'mono', size: 28, weight: 600, color: C.muted, alpha: oC(seg(t, ti, ti + 0.3)), ls: 2 });
+  txt('indicatori', 330, 695, { fam: 'mono', size: 28, weight: 600, color: C.muted, alpha: oC(seg(t, tin, tin + 0.3)), ls: 2 });
   const k12 = oB(seg(t, td, td + 0.35)); if (k12 > 0) { x.save(); x.translate(750, 615); x.scale(clamp(k12, 0, 1.2), clamp(k12, 0, 1.2)); txt('12', 0, 0, { size: 110, weight: 800, color: C.lime }); x.restore(); }
   txt('domini', 750, 695, { fam: 'mono', size: 28, weight: 600, color: C.muted, alpha: oC(seg(t, td, td + 0.3)), ls: 2 });
   mono('ISTAT · BES · DAL 2010', 540, 1425, t, WT('benessere', 'dal', 1, 0.7), { size: 24, color: C.ink });
