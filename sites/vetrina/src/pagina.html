@@ -18,6 +18,8 @@
 
 <a class="salta" href="#principale">Vai ai contenuti</a>
 
+<div class="fondo" aria-hidden="true"><i class="al al-1"></i><i class="al al-2"></i><i class="al al-3"></i></div>
+
 <!-- ============ APERTURA: il sito "prima" che si rifà ============ -->
 <div id="apertura" class="ap" aria-hidden="true">
   <div class="ap-vecchio" id="ap-vecchio">
@@ -56,10 +58,11 @@
     <nav class="menu" id="menu" aria-label="Principale">
       <a href="#lavori">Lavori</a>
       <a href="#rifaccio">Come rifaccio un sito</a>
+      <a href="#chi-sono">Chi sono</a>
       <a href="#servizi">Cosa faccio</a>
       <a href="#contatti">Contatti</a>
     </nav>
-    <a class="btn btn-mini btn-scuro" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span></a>
+    <a class="btn btn-mini btn-luce" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span></a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">Menu</span><i></i><i></i></button>
   </div>
   <div class="barra-scroll" aria-hidden="true"><i id="barra-scroll"></i></div>
@@ -69,20 +72,20 @@
 
   <!-- ============ PRESENTAZIONE ============ -->
   <section class="hero" id="presentazione" aria-labelledby="titolo">
-    <div class="hero-alone" aria-hidden="true"></div>
+    <div class="hero-luce" id="hero-luce" aria-hidden="true"></div>
     <div class="wrap hero-griglia">
       <div class="hero-testo">
-        <h1 id="titolo" class="hero-titolo">Piacere, sono Davide.</h1>
-        <p class="hero-frase h-anim">Rendo belli, chiari e veloci i siti che <span class="vecchio">sembrano vecchi</span>.</p>
-        <p class="hero-bio h-anim">Ho 22 anni e una laurea in Economia delle banche. Da tre anni lavoro come freelance: disegno siti, grafiche e animazioni, e li collego a prenotazioni, ordini e logistica.</p>
+        <h1 id="titolo" class="hero-titolo">Piacere,<br>sono Davide.</h1>
+        <p class="hero-frase h-anim">Rendo belli, chiari e veloci i siti che <span class="vecchio">sembrano vecchi<i class="taglio"></i></span>.</p>
+        <p class="hero-bio h-anim">Ho 22 anni, mi sono laureato in Economia delle banche e da tre anni lavoro come freelance. Disegno siti, grafiche e animazioni, e li collego a prenotazioni, ordini e logistica.</p>
         <div class="hero-azioni h-anim">
-          <a class="btn btn-scuro" href="#lavori" data-magnete><span>Guarda i lavori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-azzurro" href="#lavori" data-magnete><span>Guarda i lavori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-linea" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span></a>
         </div>
       </div>
 
       <figure class="conf h-anim" id="conf-hero" hidden>
-        <div class="conf-schermo" id="conf-schermo" data-cursore="Trascina">
+        <div class="conf-schermo" id="conf-schermo">
           <img class="conf-dopo" id="conf-dopo" alt="Il sito nuovo: la proposta di restyling" width="1100" height="688" decoding="async">
           <div class="conf-pr" id="conf-pr"><img id="conf-prima" alt="Il sito com'è oggi" width="1100" height="688" decoding="async"></div>
           <span class="conf-chip conf-chip-p" id="chip-p">Prima</span>
@@ -96,11 +99,18 @@
         </div>
         <figcaption class="conf-did">
           <span><strong id="conf-nome">Cosmo Hotel Palace</strong><span id="conf-sub">, proposta di restyling</span></span>
-          <button class="conf-apri" id="conf-apri" type="button" data-cursore="Apri"><span>Entra nel confronto</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <button class="conf-apri" id="conf-apri" type="button"><span>Entra nel confronto</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </figcaption>
       </figure>
     </div>
     <a class="scorri h-anim" href="#lavori" aria-label="Vai ai lavori"><i></i></a>
+  </section>
+
+  <!-- ============ L'IDEA (le parole si accendono con lo scorrimento) ============ -->
+  <section class="idea" id="idea" aria-label="L'idea">
+    <div class="wrap">
+      <p class="idea-testo" id="idea-testo">Chi cerca un hotel o un tavolo decide in <em>pochi secondi</em>. Se il tuo sito è lento, confuso o fermo a dieci anni fa, sceglie <em>un altro</em>. Per questo lo rifaccio: perché si legga bene, si apra subito e faccia <em>prenotare</em>.</p>
+    </div>
   </section>
 
   <!-- ============ LAVORI ============ -->
@@ -108,7 +118,7 @@
     <div class="wrap">
       <div class="capo">
         <h2 id="t-lavori" data-dividi>Il prima e il dopo<br>di siti veri.</h2>
-        <p class="rv">Sono proposte di restyling su siti reali. Parto dal sito com'è oggi, tengo le stesse pagine, gli stessi testi e le stesse foto, e ne mostro una versione più chiara. Scegli un lavoro per entrarci.</p>
+        <p class="rv">Sono proposte di restyling su siti reali: un hotel, un bistrot e un ristorante. Parto dal sito com'è oggi, ne tengo i contenuti e mostro come potrebbe essere. Scegli un lavoro e entraci.</p>
       </div>
       <ul class="canali" id="canali"></ul>
     </div>
@@ -180,12 +190,50 @@
     </div>
   </section>
 
+  <!-- ============ CHI SONO ============ -->
+  <section class="chisono" id="chi-sono" aria-labelledby="t-chisono">
+    <div class="wrap chisono-griglia">
+      <div class="mono-box" id="mono-box" aria-hidden="true">
+        <svg class="anello" viewBox="0 0 300 300"><defs><path id="cerchio" d="M150,150 m-132,0 a132,132 0 1,1 264,0 a132,132 0 1,1 -264,0"/></defs><text><textPath href="#cerchio" xlink:href="#cerchio" textLength="826" lengthAdjust="spacing">Siti web / Web design / Motion graphic / Prenotazioni e logistica / </textPath></text></svg>
+        <div class="mono" id="mono">
+          <span class="mono-d mono-dopo"><b>D</b></span>
+          <span class="mono-pr" id="mono-pr"><span class="mono-d mono-prima" id="mono-prima"><b>D</b></span></span>
+          <span class="mono-man" id="mono-man"><i></i><u><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></u></span>
+        </div>
+      </div>
+
+      <div class="chisono-testo">
+        <h2 id="t-chisono" data-dividi>Chi sono</h2>
+        <p class="chisono-lead rv">Sono Davide e rifaccio i siti che non fanno più il loro lavoro, per chi ha un hotel, un ristorante o un locale.</p>
+        <div class="cifre rv">
+          <p class="cifra"><span class="num" data-a="22">22</span><span class="et">anni</span></p>
+          <p class="cifra"><span class="num" data-a="3">3</span><span class="et">anni da freelance</span></p>
+          <p class="cifra"><span class="num" data-a="3" id="num-lavori">3</span><span class="et">proposte di restyling su siti reali</span></p>
+        </div>
+        <div class="chisono-blocchi">
+          <div class="blocco rv">
+            <h3>Il percorso</h3>
+            <p>Mi sono laureato in Economia delle banche e da tre anni faccio il freelance. Mi occupo di siti web, design e grafica, motion graphic (animazioni, reel, video) e collego i siti a prenotazioni, ordini e logistica.</p>
+          </div>
+          <div class="blocco rv">
+            <h3>Perché lo faccio</h3>
+            <p>Perché un sito vecchio lavora contro chi lo ha. Se qualcuno cerca un tavolo, una camera o gli orari e non li trova subito, di solito chiude e va da un altro. Mi piace sistemare proprio questo.</p>
+          </div>
+          <div class="blocco rv">
+            <h3>Come lavoro con te</h3>
+            <p>Parli con me dall'inizio alla consegna. Ti mostro il dopo prima di cambiare qualsiasi cosa, e puoi dirmi di no.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ COSA FACCIO ============ -->
   <section class="servizi" id="servizi" aria-labelledby="t-servizi">
     <div class="wrap">
       <div class="capo capo-serv">
         <h2 id="t-servizi" data-dividi>Cosa faccio</h2>
-        <p class="rv">Se hai un'attività e il tuo sito non ti rappresenta più, di solito si parte da una di queste quattro cose.</p>
+        <p class="rv">Se hai un hotel, un ristorante o un locale e il tuo sito non ti rappresenta più, di solito si parte da una di queste quattro cose.</p>
       </div>
       <ul class="serv-elenco">
         <li class="serv">
@@ -214,11 +262,11 @@
 
   <!-- ============ STRISCIA ============ -->
   <section class="striscia" aria-label="Parole del mestiere">
-    <p class="sr">Siti web, restyling, web design, grafica, motion graphic, video, prenotazioni, logistica.</p>
+    <p class="sr">Proposte di restyling su siti reali, siti web, web design, grafica, motion graphic, video, prenotazioni, logistica.</p>
     <div class="mq" aria-hidden="true" data-verso="-1">
       <div class="mq-pista">
-        <div class="mq-gr"><span>Siti web</span><i></i><span>Restyling</span><i></i><span>Web design</span><i></i><span>Grafica</span><i></i><span>Motion graphic</span><i></i><span>Reel e video</span><i></i></div>
-        <div class="mq-gr"><span>Siti web</span><i></i><span>Restyling</span><i></i><span>Web design</span><i></i><span>Grafica</span><i></i><span>Motion graphic</span><i></i><span>Reel e video</span><i></i></div>
+        <div class="mq-gr"><span>Proposte di restyling su siti reali</span><i></i><span>Siti web</span><i></i><span>Web design</span><i></i><span>Motion graphic</span><i></i><span>Prenotazioni e logistica</span><i></i></div>
+        <div class="mq-gr"><span>Proposte di restyling su siti reali</span><i></i><span>Siti web</span><i></i><span>Web design</span><i></i><span>Motion graphic</span><i></i><span>Prenotazioni e logistica</span><i></i></div>
       </div>
     </div>
     <div class="mq mq-linea" aria-hidden="true" data-verso="1">
@@ -245,7 +293,7 @@
         <li class="passo">
           <span class="nodo" aria-hidden="true"></span>
           <span class="passo-n" aria-hidden="true">2</span>
-          <div class="passo-t"><h3>Ti mostro il dopo</h3><p>Prima di costruire, ti faccio vedere la nuova versione accanto a quella di oggi: stesse pagine, stessi testi, molta più chiarezza.</p></div>
+          <div class="passo-t"><h3>Ti mostro il dopo</h3><p>Prima di costruire ti faccio vedere la nuova versione accanto a quella di oggi. Se non ti convince, non cambia niente.</p></div>
         </li>
         <li class="passo">
           <span class="nodo" aria-hidden="true"></span>
@@ -264,10 +312,10 @@
     <div class="wrap contatti-int">
       <h2 id="t-contatti" data-dividi>Il tuo sito può<br>avere un dopo.</h2>
       <p class="contatti-p rv">Scrivimi due righe su com'è oggi e su cosa vorresti che facesse. Ti rispondo con qualche idea.</p>
-      <a class="mail-grande rv" id="mail" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-cursore="Scrivi">{{EMAIL}}</a>
+      <a class="mail-grande rv" id="mail" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito">{{EMAIL}}</a>
       <div class="contatti-az rv">
         <a class="btn btn-azzurro" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <button class="btn btn-chiaro" id="copia" type="button" data-magnete><svg class="i-copia" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span id="copia-t">Copia l'indirizzo</span></button>
+        <button class="btn btn-linea" id="copia" type="button" data-magnete><svg class="i-copia" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span id="copia-t">Copia l'indirizzo</span></button>
       </div>
       <p class="sr" id="copia-stato" role="status" aria-live="polite"></p>
       <p class="copia-nota" id="copia-nota" hidden></p>

@@ -21,6 +21,42 @@
   function prova(nome, fn) { try { fn(); } catch (e) { if (window.console) console.warn("[vetrina] " + nome + ": " + (e && e.message)); } }
   function memoria(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; }
 
+  /* ---------- dividere un testo in lettere o in parole (senza librerie) ---------- */
+  function dividiLettere(el) {
+    var testo = el.textContent.replace(/\s+/g, " ").trim(), out = [], frag = document.createDocumentFragment();
+    el.setAttribute("aria-label", testo);
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+      if (n.nodeType === 3) {
+        n.nodeValue.split(/(\s+)/).forEach(function (w) {
+          if (!w) return;
+          if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(" ")); return; }
+          var p = document.createElement("span"); p.className = "parola"; p.setAttribute("aria-hidden", "true");
+          w.split("").forEach(function (ch) { var l = document.createElement("span"); l.className = "lettera"; l.textContent = ch; p.appendChild(l); out.push(l); });
+          frag.appendChild(p);
+        });
+      } else frag.appendChild(n.cloneNode(true));
+    });
+    el.textContent = ""; el.appendChild(frag);
+    return out;
+  }
+  function dividiParole(el) {
+    var out = [];
+    (function giro(nodo) {
+      Array.prototype.slice.call(nodo.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          n.nodeValue.split(/(\s+)/).forEach(function (w) {
+            if (!w) return;
+            if (/^\s+$/.test(w)) frag.appendChild(document.createTextNode(" "));
+            else { var sp = document.createElement("span"); sp.className = "p"; sp.textContent = w; out.push(sp); frag.appendChild(sp); }
+          });
+          nodo.replaceChild(frag, n);
+        } else if (n.nodeType === 1) giro(n);
+      });
+    })(el);
+    return out;
+  }
+
   var timerAvviso = 0;
   function avvisa(t) {
     var a = $("#avviso"); if (!a) return;
@@ -134,7 +170,7 @@
         var sub = esc(p.categoria || "") + (p.luogo ? " a " + esc(p.luogo) : "");
         var cambi = '<span class="c-tag">Proposta di restyling</span>' + (p.cambi || []).slice(0, 3).map(function (c) { return "<span>" + esc(c) + "</span>"; }).join("");
         li.innerHTML =
-          '<button type="button" class="canale" data-id="' + esc(p.id) + '" data-cursore="Apri" aria-label="Apri il prima e dopo: ' + esc(p.nome) + '">' +
+          '<button type="button" class="canale" data-id="' + esc(p.id) + '"  aria-label="Apri il prima e dopo: ' + esc(p.nome) + '">' +
           '<span class="c-inner"><span class="c-schermo">' +
           '<img class="c-dopo" alt="" width="1100" height="688" decoding="async">' +
           '<span class="c-pr"><img alt="" width="1100" height="688" decoding="async"></span>' +
@@ -294,27 +330,65 @@
     });
   });
 
-  var mqTw = [];
   prova("striscia", function () {
     if (!anim) return;
+    var banda = $(".striscia"); if (!banda) return;
     $$(".mq").forEach(function (m) {
       var pista = $(".mq-pista", m), verso = +m.getAttribute("data-verso") || -1;
-      var tw = G.fromTo(pista, { xPercent: verso < 0 ? 0 : -50 }, { xPercent: verso < 0 ? -50 : 0, duration: 42, ease: "none", repeat: -1 });
-      mqTw.push(tw);
-      ST.create({ trigger: m, start: "top bottom", end: "bottom top", onToggle: function (s) { tw.paused(!s.isActive); } });
+      G.fromTo(pista, { xPercent: verso < 0 ? 0 : -26 }, { xPercent: verso < 0 ? -26 : 0, ease: "none", scrollTrigger: { trigger: banda, start: "top bottom", end: "bottom top", scrub: .8 } });
     });
-    var alvo = 1, corr = 1, ultimo = 1;
-    ST.create({
-      start: 0, end: "max", onUpdate: function (s) {
-        ultimo = s.direction || ultimo;
-        alvo = ultimo * Math.min(6, 1 + Math.abs(s.getVelocity()) / 320);
-      }
-    });
-    ST.addEventListener("scrollEnd", function () { alvo = ultimo; });
-    G.ticker.add(function () {
-      corr += (alvo - corr) * .07;
-      for (var i = 0; i < mqTw.length; i++) mqTw[i].timeScale(corr);
-    });
+  });
+
+  /* ---------- l'idea: le parole si accendono mentre si scorre ---------- */
+  prova("idea", function () {
+    var el = $("#idea-testo"); if (!el || !anim) return;
+    var parole = dividiParole(el);
+    G.timeline({ scrollTrigger: { trigger: el, start: "top 84%", end: "bottom 46%", scrub: .6 } })
+      .fromTo(parole, { opacity: .2 }, { opacity: 1, duration: 1, stagger: .5, ease: "none" });
+  });
+
+  /* ---------- chi sono: numeri che entrano e monogramma prima/dopo ---------- */
+  prova("chi sono", function () {
+    var totale = (D.progetti || []).filter(function (p) { return p.pronto; }).length;
+    var nl = $("#num-lavori");
+    if (nl && totale) { nl.setAttribute("data-a", totale); nl.textContent = totale; }
+    if (anim) {
+      $$(".num").forEach(function (el) {
+        var fin = +el.getAttribute("data-a") || 0, o = { v: 0 };
+        el.textContent = "0";
+        ST.create({ trigger: el, start: "top 94%", once: true, onEnter: function () {
+          G.to(o, { v: fin, duration: 1.8, ease: "power3.out", snap: { v: 1 }, onUpdate: function () { el.textContent = o.v; } });
+        } });
+      });
+    }
+    var box = $("#mono-box"), mono = $("#mono"), pr = $("#mono-pr"), pri = $("#mono-prima"), man = $("#mono-man");
+    if (!box || !mono) return;
+    var p = .5, alvo = .5, dallo = .5, mouse = false, mp = .5, raf = 0;
+    function disegna() { dividi(pr, pri, man, p); }
+    function giro() {
+      raf = 0; alvo = mouse ? mp : dallo;
+      var d = alvo - p;
+      if (Math.abs(d) < .0008) { p = alvo; disegna(); return; }
+      p += d * .14; disegna(); raf = requestAnimationFrame(giro);
+    }
+    function ridisegna() { if (!raf) raf = requestAnimationFrame(giro); }
+    disegna();
+    function dalPuntatore(e) { var r = mono.getBoundingClientRect(); mp = clamp((e.clientX - r.left) / r.width, .02, .98); }
+    box.addEventListener("pointermove", function (e) { if (e.pointerType === "mouse" || mouse) { mouse = true; dalPuntatore(e); ridisegna(); } });
+    box.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") { mouse = false; ridisegna(); } });
+    box.addEventListener("pointerdown", function (e) { mouse = true; dalPuntatore(e); ridisegna(); try { box.setPointerCapture(e.pointerId); } catch (x) {} });
+    box.addEventListener("pointerup", function (e) { if (e.pointerType !== "mouse") { mouse = false; ridisegna(); } });
+    box.addEventListener("pointercancel", function () { mouse = false; ridisegna(); });
+    if (anim) ST.create({ trigger: "#chi-sono", start: "top bottom", end: "bottom top", onUpdate: function (st) { dallo = .1 + .8 * st.progress; ridisegna(); }, onRefresh: function (st) { dallo = .1 + .8 * st.progress; ridisegna(); } });
+  });
+
+  /* ---------- il fondo: gli aloni di luce seguono lo scorrimento ---------- */
+  prova("aloni", function () {
+    if (!anim) return;
+    var sc = { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1.4 };
+    G.to(".al-1", { x: "30vw", y: "120vh", ease: "none", scrollTrigger: sc });
+    G.to(".al-2", { x: "-36vw", y: "130vh", ease: "none", scrollTrigger: sc });
+    G.to(".al-3", { x: "20vw", y: "-100vh", ease: "none", scrollTrigger: sc });
   });
 
   /* =====================================================================
@@ -428,7 +502,6 @@
     /* parallasse leggera nella copertina */
     if (!matchMedia("(max-width: 700px)").matches) {
       var sc = { trigger: ".hero", start: "top top", end: "bottom top", scrub: true };
-      G.to(".hero-alone", { yPercent: 28, ease: "none", scrollTrigger: sc });
       G.to(".hero-testo", { yPercent: -10, ease: "none", scrollTrigger: sc });
       G.to("#conf-hero", { yPercent: 7, ease: "none", scrollTrigger: sc });
     }
@@ -439,23 +512,68 @@
      9. Entrata della copertina e apertura
      ===================================================================== */
   var heroTL = null, heroVia = false, inCorso = false;
+
+  /* le lettere del titolo si sollevano e si inclinano vicino al mouse (solo mouse, solo transform) */
+  function reazioneTitolo(h1, ch) {
+    if (!fine || !anim || !ch.length) return;
+    var base = [], R = 190, hero = $(".hero");
+    var qy = ch.map(function (c) { return G.quickTo(c, "y", { duration: .6, ease: "power3" }); });
+    var qr = ch.map(function (c) { return G.quickTo(c, "rotation", { duration: .6, ease: "power3" }); });
+    var qx = ch.map(function (c) { return G.quickTo(c, "x", { duration: .6, ease: "power3" }); });
+    function misura() {
+      var hr = h1.getBoundingClientRect();
+      base = ch.map(function (c) { var r = c.getBoundingClientRect(); return { x: r.left - hr.left + r.width / 2, y: r.top - hr.top + r.height / 2 }; });
+    }
+    function azzera() { for (var i = 0; i < ch.length; i++) { qy[i](0); qr[i](0); qx[i](0); } }
+    misura();
+    var tm = 0;
+    window.addEventListener("resize", function () { clearTimeout(tm); tm = setTimeout(function () { G.set(ch, { x: 0, y: 0, rotation: 0 }); misura(); }, 200); });
+    hero.addEventListener("pointermove", function (e) {
+      if (e.pointerType !== "mouse") return;
+      var hr = h1.getBoundingClientRect(), px = e.clientX - hr.left, py = e.clientY - hr.top;
+      for (var i = 0; i < ch.length; i++) {
+        var dx = px - base[i].x, dy = py - base[i].y, d = Math.sqrt(dx * dx + dy * dy), f = Math.max(0, 1 - d / R);
+        f = f * f * (3 - 2 * f);
+        qy[i](-f * 30); qr[i](-clamp(dx / R, -1, 1) * f * 10); qx[i](-clamp(dx / R, -1, 1) * f * 9);
+      }
+    }, { passive: true });
+    hero.addEventListener("pointerleave", azzera);
+  }
+
+  /* una luce azzurra segue il mouse nella copertina */
+  function luceMouse() {
+    if (!fine || !anim) return;
+    var l = $("#hero-luce"), hero = $(".hero"); if (!l || !hero) return;
+    var qx = G.quickTo(l, "x", { duration: .9, ease: "power3" }), qy = G.quickTo(l, "y", { duration: .9, ease: "power3" }), acceso = false;
+    hero.addEventListener("pointermove", function (e) {
+      if (e.pointerType !== "mouse") return;
+      var r = hero.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      if (!acceso) { acceso = true; G.set(l, { x: x, y: y }); G.to(l, { opacity: 1, duration: .9 }); }
+      qx(x); qy(y);
+    }, { passive: true });
+    hero.addEventListener("pointerleave", function () { acceso = false; G.to(l, { opacity: 0, duration: .9 }); });
+  }
+
   function costruisciHero() {
+    var h1 = $(".hero-titolo");
+    var lettere = (anim && h1) ? dividiLettere(h1) : [];
     html.classList.remove("pre");
     if (!anim) return;
     var tl = G.timeline({ paused: true, defaults: { ease: "expo.out" } });
-    var h1 = $(".hero-titolo");
-    if (SP && h1) {
-      var sp = SP.create(h1, { type: "lines", mask: "lines", linesClass: "riga" });
-      tl.from(sp.lines, { yPercent: 118, duration: 1.2, stagger: .1 }, .15);
+    if (lettere.length) {
+      tl.from(lettere, { y: 90, opacity: 0, scale: .7, transformOrigin: "50% 100%", rotation: function () { return G.utils.random(-12, 12); }, duration: 1.2, stagger: { each: .04 } }, .1);
     } else if (h1) tl.from(h1, { y: 40, opacity: 0, duration: 1 }, .15);
     tl.fromTo("#testata", { yPercent: -120, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .9, ease: "power3.out" }, 0)
-      .fromTo(".hero-frase", { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .45)
-      .fromTo(".hero-bio", { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .6)
-      .fromTo(".hero-azioni", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .75)
-      .fromTo("#conf-hero", { y: 70, opacity: 0, scale: .95 }, { y: 0, opacity: 1, scale: 1, duration: 1.3 }, .35)
-      .fromTo(".hero-alone", { opacity: 0, scale: .8 }, { opacity: 1, scale: 1, duration: 1.8, ease: "power2.out" }, 0)
-      .fromTo(".scorri", { opacity: 0 }, { opacity: 1, duration: 1 }, 1.3);
-    tl.eventCallback("onComplete", function () { if (conf) conf.demo(); });
+      .fromTo(".hero-frase", { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .55)
+      .fromTo(".taglio", { scaleX: 0 }, { scaleX: 1, duration: .9, ease: "power3.inOut" }, 1.5)
+      .fromTo(".hero-bio", { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .7)
+      .fromTo(".hero-azioni", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .85)
+      .fromTo("#conf-hero", { y: 70, opacity: 0, scale: .95 }, { y: 0, opacity: 1, scale: 1, duration: 1.3 }, .4)
+      .fromTo(".scorri", { opacity: 0 }, { opacity: 1, duration: 1 }, 1.4);
+    tl.eventCallback("onComplete", function () {
+      if (conf) conf.demo();
+      reazioneTitolo(h1, lettere);
+    });
     heroTL = tl;
   }
 
@@ -508,6 +626,7 @@
   function parti() {
     if (!anim) { html.classList.remove("pre", "intro"); if (conf) { /* niente giro di prova */ } return; }
     costruisciHero();
+    luceMouse();
     apertura();
     if (!inCorso) avviaHero();
     window.addEventListener("load", function () { ST.refresh(); });
