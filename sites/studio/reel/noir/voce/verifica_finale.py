@@ -7,9 +7,13 @@ D, MIX = sys.argv[1], sys.argv[2]
 m = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 C = json.load(open(f"{D}/cues.json"))["cues"]; R = {k: s for s, k in json.load(open(f"{D}/righe.json"))}
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
+NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
 def norm(s):
     s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ").replace("€", " euro ")
-    s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s)); return re.sub(r"[^a-zàéìòù ]", " ", s).split()
+    s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))
+    import unicodedata
+    s = unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode()   # tré → tre
+    return [w for w in re.sub(r"[^a-z ]", " ", s).split() if not re.fullmatch(NUMRE, w)]
 bad = 0; seg = f"{D}/_seg.wav"
 for k, (a, b) in C.items():
     if k not in R: continue

@@ -15,10 +15,13 @@ idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tu
 CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=True)
 chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
+NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
 def norm(s, heard=False):
     s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ").replace("%", " per cento ").replace("€", " euro ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))     # numeri tolti da ENTRAMBI i lati ("ci sei dentro")
-    return re.sub(r"[^a-zàéìòù ]", " ", s).split()
+    import unicodedata
+    s = unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode()   # tré → tre
+    return [w for w in re.sub(r"[^a-z ]", " ", s).split() if not re.fullmatch(NUMRE, w)]
 def coda(f, last_end):
     w = wave.open(f); sr = w.getframerate(); a = np.frombuffer(w.readframes(w.getnframes()), '<i2').astype(np.float32) / 32768
     ref = np.sqrt((a ** 2).mean()) + 1e-9; db = lambda x: 20 * np.log10(np.sqrt((x ** 2).mean()) / ref + 1e-9) if len(x) else -99
