@@ -467,3 +467,9 @@ html.intro .ap { display: block; }
   .mq-gr { display: flex; flex-wrap: wrap; align-items: center; }
   .canale:hover, .canale:focus-visible { transform: none; }
 }
+
+/* tre lavori: il primo largo in cima, gli altri due affiancati sotto */
+.canali { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.canale-li:first-child { grid-row: auto; grid-column: 1 / -1; }
+@media (min-width: 861px) { .canale-li:first-child .c-schermo { aspect-ratio: 21 / 9; } }
+@media (max-width: 860px) { .canali { grid-template-columns: minmax(0, 1fr); } }

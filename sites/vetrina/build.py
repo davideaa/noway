@@ -32,14 +32,32 @@ PAGINE_COSMO = [  # (nome, percorso: uguale sul sito originale e sul nuovo)
     ("Contatti e Location", "contatti-location/"), ("Hotel Partners", "hotel-partners/"),
 ]
 
+# Due tipi di lavoro:
+#   multipagina  (sito_dopo = cartella del sito nuovo costruito, pagine = elenco)       -> es. Cosmo
+#   pagina unica (dopo = un solo file .html autonomo, sezioni = [(nome, id)] per la tendina) -> es. Boulevard, Primevo
+# Le fotografie del "prima" stanno in cattura/<id>/: home-pc.png (computer) e home-tel.png (telefono, 2x).
+# Se manca home-pc.png il confronto mostra il prima da telefono; basta aggiungerla e rifare il build.
+# L'anteprima del riquadro usa home-pc.png (o home-pc-parziale.png) e la prima schermata del dopo in <cattura_dopo>/home-pc.png
+# (per i siti a pagina unica: node scripts/copertina-dopo.cjs lavori/<id>/dopo.html cattura/<id>-dopo/home-pc.png).
 PROGETTI = [
     dict(id="cosmo", categoria="Hotel", nome="Cosmo Hotel Palace", luogo="Cinisello Balsamo, Milano",
          dominio="cosmohotelpalace.it", sito_dopo="cosmo-hotel-palace/out", cattura="cattura/cosmo", cattura_dopo="cattura/cosmo-dopo",
          cambi=["Stesse pagine, stessi testi, stesse foto", "Foto a tutta pagina", "Prenotazione sempre a portata",
                 "Tabella delle sale leggibile", "Galleria a schermo intero", "Menu chiaro da telefono"],
          pagine=PAGINE_COSMO),
-    dict(id="locale", categoria="Locale per aperitivi", nome="In arrivo"),
-    dict(id="terzo", categoria="Prossimo lavoro", nome="In arrivo"),
+    dict(id="boulevard", categoria="Bistrot e cocktail bar", nome="Boulevard", luogo="Cinisello Balsamo, Milano",
+         dominio="boulevard-cafe-cinisello-balsamo.metro.bar", dopo="lavori/boulevard/dopo.html",
+         cattura="cattura/boulevard", cattura_dopo="cattura/boulevard-dopo",
+         cambi=["Menù completo, con ricerca e filtri", "Prenotazione del tavolo", "Orari e «aperto ora» sempre in vista",
+                "Galleria delle specialità"],
+         sezioni=[("Inizio", "top"), ("Il locale", "locale"), ("Menu", "menu"), ("Aperitivo", "aperitivo"), ("Cocktail", "cocktail"),
+                  ("Sport e feste", "eventi"), ("Galleria", "galleria"), ("Orari e dove", "dove")]),
+    dict(id="primevo", categoria="Ristorante di carne", nome="Primevo", luogo="Milano, Bicocca",
+         dominio="primevo-ristorante.it", dopo="lavori/primevo/dopo.html",
+         cattura="cattura/primevo", cattura_dopo="cattura/primevo-dopo",
+         cambi=["Racconto a scorrimento", "Tagli dry aged con calcolo del prezzo", "Menù da sfogliare", "Carta dei vini"],
+         sezioni=[("Inizio", "home"), ("Chi siamo", "chiSiamo"), ("Dry aged", "taglio"),
+                  ("Scegli il taglio", "calcolo"), ("Menù", "menu"), ("Cantina", "cantina"), ("Contatti", "contatti")]),
 ]
 
 
@@ -91,20 +109,25 @@ def font_css(famiglie):
 
 
 # ================================================================== CONFRONTO (proprietario: agente confronto)
-# Il visore (src/confronto.js) riceve per ogni lavoro pronto:
-#   pagine[i] = {nome, path, html, prima: {pc, tel}, dopo: {pc, tel}}
-#     html  = la pagina del sito nuovo con segnaposto: @@CF:TESTA@@ (stile + ponte), @@CF:CODA@@ (script del sito),
-#             @@I:chiave@@ per ogni foto (diventa un blob: URL creato UNA volta nel browser)
+# Per ogni lavoro pronto la pagina riceve in window.VETRINA.progetti[i] solo i dati leggeri (nome, anteprime...);
+# i dati pesanti stanno a parte, uno per lavoro, e il visore li legge solo quando servono:
+#   file offline:  <script type="application/json" id="cf-dati-<id>">...</script> dentro la pagina
+#   --artifact:    out/artifact/dati-<id>.js accanto a index.html (elenco dei file in out/artifact/FILES.txt)
+# Dati pesanti = {tipo, sito, pagine, sezioni?}
+#   pagine[i] = {nome, path, html, prima: {pc?, tel}}
+#     html  = la pagina del sito nuovo con segnaposto: @@CF:TESTA@@ (ponte + stile), @@CF:CODA@@ (script del sito),
+#             @@I:chiave@@ per ogni foto o font (diventa un blob: URL creato UNA volta nel browser)
 #     prima = fotografia del sito originale a fette: {w, h, fette: [[data URI WebP, altezza], ...]}
-#     dopo  = fotografia del sito NUOVO a fette (per gli "affiancati": due layout da computer senza rimpicciolire iframe)
 #   sito = {css, js, font_css (con @@F:n@@), font: [data URI woff2], img: {chiave: data URI}}
-# Ogni foto compare una sola volta nel file (anche se usata da più pagine o duplicata con un altro nome).
-# Pesi scelti per stare sotto i 15 MB (anteprima su Claude: 16 MB): le colonne affiancate sono larghe metà schermo.
+#   sezioni = [{nome, id}] per i siti a pagina unica (la tendina salta alle sezioni)
+# Ogni foto compare una sola volta nel file (anche se usata più volte o duplicata con un altro nome).
+# Pesi scelti per stare sotto i 25 MB nel file offline (e sotto i 15 MB per ogni file dell'artifact).
 PRIMA_PC = dict(larghezza=1200, q=44, fetta=2400)    # foto "prima" da computer
-DOPO_PC = dict(larghezza=1200, q=44, fetta=2400)     # foto "dopo" da computer (cattura/<lavoro>-dopo, fatte dal sito nuovo)
-PRIMA_TEL = dict(larghezza=600, q=45, fetta=3200)    # foto "prima" da telefono (Solo prima e telefono di sinistra)
-DOPO_TEL = dict(larghezza=360, q=45, fetta=3200)     # foto "dopo" da telefono: solo per i due telefoni affiancati su schermo stretto
-FOTO_SITO_Q = 72                                     # le foto del sito vivo (960 px) ricompresse, se così pesano meno
+PRIMA_TEL = dict(larghezza=600, q=45, fetta=3200)    # foto "prima" da telefono (Solo prima e colonna/telefono di sinistra)
+FOTO_SITO_Q = 72                                     # foto del sito vivo multipagina (960 px) ricompresse, se così pesano meno
+# immagini incorporate nei "dopo" a pagina unica (copie in memoria: i file in lavori/ non si toccano)
+UNICA_FOTO = dict(lato=1000, q=48, lato_grande=1600, q_grande=52, soglia_grande=1400)
+UNICA_FOTOGRAMMI = dict(prefisso="seq/", scala=0.7, q=45)   # fotogrammi dei video a scorrimento (chiavi seq/...)
 
 
 def fette(png, larghezza, q, fetta):
@@ -119,6 +142,68 @@ def fette(png, larghezza, q, fetta):
         pezzo = im.crop((0, y, larghezza, min(im.height, y + alto)))
         out.append([webp_uri(pezzo, q), pezzo.height])
     return {"w": larghezza, "h": im.height, "fette": out}
+
+
+def ricomprimi(b, lato, q, scala=1.0):
+    """Un'immagine incorporata ricompressa in WebP (ridotta a <lato> px e/o di <scala>); resta l'originale se pesa meno."""
+    im = Image.open(io.BytesIO(b)); im.load()
+    if getattr(im, "is_animated", False):
+        return b, None                                  # le animazioni restano come sono
+    trasparente = im.mode in ("RGBA", "LA", "P") and "A" in im.convert("RGBA").getbands() and im.convert("RGBA").getextrema()[3][0] < 255
+    im = im.convert("RGBA" if trasparente else "RGB")
+    s = min(1.0, lato / max(im.size)) * scala
+    if s < 1:
+        im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+    o = io.BytesIO(); im.save(o, "WEBP", quality=q, method=6, **({"alpha_quality": 50} if trasparente else {}))
+    return (o.getvalue(), "image/webp") if len(o.getvalue()) < len(b) else (b, None)
+
+
+def sito_unica(p):
+    """Un sito "dopo" a pagina unica (file autonomo con tutto in data URI): foto e font escono dal file come risorse
+    (ricompresse, una sola volta ciascuna) e al loro posto restano segnaposto @@I:chiave@@."""
+    import hashlib
+    h = open(os.path.join(QUI, p["dopo"]), encoding="utf-8").read()
+    risorse, per_hash, peso0 = {}, {}, 0
+    def togli(m):
+        nonlocal peso0
+        chiave_js, mime, b = m.group(1) or "", m.group(2), base64.b64decode(m.group(3))
+        peso0 += len(m.group(3))
+        if mime.startswith("image/") and mime != "image/svg+xml" and mime != "image/gif":
+            if chiave_js.strip('"').startswith(UNICA_FOTOGRAMMI["prefisso"]):
+                nb, nm = ricomprimi(b, 99999, UNICA_FOTOGRAMMI["q"], UNICA_FOTOGRAMMI["scala"])
+            else:
+                lato = max(Image.open(io.BytesIO(b)).size)
+                grande = lato > UNICA_FOTO["soglia_grande"]
+                nb, nm = ricomprimi(b, UNICA_FOTO["lato_grande"] if grande else UNICA_FOTO["lato"],
+                                    UNICA_FOTO["q_grande"] if grande else UNICA_FOTO["q"])
+            b, mime = nb, nm or mime
+        hsh = hashlib.sha1(b).hexdigest()
+        if hsh not in per_hash:
+            per_hash[hsh] = "r%d" % len(per_hash)
+            risorse[per_hash[hsh]] = f"data:{mime};base64," + base64.b64encode(b).decode()
+        return (m.group(1) or "") + "@@I:" + per_hash[hsh] + "@@"
+    h = re.sub(r'("(?:[^"\\\n]){1,120}"\s*:\s*")?data:([\w/+.-]+);base64,([A-Za-z0-9+/=]+)', togli, h)
+    h, n = re.subn(r"(<head(?:\s[^>]*)?>)", lambda m: m.group(1) + "@@CF:TESTA@@", h, count=1)
+    assert n == 1, p["dopo"]
+    return h, risorse, peso0
+
+
+def dati_unica(p):
+    """Dati pesanti di un lavoro a pagina unica."""
+    cart = os.path.join(QUI, p["cattura"])
+    h, risorse, peso0 = sito_unica(p)
+    prima = {"tel": fette(os.path.join(cart, "home-tel.png"), **PRIMA_TEL)}
+    if os.path.exists(os.path.join(cart, "home-pc.png")):
+        prima["pc"] = fette(os.path.join(cart, "home-pc.png"), **PRIMA_PC)
+    d = {"tipo": "unica", "sito": {"css": "", "js": "", "font_css": "", "font": [], "img": risorse},
+         "pagine": [{"nome": p["nome"], "path": "", "html": h, "prima": prima}],
+         "sezioni": [{"nome": n, "id": i} for n, i in p["sezioni"]]}
+    peso = lambda x: len(json.dumps(x, ensure_ascii=False))
+    print(f"  confronto {p['id']}: sito vivo {peso(d['sito']) / 1e6:.2f} MB (foto e font: {len(risorse)}, "
+          f"prima erano {peso0 * 1.0 / 1e6:.2f} MB), pagina {len(h) / 1e6:.2f} MB, "
+          f"foto prima pc {peso(prima.get('pc', {})) / 1e6:.2f} / tel {peso(prima['tel']) / 1e6:.2f} MB"
+          + ("" if "pc" in prima else "  [manca home-pc.png: il prima da computer non c'è]"))
+    return d
 
 
 def sito_dopo(p, font_dopo):
@@ -170,26 +255,21 @@ def sito_dopo(p, font_dopo):
 
 
 def dati_progetto(p, font_dopo):
-    """Tutto ciò che il confronto riceve in window.VETRINA.progetti[i] (vedi il commento in cima a questa sezione)."""
+    """Dati pesanti di un lavoro multipagina."""
     cart = os.path.join(QUI, p["cattura"])
-    cart_dopo = os.path.join(QUI, p["cattura_dopo"])
     pagine, sito = sito_dopo(p, font_dopo)
-    voce = {"id": p["id"], "nome": p["nome"], "categoria": p["categoria"], "luogo": p["luogo"], "dominio": p["dominio"],
-            "cambi": p["cambi"], "sito": sito, "pagine": []}
+    d = {"tipo": "pagine", "sito": sito, "pagine": []}
     for nome, path, h in pagine:
         s = slug(path)
-        voce["pagine"].append({"nome": nome, "path": path, "html": h,
-            "prima": {"pc": fette(os.path.join(cart, f"{s}-pc.png"), **PRIMA_PC),
-                      "tel": fette(os.path.join(cart, f"{s}-tel.png"), **PRIMA_TEL)},
-            "dopo": {"pc": fette(os.path.join(cart_dopo, f"{s}-pc.png"), **DOPO_PC),
-                     "tel": fette(os.path.join(cart_dopo, f"{s}-tel.png"), **DOPO_TEL)}})
+        prima = {"tel": fette(os.path.join(cart, f"{s}-tel.png"), **PRIMA_TEL)}
+        if os.path.exists(os.path.join(cart, f"{s}-pc.png")):
+            prima["pc"] = fette(os.path.join(cart, f"{s}-pc.png"), **PRIMA_PC)
+        d["pagine"].append({"nome": nome, "path": path, "html": h, "prima": prima})
     peso = lambda x: len(json.dumps(x, ensure_ascii=False))
-    mb = lambda lato, tipo: sum(peso(v[lato][tipo]) for v in voce["pagine"]) / 1e6
+    mb = lambda tipo: sum(peso(v["prima"].get(tipo, {})) for v in d["pagine"]) / 1e6
     print(f"  confronto {p['id']}: sito vivo {peso(sito) / 1e6:.2f} MB ({len(sito['img'])} foto), "
-          f"foto prima pc {mb('prima', 'pc'):.2f} / tel {mb('prima', 'tel'):.2f} MB, "
-          f"foto dopo pc {mb('dopo', 'pc'):.2f} / tel {mb('dopo', 'tel'):.2f} MB, "
-          f"pagine {sum(len(v['html']) for v in voce['pagine']) / 1e6:.2f} MB")
-    return voce
+          f"foto prima pc {mb('pc'):.2f} / tel {mb('tel'):.2f} MB, pagine {sum(len(v['html']) for v in d['pagine']) / 1e6:.2f} MB")
+    return d
 
 
 # ================================================================== assemblaggio (coordinatore)
@@ -198,21 +278,33 @@ def leggi(*parti):
     return open(f, encoding="utf-8").read() if os.path.exists(f) else ""
 
 
+def json_sicuro(x):
+    """JSON da mettere dentro <script>: nessun '<' letterale (niente </script> né <!-- che confondono il parser HTML)."""
+    return json.dumps(x, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     font_dopo = font_css({"Bodoni Moda", "Jost"})
     dati = {"email": EMAIL, "progetti": []}
+    pesanti = {}
     for p in PROGETTI:
-        if "pagine" not in p:
+        if "pagine" not in p and "dopo" not in p:          # lavoro non ancora pronto: solo il riquadro "In arrivo"
             dati["progetti"].append({"id": p["id"], "nome": p["nome"], "categoria": p["categoria"], "pronto": False})
             continue
-        v = dati_progetto(p, font_dopo)
-        v["pronto"] = True
-        v["anteprima"] = {"prima": anteprima(os.path.join(QUI, p["cattura"], "home-pc.png"), 1100),
-                          "dopo": anteprima(os.path.join(QUI, p["cattura_dopo"], "home-pc.png"), 1100)}
+        pesanti[p["id"]] = dati_progetto(p, font_dopo) if "pagine" in p else dati_unica(p)
+        cart = os.path.join(QUI, p["cattura"])
+        pc = os.path.join(cart, "home-pc.png")
+        if not os.path.exists(pc):
+            pc = os.path.join(cart, "home-pc-parziale.png")
+        v = {k: p[k] for k in ("id", "nome", "categoria", "luogo", "dominio", "cambi")}
+        v.update(pronto=True, tipo=pesanti[p["id"]]["tipo"],
+                 anteprima={"prima": anteprima(pc, 1440), "dopo": anteprima(os.path.join(QUI, p["cattura_dopo"], "home-pc.png"), 1440)})
+        if ARTIFACT:
+            v["dati"] = f"dati-{p['id']}.js"
         dati["progetti"].append(v)
 
-    js_dati = json.dumps(dati, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    js_dati = json_sicuro(dati)
     vendor = os.path.join(QUI, "vendor")
     ordine = (["gsap.min.js"] + sorted(f for f in os.listdir(vendor) if f.endswith(".js") and f != "gsap.min.js")) if os.path.isdir(vendor) else []
     librerie = "".join(f"<script>{leggi('vendor', f)}</script>\n" for f in ordine)
@@ -220,7 +312,9 @@ def main():
     pagina = leggi("src", "pagina.html")
     for k, v in {"{{EMAIL}}": e(EMAIL), "{{CONFRONTO}}": leggi("src", "confronto.html")}.items():
         pagina = pagina.replace(k, v)
-    script = (f"<script>window.VETRINA = {js_dati};</script>\n{librerie}"
+    blocchi = "" if ARTIFACT else "".join(
+        f'<script type="application/json" id="cf-dati-{k}">{json_sicuro(d)}</script>\n' for k, d in pesanti.items())
+    script = (f"<script>window.VETRINA = {js_dati};</script>\n{blocchi}{librerie}"
               f"<script>{leggi('src', 'confronto.js')}</script>\n<script>{leggi('src', 'vetrina.js')}</script>")
     testa = ("<title>Davide · Prima e dopo</title>\n"
              '<meta name="description" content="Davide, web designer freelance: rifaccio siti web, design e motion graphic. Guarda il prima e il dopo di siti reali.">\n'
@@ -228,15 +322,29 @@ def main():
     corpo = pagina + "\n" + script
     if ARTIFACT:
         d = os.path.join(OUT, "artifact"); os.makedirs(d, exist_ok=True)
+        for vecchio in os.listdir(d):
+            if vecchio.startswith("dati-") and vecchio.endswith(".js"):
+                os.remove(os.path.join(d, vecchio))
         f = os.path.join(d, "index.html")
         open(f, "w", encoding="utf-8").write(testa + "\n" + corpo + "\n")
+        elenco = ["index.html"]
+        print(f, round(os.path.getsize(f) / 1e6, 2), "MB")
+        for k, dd in pesanti.items():
+            fd = os.path.join(d, f"dati-{k}.js")
+            open(fd, "w", encoding="utf-8").write(f"(window.CF_DATI = window.CF_DATI || {{}})[{json.dumps(k)}] = {json_sicuro(dd)};\n")
+            elenco.append(os.path.basename(fd))
+            mb = os.path.getsize(fd) / 1e6
+            print(fd, round(mb, 2), "MB" + ("   ATTENZIONE: sopra i 15 MB" if mb > 15 else ""))
+        open(os.path.join(d, "FILES.txt"), "w", encoding="utf-8").write("\n".join(elenco) + "\n")
+        print(os.path.join(d, "FILES.txt"), "->", ", ".join(elenco))
     else:
         f = os.path.join(OUT, "vetrina-davide.html")
         open(f, "w", encoding="utf-8").write(
             '<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             + testa + "\n</head>\n<body>\n" + corpo + "\n</body>\n</html>\n")
-    print(f, round(os.path.getsize(f) / 1e6, 2), "MB")
+        mb = os.path.getsize(f) / 1e6
+        print(f, round(mb, 2), "MB" + ("   ATTENZIONE: sopra i 25 MB" if mb > 25 else ""))
 
 
 if __name__ == "__main__":

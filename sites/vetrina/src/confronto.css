@@ -194,18 +194,21 @@ html.cf-aperto body { overflow: hidden; }
 .cf-sito.cf-uscente { visibility: visible; z-index: 1; }
 .cf-sito.cf-entra { animation: cf-appari .2s ease-out both; }
 @keyframes cf-appari { from { opacity: 0; } }
-.cf-foto-su .cf-sito { visibility: hidden !important; }   /* nei modi a foto il sito vivo resta caricato ma non si disegna */
+.cf-foto-su .cf-sito { visibility: hidden !important; }   /* in Solo prima il sito vivo resta caricato ma non si disegna */
 
 /* fotografia a pagina intera, a fette */
 .cf-pila { position: absolute; left: 0; top: 0; background: var(--cf-bianco); will-change: transform; }
 .cf-pila img { position: absolute; left: 0; width: 100%; max-width: none; display: block; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
 
-/* ------------------------------------------------------------ foto che scorrono insieme */
+/* ------------------------------------------------------------ fotografia del prima: Solo prima (tutta larghezza) o colonna di sinistra */
 .cf-foto { position: absolute; inset: 0; z-index: 4; display: none; background: var(--cf-notte); }
-.cf-foto-su .cf-foto { display: block; }
+.cf-foto-su .cf-foto, .cf-affianca .cf-foto { display: block; }
+/* affiancati: la metà destra è il sito vivo (sotto), qui resta trasparente e lascia passare il mouse */
+.cf-affianca .cf-foto { background: transparent; pointer-events: none; }
+.cf-affianca .cf-foto-testa, .cf-affianca .cf-colonne, .cf-affianca .cf-scorre { pointer-events: auto; }
 .cf-foto-testa {
   position: absolute; left: 0; right: 0; top: 0; height: var(--cf-testa);
-  display: grid; grid-template-columns: 1fr 1fr; gap: var(--cf-gap);
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--cf-gap); background: var(--cf-notte);
 }
 .cf-foto-et { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 10px 0 16px; overflow: hidden; }
 .cf-foto-et p { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
@@ -226,33 +229,37 @@ html.cf-aperto body { overflow: hidden; }
 .cf-vivo:hover { background: #5CC8EF; transform: translateX(2px); }
 .cf-vivo-corto { display: none; }
 /* Solo prima: una colonna sola, l'etichetta del dopo diventa solo il tasto per provarlo dal vivo */
-.cf-una .cf-foto-testa { grid-template-columns: 1fr auto; }
-.cf-una .cf-et-dopo p { display: none; }
+.cf-foto-su .cf-foto-testa { grid-template-columns: 1fr auto; }
+.cf-foto-su .cf-et-dopo p { display: none; }
 
-.cf-colonne {
-  position: absolute; left: 0; right: 0; top: var(--cf-testa); bottom: 0;
-  display: grid; grid-template-columns: 1fr 1fr; gap: var(--cf-gap); overflow: hidden;
-}
-.cf-una .cf-colonne { grid-template-columns: 1fr; }
-.cf-una .cf-col + .cf-col { display: none; }
-.cf-col { position: relative; overflow: hidden; background: var(--cf-bianco); }
-.cf-col-slot { position: absolute; left: 0; top: 0; right: 0; }
+.cf-colonne { position: absolute; left: 0; right: 0; top: var(--cf-testa); bottom: 0; }
+.cf-affianca .cf-colonne, .cf-affianca .cf-scorre { right: calc(50% + 1px); }
+.cf-col { position: absolute; inset: 0; overflow: hidden; background: var(--cf-bianco); }
+.cf-prima-stretta .cf-col { background: var(--cf-notte-2); }
+.cf-col-slot { position: absolute; left: 0; top: 0; }
+.cf-prima-stretta .cf-col-slot { box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 30px 80px -20px rgba(0, 0, 0, .6); }
 .cf-guida {
-  position: absolute; top: 0; left: 50%; z-index: 2; width: 4px; margin-left: -2px; height: var(--cf-guida, 60px);
+  position: absolute; top: 0; right: 3px; z-index: 2; width: 4px; height: var(--cf-guida, 60px);
   border-radius: 4px; background: var(--cf-azzurro); box-shadow: 0 0 0 1px rgba(11, 13, 16, .35);
   will-change: transform; pointer-events: none;
 }
-.cf-una .cf-guida { left: auto; right: 3px; margin-left: 0; }
+.cf-affianca .cf-guida { right: -3px; }
 .cf-scorre {
   position: absolute; left: 0; right: 0; top: var(--cf-testa); bottom: 0; z-index: 3;
   overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
   scrollbar-width: none; -ms-overflow-style: none;
   cursor: grab; outline: none; -webkit-overflow-scrolling: touch;
 }
+.cf-affianca .cf-scorre { overflow: hidden; touch-action: none; }
 .cf-scorre::-webkit-scrollbar { display: none; }
 .cf-scorre:focus-visible { box-shadow: inset 0 0 0 2px var(--cf-azzurro); }
 .cf-trascina .cf-scorre { cursor: grabbing; }
 .cf-scorre-spazio { width: 1px; }
+.cf-affianca .cf-scorre-spazio { display: none; }
+
+/* il sito vivo nella colonna di destra: zoom sull'iframe (dentro resta largo come uno schermo da computer) */
+.cf-affianca .cf-schermo { left: calc(50% + 1px); top: var(--cf-testa); }
+.cf-affianca .cf-sito { zoom: var(--cf-zoom, .5); }
 
 /* ------------------------------------------------------------ telefoni affiancati (da computer, il dopo è vivo) */
 .cf-telefoni {

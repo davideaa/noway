@@ -34,7 +34,7 @@
         <button class="cf-tasto cf-tondo cf-freccia" id="cf-succ" type="button" aria-label="Pagina successiva"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="m8 5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 
         <div class="cf-mappa" id="cf-mappa" hidden>
-          <p class="cf-mappa-titolo"><span>Mappa del sito</span><span id="cf-mappa-conta"></span></p>
+          <p class="cf-mappa-titolo"><span id="cf-mappa-nome">Mappa del sito</span><span id="cf-mappa-conta"></span></p>
           <ol class="cf-mappa-lista" id="cf-mappa-lista"></ol>
           <div class="cf-mappa-frecce">
             <button class="cf-tasto" id="cf-mappa-prec" type="button">‹ Precedente</button>
@@ -77,22 +77,21 @@
 
       <div class="cf-schermo" id="cf-schermo"></div>
 
-      <!-- foto a pagina intera che scorrono insieme: Affiancati, Solo prima, e i due telefoni su schermo stretto -->
+      <!-- la fotografia del prima: a tutta larghezza (Solo prima) o nella colonna di sinistra (Affiancati, Telefono su schermo stretto) -->
       <div class="cf-foto" id="cf-foto">
         <div class="cf-foto-testa">
-          <p class="cf-foto-et cf-et-prima"><span class="cf-et-nome">Prima</span><span class="cf-et-sotto">il sito di oggi</span></p>
+          <p class="cf-foto-et cf-et-prima"><span class="cf-et-nome">Prima</span><span class="cf-et-sotto" id="cf-et-prima-sotto">il sito di oggi</span></p>
           <div class="cf-foto-et cf-et-dopo">
-            <p><span class="cf-et-nome">Dopo</span><span class="cf-et-sotto">la proposta</span></p>
+            <p><span class="cf-et-nome">Dopo</span><span class="cf-et-sotto">la proposta, dal vivo</span></p>
             <button class="cf-vivo" id="cf-vivo" type="button"><span class="cf-vivo-lungo">Prova dal vivo</span><span class="cf-vivo-corto">Dal vivo</span>
               <svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
         </div>
         <div class="cf-colonne" id="cf-colonne" aria-hidden="true">
           <div class="cf-col"><div class="cf-col-slot" id="cf-col-0"></div></div>
-          <div class="cf-col"><div class="cf-col-slot" id="cf-col-1"></div></div>
           <span class="cf-guida" id="cf-guida"></span>
         </div>
-        <div class="cf-scorre" id="cf-scorre" tabindex="0" role="region" aria-label="Fotografie del sito di prima e di quello nuovo: scorri per vederle insieme"><div class="cf-scorre-spazio" id="cf-spazio"></div></div>
+        <div class="cf-scorre" id="cf-scorre" tabindex="0" role="region" aria-label="Fotografia del sito di prima: scorri per vederla"><div class="cf-scorre-spazio" id="cf-spazio"></div></div>
       </div>
 
       <div class="cf-carica" id="cf-carica" aria-hidden="true"><span></span></div>
