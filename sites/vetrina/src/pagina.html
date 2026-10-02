@@ -1,0 +1,291 @@
+<script>
+/* Parte prima di tutto: decide se mostrare l'apertura e tiene nascosto (con rete di sicurezza) quello che animerà la pagina. */
+(function () {
+  var d = document.documentElement;
+  try {
+    var ridotto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    d.classList.add("js");
+    if (!ridotto) {
+      d.classList.add("pre");
+      var nuova = false;
+      try { nuova = !sessionStorage.getItem("vt-apertura"); } catch (e) { nuova = true; }
+      if (nuova && !location.hash) d.classList.add("intro");
+    }
+  } catch (e) {}
+  window.__vtFs = setTimeout(function () { d.classList.remove("intro", "pre"); }, 9000);
+})();
+</script>
+
+<a class="salta" href="#principale">Vai ai contenuti</a>
+
+<!-- ============ APERTURA: il sito "prima" che si rifà ============ -->
+<div id="apertura" class="ap" aria-hidden="true">
+  <div class="ap-vecchio" id="ap-vecchio">
+    <div class="ap-int" id="ap-int">
+      <div class="v-pagina">
+        <p class="v-fascia">Sito ottimizzato per Internet Explorer 6 &middot; risoluzione 800x600</p>
+        <p class="v-titolo">*** Benvenuti nel sito di Davide!!! ***</p>
+        <p class="v-sotto"><span class="v-lampeggia">NOVITA'</span> Siti web, grafica e altre cose</p>
+        <table class="v-tab"><tbody><tr>
+          <td><a href="#ap-int" tabindex="-1">Chi sono</a></td>
+          <td><a href="#ap-int" tabindex="-1">Lavori</a></td>
+          <td><a href="#ap-int" tabindex="-1">Servizi</a></td>
+          <td><a href="#ap-int" tabindex="-1">Contatti</a></td>
+        </tr></tbody></table>
+        <div class="v-corpo">
+          <div class="v-foto ph"><i class="sole"></i><i class="colle"></i><i class="edif"></i></div>
+          <p>Questo sito e' in costruzione dal 2009. Per entrare cliccare <a href="#ap-int" tabindex="-1">qui</a>. Si consiglia di visitarlo con Internet Explorer.</p>
+        </div>
+        <p class="v-visite">Siete il visitatore numero <b class="v-cont" id="ap-cont">004173</b></p>
+        <p class="v-cost">SITO IN COSTRUZIONE</p>
+        <p class="v-agg">Ultimo aggiornamento: 14/03/2009</p>
+      </div>
+    </div>
+    <p class="v-stato" id="ap-stato">Caricamento in corso...</p>
+  </div>
+  <div class="ap-linea" id="ap-linea"><span class="ap-manico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg></span></div>
+  <p class="ap-salta" id="ap-salta">Clic o un tasto per saltare</p>
+</div>
+
+<!-- ============ TESTATA ============ -->
+<header class="testata h-anim" id="testata">
+  <div class="wrap testata-int">
+    <a class="firma" href="#presentazione" aria-label="Davide, torna in cima">
+      <span class="firma-segno" aria-hidden="true"></span><span>Davide</span>
+    </a>
+    <nav class="menu" id="menu" aria-label="Principale">
+      <a href="#lavori">Lavori</a>
+      <a href="#rifaccio">Come rifaccio un sito</a>
+      <a href="#servizi">Cosa faccio</a>
+      <a href="#contatti">Contatti</a>
+    </nav>
+    <a class="btn btn-mini btn-scuro" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span></a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><span class="sr">Menu</span><i></i><i></i></button>
+  </div>
+  <div class="barra-scroll" aria-hidden="true"><i id="barra-scroll"></i></div>
+</header>
+
+<main id="principale">
+
+  <!-- ============ PRESENTAZIONE ============ -->
+  <section class="hero" id="presentazione" aria-labelledby="titolo">
+    <div class="hero-alone" aria-hidden="true"></div>
+    <div class="wrap hero-griglia">
+      <div class="hero-testo">
+        <h1 id="titolo" class="hero-titolo">Piacere, sono Davide.</h1>
+        <p class="hero-frase h-anim">Rendo belli, chiari e veloci i siti che <span class="vecchio">sembrano vecchi</span>.</p>
+        <p class="hero-bio h-anim">Ho 22 anni e una laurea in Economia delle banche. Da tre anni lavoro come freelance: disegno siti, grafiche e animazioni, e li collego a prenotazioni, ordini e logistica.</p>
+        <div class="hero-azioni h-anim">
+          <a class="btn btn-scuro" href="#lavori" data-magnete><span>Guarda i lavori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-linea" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span></a>
+        </div>
+      </div>
+
+      <figure class="conf h-anim" id="conf-hero" hidden>
+        <div class="conf-schermo" id="conf-schermo" data-cursore="Trascina">
+          <img class="conf-dopo" id="conf-dopo" alt="Il sito nuovo: la proposta di restyling" width="1100" height="688" decoding="async">
+          <div class="conf-pr" id="conf-pr"><img id="conf-prima" alt="Il sito com'è oggi" width="1100" height="688" decoding="async"></div>
+          <span class="conf-chip conf-chip-p" id="chip-p">Prima</span>
+          <span class="conf-chip conf-chip-d" id="chip-d">Dopo</span>
+          <div class="conf-manico" id="conf-manico">
+            <span class="conf-linea"></span>
+            <span class="conf-pomo" id="conf-pomo" role="slider" tabindex="0" aria-label="Confronto tra il sito di prima e quello di dopo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-orientation="horizontal">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>
+            </span>
+          </div>
+        </div>
+        <figcaption class="conf-did">
+          <span><strong id="conf-nome">Cosmo Hotel Palace</strong><span id="conf-sub">, proposta di restyling</span></span>
+          <button class="conf-apri" id="conf-apri" type="button" data-cursore="Apri"><span>Entra nel confronto</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </figcaption>
+      </figure>
+    </div>
+    <a class="scorri h-anim" href="#lavori" aria-label="Vai ai lavori"><i></i></a>
+  </section>
+
+  <!-- ============ LAVORI ============ -->
+  <section class="lavori" id="lavori" aria-labelledby="t-lavori">
+    <div class="wrap">
+      <div class="capo">
+        <h2 id="t-lavori" data-dividi>Il prima e il dopo<br>di siti veri.</h2>
+        <p class="rv">Sono proposte di restyling su siti reali. Parto dal sito com'è oggi, tengo le stesse pagine, gli stessi testi e le stesse foto, e ne mostro una versione più chiara. Scegli un lavoro per entrarci.</p>
+      </div>
+      <ul class="canali" id="canali"></ul>
+    </div>
+  </section>
+
+  <!-- ============ COME RIFACCIO UN SITO (sezione fissata) ============ -->
+  <section class="rifaccio" id="rifaccio" aria-labelledby="t-rifaccio">
+    <div class="rif-pista" id="rif-pista">
+      <div class="rif-fisso">
+        <div class="wrap rif-griglia">
+          <div class="rif-testo">
+            <h2 id="t-rifaccio" data-dividi>Come rifaccio un sito</h2>
+            <p class="rif-intro" id="rif-intro">Parto da un sito come ne vedo tanti. Scorri: lo sistemo davanti a te, un passo alla volta.</p>
+            <ol class="rif-passi" id="rif-passi">
+              <li data-passo="1"><button type="button" aria-current="false"><span class="n">1</span><span class="t"><b>Caratteri</b><span class="dw"><span class="d">Prima si deve poter leggere. Scelgo caratteri puliti, righe di lunghezza giusta e colori che non stancano.</span></span></span></button></li>
+              <li data-passo="2"><button type="button" aria-current="false"><span class="n">2</span><span class="t"><b>Foto grandi</b><span class="dw"><span class="d">Le foto convincono prima delle parole. Le porto a tutta larghezza e tolgo i francobolli.</span></span></span></button></li>
+              <li data-passo="3"><button type="button" aria-current="false"><span class="n">3</span><span class="t"><b>Ordine e spazi</b><span class="dw"><span class="d">Poche cose alla volta, con aria intorno. Ogni blocco dice una cosa sola.</span></span></span></button></li>
+              <li data-passo="4"><button type="button" aria-current="false"><span class="n">4</span><span class="t"><b>Prenotazione in vista</b><span class="dw"><span class="d">Chi arriva deve poter prenotare subito, senza cercare il numero in fondo alla pagina.</span></span></span></button></li>
+              <li data-passo="5"><button type="button" aria-current="false"><span class="n">5</span><span class="t"><b>Versione telefono</b><span class="dw"><span class="d">Molti ti cercano dal telefono. Lo disegno anche per quello schermo, con il tasto giusto sotto il pollice.</span></span></span></button></li>
+            </ol>
+            <div class="rif-punti" id="rif-punti" role="group" aria-label="Passi">
+              <button type="button" data-passo="0" aria-label="Il sito di partenza"><i></i></button>
+              <button type="button" data-passo="1" aria-label="Passo 1, caratteri"><i></i></button>
+              <button type="button" data-passo="2" aria-label="Passo 2, foto grandi"><i></i></button>
+              <button type="button" data-passo="3" aria-label="Passo 3, ordine e spazi"><i></i></button>
+              <button type="button" data-passo="4" aria-label="Passo 4, prenotazione in vista"><i></i></button>
+              <button type="button" data-passo="5" aria-label="Passo 5, versione telefono"><i></i></button>
+            </div>
+            <p class="rif-attivo" id="rif-attivo" aria-live="polite"></p>
+          </div>
+
+          <div class="rif-scena" id="rif-scena" aria-hidden="true">
+            <div class="sc-box" id="sc-box">
+              <div class="sc" id="sc">
+                <div class="mock" id="mock">
+                  <div class="m-chrome"><i></i><i></i><i></i><span class="m-url">www.iltuohotel.it</span></div>
+                  <div class="m-pg">
+                    <div class="m-testa"></div>
+                    <div class="m-logo" data-hl="1">Il Tuo Hotel</div>
+                    <div class="m-nav" data-hl="1"><a>Home</a><a>Camere</a><a>Ristorante</a><a>Contatti</a><a class="pr" data-hl="4">Prenota</a></div>
+                    <div class="m-foto ph" data-hl="2"><i class="sole"></i><i class="colle"></i><i class="colle colle2"></i><i class="edif"></i></div>
+                    <div class="m-titolo" data-hl="1"><h4>Benvenuti nel nostro hotel<span class="ecc">!!!</span></h4><p>Hotel a conduzione familiare in posizione tranquilla. Camere con aria condizionata, TV e colazione.</p></div>
+                    <div class="m-marq">*** OFFERTE SPECIALI *** PRENOTA ORA *** SCONTI PER GRUPPI ***</div>
+                    <div class="m-new">NEW!</div>
+                    <div class="m-col c1" data-hl="3"><i class="m-mini ph"><i class="colle"></i><i class="edif"></i></i><h5>Camere</h5><p>Doppie, triple e familiari.</p></div>
+                    <div class="m-col c2" data-hl="3"><i class="m-mini ph"><i class="sole"></i><i class="colle colle2"></i></i><h5>Ristorante</h5><p>Cucina del territorio.</p></div>
+                    <div class="m-col c3" data-hl="3"><i class="m-mini ph"><i class="colle"></i><i class="colle colle2"></i><i class="edif"></i></i><h5>Benessere</h5><p>Piscina e sauna.</p></div>
+                    <div class="m-vpren">Per prenotare clicca qui oppure scrivici una e-mail</div>
+                    <div class="m-book" data-hl="4"><span><small>Arrivo</small>Scegli</span><span><small>Partenza</small>Scegli</span><span><small>Ospiti</small>2</span><b>Prenota</b></div>
+                    <div class="m-piede" data-hl="3"><span class="cont">Visitatori: 004173</span><span class="agg-v">Ultimo aggiornamento: 14/03/2009</span><span class="agg-n">Il Tuo Hotel</span></div>
+                  </div>
+                </div>
+
+                <div class="tel" id="tel" data-hl="5">
+                  <div class="tel-s">
+                    <div class="tel-barra"><b>Il Tuo Hotel</b><span class="tel-burger"><i></i><i></i><i></i></span></div>
+                    <div class="tel-foto ph"><i class="sole"></i><i class="colle"></i><i class="colle colle2"></i><i class="edif"></i><p>Benvenuti nel nostro hotel</p></div>
+                    <div class="tel-riga"><i class="ph"><i class="colle"></i></i><span><b>Camere</b><small>Doppie, triple e familiari</small></span></div>
+                    <div class="tel-riga"><i class="ph"><i class="sole"></i><i class="colle colle2"></i></i><span><b>Ristorante</b><small>Cucina del territorio</small></span></div>
+                    <div class="tel-btn">Prenota</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rif-barra" aria-hidden="true"><i id="rif-barra"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COSA FACCIO ============ -->
+  <section class="servizi" id="servizi" aria-labelledby="t-servizi">
+    <div class="wrap">
+      <div class="capo capo-serv">
+        <h2 id="t-servizi" data-dividi>Cosa faccio</h2>
+        <p class="rv">Se hai un'attività e il tuo sito non ti rappresenta più, di solito si parte da una di queste quattro cose.</p>
+      </div>
+      <ul class="serv-elenco">
+        <li class="serv">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect pathLength="1" x="5" y="9" width="38" height="30" rx="4"/><path pathLength="1" d="M5 17h38"/><path pathLength="1" d="M12 26h12M12 32h8"/><rect pathLength="1" x="29" y="23" width="9" height="10" rx="2"/></svg>
+          <h3>Siti e restyling</h3>
+          <p>Siti nuovi, o rifatti da zero partendo da quello che hai. Chiari da leggere, veloci da aprire, facili da aggiornare.</p>
+        </li>
+        <li class="serv">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M8 38c6-2 8-10 14-14s12-4 18-14"/><circle pathLength="1" cx="8" cy="38" r="3"/><circle pathLength="1" cx="40" cy="10" r="3"/><path pathLength="1" d="M24 38h16M8 10h10"/></svg>
+          <h3>Web design e grafica</h3>
+          <p>Layout, colori, caratteri e immagini che stanno bene insieme, dalla prima pagina all'ultima.</p>
+        </li>
+        <li class="serv">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle pathLength="1" cx="24" cy="22" r="16"/><path pathLength="1" d="M20 15l12 7-12 7z"/><path pathLength="1" d="M8 44h32"/></svg>
+          <h3>Motion graphic e video</h3>
+          <p>Animazioni, reel e piccoli video per far capire in pochi secondi che cosa fai e perché farlo con te.</p>
+        </li>
+        <li class="serv">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect pathLength="1" x="6" y="9" width="36" height="33" rx="4"/><path pathLength="1" d="M6 19h36M15 5v8M33 5v8"/><path pathLength="1" d="M16 31l6 6 11-12"/></svg>
+          <h3>Prenotazioni e logistica</h3>
+          <p>Collego il sito a prenotazioni, ordini e consegne, così il lavoro ti arriva già in ordine.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ STRISCIA ============ -->
+  <section class="striscia" aria-label="Parole del mestiere">
+    <p class="sr">Siti web, restyling, web design, grafica, motion graphic, video, prenotazioni, logistica.</p>
+    <div class="mq" aria-hidden="true" data-verso="-1">
+      <div class="mq-pista">
+        <div class="mq-gr"><span>Siti web</span><i></i><span>Restyling</span><i></i><span>Web design</span><i></i><span>Grafica</span><i></i><span>Motion graphic</span><i></i><span>Reel e video</span><i></i></div>
+        <div class="mq-gr"><span>Siti web</span><i></i><span>Restyling</span><i></i><span>Web design</span><i></i><span>Grafica</span><i></i><span>Motion graphic</span><i></i><span>Reel e video</span><i></i></div>
+      </div>
+    </div>
+    <div class="mq mq-linea" aria-hidden="true" data-verso="1">
+      <div class="mq-pista">
+        <div class="mq-gr"><span>Sito in costruzione</span><i></i><span>Clicca qui</span><i></i><span>Benvenuti!!!</span><i></i><span>Visitatore numero 004173</span><i></i><span>Ottimizzato per Internet Explorer</span><i></i><span>Ultimo aggiornamento 2009</span><i></i></div>
+        <div class="mq-gr"><span>Sito in costruzione</span><i></i><span>Clicca qui</span><i></i><span>Benvenuti!!!</span><i></i><span>Visitatore numero 004173</span><i></i><span>Ottimizzato per Internet Explorer</span><i></i><span>Ultimo aggiornamento 2009</span><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COME LAVORO ============ -->
+  <section class="lavoro" id="come-lavoro" aria-labelledby="t-lavoro">
+    <div class="wrap lavoro-griglia">
+      <div class="lavoro-testa">
+        <h2 id="t-lavoro" data-dividi>Come lavoro</h2>
+        <p class="rv">Tre passi, e sai sempre a che punto siamo.</p>
+      </div>
+      <div class="traccia-box" id="traccia"><ol class="traccia">
+        <li class="passo">
+          <span class="nodo" aria-hidden="true"></span>
+          <span class="passo-n" aria-hidden="true">1</span>
+          <div class="passo-t"><h3>Guardo il tuo sito</h3><p>Lo uso come lo userebbe un cliente: provo a prenotare, a capire dove sei, a trovare un menu. Poi ti racconto che cosa ho visto.</p></div>
+        </li>
+        <li class="passo">
+          <span class="nodo" aria-hidden="true"></span>
+          <span class="passo-n" aria-hidden="true">2</span>
+          <div class="passo-t"><h3>Ti mostro il dopo</h3><p>Prima di costruire, ti faccio vedere la nuova versione accanto a quella di oggi: stesse pagine, stessi testi, molta più chiarezza.</p></div>
+        </li>
+        <li class="passo">
+          <span class="nodo" aria-hidden="true"></span>
+          <span class="passo-n" aria-hidden="true">3</span>
+          <div class="passo-t"><h3>Lo costruisco e lo collego</h3><p>Lo faccio veloce da aprire e comodo da telefono, e lo collego a prenotazioni, ordini o logistica.</p></div>
+        </li>
+      </ol>
+        <span class="filo" aria-hidden="true"><i id="filo"></i></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTATTI ============ -->
+  <section class="contatti" id="contatti" aria-labelledby="t-contatti">
+    <div class="contatti-linea" aria-hidden="true"><i></i></div>
+    <div class="wrap contatti-int">
+      <h2 id="t-contatti" data-dividi>Il tuo sito può<br>avere un dopo.</h2>
+      <p class="contatti-p rv">Scrivimi due righe su com'è oggi e su cosa vorresti che facesse. Ti rispondo con qualche idea.</p>
+      <a class="mail-grande rv" id="mail" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-cursore="Scrivi">{{EMAIL}}</a>
+      <div class="contatti-az rv">
+        <a class="btn btn-azzurro" href="mailto:{{EMAIL}}?subject=Vorrei%20rifare%20il%20mio%20sito" data-magnete><span>Scrivimi</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <button class="btn btn-chiaro" id="copia" type="button" data-magnete><svg class="i-copia" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span id="copia-t">Copia l'indirizzo</span></button>
+      </div>
+      <p class="sr" id="copia-stato" role="status" aria-live="polite"></p>
+      <p class="copia-nota" id="copia-nota" hidden></p>
+    </div>
+  </section>
+</main>
+
+<footer class="piede">
+  <div class="wrap piede-int">
+    <p>&copy; 2026 Davide, web designer freelance.</p>
+    <p class="piede-nota">Le proposte di restyling sono esercizi su siti reali: marchi, testi e foto appartengono ai rispettivi proprietari.</p>
+    <div class="piede-az">
+      <button type="button" id="rivedi">Rivedi l'apertura</button>
+      <a href="#presentazione">Torna su</a>
+    </div>
+  </div>
+</footer>
+
+<div class="avviso" id="avviso" role="status" aria-live="polite" hidden></div>
+
+{{CONFRONTO}}
