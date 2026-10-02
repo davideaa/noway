@@ -162,13 +162,13 @@ function sPizze(t, a, b) { bg('52,36,20', 0.8); x.save(); zoom(t, a, b, 1.05);
   /* pizze che escono dal forno verso la pila */
   for (let i = 0; i < 6; i++) { const t0 = tZ + i * 0.22 + (i ? tN - tZ - 0.4 : 0), u = seg(t, t0, t0 + 0.5); if (u <= 0 || u >= 1) continue;
     const px = lerp(PZ.ox, PZ.sx, ioC(u)), py = lerp(PZ.base - 60, PZ.base - 6 - 7 * 34 - 26, ioC(u)) - Math.sin(Math.PI * u) * 120; pizza(px, py, 70, 1, u * 4, 0.6); }
-  const kT = seg(t, tE, tE + 0.45), kC = oC(seg(t, tC, tC + 1.4));
+  const kT = seg(t, tE, tE + 0.45), kC = oC(seg(t, tC, tC + 0.9));
   pizzeria(t, { kIn, nBox, count: 1000 * kn, kCount: clamp(kn * 3), heat: 0.6 + 0.3 * Math.sin(t * 7), tagK: oC(kT), tagSw: swing(t, tE), tagLab: '8 €', cash: 8000 * kC, cashK: oC(seg(t, tC - 0.4, tC)) });
   for (let i = 0; i < 5; i++) { const u = seg(t, tC + i * 0.16, tC + i * 0.16 + 0.6); if (u <= 0 || u >= 1) continue; const sxx = i % 2 ? PZ.tx : PZ.sx;
     coin(lerp(sxx, 420 + i * 60, ioC(u)), lerp(800, PZ.ry - 10, ioC(u)) - Math.sin(Math.PI * u) * 80, 34, 1 - u * 0.3, LIM, '€'); }
   x.restore(); finish(t); }
 function sPrezzo(t, a, b) { bg('52,36,20', 0.6); x.save();
-  const tA = WT('prezzo', 'lanno', 1, 0.3), tS = WT('prezzo', 'stesse', 1, 1.7), tF = WT('prezzo', 'ma', 1, 2.8) + 0.3;
+  const tA = WT('prezzo', 'anno', 1, 0.3), tS = WT('prezzo', 'stesse', 1, 1.7), tF = WT('prezzo', 'ma', 1, 2.8) + 0.3;
   phrase(t, a + 0.05, [['L’anno dopo:', C.ink]], 345, { size: 92 });
   phrase(t, tS - 0.05, [['stesse pizze.', C.lime]], 448, { size: 92 });
   /* calendario che gira: anno 1 → anno 2 */
@@ -264,7 +264,7 @@ function sItalia(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
   const tN = WT('italia', 'nominale', 1, 1.7), tR = WT('italia', 'reale', 1, 5.2);
   phrase(t, a + 0.05, [['Italia, 2025', C.ink]], 360, { size: 96 });
   mono('PIL · VARIAZIONE SUL 2024', 540, 470, t, a + 0.5, { size: 26 });
-  bars(t, ioC(seg(t, tN - 0.1, tN + 1.6)), ioC(seg(t, tR - 0.1, tR + 0.9)));
+  bars(t, ioC(seg(t, tN - 0.1, tN + 1.6)), ioC(seg(t, tR - 0.1, tR + 0.6)));
   mono('ISTAT · CONTI NAZIONALI · SETTEMBRE 2026', 540, 1420, t, a + 1.0, { size: 22 });
   x.restore(); finish(t); }
 function sDeflatore(t, a, b) { bg(); x.save();
