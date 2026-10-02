@@ -1,5 +1,5 @@
 // Parti FISSE della serie «Dalla teoria alla realtà», uguali in ogni puntata.
-// Una puntata definisce P = { EP, DAY, CAP, NEXT, FONTE } (DAY 0 = lunedì, CAP 0 = capitolo 1), le sue scene e ORDER,
+// Una puntata definisce P = { EP, DAY, CAP, NEXT, FONTE, QUANDO } (QUANDO facoltativo, default 'DOMANI': la scritta sopra NEXT nella scena fine; DAY 0 = lunedì, CAP 0 = capitolo 1), le sue scene e ORDER,
 // poi chiama serie(FN, ORDER, FLASH). Scene fisse: num (numero gigante), dove (sentiero dei 12 capitoli), fine («Oggi è …»),
 // cta (like · commento · segui), end (firma col numero). Il circuito dei 5 attori serve a tutto il capitolo 1.
 const S = (k) => ((window.CUES || {})[k] || [0, 1])[0], E = (k) => ((window.CUES || {})[k] || [0, 1])[1];
@@ -106,7 +106,7 @@ function sFine(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
     if (on) glow(0, 0, 120, '200,250,114', 0.35); glass(0, 0, 150, 190, 28, 1);
     if (on) { x.save(); x.strokeStyle = C.lime; x.lineWidth = 4; rr(-75, -95, 150, 190, 28); x.stroke(); x.restore(); }
     txt(g, 0, -40, { fam: 'mono', size: 26, weight: 600, color: on ? C.lime : C.muted, ls: 2 }); txt(String(i + 1), 0, 30, { size: 70, weight: 800, color: on ? C.lime : 'rgba(241,244,238,0.35)' }); x.restore(); });
-  const d = b - a; mono('DOMANI', 540, 1080, t, a + d * 0.45, { size: 26, color: C.lime });
+  const d = b - a; mono(P.QUANDO || 'DOMANI', 540, 1080, t, a + d * 0.45, { size: 26, color: C.lime });
   phrase(t, a + d * 0.5, P.NEXT.map((l) => [l, C.ink]), 1170, { size: 72 });
   x.restore(); finish(t); }
 function heart(cx, cy, r, fill) { x.beginPath(); x.moveTo(cx, cy + r * 0.9); x.bezierCurveTo(cx - r * 1.6, cy - r * 0.2, cx - r * 0.7, cy - r * 1.4, cx, cy - r * 0.5); x.bezierCurveTo(cx + r * 0.7, cy - r * 1.4, cx + r * 1.6, cy - r * 0.2, cx, cy + r * 0.9); if (fill) x.fill(); else x.stroke(); }
