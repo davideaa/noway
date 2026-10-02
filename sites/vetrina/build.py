@@ -91,48 +91,90 @@ def font_css(famiglie):
 
 
 # ================================================================== CONFRONTO (proprietario: agente confronto)
-PONTE = """<script>(function(){var B=%s;document.addEventListener('click',function(e){var a=e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');
-if(/^(mailto:|tel:)/.test(h))return;if(/^https?:/.test(h)){a.target='_blank';a.rel='noopener';return;}if(h.charAt(0)==='#')return;e.preventDefault();
-var u=new URL(h,'https://sito.invalid/'+B);parent.postMessage({vetrina:'pagina',path:u.pathname.slice(1).replace(/index\\.html$/,''),hash:u.hash},'*');},true);})();</script>"""
+# Il visore (src/confronto.js) riceve per ogni lavoro pronto:
+#   pagine[i] = {nome, path, html, prima: {pc, tel}}
+#     html  = la pagina del sito nuovo con segnaposto: @@CF:TESTA@@ (stile + ponte), @@CF:CODA@@ (script del sito),
+#             @@I:chiave@@ per ogni foto (diventa un blob: URL creato UNA volta nel browser)
+#     prima = fotografia del sito originale a fette: {w, h, fette: [[data URI WebP, altezza], ...]}
+#   sito = {css, js, font_css (con @@F:n@@), font: [data URI woff2], img: {chiave: data URI}}
+# Ogni foto compare una sola volta nel file (anche se usata da più pagine o duplicata con un altro nome).
+PRIMA_PC = dict(larghezza=1440, q=46, fetta=2400)    # foto "prima" da computer: a 1440 px è 1:1 con lo schermo
+PRIMA_TEL = dict(larghezza=780, q=42, fetta=3200)    # foto "prima" da telefono: 390 px a 2x
 
 
-def sito_dopo(p):
-    """Le pagine del sito nuovo rese autonome. DA RIFARE dall'agente confronto (vedi BRIEF.md: niente data URI ripetuti)."""
+def fette(png, larghezza, q, fetta):
+    """Fotografia a pagina intera in fette WebP (il WebP non supera 16383 px e le fette si decodificano una per volta)."""
+    im = Image.open(png).convert("RGB")
+    if im.width != larghezza:
+        im = im.resize((larghezza, round(im.height * larghezza / im.width)), Image.LANCZOS)
+    n = -(-im.height // fetta)
+    alto = -(-im.height // n)                       # fette uguali, niente coda di pochi pixel
+    out = []
+    for y in range(0, im.height, alto):
+        pezzo = im.crop((0, y, larghezza, min(im.height, y + alto)))
+        out.append([webp_uri(pezzo, q), pezzo.height])
+    return {"w": larghezza, "h": im.height, "fette": out}
+
+
+def sito_dopo(p, font_dopo):
+    """Le pagine del sito nuovo come modelli leggeri + le risorse comuni, ognuna una volta sola."""
+    import hashlib
     radice = os.path.join(SITI, p["sito_dopo"])
-    css = open(os.path.join(radice, "assets", "site.css")).read()
-    js = open(os.path.join(radice, "assets", "site.js")).read()
-    usate, pagine = set(), []
+    css = open(os.path.join(radice, "assets", "site.css"), encoding="utf-8").read()
+    js = open(os.path.join(radice, "assets", "site.js"), encoding="utf-8").read()
+    pagine, usate = [], set()
     for nome, path in p["pagine"]:
         h = open(os.path.join(radice, path, "index.html"), encoding="utf-8").read()
-        h = re.sub(r'<link rel="preconnect"[^>]*>', "", h)
-        h = re.sub(r'<link rel="stylesheet" href="https://fonts[^>]*>\n?', "", h)
-        h = re.sub(r'<link rel="stylesheet" href="[^"]*assets/site\.css">', lambda m: "<style>@@FONT@@\n" + css + "</style>", h)
-        h = re.sub(r'<script src="[^"]*assets/site\.js"></script>', lambda m: "<script>" + js + "</script>" + PONTE % json.dumps(path), h)
+        h = re.sub(r'<link rel="preconnect"[^>]*>\s*', "", h)
+        h = re.sub(r'<link rel="stylesheet" href="https://fonts[^>]*>\s*', "", h)
+        h = re.sub(r'<link rel="stylesheet" href="[^"]*assets/site\.css">', "@@CF:TESTA@@", h)
+        h = re.sub(r'<script src="[^"]*assets/site\.js"></script>', "@@CF:CODA@@", h)
         h = re.sub(r' (srcset|sizes)="[^"]*"', "", h)
-        h = re.sub(r'(?:\.\./)*foto/([\w-]+?)(?:-m)?\.(?:webp|png)', lambda m: "@@" + m.group(1) + "@@", h)
-        usate |= set(re.findall(r"@@([\w-]+)@@", h)) - {"FONT"}
-        pagine.append((nome, path, h))
-    img = {}
+        h = re.sub(r'(?:\.\./)*foto/([\w-]+?)(?:-m)?\.(?:webp|png)', lambda m: "@@I:" + m.group(1) + "@@", h)
+        h = re.sub(r"\n\s+", "\n", h)
+        assert "@@CF:TESTA@@" in h and "@@CF:CODA@@" in h, path
+        resto = re.findall(r'(?:src|href)="(?!https?:|mailto:|tel:|#|@@)[^"]*\.(?:css|js|png|jpe?g|webp|svg|ico)"', h)
+        assert not resto, (path, resto)
+        usate |= set(re.findall(r"@@I:([\w-]+)@@", h))
+        pagine.append([nome, path, h])
+    # foto: la versione -m (960 px) per tutto, anche per l'ingrandimento della galleria; i doppioni diventano una sola
+    img, canonica, per_hash = {}, {}, {}
     for k in sorted(usate):
-        png = os.path.join(radice, "foto", k + ".png")
-        if os.path.exists(png):
-            img[k] = file_uri(png, "image/png"); continue
-        im = Image.open(os.path.join(radice, "foto", k + "-m.webp")).convert("RGB")
-        im.thumbnail((1000, 1000), Image.LANCZOS)
-        img[k] = webp_uri(im, 58)
-    return pagine, img
+        f = os.path.join(radice, "foto", k + "-m.webp")
+        mime = "image/webp"
+        if not os.path.exists(f):
+            f, mime = os.path.join(radice, "foto", k + ".png"), "image/png"
+        b = open(f, "rb").read()
+        hsh = hashlib.sha1(b).hexdigest()
+        if hsh in per_hash:
+            canonica[k] = per_hash[hsh]; continue
+        per_hash[hsh] = canonica[k] = k
+        img[k] = f"data:{mime};base64," + base64.b64encode(b).decode()
+    for pg in pagine:
+        pg[2] = re.sub(r"@@I:([\w-]+)@@", lambda m: "@@I:" + canonica[m.group(1)] + "@@", pg[2])
+    # font del sito nuovo: i data URI escono dal CSS, così il browser ne fa un blob una volta sola
+    font = []
+    def togli(m):
+        font.append(m.group(1)); return "url(@@F:%d@@)" % (len(font) - 1)
+    font_css_ = re.sub(r"url\((data:font/woff2;base64,[^)]+)\)", togli, font_dopo)
+    return pagine, {"css": css, "js": js, "font_css": font_css_, "font": font, "img": img}
 
 
 def dati_progetto(p, font_dopo):
-    """Tutto ciò che il confronto riceve in window.VETRINA.progetti[i]. DA RIVEDERE dall'agente confronto."""
+    """Tutto ciò che il confronto riceve in window.VETRINA.progetti[i] (vedi il commento in cima a questa sezione)."""
     cart = os.path.join(QUI, p["cattura"])
-    pagine, img = sito_dopo(p)
+    pagine, sito = sito_dopo(p, font_dopo)
     voce = {"id": p["id"], "nome": p["nome"], "categoria": p["categoria"], "luogo": p["luogo"], "dominio": p["dominio"],
-            "cambi": p["cambi"], "img": img, "font": font_dopo, "pagine": []}
+            "cambi": p["cambi"], "sito": sito, "pagine": []}
     for nome, path, h in pagine:
-        voce["pagine"].append({"nome": nome, "path": path, "dopo": h, "prima": {
-            "pc": pezzi(os.path.join(cart, f"{slug(path)}-pc.png"), 1100),
-            "tel": pezzi(os.path.join(cart, f"{slug(path)}-tel.png"), 520)}})
+        voce["pagine"].append({"nome": nome, "path": path, "html": h, "prima": {
+            "pc": fette(os.path.join(cart, f"{slug(path)}-pc.png"), **PRIMA_PC),
+            "tel": fette(os.path.join(cart, f"{slug(path)}-tel.png"), **PRIMA_TEL)}})
+    peso = lambda x: len(json.dumps(x, ensure_ascii=False))
+    print(f"  confronto {p['id']}: sito nuovo {peso(sito) / 1e6:.2f} MB ({len(sito['img'])} foto), "
+          f"prima da computer {sum(peso(v['prima']['pc']) for v in voce['pagine']) / 1e6:.2f} MB, "
+          f"da telefono {sum(peso(v['prima']['tel']) for v in voce['pagine']) / 1e6:.2f} MB, "
+          f"pagine {sum(len(v['html']) for v in voce['pagine']) / 1e6:.2f} MB")
     return voce
 
 
