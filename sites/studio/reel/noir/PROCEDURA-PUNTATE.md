@@ -150,6 +150,7 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 02/10 | 1–2 | Cambiando il testo, la grafica con tempi fissi («prezzo a +0,9 s», «carte al 62%») arriva fino a 1,5 s prima delle parole | i tempi interni delle scene si misurano sulle parole vere (Whisper con timestamp) e si scrivono in pN.html |
 | 02/10 | 1 | Lavoro di riavvio: il risultato di un agente può andare perso | i controlli brevi (3 punti) li fa l'orchestratore da sé; agli agenti i lavori lunghi |
 | 02/10 | 2 | Un commento `//` inserito a metà di una riga lunga ha cancellato i prezzi della filiera; trovato solo guardando la fine di ogni scena | commenti `/* */`; dopo ogni modifica a pN.html si guarda il foglio provini a fine scena prima di consegnare |
+| 02/10 | 4 | «cose in più o solo prezzi»: la voce salta la «o» in 8 tentativi su 8 e cambia il senso | `controlla_copione.py` blocca la «o» isolata: si scrive «oppure» |
 
 ### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
 Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):

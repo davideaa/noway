@@ -17,6 +17,7 @@ for s, k in R:
     if re.search(r"\bPil\b[^,;:]{0,12}[.?!]\s*$", s): out("ERRORE", k, "«Pil» in fondo alla riga: fallisce sempre («PIN»); scrivere «prodotto interno lordo»")
     elif re.search(r"\bPil\s*[.?!]", s): out("AVVISO", k, "«Pil» prima di un punto: a rischio, meglio a metà frase")
     if re.search(r"\bPil\s+[aeiouàèéìòù]", s, re.I): out("ERRORE", k, "«Pil» seguito da vocale: la voce dice «Pilo» («Pil invece» → «Pilo invece»); metti dopo una consonante («il Pil conta»)")
+    if re.search(r"\s[oO]\s", s) and k not in FISSE: out("ERRORE", k, "«o» da sola tra due parole: la voce la salta («cose in più o solo» → «cose in più solo», Puntata 4); scrivere «oppure»")
     if len(w) <= 3: out("ERRORE", k, "frase di 3 parole o meno: la voce le sbaglia spesso")
     if len(w) > 30: out("AVVISO", k, f"{len(w)} parole: oltre 30 la voce tende a inventare una coda")
     if k not in FISSE:
