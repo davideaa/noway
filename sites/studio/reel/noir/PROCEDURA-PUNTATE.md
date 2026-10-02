@@ -151,6 +151,11 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 02/10 | 1 | Lavoro di riavvio: il risultato di un agente può andare perso | i controlli brevi (3 punti) li fa l'orchestratore da sé; agli agenti i lavori lunghi |
 | 02/10 | 2 | Un commento `//` inserito a metà di una riga lunga ha cancellato i prezzi della filiera; trovato solo guardando la fine di ogni scena | commenti `/* */`; dopo ogni modifica a pN.html si guarda il foglio provini a fine scena prima di consegnare |
 | 02/10 | 4 | «cose in più o solo prezzi»: la voce salta la «o» in 8 tentativi su 8 e cambia il senso | `controlla_copione.py` blocca la «o» isolata: si scrive «oppure» |
+| 02/10 | 3–5 | Confronto col copione: «G7», «un punto e otto», «3 di 5», «aprile» sotto musica → falsi allarmi | numeri in lettere riconosciuti in generale (`NUMRE`), «g7»; i dubbi si chiudono sulla voce da sola |
+| 02/10 | 3, 5 | Numeri nel titolo a inizio scena: a schermo fino a 2,7 s prima della voce | regola nel regista: la riga col numero entra sulla parola |
+| 02/10 | 4 | Il regista ha ritoccato tre scene mentre il render completo era già partito | il regista finisce PRIMA del render; se ritocca dopo, si rifanno solo quei fotogrammi (`LIST=`) |
+| 02/10 | 4 | La verifica finale che segnala frasi fermava `produci.sh` prima di «FINE» e le attese a valle restavano appese | la verifica non è più bloccante: segnala e si arriva sempre a «FINE» |
+| 02/10 | — | Meta: «API access blocked» su Instagram e Facebook (02/10, sera) | lo sblocco è sul pannello Meta di Davide; la produzione non si ferma |
 
 ### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
 Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):
@@ -166,3 +171,8 @@ trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correz
 | 01/10 | Montaggio + video + mix + verifica, per puntata | macchina | 7–9 min |
 | 01/10 | Controllo completo con occhi nuovi | reel-controllo (Sonnet) | 11–13 min (oltre il limite di 5: da accorciare) |
 | 01/10–02/10 | Rifacimento P1+P2 con testo fluido, dall'ordine ai video approvati | tutto | ~2 h, di cui ~45 min persi per errori della catena ora corretti |
+| 02/10 | Ricerca dati P3–P5 in parallelo | 3 × reel-ricercatore (Sonnet) | 2,5–6,5 min |
+| 02/10 | Copioni P3–P5 | 3 × reel-autore (Opus) | 1,5–2 min l'uno |
+| 02/10 | Scene P3–P5 | 3 × reel-regista (Opus) in parallelo | 15–17 min (più l'attesa della voce per l'anteprima vera) |
+| 02/10 | Voci P3–P5 in fila (+ 2 frasi rifatte) | macchina | ~25 min a puntata con i registi che occupano il processore |
+| 02/10 | Controlli indipendenti P3–P5 | reel-controllo (Sonnet) | 7–10 min (ancora sopra i 5) |

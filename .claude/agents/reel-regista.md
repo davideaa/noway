@@ -27,6 +27,8 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 - Titolo `phrase` su 2 righe a size 92: y di partenza ≥ 345 (a 320 la prima riga esce dalla zona sicura).
 - Nessuna scritta sotto 22 px; etichette vicine mai a contatto (misurarle con `tw`); linee e frecce mai sopra le scritte.
 - Più etichette sulle stesse curve (es. flussi del circuito): posizioni diverse lungo la curva, non tutte a metà.
+- **Numeri nei titoli**: la riga del titolo che contiene un numero («oltre −10%», «quasi −9%», «un terzo») entra sulla parola,
+  in un `phrase` separato (`y = 345 + 92 * 1.12`), non a inizio scena (Puntate 3 e 5: numeri a schermo fino a 2,7 s prima della voce).
 - Commenti nel codice delle scene solo `/* … */` o a fine riga: un `//` in mezzo a una riga lunga commenta tutto quello che segue
   (Puntata 2: spariti i prezzi della filiera).
 - Elementi elencati dalla voce (righe di un calendario, carte, pillole, prezzi, numeri) compaiono **sulla parola**: usa
