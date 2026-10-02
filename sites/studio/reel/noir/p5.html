@@ -6,7 +6,7 @@
 <canvas id="c" width="1080" height="1920"></canvas>
 <script src="base.js"></script>
 <script src="base2.js"></script>
-<script>const P = { EP: 5, DAY: 4, CAP: 0, NEXT: ['I consumi', 'delle famiglie'], FONTE: 'DATI: ISTAT · EUROSTAT (CONTI NAZIONALI, SETT.–OTT. 2026)', QUANDO: 'LUNEDÌ' };</script>
+<script>const P = { EP: 5, DAY: 4, CAP: 0, NEXT: ['I consumi'], FONTE: 'DATI: ISTAT · EUROSTAT (CONTI NAZIONALI, SETT.–OTT. 2026)', QUANDO: 'LUNEDÌ' };</script>
 <script src="serie.js"></script>
 <script>
 /* Puntata 5 — CASO REALE «Il 2020: crollo e rimbalzo». Numeri SOLO da p5-fonti.md:
@@ -67,7 +67,7 @@ function windowView(t, cx, cy, w, h, k, ks, kr) { if (k <= 0) return; x.save(); 
   x.fillStyle = metal(X0 - 30, 0, X0 + w + 30, 0, true); rr(X0 - 30, Y0 + h - 4, w + 60, 28, 6); x.fill();
   x.restore(); }
 function sHook(t, a, b) { bg('42,50,45'); x.save(); zoom(t, a, b, 1.07);
-  const t20 = WT('hook', 'ricordi', 1, 0.3) + 0.25, tCasa = WT('hook', 'casa', 1, 2.1), tSw = WT('hook', 'proprio', 1, 2.4) - 0.1, tCr = WT('hook', 'crollo', 1, 4.1), tDg = WT('hook', 'dopoguerra', 1, 5.5);
+  const t20 = WT('hook', 'ricordi', 1, 0.3) + 0.25, tCasa = WT('hook', 'casa', 1, 2.1), tSw = WT('hook', 'crollo', 1, 4.1) - 0.3, tCr = WT('hook', 'crollo', 1, 4.1), tDg = WT('hook', 'dopoguerra', 1, 5.5);
   const k20 = oC(seg(t, t20, t20 + 0.5)), ko = oC(seg(t, tSw, tSw + 0.3));
   if (k20 > 0 && ko < 1) { x.save(); x.translate(540, 420); const s = lerp(1.18, 1, k20); x.scale(s, s); txt('2020', 0, 0, { size: 230, weight: 800, color: C.ink, alpha: k20 * (1 - ko), blur: (1 - k20) * 16 + ko * 10, ls: -8 }); x.restore(); }
   phrase(t, tSw + 0.05, [['Il calo più forte', C.ink], ['dal dopoguerra.', C.red]], 345, { size: 92 });
@@ -123,9 +123,10 @@ function gear(cx, cy, r, n, ang, col, k = 1) { if (k <= 0) return; x.save(); x.g
   for (let i = 0; i < 4; i++) { x.save(); x.rotate(i * Math.PI / 2); x.fillStyle = 'rgba(241,244,238,0.12)'; x.fillRect(r * 0.36, -5, r * 0.36, 10); x.restore(); }
   x.restore(); }
 function sFab(t, a, b) { bg('50,24,22', 0.45); x.save();
-  phrase(t, a + 0.05, [['22 marzo: stop', C.ink], ['al non essenziale.', C.red]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['22 marzo: stop', C.ink]], 345, { size: 92 });
+  phrase(t, WT('fabbriche', 'attivit', 1, 2.6) - 0.1, [['al non essenziale.', C.red]], 345 + 92 * 1.12, { size: 92 }); /* seconda riga quando la voce la dice */
   const tG = WT('fabbriche', 'governo', 1, 1.7), tF = WT('fabbriche', 'ferma', 1, 2.1), tE = WT('fabbriche', 'essenziali', 1, 3.8);
-  calendar(t, { lit: [1, 1, 1], litDim: 1, wash: 1, ring: seg(t, tG - 0.2, tG + 0.5) });
+  calendar(t, { lit: [1, 1, 1], litDim: 1, wash: 1, ring: seg(t, WT('fabbriche', '22', 1, 0.4) - 0.1, WT('fabbriche', '22', 1, 0.4) + 0.6) });
   const sp = (s) => 1 - ioC(seg(s, tF, tE + 0.35)), ang = 2.4 * integ(sp, a - 2, t), stop = seg(t, tE + 0.2, tE + 0.5), km = oC(seg(t, a, a + 0.45));
   const col = rgba(mix(RGB.lime, RGB.red, stop), 0.8);
   gear(300, 1245, 92, 12, ang, col, km); gear(300 + 140, 1245 - 52, 58, 8, -ang * 12 / 8 + 0.2, col, km);
@@ -182,7 +183,8 @@ function cart(cx, cy, k, kOut, t) { if (k <= 0) return; x.save(); x.globalAlpha 
   for (const wx of [cx - BW / 2 + 20, cx + BW / 2 - 20]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, top + BH + 64, 20, 0, 7); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 5; x.stroke(); }
   x.restore(); }
 function sConsumi(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
-  phrase(t, a + 0.05, [['Spesa delle famiglie:', C.ink], ['oltre −10%', C.red]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['Spesa delle famiglie:', C.ink]], 345, { size: 92 });
+  phrase(t, WT('consumi', 'oltre', 1, 2.0) - 0.15, [['oltre −10%', C.red]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
   const tS = WT('consumi', 'spesa', 1, 1.4), tC = WT('consumi', 'cala', 1, 2.4);
   cart(540, 850, oC(seg(t, a + 0.1, a + 0.5)), seg(t, tC - 0.05, tC + 1.1), t);
   const L = 620, x0 = 200, w20 = L * 959.404 / 1072.953, k19 = ioC(seg(t, tS - 0.1, tS + 0.5)), k20 = ioC(seg(t, tC, tC + 1.0)), kg = oC(seg(t, tC + 0.9, tC + 1.3));
@@ -197,7 +199,8 @@ function sConsumi(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
 
 /* ================= REALE: via l'etichetta dei prezzi, la colonna scende ================= */
 function sReale(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
-  phrase(t, a + 0.05, [['PIL reale 2020:', C.ink], ['quasi −9%', C.red]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['PIL reale 2020:', C.ink]], 345, { size: 92 });
+  phrase(t, WT('reale', 'quasi', 1, 3.2) - 0.15, [['quasi −9%', C.red]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
   const tP = WT('reale', 'prodotto', 1, 0.7), tR = WT('reale', 'reale', 1, 1.7), tSz = WT('reale', 'senza', 1, 2.1), tD = WT('reale', 'scende', 1, 3.4);
   const base = 1290, H0 = 620, h20 = H0 * 1665.979 / 1825.154, c1 = 330, c2 = 650, cw = 200;
   const k1 = ioC(seg(t, tP - 0.2, tP + 0.5)), k2 = ioC(seg(t, tR - 0.3, tR + 0.4)), kd = ioC(seg(t, tD, tD + 1.0)), hh2 = lerp(H0, h20, kd);
@@ -284,7 +287,8 @@ function sVent(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
 /* ================= LIVELLO: barre annuali, solo il 2022 rompe la linea ================= */
 const BV = [['2019', 1825.154, '1.825'], ['2020', 1665.979, '1.666'], ['2021', 1819.503, '1.820'], ['2022', 1908.758, '1.909']], BX = [210, 420, 630, 840], bh = (v) => (v - 1550) * 2.0;
 function sLiv(t, a, b) { bg(); x.save();
-  phrase(t, a + 0.05, [['Il livello del 2019', C.ink], ['torna solo nel 2022.', C.lime]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['Il livello del 2019', C.ink]], 345, { size: 92 });
+  phrase(t, WT('livello', 'solo', 1, 1.7) - 0.3, [['torna solo nel 2022.', C.lime]], 345 + 92 * 1.12, { size: 92 });
   const tL = WT('livello', 'livello', 1, 0.3), tS = WT('livello', 'supera', 1, 2.4), base = 1290, yL = base - bh(BV[0][1]);
   BV.forEach(([yr, v, lab], i) => { const k = i < 3 ? ioC(seg(t, a + 0.1 + i * 0.15, a + 0.7 + i * 0.15)) : oB(seg(t, tS - 0.15, tS + 0.55), 1.4), h = bh(v) * Math.max(0, k);
     if (k <= 0) return; const over = i === 3, g = x.createLinearGradient(0, base - h, 0, base);
