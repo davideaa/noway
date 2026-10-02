@@ -1,0 +1,1034 @@
+[
+ {
+  "gruppo": "NFP",
+  "periodo": "IS 2014-19",
+  "bias": "rule",
+  "n": 71,
+  "indovina": 0.62,
+  "S0": {
+   "R_medio": 0.145,
+   "R_caso": 0.032,
+   "vantaggio": 0.113,
+   "t": 1.1,
+   "vinti": 0.549,
+   "somma": 10.3,
+   "soldi": 14510
+  },
+  "S1": {
+   "R_medio": 0.029,
+   "R_caso": -0.106,
+   "vantaggio": 0.135,
+   "t": 1.4,
+   "vinti": 0.521,
+   "somma": 2.1,
+   "soldi": 10365
+  },
+  "S2": {
+   "R_medio": 0.029,
+   "R_caso": -0.106,
+   "vantaggio": 0.135,
+   "t": 1.4,
+   "vinti": 0.521,
+   "somma": 2.1,
+   "soldi": 10365
+  },
+  "S3": {
+   "R_medio": 0.145,
+   "R_caso": 0.012,
+   "vantaggio": 0.133,
+   "t": 1.32,
+   "vinti": 0.549,
+   "somma": 10.3,
+   "soldi": 14510
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "IS 2014-19",
+  "bias": "model",
+  "n": 71,
+  "indovina": 0.535,
+  "S0": {
+   "R_medio": 0.124,
+   "R_caso": 0.032,
+   "vantaggio": 0.092,
+   "t": 0.9,
+   "vinti": 0.577,
+   "somma": 8.8,
+   "soldi": 13758
+  },
+  "S1": {
+   "R_medio": -0.004,
+   "R_caso": -0.106,
+   "vantaggio": 0.101,
+   "t": 1.05,
+   "vinti": 0.521,
+   "somma": -0.3,
+   "soldi": 9449
+  },
+  "S2": {
+   "R_medio": -0.004,
+   "R_caso": -0.106,
+   "vantaggio": 0.101,
+   "t": 1.05,
+   "vinti": 0.521,
+   "somma": -0.3,
+   "soldi": 9449
+  },
+  "S3": {
+   "R_medio": 0.124,
+   "R_caso": 0.012,
+   "vantaggio": 0.112,
+   "t": 1.11,
+   "vinti": 0.577,
+   "somma": 8.8,
+   "soldi": 13758
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "OOS 2020-26",
+  "bias": "rule",
+  "n": 77,
+  "indovina": 0.597,
+  "S0": {
+   "R_medio": 0.37,
+   "R_caso": 0.106,
+   "vantaggio": 0.264,
+   "t": 2.06,
+   "vinti": 0.597,
+   "somma": 28.5,
+   "soldi": 28919
+  },
+  "S1": {
+   "R_medio": 0.218,
+   "R_caso": -0.037,
+   "vantaggio": 0.255,
+   "t": 2.11,
+   "vinti": 0.545,
+   "somma": 16.8,
+   "soldi": 18028
+  },
+  "S2": {
+   "R_medio": 0.218,
+   "R_caso": -0.037,
+   "vantaggio": 0.255,
+   "t": 2.11,
+   "vinti": 0.545,
+   "somma": 16.8,
+   "soldi": 18028
+  },
+  "S3": {
+   "R_medio": 0.352,
+   "R_caso": 0.082,
+   "vantaggio": 0.27,
+   "t": 2.09,
+   "vinti": 0.597,
+   "somma": 27.1,
+   "soldi": 27298
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "OOS 2020-26",
+  "bias": "model",
+  "n": 77,
+  "indovina": 0.494,
+  "S0": {
+   "R_medio": 0.136,
+   "R_caso": 0.106,
+   "vantaggio": 0.031,
+   "t": 0.23,
+   "vinti": 0.481,
+   "somma": 10.5,
+   "soldi": 13737
+  },
+  "S1": {
+   "R_medio": 0.007,
+   "R_caso": -0.037,
+   "vantaggio": 0.043,
+   "t": 0.35,
+   "vinti": 0.442,
+   "somma": 0.5,
+   "soldi": 9153
+  },
+  "S2": {
+   "R_medio": 0.007,
+   "R_caso": -0.037,
+   "vantaggio": 0.043,
+   "t": 0.35,
+   "vinti": 0.442,
+   "somma": 0.5,
+   "soldi": 9153
+  },
+  "S3": {
+   "R_medio": 0.128,
+   "R_caso": 0.082,
+   "vantaggio": 0.047,
+   "t": 0.35,
+   "vinti": 0.481,
+   "somma": 9.9,
+   "soldi": 13369
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "ultimi 3 anni",
+  "bias": "rule",
+  "n": 34,
+  "indovina": 0.618,
+  "S0": {
+   "R_medio": 0.663,
+   "R_caso": 0.248,
+   "vantaggio": 0.415,
+   "t": 1.74,
+   "vinti": 0.647,
+   "somma": 22.6,
+   "soldi": 23299
+  },
+  "S1": {
+   "R_medio": 0.52,
+   "R_caso": 0.118,
+   "vantaggio": 0.401,
+   "t": 1.78,
+   "vinti": 0.559,
+   "somma": 17.7,
+   "soldi": 19191
+  },
+  "S2": {
+   "R_medio": 0.52,
+   "R_caso": 0.118,
+   "vantaggio": 0.401,
+   "t": 1.78,
+   "vinti": 0.559,
+   "somma": 17.7,
+   "soldi": 19191
+  },
+  "S3": {
+   "R_medio": 0.663,
+   "R_caso": 0.227,
+   "vantaggio": 0.436,
+   "t": 1.83,
+   "vinti": 0.647,
+   "somma": 22.6,
+   "soldi": 23299
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "ultimi 3 anni",
+  "bias": "model",
+  "n": 34,
+  "indovina": 0.471,
+  "S0": {
+   "R_medio": 0.416,
+   "R_caso": 0.248,
+   "vantaggio": 0.168,
+   "t": 0.68,
+   "vinti": 0.529,
+   "somma": 14.1,
+   "soldi": 16436
+  },
+  "S1": {
+   "R_medio": 0.29,
+   "R_caso": 0.118,
+   "vantaggio": 0.172,
+   "t": 0.73,
+   "vinti": 0.471,
+   "somma": 9.9,
+   "soldi": 13874
+  },
+  "S2": {
+   "R_medio": 0.29,
+   "R_caso": 0.118,
+   "vantaggio": 0.172,
+   "t": 0.73,
+   "vinti": 0.471,
+   "somma": 9.9,
+   "soldi": 13874
+  },
+  "S3": {
+   "R_medio": 0.411,
+   "R_caso": 0.227,
+   "vantaggio": 0.183,
+   "t": 0.74,
+   "vinti": 0.529,
+   "somma": 14.0,
+   "soldi": 16304
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "tutto",
+  "bias": "rule",
+  "n": 148,
+  "indovina": 0.608,
+  "S0": {
+   "R_medio": 0.262,
+   "R_caso": 0.07,
+   "vantaggio": 0.191,
+   "t": 2.31,
+   "vinti": 0.574,
+   "somma": 38.7,
+   "soldi": 41960
+  },
+  "S1": {
+   "R_medio": 0.128,
+   "R_caso": -0.07,
+   "vantaggio": 0.198,
+   "t": 2.54,
+   "vinti": 0.534,
+   "somma": 18.9,
+   "soldi": 18685
+  },
+  "S2": {
+   "R_medio": 0.128,
+   "R_caso": -0.07,
+   "vantaggio": 0.198,
+   "t": 2.54,
+   "vinti": 0.534,
+   "somma": 18.9,
+   "soldi": 18685
+  },
+  "S3": {
+   "R_medio": 0.253,
+   "R_caso": 0.048,
+   "vantaggio": 0.204,
+   "t": 2.47,
+   "vinti": 0.574,
+   "somma": 37.4,
+   "soldi": 39608
+  }
+ },
+ {
+  "gruppo": "NFP",
+  "periodo": "tutto",
+  "bias": "model",
+  "n": 148,
+  "indovina": 0.514,
+  "S0": {
+   "R_medio": 0.13,
+   "R_caso": 0.07,
+   "vantaggio": 0.06,
+   "t": 0.71,
+   "vinti": 0.527,
+   "somma": 19.3,
+   "soldi": 18900
+  },
+  "S1": {
+   "R_medio": 0.001,
+   "R_caso": -0.07,
+   "vantaggio": 0.071,
+   "t": 0.9,
+   "vinti": 0.48,
+   "somma": 0.2,
+   "soldi": 8649
+  },
+  "S2": {
+   "R_medio": 0.001,
+   "R_caso": -0.07,
+   "vantaggio": 0.071,
+   "t": 0.9,
+   "vinti": 0.48,
+   "somma": 0.2,
+   "soldi": 8649
+  },
+  "S3": {
+   "R_medio": 0.126,
+   "R_caso": 0.048,
+   "vantaggio": 0.078,
+   "t": 0.92,
+   "vinti": 0.527,
+   "somma": 18.7,
+   "soldi": 18394
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "IS 2014-19",
+  "bias": "rule",
+  "n": 71,
+  "indovina": 0.563,
+  "S0": {
+   "R_medio": 0.008,
+   "R_caso": -0.004,
+   "vantaggio": 0.012,
+   "t": 0.25,
+   "vinti": 0.507,
+   "somma": 0.6,
+   "soldi": 10133
+  },
+  "S1": {
+   "R_medio": -0.107,
+   "R_caso": -0.119,
+   "vantaggio": 0.012,
+   "t": 0.25,
+   "vinti": 0.38,
+   "somma": -7.6,
+   "soldi": 7217
+  },
+  "S2": {
+   "R_medio": -0.107,
+   "R_caso": -0.119,
+   "vantaggio": 0.012,
+   "t": 0.25,
+   "vinti": 0.38,
+   "somma": -7.6,
+   "soldi": 7217
+  },
+  "S3": {
+   "R_medio": 0.008,
+   "R_caso": -0.004,
+   "vantaggio": 0.012,
+   "t": 0.25,
+   "vinti": 0.507,
+   "somma": 0.6,
+   "soldi": 10133
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "IS 2014-19",
+  "bias": "model",
+  "n": 71,
+  "indovina": 0.549,
+  "S0": {
+   "R_medio": 0.029,
+   "R_caso": -0.004,
+   "vantaggio": 0.033,
+   "t": 0.68,
+   "vinti": 0.521,
+   "somma": 2.1,
+   "soldi": 10775
+  },
+  "S1": {
+   "R_medio": -0.086,
+   "R_caso": -0.119,
+   "vantaggio": 0.033,
+   "t": 0.68,
+   "vinti": 0.437,
+   "somma": -6.1,
+   "soldi": 7674
+  },
+  "S2": {
+   "R_medio": -0.086,
+   "R_caso": -0.119,
+   "vantaggio": 0.033,
+   "t": 0.68,
+   "vinti": 0.437,
+   "somma": -6.1,
+   "soldi": 7674
+  },
+  "S3": {
+   "R_medio": 0.029,
+   "R_caso": -0.004,
+   "vantaggio": 0.033,
+   "t": 0.68,
+   "vinti": 0.521,
+   "somma": 2.1,
+   "soldi": 10775
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "OOS 2020-26",
+  "bias": "rule",
+  "n": 79,
+  "indovina": 0.43,
+  "S0": {
+   "R_medio": -0.182,
+   "R_caso": 0.066,
+   "vantaggio": -0.248,
+   "t": -2.28,
+   "vinti": 0.38,
+   "somma": -14.4,
+   "soldi": 5146
+  },
+  "S1": {
+   "R_medio": -0.3,
+   "R_caso": -0.084,
+   "vantaggio": -0.216,
+   "t": -2.12,
+   "vinti": 0.304,
+   "somma": -23.7,
+   "soldi": 3494
+  },
+  "S2": {
+   "R_medio": -0.321,
+   "R_caso": -0.096,
+   "vantaggio": -0.224,
+   "t": -2.22,
+   "vinti": 0.304,
+   "somma": -25.3,
+   "soldi": 3262
+  },
+  "S3": {
+   "R_medio": -0.182,
+   "R_caso": 0.054,
+   "vantaggio": -0.236,
+   "t": -2.18,
+   "vinti": 0.38,
+   "somma": -14.4,
+   "soldi": 5146
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "OOS 2020-26",
+  "bias": "model",
+  "n": 79,
+  "indovina": 0.456,
+  "S0": {
+   "R_medio": 0.071,
+   "R_caso": 0.066,
+   "vantaggio": 0.005,
+   "t": 0.05,
+   "vinti": 0.418,
+   "somma": 5.6,
+   "soldi": 11476
+  },
+  "S1": {
+   "R_medio": -0.065,
+   "R_caso": -0.084,
+   "vantaggio": 0.019,
+   "t": 0.18,
+   "vinti": 0.342,
+   "somma": -5.2,
+   "soldi": 7384
+  },
+  "S2": {
+   "R_medio": -0.07,
+   "R_caso": -0.096,
+   "vantaggio": 0.027,
+   "t": 0.26,
+   "vinti": 0.342,
+   "somma": -5.5,
+   "soldi": 7299
+  },
+  "S3": {
+   "R_medio": 0.071,
+   "R_caso": 0.054,
+   "vantaggio": 0.017,
+   "t": 0.15,
+   "vinti": 0.418,
+   "somma": 5.6,
+   "soldi": 11476
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "ultimi 3 anni",
+  "bias": "rule",
+  "n": 35,
+  "indovina": 0.343,
+  "S0": {
+   "R_medio": -0.306,
+   "R_caso": 0.047,
+   "vantaggio": -0.353,
+   "t": -2.05,
+   "vinti": 0.257,
+   "somma": -10.7,
+   "soldi": 6212
+  },
+  "S1": {
+   "R_medio": -0.416,
+   "R_caso": -0.127,
+   "vantaggio": -0.289,
+   "t": -1.8,
+   "vinti": 0.229,
+   "somma": -14.5,
+   "soldi": 5296
+  },
+  "S2": {
+   "R_medio": -0.462,
+   "R_caso": -0.155,
+   "vantaggio": -0.307,
+   "t": -1.95,
+   "vinti": 0.229,
+   "somma": -16.2,
+   "soldi": 4944
+  },
+  "S3": {
+   "R_medio": -0.306,
+   "R_caso": 0.02,
+   "vantaggio": -0.327,
+   "t": -1.9,
+   "vinti": 0.257,
+   "somma": -10.7,
+   "soldi": 6212
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "ultimi 3 anni",
+  "bias": "model",
+  "n": 35,
+  "indovina": 0.514,
+  "S0": {
+   "R_medio": 0.165,
+   "R_caso": 0.047,
+   "vantaggio": 0.118,
+   "t": 0.65,
+   "vinti": 0.457,
+   "somma": 5.8,
+   "soldi": 12053
+  },
+  "S1": {
+   "R_medio": 0.031,
+   "R_caso": -0.127,
+   "vantaggio": 0.158,
+   "t": 0.95,
+   "vinti": 0.429,
+   "somma": 1.1,
+   "soldi": 9976
+  },
+  "S2": {
+   "R_medio": 0.021,
+   "R_caso": -0.155,
+   "vantaggio": 0.176,
+   "t": 1.08,
+   "vinti": 0.429,
+   "somma": 0.7,
+   "soldi": 9860
+  },
+  "S3": {
+   "R_medio": 0.165,
+   "R_caso": 0.02,
+   "vantaggio": 0.145,
+   "t": 0.81,
+   "vinti": 0.457,
+   "somma": 5.8,
+   "soldi": 12053
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "tutto",
+  "bias": "rule",
+  "n": 150,
+  "indovina": 0.493,
+  "S0": {
+   "R_medio": -0.092,
+   "R_caso": 0.032,
+   "vantaggio": -0.125,
+   "t": -1.99,
+   "vinti": 0.44,
+   "somma": -13.8,
+   "soldi": 5215
+  },
+  "S1": {
+   "R_medio": -0.209,
+   "R_caso": -0.1,
+   "vantaggio": -0.108,
+   "t": -1.83,
+   "vinti": 0.34,
+   "somma": -31.3,
+   "soldi": 2522
+  },
+  "S2": {
+   "R_medio": -0.219,
+   "R_caso": -0.107,
+   "vantaggio": -0.112,
+   "t": -1.92,
+   "vinti": 0.34,
+   "somma": -32.9,
+   "soldi": 2354
+  },
+  "S3": {
+   "R_medio": -0.092,
+   "R_caso": 0.026,
+   "vantaggio": -0.118,
+   "t": -1.9,
+   "vinti": 0.44,
+   "somma": -13.8,
+   "soldi": 5215
+  }
+ },
+ {
+  "gruppo": "CPI",
+  "periodo": "tutto",
+  "bias": "model",
+  "n": 150,
+  "indovina": 0.5,
+  "S0": {
+   "R_medio": 0.051,
+   "R_caso": 0.032,
+   "vantaggio": 0.019,
+   "t": 0.29,
+   "vinti": 0.467,
+   "somma": 7.7,
+   "soldi": 12365
+  },
+  "S1": {
+   "R_medio": -0.075,
+   "R_caso": -0.1,
+   "vantaggio": 0.025,
+   "t": 0.43,
+   "vinti": 0.387,
+   "somma": -11.3,
+   "soldi": 5667
+  },
+  "S2": {
+   "R_medio": -0.077,
+   "R_caso": -0.107,
+   "vantaggio": 0.03,
+   "t": 0.5,
+   "vinti": 0.387,
+   "somma": -11.6,
+   "soldi": 5601
+  },
+  "S3": {
+   "R_medio": 0.051,
+   "R_caso": 0.026,
+   "vantaggio": 0.025,
+   "t": 0.39,
+   "vinti": 0.467,
+   "somma": 7.7,
+   "soldi": 12365
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "IS 2014-19",
+  "bias": "rule",
+  "n": 142,
+  "indovina": 0.592,
+  "S0": {
+   "R_medio": 0.076,
+   "R_caso": 0.014,
+   "vantaggio": 0.063,
+   "t": 1.1,
+   "vinti": 0.528,
+   "somma": 10.8,
+   "soldi": 14703
+  },
+  "S1": {
+   "R_medio": -0.039,
+   "R_caso": -0.112,
+   "vantaggio": 0.074,
+   "t": 1.37,
+   "vinti": 0.451,
+   "somma": -5.5,
+   "soldi": 7480
+  },
+  "S2": {
+   "R_medio": -0.039,
+   "R_caso": -0.112,
+   "vantaggio": 0.074,
+   "t": 1.37,
+   "vinti": 0.451,
+   "somma": -5.5,
+   "soldi": 7480
+  },
+  "S3": {
+   "R_medio": 0.076,
+   "R_caso": 0.004,
+   "vantaggio": 0.073,
+   "t": 1.29,
+   "vinti": 0.528,
+   "somma": 10.8,
+   "soldi": 14703
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "IS 2014-19",
+  "bias": "model",
+  "n": 142,
+  "indovina": 0.542,
+  "S0": {
+   "R_medio": 0.076,
+   "R_caso": 0.014,
+   "vantaggio": 0.063,
+   "t": 1.1,
+   "vinti": 0.549,
+   "somma": 10.8,
+   "soldi": 14825
+  },
+  "S1": {
+   "R_medio": -0.045,
+   "R_caso": -0.112,
+   "vantaggio": 0.067,
+   "t": 1.24,
+   "vinti": 0.479,
+   "somma": -6.4,
+   "soldi": 7251
+  },
+  "S2": {
+   "R_medio": -0.045,
+   "R_caso": -0.112,
+   "vantaggio": 0.067,
+   "t": 1.24,
+   "vinti": 0.479,
+   "somma": -6.4,
+   "soldi": 7251
+  },
+  "S3": {
+   "R_medio": 0.076,
+   "R_caso": 0.004,
+   "vantaggio": 0.073,
+   "t": 1.29,
+   "vinti": 0.549,
+   "somma": 10.8,
+   "soldi": 14825
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "OOS 2020-26",
+  "bias": "rule",
+  "n": 156,
+  "indovina": 0.513,
+  "S0": {
+   "R_medio": 0.09,
+   "R_caso": 0.086,
+   "vantaggio": 0.005,
+   "t": 0.05,
+   "vinti": 0.487,
+   "somma": 14.1,
+   "soldi": 14882
+  },
+  "S1": {
+   "R_medio": -0.044,
+   "R_caso": -0.061,
+   "vantaggio": 0.016,
+   "t": 0.2,
+   "vinti": 0.423,
+   "somma": -6.9,
+   "soldi": 6299
+  },
+  "S2": {
+   "R_medio": -0.055,
+   "R_caso": -0.067,
+   "vantaggio": 0.012,
+   "t": 0.15,
+   "vinti": 0.423,
+   "somma": -8.5,
+   "soldi": 5880
+  },
+  "S3": {
+   "R_medio": 0.081,
+   "R_caso": 0.068,
+   "vantaggio": 0.014,
+   "t": 0.16,
+   "vinti": 0.487,
+   "somma": 12.7,
+   "soldi": 14048
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "OOS 2020-26",
+  "bias": "model",
+  "n": 156,
+  "indovina": 0.474,
+  "S0": {
+   "R_medio": 0.103,
+   "R_caso": 0.086,
+   "vantaggio": 0.018,
+   "t": 0.21,
+   "vinti": 0.449,
+   "somma": 16.1,
+   "soldi": 15764
+  },
+  "S1": {
+   "R_medio": -0.03,
+   "R_caso": -0.061,
+   "vantaggio": 0.031,
+   "t": 0.38,
+   "vinti": 0.391,
+   "somma": -4.7,
+   "soldi": 6759
+  },
+  "S2": {
+   "R_medio": -0.032,
+   "R_caso": -0.067,
+   "vantaggio": 0.035,
+   "t": 0.43,
+   "vinti": 0.391,
+   "somma": -5.0,
+   "soldi": 6681
+  },
+  "S3": {
+   "R_medio": 0.099,
+   "R_caso": 0.068,
+   "vantaggio": 0.032,
+   "t": 0.37,
+   "vinti": 0.449,
+   "somma": 15.5,
+   "soldi": 15342
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "ultimi 3 anni",
+  "bias": "rule",
+  "n": 69,
+  "indovina": 0.478,
+  "S0": {
+   "R_medio": 0.172,
+   "R_caso": 0.146,
+   "vantaggio": 0.025,
+   "t": 0.16,
+   "vinti": 0.449,
+   "somma": 11.8,
+   "soldi": 14474
+  },
+  "S1": {
+   "R_medio": 0.045,
+   "R_caso": -0.006,
+   "vantaggio": 0.051,
+   "t": 0.36,
+   "vinti": 0.391,
+   "somma": 3.1,
+   "soldi": 10164
+  },
+  "S2": {
+   "R_medio": 0.022,
+   "R_caso": -0.02,
+   "vantaggio": 0.042,
+   "t": 0.3,
+   "vinti": 0.391,
+   "somma": 1.5,
+   "soldi": 9488
+  },
+  "S3": {
+   "R_medio": 0.172,
+   "R_caso": 0.122,
+   "vantaggio": 0.049,
+   "t": 0.32,
+   "vinti": 0.449,
+   "somma": 11.8,
+   "soldi": 14474
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "ultimi 3 anni",
+  "bias": "model",
+  "n": 69,
+  "indovina": 0.493,
+  "S0": {
+   "R_medio": 0.289,
+   "R_caso": 0.146,
+   "vantaggio": 0.142,
+   "t": 0.94,
+   "vinti": 0.493,
+   "somma": 19.9,
+   "soldi": 19811
+  },
+  "S1": {
+   "R_medio": 0.159,
+   "R_caso": -0.006,
+   "vantaggio": 0.165,
+   "t": 1.16,
+   "vinti": 0.449,
+   "somma": 10.9,
+   "soldi": 13840
+  },
+  "S2": {
+   "R_medio": 0.154,
+   "R_caso": -0.02,
+   "vantaggio": 0.174,
+   "t": 1.23,
+   "vinti": 0.449,
+   "somma": 10.6,
+   "soldi": 13679
+  },
+  "S3": {
+   "R_medio": 0.286,
+   "R_caso": 0.122,
+   "vantaggio": 0.164,
+   "t": 1.08,
+   "vinti": 0.493,
+   "somma": 19.7,
+   "soldi": 19651
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "tutto",
+  "bias": "rule",
+  "n": 298,
+  "indovina": 0.55,
+  "S0": {
+   "R_medio": 0.084,
+   "R_caso": 0.051,
+   "vantaggio": 0.032,
+   "t": 0.61,
+   "vinti": 0.507,
+   "somma": 24.9,
+   "soldi": 21881
+  },
+  "S1": {
+   "R_medio": -0.042,
+   "R_caso": -0.085,
+   "vantaggio": 0.044,
+   "t": 0.88,
+   "vinti": 0.436,
+   "somma": -12.4,
+   "soldi": 4712
+  },
+  "S2": {
+   "R_medio": -0.047,
+   "R_caso": -0.089,
+   "vantaggio": 0.042,
+   "t": 0.84,
+   "vinti": 0.436,
+   "somma": -14.0,
+   "soldi": 4398
+  },
+  "S3": {
+   "R_medio": 0.079,
+   "R_caso": 0.037,
+   "vantaggio": 0.042,
+   "t": 0.8,
+   "vinti": 0.507,
+   "somma": 23.6,
+   "soldi": 20655
+  }
+ },
+ {
+  "gruppo": "entrambi",
+  "periodo": "tutto",
+  "bias": "model",
+  "n": 298,
+  "indovina": 0.507,
+  "S0": {
+   "R_medio": 0.09,
+   "R_caso": 0.051,
+   "vantaggio": 0.039,
+   "t": 0.75,
+   "vinti": 0.497,
+   "somma": 26.9,
+   "soldi": 23370
+  },
+  "S1": {
+   "R_medio": -0.037,
+   "R_caso": -0.085,
+   "vantaggio": 0.048,
+   "t": 0.97,
+   "vinti": 0.433,
+   "somma": -11.1,
+   "soldi": 4901
+  },
+  "S2": {
+   "R_medio": -0.038,
+   "R_caso": -0.089,
+   "vantaggio": 0.05,
+   "t": 1.02,
+   "vinti": 0.433,
+   "somma": -11.4,
+   "soldi": 4844
+  },
+  "S3": {
+   "R_medio": 0.088,
+   "R_caso": 0.037,
+   "vantaggio": 0.051,
+   "t": 0.98,
+   "vinti": 0.497,
+   "somma": 26.3,
+   "soldi": 22745
+  }
+ }
+]
