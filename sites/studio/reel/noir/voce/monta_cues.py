@@ -10,11 +10,11 @@ SUB = {"t1b", "grow2", "text", "gap2", "rails2"}          # frasi che continuano
 def load(f):
     w = wave.open(f); sr = w.getframerate(); a = np.frombuffer(w.readframes(w.getnframes()), dtype='<i2').astype(np.float32) / 32768
     return (a.reshape(-1, w.getnchannels()).mean(1) if w.getnchannels() > 1 else a), sr
-cues = {}; out = []; t = 0.0; sr0 = None
+cues = {}; parole = {}; out = []; t = 0.0; sr0 = None
 for i, (s, key, fi) in enumerate(R):
-    a, sr = load(f"{D}/r{fi:02d}.wav"); sr0 = sr
+    a, sr = load(f"{D}/r{fi:02d}.wav"); sr0 = sr; nf = fi   # nf: numero del file (fi viene riusato sotto per la dissolvenza)
     env = np.convolve(np.abs(a), np.ones(int(sr * 0.02)) / (sr * 0.02), mode='same')
-    idx = np.where(env > 0.01)[0]; e = idx[-1]
+    idx = np.where(env > 0.01)[0]; e = idx[-1]; testa = max(0, idx[0] - int(0.03 * sr)) / sr   # secondi tolti in testa
     # la coda della parola che si spegne non va troncata: la si segue finché scende sotto 0,0025 (max 150 ms)
     while e < len(a) - 1 and e - idx[-1] < int(0.15 * sr) and env[e] > 0.0025: e += 1
     a = a[max(0, idx[0] - int(0.03 * sr)): e + int(0.04 * sr)].copy()
@@ -26,10 +26,13 @@ for i, (s, key, fi) in enumerate(R):
     if i > 0 and R[i - 1][0].rstrip().endswith((",", ":")): st = t + 0.12
     if i == 0: st = float(__import__('os').environ.get('FIRST', P))   # primo attacco della voce (default: secondo battito)
     cues[key] = [round(st, 3), round(st + len(a) / sr, 3)]; out.append((st, a)); t = st + len(a) / sr
+    import os
+    pf = f"{D}/r{nf:02d}.parole.json"
+    if os.path.exists(pf): parole[key] = [[w, round(st + a0 - testa, 3)] for w, a0, a1 in json.load(open(pf))]
 end = math.ceil((t + 0.5) / P) * P; cues["end"] = [round(end, 3), round(end + 6 * P, 3)]; DUR = round(end + 6 * P, 3)
 N = int((DUR + 0.2) * sr0); mix = np.zeros(N, np.float32)
 for st, a in out: k = int(st * sr0); mix[k:k + len(a)] += a[:N - k]
 mix = mix / np.abs(mix).max() * 0.9
 with wave.open(f"{D}/narrazione.wav", "wb") as w: w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr0); w.writeframes((mix * 32767).astype('<i2').tobytes())
-json.dump({"cues": cues, "DUR": DUR}, open(f"{D}/cues.json", "w"), indent=1)
+json.dump({"cues": cues, "DUR": DUR, "words": parole}, open(f"{D}/cues.json", "w"), indent=1, ensure_ascii=False)
 print("DUR", DUR, "· frasi", len(R))

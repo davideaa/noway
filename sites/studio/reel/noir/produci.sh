@@ -18,10 +18,12 @@ if [ "${DA:-1}" -le 1 ]; then echo "== 1. voce $(date +%T)"
   [ "$FATTE" -eq "$ATTESE" ] || { echo "STOP: voce incompleta ($FATTE frasi su $ATTESE)"; exit 4; }
   grep -q "!!" voce.log && echo "ATTENZIONE: frasi con !! — controllare a mano prima di pubblicare" || true
 fi
-echo "== 2. taglio $(date +%T)"; $PY "$NOIR/voce/taglia.py" "$W" $(python3 -c "import json;print(' '.join(str(i) for i,(s,k) in enumerate(json.load(open('righe.json'))) if k!='num'))") | grep "^r"
-cp righe.json pulite/; [ -f pulite/r00.wav ] || cp r00.wav pulite/ 2>/dev/null || true
-echo "== 3. montaggio $(date +%T)"; SKIP=num FIRST=${FIRST:-1.2412} python3 "$NOIR/voce/monta_cues.py" "$W/pulite" 0.6206; cp pulite/cues.json "$NOIR/cues-p$N.json"
+if [ "${DA:-1}" -le 2 ]; then echo "== 2. taglio $(date +%T)"; $PY "$NOIR/voce/taglia.py" "$W" $(python3 -c "import json;print(' '.join(str(i) for i,(s,k) in enumerate(json.load(open('righe.json'))) if k!='num'))") | grep "^r"
+cp righe.json pulite/; [ -f pulite/r00.wav ] || cp r00.wav pulite/ 2>/dev/null || true; fi
+if [ "${DA:-1}" -le 3 ]; then echo "== 3. montaggio $(date +%T)"; SKIP=num FIRST=${FIRST:-1.2412} python3 "$NOIR/voce/monta_cues.py" "$W/pulite" 0.6206; cp pulite/cues.json "$NOIR/cues-p$N.json"; fi
 DUR=$(python3 -c "import json;print(json.load(open('pulite/cues.json'))['DUR'])")
+# scene non ancora scritte: voce e tempi veri delle parole (cues-pN.json) pronti per il regista; poi si riprende con DA=4
+[ -f "$NOIR/p$N.html" ] || { echo "== VOCE PRONTA $(date +%T): manca p$N.html, mi fermo prima del render (poi: DA=4 ./produci.sh $N)"; exit 0; }
 echo "== 4. render $(date +%T) DUR $DUR"; cd "$NOIR"; rm -rf "out-p$N" && mkdir "out-p$N"
 for c in 0 1 2 3; do CUES=cues-p$N.json COMP=p$N.html PARTE=$c/4 node render.cjs "out-p$N" > "$W/render$c.log" 2>&1 & done; wait
 grep -h ERR "$W"/render?.log && { echo "ERRORI NEL RENDER"; exit 1; } || true

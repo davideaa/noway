@@ -151,8 +151,8 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 02/10 | 1 | Lavoro di riavvio: il risultato di un agente può andare perso | i controlli brevi (3 punti) li fa l'orchestratore da sé; agli agenti i lavori lunghi |
 | 02/10 | 2 | Un commento `//` inserito a metà di una riga lunga ha cancellato i prezzi della filiera; trovato solo guardando la fine di ogni scena | commenti `/* */`; dopo ogni modifica a pN.html si guarda il foglio provini a fine scena prima di consegnare |
 
-### Prossimo miglioramento (il più utile per velocità e zero errori)
-Far leggere alle scene i **tempi delle parole** (`window.WORDS`, da Whisper sulla narrazione, prodotto da `produci.sh` prima del render):
+### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
+Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):
 ogni elemento che la voce nomina compare su quella parola, senza tempi scritti a mano. Toglie la causa dei difetti di sincronia
 trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correzione → nuovo render».
 
