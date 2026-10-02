@@ -92,14 +92,19 @@ def font_css(famiglie):
 
 # ================================================================== CONFRONTO (proprietario: agente confronto)
 # Il visore (src/confronto.js) riceve per ogni lavoro pronto:
-#   pagine[i] = {nome, path, html, prima: {pc, tel}}
+#   pagine[i] = {nome, path, html, prima: {pc, tel}, dopo: {pc, tel}}
 #     html  = la pagina del sito nuovo con segnaposto: @@CF:TESTA@@ (stile + ponte), @@CF:CODA@@ (script del sito),
 #             @@I:chiave@@ per ogni foto (diventa un blob: URL creato UNA volta nel browser)
 #     prima = fotografia del sito originale a fette: {w, h, fette: [[data URI WebP, altezza], ...]}
+#     dopo  = fotografia del sito NUOVO a fette (per gli "affiancati": due layout da computer senza rimpicciolire iframe)
 #   sito = {css, js, font_css (con @@F:n@@), font: [data URI woff2], img: {chiave: data URI}}
 # Ogni foto compare una sola volta nel file (anche se usata da più pagine o duplicata con un altro nome).
-PRIMA_PC = dict(larghezza=1440, q=46, fetta=2400)    # foto "prima" da computer: a 1440 px è 1:1 con lo schermo
-PRIMA_TEL = dict(larghezza=780, q=42, fetta=3200)    # foto "prima" da telefono: 390 px a 2x
+# Pesi scelti per stare sotto i 15 MB (anteprima su Claude: 16 MB): le colonne affiancate sono larghe metà schermo.
+PRIMA_PC = dict(larghezza=1200, q=44, fetta=2400)    # foto "prima" da computer
+DOPO_PC = dict(larghezza=1200, q=44, fetta=2400)     # foto "dopo" da computer (cattura/<lavoro>-dopo, fatte dal sito nuovo)
+PRIMA_TEL = dict(larghezza=600, q=45, fetta=3200)    # foto "prima" da telefono (Solo prima e telefono di sinistra)
+DOPO_TEL = dict(larghezza=360, q=45, fetta=3200)     # foto "dopo" da telefono: solo per i due telefoni affiancati su schermo stretto
+FOTO_SITO_Q = 72                                     # le foto del sito vivo (960 px) ricompresse, se così pesano meno
 
 
 def fette(png, larghezza, q, fetta):
@@ -149,6 +154,10 @@ def sito_dopo(p, font_dopo):
         if hsh in per_hash:
             canonica[k] = per_hash[hsh]; continue
         per_hash[hsh] = canonica[k] = k
+        if mime == "image/webp":
+            ricompressa = webp_bytes(Image.open(io.BytesIO(b)).convert("RGB"), FOTO_SITO_Q)
+            if len(ricompressa) < len(b):
+                b = ricompressa
         img[k] = f"data:{mime};base64," + base64.b64encode(b).decode()
     for pg in pagine:
         pg[2] = re.sub(r"@@I:([\w-]+)@@", lambda m: "@@I:" + canonica[m.group(1)] + "@@", pg[2])
@@ -163,17 +172,22 @@ def sito_dopo(p, font_dopo):
 def dati_progetto(p, font_dopo):
     """Tutto ciò che il confronto riceve in window.VETRINA.progetti[i] (vedi il commento in cima a questa sezione)."""
     cart = os.path.join(QUI, p["cattura"])
+    cart_dopo = os.path.join(QUI, p["cattura_dopo"])
     pagine, sito = sito_dopo(p, font_dopo)
     voce = {"id": p["id"], "nome": p["nome"], "categoria": p["categoria"], "luogo": p["luogo"], "dominio": p["dominio"],
             "cambi": p["cambi"], "sito": sito, "pagine": []}
     for nome, path, h in pagine:
-        voce["pagine"].append({"nome": nome, "path": path, "html": h, "prima": {
-            "pc": fette(os.path.join(cart, f"{slug(path)}-pc.png"), **PRIMA_PC),
-            "tel": fette(os.path.join(cart, f"{slug(path)}-tel.png"), **PRIMA_TEL)}})
+        s = slug(path)
+        voce["pagine"].append({"nome": nome, "path": path, "html": h,
+            "prima": {"pc": fette(os.path.join(cart, f"{s}-pc.png"), **PRIMA_PC),
+                      "tel": fette(os.path.join(cart, f"{s}-tel.png"), **PRIMA_TEL)},
+            "dopo": {"pc": fette(os.path.join(cart_dopo, f"{s}-pc.png"), **DOPO_PC),
+                     "tel": fette(os.path.join(cart_dopo, f"{s}-tel.png"), **DOPO_TEL)}})
     peso = lambda x: len(json.dumps(x, ensure_ascii=False))
-    print(f"  confronto {p['id']}: sito nuovo {peso(sito) / 1e6:.2f} MB ({len(sito['img'])} foto), "
-          f"prima da computer {sum(peso(v['prima']['pc']) for v in voce['pagine']) / 1e6:.2f} MB, "
-          f"da telefono {sum(peso(v['prima']['tel']) for v in voce['pagine']) / 1e6:.2f} MB, "
+    mb = lambda lato, tipo: sum(peso(v[lato][tipo]) for v in voce["pagine"]) / 1e6
+    print(f"  confronto {p['id']}: sito vivo {peso(sito) / 1e6:.2f} MB ({len(sito['img'])} foto), "
+          f"foto prima pc {mb('prima', 'pc'):.2f} / tel {mb('prima', 'tel'):.2f} MB, "
+          f"foto dopo pc {mb('dopo', 'pc'):.2f} / tel {mb('dopo', 'tel'):.2f} MB, "
           f"pagine {sum(len(v['html']) for v in voce['pagine']) / 1e6:.2f} MB")
     return voce
 

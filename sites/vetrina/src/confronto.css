@@ -1,7 +1,7 @@
 /* ==========================================================================
    CONFRONTO prima/dopo (agente confronto) — solo classi e id con prefisso cf-
-   Il sito nuovo è vero e a grandezza naturale; il sito di prima (fotografia)
-   affiora sopra con la lente, la tenda o tenendo premuto.
+   Modi: Affiancati (foto di prima e di dopo che scorrono insieme), Telefono,
+   Solo prima (foto), Solo dopo (il sito nuovo vero, a grandezza naturale).
    Movimento: solo transform e opacity.
    ========================================================================== */
 .cf {
@@ -20,7 +20,8 @@
   --cf-testo: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --cf-prima: "Times New Roman", Times, serif;
   --cf-barra: 56px;
-  --cf-r: 150px;
+  --cf-testa: 44px;
+  --cf-gap: 2px;
   --cf-entrata: cubic-bezier(.16, 1, .3, 1);
   --cf-scorre: cubic-bezier(.65, 0, .35, 1);
   position: fixed;
@@ -36,7 +37,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .cf[hidden] { display: none; }
-html.cf-aperto { overflow: hidden; scrollbar-gutter: stable; }
+html.cf-aperto { overflow: hidden; }
 html.cf-aperto body { overflow: hidden; }
 .cf *, .cf *::before, .cf *::after { box-sizing: border-box; }
 :where(.cf) button { font: inherit; color: inherit; margin: 0; }
@@ -114,7 +115,7 @@ html.cf-aperto body { overflow: hidden; }
 
 .cf-mappa {
   position: absolute; top: calc(100% + 10px); left: 50%; z-index: 20;
-  width: 360px; max-height: min(560px, calc(100dvh - var(--cf-barra) - 24px)); overflow: auto;
+  width: 360px; max-height: min(600px, calc(100dvh - var(--cf-barra) - 24px)); overflow: auto;
   overscroll-behavior: contain;
   padding: 10px; border-radius: 14px;
   background: var(--cf-notte-2); border: 1px solid rgba(255, 255, 255, .12);
@@ -149,16 +150,18 @@ html.cf-aperto body { overflow: hidden; }
 .cf-mappa-testo { flex: 1; min-width: 0; }
 .cf-mappa-vista { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--cf-azzurro); opacity: 0; transform: scale(.4); transition: opacity .2s, transform .2s; }
 .cf-mappa-voce.cf-vista .cf-mappa-vista { opacity: .9; transform: none; }
+.cf-mappa-frecce { display: none; gap: 8px; padding: 10px 6px 4px; }
+.cf-mappa-frecce .cf-tasto { flex: 1; min-height: 44px; padding: 0 12px; }
 .cf-mappa-lavori { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--cf-filo); }
 .cf-mappa-lavori[hidden] { display: none; }
 .cf-mappa-lavori-tasti { display: flex; gap: 8px; padding: 0 6px 6px; }
 .cf-mappa-lavori-tasti .cf-tasto { flex: 1; }
 
-/* modi di confronto */
+/* modi */
 .cf-modi { flex: none; display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid var(--cf-filo); }
 .cf-modi button {
-  position: relative; display: inline-flex; align-items: center; gap: 7px;
-  min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent;
+  position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 34px; padding: 0 13px; border: 0; border-radius: 999px; background: transparent;
   cursor: pointer; font-size: 13px; font-weight: 500; color: #C9CED6; white-space: nowrap;
   transition: color .15s;
 }
@@ -166,35 +169,13 @@ html.cf-aperto body { overflow: hidden; }
   content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--cf-azzurro);
   opacity: 0; transform: scale(.85); transition: opacity .18s, transform .25s var(--cf-entrata); z-index: -1;
 }
-.cf-modi button { isolation: isolate; }
 .cf-modi button:hover { color: var(--cf-bianco); }
 .cf-modi button[aria-checked="true"] { color: var(--cf-notte); }
 .cf-modi button[aria-checked="true"]::before { opacity: 1; transform: none; }
 .cf-modi button[hidden] { display: none; }
+.cf-modo-corto { display: none; }
 
-/* tieni premuto */
-.cf-tieni {
-  display: inline-flex; align-items: center; gap: 9px;
-  min-height: 38px; padding: 0 8px 0 12px;
-  border: 1px solid #BFC4CB; border-radius: 4px; background: var(--cf-carta-prima);
-  color: var(--cf-inchiostro); cursor: pointer; user-select: none; -webkit-user-select: none;
-  -webkit-touch-callout: none; touch-action: none; white-space: nowrap; flex: none;
-  font-size: 13px; font-weight: 500;
-  transition: transform .12s, background-color .15s;
-}
-.cf-tieni em { font-family: var(--cf-prima); font-style: italic; font-size: 16px; font-weight: 400; }
-.cf-tieni:hover { background: #E4E7EA; }
-.cf-tieni[aria-pressed="true"] { transform: scale(.96); background: #C9CDD3; }
-.cf-tieni-punto { position: relative; width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #5C6470; flex: none; }
-.cf-tieni-punto::after { content: ""; position: absolute; inset: 2px; border-radius: 50%; background: #5C6470; transform: scale(0); transition: transform .15s; }
-.cf-tieni[aria-pressed="true"] .cf-tieni-punto::after { transform: scale(1); }
-.cf-tasto-kbd {
-  font: 600 10.5px/1 var(--cf-testo); letter-spacing: .04em; color: #4A515B;
-  padding: 4px 6px; border-radius: 3px; border: 1px solid #A9AFB7; background: #EEF0F2;
-}
-.cf-tieni[hidden] { display: none; }
-
-/* avanzamento della pagina (dove sei nel sito) */
+/* avanzamento (dove sei nella pagina) */
 .cf-avanzamento { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; overflow: hidden; pointer-events: none; }
 .cf-avanzamento span { position: absolute; inset: 0; background: var(--cf-azzurro); transform-origin: 0 50%; transform: scaleX(0); will-change: transform; }
 
@@ -213,98 +194,72 @@ html.cf-aperto body { overflow: hidden; }
 .cf-sito.cf-uscente { visibility: visible; z-index: 1; }
 .cf-sito.cf-entra { animation: cf-appari .2s ease-out both; }
 @keyframes cf-appari { from { opacity: 0; } }
+.cf-foto-su .cf-sito { visibility: hidden !important; }   /* nei modi a foto il sito vivo resta caricato ma non si disegna */
 
-/* fotografia del sito di prima, a fette */
+/* fotografia a pagina intera, a fette */
 .cf-pila { position: absolute; left: 0; top: 0; background: var(--cf-bianco); will-change: transform; }
-/* nella lente la foto NON è uno strato a sé: si ridisegna solo il cerchio, senza buchi bianchi quando il mouse corre */
-.cf-lente-vetro .cf-pila { will-change: auto; }
-.cf-pila img { position: absolute; left: 0; width: 100%; max-width: none; display: block; user-select: none; -webkit-user-drag: none; }
+.cf-pila img { position: absolute; left: 0; width: 100%; max-width: none; display: block; user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
 
-/* tenda: a sinistra prima, a destra dopo */
-.cf-tenda {
-  position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none;
-  visibility: hidden; opacity: 0; will-change: transform;
-  transition: opacity .16s ease-out, visibility 0s linear .16s;
+/* ------------------------------------------------------------ foto che scorrono insieme */
+.cf-foto { position: absolute; inset: 0; z-index: 4; display: none; background: var(--cf-notte); }
+.cf-foto-su .cf-foto { display: block; }
+.cf-foto-testa {
+  position: absolute; left: 0; right: 0; top: 0; height: var(--cf-testa);
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--cf-gap);
 }
-.cf-tenda-dentro { position: absolute; inset: 0; will-change: transform; }
-.cf-modo-tenda .cf-tenda, .cf-tieni-su .cf-tenda, .cf-svela .cf-tenda {
-  visibility: visible; opacity: 1; transition: opacity .16s ease-out;
+.cf-foto-et { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 10px 0 16px; overflow: hidden; }
+.cf-foto-et p { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.cf-et-nome, .cf-et-sotto { white-space: nowrap; }
+.cf-et-sotto { overflow: hidden; text-overflow: ellipsis; }
+.cf-et-prima { background: var(--cf-carta-prima); color: var(--cf-inchiostro); align-items: baseline; padding-top: 12px; }
+.cf-et-prima .cf-et-nome { font: italic 20px/1 var(--cf-prima); }
+.cf-et-prima .cf-et-sotto { font: italic 14px/1 var(--cf-prima); color: #4A515B; }
+.cf-et-dopo { background: var(--cf-notte-2); color: var(--cf-bianco); justify-content: space-between; }
+.cf-et-dopo .cf-et-nome { font: 700 18px/1 var(--cf-titoli); letter-spacing: -.01em; }
+.cf-et-dopo .cf-et-sotto { font: 500 13px/1 var(--cf-testo); color: var(--cf-azzurro); }
+.cf-vivo {
+  flex: none; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--cf-azzurro); color: var(--cf-notte); font: 650 13px/1 var(--cf-titoli); letter-spacing: .01em;
+  transition: transform .15s var(--cf-entrata), background-color .15s;
 }
-.cf-anima .cf-tenda { transition: transform var(--cf-durata, .3s) var(--cf-scorre), opacity .16s ease-out; }
-.cf-anima .cf-tenda-dentro, .cf-anima .cf-maniglia { transition: transform var(--cf-durata, .3s) var(--cf-scorre); }
+.cf-vivo:hover { background: #5CC8EF; transform: translateX(2px); }
+.cf-vivo-corto { display: none; }
+/* Solo prima: una colonna sola, l'etichetta del dopo diventa solo il tasto per provarlo dal vivo */
+.cf-una .cf-foto-testa { grid-template-columns: 1fr auto; }
+.cf-una .cf-et-dopo p { display: none; }
 
-.cf-etichetta-tieni {
-  position: absolute; bottom: 22px; left: 50%; z-index: 6; pointer-events: none;
-  padding: 7px 14px; border: 1px solid var(--cf-grigio-prima); background: var(--cf-carta-prima); color: var(--cf-inchiostro);
-  font: italic 17px/1.1 var(--cf-prima);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
-  opacity: 0; transform: translate3d(-50%, 8px, 0); transition: opacity .15s, transform .2s var(--cf-entrata);
+.cf-colonne {
+  position: absolute; left: 0; right: 0; top: var(--cf-testa); bottom: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--cf-gap); overflow: hidden;
 }
-.cf-tieni-su .cf-etichetta-tieni { opacity: 1; transform: translate3d(-50%, 0, 0); }
+.cf-una .cf-colonne { grid-template-columns: 1fr; }
+.cf-una .cf-col + .cf-col { display: none; }
+.cf-col { position: relative; overflow: hidden; background: var(--cf-bianco); }
+.cf-col-slot { position: absolute; left: 0; top: 0; right: 0; }
+.cf-guida {
+  position: absolute; top: 0; left: 50%; z-index: 2; width: 4px; margin-left: -2px; height: var(--cf-guida, 60px);
+  border-radius: 4px; background: var(--cf-azzurro); box-shadow: 0 0 0 1px rgba(11, 13, 16, .35);
+  will-change: transform; pointer-events: none;
+}
+.cf-una .cf-guida { left: auto; right: 3px; margin-left: 0; }
+.cf-scorre {
+  position: absolute; left: 0; right: 0; top: var(--cf-testa); bottom: 0; z-index: 3;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none; -ms-overflow-style: none;
+  cursor: grab; outline: none; -webkit-overflow-scrolling: touch;
+}
+.cf-scorre::-webkit-scrollbar { display: none; }
+.cf-scorre:focus-visible { box-shadow: inset 0 0 0 2px var(--cf-azzurro); }
+.cf-trascina .cf-scorre { cursor: grabbing; }
+.cf-scorre-spazio { width: 1px; }
 
-/* lente */
-.cf-lente {
-  position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 4; pointer-events: none;
-  opacity: 0; visibility: hidden; will-change: transform;
-  transition: opacity .14s ease-out, visibility 0s linear .14s;
-}
-.cf-lente-su .cf-lente { opacity: 1; visibility: visible; transition: opacity .14s ease-out; }
-.cf-lente-vetro {
-  position: absolute; left: calc(var(--cf-r) * -1); top: calc(var(--cf-r) * -1);
-  width: calc(var(--cf-r) * 2); height: calc(var(--cf-r) * 2);
-  border-radius: 50%; overflow: hidden; background: var(--cf-bianco);
-  box-shadow: 0 0 0 2px var(--cf-bianco), 0 0 0 3px rgba(13, 15, 18, .35), 0 26px 60px -12px rgba(0, 0, 0, .6);
-  transform: scale(.82); transition: transform .26s var(--cf-entrata);
-}
-.cf-lente-su .cf-lente-vetro { transform: none; }
-.cf-lente-etichetta {
-  position: absolute; left: 0; top: calc(var(--cf-r) + 12px);
-  padding: 4px 10px 5px; border: 1px solid var(--cf-grigio-prima); background: var(--cf-carta-prima); color: var(--cf-inchiostro);
-  font: italic 15px/1 var(--cf-prima); white-space: nowrap;
-  transform: translateX(-50%); box-shadow: 0 6px 16px rgba(0, 0, 0, .22);
-}
-
-/* maniglia della tenda */
-.cf-maniglia {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 0; z-index: 5;
-  visibility: hidden; opacity: 0; will-change: transform;
-  transition: opacity .16s;
-}
-.cf-modo-tenda .cf-maniglia { visibility: visible; opacity: 1; }
-.cf-modo-tenda.cf-tieni-su .cf-maniglia { opacity: 0; }
-.cf-maniglia-linea {
-  position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--cf-bianco);
-  box-shadow: 0 0 0 1px rgba(13, 15, 18, .16), 0 0 22px rgba(0, 0, 0, .35);
-}
-.cf-maniglia-zona { position: absolute; top: 0; bottom: 0; left: -10px; width: 20px; cursor: ew-resize; touch-action: none; }
-.cf-maniglia-presa {
-  position: absolute; top: 50%; left: -27px; width: 54px; height: 54px; margin-top: -27px;
-  display: grid; place-items: center; border-radius: 50%;
-  background: var(--cf-bianco); color: var(--cf-inchiostro); cursor: grab; touch-action: none;
-  box-shadow: 0 0 0 1px rgba(13, 15, 18, .12), 0 10px 30px rgba(0, 0, 0, .35);
-  will-change: transform; transition: box-shadow .2s;
-}
-.cf-trascina .cf-maniglia-presa { cursor: grabbing; box-shadow: 0 0 0 6px rgba(43, 181, 232, .35), 0 10px 30px rgba(0, 0, 0, .35); }
-.cf-maniglia-prima, .cf-maniglia-dopo {
-  position: absolute; top: 14px; white-space: nowrap; pointer-events: none;
-  transition: opacity .18s;
-}
-.cf-maniglia-prima {
-  right: 12px; padding: 5px 11px 6px; border: 1px solid var(--cf-grigio-prima); background: var(--cf-carta-prima);
-  color: var(--cf-inchiostro); font: italic 16px/1 var(--cf-prima);
-}
-.cf-maniglia-dopo {
-  left: 12px; padding: 6px 12px; border-radius: 999px; background: var(--cf-azzurro); color: var(--cf-notte);
-  font: 650 13px/1 var(--cf-titoli); letter-spacing: .01em;
-}
-.cf-senza-prima .cf-maniglia-prima, .cf-senza-dopo .cf-maniglia-dopo { opacity: 0; }
-
-/* telefoni affiancati (da computer) */
+/* ------------------------------------------------------------ telefoni affiancati (da computer, il dopo è vivo) */
 .cf-telefoni {
   position: absolute; inset: 0; z-index: 1; display: none;
   background: radial-gradient(120% 80% at 50% 0%, #1A1E24 0%, var(--cf-notte) 60%);
 }
-.cf-modo-telefono .cf-telefoni { display: block; }
+.cf-modo-telefono:not(.cf-stretto) .cf-telefoni { display: block; }
 .cf-telefono {
   position: absolute; top: var(--cf-tel-y, 60px); width: var(--cf-tel-fw, 412px); height: var(--cf-tel-fh, 760px);
   border-radius: 52px; background: #191C21;
@@ -327,22 +282,16 @@ html.cf-aperto body { overflow: hidden; }
 .cf-telefono::after {
   content: ""; position: absolute; left: 50%; bottom: 8px; width: 120px; height: 4px; margin-left: -60px; border-radius: 4px; background: #3A3F47;
 }
-.cf-telefono-titolo {
-  position: absolute; left: 0; right: 0; bottom: calc(100% + 14px); text-align: center; white-space: nowrap;
-}
+.cf-telefono-titolo { position: absolute; left: 0; right: 0; bottom: calc(100% + 14px); text-align: center; white-space: nowrap; }
 .cf-titolo-prima { font: italic 22px/1 var(--cf-prima); color: #C9CDD3; }
 .cf-titolo-prima span { font-size: 15px; color: var(--cf-grigio-prima); margin-left: 6px; }
 .cf-titolo-dopo { font: 700 21px/1 var(--cf-titoli); color: var(--cf-bianco); letter-spacing: -.01em; }
 .cf-titolo-dopo span { font: 500 13px/1 var(--cf-testo); color: var(--cf-azzurro); margin-left: 6px; letter-spacing: 0; }
-.cf-modo-telefono .cf-schermo {
+.cf-modo-telefono:not(.cf-stretto) .cf-schermo {
   left: calc(var(--cf-tel-x2) + var(--cf-tel-bl)); top: calc(var(--cf-tel-y) + var(--cf-tel-bt));
   width: 390px; height: var(--cf-tel-h); right: auto; bottom: auto;
   border-radius: 26px; overflow: hidden;
 }
-
-/* scudo durante il trascinamento: l'iframe non ruba il mouse */
-.cf-scudo { position: absolute; inset: 0; z-index: 4; display: none; cursor: ew-resize; touch-action: none; }
-.cf-trascina .cf-scudo { display: block; }
 
 /* caricamento di una pagina lenta */
 .cf-carica { position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 7; overflow: hidden; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -355,7 +304,7 @@ html.cf-aperto body { overflow: hidden; }
 .cf-suggerimento {
   position: absolute; left: 50%; bottom: 28px; z-index: 8; pointer-events: none;
   display: flex; align-items: center; gap: 14px;
-  width: max-content; max-width: min(560px, calc(100% - 32px));
+  width: max-content; max-width: min(580px, calc(100% - 32px));
   padding: 12px 18px 12px 14px; border-radius: 14px;
   background: rgba(11, 13, 16, .94); color: var(--cf-chiaro); border: 1px solid rgba(255, 255, 255, .14);
   box-shadow: 0 18px 50px -10px rgba(0, 0, 0, .6);
@@ -366,10 +315,12 @@ html.cf-aperto body { overflow: hidden; }
 .cf-suggerimento.cf-su { opacity: 1; visibility: visible; transform: translate3d(-50%, 0, 0); transition: opacity .25s, transform .35s var(--cf-entrata); }
 .cf-suggerimento b { color: var(--cf-bianco); font-weight: 600; }
 .cf-suggerimento em { font-family: var(--cf-prima); font-size: 16px; }
-.cf-suggerimento kbd { font: 600 11px/1 var(--cf-testo); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, .3); }
-.cf-sugg-icona { position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 0 0 2px var(--cf-bianco); background: var(--cf-carta-prima); }
-.cf-sugg-icona::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--cf-azzurro); animation: cf-pulsa 1.6s ease-out infinite; }
-@keyframes cf-pulsa { from { transform: scale(1); opacity: .9; } to { transform: scale(1.7); opacity: 0; } }
+.cf-sugg-icona { position: relative; flex: none; width: 30px; height: 36px; border-radius: 15px; border: 2px solid var(--cf-bianco); }
+.cf-sugg-icona::after {
+  content: ""; position: absolute; left: 50%; top: 6px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--cf-azzurro);
+  animation: cf-rotella 1.4s var(--cf-scorre) infinite;
+}
+@keyframes cf-rotella { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 0; } }
 
 /* ------------------------------------------------------------ ingresso dal riquadro */
 .cf-fantasma { position: absolute; inset: 0; z-index: 30; pointer-events: none; display: none; }
@@ -381,11 +332,12 @@ html.cf-aperto body { overflow: hidden; }
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .6);
 }
 .cf-fantasma-quadro img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.cf-fantasma-dopo { transition: opacity .3s ease-out; }
+.cf-chiude .cf-fantasma { z-index: 0; }
+.cf-chiude .cf-finestra { z-index: 1; }
 
 /* ------------------------------------------------------------ larghezze intermedie: la barra non si accavalla mai */
 @media (max-width: 1439px) {
-  .cf-modi button:not([aria-checked="true"]) span { display: none; }
+  .cf-modi button:not([aria-checked="true"]) .cf-modo-lungo { display: none; }
   .cf-modi button:not([aria-checked="true"]) { padding: 0 10px; }
 }
 @media (max-width: 1179px) {
@@ -394,43 +346,52 @@ html.cf-aperto body { overflow: hidden; }
 }
 @media (max-width: 1059px) {
   .cf-lavoro { display: none; }
-  .cf-tieni-lungo, .cf-tasto-kbd { display: none; }
 }
 @media (max-width: 879px) {
-  .cf-modi button span { display: none; }
+  .cf-modi button .cf-modo-lungo { display: none; }
   .cf-modi button { padding: 0 10px; }
   .cf-pagina { min-width: 0; max-width: 240px; }
   .cf-esci-testo { display: none; }
   .cf-esci { width: 38px; padding: 0; }
+  .cf-et-sotto { display: none; }
 }
 
-/* ------------------------------------------------------------ telefono */
+/* ------------------------------------------------------------ telefono (schermo stretto) */
 @media (max-width: 699px) {
-  .cf { --cf-barra: 56px; font-size: 15px; }
+  .cf { --cf-barra: 56px; --cf-testa: 36px; font-size: 15px; }
   .cf-barra { gap: 4px; padding: 0 6px; }
   .cf-barra-sx { flex: none; gap: 0; }
   .cf-barra-dx { flex: none; min-width: 0; }
-  .cf-pagine { flex: 1 1 auto; }
+  .cf-pagine { flex: 1 1 auto; min-width: 0; }
   .cf-esci { width: 44px; min-height: 44px; padding: 0; border-color: transparent; }
-  .cf-esci-testo, .cf-lavori, .cf-modi { display: none !important; }
-  .cf-pagine { min-width: 0; gap: 2px; }
-  .cf-pagine > .cf-tondo { width: 44px; min-height: 44px; border-color: transparent; }
+  .cf-esci-testo, .cf-lavori, .cf-freccia { display: none !important; }
   .cf-pagina { flex: 1; min-width: 0; max-width: none; min-height: 44px; padding: 0 8px 0 10px; gap: 7px; }
   .cf-pagina-n small { display: none; }
-  .cf-tieni { min-height: 44px; padding: 0 12px; gap: 7px; }
+  .cf-modi { padding: 2px; }
+  .cf-modi button { min-height: 40px; min-width: 44px; padding: 0 9px; }
+  .cf-modi button[data-modo="dopo"] { order: 1; }
+  .cf-modi button[data-modo="prima"] { order: 2; }
+  .cf-modi button[data-modo="telefono"] { order: 3; }
+  .cf-modi button .cf-modo-lungo, .cf-modi .cf-modo-icona { display: none; }
+  .cf-modo-corto { display: inline; font-family: var(--cf-titoli); font-weight: 650; font-size: 14px; }
+  .cf-corto-prima { font: italic 16px/1 var(--cf-prima); }
   .cf-mappa {
     position: fixed; left: 8px; right: 8px; top: calc(var(--cf-barra) + 6px); width: auto;
     max-height: calc(100dvh - var(--cf-barra) - 20px); transform: none; animation-name: cf-scende-tel;
   }
   @keyframes cf-scende-tel { from { opacity: 0; transform: translateY(-6px); } }
   .cf-mappa-voce { min-height: 46px; }
-  .cf-maniglia-presa { width: 48px; height: 48px; left: -24px; margin-top: -24px; }
-  .cf-maniglia-prima, .cf-maniglia-dopo { top: 50%; margin-top: -13px; }
-  .cf-maniglia-prima { right: 34px; }
-  .cf-maniglia-dopo { left: 34px; }
-  .cf-suggerimento { top: 14px; bottom: auto; transform: translate3d(-50%, -12px, 0); }
+  .cf-mappa-frecce { display: flex; }
+  .cf-foto-et { padding: 0 8px 0 12px; gap: 8px; }
+  .cf-et-prima { padding-top: 9px; }
+  .cf-et-prima .cf-et-nome { font-size: 17px; }
+  .cf-et-dopo .cf-et-nome { font-size: 15px; }
+  .cf-et-sotto { display: none; }
+  .cf-vivo { min-height: 28px; padding: 0 10px; font-size: 12px; gap: 5px; }
+  .cf-vivo-lungo { display: none; }
+  .cf-vivo-corto { display: inline; }
+  .cf-suggerimento { top: 12px; bottom: auto; transform: translate3d(-50%, -12px, 0); }
   .cf-suggerimento.cf-su { transform: translate3d(-50%, 0, 0); }
-  .cf-etichetta-tieni { bottom: auto; top: 14px; }
 }
 
 /* ------------------------------------------------------------ meno movimento */
@@ -438,6 +399,3 @@ html.cf-aperto body { overflow: hidden; }
   .cf *, .cf *::before, .cf *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   .cf-sugg-icona::after { animation: none; }
 }
-.cf-svela .cf-maniglia { opacity: 0; }
-.cf-chiude .cf-fantasma { z-index: 0; }
-.cf-chiude .cf-finestra { z-index: 1; }

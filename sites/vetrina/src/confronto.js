@@ -4,17 +4,21 @@
    API
      Confronto.apri(id, elementoDiPartenza)  apre il lavoro (animazione dal riquadro)
      Confronto.chiudi()                      torna alla vetrina (focus sull'elemento + evento 'confronto:chiuso')
-     Confronto.misure()                      fps misurati su lente/tenda e ms dei cambi pagina
+     Confronto.misure()                      fps misurati durante lo scorrimento e ms dei cambi pagina
 
-   Come resta fluido
-     - il sito nuovo è VERO e a grandezza naturale (nessun iframe rimpicciolito);
-     - foto e font del sito nuovo diventano blob: URL UNA volta sola; ogni pagina è un srcdoc di pochi kB
-       che li richiama (se il browser non accetta i blob in un srcdoc si ripiega sui data URI);
-     - fino a 4 pagine restano vive (ritorno istantaneo), la successiva è pre-caricata, anche quella
-       sotto il mouse quando si punta un link;
-     - la fotografia "prima" è a fette, decodificata in anticipo (img.decode);
-     - lente, tenda e telefoni si muovono solo con transform, un aggiornamento per fotogramma (rAF).
-   Il ponte iniettato in ogni pagina (postMessage) porta al visore mouse, scorrimento, link e tasti.
+   Modi
+     Affiancati  (predefinito su computer) fotografie a pagina intera di prima e di dopo, metà schermo
+                 ciascuna, che scorrono insieme in proporzione. Un solo scorrimento nativo (rotella, dito,
+                 tastiera) muove entrambe: dove il browser lo sa fare (ScrollTimeline) le muove il
+                 compositore, senza passare dal JavaScript; altrimenti un aggiornamento per fotogramma.
+     Telefono    da computer: due telefoni, a sinistra la foto di prima, a destra il sito nuovo VIVO a 390 px.
+                 Su schermo stretto: le due versioni da telefono affiancate (foto), che scorrono insieme.
+     Solo prima  la fotografia del sito di oggi a tutto schermo.
+     Solo dopo   il sito nuovo vero, a grandezza naturale (predefinito su telefono).
+   Fra un modo e l'altro si resta sulla stessa pagina e allo stesso punto (in proporzione).
+
+   Come resta leggero: foto e font del sito vivo diventano blob: URL una volta sola; ogni pagina è un srcdoc
+   di pochi kB; fino a 4 pagine vive restano in memoria; le fotografie sono a fette decodificate in anticipo.
    ========================================================================== */
 (function () {
   "use strict";
@@ -26,19 +30,18 @@
   var V = W.VETRINA || { progetti: [] };
   var $ = function (id) { return D.getElementById(id); };
   var finestra = $("cf-finestra"), scena = $("cf-scena"), schermo = $("cf-schermo");
-  var tenda = $("cf-tenda"), tendaDentro = $("cf-tenda-dentro");
-  var lente = $("cf-lente"), lenteVetro = $("cf-lente-vetro");
-  var maniglia = $("cf-maniglia"), presa = $("cf-presa"), scudo = $("cf-scudo");
-  var telPrima = $("cf-tel-prima"), btnTieni = $("cf-tieni"), btnPagina = $("cf-pagina");
+  var telPrima = $("cf-tel-prima"), btnPagina = $("cf-pagina");
   var mappa = $("cf-mappa"), mappaLista = $("cf-mappa-lista"), sugg = $("cf-suggerimento");
   var avanz = $("cf-avanzamento"), annuncio = $("cf-annuncio"), fantasma = $("cf-fantasma");
+  var colonne = $("cf-colonne"), scorre = $("cf-scorre"), spazio = $("cf-spazio"), guida = $("cf-guida");
+  var slot = [$("cf-col-0"), $("cf-col-1")];
   var modi = [].slice.call(radice.querySelectorAll("[data-modo]"));
 
   function mq(q) { return W.matchMedia ? W.matchMedia(q) : { matches: false }; }
   var mqRidotto = mq("(prefers-reduced-motion: reduce)");
-  var mqTel = mq("(max-width: 699px)");
-  var mqMouse = mq("(hover: hover) and (pointer: fine)");
+  var mqStretto = mq("(max-width: 699px)");
   function ridotto() { return mqRidotto.matches; }
+  function stretto() { return mqStretto.matches; }
   function ora() { return W.performance ? performance.now() : Date.now(); }
   function limita(v, a, b) { return v < a ? a : v > b ? b : v; }
   var memoria = {};                                   // se localStorage non c'è (sandbox, privata) vale per la visita
@@ -51,17 +54,11 @@
   function pronti() { return (V.progetti || []).filter(function (p) { return p.pronto && p.pagine && p.sito; }); }
 
   /* ---------------------------------------------------------------- stato */
-  var S = {
-    aperto: false, chiusura: false, prog: null, i: 0, el: null,
-    modo: "lente", tenda: 0.5, tieni: false, svela: null,
-    mx: -999, my: -999, dentro: false, trascina: false,
-    ultima: {}, visitate: {}
-  };
-  var scenaW = 0, scenaH = 0, scenaL = 0, scenaT = 0, R = 150;
-  var geo = { telH: 700 };
+  var S = { aperto: false, chiusura: false, prog: null, i: 0, el: null, modo: "affiancati", p: 0, ultima: {}, visitate: {} };
+  var scenaW = 0, scenaH = 0, geo = { telH: 700 };
 
   /* ---------------------------------------------------------------- misure */
-  var M = { lente: [], tenda: [], telefono: [], cambi: [] };
+  var M = { affiancati: [], telefono: [], prima: [], dopo: [], cambi: [] };
   var fT = null, fUlt = 0, fT0 = 0, fPrec = 0, fN = 0, fPeggio = 0, fRaf = 0;
   function fps(tipo) {
     fUlt = ora();
@@ -79,7 +76,7 @@
   function fpsChiudi() {
     cancelAnimationFrame(fRaf);
     var durata = fPrec - fT0;
-    if (fT && fN > 8 && durata > 150) M[fT].push({ fps: Math.round((fN - 1) / durata * 10000) / 10, peggiore_ms: Math.round(fPeggio * 10) / 10, durata_ms: Math.round(durata) });
+    if (fT && M[fT] && fN > 8 && durata > 150) M[fT].push({ fps: Math.round((fN - 1) / durata * 10000) / 10, peggiore_ms: Math.round(fPeggio * 10) / 10, durata_ms: Math.round(durata) });
     fT = null;
   }
   function riassunto(lista) {
@@ -144,7 +141,7 @@
     var pg = prog.pagine[i];
     if (r.stile == null) {
       var fc = (prog.sito.font_css || "").replace(/@@F:(\d+)@@/g, function (m, n) { return url(prog.sito.font[+n]); });
-      r.stile = "<style>" + fc + "\n" + prog.sito.css + "\nhtml{-webkit-touch-callout:none}</style>";
+      r.stile = "<style>" + fc + "\n" + prog.sito.css + "</style>";
     }
     var testa = r.stile + "<script>var CF_PERCORSO=" + JSON.stringify(pg.path) + ";(" + ponte + ")();<\/script>";
     r.docs[i] = pg.html
@@ -154,15 +151,13 @@
     return r.docs[i];
   }
 
-  /* ---------------------------------------------------------------- il ponte (gira DENTRO ogni pagina del sito nuovo) */
+  /* ---------------------------------------------------------------- il ponte (gira DENTRO ogni pagina del sito vivo) */
   function ponte() {
     var P = window.CF_PERCORSO || "", d = document, su = window.parent;
     var ridotto = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     function manda(m) { try { su.postMessage(m, "*"); } catch (e) {} }
-    function stato() {
-      var se = d.scrollingElement || d.documentElement;
-      manda({ cf: "s", y: se.scrollTop, max: Math.max(0, se.scrollHeight - window.innerHeight) });
-    }
+    function corsa() { var se = d.scrollingElement || d.documentElement; return Math.max(0, se.scrollHeight - window.innerHeight); }
+    function stato() { var se = d.scrollingElement || d.documentElement; manda({ cf: "s", y: se.scrollTop, max: corsa() }); }
     function vaiHash(h, subito) {
       var id = decodeURIComponent((h || "").slice(1)), t = id && d.getElementById(id);
       if (!t) { window.scrollTo({ top: 0, behavior: "instant" }); return; }
@@ -170,9 +165,7 @@
       if (!t.matches("a,button,input,select,textarea,[tabindex]")) t.setAttribute("tabindex", "-1");
       try { t.focus({ preventScroll: true }); } catch (e) {}
     }
-    var soffoca = false;
     d.addEventListener("click", function (e) {
-      if (soffoca) { soffoca = false; e.preventDefault(); e.stopPropagation(); return; }
       var a = e.target.closest && e.target.closest("a[href]");
       if (!a) return;
       var h = a.getAttribute("href") || "";
@@ -193,53 +186,19 @@
       var u = new URL(h, "https://sito.invalid/" + P);
       manda({ cf: "punta", path: u.pathname.slice(1).replace(/index\.html$/, "") });
     }, { passive: true });
-    d.addEventListener("pointermove", function (e) {
-      if (e.pointerType === "touch") return;
-      manda({ cf: "p", x: e.clientX, y: e.clientY });
-    }, { passive: true });
-    d.addEventListener("mouseout", function (e) { if (!e.relatedTarget) manda({ cf: "via" }); });
     d.addEventListener("pointerdown", function () { manda({ cf: "giu" }); }, { passive: true });
     window.addEventListener("scroll", stato, { passive: true });
     window.addEventListener("resize", stato);
     if (window.ResizeObserver) new ResizeObserver(stato).observe(d.documentElement);
-    function interattivo(t) { return t && (/^(INPUT|TEXTAREA|SELECT|BUTTON|A|SUMMARY)$/.test(t.tagName) || t.isContentEditable); }
-    function apertoQualcosa() { return d.querySelector("dialog[open], [role=dialog]:not(dialog):not([hidden])"); }
     window.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { if (!apertoQualcosa()) manda({ cf: "tasto", k: "Escape" }); return; }
-      if ((e.key === " " || e.code === "Space") && !interattivo(e.target) && !apertoQualcosa()) {
-        e.preventDefault();
-        if (!e.repeat) manda({ cf: "tasto", k: " ", giu: true });
-      }
+      if (e.key === "Escape" && !d.querySelector("dialog[open], [role=dialog]:not(dialog):not([hidden])")) manda({ cf: "tasto", k: "Escape" });
     }, true);
-    window.addEventListener("keyup", function (e) {
-      if (e.key === " " || e.code === "Space") manda({ cf: "tasto", k: " ", giu: false });
-    }, true);
-    /* pressione lunga (telefono): mostra il prima finché si tiene il dito */
-    var timer = 0, x0 = 0, y0 = 0, tenuto = false;
-    function annulla() { clearTimeout(timer); timer = 0; }
-    d.addEventListener("touchstart", function (e) {
-      if (e.touches.length !== 1) { annulla(); return; }
-      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
-      annulla();
-      timer = setTimeout(function () { tenuto = true; soffoca = true; manda({ cf: "tieni", on: true }); }, 480);
-    }, { passive: true });
-    d.addEventListener("touchmove", function (e) {
-      var t = e.touches[0];
-      if (timer && (Math.abs(t.clientX - x0) > 10 || Math.abs(t.clientY - y0) > 10)) annulla();
-    }, { passive: true });
-    function rilascia() {
-      annulla();
-      if (tenuto) { tenuto = false; manda({ cf: "tieni", on: false }); setTimeout(function () { soffoca = false; }, 400); }
-    }
-    d.addEventListener("touchend", rilascia, { passive: true });
-    d.addEventListener("touchcancel", rilascia, { passive: true });
-    d.addEventListener("contextmenu", function (e) { if (tenuto) e.preventDefault(); });
-    /* messaggi dal visore */
     window.addEventListener("message", function (e) {
       if (e.source !== su || !e.data) return;
       var m = e.data;
-      if (m.cf === "vai-a") { if (m.hash) vaiHash(m.hash, true); else window.scrollTo({ top: 0, behavior: "instant" }); stato(); }
-      else if (m.cf === "scorri") { window.scrollBy({ top: m.dy, behavior: "instant" }); }
+      if (m.cf === "vai-a") { if (m.hash) vaiHash(m.hash, true); else window.scrollTo({ top: Math.round((m.p || 0) * corsa()), behavior: "instant" }); stato(); }
+      else if (m.cf === "scorri") window.scrollBy({ top: m.dy, behavior: "instant" });
+      else if (m.cf === "scorri-a") { window.scrollTo({ top: Math.round(m.p * corsa()), behavior: "instant" }); stato(); }
       else if (m.cf === "reset") {
         [].forEach.call(d.querySelectorAll("dialog[open]"), function (x) { x.close(); });
         var mm = d.querySelector("[role=dialog]:not(dialog):not([hidden])");
@@ -263,9 +222,9 @@
     });
   }
 
-  /* ---------------------------------------------------------------- pagine del sito nuovo: gruppo di iframe */
+  /* ---------------------------------------------------------------- sito vivo: gruppo di iframe */
   var pool = [], attivo = null, richiesta = 0, tPre = 0;
-  function maxPool() { return mqTel.matches ? 3 : 4; }
+  function maxPool() { return stretto() ? 3 : 4; }
   function slotDi(win) { for (var j = 0; j < pool.length; j++) if (pool[j].ifr.contentWindow === win) return pool[j]; return null; }
   function manda(s, m) { try { s.ifr.contentWindow.postMessage(m, "*"); } catch (e) {} }
   function carica(s, prog, i) {
@@ -312,13 +271,11 @@
     pool = []; attivo = null;
   }
 
-  /* ---------------------------------------------------------------- fotografia "prima" a fette */
-  var pilaOra = null;
-  function tipoPrima() { return (S.modo === "telefono" || (scenaW || innerWidth) < 700) ? "tel" : "pc"; }
-  function pila(prog, i, tipo) {
-    var r = ris(prog), k = i + tipo;
+  /* ---------------------------------------------------------------- fotografie a pagina intera, a fette */
+  function pila(prog, i, lato, tipo) {
+    var r = ris(prog), k = i + lato + tipo;
     if (r.pile[k]) return r.pile[k];
-    var dati = prog.pagine[i].prima[tipo], el = D.createElement("div"), imgs = [], y = 0;
+    var dati = prog.pagine[i][lato][tipo], el = D.createElement("div"), imgs = [], y = 0;
     el.className = "cf-pila";
     dati.fette.forEach(function (f) {
       var im = new Image();
@@ -344,73 +301,189 @@
     var dec = function (im) { return im.decode ? im.decode().catch(function () {}) : Promise.resolve(); };
     p.pronta = Promise.all(p.imgs.slice(0, 2).map(dec));
     p.pronta.then(function () {                      // le altre fette una alla volta, senza fretta
+      p.decodificata = true;
       var resto = p.imgs.slice(2);
       (function prossima() { var im = resto.shift(); if (im) dec(im).then(prossima); })();
     });
     return p.pronta;
   }
-  function preparaPila(prog, i) { return decodifica(pila(prog, i, tipoPrima())); }
-  function contenitore() {
-    if (S.modo === "telefono") return telPrima;
-    if (S.modo === "lente" && !S.tieni && !S.rilascio && S.svela == null) return lenteVetro;
-    return tendaDentro;
+
+  /* ---------------------------------------------------------------- modi */
+  function fotoModo(m) { return m === "affiancati" || m === "prima" || (m === "telefono" && stretto()); }
+  function colonneDi(m) {
+    if (m === "affiancati") return [["prima", "pc"], ["dopo", "pc"]];
+    if (m === "prima") return [["prima", stretto() ? "tel" : "pc"]];
+    if (m === "telefono" && stretto()) return [["prima", "tel"], ["dopo", "tel"]];
+    return [];
   }
-  function montaPila() {
-    if (!S.prog) return;
-    var p = pila(S.prog, S.i, tipoPrima()), dove = contenitore();
-    disponi(p, S.modo === "telefono" ? 390 : scenaW);
-    decodifica(p);
-    if (pilaOra && pilaOra !== p && pilaOra.el.parentNode) pilaOra.el.parentNode.removeChild(pilaOra.el);
-    if (p.el.parentNode !== dove) dove.appendChild(p.el);
-    pilaOra = p;
+  function modoPossibile(m) {
+    if (m === "affiancati") return !stretto();
+    if (m === "telefono") return stretto() || geo.possibile;
+    return m === "prima" || m === "dopo";
+  }
+  function modoIniziale() { return stretto() ? "dopo" : "affiancati"; }
+
+  /* dove sono adesso, da 0 (inizio pagina) a 1 (fondo) */
+  function progresso() {
+    if (fotoModo(S.modo)) return foto.R > 0 ? limita(scorre.scrollTop / foto.R, 0, 1) : 0;
+    var s = attivo;
+    return s && s.pronto && s.max > 0 ? limita(s.y / s.max, 0, 1) : S.p;
+  }
+
+  function modo(m, da) {
+    if (!modoPossibile(m)) m = modoIniziale();
+    if (S.aperto && m !== S.modo) S.p = progresso();
+    var prima = S.modo;
+    S.modo = m;
+    ["affiancati", "telefono", "prima", "dopo"].forEach(function (k) { radice.classList.toggle("cf-modo-" + k, k === m); });
+    radice.classList.toggle("cf-stretto", stretto());
+    radice.classList.toggle("cf-foto-su", fotoModo(m));
+    modi.forEach(function (b) {
+      b.setAttribute("aria-checked", b.dataset.modo === m ? "true" : "false");
+      b.tabIndex = b.dataset.modo === m ? 0 : -1;
+      b.hidden = !modoPossibile(b.dataset.modo);
+    });
+    if (!S.aperto || !S.prog) return;
+    if (fotoModo(m)) montaFoto();
+    else {
+      annullaAnim();
+      montaTelefono();
+      if (attivo) {
+        manda(attivo, { cf: "scorri-a", p: S.p });
+        if (!attivo.pronto) { radice.classList.add("cf-carica-su"); quandoPronto(attivo).then(function () { radice.classList.remove("cf-carica-su"); if (attivo) manda(attivo, { cf: "scorri-a", p: S.p }); }); }
+      }
+    }
+    if (prima !== m && !ridotto() && da !== "avvio" && scena.animate) {
+      scena.animate([{ opacity: 0.25 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
+    }
+    if (m === "dopo" && attivo && da === "vivo") { try { attivo.ifr.focus(); } catch (e) {} }
+    else if (fotoModo(m) && da !== "avvio" && da !== "tastiera") { try { scorre.focus({ preventScroll: true }); } catch (e) {} }
+    annuncio.textContent = { affiancati: "Prima e dopo affiancati", telefono: "Versione da telefono", prima: "Solo il sito di prima", dopo: "Solo il sito nuovo, dal vivo" }[m];
     segna();
   }
 
-  /* ---------------------------------------------------------------- disegno: un aggiornamento per fotogramma */
-  var sporco = false, senzaPrima = null, senzaDopo = null;
-  function segna() { if (!sporco) { sporco = true; requestAnimationFrame(disegna); } }
-  function tendaX() {
-    if (S.tieni || S.rilascio) return scenaW;
-    if (S.svela != null) return S.svela * scenaW;
-    return S.tenda * scenaW;
+  /* ---------------------------------------------------------------- foto che scorrono insieme */
+  var TL = typeof W.ScrollTimeline === "function" && !!Element.prototype.animate;
+  var foto = { pile: [], V: 0, R: 0, anim: [], guidaH: 0 };
+  function annullaAnim() { foto.anim.forEach(function (a) { try { a.cancel(); } catch (e) {} }); foto.anim = []; }
+  function montaFoto() {
+    annullaAnim();
+    var cols = colonneDi(S.modo);
+    radice.classList.toggle("cf-una", cols.length === 1);
+    var Wc = colonne.clientWidth, Vc = colonne.clientHeight;
+    var cw = cols.length === 2 ? Math.floor((Wc - 2) / 2) : Wc;
+    foto.V = Vc; foto.pile = [];
+    slot.forEach(function (sl, k) {
+      var c = cols[k], p = c && pila(S.prog, S.i, c[0], c[1]);
+      [].slice.call(sl.children).forEach(function (x) { if (!p || x !== p.el) sl.removeChild(x); });
+      if (!p) return;
+      disponi(p, cw); decodifica(p);
+      if (p.el.parentNode !== sl) sl.appendChild(p.el);
+      foto.pile.push(p);
+    });
+    var maxH = Math.max.apply(null, foto.pile.map(function (p) { return p.alto; }).concat([Vc]));
+    foto.R = maxH - Vc;
+    spazio.style.height = maxH + "px";
+    foto.guidaH = Math.round(limita(Vc * Vc / maxH, 36, Vc));
+    guida.style.setProperty("--cf-guida", foto.guidaH + "px");
+    guida.style.opacity = foto.R > 0 ? "" : "0";
+    scorre.scrollTop = Math.round(S.p * foto.R);
+    if (TL && foto.R > 0) {
+      try {
+        var tl = new W.ScrollTimeline({ source: scorre, axis: "block" });
+        var muovi = function (el, da, a) { foto.anim.push(el.animate([{ transform: da }, { transform: a }], { timeline: tl, fill: "both", easing: "linear" })); };
+        foto.pile.forEach(function (p) { p.el.style.transform = ""; muovi(p.el, "translate3d(0,0,0)", "translate3d(0," + (-Math.max(0, p.alto - Vc)) + "px,0)"); });
+        guida.style.transform = ""; muovi(guida, "translate3d(0,0,0)", "translate3d(0," + (Vc - foto.guidaH) + "px,0)");
+        avanz.style.transform = ""; muovi(avanz, "scaleX(0)", "scaleX(1)");
+        return;
+      } catch (e) { annullaAnim(); TL = false; }
+    }
+    disegnaFoto();
   }
+  function disegnaFoto() {
+    var p = foto.R > 0 ? limita(scorre.scrollTop / foto.R, 0, 1) : 0;
+    foto.pile.forEach(function (pl) { pl.el.style.transform = "translate3d(0," + (-Math.round(p * Math.max(0, pl.alto - foto.V))) + "px,0)"; });
+    guida.style.transform = "translate3d(0," + Math.round(p * (foto.V - foto.guidaH)) + "px,0)";
+    avanz.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  }
+  scorre.addEventListener("scroll", function () {
+    if (!S.aperto || !fotoModo(S.modo)) return;
+    if (!TL || !foto.anim.length) segna();
+    fps(S.modo);
+    nascondiSugg();
+  }, { passive: true });
+
+  /* trascinare col mouse: il contenuto sotto il puntatore segue la mano, poi un po' d'inerzia (niente rimbalzi) */
+  var trasc = null, inerzia = 0;
+  function fermaInerzia() { cancelAnimationFrame(inerzia); inerzia = 0; }
+  scorre.addEventListener("pointerdown", function (e) {
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    fermaInerzia();
+    var r = scorre.getBoundingClientRect(), k = foto.pile.length === 2 && e.clientX - r.left > r.width / 2 ? 1 : 0;
+    var pl = foto.pile[k], c = pl ? Math.max(1, pl.alto - foto.V) : 1;
+    trasc = { id: e.pointerId, y0: e.clientY, top0: scorre.scrollTop, f: foto.R > 0 ? foto.R / c : 1, v: 0, t: ora(), y: e.clientY };
+    try { scorre.setPointerCapture(e.pointerId); } catch (x) {}
+    radice.classList.add("cf-trascina");
+    e.preventDefault();
+    try { scorre.focus({ preventScroll: true }); } catch (x) {}
+  });
+  scorre.addEventListener("pointermove", function (e) {
+    if (!trasc || e.pointerId !== trasc.id) return;
+    var t = ora(), dt = Math.max(1, t - trasc.t);
+    trasc.v = 0.75 * ((e.clientY - trasc.y) / dt) + 0.25 * trasc.v;
+    trasc.y = e.clientY; trasc.t = t;
+    scorre.scrollTop = trasc.top0 - (e.clientY - trasc.y0) * trasc.f;
+  });
+  function fineTrascina(e) {
+    if (!trasc || e.pointerId !== trasc.id) return;
+    var v = trasc.v * trasc.f, recente = ora() - trasc.t < 60;
+    trasc = null; radice.classList.remove("cf-trascina");
+    if (!recente || Math.abs(v) < 0.15 || ridotto()) return;
+    var prec = ora();
+    (function giro() {
+      var t = ora(), dt = Math.min(40, t - prec); prec = t;
+      scorre.scrollTop -= v * dt;
+      v *= Math.pow(0.94, dt / 16.7);
+      if (Math.abs(v) > 0.02) inerzia = requestAnimationFrame(giro); else inerzia = 0;
+    })();
+  }
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (t) { scorre.addEventListener(t, fineTrascina); });
+  scorre.addEventListener("wheel", fermaInerzia, { passive: true });
+
+  /* ---------------------------------------------------------------- telefono da computer: foto di prima legata al sito vivo */
+  var telPila = null;
+  function montaTelefono() {
+    if (S.modo !== "telefono" || stretto() || !S.prog) return;
+    var p = pila(S.prog, S.i, "prima", "tel");
+    disponi(p, 390); decodifica(p);
+    [].slice.call(telPrima.children).forEach(function (x) { if (x !== p.el) telPrima.removeChild(x); });
+    if (p.el.parentNode !== telPrima) telPrima.appendChild(p.el);
+    telPila = p;
+  }
+  telPrima.addEventListener("wheel", function (e) {
+    if (!attivo) return;
+    e.preventDefault();
+    manda(attivo, { cf: "scorri", dy: e.deltaY * (e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? geo.telH : 1) });
+  }, { passive: false });
+
+  /* ---------------------------------------------------------------- disegno: un aggiornamento per fotogramma */
+  var sporco = false;
+  function segna() { if (!sporco) { sporco = true; requestAnimationFrame(disegna); } }
   function disegna() {
     sporco = false;
     if (!S.aperto) return;
-    var s = attivo, prog = s && s.max > 0 ? limita(s.y / s.max, 0, 1) : 0;
-    avanz.style.transform = "scaleX(" + prog.toFixed(4) + ")";
-    var p = pilaOra;
-    if (!p) return;
-    var vista = S.modo === "telefono" ? geo.telH : scenaH;
-    var off = Math.round(prog * Math.max(0, p.alto - vista));
-    var dove = p.el.parentNode;
-    if (dove === lenteVetro) {
-      p.el.style.transform = "translate(" + Math.round(R - S.mx) + "px," + Math.round(R - S.my - off) + "px)";
-      lente.style.transform = "translate3d(" + Math.round(S.mx) + "px," + Math.round(S.my) + "px,0)";
-    } else if (dove === tendaDentro) {
-      var x = Math.round(tendaX());
-      tenda.style.transform = "translate3d(" + (x - scenaW) + "px,0,0)";
-      tendaDentro.style.transform = "translate3d(" + (scenaW - x) + "px,0,0)";
-      p.el.style.transform = "translate3d(0," + (-off) + "px,0)";
-      if (S.modo === "tenda") {
-        var xs = Math.round(S.tenda * scenaW);
-        maniglia.style.transform = "translate3d(" + xs + "px,0,0)";
-        presa.style.transform = "translate3d(" + (limita(xs, 30, scenaW - 30) - xs) + "px,0,0)";
-        var sp = xs < 96, sd = xs > scenaW - 96 || xs < 40;     // tenda chiusa a sinistra: solo la presa
-        if (sp !== senzaPrima) { senzaPrima = sp; maniglia.classList.toggle("cf-senza-prima", sp); }
-        if (sd !== senzaDopo) { senzaDopo = sd; maniglia.classList.toggle("cf-senza-dopo", sd); }
-      }
-    } else {
-      p.el.style.transform = "translate3d(0," + (-off) + "px,0)";
+    if (fotoModo(S.modo)) { if (!foto.anim.length) disegnaFoto(); return; }
+    var s = attivo, p = s && s.max > 0 ? limita(s.y / s.max, 0, 1) : 0;
+    avanz.style.transform = "scaleX(" + p.toFixed(4) + ")";
+    if (S.modo === "telefono" && telPila && telPila.el.parentNode === telPrima) {
+      telPila.el.style.transform = "translate3d(0," + (-Math.round(p * Math.max(0, telPila.alto - geo.telH))) + "px,0)";
     }
   }
 
   /* ---------------------------------------------------------------- scena e geometria */
   function misuraScena() {
     var r = scena.getBoundingClientRect();
-    scenaW = Math.round(r.width); scenaH = Math.round(r.height); scenaL = r.left; scenaT = r.top;
-    R = Math.round(limita(Math.min(scenaW, scenaH) * 0.19, 105, 170));
-    radice.style.setProperty("--cf-r", R + "px");
+    scenaW = Math.round(r.width); scenaH = Math.round(r.height);
     var bT = 36, bB = 22, bL = 11, sopra = 64, sotto = 22;
     var telH = Math.round(limita(scenaH - sopra - sotto - bT - bB, 420, 800));
     var fW = 390 + 2 * bL, fH = telH + bT + bB, gap = Math.round(limita(scenaW * 0.08, 48, 150));
@@ -425,70 +498,6 @@
     st.setProperty("--cf-tel-bt", bT + "px"); st.setProperty("--cf-tel-bl", bL + "px");
   }
 
-  /* ---------------------------------------------------------------- modi: lente, tenda, telefono, solo nuovo */
-  function modoPossibile(m) {
-    if (m === "lente") return mqMouse.matches && !mqTel.matches;
-    if (m === "telefono") return !mqTel.matches && geo.possibile;
-    if (m === "spento") return !mqTel.matches;
-    return true;
-  }
-  function modo(m, salva) {
-    if (!modoPossibile(m)) m = modoPossibile("lente") ? "lente" : "tenda";
-    var prima = S.modo;
-    S.modo = m;
-    ["lente", "tenda", "telefono", "spento"].forEach(function (k) { radice.classList.toggle("cf-modo-" + k, k === m); });
-    modi.forEach(function (b) {
-      b.setAttribute("aria-checked", b.dataset.modo === m ? "true" : "false");
-      b.tabIndex = b.dataset.modo === m ? 0 : -1;
-      b.hidden = !modoPossibile(b.dataset.modo);
-    });
-    btnTieni.hidden = m === "telefono";
-    if (m === "telefono") tieni(false);
-    if (m !== "lente") lenteSu(false);
-    else if (S.dentro) lenteSu(true);
-    if (salva && !mqTel.matches) memo("cf-modo", m);
-    if ((prima === "telefono") !== (m === "telefono") && S.aperto && !ridotto()) {
-      scena.animate && scena.animate([{ opacity: 0.2, transform: "scale(.985)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" });
-    }
-    montaPila();
-    if (attivo) manda(attivo, { cf: "stato" });
-    segna();
-  }
-  var lenteAccesa = false;
-  var tRilascio = 0;
-  function lenteSu(on) {
-    on = on && S.modo === "lente" && !S.tieni && !S.rilascio && S.svela == null;
-    if (on === lenteAccesa) return;
-    lenteAccesa = on;
-    radice.classList.toggle("cf-lente-su", on);
-  }
-
-  /* ---------------------------------------------------------------- tieni premuto */
-  function tieni(on) {
-    on = !!on && S.modo !== "telefono" && S.aperto;
-    if (on === S.tieni) return;
-    S.tieni = on;
-    radice.classList.toggle("cf-tieni-su", on);
-    btnTieni.setAttribute("aria-pressed", on ? "true" : "false");
-    if (S.modo === "tenda") anima(on ? 0.22 : 0.26);
-    clearTimeout(tRilascio);
-    if (!on && S.modo !== "tenda") {           // la foto sfuma prima di tornare nella lente
-      S.rilascio = true;
-      tRilascio = setTimeout(function () { S.rilascio = false; montaPila(); lenteSu(S.dentro); }, 170);
-    } else { S.rilascio = false; lenteSu(!on && S.dentro); }
-    montaPila();
-    nascondiSugg();
-    segna();
-  }
-  var tAnima = 0;
-  function anima(sec) {
-    if (ridotto()) return;
-    radice.style.setProperty("--cf-durata", sec + "s");
-    radice.classList.add("cf-anima");
-    clearTimeout(tAnima);
-    tAnima = setTimeout(function () { radice.classList.remove("cf-anima"); }, sec * 1000 + 60);
-  }
-
   /* ---------------------------------------------------------------- navigazione fra le pagine */
   function indiceDi(path) {
     var pg = S.prog.pagine;
@@ -500,43 +509,59 @@
   function vaiA(i, hash) {
     var prog = S.prog;
     if (!prog || i < 0 || i >= prog.pagine.length) return Promise.resolve();
-    var mio = ++richiesta, t0 = ora();
+    var mio = ++richiesta, t0 = ora(), m = S.modo;
     S.i = i; S.ultima[prog.id] = i;
     (S.visitate[prog.id] = S.visitate[prog.id] || {})[i] = true;
     aggiornaBarra();
-    var s = slotPer(prog, i, true), giaPronta = s.pronto;
+    var s = slotPer(prog, i, true), giaPronta;
     s.inArrivo = true; s.usato = t0;
+    var attese;
+    if (fotoModo(m)) {
+      attese = colonneDi(m).map(function (c) { return decodifica(pila(prog, i, c[0], c[1])); });
+      giaPronta = attese.length && colonneDi(m).every(function (c) { var p = ris(prog).pile[i + c[0] + c[1]]; return p && p.decodificata; });
+    } else {
+      giaPronta = s.pronto;
+      attese = [quandoPronto(s)];
+      if (m === "telefono") attese.push(Promise.race([decodifica(pila(prog, i, "prima", "tel")), attendi(400)]));
+    }
     var lento = setTimeout(function () { if (mio === richiesta) radice.classList.add("cf-carica-su"); }, 140);
-    return Promise.all([quandoPronto(s), Promise.race([preparaPila(prog, i), attendi(400)])]).then(function () {
-      s.inArrivo = false;
+    return Promise.race([Promise.all(attese), attendi(fotoModo(m) ? 1500 : 8000)]).then(function () {
       clearTimeout(lento);
-      if (mio !== richiesta || !S.aperto || s.prog !== prog || s.i !== i) return;
+      if (mio !== richiesta || !S.aperto || s.prog !== prog || s.i !== i) { s.inArrivo = false; return; }
       radice.classList.remove("cf-carica-su");
       mostra(s, hash);
       requestAnimationFrame(function () {
-        requestAnimationFrame(function () { M.cambi.push({ pagina: prog.pagine[i].nome, ms: Math.round(ora() - t0), gia_pronta: giaPronta }); });
+        requestAnimationFrame(function () { M.cambi.push({ pagina: prog.pagine[i].nome, modo: m, ms: Math.round(ora() - t0), gia_pronta: !!giaPronta }); });
       });
       precarica();
     });
   }
   function mostra(s, hash) {
     var vecchio = attivo, focusDentro = vecchio && D.activeElement === vecchio.ifr;
-    manda(s, { cf: "vai-a", hash: hash || "" });
+    s.inArrivo = false;
+    S.p = 0;
+    if (s.pronto) manda(s, { cf: "vai-a", hash: hash || "", p: 0 });
     attivo = s;
     pool.forEach(function (c) { if (c !== s && c !== vecchio) c.ifr.classList.remove("cf-attivo", "cf-uscente", "cf-entra"); });
-    s.ifr.tabIndex = 0;
+    s.ifr.tabIndex = fotoModo(S.modo) ? -1 : 0;
     s.ifr.classList.remove("cf-uscente");
     s.ifr.classList.add("cf-attivo");
     if (vecchio && vecchio !== s) {
       vecchio.ifr.tabIndex = -1;
       vecchio.ifr.classList.remove("cf-attivo", "cf-entra");
-      vecchio.ifr.classList.add("cf-uscente");
-      if (!ridotto()) { s.ifr.classList.remove("cf-entra"); void s.ifr.offsetWidth; s.ifr.classList.add("cf-entra"); }
+      var vivo = !fotoModo(S.modo) && !ridotto();
+      if (vivo) {
+        vecchio.ifr.classList.add("cf-uscente");
+        s.ifr.classList.remove("cf-entra"); void s.ifr.offsetWidth; s.ifr.classList.add("cf-entra");
+      }
       var v = vecchio;
-      setTimeout(function () { if (v !== attivo) { v.ifr.classList.remove("cf-uscente"); manda(v, { cf: "reset" }); } }, 240);
+      setTimeout(function () { if (v !== attivo) { v.ifr.classList.remove("cf-uscente"); manda(v, { cf: "reset" }); } }, vivo ? 240 : 0);
     }
     if (focusDentro) { try { s.ifr.focus(); } catch (e) {} }
-    montaPila();
+    if (fotoModo(S.modo)) {
+      montaFoto();
+      if (!ridotto() && colonne.animate) colonne.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+    } else montaTelefono();
     segna();
   }
   function precarica() {
@@ -544,15 +569,16 @@
     tPre = setTimeout(function () {
       if (!S.aperto) return;
       var n = S.prog.pagine.length, j = S.i + 1 < n ? S.i + 1 : S.i - 1;
-      if (j >= 0 && !slotPer(S.prog, j, false)) slotPer(S.prog, j, true);
-      if (j >= 0) preparaPila(S.prog, j);
+      if (j < 0) return;
+      colonneDi(S.modo).forEach(function (c) { decodifica(pila(S.prog, j, c[0], c[1])); });
+      if (!slotPer(S.prog, j, false)) slotPer(S.prog, j, true);
     }, 450);
   }
   function punta(path) {
     var j = indiceDi(path);
     if (j < 0 || slotPer(S.prog, j, false)) return;
     clearTimeout(tPre);
-    tPre = setTimeout(function () { if (S.aperto && !slotPer(S.prog, j, false)) { slotPer(S.prog, j, true); preparaPila(S.prog, j); } }, 90);
+    tPre = setTimeout(function () { if (S.aperto && !slotPer(S.prog, j, false)) slotPer(S.prog, j, true); }, 90);
   }
 
   /* ---------------------------------------------------------------- barra e mappa del sito */
@@ -561,9 +587,9 @@
     var pg = S.prog.pagine;
     mappaLista.innerHTML = "";
     pg.forEach(function (p, j) {
-      var genitore = pg.some(function (q) { return q.path && q.path !== p.path && p.path.indexOf(q.path) === 0; });
+      var figlia = pg.some(function (q) { return q.path && q.path !== p.path && p.path.indexOf(q.path) === 0; });
       var li = D.createElement("li"), b = D.createElement("button");
-      if (genitore) li.className = "cf-mappa-sotto";
+      if (figlia) li.className = "cf-mappa-sotto";
       b.type = "button"; b.className = "cf-mappa-voce"; b.dataset.i = j;
       b.innerHTML = '<span class="cf-mappa-num" aria-hidden="true">' + due(j + 1) + '</span><span class="cf-mappa-testo"></span><span class="cf-mappa-vista" aria-hidden="true"></span>';
       b.querySelector(".cf-mappa-testo").textContent = p.nome;
@@ -572,7 +598,7 @@
     $("cf-mappa-conta").textContent = pg.length + " pagine";
     var altri = pronti(), boxL = $("cf-mappa-lavori"), tasti = $("cf-mappa-lavori-tasti");
     $("cf-lavori").hidden = altri.length < 2;
-    boxL.hidden = altri.length < 2 || !mqTel.matches;
+    boxL.hidden = altri.length < 2 || !stretto();
     tasti.innerHTML = "";
     if (altri.length > 1) {
       var k = altri.indexOf(S.prog), pr = altri[(k - 1 + altri.length) % altri.length], su = altri[(k + 1) % altri.length];
@@ -593,8 +619,8 @@
     $("cf-pagina-n").innerHTML = due(S.i + 1) + "<small>/" + due(pg.length) + "</small>";
     $("cf-pagina-nome").textContent = p.nome;
     btnPagina.setAttribute("aria-label", "Pagina " + (S.i + 1) + " di " + pg.length + ": " + p.nome + ". Apri la mappa del sito");
-    $("cf-prec").disabled = S.i === 0;
-    $("cf-succ").disabled = S.i === pg.length - 1;
+    $("cf-prec").disabled = $("cf-mappa-prec").disabled = S.i === 0;
+    $("cf-succ").disabled = $("cf-mappa-succ").disabled = S.i === pg.length - 1;
     [].forEach.call(mappaLista.querySelectorAll(".cf-mappa-voce"), function (b) {
       var j = +b.dataset.i;
       if (j === S.i) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
@@ -616,13 +642,12 @@
   /* ---------------------------------------------------------------- suggerimento alla prima apertura */
   var tSugg = 0, suggDa = 0;
   function suggerisci() {
-    if (memo("cf-suggerito")) return;
-    memo("cf-suggerito", "1");
-    var t;
-    if (S.modo === "lente") t = "<b>Muovi il mouse sul sito:</b> nella lente vedi com'era <em>prima</em>. Tieni premuto <kbd>Spazio</kbd> per vederlo tutto.";
-    else if (mqTel.matches) t = "<b>Trascina la linea bianca</b> per vedere com'era <em>prima</em>, oppure tieni premuto il tasto «prima».";
-    else t = "<b>Trascina la linea</b>: a sinistra il sito di <em>prima</em>, a destra quello nuovo.";
-    sugg.innerHTML = '<span class="cf-sugg-icona" aria-hidden="true"></span><span>' + t + "</span>";
+    if (memo("cf-suggerito-2")) return;
+    memo("cf-suggerito-2", "1");
+    var t = stretto()
+      ? "Questo è il sito nuovo, <b>vero</b>: provalo. In alto <em>prima</em> mostra il sito di oggi, e i due telefoni li mettono uno accanto all'altro."
+      : "<b>Scorri</b> con la rotella o trascina: il sito di <em>prima</em> e la proposta scorrono insieme. <b>Prova dal vivo</b> apre il sito nuovo vero.";
+    sugg.innerHTML = (stretto() ? "" : '<span class="cf-sugg-icona" aria-hidden="true"></span>') + "<span>" + t + "</span>";
     sugg.classList.add("cf-su");
     suggDa = ora();
     clearTimeout(tSugg);
@@ -663,15 +688,14 @@
     if (r.width < 20 || r.height < 20 || r.bottom < 0 || r.top > innerHeight) return null;
     return r;
   }
-  function anteprime(prog) {
+  function anteprima(prog) {
     var a = prog.anteprima || {}, q = fantasma.querySelector(".cf-fantasma-quadro");
-    q.querySelector(".cf-fantasma-prima").src = a.prima || a.dopo || "";
-    q.querySelector(".cf-fantasma-dopo").src = a.dopo || a.prima || "";
+    q.querySelector("img").src = a.dopo || a.prima || "";
     return q;
   }
   function trasformaDa(r) {
-    var vw = innerWidth, top = parseFloat(getComputedStyle(radice).getPropertyValue("--cf-barra")) || 56;
-    return "translate3d(" + r.left + "px," + (r.top - top) + "px,0) scale(" + (r.width / vw) + ")";
+    var top = parseFloat(getComputedStyle(radice).getPropertyValue("--cf-barra")) || 56;
+    return "translate3d(" + r.left + "px," + (r.top - top) + "px,0) scale(" + (r.width / innerWidth) + ")";
   }
 
   function apri(id, el) {
@@ -679,10 +703,9 @@
     if (!prog) return false;
     if (S.aperto) { if (prog !== S.prog) cambiaLavoro(prog); return true; }
     S.aperto = true; S.chiusura = false; S.el = el || D.activeElement; S.prog = prog;
-    var r = ridotto() ? null : rettangolo(el), q = anteprime(prog);
+    var r = ridotto() ? null : rettangolo(el), q = anteprima(prog), im = q.querySelector("img");
     D.documentElement.classList.add("cf-aperto");
-    var dec = [].map.call(q.querySelectorAll("img"), function (im) { return im.decode && im.src ? im.decode().catch(function () {}) : 0; });
-    Promise.all([sonda(), Promise.race([Promise.all(dec), attendi(150)])]).then(function () { avvia(prog, r); });
+    Promise.all([sonda(), Promise.race([im.decode && im.src ? im.decode().catch(function () {}) : 0, attendi(150)])]).then(function () { avvia(prog, r); });
     return true;
   }
 
@@ -693,70 +716,50 @@
     if (r) radice.classList.add("cf-apertura");
     staccaPagina(true);
     misuraScena();
-    S.i = S.ultima[prog.id] || 0;
+    S.i = S.ultima[prog.id] || 0; S.p = 0;
     costruisciMappa();
-    S.svela = ridotto() ? null : 1;
-    radice.classList.toggle("cf-svela", S.svela != null);
-    S.tenda = mqTel.matches ? 0 : (S.tenda > 0.02 && S.tenda < 0.98 ? S.tenda : 0.5);
-    ariaTenda();
-    modo(memo("cf-modo") || "lente");
+    modo(modoIniziale(), "avvio");
     var pagina = vaiA(S.i);
     var entrata = Promise.resolve();
     if (r) {
-      var q = anteprime(prog), fondo = fantasma.querySelector(".cf-fantasma-fondo"), dopoImg = q.querySelector(".cf-fantasma-dopo");
+      var q = fantasma.querySelector(".cf-fantasma-quadro"), fondo = fantasma.querySelector(".cf-fantasma-fondo");
       fantasma.classList.add("cf-su");
       q.style.transition = "none"; q.style.opacity = "1"; q.style.transform = trasformaDa(r);
-      dopoImg.style.opacity = "1"; fondo.style.opacity = "0";
+      fondo.style.opacity = "0";
       void q.offsetWidth;
       entrata = new Promise(function (fatto) {
         requestAnimationFrame(function () {
-          q.style.transition = "transform .62s cubic-bezier(.16,1,.3,1)";
+          q.style.transition = "transform .5s cubic-bezier(.2,.9,.25,1)";
           q.style.transform = "translate3d(0,0,0) scale(1)";
           fondo.style.opacity = "1";
-          setTimeout(function () { dopoImg.style.opacity = "0"; }, 260);
-          setTimeout(fatto, 640);
+          setTimeout(fatto, 460);
         });
       });
     }
     Promise.all([pagina, entrata]).then(function () {
       if (!S.aperto) return;
       velaPagina();
-      if (r) finestra.style.transition = "none";      // sotto il fantasma la finestra è già piena
       radice.classList.remove("cf-nascosta");
-      requestAnimationFrame(function () { radice.classList.remove("cf-apertura"); finestra.style.transition = ""; });
-      try { finestra.focus({ preventScroll: true }); } catch (e) {}
+      requestAnimationFrame(function () { radice.classList.remove("cf-apertura"); });
+      if (fotoModo(S.modo)) { try { scorre.focus({ preventScroll: true }); } catch (e) {} }
+      else { try { finestra.focus({ preventScroll: true }); } catch (e) {} }
       if (r) {
         var q = fantasma.querySelector(".cf-fantasma-quadro");
-        q.style.transition = "opacity .24s ease-out"; q.style.opacity = "0";
+        q.style.transition = "opacity .3s ease-out"; q.style.opacity = "0";
         fantasma.querySelector(".cf-fantasma-fondo").style.opacity = "0";
         setTimeout(function () { fantasma.classList.remove("cf-su"); }, 380);
       }
-      if (S.svela != null) svela(); else suggerisci();
+      if (!ridotto() && fotoModo(S.modo) && slot[0].animate) {   // le due colonne arrivano dai lati
+        slot.forEach(function (sl, k) { sl.animate([{ transform: "translate3d(" + (k ? 28 : -28) + "px,0,0)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 520, delay: 80, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" }); });
+      }
+      suggerisci();
     });
-  }
-  /* il sito di prima scorre via come una tenda e lascia il nuovo */
-  function svela() {
-    var fine = S.modo === "tenda" ? S.tenda : 0;
-    S.svela = 1; radice.classList.add("cf-svela"); montaPila(); disegna();
-    setTimeout(function () {
-      if (!S.aperto) return;
-      anima(0.9);
-      S.svela = fine; segna();
-      setTimeout(function () {
-        if (!S.aperto) return;
-        S.svela = null;
-        radice.classList.remove("cf-svela");
-        montaPila();
-        lenteSu(S.dentro);
-        suggerisci();
-      }, 940);
-    }, 120);
   }
 
   function chiudi() {
     if (!S.aperto || S.chiusura) return;
     S.chiusura = true;
-    tieni(false); chiudiMappa(); nascondiSugg(true); lenteSu(false); fpsChiudi();
+    chiudiMappa(); nascondiSugg(true); fpsChiudi(); fermaInerzia();
     var el = S.el;
     staccaPagina(false);
     var r = ridotto() ? null : rettangolo(el);
@@ -767,18 +770,17 @@
       fantasma.querySelector(".cf-fantasma-fondo").style.transition = "";
       radice.hidden = true;
       finestra.style.transition = "";
-      radice.classList.remove("cf-nascosta", "cf-svela", "cf-tieni-su", "cf-carica-su", "cf-chiude", "cf-lente-su");
-      lenteAccesa = false;
-      S.aperto = false; S.chiusura = false; S.svela = null;
+      radice.classList.remove("cf-nascosta", "cf-carica-su", "cf-chiude");
+      S.aperto = false; S.chiusura = false;
       if (attivo) manda(attivo, { cf: "reset" });
       var id = S.prog.id;
       if (el && el.focus && D.contains(el)) { try { el.focus({ preventScroll: true }); } catch (e) {} }
       D.dispatchEvent(new CustomEvent("confronto:chiuso", { detail: { id: id } }));
     }
     if (!r) { radice.classList.add("cf-nascosta"); setTimeout(fine, ridotto() ? 0 : 200); return; }
-    var q = anteprime(S.prog), fondo = fantasma.querySelector(".cf-fantasma-fondo"), dopoImg = q.querySelector(".cf-fantasma-dopo");
+    var q = anteprima(S.prog), fondo = fantasma.querySelector(".cf-fantasma-fondo");
     q.style.transition = "none"; q.style.transform = "translate3d(0,0,0) scale(1)"; q.style.opacity = "1";
-    dopoImg.style.opacity = "1"; fondo.style.transition = "none"; fondo.style.opacity = "1";
+    fondo.style.transition = "none"; fondo.style.opacity = "1";
     radice.classList.add("cf-chiude");               // il fantasma sta SOTTO la finestra che sfuma
     finestra.style.transition = "opacity .14s ease-out";
     fantasma.classList.add("cf-su");
@@ -796,11 +798,11 @@
 
   function cambiaLavoro(prog) {
     if (!prog || prog === S.prog) return;
-    tieni(false); chiudiMappa();
+    chiudiMappa();
     var vai = function () {
-      svuotaPool(); pilaOra = null;
-      [lenteVetro, tendaDentro, telPrima].forEach(function (c) { c.innerHTML = ""; });
-      S.prog = prog;
+      svuotaPool(); annullaAnim(); telPila = null;
+      slot.concat([telPrima]).forEach(function (c) { c.innerHTML = ""; });
+      S.prog = prog; S.p = 0;
       costruisciMappa();
       return vaiA(S.ultima[prog.id] || 0);
     };
@@ -808,8 +810,7 @@
     var a = scena.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" });
     a.onfinish = function () {
       vai().then(function () {
-        var b = scena.animate([{ opacity: 0, transform: "translate3d(0,12px,0)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" });
-        b.onfinish = function () { a.cancel(); };
+        scena.animate([{ opacity: 0, transform: "translate3d(0,12px,0)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" });
         a.cancel();
       });
     };
@@ -826,16 +827,8 @@
     switch (d.cf) {
       case "s":
         s.y = +d.y || 0; s.max = +d.max || 0;
-        if (s === attivo) { segna(); if (S.modo === "telefono") fps("telefono"); }
+        if (s === attivo && !fotoModo(S.modo)) { segna(); fps(S.modo); }
         break;
-      case "p":
-        if (s !== attivo || S.modo === "telefono") break;
-        S.mx = +d.x; S.my = +d.y; S.dentro = true;
-        lenteSu(true); segna();
-        if (lenteAccesa) fps("lente");
-        nascondiSugg();
-        break;
-      case "via": S.dentro = false; lenteSu(false); break;
       case "vai":
         if (s !== attivo) break;
         var j = indiceDi(d.path);
@@ -844,29 +837,19 @@
         break;
       case "punta": if (s === attivo) punta(d.path); break;
       case "giu": chiudiMappa(); break;
-      case "tasto":
-        if (d.k === "Escape") esc();
-        else if (d.k === " ") tieni(d.giu);
-        break;
-      case "tieni": tieni(d.on); break;
+      case "tasto": if (d.k === "Escape") esc(); break;
     }
   });
 
   /* ---------------------------------------------------------------- comandi */
   function esc() {
     if (!mappa.hidden) { chiudiMappa(true); return; }
-    if (S.tieni) { tieni(false); return; }
     chiudi();
   }
-  function interattivo(t) { return t && t !== finestra && /^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(t.tagName); }
   D.addEventListener("keydown", function (e) {
     if (!S.aperto) return;
     var t = e.target;
     if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); esc(); return; }
-    if (e.key === " " || e.code === "Space") {
-      if (t === btnTieni || !interattivo(t) && t !== presa) { e.preventDefault(); e.stopPropagation(); if (!e.repeat) tieni(true); }
-      return;
-    }
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     if (!mappa.hidden && (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End")) {
       var voci = [].slice.call(mappaLista.querySelectorAll(".cf-mappa-voce")), k = voci.indexOf(D.activeElement);
@@ -875,18 +858,18 @@
       voci[k].focus();
       return;
     }
-    if (t === presa || (t && t.getAttribute && t.getAttribute("role") === "radio")) return;
+    if (t && t.getAttribute && t.getAttribute("role") === "radio") return;
     if (e.key === "ArrowRight" && S.i < S.prog.pagine.length - 1) { e.preventDefault(); e.stopPropagation(); vaiA(S.i + 1); }
     else if (e.key === "ArrowLeft" && S.i > 0) { e.preventDefault(); e.stopPropagation(); vaiA(S.i - 1); }
   }, true);
-  D.addEventListener("keyup", function (e) {
-    if (S.aperto && (e.key === " " || e.code === "Space")) tieni(false);
-  }, true);
-  W.addEventListener("blur", function () { if (S.tieni && !S.tieniDito) tieni(false); });
 
   $("cf-chiudi").addEventListener("click", chiudi);
-  $("cf-prec").addEventListener("click", function () { if (S.i > 0) vaiA(S.i - 1); });
-  $("cf-succ").addEventListener("click", function () { if (S.i < S.prog.pagine.length - 1) vaiA(S.i + 1); });
+  function pagPrec() { if (S.i > 0) vaiA(S.i - 1); }
+  function pagSucc() { if (S.i < S.prog.pagine.length - 1) vaiA(S.i + 1); }
+  $("cf-prec").addEventListener("click", pagPrec);
+  $("cf-succ").addEventListener("click", pagSucc);
+  $("cf-mappa-prec").addEventListener("click", function () { chiudiMappa(); pagPrec(); });
+  $("cf-mappa-succ").addEventListener("click", function () { chiudiMappa(); pagSucc(); });
   btnPagina.addEventListener("click", function () { if (mappa.hidden) apriMappa(); else chiudiMappa(true); });
   mappaLista.addEventListener("click", function (e) {
     var b = e.target.closest(".cf-mappa-voce");
@@ -900,108 +883,48 @@
   }
   $("cf-lavoro-prec").addEventListener("click", function () { lavoroVicino(-1); });
   $("cf-lavoro-succ").addEventListener("click", function () { lavoroVicino(1); });
+  $("cf-vivo").addEventListener("click", function () { modo("dopo", "vivo"); nascondiSugg(true); });
   D.addEventListener("pointerdown", function (e) {
     if (S.aperto && !mappa.hidden && !mappa.contains(e.target) && !btnPagina.contains(e.target)) chiudiMappa();
   }, true);
 
   modi.forEach(function (b) {
-    b.addEventListener("click", function () { modo(b.dataset.modo, true); nascondiSugg(true); });
+    b.addEventListener("click", function (e) { modo(b.dataset.modo, e.detail > 0 ? "mouse" : "tastiera"); nascondiSugg(true); });
     b.addEventListener("keydown", function (e) {
       if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
       e.preventDefault();
       var vis = modi.filter(function (x) { return !x.hidden; }), k = vis.indexOf(b);
       var n = vis[(k + (e.key === "ArrowRight" ? 1 : -1) + vis.length) % vis.length];
-      modo(n.dataset.modo, true); n.focus();
+      modo(n.dataset.modo, "tastiera"); n.focus();
     });
-  });
-
-  /* il tasto "tieni premuto": mouse, dito, tastiera */
-  btnTieni.addEventListener("pointerdown", function (e) {
-    if (e.button > 0) return;
-    e.preventDefault();
-    try { btnTieni.setPointerCapture(e.pointerId); } catch (x) {}
-    S.tieniDito = true; tieni(true);
-  });
-  ["pointerup", "pointercancel", "lostpointercapture"].forEach(function (t) {
-    btnTieni.addEventListener(t, function () { if (S.tieniDito) { S.tieniDito = false; tieni(false); } });
-  });
-  btnTieni.addEventListener("contextmenu", function (e) { e.preventDefault(); });
-  btnTieni.addEventListener("click", function (e) { e.preventDefault(); });
-
-  /* la tenda: trascinare la maniglia (scudo sopra l'iframe), oppure frecce da tastiera */
-  function ariaTenda() {
-    presa.setAttribute("aria-valuenow", Math.round(S.tenda * 100));
-    presa.setAttribute("aria-valuetext", Math.round(S.tenda * 100) + "% sito di prima");
-  }
-  function tendaA(x) {
-    S.tenda = limita(x, 0, 1);
-    ariaTenda(); segna(); fps("tenda");
-  }
-  function inizioTrascina(e) {
-    if (e.button > 0 || S.modo !== "tenda") return;
-    e.preventDefault();
-    S.trascina = e.pointerId;
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {}
-    radice.classList.add("cf-trascina");
-    nascondiSugg(true);
-    tendaA((e.clientX - scenaL) / scenaW);
-  }
-  function muoviTrascina(e) { if (S.trascina === e.pointerId) tendaA((e.clientX - scenaL) / scenaW); }
-  function fineTrascina(e) { if (S.trascina === e.pointerId) { S.trascina = false; radice.classList.remove("cf-trascina"); } }
-  [presa, maniglia.querySelector(".cf-maniglia-zona"), scudo].forEach(function (el) {
-    el.addEventListener("pointerdown", inizioTrascina);
-    el.addEventListener("pointermove", muoviTrascina);
-    el.addEventListener("pointerup", fineTrascina);
-    el.addEventListener("pointercancel", fineTrascina);
-    el.addEventListener("lostpointercapture", fineTrascina);
-  });
-  presa.addEventListener("keydown", function (e) {
-    var p = e.shiftKey ? 0.1 : 0.02, m = { ArrowLeft: -p, ArrowDown: -p, ArrowRight: p, ArrowUp: p }[e.key];
-    if (m != null) { e.preventDefault(); tendaA(S.tenda + m); }
-    else if (e.key === "Home") { e.preventDefault(); tendaA(0); }
-    else if (e.key === "End") { e.preventDefault(); tendaA(1); }
-  });
-
-  /* telefono di sinistra: la rotella fa scorrere quello di destra (sono legati) */
-  telPrima.addEventListener("wheel", function (e) {
-    if (!attivo) return;
-    e.preventDefault();
-    manda(attivo, { cf: "scorri", dy: e.deltaY * (e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? geo.telH : 1) });
-  }, { passive: false });
-
-  /* il mouse sulla barra spegne la lente */
-  finestra.addEventListener("pointermove", function (e) {
-    if (e.target.closest && e.target.closest(".cf-barra")) { if (S.dentro) { S.dentro = false; lenteSu(false); } }
-  }, { passive: true });
-
-  /* dopo un clic col mouse sui tasti il fuoco torna alla finestra, così la barra spaziatrice resta "tieni premuto" */
-  radice.querySelector(".cf-barra").addEventListener("click", function (e) {
-    var b = e.target.closest("button");
-    if (b && e.detail > 0 && S.aperto && !S.chiusura && mappa.hidden) { try { finestra.focus({ preventScroll: true }); } catch (x) {} }
   });
 
   /* trappola del fuoco */
   [].forEach.call(radice.querySelectorAll(".cf-sentinella"), function (s) {
     s.addEventListener("focus", function (e) {
       var indietro = s.dataset.cfVerso === "fine" && e.relatedTarget === $("cf-chiudi");   // Maiusc+Tab dal primo tasto
-      if (indietro && attivo) attivo.ifr.focus(); else $("cf-chiudi").focus();
+      if (indietro) { if (fotoModo(S.modo)) scorre.focus(); else if (attivo) attivo.ifr.focus(); else $("cf-chiudi").focus(); }
+      else $("cf-chiudi").focus();
     });
   });
 
-  /* ridimensionamenti, rotazione del telefono, preferenze che cambiano */
-  var tRid = 0;
+  /* ridimensionamenti, rotazione del telefono */
+  var tRid = 0, eraStretto = stretto();
   W.addEventListener("resize", function () {
     if (!S.aperto) return;
     cancelAnimationFrame(tRid);
     tRid = requestAnimationFrame(function () {
+      var p = progresso();
       misuraScena();
-      if (!modoPossibile(S.modo)) modo(S.modo); else { modi.forEach(function (b) { b.hidden = !modoPossibile(b.dataset.modo); }); montaPila(); }
-      $("cf-mappa-lavori").hidden = pronti().length < 2 || !mqTel.matches;
-      segna();
+      $("cf-mappa-lavori").hidden = pronti().length < 2 || !stretto();
+      if (eraStretto !== stretto()) { eraStretto = stretto(); S.p = p; modo(modoIniziale(), "avvio"); return; }
+      if (!modoPossibile(S.modo)) { S.p = p; modo(modoIniziale(), "avvio"); return; }
+      modi.forEach(function (b) { b.hidden = !modoPossibile(b.dataset.modo); });
+      if (fotoModo(S.modo)) { S.p = p; montaFoto(); } else { montaTelefono(); segna(); }
     });
   });
 
-  /* quando la vetrina è ferma: sonda dei blob e prima pagina del primo lavoro già caricata (al clic si apre subito) */
+  /* quando la vetrina è ferma: sonda dei blob, prima pagina del primo lavoro e le sue foto già pronte */
   function quandoFermo(f, t) { (W.requestIdleCallback || function (g) { setTimeout(g, 1200); })(f, { timeout: t }); }
   function presto() {
     quandoFermo(function () {
@@ -1010,8 +933,9 @@
           quandoFermo(function () {
             var p = pronti()[0];
             if (!p || S.aperto || pool.length) return;
-            slotPer(p, S.ultima[p.id] || 0, true);
-            preparaPila(p, S.ultima[p.id] || 0);
+            var i = S.ultima[p.id] || 0;
+            if (stretto()) slotPer(p, i, true);
+            else { decodifica(pila(p, i, "prima", "pc")); decodifica(pila(p, i, "dopo", "pc")); slotPer(p, i, true); }
           }, 6000);
         }, 1500);
       });
@@ -1025,7 +949,8 @@
     misure: function () {
       var c = M.cambi.map(function (x) { return x.ms; }).sort(function (a, b) { return a - b; });
       return {
-        blob: BLOB, lente: riassunto(M.lente), tenda: riassunto(M.tenda), telefono: riassunto(M.telefono),
+        blob: BLOB, scorrimento_dal_compositore: TL,
+        affiancati: riassunto(M.affiancati), telefono: riassunto(M.telefono), solo_prima: riassunto(M.prima), solo_dopo: riassunto(M.dopo),
         cambio_pagina_ms: { mediana: c.length ? c[c.length >> 1] : null, massimo: c.length ? c[c.length - 1] : null, tutti: M.cambi.slice() }
       };
     }
