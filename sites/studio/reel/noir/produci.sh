@@ -32,5 +32,5 @@ ffmpeg -v error -y -i "$W/pulite/narrazione.wav" -af "aresample=44100,highpass=f
 ./mix_fisso.sh "$W/narr.wav" "$W/base.wav" "$W/mix.wav"
 echo "== 6. codifica $(date +%T)"; ffmpeg -y -v error -framerate 60 -i "out-p$N/%04d.jpg" -i "$W/mix.wav" -t $DUR -af "afade=t=in:d=0.02,afade=t=out:st=$(python3 -c "print($DUR-0.4)"):d=0.4" -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p -profile:v high -r 60 -c:a aac -b:a 192k -movflags +faststart "$W/Puntata$N.mp4"
 ffmpeg -hide_banner -i "$W/Puntata$N.mp4" -af ebur128=peak=true -f null - 2>&1 | grep -E "^\s+(I:|Peak:)"
-echo "== 7. verifica finale $(date +%T)"; cd "$W"; $PY "$NOIR/voce/verifica_finale.py" "$W/pulite" "$W/mix.wav" 2>&1 | grep -v Warn
+echo "== 7. verifica finale $(date +%T)"; cd "$W"; $PY "$NOIR/voce/verifica_finale.py" "$W/pulite" "$W/mix.wav" 2>&1 | grep -v Warn || echo "VERIFICA: frasi segnalate, da riascoltare sulla voce da sola (pulite/narrazione.wav) prima di pubblicare"
 echo "== FINE $(date +%T): $W/Puntata$N.mp4"
