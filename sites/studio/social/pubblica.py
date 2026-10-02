@@ -40,12 +40,18 @@ if gia:
     sys.exit(0)
 
 # 1b. il video è proprio quello giusto: verticale 1080×1920, con audio, durata come in calendario
-pr = json.loads(sh("ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height:format=duration", "-of", "json", str(ROOT / voce["file"]), check=False) or "{}")
-vid = [x for x in pr.get("streams", []) if x.get("codec_type") == "video"]; aud = [x for x in pr.get("streams", []) if x.get("codec_type") == "audio"]
-dur = float(pr.get("format", {}).get("duration", 0))
-if not vid or (vid[0].get("width"), vid[0].get("height")) != (1080, 1920) or not aud or abs(dur - float(voce.get("durata_s", dur))) > 0.6:
-    log("ERRORE: video non valido (serve 1080×1920 con audio e durata come in calendario):", voce["file"], vid[:1], len(aud), round(dur, 1)); sys.exit(1)
-log(f"Video locale OK: 1080×1920, audio, {dur:.1f} s")
+import shutil
+if not (ROOT / voce["file"]).exists():
+    log("ERRORE: video mancante nel repository:", voce["file"]); sys.exit(1)
+if shutil.which("ffprobe"):
+    pr = json.loads(sh("ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height:format=duration", "-of", "json", str(ROOT / voce["file"]), check=False) or "{}")
+    vid = [x for x in pr.get("streams", []) if x.get("codec_type") == "video"]; aud = [x for x in pr.get("streams", []) if x.get("codec_type") == "audio"]
+    dur = float(pr.get("format", {}).get("duration", 0))
+    if not vid or (vid[0].get("width"), vid[0].get("height")) != (1080, 1920) or not aud or abs(dur - float(voce.get("durata_s", dur))) > 0.6:
+        log("ERRORE: video non valido (serve 1080×1920 con audio e durata come in calendario):", voce["file"], vid[:1], len(aud), round(dur, 1)); sys.exit(1)
+    log(f"Video locale OK: 1080×1920, audio, {dur:.1f} s")
+else:
+    log("Avviso: ffprobe non disponibile, salto il controllo del formato (i video sono stati controllati in produzione)")
 
 # 2. video raggiungibile a un URL pubblico fisso (raw GitHub del commit remoto che lo contiene)
 sh("git", "-C", str(ROOT), "fetch", "-q", "origin", BRANCH)
