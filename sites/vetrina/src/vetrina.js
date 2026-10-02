@@ -390,35 +390,8 @@
   });
 
   /* =====================================================================
-     7. Cursore (solo mouse) e bottoni "magnetici"
+     7. Bottoni "magnetici" (solo mouse; il cursore resta quello normale)
      ===================================================================== */
-  prova("cursore", function () {
-    if (!fine || !anim) return;
-    var c = document.createElement("div");
-    c.className = "cur"; c.setAttribute("aria-hidden", "true");
-    c.innerHTML = '<i class="cur-p"></i><span class="cur-a"><span class="cur-b"></span><span class="cur-t"></span></span>';
-    document.body.appendChild(c);
-    var p = $(".cur-p", c), a = $(".cur-a", c), lab = $(".cur-t", c);
-    var px = G.quickTo(p, "x", { duration: .08, ease: "power3" }), py = G.quickTo(p, "y", { duration: .08, ease: "power3" });
-    var ax = G.quickTo(a, "x", { duration: .42, ease: "power3" }), ay = G.quickTo(a, "y", { duration: .42, ease: "power3" });
-    var primo = true;
-    document.addEventListener("pointermove", function (e) {
-      if (e.pointerType !== "mouse") return;
-      if (primo) { primo = false; G.set([p, a], { x: e.clientX, y: e.clientY }); c.classList.add("on"); html.classList.add("cur-on"); }
-      px(e.clientX); py(e.clientY); ax(e.clientX); ay(e.clientY);
-    }, { passive: true });
-    document.addEventListener("pointerover", function (e) {
-      var t = e.target.closest ? e.target.closest("[data-cursore],a,button,[role=slider]") : null;
-      var testo = t && t.getAttribute("data-cursore");
-      if (testo) { lab.textContent = testo; c.classList.add("label"); c.classList.remove("link"); }
-      else { c.classList.remove("label"); c.classList.toggle("link", !!t); }
-    });
-    document.addEventListener("pointerdown", function () { c.classList.add("giu"); });
-    document.addEventListener("pointerup", function () { c.classList.remove("giu"); });
-    html.addEventListener("mouseleave", function () { c.classList.remove("on"); });
-    html.addEventListener("mouseenter", function () { if (!primo) c.classList.add("on"); });
-  });
-
   prova("magneti", function () {
     if (!fine || !anim) return;
     $$("[data-magnete]").forEach(function (el) {
