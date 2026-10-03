@@ -1,0 +1,345 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Bozza 2 — «Record oil, expensive gas». Stile noir, testo grande al centro legato all'oggetto.
+// render(t) è funzione pura del tempo. Fonti dei numeri: b2-fonti.md.
+// Zone sicure Instagram: contenuti tra y 14% e 76% (269–1459 px), x 5–90%.
+const W = 1080, H = 1920, B = 0.6, DUR = 67.2;
+window.DUR = DUR;
+const C = { bg: '#050607', ink: '#F1F4EE', muted: '#8B958F', lime: '#C8FA72', red: '#FF5A4E', amber: '#F5A524',
+            light: '#E9ECE6', dark: '#0B0D0C', grey: '#59615C' };
+const cv = document.getElementById('c'), x = cv.getContext('2d');
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const oC = (k) => 1 - Math.pow(1 - k, 3), ioC = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const oB = (k, s = 1.7) => (k <= 0 ? 0 : 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2));
+const F = (w, s, fam) => `${w} ${s}px ${fam === 'mono' ? '"IBM Plex Mono"' : 'Manrope'}`;
+function txt(s, px, py, o = {}) {
+  const { size = 40, weight = 800, color = C.ink, align = 'center', fam = 'Manrope', alpha = 1, blur = 0, ls = 0 } = o;
+  if (alpha <= 0.002 || !s) return;
+  x.save(); x.globalAlpha *= alpha; x.font = F(weight, size, fam); x.letterSpacing = ls + 'px';
+  x.textAlign = align; x.textBaseline = 'middle'; x.fillStyle = color; if (blur > 0.2) x.filter = `blur(${blur}px)`;
+  x.fillText(s, px, py); x.restore();
+}
+function tw(s, size, weight = 800, fam = 'Manrope', ls = 0) { x.save(); x.font = F(weight, size, fam); x.letterSpacing = ls + 'px'; const w = x.measureText(s).width; x.restore(); return w; }
+const typed = (s, t, a, cps = 34) => s.slice(0, Math.max(0, Math.floor((t - a) * cps)));
+const mono = (s, px, py, t, a, o = {}) => txt(typed(s, t, a), px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 3, ...o });
+
+// --- frase grande: righe di parole che entrano una alla volta (sfocate → nitide, dal basso) ---
+// lines: [[testo, colore], ...]; parole sfalsate di `st` secondi a partire da a
+function phrase(t, a, lines, y0, o = {}) {
+  const { size = 96, lh = 1.12, st = 0.13, out = null, align = 'center', x0 = 540 } = o;
+  let wi = 0, y = y0;
+  const ko = out ? oC(seg(t, out, out + 0.25)) : 0;
+  for (const [s, col] of lines) {
+    const words = s.split(' '), sp = tw(' ', size);
+    const tot = words.reduce((q, w) => q + tw(w, size), 0) + sp * (words.length - 1);
+    let cx = align === 'center' ? x0 - tot / 2 : x0;
+    for (const w of words) {
+      const k = oC(seg(t, a + wi * st, a + wi * st + 0.35)), ww = tw(w, size);
+      txt(w, cx + ww / 2, y + (1 - k) * 40 + ko * 60, { size, weight: 800, color: col, alpha: k * (1 - ko), blur: (1 - k) * 14 + ko * 10, ls: -2 });
+      cx += ww + sp; wi++;
+    }
+    y += size * lh;
+  }
+}
+
+const grain = (() => { const g = document.createElement('canvas'); g.width = 540; g.height = 960; const gx = g.getContext('2d');
+  const id = gx.createImageData(540, 960); let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < id.data.length; i += 4) { const v = r() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 255; }
+  gx.putImageData(id, 0, 0); return g; })();
+function bg(tint = '42,50,45', spot = 1) {
+  x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+  const g = x.createRadialGradient(540, -150, 0, 540, -150, 1500);
+  g.addColorStop(0, `rgba(${tint},${0.9 * spot})`); g.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+}
+function glow(cx, cy, r, rgb, a) { const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`); x.fillStyle = g; x.fillRect(cx - r, cy - r, 2 * r, 2 * r); }
+function finish(t) {
+  const v = x.createRadialGradient(540, 960, 500, 540, 960, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  const f = Math.floor(t * 60); x.save(); x.globalAlpha = 0.06; x.globalCompositeOperation = 'overlay';
+  x.drawImage(grain, -(f * 37) % 540, -(f * 61) % 960, 2160, 3840); x.restore();
+}
+// riflesso sul pavimento: disegna fn() specchiato sotto floorY e sfuma
+function reflect(floorY, fn, a = 0.16) {
+  x.save(); x.globalAlpha = a; x.translate(0, floorY * 2); x.scale(1, -1); fn(); x.restore();
+  const g = x.createLinearGradient(0, floorY, 0, floorY + 300); g.addColorStop(0, 'rgba(5,6,7,0.15)'); g.addColorStop(1, 'rgba(5,6,7,1)');
+  x.fillStyle = g; x.fillRect(0, floorY, W, 300);
+}
+const rr = (a, b, w, h, r) => { x.beginPath(); x.roundRect(a, b, w, h, r); };
+function metal(x0, y0, x1, y1, dark = false) {
+  const g = x.createLinearGradient(x0, y0, x1, y1);
+  if (dark) { g.addColorStop(0, '#2a302c'); g.addColorStop(0.45, '#151a17'); g.addColorStop(0.55, '#0e1210'); g.addColorStop(1, '#232925'); }
+  else { g.addColorStop(0, '#9aa29c'); g.addColorStop(0.35, '#e8ece6'); g.addColorStop(0.6, '#6f7771'); g.addColorStop(1, '#c9cfca'); }
+  return g;
+}
+
+// ================= OGGETTI =================
+function barrel(cx, by, s, k, rim) { // by = base; s scala
+  x.save(); x.translate(cx, by); x.scale(s, s);
+  const w = 300, h = 400;
+  x.fillStyle = metal(-w / 2, 0, w / 2, 0, true); rr(-w / 2, -h, w, h, 26); x.fill();
+  // anelli
+  for (const yy of [-h + 40, -h / 2, -40]) { x.fillStyle = 'rgba(255,255,255,0.06)'; x.fillRect(-w / 2, yy - 8, w, 16); x.strokeStyle = `rgba(${rim},0.55)`; x.lineWidth = 2; x.beginPath(); x.moveTo(-w / 2 + 10, yy - 8); x.lineTo(w / 2 - 10, yy - 8); x.stroke(); }
+  // tappo ellisse
+  x.fillStyle = '#1c221e'; x.beginPath(); x.ellipse(0, -h, w / 2 - 4, 34, 0, 0, Math.PI * 2); x.fill();
+  x.strokeStyle = `rgba(${rim},0.9)`; x.lineWidth = 3; x.beginPath(); x.ellipse(0, -h, w / 2 - 4, 34, 0, Math.PI, Math.PI * 2); x.stroke();
+  x.fillStyle = '#0c0f0d'; x.beginPath(); x.ellipse(70, -h, 22, 8, 0, 0, Math.PI * 2); x.fill();
+  // filo di luce laterale
+  x.fillStyle = `rgba(${rim},0.35)`; x.fillRect(-w / 2 + 6, -h + 30, 5, h - 60);
+  x.restore();
+}
+function pump(cx, by, s, val, kOn) {
+  x.save(); x.translate(cx, by); x.scale(s, s);
+  // corpo
+  x.fillStyle = metal(-170, 0, 170, 0, true); rr(-170, -560, 340, 560, 30); x.fill();
+  x.strokeStyle = 'rgba(255,255,255,0.10)'; x.lineWidth = 2; rr(-170, -560, 340, 560, 30); x.stroke();
+  // schermo
+  x.fillStyle = '#020302'; rr(-130, -500, 260, 150, 14); x.fill();
+  x.strokeStyle = 'rgba(245,165,36,0.35)'; x.lineWidth = 2; rr(-130, -500, 260, 150, 14); x.stroke();
+  txt(val.toFixed(2), 0, -425, { size: 92, weight: 800, color: C.amber, alpha: kOn, ls: 2 });
+  txt('$ / GALLON', 0, -372, { fam: 'mono', size: 18, weight: 600, color: 'rgba(245,165,36,0.7)', alpha: kOn, ls: 3 });
+  // tasti
+  for (let i = 0; i < 3; i++) { x.fillStyle = '#1b201d'; rr(-110 + i * 80, -320, 60, 40, 8); x.fill(); }
+  // pistola e tubo
+  x.strokeStyle = '#141815'; x.lineWidth = 16; x.lineCap = 'round'; x.beginPath(); x.moveTo(170, -380); x.bezierCurveTo(260, -380, 250, -120, 200, -140); x.stroke();
+  x.fillStyle = '#20261f'; rr(160, -260, 50, 120, 10); x.fill();
+  x.restore();
+}
+function gallon(cx, by, layers, k) { // vaso di vetro con strati [altezza(0-1), colore, etichetta, kStrato]
+  const w = 320, h = 560, x0 = cx - w / 2, y0 = by - h;
+  x.save(); x.globalAlpha = k;
+  let acc = 0;
+  for (const [hh, col, , kk] of layers) {
+    const th = hh * h * oC(kk); if (th <= 0.5) { acc += 0; continue; }
+    x.fillStyle = col; x.fillRect(x0 + 8, by - 8 - acc - th, w - 16, th);
+    x.fillStyle = 'rgba(255,255,255,0.12)'; x.fillRect(x0 + 8, by - 8 - acc - th, w - 16, 3);
+    acc += th;
+  }
+  // vetro
+  const g = x.createLinearGradient(x0, 0, x0 + w, 0); g.addColorStop(0, 'rgba(255,255,255,0.10)'); g.addColorStop(0.2, 'rgba(255,255,255,0.02)'); g.addColorStop(0.85, 'rgba(255,255,255,0.03)'); g.addColorStop(1, 'rgba(255,255,255,0.12)');
+  x.fillStyle = g; rr(x0, y0, w, h, 28); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; rr(x0, y0, w, h, 28); x.stroke();
+  x.fillStyle = 'rgba(255,255,255,0.18)'; x.fillRect(x0 + 22, y0 + 40, 8, h - 80);
+  x.restore();
+}
+function refinery(cx, by, s, k, lit = 1, col = '200,250,114') {
+  x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k;
+  const body = (fx) => { x.fillStyle = metal(-300, 0, 300, 0, true); fx(); x.fill(); };
+  // torri
+  [[-210, 110, 360], [-60, 80, 470], [70, 70, 300], [190, 100, 420]].forEach(([tx, tw2, th]) => {
+    body(() => rr(tx - tw2 / 2, -th, tw2, th, 10));
+    x.strokeStyle = `rgba(${col},${0.6 * lit})`; x.lineWidth = 2.5; x.beginPath(); x.moveTo(tx - tw2 / 2, -th + 10); x.lineTo(tx - tw2 / 2, -10); x.stroke();
+    for (let yy = -th + 40; yy < -20; yy += 60) { x.fillStyle = `rgba(${col},${0.25 * lit})`; x.fillRect(tx - tw2 / 2 + 6, yy, tw2 - 12, 3); }
+  });
+  // serbatoi
+  [-260, 260].forEach((tx) => { body(() => { x.beginPath(); x.ellipse(tx, -70, 60, 70, 0, 0, Math.PI * 2); }); });
+  // ciminiera con fiamma
+  body(() => rr(-10, -560, 28, 560, 6));
+  const fl = 0.8 + 0.2 * Math.sin(by * 0.01 + cx);
+  if (lit > 0.05) { glow(4, -580, 70, col, 0.55 * lit); x.fillStyle = `rgba(${col},${0.9 * lit})`; x.beginPath(); x.ellipse(4, -585, 10 * fl, 26 * fl, 0, 0, Math.PI * 2); x.fill(); }
+  x.restore();
+}
+function sack(cx, by, s, k) {
+  x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k;
+  const g = x.createLinearGradient(-120, 0, 120, 0); g.addColorStop(0, '#d8d3c4'); g.addColorStop(0.5, '#f4f0e4'); g.addColorStop(1, '#b9b3a3');
+  x.fillStyle = g; x.beginPath(); x.moveTo(-100, -300); x.quadraticCurveTo(0, -270, 100, -300); x.lineTo(130, -20); x.quadraticCurveTo(0, 10, -130, -20); x.closePath(); x.fill();
+  x.fillStyle = '#c9c3b2'; x.beginPath(); x.moveTo(-100, -300); x.quadraticCurveTo(-60, -345, 0, -330); x.quadraticCurveTo(60, -345, 100, -300); x.quadraticCurveTo(0, -270, -100, -300); x.fill();
+  txt('CRUDE', 0, -150, { fam: 'mono', size: 34, weight: 600, color: '#3a3528', ls: 6 });
+  x.restore();
+}
+function loaf(cx, by, s, k) {
+  x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k;
+  const g = x.createLinearGradient(0, -230, 0, 0); g.addColorStop(0, '#e6a85a'); g.addColorStop(1, '#8a5524');
+  x.fillStyle = g; x.beginPath(); x.moveTo(-170, 0); x.bezierCurveTo(-190, -220, 190, -220, 170, 0); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(255,230,190,0.6)'; x.lineWidth = 6; x.lineCap = 'round';
+  for (const dx of [-80, 0, 80]) { x.beginPath(); x.moveTo(dx - 30, -120); x.lineTo(dx + 30, -160); x.stroke(); }
+  txt('GASOLINE', 0, -60, { fam: 'mono', size: 30, weight: 600, color: '#2b1806', ls: 5 });
+  x.restore();
+}
+function gauge(cx, cy, r, v, k) { // v 0..100
+  x.save(); x.globalAlpha *= k;
+  const a0 = Math.PI * 0.8, a1 = Math.PI * 2.2;
+  x.lineCap = 'round'; x.lineWidth = 34; x.strokeStyle = '#161b18'; x.beginPath(); x.arc(cx, cy, r, a0, a1); x.stroke();
+  const av = lerp(a0, a1, v / 100);
+  const g = x.createLinearGradient(cx - r, 0, cx + r, 0); g.addColorStop(0, '#C8FA72'); g.addColorStop(0.7, '#F5A524'); g.addColorStop(1, '#FF5A4E');
+  x.strokeStyle = g; x.beginPath(); x.arc(cx, cy, r, a0, av); x.stroke();
+  for (let i = 0; i <= 10; i++) { const a = lerp(a0, a1, i / 10); x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.beginPath(); x.moveTo(cx + Math.cos(a) * (r - 40), cy + Math.sin(a) * (r - 40)); x.lineTo(cx + Math.cos(a) * (r - 58), cy + Math.sin(a) * (r - 58)); x.stroke(); }
+  x.strokeStyle = C.ink; x.lineWidth = 8; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(av) * (r - 70), cy + Math.sin(av) * (r - 70)); x.stroke();
+  x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 16, 0, Math.PI * 2); x.fill();
+  x.restore();
+}
+function truck(cx, by, s, k) { x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k; x.fillStyle = metal(-150, 0, 150, 0, true);
+  rr(-150, -170, 200, 130, 10); x.fill(); rr(55, -130, 95, 90, 12); x.fill(); x.fillStyle = 'rgba(200,250,114,0.5)'; rr(95, -120, 40, 35, 6); x.fill();
+  for (const wx of [-100, -30, 100]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, -30, 28, 0, 7); x.fill(); x.strokeStyle = '#3a423d'; x.lineWidth = 6; x.stroke(); }
+  x.restore(); }
+function train(cx, by, s, k) { x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k; x.fillStyle = metal(-150, 0, 150, 0, true);
+  rr(-150, -190, 300, 150, 16); x.fill(); x.fillStyle = 'rgba(200,250,114,0.45)'; for (const wx of [-110, -40, 30]) { rr(wx, -165, 50, 40, 6); x.fill(); }
+  x.fillStyle = 'rgba(245,165,36,0.8)'; x.beginPath(); x.arc(125, -80, 10, 0, 7); x.fill();
+  for (const wx of [-100, -40, 40, 100]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, -30, 22, 0, 7); x.fill(); }
+  x.restore(); }
+function tractor(cx, by, s, k) { x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= k; x.fillStyle = metal(-150, 0, 150, 0, true);
+  rr(-90, -150, 170, 80, 10); x.fill(); rr(-40, -230, 90, 90, 10); x.fill(); x.fillStyle = 'rgba(200,250,114,0.45)'; rr(-25, -215, 60, 45, 6); x.fill();
+  x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(-70, -60, 62, 0, 7); x.fill(); x.strokeStyle = '#3a423d'; x.lineWidth = 8; x.stroke();
+  x.beginPath(); x.arc(80, -40, 38, 0, 7); x.fillStyle = '#0a0c0b'; x.fill(); x.stroke();
+  x.restore(); }
+function pill(cx, cy, label, k, col = C.ink, fill = 'rgba(255,255,255,0.04)', size = 44) {
+  const w = tw(label, size, 700) + 80; x.save(); x.translate(cx, cy); const s = lerp(0.8, 1, oB(k)); x.scale(s, s); x.globalAlpha *= clamp(k * 2);
+  rr(-w / 2, -46, w, 92, 46); x.fillStyle = fill; x.fill(); x.strokeStyle = col; x.lineWidth = 3; x.stroke();
+  txt(label, 0, 2, { size, weight: 700, color: col }); x.restore(); return w;
+}
+function cross(cx, cy, r, k) { if (k <= 0) return; x.save(); x.strokeStyle = C.red; x.lineWidth = 14; x.lineCap = 'round'; x.globalAlpha = clamp(k * 3);
+  const a = oC(clamp(k * 2)), b = oC(clamp(k * 2 - 1)); x.beginPath(); x.moveTo(cx - r, cy - r); x.lineTo(cx - r + 2 * r * a, cy - r + 2 * r * a); x.stroke();
+  if (b > 0) { x.beginPath(); x.moveTo(cx + r, cy - r); x.lineTo(cx + r - 2 * r * b, cy - r + 2 * r * b); x.stroke(); } x.restore(); }
+
+// ================= SCENE (tempi in secondi, sui battiti da 0,6 s) =================
+const SC = [
+  [0.0, 4.8, s1], [4.8, 9.0, s2], [9.0, 12.6, s3], [12.6, 18.6, s4], [18.6, 25.2, s5], [25.2, 28.2, s6],
+  [28.2, 34.2, s7], [34.2, 38.4, s8], [38.4, 43.8, s9], [43.8, 49.2, s10], [49.2, 54.0, s11], [54.0, 59.4, s12],
+  [59.4, 63.6, s13], [63.6, 67.2, s14]];
+const zoomOut = (t, a, b, z0 = 1.08) => { const z = lerp(z0, 1, oC(seg(t, a, b))); x.translate(540, 1000); x.scale(z, z); x.translate(-540, -1000); };
+
+function s1(t) { bg('48,40,24'); x.save(); zoomOut(t, 0, 4.8, 1.12);
+  phrase(t, 0.0, [['America is pumping', C.ink], ['more oil than ever.', C.amber]], 400, { size: 92, out: 2.25 });
+  const kb = oC(seg(t, 0.0, 1.0));
+  reflect(1360, () => barrel(540, 1360, 0.9, kb, '245,165,36'));
+  glow(540, 1150, 380, '245,165,36', 0.12 * kb); barrel(540, 1360 + (1 - kb) * 80, 0.9, kb, '245,165,36');
+  // secondo tempo: il numero record
+  const kn = oC(seg(t, 2.4, 2.9));
+  if (kn > 0) { txt('13.8M', 540, 470 - (1 - kn) * 30, { size: 210, weight: 800, color: C.ink, alpha: kn, blur: (1 - kn) * 16, ls: -6 });
+    mono('BARRELS A DAY · 2026 · A U.S. RECORD', 540, 610, t, 2.6, { color: C.amber });
+    const kr = oB(seg(t, 3.3, 3.7)); if (kr > 0) pill(540, 700, 'RECORD', kr, C.amber, 'rgba(245,165,36,0.10)', 34); }
+  x.restore(); finish(t); }
+function s2(t) { bg('48,40,24'); x.save(); zoomOut(t, 4.8, 9.0, 1.06);
+  phrase(t, 4.9, [['So why is gas still', C.ink]], 380, { size: 84 });
+  const kp = oC(seg(t, 4.9, 5.7)), v = lerp(3.12, 4.47, ioC(seg(t, 5.6, 7.4)));
+  reflect(1400, () => pump(540, 1400, 1.0, v, kp));
+  glow(540, 1000, 420, '245,165,36', 0.10 * kp); pump(540, 1400 + (1 - kp) * 80, 1.0, v, kp);
+  const kq = oC(seg(t, 7.4, 7.8)); txt('$4.47?', 540, 520, { size: 150, weight: 800, color: C.amber, alpha: kq, blur: (1 - kq) * 14, ls: -4 });
+  mono('U.S. REGULAR · WEEK OF SEP 28, 2026 · EIA', 540, 1470, t, 7.6, { size: 22 });
+  x.restore(); finish(t); }
+function s3(t) { bg(); x.save(); zoomOut(t, 9.0, 12.6, 1.05);
+  phrase(t, 9.1, [['Crude is only', C.ink], ['one part', C.amber], ['of the price.', C.ink]], 360, { size: 92 });
+  const kg = oC(seg(t, 9.4, 10.2));
+  // goccia che cade nel vaso
+  const kd = seg(t, 10.6, 11.4); if (kd > 0 && kd < 1) { x.fillStyle = C.amber; x.beginPath(); const yy = lerp(760, 1290, kd * kd); x.ellipse(540, yy, 18, 26, 0, 0, 7); x.fill(); }
+  gallon(540, 1440, [[0.38, 'rgba(245,165,36,0.85)', 'CRUDE', seg(t, 11.3, 12.2)]], kg);
+  x.restore(); finish(t); }
+function s4(t) { bg(); x.save(); zoomOut(t, 12.6, 18.6, 1.04);
+  phrase(t, 12.7, [['Every gallon pays', C.ink], ['for three things.', C.ink]], 360, { size: 84 });
+  const L = [[0.38, 'rgba(245,165,36,0.85)', 'THE CRUDE', 1], [0.30, 'rgba(200,250,114,0.85)', 'THE REFINERY', seg(t, 14.6, 15.4)], [0.24, 'rgba(160,170,165,0.75)', 'TAXES + THE TRIP TO YOUR TANK', seg(t, 16.0, 16.8)]];
+  gallon(390, 1440, L, 1);
+  let acc = 0; const h = 560;
+  L.forEach(([hh, col, lab, kk], i) => {
+    const mid = 1432 - (acc + hh * h / 2); acc += hh * h; const k = oC(seg(t, [13.6, 14.8, 16.2][i], [14.0, 15.2, 16.6][i]));
+    x.save(); x.globalAlpha = k; x.strokeStyle = col; x.lineWidth = 3; x.beginPath(); x.moveTo(560, mid); x.lineTo(600, mid); x.stroke(); x.restore();
+    const words = lab.split(' + ');
+    txt(words[0], 615 + (1 - k) * 20, mid - (words.length > 1 ? 22 : 0), { size: 40, weight: 800, color: col.replace(/,0\.\d+\)/, ',1)'), align: 'left', alpha: k });
+    if (words.length > 1) txt('+ ' + words[1], 615 + (1 - k) * 20, mid + 24, { size: 28, weight: 700, color: C.muted, align: 'left', alpha: k });
+  });
+  mono('NOT TO SCALE', 390, 1480, t, 17.0, { size: 20 });
+  x.restore(); finish(t); }
+function s5(t) { bg('48,40,24'); x.save(); zoomOut(t, 18.6, 25.2, 1.05);
+  phrase(t, 18.7, [['Crude got pricier.', C.ink]], 380, { size: 92 });
+  mono('WTI, $ PER BARREL · EIA / FRED', 540, 480, t, 19.2, { color: C.amber });
+  const bars = [['2025 AVG', 65, 19.8], ['2026 AVG', 84, 21.4], ['THIS WEEK', 99, 23.0]];
+  const base = 1400, maxH = 700, bw = 210;
+  bars.forEach(([lab, v, a], i) => {
+    const cx = 270 + i * 270, k = ioC(seg(t, a, a + 0.9)), hh = maxH * v / 100 * k;
+    if (seg(t, a - 0.1, a) <= 0) return;
+    x.fillStyle = metal(cx - bw / 2, 0, cx + bw / 2, 0, i < 2); rr(cx - bw / 2, base - hh, bw, hh, 10); x.fill();
+    if (i === 2) { glow(cx, base - hh, 180, '245,165,36', 0.25 * k); x.fillStyle = 'rgba(245,165,36,0.9)'; x.fillRect(cx - bw / 2, base - hh, bw, 6); }
+    txt('$' + Math.round(v * k), cx, base - hh - 50, { size: 64, weight: 800, color: i === 2 ? C.amber : C.ink, alpha: oC(seg(t, a + 0.2, a + 0.5)) });
+    txt(lab, cx, base + 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a, a + 0.3)) });
+  });
+  x.restore(); finish(t); }
+function s6(t) { bg('30,44,26'); x.save(); zoomOut(t, 25.2, 28.2, 1.1);
+  phrase(t, 25.3, [['But the real squeeze', C.ink], ['is the refinery.', C.lime]], 380, { size: 92 });
+  const k = oC(seg(t, 25.4, 26.4));
+  reflect(1400, () => refinery(540, 1400, 1.1, k));
+  glow(540, 1150, 500, '200,250,114', 0.10 * k); refinery(540, 1400 + (1 - k) * 60, 1.1, k);
+  x.restore(); finish(t); }
+function s7(t) { bg(); x.save(); zoomOut(t, 28.2, 34.2, 1.05);
+  phrase(t, 28.3, [['Think of crude', C.ink], ['as flour.', C.amber]], 360, { size: 92, out: 31.05 });
+  phrase(t, 31.2, [['Gasoline', C.ink], ['is the bread.', C.lime]], 360, { size: 92 });
+  const ks = oB(seg(t, 28.9, 29.5)), kl = oB(seg(t, 31.6, 32.2));
+  sack(lerp(540, 300, oC(seg(t, 31.2, 31.8))), 1330, 1.0, clamp(ks));
+  if (kl > 0) { x.save(); x.globalAlpha = clamp(kl); x.strokeStyle = C.muted; x.lineWidth = 4; x.setLineDash([10, 12]); x.beginPath(); x.moveTo(460, 1180); x.lineTo(600, 1180); x.stroke(); x.setLineDash([]);
+    x.beginPath(); x.moveTo(600, 1180); x.lineTo(580, 1165); x.moveTo(600, 1180); x.lineTo(580, 1195); x.stroke(); x.restore(); loaf(790, 1330, 0.95, clamp(kl)); }
+  x.restore(); finish(t); }
+function s8(t) { bg(); x.save(); zoomOut(t, 34.2, 38.4, 1.05);
+  phrase(t, 34.3, [['Plenty of flour.', C.ink], ['Short on bakeries.', C.lime]], 360, { size: 92 });
+  // tanti sacchi, poche raffinerie (solo 1 accesa su 4)
+  for (let i = 0; i < 7; i++) { const k = oB(seg(t, 34.5 + i * 0.08, 34.9 + i * 0.08)); sack(150 + i * 130, 960, 0.42, clamp(k)); }
+  for (let i = 0; i < 4; i++) { const k = oC(seg(t, 36.2 + i * 0.1, 36.7 + i * 0.1)); refinery(195 + i * 230, 1430, 0.34, k, i === 1 ? 1 : 0.0); if (i !== 1) { x.save(); x.globalAlpha = 0.55 * k; x.fillStyle = C.bg; x.fillRect(195 + i * 230 - 110, 1230, 220, 210); x.restore(); } }
+  x.restore(); finish(t); }
+function s9(t) { bg('50,24,22', 0.8); x.save(); zoomOut(t, 38.4, 43.8, 1.05);
+  phrase(t, 38.5, [['Refineries in', C.ink]], 360, { size: 84 });
+  const R = [['RUSSIA', 39.0, 40.4], ['CHINA', 39.4, 40.9], ['THE MIDDLE EAST', 39.8, 41.4]];
+  R.forEach(([lab, a, xa], i) => { const cy = 640 + i * 200; const w = pill(540, cy, lab, seg(t, a, a + 0.4), C.ink, 'rgba(255,255,255,0.05)', 52); cross(540 + w / 2 + 50, cy, 34, seg(t, xa, xa + 0.4)); });
+  phrase(t, 41.6, [['disrupted.', C.red]], 1330, { size: 110 });
+  x.restore(); finish(t); }
+function s10(t) { bg('48,40,24'); x.save(); zoomOut(t, 43.8, 49.2, 1.05);
+  phrase(t, 43.9, [['U.S. refineries', C.ink], ['running at', C.ink]], 360, { size: 88 });
+  const k = oC(seg(t, 44.4, 45.0)), v = 97 * ioC(seg(t, 45.0, 46.6));
+  gauge(540, 980, 300, v, k);
+  txt(Math.round(v) + '%', 540, 1160, { size: 120, weight: 800, color: v > 90 ? C.red : C.ink, alpha: k, ls: -4 });
+  mono('UTILIZATION · WEEK OF SEP 11, 2026 · EIA', 540, 1265, t, 46.2, { size: 22 });
+  phrase(t, 47.2, [['Almost flat out.', C.amber]], 1370, { size: 76 });
+  x.restore(); finish(t); }
+function s11(t) { bg('56,22,20'); x.save(); zoomOut(t, 49.2, 54.0, 1.08);
+  phrase(t, 49.3, [['And diesel just hit', C.ink]], 400, { size: 84 });
+  const k = oC(seg(t, 49.9, 50.4)), v = 6.29 * ioC(seg(t, 50.0, 51.6));
+  glow(540, 820, 480, '255,90,78', 0.22 * k);
+  txt('$' + v.toFixed(2), 540, 800, { size: 230, weight: 800, color: C.red, alpha: k, blur: (1 - k) * 16, ls: -6 });
+  mono('PER GALLON · SEP 14, 2026 · EIA', 540, 950, t, 51.4, { color: '#ff9a90' });
+  const kr = seg(t, 52.0, 52.4); if (kr > 0) pill(540, 1100, 'A RECORD IN DOLLAR TERMS', kr, C.red, 'rgba(255,90,78,0.12)', 40);
+  x.restore(); finish(t); }
+function s12(t) { bg(); x.save(); zoomOut(t, 54.0, 59.4, 1.04);
+  phrase(t, 54.1, [['Diesel moves', C.ink]], 330, { size: 84 });
+  const V = [[truck, 'trucks', 54.6], [train, 'trains', 55.0], [tractor, 'tractors', 55.5]];
+  V.forEach(([fn, lab, a], i) => { const cx = 190 + i * 350, k = oB(seg(t, a, a + 0.45)); fn(cx, 760, 1.0, clamp(k)); txt(lab, cx, 830, { size: 50, weight: 800, color: C.ink, alpha: clamp(k) }); });
+  // linee che convergono verso il cartellino del prezzo
+  const kl = oC(seg(t, 56.4, 57.2));
+  if (kl > 0) { x.save(); x.strokeStyle = 'rgba(200,250,114,0.6)'; x.lineWidth = 3; for (let i = 0; i < 3; i++) { const sx = 190 + i * 350; x.beginPath(); x.moveTo(sx, 880); x.lineTo(lerp(sx, 540, kl), lerp(840, 1010, kl)); x.stroke(); } x.restore(); }
+  const kt = oB(seg(t, 57.0, 57.5)); if (kt > 0) pill(540, 1060, 'the price of almost everything', kt, C.lime, 'rgba(200,250,114,0.10)', 46);
+  phrase(t, 57.8, [['So it ends up everywhere.', C.muted]], 1260, { size: 54 });
+  x.restore(); finish(t); }
+function s13(t) { bg('30,44,26'); x.save(); zoomOut(t, 59.4, 63.6, 1.06);
+  phrase(t, 59.5, [["Record oil doesn't", C.ink], ['mean cheap fuel.', C.ink]], 520, { size: 90, out: 61.35 });
+  phrase(t, 61.5, [["The bottleneck", C.ink], ["isn't the well.", C.ink]], 520, { size: 90 });
+  phrase(t, 62.5, [["It's the refinery.", C.lime]], 820, { size: 104 });
+  const k = oC(seg(t, 62.7, 63.4)); glow(540, 1250, 420, '200,250,114', 0.12 * k); refinery(540, 1420, 0.6, k);
+  x.restore(); finish(t); }
+function s14(t) { bg();
+  txt(typed('@macro.algo.desk', t, 63.7, 28), 540, 820, { size: 66, weight: 800, color: C.ink, ls: -1 });
+  txt('Macro, explained with real data.', 540, 905, { size: 38, weight: 500, color: C.muted, alpha: oC(seg(t, 64.3, 64.7)) });
+  const kp = oC(seg(t, 64.4, 64.8)), kf = seg(t, 65.1, 65.45);
+  if (kp > 0) { const on = kf > 0.25, w = on ? 330 : 280, s = (kf > 0 ? 1 + 0.08 * Math.sin(Math.PI * kf) : 1) * lerp(0.85, 1, kp);
+    x.save(); x.translate(540, 1035); x.scale(s, s); x.globalAlpha = kp; rr(-w / 2, -48, w, 96, 48);
+    if (on) { x.fillStyle = C.lime; x.fill(); } else { x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke(); }
+    txt(on ? 'Following' : 'Follow', 0, 2, { size: 40, weight: 700, color: on ? '#15200C' : C.ink }); x.restore(); }
+  txt('EDUCATIONAL · NOT FINANCIAL ADVICE', 540, 1300, { fam: 'mono', size: 22, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, 64.6, 65.0)) });
+  txt('DATA: U.S. EIA · FRED', 540, 1340, { fam: 'mono', size: 22, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, 64.6, 65.0)) });
+  finish(t); }
+
+function flash(t, a, d = 0.14) { const k = seg(t, a - d / 2, a + d / 2); if (k <= 0 || k >= 1) return; x.fillStyle = `rgba(255,255,255,${Math.sin(k * Math.PI) * 0.7})`; x.fillRect(0, 0, W, H); }
+// riallineamento alla voce: window.WARP = [[tempo_nuovo, tempo_vecchio], ...] (iniettato da render.cjs)
+function warp(t) { const Wp = window.WARP; if (!Wp) return t; if (t <= Wp[0][0]) return Wp[0][1];
+  for (let i = 1; i < Wp.length; i++) if (t <= Wp[i][0]) { const [a0, b0] = Wp[i - 1], [a1, b1] = Wp[i]; return b0 + (b1 - b0) * (t - a0) / (a1 - a0); }
+  return Wp[Wp.length - 1][1]; }
+window.render = function (tReal) {
+  const t = warp(tReal);
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
+  const s = SC.find(([a, b]) => t >= a && t < b) || SC[SC.length - 1]; s[2](t);
+  [25.2, 49.2, 59.4].forEach((a) => flash(t, a));
+  const fi = 1 - seg(t, 0, 0.05), fo = seg(t, DUR - 0.3, DUR);
+  if (fi > 0) { x.fillStyle = `rgba(0,0,0,${fi})`; x.fillRect(0, 0, W, H); }
+  if (fo > 0) { x.fillStyle = `rgba(0,0,0,${fo})`; x.fillRect(0, 0, W, H); }
+};
+</script></body></html>

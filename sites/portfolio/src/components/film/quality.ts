@@ -1,0 +1,272 @@
+/**
+ * QUALITA' ADATTIVA del film: tre livelli (alta / media / lite) scelti UNA volta
+ * all'avvio dai segnali del dispositivo, e al massimo ABBASSATI una volta a
+ * runtime (media degli fps fra 1 e 4 s di play). Mai risaliti: niente
+ * oscillazioni. Il livello e' una costante letta dai componenti al montaggio,
+ * non stato per frame: la scena resta funzione pura di p.
+ *
+ * Segnali all'avvio:
+ *  - renderer WebGL (WEBGL_debug_renderer_info): SwiftShader / llvmpipe /
+ *    Intel HD / Mali-4xx -> lite (rendering software o GPU molto vecchia)
+ *  - deviceMemory <= 4 GB o hardwareConcurrency <= 4 -> media
+ *  - touch -> media (misurato su iPhone: lite girava a 60 fps fissi, ma senza
+ *    particelle, bloom e bande il tunnel SEMBRAVA lento; media ha tutto, e se il
+ *    telefono non regge davvero (< 27 fps misurati dopo il riscaldamento) scende)
+ *  - ?quality=alta|media|lite forza il livello (per le prove di Davide)
+ *
+ * Qui vivono anche lo stato del CARICAMENTO (bake, compilazione, primo
+ * fotogramma) e la DIAGNOSTICA (?diag=1), fuori da React: il ciclo li legge.
+ */
+
+export type Tier = "alta" | "media" | "tel" | "lite" | "eco";
+/** In ordine di costo. "tel" e' il livello dei telefoni (touch): tutto presente, ma perle e bagliore leggeri. */
+export const TIERS: Tier[] = ["alta", "media", "tel", "lite", "eco"];
+
+export type Profile = {
+  /** limite del device pixel ratio */
+  dpr: number;
+  /** perle della figura (instanceCount: il bake e' mescolato, un prefisso e' un campione uniforme) */
+  beads: number;
+  /** traiettorie del ventaglio al bake (mediana inclusa) */
+  curves: number;
+  /** particelle del wormhole (0 = nessuna) */
+  dust: number;
+  /** post chain: completa / solo bloom / nessuna */
+  post: "full" | "bloom" | "none";
+  /** frangia RGB + smear (lente): solo in alta */
+  fringe: boolean;
+  /** segmenti per filo (mai meno fili) */
+  seg: number;
+  /** shell del tunnel */
+  shells: number;
+  /**
+   * Overlay DOM (i testi del prologo e del finale): con `domBlur` le lettere si
+   * risolvono da una sfocatura CSS; con `perLetter` si anima ogni lettera, altrimenti
+   * ogni PAROLA. Su iOS un filter blur su decine di layer sopra un canvas WebGL
+   * costa piu' della scena intera (Davide: "sul telefono e' lenta"): in lite
+   * niente blur e un layer per parola, non per lettera.
+   */
+  domBlur: boolean;
+  perLetter: boolean;
+  /** false (eco): il blocco di testo entra intero, un layer per overlay */
+  perWord: boolean;
+  /** risoluzione del bagliore rispetto al canvas (0.5 = un quarto dei pixel) */
+  bloomScale: number;
+  /** perla low-poly (icosaedro, 20 triangoli invece di ~80): a pochi pixel di diametro non si distingue */
+  lowPolyBeads: boolean;
+};
+
+export const PROFILES: Record<Tier, Profile> = {
+  alta: { dpr: 1.5, beads: 40000, curves: 49, dust: 900, post: "full", fringe: true, seg: 28, shells: 3, domBlur: true, perLetter: true, perWord: true, bloomScale: 1, lowPolyBeads: false },
+  media: { dpr: 1.25, beads: 20000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: true, perLetter: true, perWord: true, bloomScale: 1, lowPolyBeads: false },
+  // tel: telefoni. Misurato (software, relativo): all'inizio pesano le perle, nel tunnel il bagliore a
+  // risoluzione piena. Qui 8000 perle e bagliore a mezza risoluzione; dust, bande e 3 shell restano,
+  // perche' sono cio' che da' la sensazione di velocita'.
+  tel: { dpr: 1.25, beads: 8000, curves: 37, dust: 400, post: "bloom", fringe: false, seg: 20, shells: 3, domBlur: false, perLetter: false, perWord: true, bloomScale: 0.5, lowPolyBeads: true },
+  lite: { dpr: 1, beads: 3500, curves: 25, dust: 0, post: "none", fringe: false, seg: 10, shells: 2, domBlur: false, perLetter: false, perWord: true, bloomScale: 0.5, lowPolyBeads: true },
+  // eco: solo a runtime (o ?quality=eco), quando lite misura ancora pochi fps: mezza risoluzione,
+  // una shell, 1200 perle, testi che entrano interi. Brutto il giusto, ma scorre.
+  eco: { dpr: 0.75, beads: 1200, curves: 25, dust: 0, post: "none", fringe: false, seg: 8, shells: 1, domBlur: false, perLetter: false, perWord: false, bloomScale: 0.5, lowPolyBeads: true },
+};
+
+export type Probe = { ok: boolean; renderer: string; vendor: string; webgl2: boolean };
+
+/** Sonda WebGL usa e getta: c'e'? e chi disegna (stringa del renderer)? */
+export function probeWebGL(): Probe {
+  const out: Probe = { ok: false, renderer: "", vendor: "", webgl2: false };
+  try {
+    const c = document.createElement("canvas");
+    const gl2 = c.getContext("webgl2");
+    const gl = (gl2 || c.getContext("webgl")) as WebGLRenderingContext | null;
+    if (!gl) return out;
+    out.ok = true;
+    out.webgl2 = !!gl2;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    if (info) {
+      out.renderer = String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || "");
+      out.vendor = String(gl.getParameter(info.UNMASKED_VENDOR_WEBGL) || "");
+    } else {
+      out.renderer = String(gl.getParameter(gl.RENDERER) || "");
+      out.vendor = String(gl.getParameter(gl.VENDOR) || "");
+    }
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+  } catch {
+    /* nessun WebGL: il fallback statico lo gestisce Film.tsx */
+  }
+  return out;
+}
+
+/** Renderer che dicono "software" o "GPU vecchia": lite senza discutere. */
+const LITE_RENDERERS = /swiftshader|llvmpipe|softpipe|software rasterizer/i;
+
+export type Signals = {
+  renderer: string;
+  memoryGB: number | null;
+  cores: number | null;
+  touch: boolean;
+  forced: Tier | null;
+};
+
+export function readSignals(search: string): Signals {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const q = new URLSearchParams(search).get("quality");
+  return {
+    renderer: "",
+    memoryGB: typeof nav.deviceMemory === "number" ? nav.deviceMemory : null,
+    cores: typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : null,
+    touch: window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0,
+    forced: q === "alta" || q === "media" || q === "tel" || q === "lite" || q === "eco" ? q : null,
+  };
+}
+
+/** La scelta iniziale, con il motivo in chiaro (finisce nella diagnostica). */
+export function pickTier(s: Signals): { tier: Tier; reason: string } {
+  if (s.forced) return { tier: s.forced, reason: `forzato da ?quality=${s.forced}` };
+  if (s.renderer && LITE_RENDERERS.test(s.renderer)) return { tier: "lite", reason: `renderer "${s.renderer}"` };
+  const why: string[] = [];
+  let tier: Tier = "alta";
+  if (s.memoryGB !== null && s.memoryGB <= 4) {
+    tier = "media";
+    why.push(`memoria ${s.memoryGB} GB`);
+  }
+  if (s.cores !== null && s.cores <= 4) {
+    tier = "media";
+    why.push(`${s.cores} core`);
+  }
+  if (s.touch) {
+    tier = "tel";
+    why.push("touch");
+  }
+  return { tier, reason: why.length ? why.join(", ") : "nessun segnale di limite" };
+}
+
+/* ---------------- lo store del livello: scelto una volta, abbassato al massimo una volta ---------------- */
+type Listener = () => void;
+
+export const quality = {
+  tier: "media" as Tier,
+  reason: "non ancora scelto",
+  probe: { ok: false, renderer: "", vendor: "", webgl2: false } as Probe,
+  signals: null as Signals | null,
+  /** true dopo la correzione a runtime (o dopo che si e' deciso di non correggere): non si misura piu' */
+  settled: false,
+  /** ultima misura degli fps che ha deciso (o confermato) il livello */
+  fpsMeasured: null as number | null,
+  listeners: new Set<Listener>(),
+  init(probe: Probe, signals: Signals) {
+    signals.renderer = probe.renderer;
+    // solo debug (?film-debug=1): ?pb= perle, ?pd= particelle, ?ps= shell, ?pp=full|bloom|none, ?pdpr= dpr
+    // sul livello scelto, per misurare quale pezzo costa di piu'. Non esiste in produzione.
+    const q = new URLSearchParams(window.location.search);
+    if (q.has("film-debug")) {
+      const pick0 = pickTier(signals).tier;
+      const t = (signals.forced || pick0) as Tier;
+      const n = (k: string) => (q.get(k) !== null && q.get(k) !== "" ? Number(q.get(k)) : null);
+      const P = PROFILES[t];
+      if (n("pb") !== null) P.beads = n("pb")!;
+      if (n("pd") !== null) P.dust = n("pd")!;
+      if (n("ps") !== null) P.shells = n("ps")!;
+      if (n("pdpr") !== null) P.dpr = n("pdpr")!;
+      if (n("pbs") !== null) P.bloomScale = n("pbs")!;
+      if (q.get("plp") === "0" || q.get("plp") === "1") P.lowPolyBeads = q.get("plp") === "1";
+      const pp = q.get("pp");
+      if (pp === "full" || pp === "bloom" || pp === "none") P.post = pp;
+    }
+    const pick = pickTier(signals);
+    quality.probe = probe;
+    quality.signals = signals;
+    quality.tier = pick.tier;
+    quality.reason = pick.reason;
+    return pick;
+  },
+  get profile(): Profile {
+    return PROFILES[quality.tier];
+  },
+  /**
+   * Opzioni DOM degli overlay. Su touch niente blur CSS e un layer per PAROLA
+   * qualunque sia il livello: su iOS decine di layer sfocati sopra il canvas
+   * costano piu' della scena, e la scena e' quella che si vede.
+   */
+  get dom(): { blur: boolean; perLetter: boolean; perWord: boolean } {
+    const p = PROFILES[quality.tier];
+    const touch = !!quality.signals?.touch;
+    return { blur: p.domBlur && !touch, perLetter: p.perLetter && !touch, perWord: p.perWord };
+  },
+  subscribe(cb: Listener) {
+    quality.listeners.add(cb);
+    return () => {
+      quality.listeners.delete(cb);
+    };
+  },
+  snapshot: () => quality.tier,
+  /**
+   * Registra gli fps misurati fra 1 e 4 s di play (solo per la riga dei numeri
+   * nel finale e per ?diag=1). NON cambia piu' il livello: Davide ha chiesto
+   * che su telefono il film resti sempre in "media", senza scendere a lite da
+   * solo (un calo momentaneo all'avvio lo spogliava per tutto il film).
+   */
+  adjust(fpsAvg: number) {
+    if (quality.settled) return;
+    quality.settled = true;
+    quality.fpsMeasured = fpsAvg;
+    quality.reason += ` · misurato ${fpsAvg.toFixed(0)} fps (livello fisso)`;
+  },
+};
+
+/* ---------------- il CARICAMENTO: fasi e tempi (performance.now), letti dal ciclo e dalla diagnostica ---------------- */
+export type BootStage = "chunk" | "bake" | "compile" | "first" | "ready" | "error";
+
+export const boot = {
+  stage: "chunk" as BootStage,
+  /** avanzamento 0..1 per la barra sottile */
+  progress: 0,
+  t0: 0,
+  /** ms: bake della figura (worker o thread principale), dove e' girato */
+  bakeMs: null as number | null,
+  bakeWhere: "" as "" | "worker" | "main",
+  /** ms: gl.compileAsync della scena + prima passata del post chain */
+  compileMs: null as number | null,
+  postMs: null as number | null,
+  /** ms dal montaggio del canvas al primo fotogramma disegnato per intero */
+  firstFrameMs: null as number | null,
+  /** ms dal montaggio di Film al ready (ingresso che parte) */
+  readyMs: null as number | null,
+  listeners: new Set<Listener>(),
+  set(stage: BootStage, progress: number) {
+    boot.stage = stage;
+    boot.progress = Math.max(boot.progress, progress);
+    boot.listeners.forEach((l) => l());
+  },
+  subscribe(cb: Listener) {
+    boot.listeners.add(cb);
+    return () => {
+      boot.listeners.delete(cb);
+    };
+  },
+};
+
+/* ---------------- DIAGNOSTICA (?diag=1): errori catturati e misure per Davide ---------------- */
+export const diag = {
+  on: false,
+  errors: [] as string[],
+  fpsNow: 0,
+  fpsAvg: 0,
+  /** finestra di misura del play: frame e secondi accumulati fra 1 e 4 s */
+  frames: 0,
+  seconds: 0,
+  pushError(msg: string) {
+    if (diag.errors.length >= 12) diag.errors.shift();
+    diag.errors.push(msg);
+  },
+};
+
+export function installErrorCapture() {
+  const onErr = (e: ErrorEvent) => diag.pushError(`${e.message}${e.filename ? ` (${e.filename.split("/").pop()}:${e.lineno})` : ""}`);
+  const onRej = (e: PromiseRejectionEvent) => diag.pushError(`promise: ${String((e.reason && (e.reason.message || e.reason)) || "?")}`);
+  window.addEventListener("error", onErr);
+  window.addEventListener("unhandledrejection", onRej);
+  return () => {
+    window.removeEventListener("error", onErr);
+    window.removeEventListener("unhandledrejection", onRej);
+  };
+}
