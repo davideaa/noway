@@ -4,14 +4,18 @@
 #   --prova  controlla tutto (calendario, video raggiungibile, token) ma NON pubblica.
 # Passi: voce del calendario di oggi → URL raw GitHub del video per commit → POST /media (REELS) → attesa FINISHED
 #        → attesa dell'ora fissata (12:00) → POST /media_publish → permalink → calendario.json + registro.json → commit e push.
-# Il token NON compare: è una credenziale dell'ambiente che il proxy aggiunge alle chiamate verso graph.instagram.com.
+# Il token NON compare: è una credenziale dell'ambiente che il proxy aggiunge alle chiamate.
+# Due strade, provate in quest'ordine: graph.facebook.com (token di «utente di sistema» del Business, senza scadenza: quello consigliato)
+# e graph.instagram.com (token «Instagram Login», 60 giorni). Gli indirizzi delle chiamate sono gli stessi.
 import json, subprocess, sys, time, datetime as dt
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[3]; SOC = Path(__file__).resolve().parent
 CAL, REG = SOC / "calendario.json", SOC / "registro.json"
-IG, API = "17841425810972500", "https://graph.instagram.com/v23.0"
+IG = "17841425810972500"
+BASI = ["https://graph.facebook.com/v23.0", "https://graph.instagram.com/v23.0"]
+API = BASI[0]
 REPO, BRANCH = "davideaa/noway", "claude/creazione-siti-web-u1dyzg"
 ROMA = ZoneInfo("Europe/Rome")
 PROVA = "--prova" in sys.argv
@@ -24,12 +28,24 @@ def api(path, post=None, timeout=60):
     out = sh(*cmd); return json.loads(out) if out else {}
 def log(*m): print(dt.datetime.now(ROMA).strftime("%H:%M:%S"), *m, flush=True)
 
+def scegli_base():
+    """Usa la prima strada il cui token vede l'account @macro.algo.desk."""
+    global API
+    errori = []
+    for b in BASI:
+        API = b
+        r = api(f"{IG}?fields=username") if "facebook" in b else api("me?fields=username")
+        if r.get("username") == "macro.algo.desk": return b, None
+        errori.append(f"{b.split('/')[2]}: {r.get('error', {}).get('message', r)}")
+    return None, " | ".join(errori)
+
 cal = json.loads(CAL.read_text())
 voce = next((v for v in cal if v["data"] == OGGI and v["stato"] == "programmato"), None)
 if not voce:
     log(f"Nessuna puntata programmata per il {OGGI}. Niente da fare."); sys.exit(0)
 log(f"Puntata {voce['puntata']} «{voce['titolo']}» per il {OGGI} alle {voce['ora']}")
 
+BASE_OK, ERR_BASE = scegli_base()
 # 1. doppioni: se un post con la stessa prima riga è già uscito, non si ripubblica
 prima = voce["caption"].split("\n")[0].strip()
 recenti = api(f"{IG}/media?fields=id,caption,timestamp,permalink&limit=10").get("data", [])
@@ -63,9 +79,9 @@ head = sh("curl", "-sI", "-m", "30", url, check=False)
 if " 200" not in head.split("\n")[0]:
     log("ERRORE: video non raggiungibile:", url, head.split("\n")[0]); sys.exit(1)
 log("Video OK:", url)
-me = api("me?fields=username")
-if me.get("username") != "macro.algo.desk":
-    log("ERRORE: token Instagram non valido o scaduto:", me); sys.exit(1)
+if not BASE_OK:
+    log("ERRORE: token Instagram non valido, scaduto o bloccato:", ERR_BASE); sys.exit(1)
+log("Collegamento OK via", BASE_OK.split("/")[2])
 if PROVA: log("PROVA: tutto pronto, non pubblico."); sys.exit(0)
 
 # 3. contenitore del reel ed elaborazione

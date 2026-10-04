@@ -73,3 +73,11 @@ Pubblicazione: video committato in `social/pubblicati/` → URL raw GitHub (per 
 - Profilo (da sistemare a mano da Davide): nome «Macro & Algo · Economia in 90 secondi», categoria Istruzione,
   bio in 3 righe (spiegazioni semplici con dati veri · una puntata al giorno alle 12:00 · inizia dalla puntata 1), post fissato = Puntata 1.
   Il reel inglese «Tokenization» va archiviato a mano (l'API non può archiviare).
+
+## Collegamento stabile (04/10/2026)
+- 02/10 sera: Meta ha bloccato l'app («API access blocked», code 200) su graph.instagram.com e graph.facebook.com.
+- Soluzione stabile scelta: **token di «utente di sistema»** del portafoglio business (Meta Business Suite), scadenza «Mai»,
+  con permessi instagram_basic, instagram_content_publish, instagram_manage_insights, pages_show_list, pages_read_engagement, business_management.
+  Va messo al posto della credenziale per graph.facebook.com. `pubblica.py` prova prima graph.facebook.com e poi graph.instagram.com.
+- Il token «Instagram Login» dura 60 giorni: resta solo come riserva.
+- Un token «senza scadenza» smette comunque di funzionare se Davide toglie l'app o i permessi, se Meta limita di nuovo l'app, o se cambia il proprietario del business.
