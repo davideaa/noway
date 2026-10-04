@@ -81,3 +81,5 @@ Pubblicazione: video committato in `social/pubblicati/` → URL raw GitHub (per 
   Va messo al posto della credenziale per graph.facebook.com. `pubblica.py` prova prima graph.facebook.com e poi graph.instagram.com.
 - Il token «Instagram Login» dura 60 giorni: resta solo come riserva.
 - Un token «senza scadenza» smette comunque di funzionare se Davide toglie l'app o i permessi, se Meta limita di nuovo l'app, o se cambia il proprietario del business.
+- 04/10/2026 11:51: **collegato** con il token dell'utente di sistema «macroalgo-bot» (scadenza «Mai»), credenziale `FB_ACCESS_TOKEN` su graph.facebook.com.
+  Permessi concessi: instagram_basic, instagram_content_publish, instagram_manage_contents, instagram_manage_insights, pages_show_list, pages_read_engagement, business_management. Prova per le puntate 1–5: tutto pronto.
