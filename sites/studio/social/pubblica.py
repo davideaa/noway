@@ -75,9 +75,10 @@ sha = sh("git", "-C", str(ROOT), "rev-parse", f"origin/{BRANCH}")
 if subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", f"{sha}:{voce['file']}"]).returncode != 0:
     log("ERRORE: il video non è nel ramo remoto:", voce["file"]); sys.exit(1)
 url = f"https://raw.githubusercontent.com/{REPO}/{sha}/{voce['file']}"
-head = sh("curl", "-sI", "-m", "30", url, check=False)
-if " 200" not in head.split("\n")[0]:
-    log("ERRORE: video non raggiungibile:", url, head.split("\n")[0]); sys.exit(1)
+# il codice della risposta vera (con il proxy la prima riga è «200 Connection Established»: non va letta quella)
+codice = sh("curl", "-s", "-o", "/dev/null", "-I", "-w", "%{http_code}", "-m", "30", url, check=False)
+if codice != "200":
+    log("ERRORE: video non raggiungibile da Instagram (HTTP", codice + "): il repository deve essere pubblico.", url); sys.exit(1)
 log("Video OK:", url)
 if not BASE_OK:
     log("ERRORE: token Instagram non valido, scaduto o bloccato:", ERR_BASE); sys.exit(1)
