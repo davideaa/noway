@@ -83,3 +83,14 @@ Pubblicazione: video committato in `social/pubblicati/` → URL raw GitHub (per 
 - Un token «senza scadenza» smette comunque di funzionare se Davide toglie l'app o i permessi, se Meta limita di nuovo l'app, o se cambia il proprietario del business.
 - 04/10/2026 11:51: **collegato** con il token dell'utente di sistema «macroalgo-bot» (scadenza «Mai»), credenziale `FB_ACCESS_TOKEN` su graph.facebook.com.
   Permessi concessi: instagram_basic, instagram_content_publish, instagram_manage_contents, instagram_manage_insights, pages_show_list, pages_read_engagement, business_management. Prova per le puntate 1–5: tutto pronto.
+
+## Pubblicazione automatica — autorizzazione permanente (06/10/2026)
+Davide, testuale: «ti autorizzo a fare qualsiasi cosa che riguarda la pubblicazione reel su Instagram, senza ogni giorno
+doverci bloccare». Vale per tutta la serie: pubblicare le puntate in calendario, ripubblicarle se l'automatico fallisce,
+correggere lo script e l'appuntamento. Non vale per altro (niente post fuori calendario, niente modifiche ai contenuti
+già approvati senza dirglielo).
+- Il repository deve restare **pubblico**: Instagram scarica i video dall'indirizzo raw di GitHub (05/10 era privato → 404).
+- L'appuntamento delle 11:52 (lun–ven) arriva nella sessione di lavoro, `trig_01N3jjwPhGqpowoUzRz9eBG7`; il vecchio
+  (sessione nuova a ogni giro, bloccata dai permessi il 06/10) è spento.
+- `.claude/settings.json` autorizza solo il comando `pubblica.py`, così anche una sessione nuova non si blocca.
+- Uscite: P1 05/10 12:00:49 https://www.instagram.com/reel/DeG8cAdH-3q/ · P2 06/10 12:00:03 https://www.instagram.com/reel/DeJg2rgFfSZ/
