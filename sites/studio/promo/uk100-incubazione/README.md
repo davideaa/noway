@@ -13,3 +13,13 @@ Nessun rendimento in percentuale nel video. La forma della nuvola di punti è il
 Musica (non nel repository): il clip di 10 s del riferimento, ripetuto a tempo (battito 0,3932 s dal 1,256 s):
 0→8,73 + 1,256→8,73 + 1,256→fine, dissolvenze 15 ms → 24,88 s.
 Render: `render.cjs` della cartella portfolio-claude con `DUR=24.88`.
+
+## Versione 2 (06/10/2026, sera) — quella consegnata
+Davide: contenuto più accattivante, risultati, in/out of sample, incubazione = demo live, almeno 30 s, rischio 1%,
+e un inizio che mostri la scelta della strategia sul sito (clic su UK100).
+- 39,8 s: musica con una frase in più (0→8,73 + 3×[1,256→8,73] + 1,256→fine); le scene della v1 spostate di 7,456 s.
+- Intro: pannello «Scegline una.» con le 5 schede del sito ricreate (curve mini vere dal sito v4), cursore, clic su UK100.
+- Numeri (curva MT5 della pagina uk100, costi Fusion, rischio 1%, `curva.js`): $10.000 → $39.072 (+290,7%) dal
+  02/01/2019 al 01/10/2026; in sample 2019–2022 +63,5%; out of sample 2023–2026 +138,9%; anni 2019–2026 tutti positivi
+  (+3, +9, +12, +30, +33, +17, +33, +15 fino a ottobre); discesa massima 20,2%; 1.763 trade.
+- Nella pagina c'è anche «$30,671 / +206,7%»: è un valore statico dell'HTML, non coerente con la curva (0,75% → +184%).

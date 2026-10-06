@@ -5,9 +5,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1080px;height:1920px;overflow:hidden;background:#050407}
 #stage{position:absolute;inset:0;overflow:hidden;background:#050407;font-family:Inter,sans-serif;color:#fff}
-.blob{position:absolute;border-radius:50%;filter:blur(90px);will-change:transform}
+.blob{position:absolute;border-radius:50%;filter:blur(90px)}
 .sc{position:absolute;inset:0;display:none}
-.ttl{position:absolute;left:80px;right:80px;text-align:center;font-weight:600;letter-spacing:-.02em;line-height:1.08}
+.ttl{position:absolute;left:70px;right:70px;text-align:center;font-weight:600;letter-spacing:-.02em;line-height:1.08}
 .w{display:inline-block;white-space:nowrap}
 .l{display:inline-block;position:relative}
 .glass{position:absolute;border-radius:46px;background:linear-gradient(140deg,rgba(255,255,255,.17) 0%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.09) 100%);
@@ -18,126 +18,202 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#050407}
 .pill{border-radius:999px}
 .num{font-weight:600;letter-spacing:-.03em}
 .dim{color:rgba(255,255,255,.62)}
-.org{color:#ff9a3c}
+.org{color:#ffb02e}
 #flash{position:absolute;inset:0;background:#ff8a3a;mix-blend-mode:screen;pointer-events:none;opacity:0}
-#grain{position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='.8'/></svg>")}
+.cht{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:500}
+.leg .ln{position:absolute;left:52px;top:44px;font-size:44px;color:#ffb02e;font-weight:500}
+.leg .lt{position:absolute;left:150px;top:34px;font-size:52px;font-weight:600;letter-spacing:-.01em}
+.leg .ld{position:absolute;left:152px;top:104px;font-size:32px;color:rgba(255,255,255,.66)}
+.x6{font-style:normal;width:96px;height:96px;border-radius:50%;background:rgba(255,70,50,.22);border:2px solid rgba(255,90,70,.7);color:#ff6a55;font-size:48px;display:flex;align-items:center;justify-content:center}
+.step{display:flex;align-items:center;gap:30px;padding:0 44px}
+.step .ic{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;flex:none}
+.step .ok{background:rgba(140,255,184,.18);border:2px solid rgba(140,255,184,.7);color:#8CFFB8}
+.step .now{background:rgba(255,176,46,.22);border:2px solid #ffb02e;color:#ffb02e}
+.step .next{background:rgba(255,255,255,.06);border:2px dashed rgba(255,255,255,.4);color:rgba(255,255,255,.5)}
+.step b{font-size:44px;font-weight:600;display:block}
+.step i{font-style:normal;font-size:28px;color:rgba(255,255,255,.62);display:block;margin-top:4px}
+.step .tag{margin-left:auto;font-family:'IBM Plex Mono';font-size:24px;letter-spacing:.1em;padding:10px 18px;border-radius:999px;background:rgba(255,176,46,.2);color:#ffd08a;border:1.5px solid rgba(255,176,46,.6)}
+.bar9{position:absolute;bottom:120px;width:84px;border-radius:18px 18px 8px 8px;background:linear-gradient(180deg,#ffb02e,#ff5a1f);box-shadow:0 0 30px rgba(255,120,40,.45)}
+.bl9{position:absolute;bottom:62px;width:84px;text-align:center;font-family:'IBM Plex Mono';font-size:24px;color:rgba(255,255,255,.7)}
+.bv9{position:absolute;width:110px;text-align:center;font-size:30px;font-weight:600}
+.sc0{position:absolute;inset:0;display:none}
+#site{left:40px;top:300px;width:1000px;height:1250px;border-radius:52px;background:linear-gradient(160deg,rgba(10,14,20,.86),rgba(6,9,13,.92));transform-origin:50% 50%}
+#sitebar{position:absolute;left:0;right:0;top:0;height:110px;display:flex;align-items:center;gap:18px;padding:0 44px;border-bottom:1px solid rgba(255,255,255,.08);font-size:30px}
+#sitebar img{height:48px}#sitebar .sb2{margin-left:auto;font-size:20px;letter-spacing:.12em;color:rgba(255,255,255,.5)}
+#sitein{position:absolute;left:0;right:0;top:110px;bottom:0}
+#sEy{position:absolute;left:50px;top:56px;font-size:24px;letter-spacing:.1em;color:#9aa1a8}#sEy b{color:#c8fa72;font-weight:500}
+#sH1,#sH2{position:absolute;left:46px;font-size:76px;font-weight:500;letter-spacing:-.02em}
+#sH1{top:100px;color:#f1f4ee}#sH2{top:186px;color:#7f878e}
+.xc{position:absolute;width:440px;height:300px;border-radius:30px;background:linear-gradient(160deg,rgba(18,23,30,.96),rgba(10,13,18,.98));border:1.5px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);transform-origin:50% 50%}
+.xc__glow{position:absolute;inset:0;background:radial-gradient(80% 70% at 50% 0%,color-mix(in srgb,var(--zc) 35%,transparent),transparent 70%);opacity:0}
+.xc__head{position:absolute;left:30px;right:30px;top:28px;display:flex;align-items:center}
+.xc__name{display:flex;align-items:center;gap:14px;font-family:Manrope;font-weight:600;font-size:40px;color:#f1f4ee}
+.xc__dot{width:16px;height:16px;border-radius:50%;background:var(--zc);box-shadow:0 0 14px var(--zc)}
+#xc3 .xc__mkt{display:none}
+.xc__mkt{margin-left:auto;font-size:20px;letter-spacing:.1em;color:rgba(255,255,255,.55)}
+.xc__tipo{position:absolute;left:30px;top:88px;font-size:24px;color:rgba(255,255,255,.62)}
+.xc__mini{position:absolute;left:30px;top:130px;width:380px;height:100px}
+.xc__go{position:absolute;left:30px;bottom:24px;font-size:24px;color:var(--zc)}
+.xc--uk{width:900px;height:240px;border-color:rgba(232,65,79,.55);background:linear-gradient(160deg,rgba(9,14,30,.80),rgba(9,14,30,.93)),linear-gradient(90deg,transparent 46.5%,#c8102e 46.5% 53.5%,transparent 53.5%),linear-gradient(0deg,transparent 42%,#c8102e 42% 58%,transparent 58%),linear-gradient(90deg,transparent 43%,#fff 43% 57%,transparent 57%),linear-gradient(0deg,transparent 36%,#fff 36% 64%,transparent 64%),linear-gradient(28deg,transparent 48%,#c8102e 48% 50.5%,transparent 50.5%),linear-gradient(-28deg,transparent 48%,#c8102e 48% 50.5%,transparent 50.5%),linear-gradient(28deg,transparent 45%,#fff 45% 55%,transparent 55%),linear-gradient(-28deg,transparent 45%,#fff 45% 55%,transparent 55%),#012169}
+.xc--uk .xc__dot{background:linear-gradient(135deg,#c8102e 0 50%,#2f63e0 50%);box-shadow:0 0 12px rgba(200,16,46,.8)}
+.xc--uk .xc__mini{width:420px;left:450px;top:80px;height:110px}
+.xc--uk .xc__mkt{position:absolute;left:240px;top:14px;margin:0}
+.ukbadge{position:absolute;left:30px;top:130px;font-size:22px;letter-spacing:.1em;color:#ffd08a;padding:10px 18px;border-radius:999px;background:rgba(255,176,46,.18);border:1.5px solid rgba(255,176,46,.6)}
+.uknew{position:absolute;right:30px;top:24px;font-size:20px;letter-spacing:.14em;color:#fff;padding:8px 16px;border-radius:999px;background:#e8414f}
+#ukzoom{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none;opacity:0}
+#cur{position:absolute;left:0;top:0;width:54px;height:54px;transform-origin:0 0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
 </style></head>
 <body><div id="stage">
   <div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div><div class="blob" id="b4"></div>
 
-  <!-- S1 UK100 -->
   <div class="sc" id="s1">
     <div class="ttl" id="t1" style="top:690px;font-size:250px;letter-spacing:-.04em">UK100</div>
-    <div class="glass pill" id="p1" style="left:300px;top:1000px;width:480px;height:104px;display:flex;align-items:center;justify-content:center;gap:20px">
-      <i id="p1dot" style="width:20px;height:20px;border-radius:50%;background:#ffb02e;box-shadow:0 0 20px #ffb02e"></i><span class="mono" style="font-size:34px;letter-spacing:.16em;font-weight:500">IN INCUBAZIONE</span></div>
+    <div class="glass pill" id="p1" style="left:150px;top:1000px;width:780px;height:104px;display:flex;align-items:center;justify-content:center;gap:20px">
+      <i class="dot" style="width:20px;height:20px;border-radius:50%;background:#ffb02e;box-shadow:0 0 20px #ffb02e"></i><span class="mono" style="font-size:31px;letter-spacing:.12em;font-weight:500;white-space:nowrap">NUOVA STRATEGIA · IN TESTING</span></div>
   </div>
-  <!-- S2 nuova strategia -->
   <div class="sc" id="s2">
-    <div class="ttl" id="t2a" style="top:740px;font-size:100px">La nuova strategia</div>
-    <div class="ttl" id="t2b" style="top:870px;font-size:100px">sul FTSE 100.</div>
-    <div class="ttl mono dim" id="t2c" style="top:1040px;font-size:30px;letter-spacing:.14em;font-weight:400">FTSE 100 · H1 · BACKTEST 2019–2026</div>
+    <div class="ttl" id="t2a" style="top:560px;font-size:124px">Cos'è UK100?</div>
+    <div class="ttl" id="t2b" style="top:790px;font-size:58px;font-weight:500">Il CFD sul FTSE 100:</div>
+    <div class="ttl" id="t2c" style="top:870px;font-size:52px;font-weight:500">le 100 società più grandi di Londra.</div>
   </div>
-  <!-- S3 100 società -->
   <div class="sc" id="s3">
-    <div class="ttl" id="t3a" style="top:600px;font-size:96px">Le 100 società</div>
-    <div class="ttl" id="t3b" style="top:722px;font-size:96px">più grandi di Londra.</div>
-    <div class="glass pill ch" id="c30" style="left:120px;top:960px;width:380px;height:110px"><div class="cht">🏦 Banche</div></div>
-    <div class="glass pill ch" id="c31" style="left:580px;top:960px;width:380px;height:110px"><div class="cht">🛢️ Petrolio</div></div>
-    <div class="glass pill ch" id="c32" style="left:120px;top:1100px;width:380px;height:110px"><div class="cht">💊 Farmaceutica</div></div>
-    <div class="glass pill ch" id="c33" style="left:580px;top:1100px;width:380px;height:110px"><div class="cht">⛏️ Materie prime</div></div>
+    <div class="ttl" id="t3a" style="top:560px;font-size:84px">Le colonne della</div>
+    <div class="ttl" id="t3b" style="top:662px;font-size:84px">Borsa di Londra.</div>
+    <div class="glass pill" id="c30" style="left:110px;top:900px;width:400px;height:116px"><div class="cht">🏦 Banche</div></div>
+    <div class="glass pill" id="c31" style="left:570px;top:900px;width:400px;height:116px"><div class="cht">🛢️ Petrolio</div></div>
+    <div class="glass pill" id="c32" style="left:110px;top:1046px;width:400px;height:116px"><div class="cht">💊 Farmaceutica</div></div>
+    <div class="glass pill" id="c33" style="left:570px;top:1046px;width:400px;height:116px"><div class="cht">⛏️ Materie prime</div></div>
   </div>
-  <!-- S4 tre strategie -->
   <div class="sc" id="s4">
-    <div class="ttl" id="t4a" style="top:430px;font-size:104px">Tre strategie.</div>
-    <div class="ttl" id="t4b" style="top:556px;font-size:104px">Una sola idea.</div>
-    <div class="glass leg" id="g40" style="left:90px;top:790px;width:900px;height:170px"><span class="ln mono">01</span><span class="lt">Rimbalzo dopo un crollo</span></div>
-    <div class="glass leg" id="g41" style="left:90px;top:990px;width:900px;height:170px"><span class="ln mono">02</span><span class="lt">Lunedì debole</span></div>
-    <div class="glass leg" id="g42" style="left:90px;top:1190px;width:900px;height:170px"><span class="ln mono">03</span><span class="lt">Pullback nel trend</span></div>
+    <div class="ttl" id="t4a" style="top:370px;font-size:112px">3 strategie.</div>
+    <div class="ttl" id="t4b" style="top:500px;font-size:112px">1 solo sistema.</div>
+    <div class="glass leg" id="g40" style="left:80px;top:740px;width:920px;height:180px"><span class="ln mono">01</span><span class="lt">Rimbalzo dopo un crollo</span><span class="ld">compra quando il prezzo crolla troppo</span></div>
+    <div class="glass leg" id="g41" style="left:80px;top:944px;width:920px;height:180px"><span class="ln mono">02</span><span class="lt">Lunedì debole</span><span class="ld">compra le vendite di inizio settimana</span></div>
+    <div class="glass leg" id="g42" style="left:80px;top:1148px;width:920px;height:180px"><span class="ln mono">03</span><span class="lt">Pullback nel trend</span><span class="ld">entra sui ritracciamenti, long e short</span></div>
   </div>
-  <!-- S5 l'idea -->
   <div class="sc" id="s5">
-    <div class="ttl" id="t5a" style="top:420px;font-size:78px">I crolli esagerati</div>
-    <div class="ttl" id="t5b" style="top:518px;font-size:78px">tornano verso la media.</div>
+    <div class="ttl" id="t5a" style="top:420px;font-size:76px">Un crollo esagerato?</div>
+    <div class="ttl" id="t5b" style="top:516px;font-size:76px">Spesso torna alla media.</div>
     <div class="glass" id="g5" style="left:90px;top:700px;width:900px;height:620px">
-      <svg id="ch5" width="900" height="620" viewBox="0 0 900 620" style="position:absolute;left:0;top:0">
+      <svg width="900" height="620" viewBox="0 0 900 620" style="position:absolute;left:0;top:0">
         <line id="mean5" x1="60" y1="250" x2="840" y2="250" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-dasharray="10 12"/>
         <text id="meanT" x="840" y="228" text-anchor="end" font-family="IBM Plex Mono" font-size="26" fill="rgba(255,255,255,.7)">MEDIA</text>
         <path id="pr5" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
         <g id="in5"><circle r="18" fill="#ffb02e"/><circle r="34" fill="none" stroke="#ffb02e" stroke-width="3"/><text font-family="Inter" font-weight="600" font-size="32" fill="#ffb02e" text-anchor="middle" dy="78">entra</text></g>
-        <g id="out5"><circle r="18" fill="#7CFFB2"/><text font-family="Inter" font-weight="600" font-size="32" fill="#7CFFB2" text-anchor="middle" dy="-38">esce</text></g>
+        <g id="out5"><circle r="18" fill="#8CFFB8"/><text font-family="Inter" font-weight="600" font-size="32" fill="#8CFFB8" text-anchor="middle" dy="-38">esce</text></g>
       </svg>
       <div class="mono dim" id="t5c" style="position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:27px;letter-spacing:.1em">STOP SULLA VOLATILITÀ · USCITA ENTRO 24–48 ORE</div>
     </div>
   </div>
-  <!-- S6 difesa -->
   <div class="sc" id="s6">
-    <div class="ttl" id="t6a" style="top:560px;font-size:92px">Dopo 2 perdite di fila</div>
-    <div class="ttl" id="t6b" style="top:672px;font-size:92px">il rischio si dimezza.</div>
+    <div class="ttl" id="t6a" style="top:560px;font-size:100px">2 perdite di fila?</div>
+    <div class="ttl" id="t6b" style="top:680px;font-size:100px">Rischio dimezzato.</div>
     <div class="glass" id="g6" style="left:150px;top:900px;width:780px;height:300px">
-      <div style="position:absolute;left:70px;top:70px;display:flex;gap:26px" id="xs6"><i class="x6">✕</i><i class="x6">✕</i></div>
-      <div id="bar6w" style="position:absolute;left:330px;top:96px;width:380px;height:44px;border-radius:22px;background:rgba(255,255,255,.12)"><div id="bar6" style="height:100%;border-radius:22px;background:linear-gradient(90deg,#ff7a1a,#ffb02e)"></div></div>
-      <div class="mono dim" style="position:absolute;left:330px;top:160px;font-size:26px;letter-spacing:.1em" id="lab6" >RISCHIO PIENO</div>
+      <div style="position:absolute;left:70px;top:70px;display:flex;gap:26px"><i class="x6">✕</i><i class="x6">✕</i></div>
+      <div style="position:absolute;left:330px;top:96px;width:380px;height:44px;border-radius:22px;background:rgba(255,255,255,.12)"><div id="bar6" style="height:100%;border-radius:22px;background:linear-gradient(90deg,#ff7a1a,#ffb02e)"></div></div>
+      <div class="mono dim" style="position:absolute;left:330px;top:160px;font-size:26px;letter-spacing:.1em" id="lab6">RISCHIO PIENO</div>
       <div class="mono" style="position:absolute;left:70px;top:226px;font-size:25px;color:rgba(255,255,255,.55);letter-spacing:.06em">…fino alla prossima vincita</div>
     </div>
   </div>
-  <!-- S7 numeri -->
   <div class="sc" id="s7">
-    <div class="glass" id="g70" style="left:90px;top:440px;width:900px;height:300px">
-      <div class="num" id="n70" style="position:absolute;left:60px;top:40px;font-size:150px">0</div>
-      <div style="position:absolute;left:64px;top:210px;font-size:34px" class="dim">trade nel backtest, 2019–2026</div></div>
-    <div class="glass" id="g71" style="left:90px;top:770px;width:900px;height:200px">
-      <div style="position:absolute;left:60px;top:38px;font-size:46px;font-weight:600">MetaTrader 5, ogni tick</div>
-      <div style="position:absolute;left:60px;top:112px;font-size:32px" class="dim">con i costi veri del broker</div></div>
-    <div class="glass" id="g72" style="left:90px;top:1000px;width:900px;height:240px">
-      <div class="mono org" style="position:absolute;left:60px;top:40px;font-size:28px;letter-spacing:.12em">FUORI CAMPIONE · 2023–2026</div>
-      <div style="position:absolute;left:60px;top:96px;font-size:62px;font-weight:600">In utile.</div>
-      <div style="position:absolute;left:60px;top:176px;font-size:30px" class="dim">anni mai visti quando sono state scelte le regole</div></div>
-  </div>
-  <!-- S8 edge o fortuna -->
-  <div class="sc" id="s8">
-    <div class="ttl" id="t8a" style="top:380px;font-size:100px">Edge o fortuna?</div>
-    <div class="glass" id="g8" style="left:90px;top:580px;width:900px;height:700px">
-      <canvas id="cv8" width="900" height="700" style="position:absolute;left:0;top:0"></canvas>
-      <div class="mono dim" id="l8a" style="position:absolute;left:60px;top:44px;font-size:26px;letter-spacing:.08em">1.000 STRATEGIE CON ENTRATE A CASO</div>
-      <div class="mono dim" id="l8b" style="position:absolute;left:60px;top:84px;font-size:24px;letter-spacing:.06em">stesse uscite · −0,043 R a trade in media</div>
-      <div id="l8c" style="position:absolute;right:56px;top:150px;text-align:right"><div style="font-size:34px;font-weight:600;color:#ffb02e">la strategia</div><div class="mono" style="font-size:26px;color:#ffd08a">+0,095 R a trade</div></div>
+    <div class="ttl mono org" id="t7a" style="top:330px;font-size:34px;letter-spacing:.16em;font-weight:500">IL BACKTEST · 2019 → 2026</div>
+    <div class="ttl num" id="n7a" style="top:390px;font-size:84px;font-weight:500;color:rgba(255,255,255,.7)">$10.000 →</div>
+    <div class="ttl num" id="n7b" style="top:480px;font-size:190px">$0</div>
+    <div class="glass" id="g7" style="left:80px;top:740px;width:920px;height:560px">
+      <svg id="cv7" width="920" height="560" style="position:absolute;left:0;top:0"></svg>
+      <div class="glass pill" id="p7" style="left:560px;top:40px;width:320px;height:110px;display:flex;align-items:center;justify-content:center"><span class="num" style="font-size:66px;color:#8CFFB8">+291%</span></div>
     </div>
-    <div class="ttl" id="t8b" style="top:1330px;font-size:54px;font-weight:500">Batte il 100% delle versioni a caso.</div>
+    <div class="ttl mono dim" id="t7b" style="top:1330px;font-size:26px;letter-spacing:.08em;font-weight:400;line-height:1.5">RISCHIO 1% A TRADE · 1.763 TRADE · METATRADER 5<br>OGNI TICK · COSTI REALI · DISCESA MASSIMA 20%</div>
   </div>
-  <!-- S9 correlazioni -->
+  <div class="sc" id="s8">
+    <div class="ttl" id="t8a" style="top:380px;font-size:96px">Validata due volte.</div>
+    <div class="ttl dim" id="t8b" style="top:500px;font-size:40px;font-weight:500">Regole scelte su un periodo, provate su un altro.</div>
+    <div style="position:absolute;left:80px;top:660px;width:920px;height:16px;border-radius:8px;overflow:hidden;background:rgba(255,255,255,.1)">
+      <div id="tl8a" style="position:absolute;left:0;top:0;height:100%;background:#7FB2FF"></div><div id="tl8b" style="position:absolute;left:52%;top:0;height:100%;background:#8CFFB8"></div></div>
+    <div class="glass" id="g80" style="left:80px;top:730px;width:440px;height:520px">
+      <div class="mono" style="position:absolute;left:44px;top:44px;font-size:26px;letter-spacing:.12em;color:#9cc3ff">IN SAMPLE</div>
+      <div style="position:absolute;left:44px;top:90px;font-size:50px;font-weight:600">2019–2022</div>
+      <div class="num" id="n80" style="position:absolute;left:40px;top:200px;font-size:100px;color:#cfe0ff">+0%</div>
+      <div style="position:absolute;left:44px;top:350px;right:36px;font-size:31px;line-height:1.35" class="dim">gli anni su cui sono state scelte le regole</div></div>
+    <div class="glass" id="g81" style="left:560px;top:730px;width:440px;height:520px">
+      <div class="mono" style="position:absolute;left:44px;top:44px;font-size:26px;letter-spacing:.12em;color:#8CFFB8">OUT OF SAMPLE</div>
+      <div style="position:absolute;left:44px;top:90px;font-size:50px;font-weight:600">2023–2026</div>
+      <div class="num" id="n81" style="position:absolute;left:40px;top:200px;font-size:100px;color:#8CFFB8">+0%</div>
+      <div style="position:absolute;left:44px;top:350px;right:36px;font-size:31px;line-height:1.35" class="dim">anni mai visti prima: il vero esame</div></div>
+  </div>
   <div class="sc" id="s9">
-    <div class="ttl" id="t9a" style="top:400px;font-size:80px">Lavora per conto suo.</div>
-    <div class="ttl dim" id="t9b" style="top:516px;font-size:48px;font-weight:500">Quasi scorrelata dalle altre strategie.</div>
-    <svg id="sv9" width="1080" height="1920" style="position:absolute;left:0;top:0"></svg>
-    <div class="glass pill orb" id="o90" style="left:400px;top:880px;width:280px;height:280px"><b>UK100</b></div>
-    <div class="glass pill orb sm" id="o91" style="left:110px;top:700px;width:220px;height:220px"><b>Oro</b></div>
-    <div class="glass pill orb sm" id="o92" style="left:750px;top:700px;width:220px;height:220px"><b>Nasdaq</b></div>
-    <div class="glass pill orb sm" id="o93" style="left:430px;top:1260px;width:220px;height:220px"><b>USDJPY</b></div>
+    <div class="ttl" id="t9a" style="top:400px;font-size:100px">8 anni su 8</div>
+    <div class="ttl" id="t9b" style="top:520px;font-size:100px">in positivo.</div>
+    <div class="glass" id="g9" style="left:60px;top:720px;width:960px;height:620px"></div>
+    <div class="ttl mono dim" id="t9c" style="top:1370px;font-size:24px;letter-spacing:.08em;font-weight:400">RISCHIO 1% A TRADE · 2026 FINO A OTTOBRE</div>
   </div>
-  <!-- S10 onestà -->
   <div class="sc" id="s10">
-    <div class="ttl" id="t10a" style="top:640px;font-size:104px">Vantaggio vero,</div>
-    <div class="ttl" id="t10b" style="top:766px;font-size:104px">ma sottile.</div>
-    <div class="ttl" id="t10c" style="top:990px;font-size:62px;font-weight:500">Per questo ora gira in demo.</div>
+    <div class="ttl" id="t10a" style="top:380px;font-size:96px">Edge o fortuna?</div>
+    <div class="glass" id="g10" style="left:90px;top:580px;width:900px;height:640px">
+      <canvas id="cv10" width="900" height="640" style="position:absolute;left:0;top:0"></canvas>
+      <div class="mono dim" style="position:absolute;left:56px;top:44px;font-size:26px;letter-spacing:.08em">1.000 STRATEGIE CON ENTRATE A CASO</div>
+      <div id="l10" style="position:absolute;right:52px;top:120px;text-align:right"><div style="font-size:36px;font-weight:600;color:#ffb02e">UK100</div><div class="mono" style="font-size:24px;color:#ffd08a">stesse uscite, entrate vere</div></div>
+    </div>
+    <div class="ttl" id="t10b" style="top:1270px;font-size:58px;font-weight:500">Le batte tutte e 1.000.</div>
   </div>
-  <!-- S11 chiusura -->
   <div class="sc" id="s11">
-    <img id="mk" src="img/mark.png" style="position:absolute;left:390px;top:520px;height:380px">
-    <div class="ttl" id="t11a" style="top:960px;font-size:150px;letter-spacing:-.04em">UK100</div>
-    <div class="glass pill" id="p11" style="left:300px;top:1150px;width:480px;height:104px;display:flex;align-items:center;justify-content:center;gap:20px">
-      <i id="p11dot" style="width:20px;height:20px;border-radius:50%;background:#ffb02e;box-shadow:0 0 20px #ffb02e"></i><span class="mono" style="font-size:34px;letter-spacing:.16em;font-weight:500">IN INCUBAZIONE</span></div>
-    <div class="ttl" id="t11b" style="top:1300px;font-family:Manrope;font-size:40px;font-weight:600;letter-spacing:.18em">PORTFOLIO ALGO MANAGER</div>
-    <div class="ttl mono" id="t11c" style="top:1390px;font-size:21px;line-height:34px;letter-spacing:.06em;font-weight:400;color:rgba(255,255,255,.5)">BACKTEST SU DATI STORICI · TRADING AD ALTO RISCHIO<br>NON È CONSULENZA FINANZIARIA</div>
+    <div class="ttl" id="t11a" style="top:300px;font-size:104px">Ora: incubazione.</div>
+    <div class="ttl dim" id="t11b" style="top:428px;font-size:48px;font-weight:500">Prima dei soldi veri, gira in demo live.</div>
+    <div class="glass step" id="g110" style="left:80px;top:560px;width:920px;height:150px"><span class="ic ok">✓</span><div><b>Backtest 2019–2026</b><i>ogni tick, costi reali</i></div></div>
+    <div class="glass step" id="g111" style="left:80px;top:730px;width:920px;height:150px"><span class="ic ok">✓</span><div><b>Out of sample</b><i>2023–2026 in utile</i></div></div>
+    <div class="glass step" id="g112" style="left:80px;top:900px;width:920px;height:150px"><span class="ic ok">✓</span><div><b>Test di robustezza</b><i>entrate a caso, costi, ribassi</i></div></div>
+    <div class="glass step" id="g113" style="left:80px;top:1070px;width:920px;height:150px"><span class="ic now">●</span><div><b>Demo live</b><i>mercato vero, conto demo</i></div><span class="tag">IN CORSO</span></div>
+    <div class="glass step" id="g114" style="left:80px;top:1240px;width:920px;height:150px"><span class="ic next">5</span><div><b>Conto reale</b><i>solo se regge dal vivo</i></div></div>
   </div>
-  <div id="flash"></div><div id="grain"></div>
+  <div class="sc" id="s12">
+    <div class="ttl" id="t12a" style="top:690px;font-size:96px">Se regge dal vivo,</div>
+    <div class="ttl" id="t12b" style="top:810px;font-size:96px">entra nel portafoglio.</div>
+  </div>
+  <div class="sc" id="s13">
+    <img id="mk" src="img/mark.png" style="position:absolute;left:390px;top:500px;height:380px">
+    <div class="ttl" id="t13a" style="top:940px;font-size:150px;letter-spacing:-.04em">UK100</div>
+    <div class="glass pill" id="p13" style="left:300px;top:1130px;width:480px;height:104px;display:flex;align-items:center;justify-content:center;gap:20px">
+      <i class="dot" style="width:20px;height:20px;border-radius:50%;background:#ffb02e;box-shadow:0 0 20px #ffb02e"></i><span class="mono" style="font-size:34px;letter-spacing:.16em;font-weight:500">IN TESTING</span></div>
+    <div class="ttl" id="t13b" style="top:1280px;font-family:Manrope;font-size:40px;font-weight:600;letter-spacing:.18em">PORTFOLIO ALGO MANAGER</div>
+    <div class="ttl mono" id="t13c" style="top:1370px;font-size:21px;line-height:34px;letter-spacing:.05em;font-weight:400;color:rgba(255,255,255,.55)">BACKTEST SU DATI STORICI · I RISULTATI PASSATI NON GARANTISCONO<br>QUELLI FUTURI · TRADING AD ALTO RISCHIO · NON È CONSULENZA FINANZIARIA</div>
+  </div>
+  <div class="sc0" id="s0">
+  <div id="site" class="glass">
+    <div id="sitebar"><img src="img/mark.png"><span class="man">Portfolio Algo Manager</span><span class="mono sb2">STRATEGIE · CONTATTI · AVVISO</span></div>
+    <div id="sitein">
+      <div class="mono" id="sEy"><b>02</b> — LE STRATEGIE</div>
+      <div class="man" id="sH1">Scegline una.</div>
+      <div class="man" id="sH2">Guarda solo i suoi risultati.</div>
+      <div class="xc" id="xc0" style="--zc:#e5b966"><div class="xc__glow"></div>
+  <div class="xc__head"><span class="xc__name"><i class="xc__dot"></i>XAUUSD</span><span class="xc__mkt mono">XAUUSD</span></div>
+  <div class="xc__tipo">Segue il trend</div>
+  <svg class="xc__mini" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0.0,54.6L1.6,54.5L3.2,54.1L4.8,54.2L6.4,55.1L8.0,54.9L9.6,56.0L11.2,52.6L12.8,51.9L14.4,50.4L16.0,51.5L17.6,53.5L19.2,52.9L20.8,53.6L22.4,52.6L24.0,52.0L25.6,53.6L27.2,49.5L28.8,50.1L30.4,49.9L32.0,49.6L33.6,49.7L35.2,50.6L36.8,48.6L38.4,46.2L40.0,46.7L41.6,47.5L43.2,45.2L44.8,43.4L46.4,42.9L48.0,42.3L49.6,43.9L51.2,43.0L52.8,43.3L54.4,43.6L56.0,41.9L57.6,42.1L59.2,43.8L60.8,41.6L62.4,41.4L64.0,40.3L65.6,40.9L67.2,42.7L68.8,44.3L70.4,44.9L72.0,45.7L73.6,45.4L75.2,45.5L76.8,44.3L78.4,44.9L80.0,46.1L81.6,45.3L83.2,45.3L84.8,46.8L86.4,45.2L88.0,46.6L89.6,46.3L91.2,43.9L92.8,44.2L94.4,44.7L96.0,42.4L97.6,42.5L99.2,42.7L100.8,43.0L102.4,43.4L104.0,43.7L105.6,40.5L107.2,42.0L108.8,41.1L110.4,41.8L112.0,42.0L113.6,43.2L115.2,43.9L116.8,44.1L118.4,43.7L120.0,37.4L121.6,37.1L123.2,36.1L124.8,33.4L126.4,32.1L128.0,33.4L129.6,34.1L131.2,34.3L132.8,35.5L134.4,35.5L136.0,34.4L137.6,32.9L139.2,34.6L140.8,35.1L142.4,34.0L144.0,34.6L145.6,36.5L147.2,34.2L148.8,34.4L150.4,33.0L152.0,30.9L153.6,31.4L155.2,32.9L156.8,30.5L158.4,29.6L160.0,30.7L161.6,28.9L163.2,29.4L164.8,26.0L166.4,25.1L168.0,26.0L169.6,25.7L171.2,25.1L172.8,26.7L174.4,23.3L176.0,21.3L177.6,19.1L179.2,18.4L180.8,17.3L182.4,15.7L184.0,12.4L185.6,11.4L187.2,7.2L188.8,7.8L190.4,6.9L192.0,7.2L193.6,4.7L195.2,5.5L196.8,4.7L198.4,4.4L200.0,4.0L200,60L0,60ZL200,60L0,60Z" fill="#e5b966" opacity=".14"/><path class="xc__ln" d="M0.0,54.6L1.6,54.5L3.2,54.1L4.8,54.2L6.4,55.1L8.0,54.9L9.6,56.0L11.2,52.6L12.8,51.9L14.4,50.4L16.0,51.5L17.6,53.5L19.2,52.9L20.8,53.6L22.4,52.6L24.0,52.0L25.6,53.6L27.2,49.5L28.8,50.1L30.4,49.9L32.0,49.6L33.6,49.7L35.2,50.6L36.8,48.6L38.4,46.2L40.0,46.7L41.6,47.5L43.2,45.2L44.8,43.4L46.4,42.9L48.0,42.3L49.6,43.9L51.2,43.0L52.8,43.3L54.4,43.6L56.0,41.9L57.6,42.1L59.2,43.8L60.8,41.6L62.4,41.4L64.0,40.3L65.6,40.9L67.2,42.7L68.8,44.3L70.4,44.9L72.0,45.7L73.6,45.4L75.2,45.5L76.8,44.3L78.4,44.9L80.0,46.1L81.6,45.3L83.2,45.3L84.8,46.8L86.4,45.2L88.0,46.6L89.6,46.3L91.2,43.9L92.8,44.2L94.4,44.7L96.0,42.4L97.6,42.5L99.2,42.7L100.8,43.0L102.4,43.4L104.0,43.7L105.6,40.5L107.2,42.0L108.8,41.1L110.4,41.8L112.0,42.0L113.6,43.2L115.2,43.9L116.8,44.1L118.4,43.7L120.0,37.4L121.6,37.1L123.2,36.1L124.8,33.4L126.4,32.1L128.0,33.4L129.6,34.1L131.2,34.3L132.8,35.5L134.4,35.5L136.0,34.4L137.6,32.9L139.2,34.6L140.8,35.1L142.4,34.0L144.0,34.6L145.6,36.5L147.2,34.2L148.8,34.4L150.4,33.0L152.0,30.9L153.6,31.4L155.2,32.9L156.8,30.5L158.4,29.6L160.0,30.7L161.6,28.9L163.2,29.4L164.8,26.0L166.4,25.1L168.0,26.0L169.6,25.7L171.2,25.1L172.8,26.7L174.4,23.3L176.0,21.3L177.6,19.1L179.2,18.4L180.8,17.3L182.4,15.7L184.0,12.4L185.6,11.4L187.2,7.2L188.8,7.8L190.4,6.9L192.0,7.2L193.6,4.7L195.2,5.5L196.8,4.7L198.4,4.4L200.0,4.0L200,60L0,60Z" fill="none" stroke="#e5b966" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="xc__go">Scopri i risultati ↗</div></div><div class="xc" id="xc1" style="--zc:#72baff"><div class="xc__glow"></div>
+  <div class="xc__head"><span class="xc__name"><i class="xc__dot"></i>Nasdaq</span><span class="xc__mkt mono">NAS100</span></div>
+  <div class="xc__tipo">Slancio all’apertura</div>
+  <svg class="xc__mini" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0.0,54.1L1.6,53.4L3.2,53.3L4.8,52.9L6.3,54.4L7.9,55.3L9.5,55.2L11.1,55.6L12.7,56.0L14.3,54.5L15.9,53.1L17.5,52.6L19.0,52.9L20.6,52.6L22.2,54.5L23.8,55.2L25.4,55.7L27.0,53.5L28.6,51.7L30.2,50.2L31.7,51.2L33.3,51.3L34.9,50.9L36.5,50.5L38.1,49.8L39.7,49.3L41.3,48.7L42.9,47.8L44.4,46.3L46.0,45.6L47.6,43.7L49.2,44.1L50.8,45.4L52.4,45.4L54.0,45.1L55.6,45.3L57.1,44.7L58.7,44.9L60.3,43.0L61.9,41.1L63.5,39.4L65.1,39.1L66.7,37.7L68.3,38.1L69.8,37.3L71.4,36.0L73.0,35.4L74.6,36.7L76.2,36.7L77.8,37.1L79.4,36.2L81.0,35.9L82.5,35.6L84.1,34.9L85.7,34.2L87.3,34.1L88.9,33.3L90.5,33.2L92.1,33.1L93.7,33.2L95.2,33.4L96.8,32.7L98.4,34.1L100.0,33.8L101.6,34.5L103.2,34.4L104.8,33.6L106.3,32.4L107.9,30.8L109.5,30.4L111.1,30.0L112.7,29.7L114.3,30.8L115.9,31.0L117.5,31.9L119.0,31.5L120.6,30.1L122.2,29.2L123.8,29.4L125.4,28.1L127.0,28.9L128.6,27.0L130.2,27.8L131.7,29.0L133.3,28.9L134.9,28.1L136.5,28.8L138.1,27.4L139.7,28.1L141.3,27.0L142.9,25.1L144.4,25.0L146.0,25.3L147.6,25.6L149.2,26.6L150.8,25.8L152.4,26.0L154.0,23.4L155.6,22.3L157.1,21.1L158.7,20.0L160.3,20.2L161.9,18.9L163.5,18.3L165.1,18.5L166.7,19.7L168.3,19.1L169.8,16.5L171.4,17.0L173.0,15.1L174.6,15.4L176.2,13.1L177.8,11.2L179.4,10.3L181.0,10.6L182.5,9.8L184.1,9.8L185.7,9.3L187.3,8.9L188.9,6.9L190.5,6.1L192.1,6.4L193.7,6.0L195.2,5.7L196.8,4.0L198.4,5.2L200.0,5.2L200,60L0,60ZL200,60L0,60Z" fill="#72baff" opacity=".14"/><path class="xc__ln" d="M0.0,54.1L1.6,53.4L3.2,53.3L4.8,52.9L6.3,54.4L7.9,55.3L9.5,55.2L11.1,55.6L12.7,56.0L14.3,54.5L15.9,53.1L17.5,52.6L19.0,52.9L20.6,52.6L22.2,54.5L23.8,55.2L25.4,55.7L27.0,53.5L28.6,51.7L30.2,50.2L31.7,51.2L33.3,51.3L34.9,50.9L36.5,50.5L38.1,49.8L39.7,49.3L41.3,48.7L42.9,47.8L44.4,46.3L46.0,45.6L47.6,43.7L49.2,44.1L50.8,45.4L52.4,45.4L54.0,45.1L55.6,45.3L57.1,44.7L58.7,44.9L60.3,43.0L61.9,41.1L63.5,39.4L65.1,39.1L66.7,37.7L68.3,38.1L69.8,37.3L71.4,36.0L73.0,35.4L74.6,36.7L76.2,36.7L77.8,37.1L79.4,36.2L81.0,35.9L82.5,35.6L84.1,34.9L85.7,34.2L87.3,34.1L88.9,33.3L90.5,33.2L92.1,33.1L93.7,33.2L95.2,33.4L96.8,32.7L98.4,34.1L100.0,33.8L101.6,34.5L103.2,34.4L104.8,33.6L106.3,32.4L107.9,30.8L109.5,30.4L111.1,30.0L112.7,29.7L114.3,30.8L115.9,31.0L117.5,31.9L119.0,31.5L120.6,30.1L122.2,29.2L123.8,29.4L125.4,28.1L127.0,28.9L128.6,27.0L130.2,27.8L131.7,29.0L133.3,28.9L134.9,28.1L136.5,28.8L138.1,27.4L139.7,28.1L141.3,27.0L142.9,25.1L144.4,25.0L146.0,25.3L147.6,25.6L149.2,26.6L150.8,25.8L152.4,26.0L154.0,23.4L155.6,22.3L157.1,21.1L158.7,20.0L160.3,20.2L161.9,18.9L163.5,18.3L165.1,18.5L166.7,19.7L168.3,19.1L169.8,16.5L171.4,17.0L173.0,15.1L174.6,15.4L176.2,13.1L177.8,11.2L179.4,10.3L181.0,10.6L182.5,9.8L184.1,9.8L185.7,9.3L187.3,8.9L188.9,6.9L190.5,6.1L192.1,6.4L193.7,6.0L195.2,5.7L196.8,4.0L198.4,5.2L200.0,5.2L200,60L0,60Z" fill="none" stroke="#72baff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="xc__go">Scopri i risultati ↗</div></div><div class="xc" id="xc2" style="--zc:#b59aff"><div class="xc__glow"></div>
+  <div class="xc__head"><span class="xc__name"><i class="xc__dot"></i>USDJPY</span><span class="xc__mkt mono">USDJPY</span></div>
+  <div class="xc__tipo">Rottura con filtro</div>
+  <svg class="xc__mini" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0.0,55.8L1.6,54.9L3.3,53.8L4.9,55.4L6.6,55.3L8.2,54.6L9.8,54.2L11.5,52.8L13.1,50.9L14.8,51.5L16.4,52.2L18.0,52.3L19.7,51.0L21.3,51.8L23.0,51.3L24.6,50.5L26.2,50.4L27.9,46.9L29.5,47.5L31.1,47.7L32.8,48.2L34.4,47.7L36.1,49.1L37.7,48.2L39.3,47.9L41.0,48.1L42.6,49.2L44.3,48.4L45.9,47.3L47.5,48.2L49.2,48.7L50.8,49.0L52.5,49.0L54.1,47.2L55.7,44.7L57.4,46.3L59.0,44.8L60.7,43.3L62.3,41.6L63.9,40.9L65.6,41.8L67.2,39.4L68.9,37.9L70.5,37.2L72.1,37.1L73.8,35.5L75.4,36.0L77.0,37.0L78.7,37.1L80.3,32.7L82.0,31.1L83.6,30.8L85.2,28.5L86.9,25.4L88.5,26.0L90.2,26.6L91.8,24.9L93.4,24.4L95.1,22.6L96.7,22.2L98.4,22.0L100.0,21.2L101.6,22.9L103.3,21.1L104.9,20.5L106.6,21.7L108.2,22.8L109.8,23.5L111.5,21.7L113.1,23.6L114.8,21.4L116.4,22.0L118.0,23.3L119.7,21.8L121.3,23.2L123.0,23.7L124.6,22.7L126.2,18.6L127.9,17.7L129.5,18.9L131.1,19.4L132.8,17.7L134.4,14.4L136.1,15.7L137.7,16.7L139.3,17.4L141.0,15.1L142.6,12.3L144.3,12.9L145.9,14.4L147.5,13.2L149.2,10.9L150.8,11.1L152.5,9.0L154.1,11.8L155.7,10.9L157.4,11.4L159.0,11.2L160.7,11.8L162.3,9.6L163.9,9.9L165.6,10.7L167.2,8.8L168.9,8.9L170.5,9.5L172.1,10.3L173.8,7.1L175.4,7.0L177.0,6.3L178.7,4.6L180.3,4.9L182.0,4.0L183.6,4.2L185.2,4.6L186.9,6.3L188.5,8.4L190.2,6.1L191.8,7.1L193.4,7.8L195.1,6.7L196.7,6.5L198.4,5.3L200.0,4.4L200,60L0,60ZL200,60L0,60Z" fill="#b59aff" opacity=".14"/><path class="xc__ln" d="M0.0,55.8L1.6,54.9L3.3,53.8L4.9,55.4L6.6,55.3L8.2,54.6L9.8,54.2L11.5,52.8L13.1,50.9L14.8,51.5L16.4,52.2L18.0,52.3L19.7,51.0L21.3,51.8L23.0,51.3L24.6,50.5L26.2,50.4L27.9,46.9L29.5,47.5L31.1,47.7L32.8,48.2L34.4,47.7L36.1,49.1L37.7,48.2L39.3,47.9L41.0,48.1L42.6,49.2L44.3,48.4L45.9,47.3L47.5,48.2L49.2,48.7L50.8,49.0L52.5,49.0L54.1,47.2L55.7,44.7L57.4,46.3L59.0,44.8L60.7,43.3L62.3,41.6L63.9,40.9L65.6,41.8L67.2,39.4L68.9,37.9L70.5,37.2L72.1,37.1L73.8,35.5L75.4,36.0L77.0,37.0L78.7,37.1L80.3,32.7L82.0,31.1L83.6,30.8L85.2,28.5L86.9,25.4L88.5,26.0L90.2,26.6L91.8,24.9L93.4,24.4L95.1,22.6L96.7,22.2L98.4,22.0L100.0,21.2L101.6,22.9L103.3,21.1L104.9,20.5L106.6,21.7L108.2,22.8L109.8,23.5L111.5,21.7L113.1,23.6L114.8,21.4L116.4,22.0L118.0,23.3L119.7,21.8L121.3,23.2L123.0,23.7L124.6,22.7L126.2,18.6L127.9,17.7L129.5,18.9L131.1,19.4L132.8,17.7L134.4,14.4L136.1,15.7L137.7,16.7L139.3,17.4L141.0,15.1L142.6,12.3L144.3,12.9L145.9,14.4L147.5,13.2L149.2,10.9L150.8,11.1L152.5,9.0L154.1,11.8L155.7,10.9L157.4,11.4L159.0,11.2L160.7,11.8L162.3,9.6L163.9,9.9L165.6,10.7L167.2,8.8L168.9,8.9L170.5,9.5L172.1,10.3L173.8,7.1L175.4,7.0L177.0,6.3L178.7,4.6L180.3,4.9L182.0,4.0L183.6,4.2L185.2,4.6L186.9,6.3L188.5,8.4L190.2,6.1L191.8,7.1L193.4,7.8L195.1,6.7L196.7,6.5L198.4,5.3L200.0,4.4L200,60L0,60Z" fill="none" stroke="#b59aff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="xc__go">Scopri i risultati ↗</div></div><div class="xc" id="xc3" style="--zc:#c8fa72"><div class="xc__glow"></div>
+  <div class="xc__head"><span class="xc__name"><i class="xc__dot"></i>Portafoglio</span><span class="xc__mkt mono">3 strategie</span></div>
+  <div class="xc__tipo">XAUUSD, Nasdaq e USDJPY insieme</div>
+  <svg class="xc__mini" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0.0,55.5L1.7,54.8L3.3,54.6L5.0,54.6L6.6,56.0L8.3,56.0L9.9,56.0L11.6,54.2L13.2,53.8L14.9,52.3L16.5,52.6L18.2,53.6L19.8,53.7L21.5,54.5L23.1,55.1L24.8,53.3L26.4,52.7L28.1,50.0L29.8,50.5L31.4,50.7L33.1,50.6L34.7,50.0L36.4,50.3L38.0,50.6L39.7,47.9L41.3,47.8L43.0,47.1L44.6,46.6L46.3,46.6L47.9,45.9L49.6,45.8L51.2,45.7L52.9,45.4L54.5,45.4L56.2,43.7L57.9,43.5L59.5,42.8L61.2,41.6L62.8,41.3L64.5,40.4L66.1,40.1L67.8,39.0L69.4,38.4L71.1,39.6L72.7,40.0L74.4,39.8L76.0,40.1L77.7,40.0L79.3,39.8L81.0,38.6L82.6,38.6L84.3,37.8L86.0,37.0L87.6,36.6L89.3,35.9L90.9,36.6L92.6,36.5L94.2,35.4L95.9,35.4L97.5,35.8L99.2,33.8L100.8,34.0L102.5,34.0L104.1,33.5L105.8,33.2L107.4,31.8L109.1,32.9L110.7,32.0L112.4,32.9L114.0,33.1L115.7,33.6L117.4,34.2L119.0,33.5L120.7,32.0L122.3,30.7L124.0,30.2L125.6,27.8L127.3,27.1L128.9,28.0L130.6,28.7L132.2,28.1L133.9,28.2L135.5,27.4L137.2,26.8L138.8,27.9L140.5,27.8L142.1,26.4L143.8,25.5L145.5,25.9L147.1,26.0L148.8,25.3L150.4,23.7L152.1,23.6L153.7,22.6L155.4,22.6L157.0,21.4L158.7,22.0L160.3,20.9L162.0,19.4L163.6,18.2L165.3,18.7L166.9,19.8L168.6,18.6L170.2,17.8L171.9,17.6L173.6,16.3L175.2,14.1L176.9,12.7L178.5,12.4L180.2,10.5L181.8,9.8L183.5,8.4L185.1,8.4L186.8,6.9L188.4,7.8L190.1,6.3L191.7,6.3L193.4,5.5L195.0,5.8L196.7,4.5L198.3,4.2L200.0,4.0L200,60L0,60ZL200,60L0,60Z" fill="#c8fa72" opacity=".14"/><path class="xc__ln" d="M0.0,55.5L1.7,54.8L3.3,54.6L5.0,54.6L6.6,56.0L8.3,56.0L9.9,56.0L11.6,54.2L13.2,53.8L14.9,52.3L16.5,52.6L18.2,53.6L19.8,53.7L21.5,54.5L23.1,55.1L24.8,53.3L26.4,52.7L28.1,50.0L29.8,50.5L31.4,50.7L33.1,50.6L34.7,50.0L36.4,50.3L38.0,50.6L39.7,47.9L41.3,47.8L43.0,47.1L44.6,46.6L46.3,46.6L47.9,45.9L49.6,45.8L51.2,45.7L52.9,45.4L54.5,45.4L56.2,43.7L57.9,43.5L59.5,42.8L61.2,41.6L62.8,41.3L64.5,40.4L66.1,40.1L67.8,39.0L69.4,38.4L71.1,39.6L72.7,40.0L74.4,39.8L76.0,40.1L77.7,40.0L79.3,39.8L81.0,38.6L82.6,38.6L84.3,37.8L86.0,37.0L87.6,36.6L89.3,35.9L90.9,36.6L92.6,36.5L94.2,35.4L95.9,35.4L97.5,35.8L99.2,33.8L100.8,34.0L102.5,34.0L104.1,33.5L105.8,33.2L107.4,31.8L109.1,32.9L110.7,32.0L112.4,32.9L114.0,33.1L115.7,33.6L117.4,34.2L119.0,33.5L120.7,32.0L122.3,30.7L124.0,30.2L125.6,27.8L127.3,27.1L128.9,28.0L130.6,28.7L132.2,28.1L133.9,28.2L135.5,27.4L137.2,26.8L138.8,27.9L140.5,27.8L142.1,26.4L143.8,25.5L145.5,25.9L147.1,26.0L148.8,25.3L150.4,23.7L152.1,23.6L153.7,22.6L155.4,22.6L157.0,21.4L158.7,22.0L160.3,20.9L162.0,19.4L163.6,18.2L165.3,18.7L166.9,19.8L168.6,18.6L170.2,17.8L171.9,17.6L173.6,16.3L175.2,14.1L176.9,12.7L178.5,12.4L180.2,10.5L181.8,9.8L183.5,8.4L185.1,8.4L186.8,6.9L188.4,7.8L190.1,6.3L191.7,6.3L193.4,5.5L195.0,5.8L196.7,4.5L198.3,4.2L200.0,4.0L200,60L0,60Z" fill="none" stroke="#c8fa72" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="xc__go">Scopri i risultati ↗</div></div><div class="xc xc--uk" id="xc4" style="--zc:#e8414f"><div class="xc__glow"></div>
+  <div class="xc__head"><span class="xc__name"><i class="xc__dot"></i>UK100</span><span class="xc__mkt mono">FTSE 100</span></div>
+  <div class="xc__tipo">Rimbalzo · Lunedì debole · Pullback</div><span class="ukbadge mono">● IN INCUBAZIONE</span><span class="uknew mono">NUOVA</span>
+  <svg class="xc__mini" viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0.0,53.7L1.6,52.6L3.2,53.0L4.8,51.8L6.3,53.2L7.9,51.5L9.5,50.1L11.1,51.8L12.7,50.6L14.3,51.2L15.9,50.7L17.5,51.2L19.0,51.6L20.6,49.1L22.2,49.8L23.8,50.9L25.4,53.4L27.0,54.3L28.6,53.0L30.2,54.1L31.7,56.0L33.3,54.7L34.9,52.3L36.5,50.9L38.1,51.9L39.7,53.2L41.3,52.5L42.9,52.3L44.4,49.6L46.0,48.2L47.6,47.9L49.2,48.8L50.8,49.2L52.4,47.4L54.0,48.4L55.6,47.0L57.1,45.2L58.7,46.7L60.3,47.1L61.9,46.3L63.5,45.5L65.1,47.7L66.7,45.3L68.3,43.5L69.8,44.0L71.4,43.7L73.0,44.5L74.6,42.5L76.2,42.0L77.8,41.9L79.4,42.3L81.0,39.5L82.5,41.5L84.1,40.7L85.7,42.3L87.3,43.1L88.9,43.8L90.5,41.5L92.1,40.7L93.7,40.0L95.2,39.2L96.8,37.4L98.4,35.7L100.0,35.6L101.6,34.0L103.2,30.5L104.8,27.9L106.3,28.8L107.9,30.0L109.5,28.1L111.1,27.7L112.7,29.4L114.3,30.8L115.9,30.6L117.5,29.3L119.0,29.0L120.6,30.3L122.2,31.1L123.8,29.4L125.4,28.7L127.0,27.9L128.6,26.7L130.2,24.8L131.7,25.8L133.3,25.9L134.9,27.1L136.5,26.8L138.1,26.5L139.7,24.1L141.3,25.0L142.9,22.5L144.4,23.8L146.0,24.6L147.6,25.3L149.2,24.1L150.8,22.6L152.4,21.7L154.0,20.0L155.6,20.3L157.1,18.2L158.7,19.6L160.3,18.7L161.9,19.4L163.5,18.3L165.1,17.6L166.7,13.4L168.3,13.4L169.8,10.0L171.4,9.6L173.0,9.2L174.6,9.1L176.2,9.2L177.8,10.5L179.4,10.7L181.0,10.5L182.5,8.8L184.1,8.6L185.7,10.0L187.3,8.5L188.9,7.0L190.5,8.7L192.1,9.3L193.7,8.1L195.2,4.5L196.8,4.0L198.4,4.3L200.0,4.3L200,60L0,60ZL200,60L0,60Z" fill="#e8414f" opacity=".14"/><path class="xc__ln" d="M0.0,53.7L1.6,52.6L3.2,53.0L4.8,51.8L6.3,53.2L7.9,51.5L9.5,50.1L11.1,51.8L12.7,50.6L14.3,51.2L15.9,50.7L17.5,51.2L19.0,51.6L20.6,49.1L22.2,49.8L23.8,50.9L25.4,53.4L27.0,54.3L28.6,53.0L30.2,54.1L31.7,56.0L33.3,54.7L34.9,52.3L36.5,50.9L38.1,51.9L39.7,53.2L41.3,52.5L42.9,52.3L44.4,49.6L46.0,48.2L47.6,47.9L49.2,48.8L50.8,49.2L52.4,47.4L54.0,48.4L55.6,47.0L57.1,45.2L58.7,46.7L60.3,47.1L61.9,46.3L63.5,45.5L65.1,47.7L66.7,45.3L68.3,43.5L69.8,44.0L71.4,43.7L73.0,44.5L74.6,42.5L76.2,42.0L77.8,41.9L79.4,42.3L81.0,39.5L82.5,41.5L84.1,40.7L85.7,42.3L87.3,43.1L88.9,43.8L90.5,41.5L92.1,40.7L93.7,40.0L95.2,39.2L96.8,37.4L98.4,35.7L100.0,35.6L101.6,34.0L103.2,30.5L104.8,27.9L106.3,28.8L107.9,30.0L109.5,28.1L111.1,27.7L112.7,29.4L114.3,30.8L115.9,30.6L117.5,29.3L119.0,29.0L120.6,30.3L122.2,31.1L123.8,29.4L125.4,28.7L127.0,27.9L128.6,26.7L130.2,24.8L131.7,25.8L133.3,25.9L134.9,27.1L136.5,26.8L138.1,26.5L139.7,24.1L141.3,25.0L142.9,22.5L144.4,23.8L146.0,24.6L147.6,25.3L149.2,24.1L150.8,22.6L152.4,21.7L154.0,20.0L155.6,20.3L157.1,18.2L158.7,19.6L160.3,18.7L161.9,19.4L163.5,18.3L165.1,17.6L166.7,13.4L168.3,13.4L169.8,10.0L171.4,9.6L173.0,9.2L174.6,9.1L176.2,9.2L177.8,10.5L179.4,10.7L181.0,10.5L182.5,8.8L184.1,8.6L185.7,10.0L187.3,8.5L188.9,7.0L190.5,8.7L192.1,9.3L193.7,8.1L195.2,4.5L196.8,4.0L198.4,4.3L200.0,4.3L200,60L0,60Z" fill="none" stroke="#e8414f" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <div class="xc__go">Scopri i risultati ↗</div></div>
+    </div>
+  </div>
+  <div id="ukzoom"></div>
 </div>
-<style>
-.cht{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:500}
-.leg .ln{position:absolute;left:56px;top:56px;font-size:48px;color:#ffb02e;font-weight:500}
-.leg .lt{position:absolute;left:170px;top:48px;font-size:56px;font-weight:600;letter-spacing:-.01em}
-.x6{font-style:normal;width:96px;height:96px;border-radius:50%;background:rgba(255,70,50,.22);border:2px solid rgba(255,90,70,.7);color:#ff6a55;font-size:48px;display:flex;align-items:center;justify-content:center}
-.orb{display:flex;align-items:center;justify-content:center}.orb b{font-size:52px;font-weight:600}.orb.sm b{font-size:40px;font-weight:500}
-</style>
+<svg id="cur" viewBox="0 0 54 54"><g id="arrow"><path d="M8 4 L8 42 L18 32.5 L25 48 L31.5 45 L24.5 30 L38 30 Z" fill="#fff" stroke="#111" stroke-width="2.6" stroke-linejoin="round"/></g>
+<g id="hand" transform="translate(4 2) scale(1.05)"><path d="M17 22V8.5a3 3 0 0 1 6 0V20l.2-3.2a3 3 0 0 1 5.8.3V21l.3-2.2a3 3 0 0 1 5.7.6V23l.4-1.4a3 3 0 0 1 5.6 1.4v9.5c0 6.5-4.6 11.5-11 11.5h-2.6c-3.6 0-6.4-1.5-8.4-4.4L11.5 31a3 3 0 0 1 4.8-3.6L17 28.5Z" fill="#fff" stroke="#111" stroke-width="2.4" stroke-linejoin="round"/></g></svg>
+<div id="flash"></div>
+</div>
+<script src="curva.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), lin=(t,a,b)=>cl((t-a)/(b-a));
@@ -145,123 +221,149 @@ const eo=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2, eo5=x
 const bo=(x,s=1.7)=>{x=cl(x);const c=s+1;return 1+c*Math.pow(x-1,3)+s*Math.pow(x-1,2)};
 const mix=(a,b,k)=>a+(b-a)*k;
 function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
-const B=k=>1.256+0.3932*k;           // griglia dei battiti
-// ---------- testi a lettere ----------
 const T={};
-function prep(id){const el=$(id);const txt=el.textContent;el.textContent='';const L=[];let i=0;
+function prep(id){const el=$(id);const txt=el.textContent;el.textContent='';const L=[];
   txt.split(' ').forEach((w,wi,arr)=>{const ws=document.createElement('span');ws.className='w';
-    [...w].forEach(ch=>{const s=document.createElement('span');s.className='l';s.textContent=ch;s.dataset.i=i++;ws.appendChild(s);L.push({s,w:wi});});
+    [...w].forEach(ch=>{const s=document.createElement('span');s.className='l';s.textContent=ch;ws.appendChild(s);L.push({s,w:wi});});
     el.appendChild(ws);if(wi<arr.length-1)el.appendChild(document.createTextNode(' '));});
-  T[id]={el,L,n:L.length,nw:txt.split(' ').length};}
-['t1','t2a','t2b','t3a','t3b','t4a','t4b','t5a','t5b','t6a','t6b','t8a','t8b','t9a','t9b','t10a','t10b','t10c','t11a'].forEach(prep);
-const ORG=[255,138,48],YEL=[255,196,90];
+  T[id]={el,L,n:L.length,nw:txt.split(' ').length,dim:el.classList.contains('dim')};}
+['t1','t2a','t2b','t2c','t3a','t3b','t4a','t4b','t5a','t5b','t6a','t6b','t8a','t8b','t9a','t9b','t10a','t10b','t11a','t11b','t12a','t12b','t13a'].forEach(prep);
+const ORG=[255,138,48],YEL=[255,196,90],WHITE=[255,255,255];
 const rgb=(c,a=1)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
 const mixc=(a,b,k)=>[mix(a[0],b[0],k),mix(a[1],b[1],k),mix(a[2],b[2],k)];
-const WHITE=[255,255,255];
-// stili: pixel · fuoco (macchina da scrivere) · luce · scorre (da destra) · rimbalzo
-function fx(id,style,t0,dur,t){const o=T[id];const n=o.n;
-  o.L.forEach((x,i)=>{const s=x.s;let op=0,tf='',col=WHITE,sh='none',fl='none',bg='transparent';
-    if(style==='pixel'){const ti=t0+dur*i/n,a=t-ti;if(a<0){op=0}else{op=1;const k=lin(a,0,.16);col=mixc(ORG,WHITE,k);
+function fx(id,style,t0,dur,t){const o=T[id];const n=o.n;const fin=o.dim?.62:1;
+  o.L.forEach((x,i)=>{const s=x.s;let op=0,tf='',col=WHITE,ca=fin,sh='none',fl='none',bg='transparent';
+    if(style==='pixel'){const a=t-(t0+dur*i/n);if(a>=0){op=1;const k=lin(a,0,.16);col=mixc(ORG,WHITE,k);
         if(k<1){fl=`blur(${(1-k)*5}px) contrast(${1+2*(1-k)})`;tf=`scale(${mix(1.25,1,k)})`;sh=`0 0 ${30*(1-k)}px ${rgb(ORG,.9)}`;
           bg=`repeating-linear-gradient(90deg,${rgb(ORG,.85*(1-k))} 0 10px,transparent 10px 14px),repeating-linear-gradient(0deg,${rgb(YEL,.6*(1-k))} 0 10px,transparent 10px 14px)`}}}
-    else if(style==='fuoco'){const ti=t0+dur*i/n,a=t-ti;if(a<0){op=0}else{op=1;const k=lin(a,0,.32);col=mixc(YEL,WHITE,eo(k));
+    else if(style==='fuoco'){const a=t-(t0+dur*i/n);if(a>=0){op=1;const k=lin(a,0,.32);col=mixc(YEL,WHITE,eo(k));ca=mix(1,fin,k);
         if(k<1){sh=`0 0 ${26*(1-k)}px ${rgb(ORG,1)},0 -${10*(1-k)}px ${30*(1-k)}px ${rgb([255,90,20],.8)}`;tf=`translateY(${(1-k)*-6*Math.sin(t*60+i)}px) scaleY(${1+.12*(1-k)})`;}}}
-    else if(style==='luce'){const tw=t0+dur*x.w/o.nw,a=t-tw;if(a<0){op=0}else{const k=lin(a,0,.55);op=cl(a/.12);col=mixc(ORG,WHITE,eo(k));sh=`0 0 ${50*(1-eo(k))+4}px ${rgb(ORG,.95*(1-k)+.0)}`;fl=k<.3?`blur(${(1-k/.3)*6}px)`:'none'}}
-    else if(style==='scorre'){const tw=t0+dur*x.w/o.nw,a=t-tw;if(a<0){op=0}else{const k=eo5(lin(a,0,.45));op=cl(a/.15);col=mixc(ORG,WHITE,lin(a,.15,.6));tf=`translateX(${(1-k)*140}px)`;fl=k<1?`blur(${(1-k)*10}px)`:'none'}}
-    else if(style==='rimbalzo'){const ti=t0+dur*i/n,a=t-ti;if(a<0){op=0}else{const k=bo(lin(a,0,.4),2.4);op=cl(a/.1);col=mixc(YEL,WHITE,lin(a,.1,.6));tf=`translateY(${(1-k)*70}px)`;sh=`0 0 ${36*(1-lin(a,0,.6))}px ${rgb(ORG,.9)}`}}
-    else {op=1}
-    s.style.opacity=op;s.style.color=rgb(col);s.style.textShadow=sh;s.style.transform=tf;s.style.filter=fl;s.style.background=bg;s.style.backgroundClip=bg==='transparent'?'':'padding-box';});
+    else if(style==='luce'){const a=t-(t0+dur*x.w/o.nw);if(a>=0){const k=lin(a,0,.55);op=cl(a/.12);col=mixc(ORG,WHITE,eo(k));ca=mix(1,fin,k);sh=`0 0 ${50*(1-eo(k))+4}px ${rgb(ORG,.95*(1-k))}`;fl=k<.3?`blur(${(1-k/.3)*6}px)`:'none'}}
+    else if(style==='scorre'){const a=t-(t0+dur*x.w/o.nw);if(a>=0){const k=eo5(lin(a,0,.45));op=cl(a/.15);const kc=lin(a,.15,.6);col=mixc(ORG,WHITE,kc);ca=mix(1,fin,kc);tf=`translateX(${(1-k)*140}px)`;fl=k<1?`blur(${(1-k)*10}px)`:'none'}}
+    else if(style==='rimbalzo'){const a=t-(t0+dur*i/n);if(a>=0){const k=bo(lin(a,0,.4),2.4);op=cl(a/.1);const kc=lin(a,.1,.6);col=mixc(YEL,WHITE,kc);ca=mix(1,fin,kc);tf=`translateY(${(1-k)*70}px)`;sh=`0 0 ${36*(1-lin(a,0,.6))}px ${rgb(ORG,.9)}`}}
+    s.style.opacity=op;s.style.color=rgb(col,ca);s.style.textShadow=sh;s.style.transform=tf;s.style.filter=fl;s.style.background=bg;});
 }
-// scene: [id, inizio, fine]
-const SC=[['s1',0,2.02],['s2',2.02,4.02],['s3',4.02,5.57],['s4',5.57,8.71],['s5',8.71,11.48],['s6',11.48,13.03],['s7',13.03,16.17],['s8',16.17,18.93],['s9',18.93,20.48],['s10',20.48,22.46],['s11',22.46,30]];
-function glassIn(id,t0,t,mode='su'){const e=$(id);const a=t-t0;if(a<0){e.style.opacity=0;return 0}
-  const k=bo(lin(a,0,.5),1.5),o=cl(a/.18);e.style.opacity=o;
+function glassIn(id,t0,t,mode='su',maxOp=1){const e=$(id);const a=t-t0;if(a<0){e.style.opacity=0;return 0}
+  const k=bo(lin(a,0,.5),1.5),o=cl(a/.18);e.style.opacity=o*maxOp;
   e.style.transform=mode==='destra'?`translateX(${(1-k)*260}px) scale(${mix(.92,1,cl(k))})`:mode==='zoom'?`scale(${mix(.6,1,k)})`:`translateY(${(1-k)*90}px) scale(${mix(.9,1,cl(k))})`;
   e.style.filter=a<.25?`blur(${(1-a/.25)*12}px)`:'none';return k}
-function seek(t){
-  // sfondo: bagliori arancio-rossi che respirano a tempo
+const it=n=>Math.round(n).toLocaleString('it-IT');
+const SC=[['s1',0,2.02],['s2',2.02,4.02],['s3',4.02,5.57],['s4',5.57,8.71],['s5',8.71,11.48],['s6',11.48,13.02],['s7',13.02,16.17],['s8',16.17,19.21],['s9',19.21,22.06],['s10',22.06,23.63],['s11',23.63,27.94],['s12',27.94,29.92],['s13',29.92,40]];
+function seekOld(t){
   const beat=t<1.256?0:Math.exp(-6*((t-1.256)%0.3932));
-  const bl=[[ 'b1',540+160*Math.sin(t*.35),1650+60*Math.sin(t*.5),1200,'rgba(255,72,20,.85)'],['b2',200+120*Math.sin(t*.27+1),1300+150*Math.cos(t*.3),760,'rgba(200,24,20,.65)'],
-            ['b3',900+80*Math.cos(t*.4),1100+180*Math.sin(t*.33+2),700,'rgba(255,150,40,.45)'],['b4',540+260*Math.sin(t*.21+3),500+120*Math.cos(t*.25),620,'rgba(255,90,30,.22)']];
-  bl.forEach(([id,x,y,r,c],i)=>{const e=$(id);const rr=r*(1+.04*beat*(i===0?1:.5));e.style.width=rr+'px';e.style.height=rr+'px';e.style.left=(x-rr/2)+'px';e.style.top=(y-rr/2)+'px';e.style.background=`radial-gradient(circle,${c} 0%,rgba(0,0,0,0) 68%)`;});
-  // scene
+  [['b1',540+160*Math.sin(t*.35),1650+60*Math.sin(t*.5),1200,'rgba(255,72,20,.85)'],['b2',200+120*Math.sin(t*.27+1),1300+150*Math.cos(t*.3),760,'rgba(200,24,20,.65)'],
+   ['b3',900+80*Math.cos(t*.4),1100+180*Math.sin(t*.33+2),700,'rgba(255,150,40,.45)'],['b4',540+260*Math.sin(t*.21+3),500+120*Math.cos(t*.25),620,'rgba(255,90,30,.22)']]
+   .forEach(([id,x,y,r,c],i)=>{const e=$(id);const rr=r*(1+.04*beat*(i===0?1:.5));e.style.width=rr+'px';e.style.height=rr+'px';e.style.left=(x-rr/2)+'px';e.style.top=(y-rr/2)+'px';e.style.background=`radial-gradient(circle,${c} 0%,rgba(0,0,0,0) 68%)`;});
   SC.forEach(([id,a,b])=>{const e=$(id);const on=t>=a-0.02&&t<b;e.style.display=on?'block':'none';
     if(on){const out=lin(t,b-.2,b);e.style.opacity=1-out;e.style.filter=out>0?`blur(${out*14}px)`:'none';e.style.transform=`scale(${1+.05*out})`;}});
-  // S1
-  fx('t1','pixel',0.25,0.85,t);
-  const p1=glassIn('p1',1.25,t,'zoom');$('p1dot').style.opacity=.55+.45*Math.abs(Math.sin(t*4));
-  // S2
-  fx('t2a','fuoco',2.06,0.75,t);fx('t2b','fuoco',2.85,0.5,t);
-  {const e=$('t2c');const k=eo(lin(t,3.4,3.7));e.style.opacity=k;e.style.transform=`translateY(${(1-k)*20}px)`;}
-  // S3
-  fx('t3a','luce',4.02,.35,t);fx('t3b','luce',4.3,.5,t);
-  [4.81,5.0,5.2,5.38].forEach((a,i)=>glassIn('c3'+i,a-.02,t));
-  // S4
-  fx('t4a','scorre',5.57,.25,t);fx('t4b','scorre',6.0,.35,t);
-  [6.15,7.15,7.55].forEach((a,i)=>glassIn('g4'+i,a,t,'destra'));
-  // S5
-  fx('t5a','rimbalzo',8.71,.45,t);fx('t5b','rimbalzo',9.48,.6,t);
-  glassIn('g5',9.0,t);ch5(t);
-  {const e=$('t5c');e.style.opacity=lin(t,10.9,11.2);}
-  // S6
-  fx('t6a','fuoco',11.48,.6,t);fx('t6b','fuoco',12.1,.45,t);
-  glassIn('g6',11.76,t);
-  [...document.querySelectorAll('.x6')].forEach((x,i)=>{const a=t-(12.05+i*.2);const k=a<0?0:bo(lin(a,0,.35),2.5);x.style.transform=`scale(${k})`;x.style.opacity=a<0?0:1;});
-  {const w=mix(1,.5,eio(lin(t,12.65,12.95)));$('bar6').style.width=(w*100)+'%';$('lab6').textContent=w>.75?'RISCHIO PIENO':'RISCHIO ×½';}
-  // S7
-  glassIn('g70',13.03,t);glassIn('g71',13.61,t);glassIn('g72',14.61,t);
-  {const k=eo(lin(t,13.1,14.2));$('n70').textContent=Math.round(1763*k).toLocaleString('it-IT');}
-  // S8
-  fx('t8a','luce',16.17,.3,t);glassIn('g8',16.5,t);cv8(t);
-  ['l8a','l8b'].forEach((id,i)=>{$(id).style.opacity=lin(t,16.7+i*.1,16.95+i*.1)});
-  {const k=lin(t,17.95,18.2);$('l8c').style.opacity=k;}
-  fx('t8b','scorre',18.2,.4,t);
-  // S9
-  fx('t9a','scorre',18.93,.3,t);fx('t9b','luce',19.25,.3,t);
-  [['o90',19.21],['o91',19.4],['o92',19.55],['o93',19.7]].forEach(([id,a])=>glassIn(id,a,t,'zoom'));
-  sv9(t);
-  // S10
-  fx('t10a','fuoco',20.48,.55,t);fx('t10b','fuoco',21.06,.3,t);fx('t10c','luce',21.5,.35,t);
-  // S11
-  {const a=t-22.46;const e=$('mk');const k=bo(lin(a,0,.6),1.4);e.style.opacity=cl(a/.2);e.style.transform=`scale(${mix(.7,1,k)})`;
-   e.style.filter=`drop-shadow(0 0 ${40+30*Math.exp(-4*Math.max(0,a))}px rgba(255,150,60,.45)) hue-rotate(${0}deg)`;}
-  fx('t11a','pixel',22.7,.5,t);glassIn('p11',23.24,t,'zoom');$('p11dot').style.opacity=.55+.45*Math.abs(Math.sin(t*4));
-  {const k=eo(lin(t,23.64,24.0));$('t11b').style.opacity=k;$('t11b').style.letterSpacing=mix(.32,.18,k)+'em';}
-  $('t11c').style.opacity=lin(t,24.0,24.3);
-  // lampi sugli accenti
-  let fl=0;[[1.25,.16],[8.71,.12],[16.17,.12],[22.46,.14]].forEach(([a,v])=>{if(t>=a)fl=Math.max(fl,v*Math.exp(-9*(t-a)))});
+  document.querySelectorAll('.dot').forEach(d=>d.style.opacity=.55+.45*Math.abs(Math.sin(t*4)));
+  fx('t1','pixel',0.25,0.85,t);glassIn('p1',1.25,t,'zoom');
+  fx('t2a','fuoco',2.02,.5,t);fx('t2b','luce',2.77,.25,t);fx('t2c','luce',3.05,.6,t);
+  fx('t3a','luce',4.02,.25,t);fx('t3b','luce',4.3,.3,t);[4.6,4.81,5.0,5.2].forEach((a,i)=>glassIn('c3'+i,a,t));
+  fx('t4a','scorre',5.57,.2,t);fx('t4b','scorre',5.87,.3,t);[6.15,7.15,7.55].forEach((a,i)=>glassIn('g4'+i,a,t,'destra'));
+  fx('t5a','rimbalzo',8.71,.5,t);fx('t5b','rimbalzo',9.48,.6,t);glassIn('g5',9.0,t);ch5(t);$('t5c').style.opacity=lin(t,10.9,11.15);
+  fx('t6a','fuoco',11.48,.45,t);fx('t6b','fuoco',11.98,.4,t);glassIn('g6',11.75,t);
+  [...document.querySelectorAll('.x6')].forEach((x,i)=>{const a=t-(12.0+i*.2);x.style.transform=`scale(${a<0?0:bo(lin(a,0,.35),2.5)})`;x.style.opacity=a<0?0:1;});
+  {const w=mix(1,.5,eio(lin(t,12.5,12.8)));$('bar6').style.width=(w*100)+'%';$('lab6').textContent=w>.75?'RISCHIO PIENO':'RISCHIO ×½';}
+  {const k=eo(lin(t,13.05,13.35));$('t7a').style.opacity=k;$('t7a').style.letterSpacing=mix(.4,.16,k)+'em';
+   const k2=eo(lin(t,13.3,13.6));$('n7a').style.opacity=k2;$('n7a').style.transform=`translateY(${(1-k2)*20}px)`;
+   const kc=eio(lin(t,13.75,15.0));const nc=Math.max(1,Math.round(kc*CURVA.length));$('n7b').textContent='$'+it(CURVA[nc-1][1]);$('n7b').style.opacity=lin(t,13.55,13.7);
+   $('n7b').style.textShadow=`0 0 ${60*(t>15.0?Math.exp(-5*(t-15.0)):0)}px rgba(140,255,184,.8)`;}
+  glassIn('g7',13.6,t);cv7(t);glassIn('p7',14.6,t,'zoom');$('t7b').style.opacity=lin(t,15.0,15.3);
+  fx('t8a','luce',16.17,.35,t);fx('t8b','luce',16.6,.5,t);
+  $('tl8a').style.width=(52*eio(lin(t,16.94,17.3)))+'%';$('tl8b').style.width=(48*eio(lin(t,18.94,19.15)))+'%';
+  glassIn('g80',17.21,t);glassIn('g81',18.3,t);
+  $('n80').textContent='+'+(63.5*eo(lin(t,17.3,18.0))).toFixed(1).replace('.',',')+'%';
+  $('n81').textContent='+'+Math.round(139*eo(lin(t,18.4,18.94)))+'%';
+  $('n81').style.textShadow=`0 0 ${50*(t>18.94?Math.exp(-6*(t-18.94)):0)}px rgba(140,255,184,.9)`;
+  fx('t9a','fuoco',19.21,.4,t);fx('t9b','fuoco',19.65,.35,t);glassIn('g9',19.6,t);bars9(t);$('t9c').style.opacity=lin(t,21.2,21.5);
+  fx('t10a','luce',22.06,.25,t);glassIn('g10',22.2,t);cv10(t);$('l10').style.opacity=lin(t,22.95,23.1);fx('t10b','scorre',23.05,.25,t);
+  fx('t11a','fuoco',23.63,.55,t);fx('t11b','luce',24.1,.4,t);
+  [['g110',24.40,1],['g111',24.67,1],['g112',25.2,1],['g113',26.40,1],['g114',26.67,.6]].forEach(([id,a,m])=>glassIn(id,a,t,'destra',m));
+  {const a=t-26.4;$('g113').style.boxShadow=a>0?`inset 0 1.5px 0 rgba(255,255,255,.45),0 0 ${30+25*Math.abs(Math.sin(t*4))}px rgba(255,176,46,.45),0 40px 90px rgba(0,0,0,.5)`:'';}
+  fx('t12a','rimbalzo',27.94,.5,t);fx('t12b','rimbalzo',28.52,.6,t);
+  {const a=t-29.92;const e=$('mk');const k=bo(lin(a,0,.6),1.4);e.style.opacity=cl(a/.2);e.style.transform=`scale(${mix(.7,1,k)})`;
+   e.style.filter=`drop-shadow(0 0 ${40+30*Math.exp(-4*Math.max(0,a))}px rgba(255,150,60,.45))`;}
+  fx('t13a','pixel',30.1,.5,t);glassIn('p13',30.6,t,'zoom');
+  {const k=eo(lin(t,31.0,31.35));$('t13b').style.opacity=k;$('t13b').style.letterSpacing=mix(.32,.18,k)+'em';}
+  $('t13c').style.opacity=lin(t,31.3,31.6);
+  let fl=0;[[1.25,.16],[8.71,.12],[16.17,.12],[23.63,.12],[29.92,.14]].forEach(([a,v])=>{if(t>=a)fl=Math.max(fl,v*Math.exp(-9*(t-a)))});
   $('flash').style.opacity=fl;
-  $('stage').style.opacity=1-lin(t,24.7,24.88)*.5;
+  $('stage').style.opacity=1-lin(t,32.1,32.33)*.5;
 }
-// grafico della S5: prezzo che crolla e torna alla media
 const P5=(()=>{const pts=[];for(let i=0;i<=120;i++){const x=60+i*6.5;let y=250+Math.sin(i*.55)*14+Math.sin(i*1.7)*7;
-  if(i>40&&i<=58)y+= (i-40)/18*230; if(i>58&&i<=64)y+=230; if(i>64&&i<=100)y+=230*(1-eo((i-64)/36)); pts.push([x,y]);}return pts})();
-function ch5(t){const k=eio(lin(t,9.3,10.9));const n=Math.max(2,Math.round(k*P5.length));
+  if(i>40&&i<=58)y+=(i-40)/18*230;if(i>58&&i<=64)y+=230;if(i>64&&i<=100)y+=230*(1-eo((i-64)/36));pts.push([x,y]);}return pts})();
+function ch5(t){const T0=9.3,T1=10.9;const k=eio(lin(t,T0,T1));const n=Math.max(2,Math.round(k*P5.length));
   $('pr5').setAttribute('d',P5.slice(0,n).map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(''));
-  const iIn=61,iOut=100;const pi=P5[iIn],po=P5[iOut];
-  const gi=$('in5'),go=$('out5');gi.setAttribute('transform',`translate(${pi[0]},${pi[1]}) scale(${n>iIn?bo(lin(t,9.3+1.6*iIn/120,9.3+1.6*iIn/120+.35),2.2):0})`);
-  go.setAttribute('transform',`translate(${po[0]},${po[1]}) scale(${n>iOut?bo(lin(t,9.3+1.6*iOut/120,9.3+1.6*iOut/120+.35),2.2):0})`);
+  [['in5',61],['out5',100]].forEach(([id,ix])=>{const p=P5[ix];const ta=T0+(T1-T0)*ix/120;$(id).setAttribute('transform',`translate(${p[0]},${p[1]}) scale(${n>ix?bo(lin(t,ta,ta+.35),2.2):0})`)});
   $('mean5').style.opacity=lin(t,9.2,9.5);$('meanT').style.opacity=lin(t,9.3,9.6);}
-// S8: nuvola di 1.000 strategie a caso (forma illustrativa) e la strategia vera
-const R8=[];for(let i=0;i<1000;i++){let u=0;for(let j=0;j<6;j++)u+=rnd(i*7+j);u=(u-3)/Math.sqrt(.5);R8.push(-0.043+u*0.017)}
-function cv8(t){const c=$('cv8').getContext('2d');c.clearRect(0,0,900,700);
-  const x0=60,x1=840,lo=-0.12,hi=0.12,X=v=>x0+(v-lo)/(hi-lo)*(x1-x0),base=600;
+function cv7(t){const x0=50,x1=870,y0=500,y1=180,lo=9000,hi=40500;
+  const d0=Date.parse(CURVA[0][0]),d1=Date.parse(CURVA[CURVA.length-1][0]);
+  const X=d=>x0+(Date.parse(d)-d0)/(d1-d0)*(x1-x0),Y=v=>y0-(v-lo)/(hi-lo)*(y0-y1);
+  const k=eio(lin(t,13.75,15.0));const n=Math.max(2,Math.round(k*CURVA.length));
+  const pts=CURVA.slice(0,n).map(([d,v])=>[X(d),Y(v)]);
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join('');const last=pts[pts.length-1];
+  let h=`<defs><linearGradient id="gf7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CFFB8" stop-opacity=".35"/><stop offset="1" stop-color="#8CFFB8" stop-opacity="0"/></linearGradient></defs>`;
+  [2019,2021,2023,2025].forEach(a=>{h+=`<text x="${X(a+'-01-01')}" y="${y0+40}" fill="rgba(255,255,255,.55)" font-family="IBM Plex Mono" font-size="22" text-anchor="middle">${a}</text>`});
+  const xs=X('2023-01-01');h+=`<line x1="${xs}" y1="${y1-40}" x2="${xs}" y2="${y0}" stroke="rgba(255,255,255,.35)" stroke-dasharray="6 10" stroke-width="2"/>`;
+  h+=`<path d="${path}L${last[0]},${y0}L${x0},${y0}Z" fill="url(#gf7)"/><path d="${path}" fill="none" stroke="#8CFFB8" stroke-width="5" stroke-linejoin="round"/>`;
+  h+=`<circle cx="${last[0]}" cy="${last[1]}" r="10" fill="#fff"/><circle cx="${last[0]}" cy="${last[1]}" r="22" fill="none" stroke="#8CFFB8" stroke-width="3" opacity=".7"/>`;
+  $('cv7').innerHTML=h;}
+const ANNI=[['2019',3.0],['2020',8.6],['2021',12.4],['2022',30.0],['2023',33.1],['2024',17.4],['2025',32.5],['2026',15.4]];
+(function(){const g=$('g9');ANNI.forEach(([a,v],i)=>{const x=60+i*110;g.insertAdjacentHTML('beforeend',`<div class="bar9" id="br${i}" style="left:${x}px"></div><div class="bl9" style="left:${x}px">${a==='2026'?"'26*":"'"+a.slice(2)}</div><div class="bv9" id="bv${i}" style="left:${x-13}px">+${Math.round(v)}%</div>`)})})();
+function bars9(t){ANNI.forEach(([a,v],i)=>{const a0=19.75+i*.19;const k=bo(lin(t,a0,a0+.45),1.6);const h=Math.max(0,v*12*k);
+  $('br'+i).style.height=h+'px';$('br'+i).style.opacity=t>a0?1:0;const bv=$('bv'+i);bv.style.bottom=(130+h)+'px';bv.style.opacity=lin(t,a0+.15,a0+.35);})}
+const R10=[];for(let i=0;i<1000;i++){let u=0;for(let j=0;j<6;j++)u+=rnd(i*7+j);u=(u-3)/Math.sqrt(.5);R10.push(-0.043+u*0.017)}
+function cv10(t){const c=$('cv10').getContext('2d');c.clearRect(0,0,900,640);
+  const x0=60,x1=840,lo=-0.12,hi=0.12,X=v=>x0+(v-lo)/(hi-lo)*(x1-x0),base=540,BW=0.006;
+  if(!cv10.mx){const bb={};R10.forEach(v=>{const b=Math.round((v-lo)/BW);bb[b]=(bb[b]||0)+1});cv10.mx=Math.max(...Object.values(bb))}const st=300/cv10.mx;
   c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=2;c.beginPath();c.moveTo(x0,base+8);c.lineTo(x1,base+8);c.stroke();
-  c.fillStyle='rgba(255,255,255,.6)';c.font='24px IBM Plex Mono';c.textAlign='center';
-  [[-0.1,'−0,10'],[0,'0'],[0.1,'+0,10']].forEach(([v,s])=>{c.fillText(s,X(v),base+46);c.fillRect(X(v)-1,base+2,2,12)});
-  const k=lin(t,16.7,17.85);const m=Math.floor(k*1000);const bins={};const BW=0.006;if(!cv8.mx){const bb={};R8.forEach(v=>{const b=Math.round((v-lo)/BW);bb[b]=(bb[b]||0)+1});cv8.mx=Math.max(...Object.values(bb))}const st=330/cv8.mx;
-  for(let i=0;i<m;i++){const v=R8[i];const b=Math.round((v-lo)/BW);const h=(bins[b]=(bins[b]||0)+1);const x=lo+b*BW;
-    c.fillStyle=`rgba(255,${120+((i*37)%60)},${60+((i*13)%40)},.8)`;c.beginPath();c.arc(X(x),base-h*st,5.5,0,7);c.fill();}
-  const a=t-17.95;if(a>0){const kk=bo(lin(a,0,.45),2);const y=mix(160,base-40,kk);const xs=X(0.095);
+  c.fillStyle='rgba(255,255,255,.6)';c.font='22px IBM Plex Mono';c.textAlign='center';c.fillText('guadagno medio a trade →',450,base+50);
+  const m=Math.floor(lin(t,22.35,22.95)*1000);const bins={};
+  for(let i=0;i<m;i++){const v=R10[i];const b=Math.round((v-lo)/BW);const h=(bins[b]=(bins[b]||0)+1);
+    c.fillStyle=`rgba(255,${120+((i*37)%60)},${60+((i*13)%40)},.8)`;c.beginPath();c.arc(X(lo+b*BW),base-h*st,5.5,0,7);c.fill();}
+  const a=t-22.95;if(a>0){const kk=bo(lin(a,0,.4),2);const y=mix(140,base-40,kk);const xs=X(0.095);
     c.strokeStyle='rgba(255,176,46,.9)';c.lineWidth=4;c.beginPath();c.moveTo(xs,base);c.lineTo(xs,Math.min(base,y+40));c.stroke();
-    c.shadowColor='#ffb02e';c.shadowBlur=40;c.fillStyle='#ffd08a';c.beginPath();c.arc(xs,y,22,0,7);c.fill();c.shadowBlur=0;}
+    c.shadowColor='#ffb02e';c.shadowBlur=40;c.fillStyle='#ffd08a';c.beginPath();c.arc(xs,y,22,0,7);c.fill();c.shadowBlur=0;}}
+const SH=7.456;
+const CPOS=[[60,330],[520,330],[60,660],[520,660],[60,990]];
+function ctr(id,dx=.5,dy=.5){const r=$(id).getBoundingClientRect();return[r.left+r.width*dx,r.top+r.height*dy]}
+function seek(t){
+  seekOld(t-SH);
+  const s0=$('s0');const on=t<SH+.05;s0.style.display=on?'block':'none';
+  if(!on){$('cur').style.opacity=0;return;}
+  const site=$('site');const kin=bo(lin(t,.15,.75),1.3);
+  site.style.opacity=cl(t/.25)*(1-lin(t,7.05,SH));
+  site.style.transform=`scale(${mix(.86,1,kin)})`;site.style.filter=t<.4?`blur(${(1-t/.4)*10}px)`:'none';
+  [['sEy',.45],['sH1',.6],['sH2',.85]].forEach(([id,a])=>{const k=eo5(lin(t,a,a+.45));const e=$(id);e.style.opacity=k;e.style.transform=`translateX(${(1-k)*120}px)`;e.style.filter=k<1?`blur(${(1-k)*8}px)`:'none'});
+  const IN=[1.25,1.65,2.02,2.41,2.83];
+  const HOV=[[4.02,4.41],[4.41,4.81],[4.81,5.2],[5.2,5.57],[5.97,99]];
+  CPOS.forEach(([x,y],i)=>{const e=$('xc'+i);const a=t-IN[i];const k=a<0?0:bo(lin(a,0,.5),1.5);
+    let sc=mix(.6,1,k),op=cl(a/.15),ry=mix(i%2?-30:30,0,eo(lin(a,0,.5))),rx=mix(25,0,eo(lin(a,0,.5))),gl=0,ty=0;
+    const [h0,h1]=HOV[i];const hv=lin(t,h0,h0+.15)*(1-lin(t,h1,h1+.15));
+    sc*=1+.05*hv;gl=hv;ty=-14*hv;rx+=4*hv;ry+=(i%2?-5:5)*hv;
+    if(i<4){const aw=eo(lin(t,6.36,6.7));sc*=mix(1,.94,aw);op*=mix(1,.35,aw);}
+    if(i===4){const p=eio(lin(t,6.76,SH));sc*=mix(1,1.06,lin(t,6.3,6.76))*(1+p*2.4);ty-=p*420;op*=1-lin(t,7.1,SH);gl=Math.max(gl,lin(t,6.3,6.76));}
+    e.style.left=x+'px';e.style.top=y+'px';e.style.opacity=op;
+    e.style.transform=`perspective(1600px) translateY(${ty}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${sc})`;
+    e.querySelector('.xc__glow').style.opacity=gl;
+    e.style.boxShadow=gl>0?`0 0 ${70*gl}px color-mix(in srgb,var(--zc) ${Math.round(60*gl)}%,transparent),0 30px 60px rgba(0,0,0,.6)`:'0 20px 50px rgba(0,0,0,.5)';
+    e.style.zIndex=i===4?3:1;
+    const ln=e.querySelector('.xc__ln');const L=ln.getTotalLength();const kd=eio(lin(a,.1,.8));ln.style.strokeDasharray=L;ln.style.strokeDashoffset=L*(1-kd);
+  });
+  const cur=$('cur');
+  const legs=[[2.9,[1000,1760]],[4.02,'xc0'],[4.41,'xc1'],[4.81,'xc2'],[5.2,'xc3'],[5.97,'xc4'],[6.76,'xc4']];
+  const f=x=>typeof x==='string'?ctr(x,x==='xc4'?.3:.62,.6):x;
+  let p=null;for(let i=0;i<legs.length-1;i++){const[a,A]=legs[i],[b,Bp]=legs[i+1];if(t>=a&&t<=b){const k=eio(lin(t,a,a+Math.min(.32,b-a)));const pa=f(A),pb=f(Bp);p=[mix(pa[0],pb[0],k),mix(pa[1],pb[1],k)];break;}}
+  if(t>6.76)p=f('xc4');
+  const cop=t<2.9?0:cl((t-2.9)/.15)*(1-lin(t,6.95,7.1));
+  if(!p||cop<=0){cur.style.opacity=0;}else{
+    let pr=1;const c=6.76;if(t>c-.12&&t<c+.14)pr=t<c?1-.18*eo(lin(t,c-.12,c)):.82+.18*eo(lin(t,c,c+.14));
+    const hand=t>3.9;$('arrow').style.display=hand?'none':'inline';$('hand').style.display=hand?'inline':'none';
+    cur.style.opacity=cop;cur.style.transform=`translate(${p[0]-30}px,${p[1]-9}px) scale(${1.5*pr})`;}
+  const fz=$('ukzoom');const fk=t>6.76?Math.exp(-7*(t-6.76)):0;fz.style.opacity=1;fz.style.background=`radial-gradient(circle at 50% 70%,rgba(255,120,60,${.55*fk}),rgba(232,65,79,0) 60%)`;
 }
-// S9: fili tratteggiati quasi invisibili fra UK100 e gli altri
-function sv9(t){const c=[540,1020],o=[[220,810],[860,810],[540,1370]];let h='';
-  o.forEach((p,i)=>{const k=eo(lin(t,19.55+i*.12,19.9+i*.12));const x=mix(c[0],p[0],k),y=mix(c[1],p[1],k);
-    h+=`<line x1="${c[0]}" y1="${c[1]}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-dasharray="6 14"/>`;
-    if(k>.9)h+=`<text x="${(c[0]+p[0])/2+(i==2?60:0)}" y="${(c[1]+p[1])/2-(i==2?0:20)}" fill="rgba(255,255,255,.75)" font-family="IBM Plex Mono" font-size="30" text-anchor="middle">bassa</text>`;});
-  $('sv9').innerHTML=h;}
+
 window.seek=seek;
 document.fonts.ready.then(()=>{window.READY=true;seek(0)});
 </script></body></html>
