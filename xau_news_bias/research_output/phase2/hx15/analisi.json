@@ -1,0 +1,295 @@
+{
+ "slot_ricerca": 1169,
+ "slot_validazione": 355,
+ "per_famiglia_ricerca": {
+  "CLAIMS": 285,
+  "ISM_M": 107,
+  "FIDUCIA": 103,
+  "ISM_S": 103,
+  "ADP": 98,
+  "RETAIL": 93,
+  "PIL": 90,
+  "MICHIGAN": 76,
+  "PPI": 73,
+  "FOMC": 72,
+  "VERBALI": 69
+ },
+ "combinazioni": 2346,
+ "maxt_nullo_quantili": {
+  "0.5": 0.11734890702774717,
+  "0.9": 0.4886037694176284,
+  "0.95": 0.6519814123098889,
+  "0.99": 0.8503558667568427
+ },
+ "migliori_20": [
+  {
+   "gruppo": "RETAIL",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E5",
+   "n": 29,
+   "R_medio": 0.4063241379310346,
+   "t": 0.903487074122682,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E15",
+   "n": 29,
+   "R_medio": 0.33495172413793106,
+   "t": 0.7135603167225961,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_X60",
+   "n": 39,
+   "R_medio": 0.12805128205128202,
+   "t": 0.42288020022154954,
+   "p_fw": 0.149
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "B4",
+   "verso": 1,
+   "config": "SB1_X60",
+   "n": 21,
+   "R_medio": 0.17090000000000008,
+   "t": 0.36585586600129144,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E1",
+   "n": 29,
+   "R_medio": 0.11899310344827588,
+   "t": 0.3240266859809052,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "B4",
+   "verso": -1,
+   "config": "SB3_X60",
+   "n": 17,
+   "R_medio": 0.1729117647058824,
+   "t": 0.14897843778665854,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_X60",
+   "n": 49,
+   "R_medio": 0.016202040816326525,
+   "t": 0.08573865056828184,
+   "p_fw": 0.541
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_TP2R",
+   "n": 49,
+   "R_medio": 0.009389795918367347,
+   "t": 0.05259740584948642,
+   "p_fw": 0.577
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E15",
+   "n": 24,
+   "R_medio": -0.007104166666666578,
+   "t": -0.021585977923385208,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "B4",
+   "verso": -1,
+   "config": "SB1_X60",
+   "n": 31,
+   "R_medio": -0.07289354838709682,
+   "t": -0.07116957159622336,
+   "p_fw": 0.769
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "B6",
+   "verso": 1,
+   "config": "SB1_X15",
+   "n": 29,
+   "R_medio": -0.0288344827586207,
+   "t": -0.07447113700796863,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB3_X60",
+   "n": 40,
+   "R_medio": -0.07980000000000002,
+   "t": -0.08117048562336796,
+   "p_fw": 0.788
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_X15",
+   "n": 49,
+   "R_medio": -0.03718775510204079,
+   "t": -0.24537410010504435,
+   "p_fw": 0.927
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E15",
+   "n": 24,
+   "R_medio": -0.09983749999999995,
+   "t": -0.26557920457792505,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "B4",
+   "verso": -1,
+   "config": "SB1_X60",
+   "n": 17,
+   "R_medio": -0.35617058823529424,
+   "t": -0.2932960550171248,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "B4",
+   "verso": -1,
+   "config": "SB2_X60",
+   "n": 17,
+   "R_medio": -0.3433058823529411,
+   "t": -0.32112188844536516,
+   "p_fw": NaN
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_X15",
+   "n": 60,
+   "R_medio": -0.06227500000000002,
+   "t": -0.42420633473095726,
+   "p_fw": 0.979
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB1_TP2R",
+   "n": 39,
+   "R_medio": -0.08589230769230766,
+   "t": -0.4344571714847835,
+   "p_fw": 0.98
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "B5",
+   "verso": 1,
+   "config": "SB2_X60",
+   "n": 49,
+   "R_medio": -0.12527346938775508,
+   "t": -0.44654767978438153,
+   "p_fw": 0.981
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A7",
+   "verso": 1,
+   "config": "E5",
+   "n": 24,
+   "R_medio": -0.12132083333333332,
+   "t": -0.5311109397427229,
+   "p_fw": NaN
+  }
+ ],
+ "candidati": [],
+ "finalisti": [],
+ "validazione": {},
+ "principali": {
+  "P1": {
+   "regola": "B2",
+   "verso": 1,
+   "gruppo": "TUTTE",
+   "config": "SB1_X15",
+   "n": 1269,
+   "R_medio": -0.5341954294720253,
+   "t": -15.024334547341585,
+   "p": 1.0,
+   "R_medio_conservative": -0.809393380614657,
+   "vinti": 0.26871552403467297,
+   "R_2011_19": -0.549495612244898,
+   "R_2020_23": -0.4823124567474049,
+   "p_holm": 1.0,
+   "passa": false
+  },
+  "P2": {
+   "regola": "B1",
+   "verso": 1,
+   "gruppo": "TUTTE",
+   "config": "SB1_X15",
+   "n": 1523,
+   "R_medio": -0.4863271831910703,
+   "t": -17.21639705241493,
+   "p": 1.0,
+   "R_medio_conservative": -0.7291908076165462,
+   "vinti": 0.28233749179251477,
+   "R_2011_19": -0.4882960616438356,
+   "R_2020_23": -0.47984929577464785,
+   "p_holm": 1.0,
+   "passa": false
+  },
+  "P3": {
+   "regola": "B1",
+   "verso": -1,
+   "gruppo": "TUTTE",
+   "config": "SB1_X15",
+   "n": 1523,
+   "R_medio": -0.9295340118187787,
+   "t": -26.483377675231093,
+   "p": 1.0,
+   "R_medio_conservative": -1.2498581089954037,
+   "vinti": 0.1608667104399212,
+   "R_2011_19": -0.990189383561644,
+   "R_2020_23": -0.7299692957746479,
+   "p_holm": 1.0,
+   "passa": false
+  },
+  "P4": {
+   "regola": "A1",
+   "verso": -1,
+   "gruppo": "TUTTE",
+   "config": "E1",
+   "n": 1523,
+   "R_medio": -1.0107386736703874,
+   "t": -28.06035138012906,
+   "p": 1.0,
+   "R_medio_conservative": -1.8430706500328302,
+   "vinti": 0.22455679579776758,
+   "R_2011_19": -1.0935410102739724,
+   "R_2020_23": -0.7383073239436618,
+   "p_holm": 1.0,
+   "passa": false
+  }
+ }
+}

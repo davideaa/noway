@@ -1,0 +1,16 @@
+{
+ "scartati_per_ora": {
+  "FOMC": 4,
+  "FIDUCIA": 1,
+  "VERBALI": 3,
+  "ISM_S": 1,
+  "ISM_M": 1,
+  "PIL": 1,
+  "RETAIL": 1,
+  "ADP": 1,
+  "CLAIMS": 2
+ },
+ "slot_lavorati": 1935,
+ "validi": 1931,
+ "con_U": 1865
+}
