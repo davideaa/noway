@@ -225,3 +225,99 @@ cambia il verdetto.
 - Nullo a permutazioni dentro le famiglie, 1.000 volte, t massima. Almeno
   30 eventi per combinazione.
 - Il 2020–23 e il 2024–26 non si toccano.
+
+## Risultati (dopo i commit del protocollo `ce12764`, `a551c44` e degli script `b527332`)
+
+File in `research_output/phase2/hx15/`:
+- `analisi.json`, con tutte le combinazioni in `ricerca_tutte_le_combinazioni.csv`;
+- `direzione_esplorativo.json`;
+- `ampiezza_per_anno.csv`.
+
+Codice: `scripts/hx15_build.py`, `hx15_analysis.py`, `hx15_direzione.py`.
+
+**Errore trovato durante il calcolo.** Il primo passaggio si è fermato su
+una release senza tick nei primi 10 secondi: lo spread massimo era un
+massimo di un insieme vuoto. Corretto (vale solo per la descrizione dello
+spread) e rifatto dalla cache prima di guardare qualunque risultato.
+
+### Dati
+
+- 1.935 release 2008–2023, 1.931 valide.
+- Ricerca 2011–19: 1.169 release con U.
+- Validazione 2020–23: 355 release, mai usate dal percorso 2 perché non
+  c'è nessun candidato.
+- 2.346 combinazioni con almeno 30 trade.
+
+### Percorso 2 — ricerca ampia
+
+- **Nessun candidato.** La miglior combinazione ha t **0,42**: FOMC, segui
+  la candela quando è grande, stop oltre la candela, uscita a 60 min,
+  +0,13 R su 39 trade, p familywise 0,15.
+- Nessuna combinazione ha un R medio positivo significativo.
+- Il nullo ha t massima mediana 0,12: quasi tutto è negativo per i costi.
+- **La validazione e il test finale non si aprono. Il 2024–26 resta
+  vergine.**
+
+### Percorso 1 — ipotesi principali (2011–2023, costi base)
+
+| | Regola | n | R medio | Vinti | Holm |
+|---|---|---|---|---|---|
+| P1 | dopo 1 min segui la sorpresa | 1.269 | −0,53 | 27% | 1,00 |
+| P2 | dopo 1 min segui la candela | 1.523 | −0,49 | 28% | 1,00 |
+| P3 | dopo 1 min sfuma la candela | 1.523 | −0,93 | 16% | 1,00 |
+| P4 | inverti la release precedente | 1523 | −1,01 | 22% | 1,00 |
+
+Nessuna passa.
+
+Un trade a caso perde in media:
+- 1,03 R prima della news (stop 0,6 U, uscita a 1 min);
+- 0,71 R dopo il primo minuto (stop oltre la candela, uscita a 15 min).
+
+Lo stop è piccolo rispetto allo spread e ai salti della release (U tipico
+13–30 pips; FOMC 51).
+
+### Controllo esplorativo (emendamento 2): solo direzione, senza costi, 2011–19
+
+- **Dopo il primo minuto, seguire la sorpresa (B2), da T0 + 1 min a T0 + 5
+  min**:
+  - 980 release, direzione giusta il **56,8%**;
+  - t 4,5, p familywise 0,004.
+  - Con la candela d'accordo con la sorpresa (B3): 58,3%, p 0,007.
+- È informazione vera, ma **piccola**: in media **+2,5 pips** in 4
+  minuti.
+  - Per famiglia: PIL +5,6; ISM manifatturiero +5,1; Retail +3,8; ISM
+    servizi +3,2; ADP +2,8; Claims +1,5; PPI +1,3; Fiducia +1,1; Michigan
+    −0,5.
+  - Lo spread Dukascopy a T0 + 1 min è circa 3 pips; quello del broker di
+    Davide alla news circa 40.
+  - **Non si può tradare.**
+- Prima della news nessuna regola si avvicina al nullo: miglior p
+  familywise 0,98.
+- È esplorativo e dichiarato dopo i risultati: non promuove niente.
+
+### Quanto si muovono (mediana 2020–23, pips)
+
+| | Range prima M1 | Range 5 min | Spread max primi 10 s |
+|---|---|---|---|
+| **NFP** (fase 2) | 77 | | |
+| **FOMC** | **74** | 91 | 14 |
+| **CPI** (fase 2) | 60 | | |
+| Michigan | 37 | 54 | 8 |
+| PPI | 37 | 54 | 6 |
+| ISM manifatturiero | 36 | 46 | 8 |
+| ISM servizi | 34 | 54 | 8 |
+| Retail Sales | 33 | 48 | 8 |
+| ADP | 32 | 45 | 8 |
+| Jobless Claims | 30 | 49 | 12 |
+| PIL | 30 | 44 | 8 |
+| Consumer Confidence | 24 | 30 | 8 |
+| Verbali FOMC | 14 | 24 | 6 |
+
+Solo FOMC, NFP e CPI si muovono abbastanza per uno spread di 40 pips. Le
+altre rosse fanno circa metà.
+
+## FINAL VERDICT = NO RELIABLE EDGE sulle news rosse oltre CPI e NFP
+
+Né prima della news né dopo il primo minuto, dopo i costi. L'unica
+informazione di direzione trovata (seguire la sorpresa per 4 minuti) vale
+2–3 pips e i costi la cancellano. Il 2024–26 non è stato aperto.
