@@ -265,7 +265,7 @@ spread) e rifatto dalla cache prima di guardare qualunque risultato.
 | P1 | dopo 1 min segui la sorpresa | 1.269 | −0,53 | 27% | 1,00 |
 | P2 | dopo 1 min segui la candela | 1.523 | −0,49 | 28% | 1,00 |
 | P3 | dopo 1 min sfuma la candela | 1.523 | −0,93 | 16% | 1,00 |
-| P4 | inverti la release precedente | 1523 | −1,01 | 22% | 1,00 |
+| P4 | inverti la release precedente | 1.523 | −1,01 | 22% | 1,00 |
 
 Nessuna passa.
 
