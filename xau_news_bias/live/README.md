@@ -26,6 +26,9 @@ scrivere anche le bias CPI, solo per informazione.
 Poi si ripubblica `docs/replay.html` sullo stesso artifact
 (https://claude.ai/artifact/KiFQgHyA9Aqqs5G9x7LEpV) e si fa commit e push.
 
+Dalla NFP del 06/11/2026 il risultato contiene anche `trade_u5`: lo stesso trade
+chiuso a T0 + 5 min (H-X13), registrato in parallelo. Il giudizio resta sulla fine M1.
+
 Se i tick Dukascopy non sono ancora disponibili, `update` lo dice e non
 scrive niente: si riprova più tardi. Quando `calendar.json` finisce, va
 riempito con le date nuove dal calendario BLS (`xnb/providers/bls.py`).

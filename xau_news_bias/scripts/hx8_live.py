@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 LOG = ROOT / "live" / "hx8_live.jsonl"
 CAL = ROOT / "live" / "calendar.json"
 GENESIS = "0" * 64
+U5_FROM = pd.Timestamp("2026-11-01", tz="UTC")  # H-X13: uscita a 5 min dal vivo dalla NFP del 6/11/2026
 
 
 def digest(rec: dict) -> str:
@@ -92,8 +93,19 @@ def resolve(ev: dict) -> dict | None:
         b, a = quotes(bid, ask, s)
         tr = trade(t, b, a, d, stop, MODE[s])
         res[s] = {k: tr[k] for k in ("en", "sl", "ex", "st", "r")}
-    return {"mv": round(mv, 2), "hit": bool(mv != 0 and (mv > 0) == (d > 0)), "stop_usd": stop, "trade": res,
-            "n_ticks": int(len(t))}
+    out = {"mv": round(mv, 2), "hit": bool(mv != 0 and (mv > 0) == (d > 0)), "stop_usd": stop, "trade": res,
+           "n_ticks": int(len(t))}
+    if t0 >= U5_FROM:  # H-X13: uscita a T0 + 5 min registrata in parallelo, solo S1
+        from hx13_vol_exits import trade_until
+        tk = DukascopyProvider().ticks("XAUUSD", (t0 - pd.Timedelta(minutes=3)).to_pydatetime(),
+                                       (t0 + pd.Timedelta(minutes=6)).to_pydatetime())
+        t5 = tk.ts_ms.to_numpy("int64") - int(t0.value // 1_000_000)
+        if len(t5) < 20 or t5.max() < 300_000:
+            return None
+        b, a = quotes(tk.bid.to_numpy(float), tk.ask.to_numpy(float), "S1")
+        r, r_raw = trade_until(t5, b, a, d, stop, 300)
+        out["trade_u5"] = {"S1": {"r": r, "r_raw": r_raw}}
+    return out
 
 
 def update(now: datetime) -> None:
