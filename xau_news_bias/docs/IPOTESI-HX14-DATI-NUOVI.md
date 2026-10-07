@@ -62,3 +62,50 @@ Restano due fonti mai usate da nessuna regola di direzione:
 - **In mezzo** → non si può dire.
 - In ogni caso il giudizio ufficiale resta quello dal vivo di H-X8 (24
   NFP).
+
+## Risultati (dopo il commit della pre-registrazione `ba98445`)
+
+File: `research_output/phase2/hx11/hx14_dati_nuovi.json`. Codice:
+`scripts/hx14_dati_nuovi.py`. Controllo: ricalcolata così, la regola
+sull'oro 2014–26 fa 91/147 (61,9%), contro 90/148 del sito. La differenza
+viene dai criteri di validità, appena diversi.
+
+### Test
+
+| Test | Strumento e periodo | Indovinate | Quota | p | p Holm |
+|---|---|---|---|---|---|
+| T1 | XAUUSD 2003–2007 | 24/53 | **45,3%** | 0,79 | 1,00 |
+| T2 | EURUSD 2003–2013 | 63/126 | **50,0%** | 0,54 | 1,00 |
+
+**Per la regola scritta prima: T1 e T2 sono entrambi ≤ 50%. Su dati nuovi
+la regola non c'è.** Il 2014–26 è un periodo fortunato oppure un regime
+che può finire.
+
+### Descrittivo
+
+| Strumento | 2003–07 | 2008–13 | 2014–26 |
+|---|---|---|---|
+| XAUUSD | 45% (53) | 50% (70) | 62% (147) |
+| EURUSD | 39% (54) | 58% (72) | 62% (151) |
+
+- Oro ed EURUSD si muovono nella stessa direzione alla NFP il 67%
+  (2003–07), il 72% (2008–13) e il **91%** (2014–26) delle volte. Il 62%
+  dell'EURUSD nel 2014–26 è quindi lo **stesso movimento del dollaro**
+  dell'oro, non una conferma indipendente.
+- L'inversione cresce col tempo: assente o al contrario nel 2003–07, debole
+  nel 2008–13 (solo EURUSD), chiara dal 2014. È compatibile con un regime
+  nato negli ultimi anni.
+- Qualità del feed, tick nel primo minuto (mediana): oro 23–41 nel
+  2003–06, 8–11 nel 2007–09, oltre 300 dal 2014; EURUSD 16–24 nel 2003–06,
+  oltre 400 dal 2014. Un feed sottile rende la direzione più rumorosa e
+  spinge verso il 50%. È un limite vero, **ma non cambia la decisione
+  scritta prima**: nel 2008–13 l'EURUSD ha un feed buono (83–279 tick) e
+  fa 58%, non significativo (p 0,10).
+- Eventi non validi: oro 9 (5 nel 2003), EURUSD 5 (tutti nel 2003).
+
+### Cosa cambia
+
+- Il giudizio ufficiale resta dal vivo (H-X8, 24 NFP, stop anticipato se
+  ≤ 4/12).
+- Il sito resta com'è. La regola va presentata come **regime degli ultimi
+  anni**, non come legge del mercato: su 2003–2013 non funzionava.
