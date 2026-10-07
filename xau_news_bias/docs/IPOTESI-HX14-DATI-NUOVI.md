@@ -99,7 +99,7 @@ che può finire.
   2003–06, 8–11 nel 2007–09, oltre 300 dal 2014; EURUSD 16–24 nel 2003–06,
   oltre 400 dal 2014. Un feed sottile rende la direzione più rumorosa e
   spinge verso il 50%. È un limite vero, **ma non cambia la decisione
-  scritta prima**: nel 2008–13 l'EURUSD ha un feed buono (83–279 tick) e
+  scritta prima**: nel 2008–13 l'EURUSD ha un feed discreto (25–279 tick, sottile solo nel 2010) e
   fa 58%, non significativo (p 0,10).
 - Eventi non validi: oro 9 (5 nel 2003), EURUSD 5 (tutti nel 2003).
 
