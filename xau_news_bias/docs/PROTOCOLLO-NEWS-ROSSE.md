@@ -201,3 +201,27 @@ Hanno un motivo economico e non vengono dalla ricerca:
 - **Dichiarazione.** Per provare il codice è stato scaricato un solo
   evento, ISM manifatturiero del 02/01/2015. I suoi trade sono stati
   stampati e poi cancellati prima del calcolo vero.
+
+## Emendamento 2 (07/10/2026, scritto DOPO i risultati del §6–7, prima di questo controllo)
+
+I risultati del §6–7 dicono **nessun candidato**. Si osserva anche che un
+trade a caso perde in media circa 1R (prima della news) e 0,7R (dopo il
+primo minuto).
+
+Un **difetto del protocollo**, da dichiarare: la distanza minima dello
+stop (0,1 × U) può essere di pochi pips, meno dello spread. Su quei trade
+il costo vale diversi R e pesa sulle medie.
+
+Per capire se c'è **informazione sulla direzione** che i costi nascondono,
+si aggiunge un controllo **esplorativo**. Non può promuovere niente e non
+cambia il verdetto.
+
+- Stesse regole, gruppi e versi. Stesso periodo di ricerca 2011–19.
+- **Nessun costo e nessuno stop**: solo il movimento del prezzo medio nella
+  direzione della regola, diviso U.
+  - Trade A: da T0 − 60 s a E1, E5, E15.
+  - Trade B: da T0 + 60 s a 5, 15, 60 min.
+- Quota di direzioni giuste e t del movimento medio.
+- Nullo a permutazioni dentro le famiglie, 1.000 volte, t massima. Almeno
+  30 eventi per combinazione.
+- Il 2020–23 e il 2024–26 non si toccano.

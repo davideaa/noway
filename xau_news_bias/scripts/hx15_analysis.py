@@ -233,7 +233,7 @@ if __name__ == "__main__":
         prim[k]["passa"] = bool(prim[k]["R_medio"] > 0 and ph < 0.05)
     # ----- descrittivo: ampiezza in pips per famiglia e anno
     amp = df[df.ok].assign(anno=df.t0.dt.year, m1=df.rng1 / 0.1, m5=df.rng5 / 0.1, a15=df.mv15.abs() / 0.1,
-                           a60=df.mv60.abs() / 0.1, sp=df.spmax10 / 0.1)
+                           a60=df.mv60.abs() / 0.1, sp=df.spmax10.replace(-np.inf, np.nan) / 0.1)
     amp = amp.groupby(["fam", "anno"])[["m1", "m5", "a15", "a60", "sp"]].median().round(0)
     obs.to_csv(R / "ricerca_tutte_le_combinazioni.csv", index=False)
     out = {"slot_ricerca": len(D), "slot_validazione": len(V), "per_famiglia_ricerca": D.fam.value_counts().to_dict(),

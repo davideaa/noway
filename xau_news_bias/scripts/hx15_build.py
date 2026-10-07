@@ -163,7 +163,7 @@ def slot_row(p: Path, U: float | None) -> dict:
                 "rng5": float(np.ptp(np.r_[p0, mid[(t >= 0) & (t < 300_000)]])),
                 "mv15": mid_before(t, mid, 900_000) - p0, "mv60": mid_before(t, mid, 3_600_000) - p0,
                 "drift1h": mid_before(t, mid, -60_000) - mid_before(t, mid, -3_660_000),
-                "spmax10": float((ask - bid)[(t >= 0) & (t < 10_000)].max())})
+                "spmax10": float(np.max((ask - bid)[(t >= 0) & (t < 10_000)], initial=-np.inf))})
     if U is None:
         return out
     out["U"] = U
