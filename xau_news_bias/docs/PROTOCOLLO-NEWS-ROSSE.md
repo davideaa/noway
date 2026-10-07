@@ -183,3 +183,21 @@ Hanno un motivo economico e non vengono dalla ricerca:
 - Il 2024–26 si aggiunge dopo il test finale.
 - Tutte le combinazioni con n, R medio, t e p familywise, anche le
   peggiori.
+
+## Emendamento 1 (07/10/2026, prima di guardare i prezzi)
+
+- **Orari del FOMC.** Fino al 2012 il comunicato usciva verso le 14:15 New
+  York, non alle 14:00, e FF registra il minuto vero (14:09–14:23). Nelle
+  riunioni con conferenza del 2011–12 usciva verso le 12:30 (12:27–12:32).
+  - Prima: si accettavano solo 14:00 e 12:30. Così si perdevano 50
+    riunioni, tutte del 2008–2012.
+  - Ora: per il FOMC vale un orario fra 14:00 e 14:25, oppure fra 12:25 e
+    12:35.
+  - Restano fuori le mosse d'emergenza (07:00, 08:20, 10:00, 17:00).
+  - Per le altre famiglie la regola resta esatta: si perde 1–3 release
+    ciascuna, uscite qualche minuto in ritardo.
+- **Finestra dei tick**: da T0 − 62 min invece di T0 − 61 min. Serve per
+  avere un prezzo a T0 − 61 min (regola A2).
+- **Dichiarazione.** Per provare il codice è stato scaricato un solo
+  evento, ISM manifatturiero del 02/01/2015. I suoi trade sono stati
+  stampati e poi cancellati prima del calcolo vero.
