@@ -17,7 +17,11 @@ Numero N e cartella di lavoro `~/reel-lavoro/pN/` (video `PuntataN.mp4`, `mix.wa
 2. **Audio**: −14 ± 0,5 LUFS integrato, picco ≤ −1 dBTP (`ffmpeg -af ebur128=peak=true`). Durata 70–90 s.
 3. **Immagine**: foglio provini con un fotogramma all'80% e uno al 98% di ogni scena (tempi da `cues.json`). Cerca: testo tagliato o fuori
    da y 270–1460, sovrapposizioni, icone sopra numeri, scritte illeggibili, contatori non arrivati al valore finale, scene vuote.
-4. **Numeri**: ogni numero detto o mostrato coincide con `pN-fonti.md` (leggi il sorgente `pN.html`, non i fotogrammi in movimento).
+4. **Numeri e affermazioni**: ogni numero detto o mostrato coincide con `pN-fonti.md` (leggi il sorgente `pN.html`, non i fotogrammi in movimento).
+   Ogni AFFERMAZIONE deve avere la sua riga nelle fonti: cerca apposta superlativi («il più», «la voce più…»), «mai/sempre»,
+   «la maggior parte», «molti», nessi causali («perché…»). Nella settimana 2 ne sono passate quattro non verificate.
+   Controlla anche che ogni `WT`/`WA` di `pN.html` trovi la sua parola nei cues (se usa la riserva, l'elemento è fuori tempo) e il
+   contrasto dei testi anche quando attenuati (≥ 3:1).
 5. **Struttura**: numero gigante iniziale, «Oggi è <giorno giusto>: lezione X di 5», «Domani: …» = titolo della puntata N+1 in `lezioni.json`,
    like/commento/segui, firma col numero, riga «Contenuto educativo · Non è consulenza finanziaria».
 6. **Stile del testo**: `voce/controlla_copione.py` senza errori; il testo letto di fila scorre (niente elenchi «Primo/Secondo»).

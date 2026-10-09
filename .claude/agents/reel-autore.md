@@ -31,6 +31,8 @@ Una frase può continuare nella riga dopo (riga che finisce con la virgola): il 
 - Righe tra 6 e 30 parole; niente righe di 3 parole o meno. Totale 190–235 parole (≈ 75–85 s).
 - Parole straniere o difficili: grafia come si pronunciano in italiano (es. «tochenizzato»).
 - Usa solo i dati di `pN-fonti.md`, detti come lì suggerito. Nessun dato in più.
+- Niente affermazioni più forti delle fonti: superlativi («la voce più…»), «mai/sempre», «la maggior parte», «molti economisti»,
+  nessi causali («perché…») solo se `pN-fonti.md` li verifica. Altrimenti: «una voce che…», «alcuni», «c'è chi sostiene».
 
 ## Output
 `sites/studio/reel/noir/voce/righe-pN.json` nel formato `[["frase", "chiave"], …]` (una riga per elemento),
