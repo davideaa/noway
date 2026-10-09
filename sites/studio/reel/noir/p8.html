@@ -149,14 +149,14 @@ function sTrasf(t, a, b) { bg(); x.save();
   const tSo = WT('trasferimenti', 'soldi', 1, 0.6), tPe = WT('trasferimenti', 'persone', 1, 1.8), tPn = WT('trasferimenti', 'pensioni', 1, 2.6), tG = WT('trasferimenti', 'grande', 1, 4.4);
   phrase(t, a + 0.05, [['E poi i soldi', C.ink]], 345, { size: 92 });
   phrase(t, tPe - 0.25, [['dritti alle persone.', C.amber]], 345 + 92 * 1.12, { size: 92 });
-  const kP = seg(t, tSo - 0.1, tSo + 1.3), kA = seg(t, tSo + 1.4, tSo + 2.2), emph = oC(seg(t, tG - 0.25, tG + 0.3));
-  tank(t, LX, [1, 1, 1, kP, kA], { top100: true, hot: emph, big: ['51 €', RGB.amber, seg(t, Math.max(tSo + 2.1, tPe + 2.85), Math.max(tSo + 2.5, tPe + 3.25))] }); /* dopo le monete, che passano proprio lì */
-  tankLabels(LX, [1, 1, 1, seg(t, tPn - 0.15, tPn + 0.3), seg(t, tSo + 1.9, tSo + 2.3)], emph);
+  const kP = seg(t, tSo - 0.1, tSo + 1.3), kA = seg(t, Math.max(tSo + 1.4, tPn + 0.4), Math.max(tSo + 2.2, tPn + 1.1)), emph = oC(seg(t, tG - 0.25, tG + 0.3));
+  tank(t, LX, [1, 1, 1, kP, kA], { top100: true, hot: emph, big: ['51 €', RGB.amber, seg(t, Math.max(tPn + 1.1, tPe + 1.95), Math.max(tPn + 1.5, tPe + 2.35))] }); /* dopo le monete, che passano proprio lì */
+  tankLabels(LX, [1, 1, 1, seg(t, tPn - 0.15, tPn + 0.3), seg(t, Math.max(tSo + 1.9, tPn + 0.6), Math.max(tSo + 2.3, tPn + 1.0))], emph);
   /* monete che escono dalla vasca e arrivano alle persone */
   const kp = oC(seg(t, tPe - 0.35, tPe + 0.15)), PX = [600, 730, 860];
   if (kp > 0) { PX.forEach((px, i) => iconS('fam', px, 636, 0.75, C.amber)); x.save(); x.globalAlpha = 1; x.restore();
     txt('ALLE PERSONE', 730, 712, { fam: 'mono', size: 22, weight: 600, color: C.amber, alpha: kp, ls: 2 }); }
-  for (let j = 0; j < 9; j++) { const ts = tPe - 0.2 + j * 0.24, u = seg(t, ts, ts + 1.1); if (u <= 0 || u >= 1) continue; const e = ioC(u), tx = PX[j % 3], q = { p0: [240, 1120], c: [180, 480], p1: [tx, 660] }, [px, py] = qp(q, e);
+  for (let j = 0; j < 6; j++) { const ts = tPe - 0.2 + j * 0.2, u = seg(t, ts, ts + 1.1); if (u <= 0 || u >= 1) continue; const e = ioC(u), tx = PX[j % 3], q = { p0: [300, 1120], c: [230, 480], p1: [tx, 660] }, [px, py] = qp(q, e);
     coin(px, py, 24, clamp(Math.min(u * 6, (1 - u) * 6)), '245,165,36', '€'); }
   mono(FOOT, 540, 1410, t, a - 5, { size: 22 });
   x.restore(); finish(t); }
