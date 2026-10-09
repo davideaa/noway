@@ -264,7 +264,7 @@ function reformBoard(t, o) { const { kIn = 1, hz = [0, 0, 0], q = 0, band = 0, p
       txt(n, 150, y - 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', ls: 2 });
       x.fillStyle = rgba(c, 0.85); rr(150, y - 25, w, 50, 12); x.fill();
       txt('+' + it(v0) + '%', 150 + gw(v0) + 20, y + 1, { size: 38, weight: 800, color: rgba(c === RGB.grey ? RGB.ink : c), align: 'left', alpha: seg(bars, 0.8, 1) * (1 - clamp(morph * 2)) });
-      txt('+' + it(v1) + '%', 150 + Math.max(6, gw(v1)) + 20, y + 1, { size: 38, weight: 800, color: rgba(c === RGB.grey ? RGB.ink : c), align: 'left', alpha: clamp(morph * 2 - 1) }); });
+      txt('+' + it(v1) + '%', 150 + w + 20, y + 1, { size: 38, weight: 800, color: rgba(c === RGB.grey ? RGB.ink : c), align: 'left', alpha: clamp(morph * 2 - 1) }); });
     x.restore(); }
 }
 function sRiforme(t, a, b) { bg(); x.save();
@@ -347,9 +347,9 @@ function sFondo(t, a, b) { bg(); x.save();
 /* ================= CASA: tre correnti che si uniscono nel surplus ================= */
 const CS = { src: [[235, 700, 'PRODOTTI', 'prodotti'], [235, 880, 'COSTI', 'costi'], [235, 1060, 'CAMBIO', 'cambio']], node: [800, 880], nr: 118 };
 function sCasa(t, a, b) { bg('30,44,26'); x.save();
-  const tS = WT('casa', 'segreto', 1, 4.14), tW = CS.src.map(([, , , w]) => WT('casa', w, 1, w === 'prodotti' ? 4.83 : w === 'costi' ? 5.17 : 5.86)), tIn = WT('casa', 'insieme', 1, 6.21);
+  const tS = WT('casa', 'discute', 1, 4.14), tW = CS.src.map(([, , , w]) => WT('casa', w, 1, w === 'prodotti' ? 4.83 : w === 'costi' ? 5.17 : 5.86)), tIn = WT('casa', 'cambio', 1, 5.86) + 0.5;
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tS - 0.55 });
-  phrase(t, tS - 0.3, [['Nessun segreto unico:', C.ink], ['tre cose insieme.', C.lime]], 345, { size: 92 });
+  phrase(t, tS - 0.3, [['Se ne discute', C.ink], ['su tre fronti.', C.lime]], 345, { size: 92 });
   const [nx, ny] = CS.node, kN = oC(seg(t, a + 0.3, a + 0.9)), kJ = seg(t, tIn - 0.1, tIn + 0.6);
   const COL = ['200,250,114', '245,165,36', '241,244,238'];
   CS.src.forEach(([px, py, lab], i) => { const k = seg(t, tW[i] - 0.2, tW[i] + 0.3), kl = ioC(seg(t, tW[i], tW[i] + 0.6)); if (k <= 0) return;
