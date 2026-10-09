@@ -79,7 +79,7 @@ function pie3d(o) { const { cx = 540, cy = 930, rx = 330, ry = 140, dep = 64, kI
       wedge(cx + lx, cy + ly, rx, ry, ae, f.a1); x.fillStyle = 'rgba(241,244,238,0.55)'; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke();
       x.save(); x.translate(cx + lx, cy + ly); x.scale(1, ry / rx); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(ae) * rx, Math.sin(ae) * rx); x.restore(); x.setLineDash([9, 8]); x.strokeStyle = 'rgba(5,6,7,0.95)'; x.lineWidth = 4; x.stroke(); x.restore(); }
     if (famLab > 0) { const r = 0.55; txt('FAMIGLIE', cx + lx + Math.cos(mid) * rx * r, cy + ly + Math.sin(mid) * ry * r - 6, { fam: 'mono', size: Math.max(22, 26 * rx / 330), weight: 600, color: '#0b0d0c', alpha: famLab, ls: 2 }); } }
-  if (labels > 0) SL.slice(1).forEach((sl) => { if (!sl.lab) return; const m = sl.k === 'inv' ? lerp(sl.a0, sl.a1, 0.75) : (sl.a0 + sl.a1) / 2, r = sl.k === 'inv' ? 0.68 : 0.6;
+  if (labels > 0) SL.slice(1).forEach((sl) => { if (!sl.lab) return; const m = sl.k === 'inv' ? lerp(sl.a0, sl.a1, 0.3) : (sl.a0 + sl.a1) / 2, r = sl.k === 'inv' ? 0.74 : 0.6;
     txt(sl.lab, cx + Math.cos(m) * rx * r, cy + Math.sin(m) * ry * r, { fam: 'mono', size: 22, weight: 600, color: sl.k === 'inv' ? '#0b0d0c' : C.ink, alpha: labels, ls: 1 }); });
   x.restore(); }
 /* carrello di lato (fronte a destra in coordinate locali; dir -1 = guarda a sinistra) */
