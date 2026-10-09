@@ -71,13 +71,14 @@ function phone(cx, cy, w, h, o = {}) { const { k = 1, red = 0, lime = 0, dimRed 
   x.fillStyle = 'rgba(241,244,238,0.35)'; rr(x0 + w - 2, y0 + 120, 6, 70, 3); x.fill();
   x.save(); rr(sx, sy, sw, sh, 32); x.clip();
   const g = x.createLinearGradient(sx, sy, sx + sw, sy + sh); g.addColorStop(0, '#18201c'); g.addColorStop(1, '#070908'); x.fillStyle = g; x.fillRect(sx, sy, sw, sh);
-  if (red > 0) { const hh = (split - sy) * oC(clamp(red)); x.fillStyle = `rgba(255,90,78,${0.82 * (1 - 0.62 * dimRed)})`; x.fillRect(sx, sy, sw, hh); }
+  if (red > 0) { const hh = (split - sy) * oC(clamp(red)); x.fillStyle = `rgba(255,90,78,${0.82 * (1 - 0.45 * dimRed)})`; x.fillRect(sx, sy, sw, hh); }
   if (lime > 0) { const hh = (sy + sh - split) * oC(clamp(lime)); x.fillStyle = 'rgba(200,250,114,0.88)'; x.fillRect(sx, sy + sh - hh, sw, hh); }
   if (red > 0.9 && lime > 0.9) { x.fillStyle = '#050607'; x.fillRect(sx, split - 2, sw, 4); }
   const sp = x.createLinearGradient(sx, sy, sx + sw, sy); sp.addColorStop(0, 'rgba(255,255,255,0.12)'); sp.addColorStop(0.35, 'rgba(255,255,255,0)'); x.fillStyle = sp; x.fillRect(sx, sy, sw, sh);
   x.restore();
   x.fillStyle = '#050607'; rr(cx - 46, sy + 14, 92, 26, 13); x.fill();
-  if (redTxt) txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#1c0806', alpha: kr * (1 - 0.55 * dimRed) });
+  if (redTxt) { txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#1c0806', alpha: kr * (1 - dimRed) });   /* attenuato: il testo diventa chiaro, non sparisce */
+    txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#f1f4ee', alpha: kr * 0.9 * dimRed }); }
   if (globeK > 0) globe(cx, (sy + split) / 2 + 10, 58, 'rgba(28,8,6,0.85)', 6, globeK, 0.6);
   if (limeTxt) txt(limeTxt, cx, (split + sy + sh) / 2, { size: 58, weight: 800, color: '#15200C', alpha: kl });
   x.restore();
@@ -143,8 +144,8 @@ function esempio(t, hotP = null) {
   const kx = oC(seg(t, tX - 0.1, tX + 0.35)) * (1 - seg(t, t7 - 0.4, t7));
   globe(600, 1052, 30, C.amber, 4, kx, t); txt('costruito', 652, 1036, { fam: 'mono', size: 26, weight: 600, color: C.amber, align: 'left', alpha: kx, ls: 1 }); txt('all’estero', 652, 1070, { fam: 'mono', size: 26, weight: 600, color: C.amber, align: 'left', alpha: kx, ls: 1 });
   /* l'import: etichetta accanto alla parte rossa e una copia che vola nella M */
-  const ki = oC(seg(t, tI - 0.1, tI + 0.3)) * (1 - 0.55 * seg(t, tR, tR + 0.5)), ry = (g ? (g.sy + g.split) / 2 : 984) + 10;
-  globe(560, ry, 28, C.red, 4, ki, t * 0.8); txt('import', 610, ry - 16, { size: 40, weight: 800, color: C.red, align: 'left', alpha: ki }); txt('prodotto fuori', 610, ry + 24, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', alpha: ki, ls: 1 });
+  const ki = oC(seg(t, tI - 0.1, tI + 0.3)) * (1 - 0.2 * seg(t, tR, tR + 0.5)), ry = (g ? (g.sy + g.split) / 2 : 984) + 10;
+  globe(560, ry, 28, C.red, 4, ki, t * 0.8); txt('import', 610, ry - 16, { size: 40, weight: 800, color: C.red, align: 'left', alpha: ki }); txt('prodotto fuori', 610, ry + 24, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', alpha: ki, ls: 1 });
   const gk = seg(t, tI, tI + 0.6); if (gk > 0 && gk < 1 && g) { const e = ioC(gk), [mx, my] = FX(4, 1, 620), bw = lerp(g.sw, 88, e), bh = lerp(g.split - g.sy, 88, e), bx = lerp(cx, mx, e), by = lerp((g.sy + g.split) / 2, my, e) - Math.sin(Math.PI * e) * 60;
     x.save(); x.globalAlpha *= 1 - seg(gk, 0.8, 1); glow(bx, by, bw, '255,90,78', 0.3); x.fillStyle = 'rgba(255,90,78,0.55)'; rr(bx - bw / 2, by - bh / 2, bw, bh, 18); x.fill(); x.strokeStyle = C.red; x.lineWidth = 3; x.stroke(); x.restore(); }
   /* i 300 € che restano: tre voci, una per parola */

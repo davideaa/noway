@@ -145,11 +145,11 @@
   "n": 9,
   "titolo": "Export e import",
   "caso_reale": false,
-  "gancio": "Ogni volta che compri un iPhone, il PIL italiano non sale. Perché?",
+  "gancio": "Compri un telefono fatto all'estero: il PIL italiano sale molto meno del prezzo. Perché?",
   "spiega": [
    "L'export è domanda estera per beni italiani: aggiunge al PIL. L'import è spesa verso l'estero: si sottrae.",
    "La formula completa è PIL = consumi + investimenti + spesa pubblica + export netto.",
-   "L'export netto dipende da prezzi, qualità dei prodotti, cambio e crescita dei Paesi che comprano."
+   "L'import si toglie non perché sia un danno, ma perché è stato prodotto altrove."
   ],
   "esempio": "Prendere il saldo commerciale italiano dell'ultimo anno dal comunicato ISTAT sul commercio estero e confrontare i principali settori esportatori.",
   "ti_serve": "Chiude la formula del PIL che userai in ogni esame di macroeconomia.",
