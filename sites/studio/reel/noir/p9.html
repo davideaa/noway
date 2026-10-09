@@ -85,13 +85,14 @@ function phone(cx, cy, w, h, o = {}) { const { k = 1, red = 0, lime = 0, dimRed 
 
 /* ================= HOOK: il telefono arriva, timbro «fatto all'estero», lo schermo si riempie ================= */
 function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
-  const tC = WT('hook', 'compri', 1, 0.3), tE = WA('hook', ['estero', 'allestero'], 1, 1.7), tM = WT('hook', 'maggior', 1, 2.4), tN = WT('hook', 'non', 1, 4.5);
+  const tC = WT('hook', 'compri', 1, 0.3), tE = WA('hook', ['estero', 'allestero'], 1, 1.7), tM = WT('hook', 'prodotto', 1, 2.4), tN = WT('hook', 'sale', 1, 4.5);
   phrase(t, a + 0.05, [['Compri un telefono', C.ink], ['fatto all’estero?', C.ink]], 345, { size: 92, out: tM - 0.5 });
-  phrase(t, tM - 0.28, [['La maggior parte', C.ink]], 345, { size: 92 });
-  phrase(t, tN - 0.1, [['non è PIL italiano.', C.red]], 345 + 92 * 1.12, { size: 92 });
+  phrase(t, tM - 0.28, [['Il PIL italiano', C.ink]], 345, { size: 92 });
+  phrase(t, tN - 0.1, [['sale molto meno.', C.red]], 345 + 92 * 1.12, { size: 92 });
   const kp = seg(t, a + 0.1, a + 0.8), fl = lerp(0.04, 1, oB(kp));
   const red = seg(t, tM, tM + 0.9), lime = seg(t, tN, tN + 0.6);
   phone(540, 1010, 330, 600, { k: clamp(kp * 3), flip: fl, red, lime });
+  mono('ESEMPIO · CIFRE INVENTATE', 540, 1365, t, tM + 0.2, { size: 22, color: 'rgba(245,165,36,0.85)' });
   tap(540, 1000, t, tC + 0.15);
   stamp(540, 1150, 'FATTO ALL’ESTERO', seg(t, tE - 0.1, tE + 0.25) * (1 - seg(t, tM - 0.3, tM + 0.05)));
   const kr = oC(seg(t, tM + 0.3, tM + 0.8)); globe(850, 870, 32, C.red, 4, kr, t * 1.2);
@@ -150,7 +151,7 @@ function esempio(t, hotP = null) {
   const lb = oC(seg(t, t3 + 0.1, t3 + 0.5)); if (lb > 0 && g) { x.save(); x.globalAlpha *= lb; x.strokeStyle = C.lime; x.lineWidth = 3; const bx = 478;
     x.beginPath(); x.moveTo(bx - 14, g.split + 6); x.lineTo(bx, g.split + 6); x.lineTo(bx, g.sy + g.sh + 26); x.lineTo(bx - 14, g.sy + g.sh + 26); x.stroke(); x.restore(); }
   chip(735, 1128, 'margine del negozio', seg(t, tNe - 0.15, tNe + 0.3));
-  chip(735, 1213, 'trasporto', seg(t, tTr - 0.15, tTr + 0.3));
+  chip(735, 1213, 'trasporto interno', seg(t, tTr - 0.15, tTr + 0.3));
   chip(735, 1298, 'Iva', seg(t, tIv - 0.15, tIv + 0.3));
   /* etichetta «esempio» */
   const ke = oC(seg(t, aM + 0.5, aM + 0.9)); if (ke > 0) { const lab = 'ESEMPIO · CIFRE INVENTATE', ww = tw(lab, 22, 600, 'mono', 3) + 44; x.save(); x.globalAlpha *= ke; x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 2; x.setLineDash([6, 6]); rr(540 - ww / 2, 1393, ww, 50, 25); x.stroke(); x.setLineDash([]); x.restore();
@@ -348,7 +349,7 @@ function sClienti(t, a, b) { bg('48,40,22', 0.6); x.save(); zoom(t, a, b, 1.04);
   badge(1);
   phrase(t, a + 0.05, [['Primi clienti:', C.ink]], 345, { size: 92 });
   phrase(t, tG - 0.1, [['chi compra da noi', C.amber]], 345 + 92 * 1.12, { size: 72 });
-  const POD = [['de', 'GERMANIA', '11,2%', 540, 300, tG], ['us', 'STATI UNITI', '10,8%', 250, 230, tS], ['fr', 'FRANCIA', '10,1%', 830, 170, tF]], base = 1330, bw = 230;
+  const POD = [['de', 'GERMANIA', '11,2%', 540, 300, tG], ['us', 'STATI UNITI', '10,8%', 250, 289, tS], ['fr', 'FRANCIA', '10,1%', 830, 270, tF]], base = 1330, bw = 230;
   POD.forEach(([kind, name, q, cx, hgt, t0]) => { const kr = ioC(seg(t, t0 - 0.2, t0 + 0.35)), hh = hgt * kr, top = base - hh; if (kr <= 0) return;
     glass(cx, base - hh / 2, bw, Math.max(hh, 1), 20, 1); if (kind === 'de') { x.save(); x.globalAlpha = kr; x.strokeStyle = C.amber; x.lineWidth = 3; rr(cx - bw / 2, top, bw, hh, 20); x.stroke(); x.restore(); }
     const kt = oC(seg(t, t0 + 0.1, t0 + 0.45));

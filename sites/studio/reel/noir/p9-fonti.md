@@ -94,3 +94,9 @@ Quote sul totale 2025 calcolate da me sui valori annuali dell'Istat (643.153 mln
 5. **Fattori dell'export netto (prezzi, qualità, cambio, crescita dei partner).** Nella scheda sono spiegazioni di manuale; qui non sono stati verificati dati su cambio o crescita dei paesi acquirenti. Se il copione vuole un numero, l'unico verificato è la scomposizione prezzi/volumi dell'export 2025 (+2,6% prezzi, +0,7% volumi). Non attribuire il +28,5% della farmaceutica a dazi o ad altre cause: Istat non le indica nel testo letto.
 6. **Smartphone ≠ iPhone.** Il dato Eurostat riguarda tutti gli smartphone importati (5,5 mld nel 2025, in calo dai 6,6 del 2024). Non esiste un dato sui soli iPhone da fonte ufficiale.
 7. **Ultimo anno completo:** 2025 per tutti i dati. Il 2026 è disponibile solo gen–lug per le merci (dato fresco opzionale, tabella 3).
+
+## Correzione dopo il controllo finale (09/10/2026)
+
+- Gancio: «la maggior parte di quello che paghi non è Pil italiano» non era verificato (nessun dato sulla quota italiana del prezzo di un telefono vero). Ora, come proposto dal dubbio aperto 1: «il prodotto interno lordo dell'Italia sale molto meno del prezzo che paghi»; il disegno 70/30 porta da subito «ESEMPIO · CIFRE INVENTATE».
+- Trecento: «il trasporto» → «il trasporto interno» (quello internazionale è già dentro l'import, valutato CIF); «l'unica parte prodotta in Italia» → «che resta in Italia» (l'Iva non è prodotta).
+- Podio dei clienti: altezze quasi uguali (11,2 / 10,8 / 10,1 non stanno in rapporto 1,8 a 1).
