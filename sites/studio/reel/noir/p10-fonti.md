@@ -48,3 +48,10 @@ Il saldo di conto corrente 2025 è stato rivisto più volte: 197,4 mld (Bundesba
 6. **Hartz e competitività**: i dati sul costo del lavoro mostrano moderazione già dal 1995, prima di Hartz. La frase della scheda «riforme del lavoro e salari moderati hanno reso i prodotti più competitivi» va attenuata («secondo molti economisti», «insieme a una lunga moderazione salariale»). L'effetto causale di Hartz sull'export non è verificato.
 7. **Bundesbank**: la pagina originale del comunicato annuale non era apribile dal nostro ambiente; il «203 mld / 4½ %» è letto sulla pagina *Außenwirtschaft* della Bundesbank (testo integrale), il comunicato del 12/02/2026 (197,4 mld) letto per intero.
 8. Dati sul PIL tedesco 2023–2025 in Eurostat sono ancora contrassegnati provvisori (`p`): i rapporti calcolati su PIL possono cambiare di un decimo.
+
+
+## Correzione dopo il controllo finale (09/10/2026)
+
+- «Perché vende così tanto? Perché auto, macchinari e chimica…»: le fonti provano la quota (circa 40 %), non il nesso causale. Ora: «Ma cosa vende? Soprattutto auto, macchinari e chimica: circa il quaranta per cento».
+- «Secondo molti economisti» / «molti aggiungono»: le fonti citate sono poche e in parte contrarie (Dustmann et al.; Zettelmeyer). Ora «alcuni economisti» e «c'è chi aggiunge», a voce e a schermo.
+- Barre 2025: export 1.564 e import 1.362 (tabella storica, 1.563,8 e 1.362,2, come le altezze); il comunicato dà 1.563,0 e 1.362,5. Il saldo «circa 200» vale in entrambi.
