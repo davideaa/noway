@@ -77,8 +77,7 @@ function phone(cx, cy, w, h, o = {}) { const { k = 1, red = 0, lime = 0, dimRed 
   const sp = x.createLinearGradient(sx, sy, sx + sw, sy); sp.addColorStop(0, 'rgba(255,255,255,0.12)'); sp.addColorStop(0.35, 'rgba(255,255,255,0)'); x.fillStyle = sp; x.fillRect(sx, sy, sw, sh);
   x.restore();
   x.fillStyle = '#050607'; rr(cx - 46, sy + 14, 92, 26, 13); x.fill();
-  if (redTxt) { txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#1c0806', alpha: kr * (1 - dimRed) });   /* attenuato: il testo diventa chiaro, non sparisce */
-    txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#f1f4ee', alpha: kr * 0.9 * dimRed }); }
+  if (redTxt) txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#f1f4ee', alpha: kr });   /* sempre chiaro: leggibile sul rosso pieno e su quello attenuato */
   if (globeK > 0) globe(cx, (sy + split) / 2 + 10, 58, 'rgba(28,8,6,0.85)', 6, globeK, 0.6);
   if (limeTxt) txt(limeTxt, cx, (split + sy + sh) / 2, { size: 58, weight: 800, color: '#15200C', alpha: kl });
   x.restore();
