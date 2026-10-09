@@ -7,9 +7,10 @@ D, MIX = sys.argv[1], sys.argv[2]
 m = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 C = json.load(open(f"{D}/cues.json"))["cues"]; R = {k: s for s, k in json.load(open(f"{D}/righe.json"))}
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
-NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
+NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|cent|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
 def norm(s):
     s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ").replace("g7", "gi sette").replace("€", " euro ")
+    s = re.sub(r"\be mezzo\b", " ", s)                      # «quattro e mezzo» = «4,5»
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))
     import unicodedata
     s = unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode()   # tré → tre
