@@ -233,17 +233,17 @@ function scope(t, k, kInv, kBand, X0 = 110, X1 = 970, Y0 = 570, Y1 = 1190) { if 
   wave(X0 + 30, X1 - 30, mid, 75, t, 'rgba(241,244,238,0.85)', 5); wave(X0 + 30, X1 - 30, mid, 150, t, C.amber, 7, kInv);
   x.restore(); }
 function sBarra(t, a, b) { bg('52,40,20', 0.6); x.save();
-  const tB = WT('barra', 'ballerina', 1, 1.7), tT = WT('barra', 'trent', 1, 3.1), tO = WT('barra', 'oscillano', 1, 3.4), tD = WT('barra', 'doppio', 1, 4.5);
+  const tB = WT('barra', 'ballerina', 1, 1.7), tT = WT('barra', 'ultimi', 1, 1.5), tO = WT('barra', 'oscillano', 1, 3.4), tD = WT('barra', 'doppio', 1, 4.5);
   phrase(t, a + 0.05, [['Una voce', C.ink]], 345, { size: 92 });
   phrase(t, tB - 0.35, [['ballerina.', C.amber]], Y2, { size: 92 });
   const kp = oC(seg(t, a + 0.2, a + 0.7)); scope(t, kp, oC(seg(t, tB - 0.3, tB + 0.4)), oC(seg(t, tO, tO + 0.6)));
-  mono('ULTIMI 30 ANNI', 150, 605, t, tT, { size: 24, color: C.muted, align: 'left' });
+  mono('ULTIMI 30 ANNI', 150, 605, t, tT, { size: 24, color: C.ink, align: 'left' });
   const kx = oB(seg(t, tD - 0.15, tD + 0.35)); if (kx > 0) { x.save(); x.translate(860, 618); x.scale(clamp(kx, 0, 1.2), clamp(kx, 0, 1.2)); glow(0, 0, 120, '245,165,36', 0.3);
     txt('×2', 0, 0, { size: 76, weight: 800, color: C.amber, ls: -2 }); x.restore(); }
   const kl = oC(seg(t, tB, tB + 0.4)); x.save(); x.globalAlpha = kl;
   x.fillStyle = C.amber; rr(250, 1258, 56, 10, 5); x.fill(); txt('INVESTIMENTI', 322, 1264, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'left', ls: 2 });
   x.fillStyle = 'rgba(241,244,238,0.85)'; rr(650, 1258, 56, 8, 4); x.fill(); txt('PIL', 722, 1264, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', ls: 2 }); x.restore();
-  txt('SCARTO MEDIO 1996–2025: 6,1 CONTRO 3,0 PUNTI', 540, 1355, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tO, tO + 0.4)) });
+  txt('SCARTO QUADRATICO MEDIO 1996–2025: 6,1 CONTRO 3,0 PUNTI', 540, 1355, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tO, tO + 0.4)) });
   txt('CALCOLO NOSTRO SU DATI EUROSTAT · LINEE ILLUSTRATIVE', 540, 1395, { fam: 'mono', size: 22, weight: 600, color: '#7A847E', ls: 2, alpha: oC(seg(t, tO + 0.2, tO + 0.6)) });
   x.restore(); finish(t); }
 
