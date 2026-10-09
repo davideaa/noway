@@ -1,0 +1,375 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 6, DAY: 0, CAP: 0, NEXT: ['Gli investimenti', 'che non sono azioni'], FONTE: 'DATI: ISTAT 2025–2026 (CONTI, RISPARMIO, FIDUCIA) · EUROSTAT' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 6 — «I consumi». Fonti in p6-fonti.md: Istat conti nazionali 22/09/2026 (2025: spesa famiglie 1.296 mld su PIL 2.265 = 57,2%),
+   Eurostat nama_10_gdp (area euro 51,6%), Istat QSA 05/10/2026 (propensione al risparmio II trim. 2026 6,7%, I trim. 7,9%; reddito +0,4%, consumi +1,7%,
+   deflatore +1,4%), Eurostat namq_10_gdp (consumi in volume +0,3%), Istat fiducia 30/09/2026 (91,2 da 94,5; base 2021 = 100; cambio operatore di rilevazione). */
+const ORDER = ['num', 'hook', 'torta', 'miliardi', 'reddito', 'risparmio', 'speso', 'prezzi', 'fiducia', 'indice', 'sotto', 'termometro', 'casa', 'fine', 'cta', 'end'];
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+const RGB = { lime: [200, 250, 114], amber: [245, 165, 36], red: [255, 90, 78], ink: [241, 244, 238], muted: [139, 149, 143], bg: [5, 6, 7] };
+const mix = (p, q, k) => p.map((v, i) => Math.round(v + (q[i] - v) * k));
+const rgba = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const hash = (i) => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+function tick(cx, cy, r, k, col = C.lime) { if (k <= 0) return; x.save(); x.strokeStyle = col; x.lineWidth = r * 0.3; x.lineCap = 'round'; x.lineJoin = 'round';
+  const a1 = oC(clamp(k * 2)), b1 = oC(clamp(k * 2 - 1)); x.beginPath(); x.moveTo(cx - r, cy); x.lineTo(cx - r + r * 0.7 * a1, cy + r * 0.7 * a1);
+  if (b1 > 0) x.lineTo(cx - r * 0.3 + r * 1.3 * b1, cy + r * 0.7 - r * 1.5 * b1); x.stroke(); x.restore(); }
+function dashH(x0, x1, y, col, a = 1, w = 3) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash([10, 10]); x.beginPath(); x.moveTo(x0, y); x.lineTo(x1, y); x.stroke(); x.restore(); }
+
+/* ================= HOOK: il contagiri dell'economia, la carta sul POS lo fa salire ================= */
+function pos(cx, cy, k, paid) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k);
+  glass(cx, cy, 240, 310, 34, 1);
+  x.fillStyle = '#020302'; rr(cx - 90, cy - 128, 180, 112, 14); x.fill();
+  x.strokeStyle = paid > 0 ? rgba(RGB.lime, 0.35 + 0.6 * paid) : 'rgba(241,244,238,0.18)'; x.lineWidth = 2.5; rr(cx - 90, cy - 128, 180, 112, 14); x.stroke();
+  if (paid > 0) glow(cx, cy - 72, 110, '200,250,114', 0.25 * paid);
+  txt('€', cx, cy - 72, { size: 60, weight: 800, color: C.muted, alpha: 1 - clamp(paid * 2) });
+  tick(cx + 8, cy - 78, 30, paid);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) { x.fillStyle = 'rgba(241,244,238,0.16)'; x.beginPath(); x.arc(cx - 52 + c * 52, cy + 30 + r * 40, 13, 0, 7); x.fill(); }
+  x.restore(); }
+function card(cx, cy, ang, k) { if (k <= 0.01) return; x.save(); x.globalAlpha *= clamp(k * 3); x.translate(cx, cy); x.rotate(ang);
+  const g = x.createLinearGradient(-95, -60, 95, 60); g.addColorStop(0, '#34461f'); g.addColorStop(1, '#10160c'); x.fillStyle = g; rr(-95, -60, 190, 120, 14); x.fill();
+  x.strokeStyle = 'rgba(200,250,114,0.75)'; x.lineWidth = 2.5; x.stroke();
+  x.fillStyle = '#d9b25c'; rr(-66, -26, 38, 30, 6); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.75)'; x.lineWidth = 3.5; x.lineCap = 'round'; for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(38, -10, 9 + i * 9, -0.75, 0.75); x.stroke(); }
+  x.fillStyle = 'rgba(241,244,238,0.3)'; for (let i = 0; i < 4; i++) { rr(-66 + i * 36, 28, 28, 7, 3); x.fill(); }
+  x.restore(); }
+function cardTap(t, t0) { const ka = oC(seg(t, t0 - 0.45, t0)), kr = ioC(seg(t, t0 + 0.3, t0 + 0.75)), k = ka * (1 - kr);
+  card(lerp(940, 715, k), lerp(1520, 1175, k), lerp(0.55, -0.18, k), k);
+  const kw = seg(t, t0, t0 + 0.7); if (kw > 0 && kw < 1) for (let i = 0; i < 3; i++) { const q = clamp(kw * 1.4 - i * 0.2); if (q <= 0 || q >= 1) continue;
+    x.save(); x.strokeStyle = `rgba(200,250,114,${(1 - q) * 0.8})`; x.lineWidth = 4; x.beginPath(); x.arc(675, 1150, 40 + 120 * q, -2.6, -0.4); x.stroke(); x.restore(); } }
+function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
+  const tS = WT('hook', 'sei', 1, 2.15), t1 = WT('hook', 'volta', 1, 2.9), t2 = WT('hook', 'spesa', 1, 3.95);
+  phrase(t, a + 0.05, [['Il motore più grande', C.ink], ['dell’economia', C.ink]], 345, { size: 92 });
+  phrase(t, tS - 0.1, [['sei tu.', C.lime]], 345 + 2 * 92 * 1.12, { size: 92 });
+  const kg = oC(seg(t, a + 0.3, a + 0.8)), r1 = oB(seg(t, t1, t1 + 0.7)), r2 = oB(seg(t, t2, t2 + 0.7)), rev = clamp(0.4 * r1 + 0.6 * r2);
+  const v = 14 + 34 * r1 + 40 * r2 + 1.6 * Math.sin(t * 11) * (0.4 + rev);
+  glow(540, 900, 330, '200,250,114', (0.06 + 0.2 * rev) * kg);
+  gauge(540, 900, 190, clamp(v, 0, 100), kg);
+  txt('IL MOTORE', 540, 1030, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kg, ls: 3 });
+  const paid = Math.max(oC(seg(t, t1 + 0.05, t1 + 0.35)) * (1 - seg(t, t2 - 0.5, t2 - 0.3)), oC(seg(t, t2 + 0.05, t2 + 0.35)));
+  pos(540, 1255, oC(seg(t, a + 0.5, a + 1.0)), paid);
+  cardTap(t, t1); cardTap(t, t2);
+  x.restore(); finish(t); }
+
+/* ================= TORTA 3D del PIL: il carrello versa la spesa nella fetta delle famiglie ================= */
+const PIE = [['fam', 57.2, RGB.lime, ''], ['inv', 22.0, [214, 220, 210], 'investimenti'], ['ap', 18.1, [112, 122, 116], 'Stato'], ['alt', 2.7, [66, 74, 69], '']];
+function wedge(cx, cy, rx, ry, a0, a1) { x.save(); x.translate(cx, cy); x.scale(1, ry / rx); x.beginPath(); x.moveTo(0, 0); x.arc(0, 0, rx, a0, a1); x.closePath(); x.restore(); }
+function pieSlices() { let acc = -Math.PI / 2; return PIE.map(([k, v, c, lab]) => { const r = { k, v, c, lab, a0: acc, a1: acc + v / 100 * 2 * Math.PI }; acc = r.a1; return r; }); }
+function pie3d(o) { const { cx = 540, cy = 930, rx = 330, ry = 140, dep = 64, kIn = 1, fill = 1, lift = 0, ghost = 0, labels = 1, famLab = 0, step = 2 } = o; if (kIn <= 0) return;
+  const SL = pieSlices(), s = lerp(0.85, 1, oB(clamp(kIn))), f = SL[0], mid = (f.a0 + f.a1) / 2, lx = Math.cos(mid) * 30 * lift * rx / 330, ly = Math.sin(mid) * 14 * lift - 70 * lift * rx / 330;
+  x.save(); x.globalAlpha *= clamp(kIn * 1.5); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy);
+  const draw = (sl, dx, dy, a1, top, side, edge) => { for (let d = dep; d > 0; d -= step) { wedge(cx + dx, cy + dy + d, rx, ry, sl.a0, a1); x.fillStyle = side; x.fill(); }
+    wedge(cx + dx, cy + dy, rx, ry, sl.a0, a1); x.fillStyle = top; x.fill(); x.strokeStyle = edge; x.lineWidth = 3; x.stroke(); };
+  glow(cx, cy + dep, rx * 1.15, '0,0,0', 0.45);
+  SL.slice(1).forEach((sl) => draw(sl, 0, 0, sl.a1, rgba(mix(RGB.bg, sl.c, 0.8)), rgba(mix(RGB.bg, sl.c, 0.38)), 'rgba(5,6,7,0.9)'));
+  /* sede della fetta: vuota e tratteggiata finché non si riempie o si solleva */
+  wedge(cx, cy + dep, rx, ry, f.a0, f.a1); x.fillStyle = '#0a0d0b'; x.fill();
+  wedge(cx, cy, rx, ry, f.a0, f.a1); x.fillStyle = rgba(mix(RGB.bg, RGB.lime, 0.08)); x.fill();
+  x.save(); x.setLineDash([10, 9]); x.strokeStyle = rgba(RGB.lime, 0.55 * (1 - clamp(fill * 3 - 2))); x.lineWidth = 3; x.stroke(); x.restore();
+  if (fill > 0) { const a1 = f.a0 + (f.a1 - f.a0) * fill; if (lift > 0) glow(cx + lx + Math.cos(mid) * rx * 0.4, cy + ly, rx * 0.9, '200,250,114', 0.22 * lift);
+    draw(f, lx, ly, a1, rgba(mix(RGB.bg, RGB.lime, 0.92)), rgba(mix(RGB.bg, RGB.lime, 0.42)), rgba(RGB.ink, 0.55));
+    if (ghost > 0) { const ae = f.a0 + 0.516 * 2 * Math.PI; x.save(); x.globalAlpha *= ghost;
+      wedge(cx + lx, cy + ly, rx, ry, ae, f.a1); x.fillStyle = 'rgba(241,244,238,0.55)'; x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke();
+      x.save(); x.translate(cx + lx, cy + ly); x.scale(1, ry / rx); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(ae) * rx, Math.sin(ae) * rx); x.restore(); x.setLineDash([9, 8]); x.strokeStyle = 'rgba(5,6,7,0.95)'; x.lineWidth = 4; x.stroke(); x.restore(); }
+    if (famLab > 0) { const r = 0.55; txt('FAMIGLIE', cx + lx + Math.cos(mid) * rx * r, cy + ly + Math.sin(mid) * ry * r - 6, { fam: 'mono', size: Math.max(22, 26 * rx / 330), weight: 600, color: '#0b0d0c', alpha: famLab, ls: 2 }); } }
+  if (labels > 0) SL.slice(1).forEach((sl) => { if (!sl.lab) return; const m = sl.k === 'inv' ? lerp(sl.a0, sl.a1, 0.75) : (sl.a0 + sl.a1) / 2, r = sl.k === 'inv' ? 0.68 : 0.6;
+    txt(sl.lab, cx + Math.cos(m) * rx * r, cy + Math.sin(m) * ry * r, { fam: 'mono', size: 22, weight: 600, color: sl.k === 'inv' ? '#0b0d0c' : C.ink, alpha: labels, ls: 1 }); });
+  x.restore(); }
+/* carrello di lato (fronte a destra in coordinate locali; dir -1 = guarda a sinistra) */
+const CI = [[-92, -196, RGB.lime], [-40, -206, RGB.amber], [12, -200, RGB.ink], [64, -208, RGB.lime], [-66, -150, RGB.amber], [-14, -156, RGB.lime], [38, -152, RGB.amber], [90, -160, RGB.ink]];
+function cart2(cx, by, s, tilt, k, left = 8, wa = 0, dir = -1) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, by); x.scale(dir * s, s);
+  x.translate(80, -12); x.rotate(tilt); x.translate(-80, 12);
+  CI.forEach(([ix, iy, c], i) => { if (i >= left) return; x.fillStyle = rgba(c, 0.85); rr(ix - 23, iy - 23, 46, 46, 8); x.fill(); x.fillStyle = 'rgba(5,6,7,0.3)'; x.fillRect(ix - 23, iy - 3, 46, 6); });
+  x.beginPath(); x.moveTo(-130, -170); x.lineTo(130, -170); x.lineTo(100, -50); x.lineTo(-110, -50); x.closePath(); x.fillStyle = 'rgba(241,244,238,0.08)'; x.fill();
+  x.save(); x.clip(); x.strokeStyle = 'rgba(241,244,238,0.28)'; x.lineWidth = 2; for (let i = 1; i < 7; i++) { const f = i / 7; x.beginPath(); x.moveTo(lerp(-130, 130, f), -170); x.lineTo(lerp(-110, 100, f), -50); x.stroke(); }
+  for (let j = 1; j < 3; j++) { x.beginPath(); x.moveTo(-140, -170 + 40 * j); x.lineTo(140, -170 + 40 * j); x.stroke(); } x.restore();
+  x.strokeStyle = C.ink; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round';
+  x.beginPath(); x.moveTo(-130, -170); x.lineTo(130, -170); x.lineTo(100, -50); x.lineTo(-110, -50); x.closePath(); x.stroke();
+  x.beginPath(); x.moveTo(-130, -170); x.lineTo(-166, -214); x.lineTo(-206, -214); x.stroke();
+  x.beginPath(); x.moveTo(-110, -50); x.lineTo(-118, -28); x.lineTo(104, -28); x.stroke();
+  for (const wx of [-85, 80]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, -12, 15, 0, 7); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 5; x.stroke();
+    x.lineWidth = 3; x.beginPath(); x.moveTo(wx + Math.cos(wa) * 10, -12 + Math.sin(wa) * 10); x.lineTo(wx - Math.cos(wa) * 10, -12 - Math.sin(wa) * 10); x.stroke(); }
+  x.restore(); }
+function cartMouth(cx, by, s, tilt) { const c = Math.cos(tilt), sn = Math.sin(tilt), px = 80 + 50 * c + 158 * sn, py = -12 + 50 * sn - 158 * c; return [cx - s * px, by + s * py]; }
+/* tempi della torta: servono anche a «miliardi», che continua lo stesso disegno */
+function tortaT() { const a = S('torta'), tCo = WT('torta', 'consumi', 1, 0.6), tF = WT('torta', 'fetta', 1, 2.2), tN = WT('torta', 'circa', 1, 4.6);
+  const tp0 = Math.max(tCo - 0.1, a + 0.6), tp1 = Math.max(tp0 + 1.0, tF - 0.15), tl = Math.max(tF, tp1 + 0.45);
+  return { a, tp0, tp1, tl, tN }; }
+const PC = [540, 930];
+function tortaDraw(t, o = {}) { const T = tortaT(), { ghost = 0, famLab = 1 } = o, s = 0.8;
+  const kIn = oC(seg(t, T.a + 0.05, T.a + 0.6)), N = 26;
+  const fill = clamp((t - T.tp0 - 0.5) / (T.tp1 - T.tp0)), lift = oB(seg(t, T.tl, T.tl + 0.7));
+  pie3d({ kIn, fill, lift, ghost, labels: kIn, famLab: oC(seg(t, T.tl + 0.3, T.tl + 0.7)) * famLab });
+  /* carrello: entra, si inclina e versa, poi esce a destra */
+  const kx = ioC(seg(t, T.a, T.a + 0.6)), ko = ioC(seg(t, T.tp1 + 0.25, T.tp1 + 1.1)), cx = lerp(1280, 870, kx) + 440 * ko, by = 830;
+  const tilt = 0.55 * ioC(seg(t, T.tp0 - 0.3, T.tp0 + 0.05)) * (1 - ioC(seg(t, T.tp1, T.tp1 + 0.3)));
+  const poured = Math.floor(clamp((t - T.tp0) / (T.tp1 - T.tp0)) * 8 + 0.0001);
+  if (ko < 1) cart2(cx, by, s, tilt, kIn * (1 - ko), 8 - poured, (cx - 860) / 15);
+  const [mx, my] = cartMouth(cx, by, s, tilt), f = pieSlices()[0]; /* bocca del carrello */
+  for (let i = 0; i < N; i++) { const ti = T.tp0 + (i / N) * (T.tp1 - T.tp0), q = (t - ti) / 0.5; if (q <= 0 || q >= 1) continue;
+    const ang = f.a0 + (f.a1 - f.a0) * ((i + 0.5) / N), rr0 = 0.35 + 0.45 * hash(i), tx = PC[0] + Math.cos(ang) * 330 * rr0, ty0 = PC[1] + Math.sin(ang) * 140 * rr0;
+    const sx = mx + (hash(i + 9) - 0.5) * 30, px = lerp(sx, tx, q), py = lerp(my, ty0, q * q) - Math.sin(Math.PI * q) * 40, c = [RGB.lime, RGB.amber, RGB.ink][i % 3];
+    x.save(); x.translate(px, py); x.rotate(q * 3 * (hash(i + 3) - 0.5)); x.fillStyle = rgba(c, 0.9 * (1 - seg(q, 0.85, 1))); rr(-13, -13, 26, 26, 5); x.fill(); x.restore(); }
+  return T; }
+function sTorta(t, a, b) { bg(); x.save();
+  const T = tortaDraw(t);
+  phrase(t, a + 0.05, [['I consumi: la fetta', C.ink], ['più grande del PIL', C.lime]], 345, { size: 92 });
+  const kn = oB(seg(t, T.tN + 0.25, T.tN + 0.75)); if (kn > 0) { x.save(); x.translate(540, 1262); x.scale(clamp(kn, 0, 1.2), clamp(kn, 0, 1.2)); glow(0, 0, 240, '200,250,114', 0.2);
+    txt('57%', 0, 0, { size: 150, weight: 800, color: C.lime, ls: -4 }); x.restore(); }
+  mono('ISTAT · SPESA DELLE FAMIGLIE SUL PIL · 2025', 540, 1385, t, T.tN + 0.4, { size: 22 });
+  x.restore(); finish(t); }
+function sMiliardi(t, a, b) { bg(); x.save();
+  const tQ = WT('miliardi', 'quasi', 1, 0.3), tE = WT('miliardi', 'euro', 1, 1.8), tQu = WT('miliardi', 'quota', 1, 3.3), tA = WA('miliardi', ['area', 'dellarea'], 1, 4.9);
+  const kA = oC(seg(t, tA - 0.1, tA + 0.5)); tortaDraw(t, { ghost: kA });
+  phrase(t, tQ - 0.15, [['Quasi 1.300 miliardi', C.lime]], 345, { size: 92 }); /* il numero sulla parola «quasi» */
+  phrase(t, tE - 0.1, [['di euro, nel 2025.', C.ink]], 345 + 92 * 1.12, { size: 92 });
+  /* 57% dalla scena prima: si sposta a sinistra quando arriva l'area euro */
+  const kq = oC(seg(t, tQu - 0.1, tQu + 0.4)), ks = ioC(seg(t, tA - 0.1, tA + 0.5)), xi = lerp(540, 330, ks);
+  glow(xi, 1262, 240, '200,250,114', 0.12 + 0.12 * kq);
+  txt('57%', xi, 1262, { size: lerp(150, 120, ks), weight: 800, color: C.lime, ls: -4 });
+  txt('ITALIA', xi, 1360, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: Math.max(kq, ks), ls: 3 });
+  txt('52%', 760, 1262, { size: 120, weight: 800, color: C.muted, alpha: kA, blur: (1 - kA) * 12, ls: -4 });
+  txt('AREA EURO (CIRCA)', 760, 1360, { fam: 'mono', size: 26, weight: 600, color: C.muted, alpha: kA, ls: 2 });
+  mono('ISTAT 2025 · EUROSTAT (AREA EURO)', 540, 1428, t, tA + 0.2, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= REDDITO: la barra si riempie, tasse e contributi si staccano, resta il disponibile ================= */
+const BAR = { x0: 120, w: 840, y: 880, h: 140 }, CUT = [0.62, 0.82];
+function sReddito(t, a, b) { bg(); x.save();
+  const tD = WT('reddito', 'disponibile', 1, 2.5), tR = WT('reddito', 'resta', 1, 4.15), tT = WT('reddito', 'tasse', 1, 4.7), tC = WT('reddito', 'contributi', 1, 5.15);
+  phrase(t, a + 0.05, [['Quanto spendi dipende', C.ink], ['da quanto ti resta.', C.lime]], 345, { size: 92 });
+  const { x0, w, y, h } = BAR, kIn = oC(seg(t, a + 0.1, a + 0.5)), kf = ioC(seg(t, a + 0.3, a + 1.4)), kd = oC(seg(t, tD - 0.1, tD + 0.4));
+  glass(x0 + w / 2, y, w, h, 26, kIn);
+  const PC2 = [[0, CUT[0], null], [CUT[0], CUT[1], tT], [CUT[1], 1, tC]];
+  PC2.forEach(([u0, u1, tf], i) => { const px0 = x0 + w * u0, pw = w * (u1 - u0), vis = clamp((kf * w - px0 + x0) / pw); if (vis <= 0) return;
+    let dx = 0, dy = 0, rot = 0, col = mix(RGB.ink, RGB.lime, kd), al = 0.42 + 0.4 * kd;
+    if (tf !== null) { const kk = ioC(seg(t, tf - 0.1, tf + 0.6)); dy = 270 * kk + (i === 2 ? 20 * kk : 0); dx = (i === 1 ? -25 : -5) * kk; rot = (i === 1 ? 0.12 : -0.1) * kk; col = mix(RGB.ink, RGB.red, Math.max(kd * 0.25, kk)); al = 0.42 + 0.4 * Math.max(kd * 0.3, kk); }
+    x.save(); x.translate(px0 + pw / 2 + dx, y + dy); x.rotate(rot); x.fillStyle = rgba(col, al); rr(-pw / 2 + 4, -h / 2 + 8, pw * vis - 8, h - 16, 18); x.fill(); x.restore();
+    if (tf !== null) { const kl = oC(seg(t, tf + 0.25, tf + 0.6)); txt(i === 1 ? 'TASSE' : 'CONTRIBUTI', px0 + pw / 2 + dx, y + dy + 120, { fam: 'mono', size: 24, weight: 600, color: C.red, alpha: kl, ls: 1 }); } });
+  /* separatori tratteggiati sul «disponibile» */
+  CUT.forEach((u) => { const sx = x0 + w * u; x.save(); x.globalAlpha = kd * (1 - oC(seg(t, tT - 0.1, tT + 0.2))); x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([8, 8]); x.beginPath(); x.moveTo(sx, y - h / 2 - 16); x.lineTo(sx, y + h / 2 + 16); x.stroke(); x.restore(); });
+  txt('REDDITO', 540, y + 2, { fam: 'mono', size: 30, weight: 600, color: '#0b0d0c', alpha: kf * (1 - kd), ls: 4 });
+  const bx1 = x0 + w * CUT[0];
+  x.save(); x.globalAlpha = kd; x.strokeStyle = C.lime; x.lineWidth = 3; x.beginPath(); x.moveTo(x0 + 6, y - h / 2 - 22); x.lineTo(x0 + 6, y - h / 2 - 40); x.lineTo(bx1 - 6, y - h / 2 - 40); x.lineTo(bx1 - 6, y - h / 2 - 22); x.stroke(); x.restore();
+  txt('REDDITO DISPONIBILE', (x0 + bx1) / 2, y - h / 2 - 72, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kd, ls: 2 });
+  txt('QUELLO CHE TI RESTA', (x0 + bx1) / 2, y + 2, { fam: 'mono', size: 24, weight: 600, color: '#0b0d0c', alpha: oC(seg(t, tR - 0.1, tR + 0.3)), ls: 1 });
+  mono('ESEMPIO · PROPORZIONI NON IN SCALA', 540, 1420, t, tD, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= 100 QUADRATI: il reddito diventa una griglia, 6,7 messi da parte, 93,3 spesi ================= */
+const G = { x0: 214, y0: 660, c: 58, p: 66 }, NSP = 93.3;
+function cellXY(i) { return [G.x0 + (i % 10) * G.p, G.y0 + Math.floor(i / 10) * G.p]; }
+function grid(t, o = {}) { const { morph = 1, sav = 0, spent = 0, glowSav = 0 } = o;
+  for (let i = 0; i < 100; i++) { const [gx, gy] = cellXY(i), km = ioC(seg(morph, i * 0.005, i * 0.005 + 0.5));
+    const sx = BAR.x0 + (i % 10) * 52.1 + 1, sy = BAR.y - BAR.h / 2 + Math.floor(i / 10) * 14 + 1;
+    const cx0 = lerp(sx, gx, km), cy0 = lerp(sy, gy, km), cw = lerp(50, G.c, km), ch = lerp(12, G.c, km), rad = lerp(2, 10, km);
+    const lit = clamp(spent * 1.15 - (i / 93) * 1.0) > 0 ? oC(clamp((spent * 1.15 - (i / 93)) * 6)) : 0;
+    const limeA = 0.42 + 0.5 * lit, isSav = i >= 94 ? 1 : 0, part = i === 93 ? 0.3 : 1;
+    const col = isSav ? mix(RGB.lime, RGB.amber, sav) : RGB.lime, al = isSav ? lerp(0.42, 0.9, sav) : limeA;
+    const dy = isSav ? 10 * sav : 0;
+    x.fillStyle = rgba(col, al); rr(cx0, cy0 + dy, cw, ch, rad); x.fill();
+    if (i === 93 && sav > 0) { x.save(); rr(cx0, cy0, cw, ch, rad); x.clip(); x.fillStyle = rgba(RGB.bg, 1); x.fillRect(cx0 + cw * part, cy0, cw * (1 - part), ch); x.fillStyle = rgba(RGB.amber, 0.9 * sav); x.fillRect(cx0 + cw * part + 2, cy0, cw * (1 - part), ch); x.restore(); }
+    if (lit > 0 && lit < 1 && !isSav) glow(cx0 + cw / 2, cy0 + ch / 2, 60, '200,250,114', 0.25 * (1 - lit)); }
+  if (glowSav > 0) glow(G.x0 + 6.5 * G.p + 3 * G.p, G.y0 + 9 * G.p + 40, 260, '245,165,36', 0.2 * glowSav); }
+function savBracket(k) { if (k <= 0) return; const xa = G.x0 + 3 * G.p + G.c * 0.3 + 2, xb = G.x0 + 9 * G.p + G.c, yb = G.y0 + 9 * G.p + G.c + 26;
+  x.save(); x.globalAlpha *= k; x.strokeStyle = C.amber; x.lineWidth = 3; x.beginPath(); x.moveTo(xa, yb - 12); x.lineTo(xa, yb); x.lineTo(xb, yb); x.lineTo(xb, yb - 12); x.stroke(); x.restore(); }
+function sRisparmio(t, a, b) { bg(); x.save();
+  const tSe = WT('risparmio', 'secondo', 1, 1.4), tM = WT('risparmio', 'messo', 1, 4.45), tCi = WT('risparmio', 'circa', 1, 5.3);
+  phrase(t, a + 0.05, [['Messo da parte:', C.ink]], 345, { size: 92 });
+  phrase(t, tCi - 0.1, [['circa il 6,7%', C.amber]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola «circa» */
+  const morph = seg(t, a, a + 1.3), sav = ioC(seg(t, tM - 0.1, tM + 0.6));
+  mono('OGNI QUADRATO = 1% DEL REDDITO DISPONIBILE', 540, 600, t, a + 0.9, { size: 24 });
+  grid(t, { morph, sav, glowSav: sav });
+  const kb = oC(seg(t, tCi + 0.25, tCi + 0.65)); savBracket(kb);
+  txt('6,7 € messi da parte', G.x0 + 9 * G.p + G.c, 1382, { size: 36, weight: 800, color: C.amber, align: 'right', alpha: kb, blur: (1 - kb) * 8 });
+  mono('ISTAT · FAMIGLIE CONSUMATRICI · II TRIM. 2026', 540, 1438, t, tSe, { size: 22 });
+  x.restore(); finish(t); }
+function sSpeso(t, a, b) { bg(); x.save();
+  const tO = WT('speso', 'oltre', 1, 0.85), tSp = WT('speso', 'speso', 1, 3.25);
+  phrase(t, a + 0.05, [['Il resto, speso:', C.ink]], 345, { size: 92 });
+  phrase(t, tO - 0.15, [['oltre 93 € su 100', C.lime]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola «oltre» */
+  mono('OGNI QUADRATO = 1% DEL REDDITO DISPONIBILE', 540, 600, t, a - 5, { size: 24 });
+  const sp = ioC(seg(t, tO - 0.05, Math.max(tO + 1.2, tSp)));
+  grid(t, { morph: 1, sav: 1, spent: sp }); savBracket(1);
+  txt('6,7 € messi da parte', G.x0 + 9 * G.p + G.c, 1382, { size: 36, weight: 800, color: C.amber, align: 'right' });
+  const kc = oC(seg(t, tO, tO + 0.3)), v = NSP * oC(seg(t, tO, tO + 1.0));
+  txt(v.toFixed(1).replace('.', ',') + ' € spesi', G.x0, 1382, { size: 36, weight: 800, color: C.lime, align: 'left', alpha: kc });
+  mono('ISTAT · FAMIGLIE CONSUMATRICI · II TRIM. 2026', 540, 1438, t, a - 5, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= PREZZI: due colonne, la spesa corre più del reddito e in cima sono prezzi ================= */
+function hatchRect(x0, y0, w, h, col, a) { if (a <= 0 || h <= 0) return; x.save(); x.globalAlpha *= a; x.beginPath(); x.rect(x0, y0, w, h); x.clip(); x.strokeStyle = col; x.lineWidth = 4;
+  for (let v = -h; v < w + h; v += 18) { x.beginPath(); x.moveTo(x0 + v, y0); x.lineTo(x0 + v + h, y0 + h); x.stroke(); } x.restore(); }
+function sPrezzi(t, a, b) { bg('48,40,22', 0.6); x.save(); zoom(t, a, b, 1.03);
+  const tCa = WT('prezzi', 'calo', 1, 1.55), tS = WT('prezzi', 'spesa', 1, 2.6), tR = WT('prezzi', 'reddito', 1, 4.2), tP = WT('prezzi', 'prezzi', 1, 5.6);
+  phrase(t, a + 0.05, [['Risparmio in calo:', C.ink], ['la spesa corre di più.', C.amber]], 345, { size: 92 });
+  glassPill(540, 590, 'risparmio: da 7,9% a 6,7%', seg(t, tCa - 0.1, tCa + 0.4), C.amber, 38);
+  const base = 1290, U = 310, cw = 190, XR = 330, XS = 750;
+  const kS = ioC(seg(t, tS - 0.1, tS + 0.9)), kR = ioC(seg(t, tR - 0.1, tR + 0.7)), kP = oC(seg(t, tP - 0.1, tP + 0.5));
+  const hS = 1.7 * U * kS, hR = 0.4 * U * kR, hQ = 0.3 * U * kS;
+  [[XR, hR, kR, 'REDDITO', '+0,4%'], [XS, hS, kS, 'SPESA', '+1,7%']].forEach(([cx, hh, k, lab, val]) => { const kk = oC(seg(k, 0, 0.3)); if (kk <= 0) return;
+    glass(cx, base - 0.85 * U, cw + 20, 1.7 * U + 40, 26, kk * 0.5);
+    txt(lab, cx, base + 48, { fam: 'mono', size: 28, weight: 600, color: C.ink, alpha: kk, ls: 3 });
+    txt(val, cx, base - hh - 46, { size: 52, weight: 800, color: lab === 'SPESA' ? C.amber : C.lime, alpha: oC(seg(k, 0.6, 1)) }); });
+  if (kR > 0) { x.fillStyle = rgba(RGB.lime, 0.8); rr(XR - cw / 2, base - hR, cw, hR, 14); x.fill(); }
+  if (kS > 0) { x.save(); rr(XS - cw / 2, base - hS, cw, hS, 14); x.clip();
+    x.fillStyle = rgba(mix(RGB.lime, RGB.amber, kP * 0.0), 0.8); x.fillRect(XS - cw / 2, base - hS, cw, hS);
+    x.fillStyle = rgba(RGB.amber, 0.85 * kP); x.fillRect(XS - cw / 2, base - hS, cw, hS - hQ - 3);
+    hatchRect(XS - cw / 2, base - hS, cw, hS - hQ - 3, 'rgba(5,6,7,0.35)', kP); x.restore(); }
+  const yP = base - hQ - (1.4 * U) / 2, yQ = base - hQ / 2;
+  txt('PREZZI', 628, yP - 24, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'right', alpha: kP, ls: 2 });
+  txt('+1,4%', 628, yP + 18, { size: 44, weight: 800, color: C.amber, align: 'right', alpha: kP });
+  txt('QUANTITÀ', 628, yQ - 20, { fam: 'mono', size: 24, weight: 600, color: C.lime, align: 'right', alpha: kP, ls: 2 });
+  txt('+0,3%', 628, yQ + 16, { size: 34, weight: 800, color: C.lime, align: 'right', alpha: kP });
+  mono('II TRIM. 2026 SUL TRIMESTRE PRIMA · ISTAT, EUROSTAT', 540, 1420, t, tS, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= FIDUCIA: vasi comunicanti, la paura spinge giù la spesa e su il risparmio ================= */
+function cloud(cx, cy, s, k, t) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.scale(s, s);
+  const P2 = [[-70, 12, 46], [-25, -18, 58], [32, -8, 52], [74, 16, 40], [0, 22, 50]];
+  x.fillStyle = '#2a302c'; P2.forEach(([px, py, r]) => { x.beginPath(); x.arc(px, py, r, 0, 7); x.fill(); });
+  x.fillStyle = '#1a1f1c'; x.fillRect(-110, 22, 220, 40); x.beginPath(); x.arc(0, 30, 1, 0, 7); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.beginPath(); x.arc(-25, -18, 58, Math.PI * 1.1, Math.PI * 1.75); x.stroke(); x.beginPath(); x.arc(32, -8, 52, Math.PI * 1.25, Math.PI * 1.85); x.stroke();
+  x.restore(); }
+function sFiducia(t, a, b) { bg('34,38,44', 0.8); x.save();
+  const tTe = WT('fiducia', 'teoria', 1, 1.7), tTm = WT('fiducia', 'temi', 1, 2.45), tRi = WT('fiducia', 'risparmi', 1, 3.5), tSp = WT('fiducia', 'spendi', 1, 4.7);
+  phrase(t, a + 0.05, [['Poi conta la fiducia.', C.ink]], 345, { size: 92 });
+  glassPill(540, 478, 'in teoria', seg(t, tTe - 0.15, tTe + 0.35), C.ink, 38);
+  const L = { cx: 330, col: RGB.lime, lab: 'SPENDI' }, R = { cx: 750, col: RGB.amber, lab: 'RISPARMI' }, top = 770, base = 1250, tw2 = 170, inner = 460;
+  const kIn = oC(seg(t, a + 0.2, a + 0.7)), ks = ioC(seg(t, tRi - 0.3, Math.max(tRi + 0.8, tSp + 0.3))), wob = Math.sin(t * 7) * 6 * Math.sin(Math.PI * ks);
+  const lvL = lerp(0.58, 0.3, ks), lvR = lerp(0.58, 0.86, ks);
+  /* tubo di collegamento */
+  glass(540, 1215, 300, 54, 20, kIn);
+  x.save(); x.globalAlpha = kIn; const gp = x.createLinearGradient(415, 0, 665, 0); gp.addColorStop(0, rgba(RGB.lime, 0.7)); gp.addColorStop(1, rgba(RGB.amber, 0.7)); x.fillStyle = gp; x.fillRect(400, 1200, 280, 30);
+  if (ks > 0 && ks < 1) for (let j = 0; j < 4; j++) { const u = ((t * 1.6 + j / 4) % 1); x.fillStyle = 'rgba(255,255,255,0.7)'; x.beginPath(); x.arc(lerp(420, 660, u), 1215, 5, 0, 7); x.fill(); }
+  x.restore();
+  [[L, lvL, -wob], [R, lvR, wob]].forEach(([V, lv, wb]) => { glass(V.cx, (top + base) / 2, tw2, base - top + 20, 30, kIn);
+    x.save(); x.globalAlpha = kIn; x.beginPath(); x.roundRect(V.cx - tw2 / 2 + 10, top, tw2 - 20, base - top, 22); x.clip();
+    const ly = base - 10 - inner * lv + wb; const g = x.createLinearGradient(0, ly, 0, base); g.addColorStop(0, rgba(V.col, 0.9)); g.addColorStop(1, rgba(V.col, 0.45));
+    x.fillStyle = g; x.beginPath(); x.moveTo(V.cx - tw2 / 2, ly); for (let i = 0; i <= 10; i++) x.lineTo(V.cx - tw2 / 2 + i * tw2 / 10, ly + Math.sin(t * 5 + i * 0.9) * 3); x.lineTo(V.cx + tw2 / 2, base); x.lineTo(V.cx - tw2 / 2, base); x.closePath(); x.fill(); x.restore(); });
+  /* nuvola della paura sul tubo della spesa, con pioggia */
+  const kc = oC(seg(t, tTm - 0.3, tTm + 0.4)), cxC = lerp(150, 330, kc), cyC = 668 + Math.sin(t * 2) * 4;
+  cloud(cxC, cyC, 0.95, kc, t);
+  if (kc > 0.5) { x.save(); x.globalAlpha = (kc - 0.5) * 2 * 0.6; x.strokeStyle = 'rgba(160,175,190,0.9)'; x.lineWidth = 3; x.lineCap = 'round';
+    const lyL = base - 10 - inner * lvL; for (let j = 0; j < 7; j++) { const u = (t * 1.7 + j * 0.37) % 1, rx = 268 + j * 20, ry = lerp(735, lyL - 10, u); if (ry > lyL - 20) continue; x.beginPath(); x.moveTo(rx, ry); x.lineTo(rx - 4, ry + 18); x.stroke(); } x.restore(); }
+  txt('SE TEMI IL FUTURO', 450, 668, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', alpha: kc, ls: 2 });
+  const kR = oC(seg(t, tRi - 0.1, tRi + 0.3)), kS = oC(seg(t, tSp - 0.1, tSp + 0.3));
+  txt('SPENDI', L.cx - (kS > 0 ? 18 : 0) * kS, 1318, { fam: 'mono', size: 30, weight: 600, color: C.lime, alpha: kIn, ls: 3 });
+  txt('↓', L.cx + 82, 1316, { size: 40, weight: 800, color: C.red, alpha: kS });
+  txt('RISPARMI', R.cx - 18 * kR, 1318, { fam: 'mono', size: 30, weight: 600, color: C.amber, alpha: kIn, ls: 3 });
+  txt('↑', R.cx + 106, 1316, { size: 40, weight: 800, color: C.amber, alpha: kR });
+  mono('MECCANISMO TEORICO · NON È UN DATO', 540, 1420, t, tTe, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= TERMOMETRO della fiducia (indice, sotto, termometro: stesso disegno che si arricchisce) ================= */
+const TH = { cx: 330, v0: 86, top: 650, bot: 1290, bulbY: 1325 }, ty = (v) => 1250 - (v - TH.v0) * 34;
+const MESI = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT'];
+function thermo(t, o = {}) { const { kIn = 1, val = 94.5, hatch = 0, l100 = 0, lab100 = 0, pulse = 0 } = o; if (kIn <= 0) return;
+  const { cx } = TH; x.save(); x.globalAlpha *= clamp(kIn);
+  glass(cx, (TH.top + TH.bot) / 2, 96, TH.bot - TH.top, 48, 1); glass(cx, TH.bulbY, 136, 136, 68, 1);
+  for (let v = 87; v <= 102; v++) { const yy = ty(v), big = v % 2 === 0; x.strokeStyle = big ? 'rgba(241,244,238,0.6)' : 'rgba(241,244,238,0.3)'; x.lineWidth = big ? 3 : 2; x.beginPath(); x.moveTo(cx - 46, yy); x.lineTo(cx - 46 + (big ? 18 : 10), yy); x.stroke();
+    if (big && v <= 100) txt(String(v), cx - 70, yy, { fam: 'mono', size: 22, weight: 600, color: v === 100 ? C.ink : C.muted, align: 'right' }); }
+  const g = x.createLinearGradient(0, ty(val), 0, TH.bulbY); g.addColorStop(0, rgba(RGB.amber, 0.95)); g.addColorStop(1, rgba(RGB.amber, 0.7));
+  x.fillStyle = g; rr(cx - 22, ty(val), 44, TH.bulbY - ty(val), 22); x.fill(); x.beginPath(); x.arc(cx, TH.bulbY, 50, 0, 7); x.fill();
+  glow(cx, ty(val), 70, '245,165,36', 0.3);
+  if (pulse > 0) { const q = (t * 0.9) % 1; x.save(); x.globalAlpha *= pulse * (1 - q); x.strokeStyle = C.amber; x.lineWidth = 3; x.beginPath(); x.ellipse(cx, ty(val), 30 + 40 * q, 8 + 10 * q, 0, 0, 7); x.stroke(); x.restore(); }
+  if (hatch > 0) { x.save(); x.beginPath(); x.rect(cx - 22, ty(94.5), 44, ty(val) - ty(94.5)); x.clip(); x.globalAlpha *= hatch; x.fillStyle = 'rgba(139,149,143,0.18)'; x.fillRect(cx - 22, ty(94.5), 44, ty(val) - ty(94.5));
+    x.strokeStyle = 'rgba(139,149,143,0.85)'; x.lineWidth = 3; for (let v = -60; v < 80; v += 12) { x.beginPath(); x.moveTo(cx - 22 + v, ty(94.5)); x.lineTo(cx - 22 + v + 60, ty(94.5) + 60 * 2); x.stroke(); } x.restore();
+    x.save(); x.globalAlpha *= hatch; x.strokeStyle = 'rgba(139,149,143,0.9)'; x.lineWidth = 2; x.setLineDash([5, 5]); x.strokeRect(cx - 22, ty(94.5), 44, ty(val) - ty(94.5)); x.restore(); }
+  x.restore();
+  if (l100 > 0) { const y1 = ty(100); x.save(); x.globalAlpha = clamp(kIn); x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([12, 10]); x.beginPath(); x.moveTo(cx + 52, y1); x.lineTo(cx + 52 + (930 - cx - 52) * oC(l100), y1); x.stroke(); x.restore();
+    txt('100 = MEDIA DEL 2021', 930, y1 - 30, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'right', alpha: lab100 * kIn, ls: 1 }); } }
+function readouts(t, kAgo, kSet, k = 1) { if (k <= 0) return; const cx = TH.cx;
+  if (kAgo > 0) { const y = ty(94.5); x.save(); x.globalAlpha = kAgo * k; x.strokeStyle = 'rgba(139,149,143,0.8)'; x.lineWidth = 2; x.beginPath(); x.moveTo(cx + 54, y); x.lineTo(cx + 84, y); x.stroke(); x.restore();
+    txt('AGOSTO 94,5', cx + 98, y, { fam: 'mono', size: 26, weight: 600, color: C.muted, align: 'left', alpha: kAgo * k, ls: 1 }); }
+  if (kSet > 0) { const y = ty(91.2); x.save(); x.globalAlpha = kSet * k; x.strokeStyle = C.amber; x.lineWidth = 3; x.beginPath(); x.moveTo(cx + 54, y); x.lineTo(cx + 84, y); x.stroke(); x.restore();
+    txt('SETTEMBRE', cx + 98, y - 2, { fam: 'mono', size: 26, weight: 600, color: C.amber, align: 'left', alpha: kSet * k, ls: 1 });
+    txt('91,2', cx + 98 + tw('SETTEMBRE ', 26, 600, 'mono', 1) + 8, y, { size: 52, weight: 800, color: C.amber, align: 'left', alpha: kSet * k, blur: (1 - kSet) * 8 }); } }
+function calCard(cx, cy, k, m, sub = '2026', hot = false, w = 290) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const h = 200;
+  glass(cx, cy, w, h, 26, 1); x.fillStyle = hot ? rgba(RGB.lime, 0.85) : rgba(RGB.amber, 0.8); x.beginPath(); x.roundRect(cx - w / 2, cy - h / 2, w, 46, [26, 26, 0, 0]); x.fill();
+  for (const dx of [-w * 0.24, w * 0.24]) { x.fillStyle = '#0b0d0c'; x.beginPath(); x.arc(cx + dx, cy - h / 2 + 23, 7, 0, 7); x.fill(); }
+  x.save(); x.beginPath(); x.rect(cx - w / 2, cy - h / 2 + 50, w, 110); x.clip();
+  const mi = Math.floor(m), f = m - mi, e = ioC(clamp(f * 1.6));
+  txt(MESI[Math.min(mi, MESI.length - 1)], cx, cy + 22 - 70 * e, { size: 76, weight: 800, color: C.ink, alpha: 1 - e });
+  if (mi + 1 < MESI.length && e > 0) txt(MESI[mi + 1], cx, cy + 22 + 70 * (1 - e), { size: 76, weight: 800, color: C.ink, alpha: e });
+  x.restore(); txt(sub, cx, cy + 76, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 2 }); x.restore(); }
+function headset(cx, cy, col, a) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 5; x.lineCap = 'round';
+  x.beginPath(); x.arc(cx, cy, 26, Math.PI * 1.05, Math.PI * 1.95); x.stroke(); rr(cx - 32, cy - 6, 14, 26, 6); x.fill(); rr(cx + 18, cy - 6, 14, 26, 6); x.fill();
+  x.beginPath(); x.moveTo(cx + 25, cy + 20); x.quadraticCurveTo(cx + 22, cy + 38, cx + 2, cy + 38); x.stroke(); x.beginPath(); x.arc(cx - 2, cy + 38, 5, 0, 7); x.fill(); x.restore(); }
+function sIndice(t, a, b) { bg('34,38,44', 0.7); x.save();
+  const tOg = WT('indice', 'ogni', 1, 1.15), tSe = WT('indice', 'settembre', 1, 2.05), tSc = WT('indice', 'sceso', 1, 3.25), tIn = WT('indice', 'intorno', 1, 3.6);
+  phrase(t, a + 0.05, [['La fiducia, a settembre:', C.ink]], 345, { size: 92 });
+  phrase(t, tIn - 0.1, [['intorno a 91.', C.amber]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola «intorno» */
+  const kIn = oC(seg(t, a + 0.1, a + 0.6)), fillUp = ioC(seg(t, a + 0.2, a + 1.0)), drop = ioC(seg(t, tSc - 0.1, tSc + 0.9));
+  thermo(t, { kIn, val: lerp(TH.v0, 94.5, fillUp) - 3.3 * drop });
+  readouts(t, oC(seg(t, a + 0.9, a + 1.3)), oC(seg(t, tIn + 0.3, tIn + 0.7)));
+  const m = clamp((t - tOg) / Math.max(0.3, tSe - tOg)) * 8; calCard(760, 760, oC(seg(t, tOg - 0.3, tOg + 0.2)), Math.min(8, m), 'OGNI MESE · ISTAT');
+  mono('ISTAT · CLIMA DI FIDUCIA DEI CONSUMATORI', 540, 1440, t, a + 0.4, { size: 22 });
+  x.restore(); finish(t); }
+function sSotto(t, a, b) { bg('34,38,44', 0.7); x.save();
+  const tL = WT('sotto', 'livello', 1, 1.0), tMa = WT('sotto', 'ma', 1, 2.8), tTe = WT('sotto', 'tecnico', 1, 4.15), tCa = WT('sotto', 'cambiato', 1, 5.15);
+  phrase(t, a + 0.05, [['Sotto 100,', C.ink]], 345, { size: 92, out: tMa - 0.35 });
+  phrase(t, tL - 0.1, [['la media del 2021.', C.muted]], 345 + 92 * 1.12, { size: 92, out: tMa - 0.35 }); /* «2021» sulla parola «livello» */
+  phrase(t, tMa - 0.1, [['Ma il calo è', C.ink], ['in parte tecnico.', C.amber]], 345, { size: 92 });
+  const kH = oC(seg(t, tTe - 0.1, tTe + 0.5)), kN = oC(seg(t, tCa - 0.2, tCa + 0.4));
+  thermo(t, { val: 91.2, l100: seg(t, a + 0.1, a + 0.8), lab100: oC(seg(t, tL - 0.1, tL + 0.3)), hatch: kH });
+  readouts(t, 1, 1);
+  calCard(760, 760, 1 - oC(seg(t, a, a + 0.3)), 8, 'OGNI MESE · ISTAT');
+  if (kN > 0) { const cx = 700, cy = 1250; x.save(); x.globalAlpha = kN; x.translate(0, (1 - kN) * 30); glass(cx, cy, 500, 170, 28, 1, '245,215,160');
+    const sw = ioC(seg(t, tCa + 0.1, tCa + 0.7)); headset(505 - 40 * sw, cy + 2, C.muted, 1 - sw); headset(505 + 40 * (1 - sw), cy + 2, C.amber, sw);
+    txt('CALO IN PARTE TECNICO:', 560, cy - 48, { fam: 'mono', size: 22, weight: 600, color: C.amber, align: 'left', ls: 1 });
+    txt('cambio dell’operatore', 560, cy - 2, { size: 32, weight: 800, color: C.ink, align: 'left' });
+    txt('di rilevazione', 560, cy + 40, { size: 32, weight: 800, color: C.ink, align: 'left' }); x.restore(); }
+  mono('ISTAT · BASE 2021 = 100 · SETTEMBRE 2026', 540, 1440, t, a + 0.3, { size: 22 });
+  x.restore(); finish(t); }
+function sTermometro(t, a, b) { bg('34,38,44', 0.6); x.save(); zoom(t, a, b, 1.03);
+  const tSv = WT('termometro', 'serve', 1, 1.8), tLe = WT('termometro', 'leggere', 1, 2.2), tM1 = WT('termometro', 'mese', 1, 3.2), tM2 = WT('termometro', 'mese', 2, 3.7);
+  phrase(t, a + 0.05, [['Un termometro', C.ink], ['dell’economia.', C.amber]], 345, { size: 92 });
+  const ko = oC(seg(t, a, a + 0.35));
+  thermo(t, { val: 91.2, l100: 1, lab100: 1, hatch: 1 - ko, pulse: oC(seg(t, tLe - 0.2, tLe + 0.4)) });
+  readouts(t, 1, 1);
+  if (ko < 1) { const cx = 700, cy = 1250; x.save(); x.globalAlpha = 1 - ko; glass(cx, cy, 500, 170, 28, 1, '245,215,160'); headset(545, cy + 2, C.amber, 1);
+    txt('CALO IN PARTE TECNICO:', 560, cy - 48, { fam: 'mono', size: 22, weight: 600, color: C.amber, align: 'left', ls: 1 });
+    txt('cambio dell’operatore', 560, cy - 2, { size: 32, weight: 800, color: C.ink, align: 'left' }); txt('di rilevazione', 560, cy + 40, { size: 32, weight: 800, color: C.ink, align: 'left' }); x.restore(); }
+  /* mese dopo mese: il calendario gira da settembre a ottobre, prossima lettura il 29 */
+  const kc = oC(seg(t, tM1 - 0.4, tM1 + 0.1)), m = 8 + ioC(seg(t, tM1, tM2 + 0.2));
+  calCard(700, 1225, kc, m, m >= 8.99 ? 'PROSSIMO DATO: 29/10' : 'OGNI MESE · ISTAT', m >= 8.99, 340);
+  mono('ISTAT · INDAGINE PER L’ANALISI CONGIUNTURALE', 540, 1440, t, tSv, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= CASA: tasca → carrello → metà dell'economia ================= */
+function wallet(cx, cy, k) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = lerp(0.8, 1, oB(clamp(k))); x.translate(cx, cy); x.scale(s, s);
+  x.fillStyle = rgba(RGB.lime, 0.85); x.save(); x.rotate(-0.12); rr(-70, -88, 130, 70, 8); x.fill(); x.fillStyle = 'rgba(5,6,7,0.35)'; x.beginPath(); x.arc(-5, -53, 16, 0, 7); x.fill(); x.restore();
+  glass(0, 0, 190, 130, 22, 1); x.strokeStyle = C.ink; x.lineWidth = 5; rr(-95, -65, 190, 130, 22); x.stroke();
+  x.fillStyle = '#121714'; rr(30, -24, 75, 48, 14); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 4; rr(30, -24, 75, 48, 14); x.stroke();
+  x.fillStyle = C.lime; x.beginPath(); x.arc(58, 0, 8, 0, 7); x.fill(); x.restore(); }
+function flow(x0, x1, y, t, k, col = '200,250,114') { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.strokeStyle = `rgba(${col},0.5)`; x.lineWidth = 3; x.setLineDash([2, 10]);
+  x.beginPath(); x.moveTo(x0, y); x.lineTo(x1, y); x.stroke(); x.setLineDash([]); x.fillStyle = `rgba(${col},0.9)`; x.beginPath(); x.moveTo(x1 + 12, y); x.lineTo(x1 - 6, y - 11); x.lineTo(x1 - 6, y + 11); x.closePath(); x.fill();
+  for (let j = 0; j < 3; j++) { const u = (t * 0.8 + j / 3) % 1, px = lerp(x0, x1 - 10, u); x.fillStyle = `rgba(${col},${0.95 * Math.sin(Math.PI * u)})`; x.beginPath(); x.arc(px, y, 8, 0, 7); x.fill(); glow(px, y, 26, col, 0.3 * Math.sin(Math.PI * u)); }
+  x.restore(); }
+function sCasa(t, a, b) { bg('30,44,26'); x.save();
+  const tC = WT('casa', 'che', 1, 1.5), tMe = WT('casa', 'meta', 1, 2.3), tK1 = WT('casa', 'carrello', 1, 4.15), tK2 = WT('casa', 'carrello', 2, 5.1), tT = WT('casa', 'tasca', 1, 7.35);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tC - 0.4 });
+  phrase(t, tC - 0.15, [['Più di metà del PIL', C.ink], ['passa dal carrello.', C.lime]], 345, { size: 92 });
+  const yy = 960, kP = oC(seg(t, tMe - 0.2, tMe + 0.4)), kK = oC(seg(t, tK1 - 0.3, tK1 + 0.3)), kW = oC(seg(t, tT - 0.4, tT + 0.2));
+  pie3d({ cx: 850, cy: yy - 10, rx: 120, ry: 52, dep: 26, kIn: kP, fill: 1, lift: 1, labels: 0, famLab: 0, step: 1.5 });
+  cart2(560, yy + 80, 0.62, 0, kK, 8, t * 2, 1);
+  wallet(215, yy, kW);
+  flow(640, 715, yy, t, oC(seg(t, tK1, tK1 + 0.4)));
+  flow(320, 405, yy, t, oC(seg(t, tT, tT + 0.4)));
+  txt('57% DEL PIL', 850, 1150, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kP, ls: 2 });
+  txt('CARRELLO', 560, 1150, { fam: 'mono', size: 26, weight: 600, color: C.ink, alpha: kK, ls: 2 });
+  txt('IN TASCA', 215, 1150, { fam: 'mono', size: 26, weight: 600, color: C.ink, alpha: kW, ls: 2 });
+  const kR = oC(seg(t, tT + 0.3, tT + 0.8)); if (kR > 0) glassPill(540, 1330, 'reddito, spesa, PIL', kR, C.lime, 44);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, torta: sTorta, miliardi: sMiliardi, reddito: sReddito, risparmio: sRisparmio, speso: sSpeso, prezzi: sPrezzi,
+  fiducia: sFiducia, indice: sIndice, sotto: sSotto, termometro: sTermometro, casa: sCasa }, ORDER, ['hook', 'reddito', 'fiducia', 'casa']);
+</script></body></html>
