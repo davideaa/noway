@@ -56,3 +56,4 @@ Il saldo di conto corrente 2025 è stato rivisto più volte: 197,4 mld (Bundesba
 - «Secondo molti economisti» / «molti aggiungono»: le fonti citate sono poche e in parte contrarie (Dustmann et al.; Zettelmeyer). Ora «alcuni economisti» e «c'è chi aggiunge», a voce e a schermo.
 - Barre 2025: export 1.564 e import 1.362 (tabella storica, 1.563,8 e 1.362,2, come le altezze); il comunicato dà 1.563,0 e 1.362,5. Il saldo «circa 200» vale in entrambi.
 - Chiusura: «un surplus non ha un solo segreto, ma prodotti, costi e cambio insieme» affermava un nesso causale che le fonti lasciano aperto (dubbi 5 e 6). Ora: «sul surplus tedesco si discute su tre fronti: prodotti, costi e cambio». Tolto anche «anche» in «hanno aiutato le riforme».
+- «surplus» a voce instabile (8 riprese: «Cyprus», «Surprise», «Solplus»…): nella chiusura si dice «avanzo»; a schermo resta «SURPLUS».
