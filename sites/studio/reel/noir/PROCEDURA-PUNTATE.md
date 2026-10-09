@@ -156,6 +156,18 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 02/10 | 4 | Il regista ha ritoccato tre scene mentre il render completo era già partito | il regista finisce PRIMA del render; se ritocca dopo, si rifanno solo quei fotogrammi (`LIST=`) |
 | 02/10 | 4 | La verifica finale che segnala frasi fermava `produci.sh` prima di «FINE» e le attese a valle restavano appese | la verifica non è più bloccante: segnala e si arriva sempre a «FINE» |
 | 02/10 | — | Meta: «API access blocked» su Instagram e Facebook (02/10, sera) | lo sblocco è sul pannello Meta di Davide; la produzione non si ferma |
+| 09/10 | 7, 9, 10 | Affermazioni non verificate passate da autore e regista: «la voce più ballerina» (falso: import ed export oscillano di più), «la maggior parte non è Pil italiano», «perché auto, macchinari e chimica…» (nesso causale), «molti economisti» | il controllo cerca apposta superlativi, «mai/sempre», «la maggior parte», «molti», nessi causali: ognuno deve avere la sua riga in pN-fonti.md; quando si corregge si aggiornano anche pN-fonti.md e la scheda in `lezioni.json` (la caption la usa) |
+| 09/10 | 9 | «prodotto interno lordo italiano» → «all'orda italiano» 8 volte su 8 | `controlla_copione.py` blocca «lordo» + vocale (non «lordo è», che passa) |
+| 09/10 | 9, 10 | «seicentottanta» e «quattro e mezzo per cento» scartati: la voce era giusta, il confronto no | «cent» e «e mezzo» trattati come numero in `rigenera2.py` E in `verifica_finale.py` (le due regole devono restare uguali) |
+| 09/10 | 10 | Frasi passate da sole ma segnalate sulla voce intera («parchite», «Solplus») | rifarle con `NOCACHE=1 SEEDS="505 606 …" PMIN=0.6 flock ~/reel-lavoro/voce.lock … rigenera2.py N`, poi `DA=2 ./produci.sh N`; tenere la vecchia come `rNN_prima.wav` |
+| 09/10 | 10 | Whisper chiude la frase con «?»: intonazione da domanda | si sceglie un'altra ripresa che finisca con «.» |
+| 09/10 | 6, 9, 10 | Testi scuri su fondi attenuati (etichetta della torta, «700 €», valori nelle barre) e testo che tocca bordi: 4 giri di controllo sulla sola P6 | il regista misura il contrasto (≥ 3:1, meglio 4,5:1) anche nello stato attenuato e lascia ≥ 4 px d'aria; niente dissolvenze scuro→chiaro sul testo |
+| 09/10 | 7 | Etichetta agganciata a «trent» ma Whisper scrive «30»: riserva usata, 1,6 s di ritardo | il controllo verifica che ogni `WT`/`WA` trovi la parola nei cues; per i numeri si aggancia una parola vicina |
+| 09/10 | 10 | Picco −0,9 dB dopo la codifica AAC | limitatore a 0,78 in `mix_fisso.sh` |
+| 09/10 | 6 | Mix fermo: base musicale non trovata | `~/reel-lavoro/run.wav` collegata alla base (o `RUN_WAV=`) prima di lanciare |
+| 09/10 | 8 | `produci.sh` avrebbe fatto il render con un `p8.html` non finito | se il regista non ha finito, `produci.sh` si ferma dopo il montaggio e si riprende con `DA=4` |
+| 09/10 | tutte | Disco al 99% | prima di produrre: cancellare `out-pN` vecchi, cache pip/uv, `node_modules`; MAI `~/.cache/huggingface` (modelli) |
+| 09/10 | 7, 9, 10 | Voce lenta (~25–40 min a puntata) mentre i registi e i render usano il processore | una voce alla volta (`flock`); mettere in coda, non in parallelo |
 
 ### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
 Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):
