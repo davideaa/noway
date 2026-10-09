@@ -1,0 +1,380 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 9, DAY: 3, CAP: 0, NEXT: ['Germania:', 'il caso reale'], FONTE: 'DATI: ISTAT CONTI NAZIONALI E COMMERCIO ESTERO 2025 (PROVV.)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 9 — «Export e import». Numeri SOLO da p9-fonti.md:
+   conti nazionali 2025 (Istat 22/09/2026): export beni e servizi 716,4 mld = 31,6% del PIL; import 684,0 mld; export netto +32,4 mld;
+   commercio estero di merci 2025 (Istat 15/09/2026): export 643,2 mld, import 592,5 mld, saldo +50,7 mld; macchinari 99,5 mld = 15,5%;
+   primi clienti Germania 11,2%, Stati Uniti 10,8%, Francia 10,1%. Il telefono da 1.000 € (700 import + 300 Italia) è un esempio inventato.
+   CAP 0 = capitolo 1 («Come gira l'economia»): la lezione 9 è nel primo capitolo (20 lezioni a capitolo). */
+const ORDER = ['num', 'hook', 'formula', 'mille', 'settecento', 'trecento', 'perche', 'export', 'quota', 'netto', 'merci', 'macchinari', 'clienti', 'casa', 'fine', 'cta', 'end'];
+
+/* parola con o senza articolo apostrofato (Whisper può scrivere «all'estero» attaccato): prova più grafie, poi la riserva */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+
+/* ================= oggetti ================= */
+function globe(cx, cy, r, col, lw = 4, k = 1, spin = 0) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.strokeStyle = col; x.lineWidth = lw;
+  x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();
+  for (const f of [0, 0.5]) { const ph = spin + f * Math.PI, rw = Math.abs(Math.cos(ph)) * r; x.beginPath(); x.ellipse(cx, cy, Math.max(rw, 1), r, 0, 0, 7); x.stroke(); }
+  x.beginPath(); x.moveTo(cx - r, cy); x.lineTo(cx + r, cy); x.stroke();
+  for (const f of [-0.5, 0.5]) { const yy = cy + f * r, hw = Math.sqrt(1 - f * f) * r; x.beginPath(); x.moveTo(cx - hw, yy); x.lineTo(cx + hw, yy); x.stroke(); }
+  x.restore(); }
+function stamp(cx, cy, label, k, ang = -0.12) { if (k <= 0) return; const s = lerp(1.7, 1, oC(clamp(k))), w = tw(label, 30, 600, 'mono', 3) + 64;
+  x.save(); x.translate(cx, cy); x.rotate(ang); x.scale(s, s); x.globalAlpha *= clamp(k * 2.5);
+  x.fillStyle = 'rgba(5,6,7,0.55)'; rr(-w / 2, -40, w, 80, 10); x.fill();
+  x.strokeStyle = C.amber; x.lineWidth = 5; rr(-w / 2, -40, w, 80, 10); x.stroke(); x.lineWidth = 2; rr(-w / 2 + 9, -31, w - 18, 62, 6); x.stroke();
+  txt(label, 0, 2, { fam: 'mono', size: 30, weight: 600, color: C.amber, ls: 3 }); x.restore(); }
+function chip(cx, cy, label, k, col = C.lime, size = 32) { if (k <= 0) return; const w = tw(label, size, 700) + 64, s = lerp(0.8, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); glass(cx, cy, w, 70, 35, clamp(k * 2)); txt(label, cx, cy + 2, { size, weight: 700, color: col, alpha: clamp(k * 2) }); x.restore(); }
+function badge(k) { if (k <= 0) return; glassPill(540, 600, 'SOLO MERCI', k, C.amber, 32); }
+/* bottom note */
+const note = (s, t, a0) => mono(s, 540, 1418, t, a0, { size: 22, color: C.muted, ls: 2 });
+
+/* --- la formula: m = 0 grande (scena «formula»), m = 1 striscia in alto (scene successive) --- */
+const FL9 = ['C', 'I', 'G', 'X', 'M'], FLAB = ['consumi', 'investimenti', 'spesa pubblica', 'export', 'import'], FCOL = [C.ink, C.ink, C.ink, C.lime, C.red];
+const FX = (i, m, sy) => [lerp(180 + i * 180, 400 + i * 120, m), lerp(1010, sy, m), lerp(140, 88, m)];
+function formula(o) { const { m = 0, sy = 620, kP = 1, kT = [1, 1, 1, 1, 1], hot = [0, 0, 0, 0, 0], dim = [0, 0, 0, 0, 0], lab = 0, val = [], pv = null, alpha = 1 } = o;
+  if (alpha <= 0) return; x.save(); x.globalAlpha *= alpha;
+  const mp = clamp(m * 1.5), mt = clamp(m * 1.3 - 0.3); /* «PIL =» arriva prima, le tessere dopo: non si incrociano */
+  const px = lerp(540, 250, mp), py = lerp(700, sy, mp);
+  txt('PIL =', px, py, { size: lerp(120, 56, mp), weight: 800, color: C.ink, alpha: kP, ls: -2 });
+  if (pv && pv[1] > 0) { glow(px, py, 140, '200,250,114', 0.25 * pv[1]); txt(pv[0], px, py + 74, { size: 30, weight: 800, color: C.lime, alpha: pv[1] }); }
+  for (let i = 0; i < 5; i++) { const [cx, cy, s] = FX(i, mt, sy), k = kT[i]; if (k <= 0) continue; const h = hot[i], rgb = i === 4 ? '255,90,78' : '200,250,114', hc = i === 4 ? C.red : C.lime;
+    if (i > 0) { const [p0] = FX(i - 1, mt, sy); txt(i === 4 ? '−' : '+', (p0 + cx) / 2, cy, { size: lerp(64, 42, mt), weight: 800, color: i === 4 ? C.red : C.muted, alpha: clamp(k * 2) * (1 - 0.6 * dim[i]) }); }
+    const sc = lerp(0.6, 1, oB(clamp(k)));
+    x.save(); x.translate(cx, cy); x.scale(sc, sc); x.globalAlpha *= 1 - 0.65 * dim[i];
+    if (h > 0) glow(0, 0, s * 1.3, rgb, 0.32 * h);
+    glass(0, 0, s, s, s * 0.22, clamp(k * 2));
+    if (h > 0) { x.save(); x.globalAlpha *= h; x.strokeStyle = hc; x.lineWidth = 4; rr(-s / 2, -s / 2, s, s, s * 0.22); x.stroke(); x.restore(); }
+    txt(FL9[i], 0, 3, { size: s * 0.6, weight: 800, color: FCOL[i], alpha: clamp(k * 2) });
+    x.restore();
+    if (lab > 0) { const up = i % 2 === 1; txt(FLAB[i], cx, cy + (up ? -125 : 125), { fam: 'mono', size: 26, weight: 600, color: h > 0.5 ? hc : C.muted, alpha: lab * clamp(k * 2), ls: 1 }); }
+    const v = val[i]; if (v && v[1] > 0) { txt(v[0], cx, cy + s / 2 + 30, { size: 30, weight: 800, color: v[2], alpha: v[1] });
+      if (v[3]) txt(v[3], cx, cy + s / 2 + 64, { fam: 'mono', size: 22, weight: 600, color: C.muted, alpha: v[1] }); }
+  }
+  x.restore(); }
+
+/* --- il telefono: sopra la parte fatta all'estero (70%), sotto quella italiana (30%) --- */
+function phone(cx, cy, w, h, o = {}) { const { k = 1, red = 0, lime = 0, dimRed = 0, redTxt = '', limeTxt = '', kr = 0, kl = 0, flip = 1, globeK = 0 } = o; if (k <= 0) return;
+  x.save(); x.translate(cx, cy); x.scale(flip, 1); x.translate(-cx, -cy); x.globalAlpha *= clamp(k);
+  const x0 = cx - w / 2, y0 = cy - h / 2, sx = x0 + 16, sy = y0 + 16, sw = w - 32, sh = h - 32, split = sy + sh * 0.7;
+  glow(cx, cy, w * 1.1, '200,250,114', 0.07);
+  x.fillStyle = '#0b0e0d'; rr(x0, y0, w, h, 46); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 4; rr(x0, y0, w, h, 46); x.stroke();
+  x.fillStyle = 'rgba(241,244,238,0.35)'; rr(x0 + w - 2, y0 + 120, 6, 70, 3); x.fill();
+  x.save(); rr(sx, sy, sw, sh, 32); x.clip();
+  const g = x.createLinearGradient(sx, sy, sx + sw, sy + sh); g.addColorStop(0, '#18201c'); g.addColorStop(1, '#070908'); x.fillStyle = g; x.fillRect(sx, sy, sw, sh);
+  if (red > 0) { const hh = (split - sy) * oC(clamp(red)); x.fillStyle = `rgba(255,90,78,${0.82 * (1 - 0.62 * dimRed)})`; x.fillRect(sx, sy, sw, hh); }
+  if (lime > 0) { const hh = (sy + sh - split) * oC(clamp(lime)); x.fillStyle = 'rgba(200,250,114,0.88)'; x.fillRect(sx, sy + sh - hh, sw, hh); }
+  if (red > 0.9 && lime > 0.9) { x.fillStyle = '#050607'; x.fillRect(sx, split - 2, sw, 4); }
+  const sp = x.createLinearGradient(sx, sy, sx + sw, sy); sp.addColorStop(0, 'rgba(255,255,255,0.12)'); sp.addColorStop(0.35, 'rgba(255,255,255,0)'); x.fillStyle = sp; x.fillRect(sx, sy, sw, sh);
+  x.restore();
+  x.fillStyle = '#050607'; rr(cx - 46, sy + 14, 92, 26, 13); x.fill();
+  if (redTxt) txt(redTxt, cx, (sy + split) / 2 + 10, { size: 66, weight: 800, color: '#1c0806', alpha: kr * (1 - 0.55 * dimRed) });
+  if (globeK > 0) globe(cx, (sy + split) / 2 + 10, 58, 'rgba(28,8,6,0.85)', 6, globeK, 0.6);
+  if (limeTxt) txt(limeTxt, cx, (split + sy + sh) / 2, { size: 58, weight: 800, color: '#15200C', alpha: kl });
+  x.restore();
+  return { sx, sy, sw, sh, split }; }
+
+/* ================= HOOK: il telefono arriva, timbro «fatto all'estero», lo schermo si riempie ================= */
+function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
+  const tC = WT('hook', 'compri', 1, 0.3), tE = WA('hook', ['estero', 'allestero'], 1, 1.7), tM = WT('hook', 'maggior', 1, 2.4), tN = WT('hook', 'non', 1, 4.5);
+  phrase(t, a + 0.05, [['Compri un telefono', C.ink], ['fatto all’estero?', C.ink]], 345, { size: 92, out: tM - 0.5 });
+  phrase(t, tM - 0.28, [['La maggior parte', C.ink]], 345, { size: 92 });
+  phrase(t, tN - 0.1, [['non è PIL italiano.', C.red]], 345 + 92 * 1.12, { size: 92 });
+  const kp = seg(t, a + 0.1, a + 0.8), fl = lerp(0.04, 1, oB(kp));
+  const red = seg(t, tM, tM + 0.9), lime = seg(t, tN, tN + 0.6);
+  phone(540, 1010, 330, 600, { k: clamp(kp * 3), flip: fl, red, lime });
+  tap(540, 1000, t, tC + 0.15);
+  stamp(540, 1150, 'FATTO ALL’ESTERO', seg(t, tE - 0.1, tE + 0.25) * (1 - seg(t, tM - 0.3, tM + 0.05)));
+  const kr = oC(seg(t, tM + 0.3, tM + 0.8)); globe(850, 870, 32, C.red, 4, kr, t * 1.2);
+  txt('fatto', 850, 935, { fam: 'mono', size: 26, weight: 600, color: C.red, alpha: kr, ls: 1 }); txt('all’estero', 850, 968, { fam: 'mono', size: 26, weight: 600, color: C.red, alpha: kr, ls: 1 });
+  const kl = oC(seg(t, tN + 0.3, tN + 0.8)); txt('PIL', 850, 1190, { size: 48, weight: 800, color: C.lime, alpha: kl }); txt('italiano', 850, 1238, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kl, ls: 1 });
+  x.restore(); finish(t); }
+
+/* ================= FORMULA: C + I + G + X − M, un pezzo per parola ================= */
+function sFormula(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tF = WT('formula', 'formula', 1, 1.4), ts = [WT('formula', 'consumi', 1, 2.1), WT('formula', 'investimenti', 1, 2.8), WT('formula', 'spesa', 1, 3.4), WA('formula', ['export', 'lexport'], 1, 4.5), WA('formula', ['import', 'limport'], 1, 5.2)];
+  phrase(t, a + 0.05, [['La formula', C.ink], ['completa del PIL', C.lime]], 345, { size: 92 });
+  const hot = ts.map((v, i) => seg(t, v - 0.15, v + 0.2) * (i < 4 ? 1 - seg(t, ts[i + 1] - 0.15, ts[i + 1] + 0.1) : 1));
+  formula({ m: 0, kP: oC(seg(t, tF - 0.2, tF + 0.3)), kT: ts.map((v) => seg(t, v - 0.2, v + 0.3)), hot, lab: 1 });
+  /* due graffe: la spesa interna (C + I + G) e gli scambi con l'estero (X − M) */
+  const b1 = oC(seg(t, ts[2] + 0.5, ts[2] + 0.9)), b2 = oC(seg(t, ts[4] + 0.25, ts[4] + 0.65));
+  const brace = (x0, x1, k, col, lab) => { if (k <= 0) return; const mx = (x0 + x1) / 2, hw = (x1 - x0) / 2 * k; x.save(); x.globalAlpha *= k; x.strokeStyle = col; x.lineWidth = 3;
+    x.beginPath(); x.moveTo(mx - hw, 1195); x.lineTo(mx - hw, 1212); x.lineTo(mx + hw, 1212); x.lineTo(mx + hw, 1195); x.moveTo(mx, 1212); x.lineTo(mx, 1228); x.stroke(); x.restore();
+    txt(lab, mx, 1262, { fam: 'mono', size: 26, weight: 600, color: col, alpha: k, ls: 1 }); };
+  brace(115, 605, b1, C.ink, 'la spesa');
+  brace(655, 965, b2, C.amber, 'con l’estero');
+  x.restore(); finish(t); }
+
+/* ================= L'ESEMPIO DEL TELEFONO (mille → settecento → trecento): un solo disegno che si arricchisce ================= */
+const PH = [300, 1060, 290, 540];
+function esempio(t, hotP = null) {
+  const aM = S('mille'), aP = S('perche');
+  const tP = WA('mille', ['mille', '1000', 'euro'], 1, 1.4) - 0.1, tX = WA('mille', ['estero', 'allestero'], 1, 2.4), tC = WT('mille', 'consumi', 1, 4.5);
+  const t7 = WA('settecento', ['settecento', '700', 'euro'], 1, 2.1) - 0.1, tI = WA('settecento', ['import', 'nellimport'], 1, 3.4), tS = WT('settecento', 'sottrae', 1, 4.5);
+  const tR = WT('trecento', 'restano', 1, 0.3), t3 = WA('trecento', ['trecento', '300', 'euro'], 1, 0.7) - 0.1, tNe = WT('trecento', 'negozio', 1, 2.4), tTr = WT('trecento', 'trasporto', 1, 3.1), tIv = WA('trecento', ['iva', 'liva'], 1, 3.8), tIt = WA('trecento', ['italia', 'litalia'], 1, 5.5);
+  const out = 1 - oC(seg(t, aP - 0.05, aP + 0.35));   /* tutto l'esempio esce all'inizio di «perche», resta la striscia */
+  const m = ioC(seg(t, aM, aM + 0.8));
+  /* striscia della formula: C riceve 1.000, M riceve 700, il PIL tiene 300 */
+  const kC = oC(seg(t, tC + 0.45, tC + 0.75)), kM = oC(seg(t, tI + 0.55, tI + 0.85)), kPil = oC(seg(t, tIt - 0.1, tIt + 0.3));
+  const pulse = Math.max(0, Math.sin(Math.PI * clamp((t - tS) / 0.5))) * (t > tS ? 1 : 0);
+  formula({ m, kP: 1, hot: hotP || [seg(t, tC + 0.3, tC + 0.6) * (1 - seg(t, tI, tI + 0.3)), 0, 0, 0, Math.max(seg(t, tI + 0.4, tI + 0.7) * (1 - seg(t, tIt - 0.2, tIt + 0.2)), pulse)],
+    val: [['+1.000', kC * out, C.lime, 'consumi'], null, null, null, ['−700', kM * out, C.red, 'import']], pv: ['+300', kPil * out], lab: 1 - oC(seg(t, aM, aM + 0.35)) });
+  if (t >= aP + 0.35) return;
+  x.save(); x.globalAlpha *= out;
+  const [cx, cy, w, h] = PH, kin = oC(seg(t, aM + 0.3, aM + 0.9));
+  x.save(); x.translate((1 - kin) * -120, 0);
+  const g = phone(cx, cy, w, h, { k: kin, red: seg(t, t7 - 0.2, t7 + 0.5), lime: seg(t, t3 - 0.2, t3 + 0.4), dimRed: seg(t, tR - 0.1, tR + 0.5), redTxt: '700 €', kr: oC(seg(t, t7, t7 + 0.3)), limeTxt: '300 €', kl: oC(seg(t, t3, t3 + 0.3)) });
+  x.restore();
+  /* cartellino del prezzo: compare su «mille euro», vola nella C su «consumi» */
+  const kp = oB(seg(t, tP - 0.1, tP + 0.35)), fly = ioC(seg(t, tC - 0.1, tC + 0.5));
+  if (kp > 0 && fly < 1) { const px = lerp(735, FX(0, 1, 620)[0], fly), py = lerp(900, 620, fly), s = lerp(1, 0.45, fly);
+    x.save(); x.translate(px, py); x.scale(s, s); x.translate(-px, -py); glassPill(px, py, '1.000 €', clamp(kp, 0, 1.1), C.lime, 60); x.restore(); }
+  /* «costruito all'estero» */
+  const kx = oC(seg(t, tX - 0.1, tX + 0.35)) * (1 - seg(t, t7 - 0.4, t7));
+  globe(600, 1052, 30, C.amber, 4, kx, t); txt('costruito', 652, 1036, { fam: 'mono', size: 26, weight: 600, color: C.amber, align: 'left', alpha: kx, ls: 1 }); txt('all’estero', 652, 1070, { fam: 'mono', size: 26, weight: 600, color: C.amber, align: 'left', alpha: kx, ls: 1 });
+  /* l'import: etichetta accanto alla parte rossa e una copia che vola nella M */
+  const ki = oC(seg(t, tI - 0.1, tI + 0.3)) * (1 - 0.55 * seg(t, tR, tR + 0.5)), ry = (g ? (g.sy + g.split) / 2 : 984) + 10;
+  globe(560, ry, 28, C.red, 4, ki, t * 0.8); txt('import', 610, ry - 16, { size: 40, weight: 800, color: C.red, align: 'left', alpha: ki }); txt('prodotto fuori', 610, ry + 24, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', alpha: ki, ls: 1 });
+  const gk = seg(t, tI, tI + 0.6); if (gk > 0 && gk < 1 && g) { const e = ioC(gk), [mx, my] = FX(4, 1, 620), bw = lerp(g.sw, 88, e), bh = lerp(g.split - g.sy, 88, e), bx = lerp(cx, mx, e), by = lerp((g.sy + g.split) / 2, my, e) - Math.sin(Math.PI * e) * 60;
+    x.save(); x.globalAlpha *= 1 - seg(gk, 0.8, 1); glow(bx, by, bw, '255,90,78', 0.3); x.fillStyle = 'rgba(255,90,78,0.55)'; rr(bx - bw / 2, by - bh / 2, bw, bh, 18); x.fill(); x.strokeStyle = C.red; x.lineWidth = 3; x.stroke(); x.restore(); }
+  /* i 300 € che restano: tre voci, una per parola */
+  const lb = oC(seg(t, t3 + 0.1, t3 + 0.5)); if (lb > 0 && g) { x.save(); x.globalAlpha *= lb; x.strokeStyle = C.lime; x.lineWidth = 3; const bx = 478;
+    x.beginPath(); x.moveTo(bx - 14, g.split + 6); x.lineTo(bx, g.split + 6); x.lineTo(bx, g.sy + g.sh + 26); x.lineTo(bx - 14, g.sy + g.sh + 26); x.stroke(); x.restore(); }
+  chip(735, 1128, 'margine del negozio', seg(t, tNe - 0.15, tNe + 0.3));
+  chip(735, 1213, 'trasporto', seg(t, tTr - 0.15, tTr + 0.3));
+  chip(735, 1298, 'Iva', seg(t, tIv - 0.15, tIv + 0.3));
+  /* etichetta «esempio» */
+  const ke = oC(seg(t, aM + 0.5, aM + 0.9)); if (ke > 0) { const lab = 'ESEMPIO · CIFRE INVENTATE', ww = tw(lab, 22, 600, 'mono', 3) + 44; x.save(); x.globalAlpha *= ke; x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 2; x.setLineDash([6, 6]); rr(540 - ww / 2, 1393, ww, 50, 25); x.stroke(); x.setLineDash([]); x.restore();
+    txt(lab, 540, 1419, { fam: 'mono', size: 22, weight: 600, color: C.amber, alpha: ke, ls: 3 }); }
+  x.restore(); }
+function sMille(t, a, b) { bg(); x.save();
+  const tP = WA('mille', ['mille', '1000', 'euro'], 1, 1.4) - 0.1;
+  phrase(t, a + 0.05, [['Un telefono', C.ink]], 345, { size: 92 });
+  phrase(t, tP, [['da 1.000 €', C.lime]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  esempio(t); x.restore(); finish(t); }
+function sSette(t, a, b) { bg('50,24,22', 0.5); x.save();
+  const t7 = WA('settecento', ['settecento', '700', 'euro'], 1, 2.1) - 0.1;
+  phrase(t, a + 0.05, [['Il suo valore,', C.ink]], 345, { size: 92 });
+  phrase(t, t7, [['700 €, è import', C.red]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  esempio(t); x.restore(); finish(t); }
+function sTre(t, a, b) { bg('30,44,26'); x.save();
+  const t3 = WA('trecento', ['trecento', '300', 'euro'], 1, 0.7) - 0.1;
+  phrase(t, a + 0.05, [['Resta in Italia:', C.ink]], 345, { size: 92 });
+  phrase(t, t3, [['300 €', C.lime]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  esempio(t); x.restore(); finish(t); }
+
+/* ================= PERCHÉ: la spesa contiene pezzi fatti fuori, che cadono nella cassa «import» ================= */
+const BLK = { n: 10, w: 80, h: 110, gap: 6, y: 860 }, IMP = [1, 4, 8];
+function sPerche(t, a, b) { bg(); x.save();
+  const tSp = WT('perche', 'spesa', 1, 1.4), tX = WA('perche', ['estero', 'allestero'], 1, 3.1), tN = WT('perche', 'non', 1, 3.8), tPr = WT('perche', 'produzione', 1, 4.5);
+  const hs = seg(t, tSp - 0.1, tSp + 0.3) * (1 - seg(t, tN, tN + 0.3));
+  esempio(t, [hs, hs, hs, 0, seg(t, tN + 0.2, tN + 0.5)]); /* la striscia della formula resta (C, I, G accese sulla spesa, M sulla caduta), l'esempio esce */
+  phrase(t, a + 0.05, [['Perché si toglie?', C.ink]], 345, { size: 92 });
+  phrase(t, tN - 0.1, [['Non è fatto qui.', C.red]], 345 + 92 * 1.12, { size: 92 });
+  mono('SPESA DI FAMIGLIE, IMPRESE, STATO', 540, 760, t, tSp - 0.1, { size: 26, color: C.ink });
+  const kb = oC(seg(t, tX - 0.2, tX + 0.3)); if (kb > 0) { glass(540, 1255, 420, 170, 30, kb, '255,170,160'); txt('IMPORT · SI TOGLIE', 540, 1378, { fam: 'mono', size: 26, weight: 600, color: C.red, alpha: kb, ls: 2 }); }
+  const tot = BLK.n * BLK.w + (BLK.n - 1) * BLK.gap, x0 = 540 - tot / 2, keep = [...Array(BLK.n).keys()].filter((i) => !IMP.includes(i)), tot2 = keep.length * BLK.w + (keep.length - 1) * BLK.gap, x02 = 540 - tot2 / 2;
+  const kr = seg(t, tX - 0.1, tX + 0.3), cg = ioC(seg(t, tN + 0.45, tN + 1.05)), tL = Math.max(tPr, tN + 0.8), kl = seg(t, tL, tL + 0.4);
+  for (let i = 0; i < BLK.n; i++) { const k = oB(seg(t, tSp - 0.25 + i * 0.05, tSp + 0.15 + i * 0.05)); if (k <= 0) continue;
+    const imp = IMP.includes(i); let px = x0 + i * (BLK.w + BLK.gap) + BLK.w / 2, py = BLK.y, rot = 0;
+    if (imp) { const j = IMP.indexOf(i), dk = seg(t, tN + j * 0.08, tN + 0.7 + j * 0.08); px = lerp(px, 440 + j * 100, oC(dk)); py = lerp(BLK.y, 1262, dk * dk); rot = Math.sin(Math.PI * dk) * 0.5 * (j - 1 || 0.6); }
+    else { const j = keep.indexOf(i); px = lerp(px, x02 + j * (BLK.w + BLK.gap) + BLK.w / 2, cg); }
+    x.save(); x.translate(px, py); x.rotate(rot); x.scale(clamp(k, 0, 1.15), clamp(k, 0, 1.15));
+    const fill = imp ? `rgba(255,90,78,${lerp(0.12, 0.8, kr)})` : kl > 0 ? `rgba(200,250,114,${lerp(0.12, 0.78, kl)})` : 'rgba(241,244,238,0.12)';
+    x.fillStyle = fill; rr(-BLK.w / 2, -BLK.h / 2, BLK.w, BLK.h, 14); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 2; x.stroke();
+    if (imp && kr > 0) globe(0, 0, 22, 'rgba(28,8,6,0.9)', 4, kr, t * 1.5 + i);
+    x.restore(); }
+  txt('PRODUZIONE ITALIANA', 540, 978, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: oC(kl), ls: 3 });
+  x.restore(); finish(t); }
+
+/* ================= EXPORT: la nave parte carica, gli euro tornano dall'estero ================= */
+function ship(cx, by, k, t) { if (k <= 0) return; const bob = Math.sin(t * 2.2) * 4; x.save(); x.translate(cx, by + bob); x.rotate(Math.sin(t * 1.7) * 0.012); x.globalAlpha *= k;
+  const cols = ['rgba(200,250,114,0.88)', 'rgba(245,165,36,0.88)', 'rgba(233,236,230,0.75)'];
+  for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) { const bx = -100 + c * 46, byy = -44 - r * 36; x.fillStyle = cols[(r + c * 2) % 3]; rr(bx, byy - 32, 44, 32, 3); x.fill();
+    x.strokeStyle = 'rgba(5,6,7,0.45)'; x.lineWidth = 2; for (let q = 1; q < 4; q++) { x.beginPath(); x.moveTo(bx + q * 11, byy - 28); x.lineTo(bx + q * 11, byy - 4); x.stroke(); } }
+  x.fillStyle = metal(-170, 0, -120, 0, true); rr(-168, -150, 52, 110, 6); x.fill(); x.fillStyle = 'rgba(200,250,114,0.7)'; rr(-160, -136, 36, 12, 3); x.fill();
+  x.fillStyle = metal(-180, 0, 200, 0, true); x.beginPath(); x.moveTo(-180, -40); x.lineTo(205, -44); x.lineTo(160, 12); x.lineTo(-168, 12); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(200,250,114,0.6)'; x.lineWidth = 3; x.beginPath(); x.moveTo(-172, -28); x.lineTo(192, -31); x.stroke();
+  x.restore(); }
+function factoryIco(cx, cy, col, k) { if (k <= 0) return; x.save(); x.globalAlpha *= k; x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round';
+  x.beginPath(); x.moveTo(cx - 60, cy + 40); x.lineTo(cx - 60, cy - 6); x.lineTo(cx - 25, cy + 12); x.lineTo(cx - 25, cy - 6); x.lineTo(cx + 10, cy + 12); x.lineTo(cx + 10, cy - 44); x.lineTo(cx + 50, cy - 44); x.lineTo(cx + 50, cy + 40); x.closePath(); x.stroke(); x.restore(); }
+function sExport(t, a, b) { bg(); x.save(); const d = b - a;
+  const tA = WT('export', 'aggiunge', 1, 1.0), tE = WA('export', ['estero', 'lestero'], 1, 2.1), tC = WT('export', 'compra', 1, 2.8), tP = WT('export', 'produciamo', 1, 3.8);
+  phrase(t, a + 0.05, [['L’export', C.ink], ['si aggiunge.', C.lime]], 345, { size: 92 });
+  formula({ m: 1, kP: 1, hot: [0, 0, 0, seg(t, tA - 0.15, tA + 0.25), 0], dim: [0, 0, 0, 0, seg(t, tA - 0.15, tA + 0.25)] });
+  /* mare */
+  const ks = oC(seg(t, a + 0.2, a + 0.7)), sea = 1250;
+  for (let r = 0; r < 3; r++) { x.save(); x.globalAlpha = ks * (0.55 - r * 0.15); x.strokeStyle = r ? 'rgba(241,244,238,0.6)' : C.lime; x.lineWidth = r ? 2 : 3; x.beginPath();
+    for (let px = 100; px <= 980; px += 10) { const py = sea + r * 26 + Math.sin(px * 0.03 + t * 2.4 + r) * 5; px === 100 ? x.moveTo(px, py) : x.lineTo(px, py); } x.stroke(); x.restore(); }
+  /* Italia a sinistra, estero a destra */
+  const ki = oC(seg(t, a + 0.3, a + 0.8)); factoryIco(190, 905, C.lime, ki); txt('ITALIA', 190, 985, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: ki, ls: 3 });
+  const ke = oC(seg(t, tE - 0.2, tE + 0.3)); globe(860, 900, 78, C.ink, 5, ke, t * 0.9); txt('ESTERO', 860, 1012, { fam: 'mono', size: 26, weight: 600, color: C.ink, alpha: ke, ls: 3 });
+  /* la nave salpa su «aggiunge» */
+  const sail = ioC(seg(t, tA - 0.3, Math.max(b, tA + 2.5))); ship(lerp(300, 640, sail), sea + 6, ks, t);
+  txt('ciò che produciamo', lerp(300, 640, sail), sea + 88, { fam: 'mono', size: 24, weight: 600, color: C.muted, alpha: oC(seg(t, tP - 0.3, tP + 0.2)), ls: 1 });
+  /* euro che tornano: dall'estero all'Italia */
+  const kc = seg(t, tC - 0.2, tC + 0.3); if (kc > 0) { const p0 = [860, 815], c0 = [540, 610], p1 = [200, 830];
+    x.save(); x.globalAlpha = kc * 0.5; x.strokeStyle = C.amber; x.lineWidth = 3; x.setLineDash([3, 12]); x.beginPath(); x.moveTo(...p0); x.quadraticCurveTo(...c0, ...p1); x.stroke(); x.setLineDash([]); x.restore();
+    for (let j = 0; j < 4; j++) { const u = ((t - tC) * 0.5 + j / 4) % 1; if (t < tC + j * 0.12) continue; const px = (1 - u) * (1 - u) * p0[0] + 2 * u * (1 - u) * c0[0] + u * u * p1[0], py = (1 - u) * (1 - u) * p0[1] + 2 * u * (1 - u) * c0[1] + u * u * p1[1];
+      glow(px, py, 40, '245,165,36', 0.3 * kc); coin(px, py, 30, kc, '245,165,36', '€'); }
+    txt('l’estero paga', 540, 805, { fam: 'mono', size: 26, weight: 600, color: C.amber, alpha: oC(kc), ls: 1 }); }
+  x.restore(); finish(t); }
+
+/* ================= QUOTA e NETTO: la barra del PIL, poi export e import in piedi ================= */
+const QB = { x0: 120, w: 840, y: 790, h: 220 }, EXW = QB.w * 716.3829 / 2265.0025, VB = { base: 1330, u: 1.0, ex: 300, im: 560, w: 200 };
+function sQuota(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tY = WA('quota', ['duemila', '2025'], 1, 0.3), tEs = WT('quota', 'esportato', 1, 1.4), tO = WT('quota', 'oltre', 1, 3.1), tT = WT('quota', 'terzo', 1, 4.8);
+  formula({ m: 1, kP: 1, alpha: 1 - oC(seg(t, a, a + 0.4)) });
+  phrase(t, Math.min(a + 0.05, tY - 0.1), [['Export 2025:', C.ink]], 345, { size: 92 });
+  phrase(t, tO - 0.1, [['oltre 700 mld', C.lime]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  const kb = oC(seg(t, a + 0.3, a + 0.8)), kT = oC(seg(t, tT - 0.15, tT + 0.3));
+  mono('IL PIL 2025, TUTTO', 540, 735, t, a + 0.4, { size: 26, color: C.ink, alpha: 1 - kT });
+  if (kb > 0) { glass(540, QB.y + QB.h / 2, QB.w, QB.h, 30, kb);
+    for (const f of [1 / 3, 2 / 3]) { const dx = QB.x0 + QB.w * f; x.save(); x.globalAlpha = kb * 0.6; x.strokeStyle = C.ink; x.lineWidth = 2; x.setLineDash([6, 8]); x.beginPath(); x.moveTo(dx, QB.y + 14); x.lineTo(dx, QB.y + QB.h - 14); x.stroke(); x.restore(); } }
+  const kf = ioC(seg(t, tEs - 0.1, tO + 0.5)); if (kf > 0) { x.save(); x.beginPath(); x.roundRect(QB.x0, QB.y, QB.w, QB.h, 30); x.clip(); const g = x.createLinearGradient(QB.x0, 0, QB.x0 + EXW, 0); g.addColorStop(0, 'rgba(200,250,114,0.45)'); g.addColorStop(1, 'rgba(200,250,114,0.9)');
+    x.fillStyle = g; x.fillRect(QB.x0, QB.y, EXW * kf, QB.h); x.restore(); }
+  txt('EXPORT', QB.x0 + EXW / 2, 1060, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: oC(seg(t, tEs + 0.2, tEs + 0.6)), ls: 3 });
+  if (kT > 0) { const x1 = QB.x0 + QB.w / 3; x.save(); x.globalAlpha = kT; x.strokeStyle = C.lime; x.lineWidth = 4; rr(QB.x0, QB.y, QB.w / 3, QB.h, 30); x.stroke();
+      x.lineWidth = 3; x.beginPath(); x.moveTo(QB.x0 + 8, 765); x.lineTo(QB.x0 + 8, 750); x.lineTo(x1 - 8, 750); x.lineTo(x1 - 8, 765); x.stroke(); x.restore();
+    glow(QB.x0 + QB.w / 6, 705, 160, '200,250,114', 0.18 * kT); txt('quasi 1/3', QB.x0 + QB.w / 6, 705, { size: 52, weight: 800, color: C.lime, alpha: kT });
+    txt('31,6% del PIL', QB.x0 + EXW / 2, 1110, { size: 36, weight: 800, color: C.ink, alpha: oC(seg(t, tT + 0.2, tT + 0.6)) }); }
+  note('ISTAT · CONTI NAZIONALI 2025, PROVVISORI', t, a + 0.6);
+  x.restore(); finish(t); }
+function sNetto(t, a, b) { bg(); x.save();
+  const tIm = WT('netto', 'importati', 1, 1.0), tC1 = WT('netto', 'circa', 1, 1.7), tN = WT('netto', 'netto', 1, 3.1), tC2 = WT('netto', 'circa', 2, 4.1);
+  phrase(t, a + 0.05, [['Export − import', C.ink]], 345, { size: 92 });
+  phrase(t, tC2 - 0.1, [['= +32 mld', C.lime]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  /* la barra del PIL svanisce, il pezzo «export» si alza in piedi */
+  const ko = 1 - oC(seg(t, a, a + 0.5)); if (ko > 0) { glass(540, QB.y + QB.h / 2, QB.w, QB.h, 30, ko); }
+  const mo = ioC(seg(t, a + 0.1, a + 0.9)), eh = 716.3829 * VB.u, ih = 684.0207 * VB.u;
+  const rx = lerp(QB.x0, VB.ex - VB.w / 2, mo), ry = lerp(QB.y, VB.base - eh, mo), rw = lerp(EXW, VB.w, mo), rh = lerp(QB.h, eh, mo);
+  const g = x.createLinearGradient(0, ry, 0, ry + rh); g.addColorStop(0, 'rgba(200,250,114,0.9)'); g.addColorStop(1, 'rgba(200,250,114,0.4)'); x.fillStyle = g; rr(rx, ry, rw, rh, lerp(0, 16, mo)); x.fill();
+  const kv = oC(seg(t, a + 0.8, a + 1.2)); txt('oltre 700', VB.ex, VB.base - eh + 50, { size: 38, weight: 800, color: '#15200C', alpha: kv }); txt('mld', VB.ex, VB.base - eh + 92, { fam: 'mono', size: 24, weight: 600, color: '#15200C', alpha: kv });
+  txt('EXPORT', VB.ex, VB.base + 42, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: mo, ls: 3 });
+  const ki = ioC(seg(t, tIm - 0.15, tC1 + 0.5)); if (ki > 0) { const hh = ih * ki, gi = x.createLinearGradient(0, VB.base - hh, 0, VB.base); gi.addColorStop(0, 'rgba(255,90,78,0.85)'); gi.addColorStop(1, 'rgba(255,90,78,0.35)');
+    x.fillStyle = gi; rr(VB.im - VB.w / 2, VB.base - hh, VB.w, hh, 16); x.fill(); }
+  const kiv = oC(seg(t, Math.max(tC1 - 0.05, tC1 + 0.5 - 0.3), tC1 + 0.75)) * (ki > 0.97 ? 1 : 0); txt('circa 680', VB.im, VB.base - ih + 50, { size: 38, weight: 800, color: '#1c0806', alpha: kiv }); txt('mld', VB.im, VB.base - ih + 92, { fam: 'mono', size: 24, weight: 600, color: '#1c0806', alpha: kiv });
+  txt('IMPORT', VB.im, VB.base + 42, { fam: 'mono', size: 26, weight: 600, color: C.red, alpha: oC(seg(t, tIm - 0.15, tIm + 0.3)), ls: 3 });
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(150, VB.base); x.lineTo(720, VB.base); x.stroke();
+  /* la differenza: la parte dell'export che sporge sopra l'import */
+  const kd = oC(seg(t, tN - 0.2, tN + 0.3)), yE = VB.base - eh, yI = VB.base - ih, bx = 692;
+  if (kd > 0) { x.save(); x.globalAlpha = kd; x.strokeStyle = 'rgba(200,250,114,0.75)'; x.lineWidth = 2; x.setLineDash([6, 6]); x.beginPath(); x.moveTo(VB.ex + VB.w / 2 + 6, yE); x.lineTo(bx, yE); x.moveTo(VB.im + VB.w / 2 + 6, yI); x.lineTo(bx, yI); x.stroke(); x.setLineDash([]);
+    x.fillStyle = 'rgba(200,250,114,0.35)'; x.fillRect(VB.im - VB.w / 2, yE, VB.w, yI - yE); x.strokeStyle = C.lime; x.lineWidth = 4; x.beginPath(); x.moveTo(bx, yE); x.lineTo(bx, yI); x.stroke(); x.restore(); }
+  const k32 = oC(seg(t, tC2 - 0.1, tC2 + 0.3)); if (k32 > 0) { glow(800, (yE + yI) / 2, 150, '200,250,114', 0.22 * k32); txt('+32 mld', 716, (yE + yI) / 2 - 4, { size: 54, weight: 800, color: C.lime, align: 'left', alpha: k32 });
+    txt('EXPORT NETTO', 718, (yE + yI) / 2 + 48, { fam: 'mono', size: 24, weight: 600, color: C.lime, align: 'left', alpha: k32, ls: 2 }); }
+  note('ISTAT · CONTI NAZIONALI 2025, PROVVISORI', t, a);
+  x.restore(); finish(t); }
+
+/* ================= MERCI (a parte): container che si impilano, uno in più dalla parte dell'export ================= */
+const CT = { base: 1330, h: 40, gap: 6, w: 220, ex: 265, im: 515 };
+function container(cx, cy, col, k, hot = 0) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); if (hot > 0) glow(cx, cy, 170, '245,165,36', 0.35 * hot);
+  x.fillStyle = col; rr(cx - CT.w / 2, cy - CT.h / 2, CT.w, CT.h, 4); x.fill(); x.strokeStyle = 'rgba(5,6,7,0.45)'; x.lineWidth = 2;
+  for (let q = 1; q < 11; q++) { const lx = cx - CT.w / 2 + q * CT.w / 11; x.beginPath(); x.moveTo(lx, cy - CT.h / 2 + 5); x.lineTo(lx, cy + CT.h / 2 - 5); x.stroke(); } x.restore(); }
+function sMerci(t, a, b) { bg('48,40,22', 0.75); x.save();
+  const tMe = WT('merci', 'merci', 1, 1.4), tPa = WT('merci', 'parte', 1, 3.1), tSa = WT('merci', 'saldo', 1, 3.8), tSu = WT('merci', 'supera', 1, 4.5);
+  phrase(t, a + 0.4, [['Solo merci:', C.amber]], 345, { size: 92 });
+  phrase(t, tSu - 0.1, [['saldo oltre +50 mld', C.ink]], 345 + 92 * 1.12, { size: 92 }); /* il numero sulla parola */
+  mono('STATISTICHE DEL COMMERCIO ESTERO', 540, 610, t, tPa - 0.2, { size: 24, color: C.amber });
+  const nE = 13, nI = 12, t0 = Math.min(tMe, a + 1.2) - 0.1;  /* 643 mld ≈ 13 container da 50, 592 mld ≈ 12 */
+  for (let j = 0; j < Math.max(nE, nI); j++) { for (const [n, cx, col, dl] of [[nE, CT.ex, 'rgba(200,250,114,0.82)', 0], [nI, CT.im, 'rgba(255,90,78,0.62)', 0.06]]) { if (j >= n) continue;
+      const st = t0 + dl + j * 0.09, k = seg(t, st, st + 0.3), cy = CT.base - CT.h / 2 - j * (CT.h + CT.gap); if (k <= 0) continue;
+      const last = n === nE && j === nE - 1, hot = last ? oC(seg(t, tSa - 0.1, tSa + 0.4)) : 0;
+      container(cx, cy - (1 - k * k) * 260, last && hot > 0 ? `rgba(245,165,36,${lerp(0.82, 0.95, hot)})` : col, clamp(k * 3), hot); } }
+  const kl = oC(seg(t, t0, t0 + 0.4)); txt('EXPORT', CT.ex, CT.base + 42, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kl, ls: 3 }); txt('IMPORT', CT.im, CT.base + 42, { fam: 'mono', size: 26, weight: 600, color: C.red, alpha: kl, ls: 3 });
+  const yE = CT.base - nE * (CT.h + CT.gap) + CT.gap, yI = CT.base - nI * (CT.h + CT.gap) + CT.gap, bx = 652, kd = oC(seg(t, tSa, tSa + 0.4));
+  if (kd > 0) { x.save(); x.globalAlpha = kd; x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 2; x.setLineDash([6, 6]); x.beginPath(); x.moveTo(CT.ex + CT.w / 2 + 6, yE); x.lineTo(bx, yE); x.stroke(); x.setLineDash([]);
+    x.strokeStyle = C.amber; x.lineWidth = 4; x.beginPath(); x.moveTo(bx - 12, yE); x.lineTo(bx, yE); x.lineTo(bx, yI); x.lineTo(bx - 12, yI); x.stroke(); x.restore(); }
+  const k5 = oC(seg(t, tSu - 0.1, tSu + 0.3)); if (k5 > 0) { txt('+50 mld', 680, (yE + yI) / 2 - 6, { size: 54, weight: 800, color: C.amber, align: 'left', alpha: k5 });
+    txt('SALDO COMMERCIALE', 682, (yE + yI) / 2 + 46, { fam: 'mono', size: 22, weight: 600, color: C.amber, align: 'left', alpha: k5, ls: 1 }); }
+  note('OGNI CONTAINER ≈ 50 MLD DI MERCI · ISTAT 2025', t, t0 + 0.4);
+  /* sipario ambra: separa le merci da quanto visto prima */
+  const kw = seg(t, a, a + 0.45); if (kw < 1) { const wx = lerp(-40, 1120, ioC(kw)); x.fillStyle = 'rgba(5,6,7,0.85)'; x.fillRect(wx, 0, W - wx, H); glow(wx, 960, 260, '245,165,36', 0.45); x.fillStyle = C.amber; x.fillRect(wx - 3, 0, 6, H); }
+  x.restore(); finish(t); }
+
+/* ================= MACCHINARI: braccio robotico + export di merci diviso in settimi ================= */
+function robot(bx, by, k, t) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k);
+  const a1 = -1.25 + 0.22 * Math.sin(t * 1.6), a2 = 0.9 + 0.3 * Math.sin(t * 1.6 + 1), L1 = 160, L2 = 130, j0 = [bx, by - 46], j1 = [j0[0] + Math.cos(a1) * L1, j0[1] + Math.sin(a1) * L1], j2 = [j1[0] + Math.cos(a1 + a2) * L2, j1[1] + Math.sin(a1 + a2) * L2];
+  x.fillStyle = metal(bx - 80, 0, bx + 80, 0, true); rr(bx - 80, by - 34, 160, 34, 8); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.5)'; x.lineWidth = 2; x.stroke();
+  x.lineCap = 'round'; for (const [p, q, wd] of [[j0, j1, 38], [j1, j2, 30]]) { x.strokeStyle = '#2a322d'; x.lineWidth = wd; x.beginPath(); x.moveTo(...p); x.lineTo(...q); x.stroke(); x.strokeStyle = 'rgba(200,250,114,0.55)'; x.lineWidth = 3; x.beginPath(); x.moveTo(...p); x.lineTo(...q); x.stroke(); }
+  for (const [p, r] of [[j0, 28], [j1, 24]]) { x.fillStyle = '#121714'; x.beginPath(); x.arc(...p, r, 0, 7); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 4; x.stroke(); }
+  const an = a1 + a2, op = 0.35 + 0.2 * Math.sin(t * 3.2); x.strokeStyle = C.lime; x.lineWidth = 7;
+  for (const sd of [-1, 1]) { x.beginPath(); x.moveTo(...j2); const m = [j2[0] + Math.cos(an + sd * op) * 34, j2[1] + Math.sin(an + sd * op) * 34]; x.lineTo(...m); x.lineTo(m[0] + Math.cos(an) * 26, m[1] + Math.sin(an) * 26); x.stroke(); }
+  x.restore(); }
+const SB = { x0: 120, w: 840, y: 1168, h: 92 };
+function sMacch(t, a, b) { bg('48,40,22', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tMa = WT('macchinari', 'macchinari', 1, 2.1), tCi = WT('macchinari', 'circa', 1, 2.4), tEu = WA('macchinari', ['euro', 'su'], 1, 4.5);
+  badge(oC(seg(t, a, a + 0.3)));
+  phrase(t, a + 0.05, [['Primo settore:', C.ink]], 345, { size: 92 });
+  phrase(t, tMa - 0.1, [['i macchinari', C.lime]], 345 + 92 * 1.12, { size: 92 });
+  robot(200, 1040, oC(seg(t, a + 0.2, a + 0.7)), t);
+  const kn = oC(seg(t, tCi - 0.1, tCi + 0.3)); txt('circa 100 mld', 725, 880, { size: 66, weight: 800, color: C.lime, alpha: kn, blur: (1 - kn) * 10 });
+  txt('export di macchinari', 725, 945, { fam: 'mono', size: 24, weight: 600, color: C.muted, alpha: kn, ls: 1 });
+  const kb = oC(seg(t, a + 0.4, a + 0.9)); if (kb > 0) { glass(540, SB.y, SB.w, SB.h, 24, kb);
+    for (let i = 1; i < 7; i++) { const dx = SB.x0 + SB.w * i / 7; x.save(); x.globalAlpha = kb * 0.6; x.strokeStyle = C.ink; x.lineWidth = 2; x.setLineDash([5, 7]); x.beginPath(); x.moveTo(dx, SB.y - SB.h / 2 + 12); x.lineTo(dx, SB.y + SB.h / 2 - 12); x.stroke(); x.restore(); } }
+  txt('TUTTO L’EXPORT DI MERCI, IN 7 PARTI', 540, SB.y - 80, { fam: 'mono', size: 24, weight: 600, color: C.ink, alpha: kb, ls: 1 });
+  const kf = ioC(seg(t, tCi - 0.1, tCi + 0.7)), fw = SB.w * 0.155 * kf; if (fw > 0) { x.save(); x.beginPath(); x.roundRect(SB.x0, SB.y - SB.h / 2, SB.w, SB.h, 24); x.clip(); x.fillStyle = 'rgba(200,250,114,0.85)'; x.fillRect(SB.x0, SB.y - SB.h / 2, fw, SB.h); x.restore(); }
+  const k7 = oC(seg(t, tEu - 0.2, tEu + 0.3)); if (k7 > 0) { const x1 = SB.x0 + SB.w / 7; x.save(); x.globalAlpha = k7; x.strokeStyle = C.amber; x.lineWidth = 4; x.beginPath(); x.moveTo(x1, SB.y - SB.h / 2 - 16); x.lineTo(x1, SB.y + SB.h / 2 + 16); x.stroke(); x.restore();
+    txt('1/7', x1, SB.y + SB.h / 2 + 42, { fam: 'mono', size: 26, weight: 600, color: C.amber, alpha: k7, ls: 1 });
+    glow(540, 1335, 260, '200,250,114', 0.16 * k7); txt('più di 1 euro su 7', 540, 1335, { size: 58, weight: 800, color: C.lime, alpha: k7 }); }
+  note('ISTAT · MACCHINARI 15,5% DELL’EXPORT DI MERCI 2025', t, a + 0.5);
+  x.restore(); finish(t); }
+
+/* ================= CLIENTI: il podio con le bandiere ================= */
+function flagBody(kind, w, h) { const x0 = -w / 2, y0 = -h / 2;
+  if (kind === 'de') { ['#1d1d1d', '#DD0000', '#FFCE00'].forEach((c, i) => { x.fillStyle = c; x.fillRect(x0, y0 + i * h / 3, w, h / 3 + 0.5); }); }
+  if (kind === 'fr') { ['#0055A4', '#F4F4F4', '#EF4135'].forEach((c, i) => { x.fillStyle = c; x.fillRect(x0 + i * w / 3, y0, w / 3 + 0.5, h); }); }
+  if (kind === 'us') { for (let i = 0; i < 13; i++) { x.fillStyle = i % 2 ? '#F4F4F4' : '#B22234'; x.fillRect(x0, y0 + i * h / 13, w, h / 13 + 0.5); }
+    const cw = w * 0.42, ch = h * 7 / 13; x.fillStyle = '#3C3B6E'; x.fillRect(x0, y0, cw, ch); x.fillStyle = '#F4F4F4';
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) { x.beginPath(); x.arc(x0 + cw * (c + 0.5 + (r % 2) * 0.25) / 5.25, y0 + ch * (r + 0.5) / 4, 2.6, 0, 7); x.fill(); } } }
+function flag(kind, cx, cy, w, h, k, t, pole) { if (k <= 0) return; const s = clamp(oB(clamp(k)), 0, 1.12);
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.globalAlpha *= clamp(k * 2);
+  x.strokeStyle = 'rgba(241,244,238,0.75)'; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(-w / 2 - 6, -h / 2 - 10); x.lineTo(-w / 2 - 6, pole); x.stroke();
+  const N = 28, sw = w / N; for (let i = 0; i < N; i++) { const u = (i + 0.5) / N, ph = t * 4 - u * 5, off = Math.sin(ph) * 7 * u;
+    x.save(); x.beginPath(); x.rect(-w / 2 + i * sw - 0.3, -h / 2 - 12, sw + 0.6, h + 24); x.clip(); x.translate(0, off); flagBody(kind, w, h);
+    x.fillStyle = `rgba(0,0,0,${0.18 * (0.5 + 0.5 * Math.cos(ph)) * u})`; x.fillRect(-w / 2, -h / 2, w, h); x.restore(); }
+  x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 2; x.strokeRect(-w / 2, -h / 2, w, h);
+  x.restore(); }
+function sClienti(t, a, b) { bg('48,40,22', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tG = WT('clienti', 'germania', 1, 1.7), tS = WT('clienti', 'stati', 1, 2.1), tF = WT('clienti', 'francia', 1, 3.1);
+  badge(1);
+  phrase(t, a + 0.05, [['Primi clienti:', C.ink]], 345, { size: 92 });
+  phrase(t, tG - 0.1, [['chi compra da noi', C.amber]], 345 + 92 * 1.12, { size: 72 });
+  const POD = [['de', 'GERMANIA', '11,2%', 540, 300, tG], ['us', 'STATI UNITI', '10,8%', 250, 230, tS], ['fr', 'FRANCIA', '10,1%', 830, 170, tF]], base = 1330, bw = 230;
+  POD.forEach(([kind, name, q, cx, hgt, t0]) => { const kr = ioC(seg(t, t0 - 0.2, t0 + 0.35)), hh = hgt * kr, top = base - hh; if (kr <= 0) return;
+    glass(cx, base - hh / 2, bw, Math.max(hh, 1), 20, 1); if (kind === 'de') { x.save(); x.globalAlpha = kr; x.strokeStyle = C.amber; x.lineWidth = 3; rr(cx - bw / 2, top, bw, hh, 20); x.stroke(); x.restore(); }
+    const kt = oC(seg(t, t0 + 0.1, t0 + 0.45));
+    txt(name, cx, base - hgt + 40, { fam: 'mono', size: 26, weight: 600, color: kind === 'de' ? C.amber : C.ink, alpha: kt, ls: 2 });
+    txt(q, cx, base - hgt + 100, { size: 44, weight: 800, color: C.ink, alpha: kt });
+    flag(kind, cx + 8, base - hgt - 96, 170, 112, seg(t, t0 - 0.05, t0 + 0.45), t + cx * 0.01, 96); });
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(110, base); x.lineTo(970, base); x.stroke();
+  note('QUOTA SULL’EXPORT DI MERCI · ISTAT 2025', t, tG);
+  x.restore(); finish(t); }
+
+/* ================= CASA: il meno non è un danno, è produzione altrove ================= */
+function sCasa(t, a, b) { bg('30,44,26'); x.save(); const d = b - a;
+  const tIm = WA('casa', ['import', 'limport'], 1, 2.1), tD = WT('casa', 'danno', 1, 4.5), tPr = WT('casa', 'prodotto', 1, 6.2), tAl = WT('casa', 'altrove', 1, 6.6);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tIm - 0.45 });
+  phrase(t, tIm - 0.2, [['L’import si toglie:', C.ink]], 345, { size: 92 });
+  phrase(t, tD - 0.3, [['non è un danno,', C.ink]], 345 + 92 * 1.12, { size: 92 });
+  phrase(t, tPr - 0.15, [['è fatto altrove.', C.lime]], 345 + 2 * 92 * 1.12, { size: 92 });
+  formula({ m: 1, sy: 720, kP: oC(seg(t, a + 0.2, a + 0.6)), kT: [0, 1, 2, 3, 4].map((i) => seg(t, a + 0.2 + i * 0.07, a + 0.6 + i * 0.07)), hot: [0, 0, 0, 0, seg(t, tIm - 0.1, tIm + 0.3)] });
+  const kp = oC(seg(t, a + 0.3, a + 0.8));
+  phone(300, 1110, 260, 480, { k: kp, red: seg(t, a + 0.4, a + 1.0), lime: seg(t, a + 0.6, a + 1.1), globeK: oC(seg(t, a + 0.9, a + 1.3)) });
+  const kd = oC(seg(t, tD - 0.15, tD + 0.25)), ka = oC(seg(t, tAl - 0.3, tAl + 0.2));
+  chip(720, 1045, 'un danno?', kd * (1 - ka), C.red, 38);
+  chip(720, 1045, 'prodotto altrove', ka, C.amber, 38);
+  const kl = oC(seg(t, a + 1.0, a + 1.4)); txt('resta in Italia', 720, 1265, { fam: 'mono', size: 26, weight: 600, color: C.lime, alpha: kl, ls: 1 });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, formula: sFormula, mille: sMille, settecento: sSette, trecento: sTre, perche: sPerche, export: sExport, quota: sQuota, netto: sNetto,
+  merci: sMerci, macchinari: sMacch, clienti: sClienti, casa: sCasa }, ORDER, ['hook', 'formula', 'quota', 'casa']);
+</script></body></html>
