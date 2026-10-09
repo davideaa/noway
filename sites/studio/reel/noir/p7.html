@@ -209,8 +209,8 @@ function sQuota(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   if (kb > 0) { glass(X0 + BW / 2, Y0 + BH / 2, BW, BH, 24, kb); x.save(); x.beginPath(); x.roundRect(X0, Y0, BW * kb, BH, 24); x.clip();
     x.fillStyle = 'rgba(241,244,238,0.12)'; x.fillRect(X0, Y0, BW, BH); x.restore(); }
   /* la fetta: si accende e scende di un passo */
-  const ks = oC(seg(t, tV, tV + 0.5)), dy = 38 * ioC(seg(t, tV + 0.3, tV + 0.9));
-  if (ks > 0) { glow(X0 + sw / 2, Y0 + BH / 2 + dy, 200, '200,250,114', 0.3 * ks); x.save(); x.globalAlpha = ks; x.fillStyle = 'rgba(5,6,7,0.9)'; x.fillRect(X0, Y0, sw + 4, BH);
+  const ks = oC(seg(t, tV, tV + 0.5)), dy = 0;
+  if (ks > 0) { glow(X0 + sw / 2, Y0 + BH / 2 + dy, 200, '200,250,114', 0.3 * ks); x.save(); x.globalAlpha = ks; 
     x.fillStyle = C.lime; rr(X0, Y0 + dy, sw, BH, [24, 6, 6, 24]); x.fill(); x.restore();
     txt('22%', X0 + sw / 2, Y0 + BH / 2 + dy, { size: 60, weight: 800, color: '#15200C', alpha: ks });
     txt('INVESTIMENTI', X0, Y0 + BH + dy + 36, { fam: 'mono', size: 24, weight: 600, color: C.lime, align: 'left', ls: 2, alpha: ks }); }
@@ -234,8 +234,8 @@ function scope(t, k, kInv, kBand, X0 = 110, X1 = 970, Y0 = 570, Y1 = 1190) { if 
   x.restore(); }
 function sBarra(t, a, b) { bg('52,40,20', 0.6); x.save();
   const tB = WT('barra', 'ballerina', 1, 1.7), tT = WT('barra', 'trent', 1, 3.1), tO = WT('barra', 'oscillano', 1, 3.4), tD = WT('barra', 'doppio', 1, 4.5);
-  phrase(t, a + 0.05, [['La voce', C.ink]], 345, { size: 92 });
-  phrase(t, tB - 0.35, [['più ballerina.', C.amber]], Y2, { size: 92 });
+  phrase(t, a + 0.05, [['Una voce', C.ink]], 345, { size: 92 });
+  phrase(t, tB - 0.35, [['ballerina.', C.amber]], Y2, { size: 92 });
   const kp = oC(seg(t, a + 0.2, a + 0.7)); scope(t, kp, oC(seg(t, tB - 0.3, tB + 0.4)), oC(seg(t, tO, tO + 0.6)));
   mono('ULTIMI 30 ANNI', 150, 605, t, tT, { size: 24, color: C.muted, align: 'left' });
   const kx = oB(seg(t, tD - 0.15, tD + 0.35)); if (kx > 0) { x.save(); x.translate(860, 618); x.scale(clamp(kx, 0, 1.2), clamp(kx, 0, 1.2)); glow(0, 0, 120, '245,165,36', 0.3);
@@ -340,7 +340,7 @@ function sCasa(t, a, b) { bg('30,44,26'); x.save();
   const tI = WT('casa', 'investire', 1, 2.1), tC = WT('casa', 'capitale', 1, 3.1), tO = WT('casa', 'oscilla', 1, 5.2);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 330, { size: 70, out: tI - 0.35 });
   phrase(t, tI - 0.1, [['Investire = capitale,', C.ink]], 345, { size: 92 });
-  phrase(t, tO - 0.15, [['e oscilla di più.', C.amber]], Y2, { size: 92 });
+  phrase(t, tO - 0.15, [['e oscilla il doppio.', C.amber]], Y2, { size: 92 });
   ICO.forEach((f, i) => { const cx = 195 + i * 230, k = oB(seg(t, tC - 0.2 + i * 0.1, tC + 0.3 + i * 0.1)); if (k <= 0) return;
     x.save(); x.translate(cx, 720); x.scale(clamp(k, 0, 1.15) * 0.8, clamp(k, 0, 1.15) * 0.8); glass(0, 0, 220, 200, 100, 1); f(0, 0, C.lime, t); x.restore(); });
   scope(t, oC(seg(t, tO - 0.4, tO + 0.1)), oC(seg(t, tO, tO + 0.5)), 0, 130, 950, 900, 1330);

@@ -39,3 +39,8 @@ Controllo di coerenza: i livelli Eurostat 2021–2025 (investimenti fissi lordi 
 4. **Dati 2024–2025 provvisori** (Istat); la revisione di marzo 2027 può spostare i decimali: da qui «circa» e arrotondamenti prudenti (22%, 10%, 5%, 30%).
 5. **Serie lunghe 2007–2014**: fonte primaria Eurostat (dati Istat trasmessi), perché il file Istat di settembre 2026 parte dal 2021 e IstatData non è raggiungibile dal nostro ambiente. La deviazione standard e le variazioni cumulate sono calcoli nostri.
 6. **BCE**: il quadro 2026 (due rialzi, giugno e settembre) è quello del comunicato del 10/09/2026; la prossima riunione è il 29/10. Se il reel esce il 13/10 il dato regge; se slitta oltre il 29/10 va rifatto il controllo.
+
+
+## Correzione dopo il controllo finale (09/10/2026)
+
+«La voce più ballerina / che oscilla di più» era FALSO se letto come «la componente del PIL più instabile»: il controllo ha ricalcolato lo scarto quadratico delle variazioni annue in volume 1996–2025 (Eurostat nama_10_gdp, CLV_PCH_PRE, Italia): importazioni 6,9, esportazioni 6,5, investimenti 6,1, PIL 3,0, consumi delle famiglie 2,8, spesa pubblica 1,5. Il copione ora dice «una voce ballerina» e «oscilla il doppio dell'economia», che è quanto le fonti verificano (6,1 contro 3,0).

@@ -111,12 +111,12 @@
   "gancio": "Un'impresa che compra un macchinario oggi decide i salari di domani.",
   "spiega": [
    "In macroeconomia investire significa comprare capitale: macchinari, edifici, software, case nuove. Non è comprare azioni.",
-   "È la voce più instabile del PIL: sale molto nei periodi buoni e crolla nelle crisi.",
+   "È una voce molto instabile: oscilla circa il doppio del PIL, sale molto nei periodi buoni e crolla nelle crisi.",
    "Dipende da attese di vendita e dal costo del denaro: se prendere a prestito costa di più, si investe meno."
   ],
   "esempio": "Un panificio compra un forno da 50.000 € per raddoppiare la produzione: è investimento. Comprare azioni di un'altra impresa no.",
   "ti_serve": "Evita una confusione tipica agli esami: investimento macro e investimento finanziario sono cose diverse.",
-  "visual": "Fabbrica di vetro che cresce pezzo per pezzo; barra investimenti che oscilla più delle altre.",
+  "visual": "Fabbrica di vetro che cresce pezzo per pezzo; barra investimenti che oscilla il doppio del PIL.",
   "collega": [
    3,
    6
