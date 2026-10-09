@@ -11,6 +11,8 @@ from faster_whisper import WhisperModel
 import os, hashlib
 R = json.load(open("righe.json")); SKIP = set(os.environ.get("SKIP", "num").split(","))
 idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tutte"] else [int(v) for v in sys.argv[1:]]
+# rifare una frase già promossa ma segnalata dalla verifica finale: NOCACHE=1 SEEDS="505 606 ..." PMIN=0.6 python rigenera2.py 3
+SEEDS = [int(v) for v in os.environ.get("SEEDS", "11 23 42 77 101 202 303 404").split()]; PMIN = float(os.environ.get("PMIN", "0.45"))
 # cache delle frasi GIÀ promosse (stesso testo → stesso file, niente rigenerazione): ~/reel-lavoro/cache/<sha1>.wav
 CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=True)
 chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
@@ -32,9 +34,9 @@ def coda(f, last_end):
     return fine, minimo
 tts = ChatterboxMultilingualTTS.from_pretrained(device="cpu"); asr = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 for i in idx:
-    if os.path.exists(chiave(R[i][0])): shutil.copy(chiave(R[i][0]), f"r{i:02d}.wav"); print(f"{i:02d} DALLA CACHE (già verificata)", flush=True); continue
+    if os.path.exists(chiave(R[i][0])) and not os.environ.get("NOCACHE"): shutil.copy(chiave(R[i][0]), f"r{i:02d}.wav"); print(f"{i:02d} DALLA CACHE (già verificata)", flush=True); continue
     best = (-9, None); exp = len(R[i][0].split()) / 2.4
-    for seed in (11, 23, 42, 77, 101, 202, 303, 404):
+    for seed in SEEDS:
         torch.manual_seed(seed); wav = tts.generate(R[i][0], language_id="it", exaggeration=0.35, cfg_weight=0.4)
         f = f"r{i:02d}_v{seed}.wav"; ta.save(f, wav, tts.sr); dur = wav.shape[-1] / tts.sr
         W = [w for s in asr.transcribe(f, language="it", beam_size=5, word_timestamps=True)[0] for w in s.words]
@@ -43,7 +45,7 @@ for i in idx:
         pmin = min((w.probability for w in W), default=0)
         fine, minimo = coda(f, W[-1].end if W else dur)
         ok_fine = fine < -30 or minimo < -38
-        passa = sim >= 0.985 and pmin >= 0.45 and ok_fine and dur <= 1.6 * exp + 1
+        passa = sim >= 0.985 and pmin >= PMIN and ok_fine and dur <= 1.6 * exp + 1
         score = sim + 0.3 * pmin + (0.2 if ok_fine else 0) - (1 if dur > 1.6 * exp + 1 else 0)
         print(f"{i:02d} seed {seed:3d} {'PASSA' if passa else 'no   '} sim {sim:.2f} pmin {pmin:.2f} fine {fine:5.0f}dB min {minimo:5.0f}dB {dur:.1f}s | {got}", flush=True)
         if passa: best = (9, f); break          # chi passa tutti i controlli è SEMPRE la scelta (prima vinceva il punteggio più alto, anche se bocciato)
