@@ -80,7 +80,7 @@ function pie3d(o) { const { cx = 540, cy = 930, rx = 330, ry = 140, dep = 64, kI
       x.save(); x.translate(cx + lx, cy + ly); x.scale(1, ry / rx); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(ae) * rx, Math.sin(ae) * rx); x.restore(); x.setLineDash([9, 8]); x.strokeStyle = 'rgba(5,6,7,0.95)'; x.lineWidth = 4; x.stroke(); x.restore(); }
     if (famLab > 0) { const r = 0.55; txt('FAMIGLIE', cx + lx + Math.cos(mid) * rx * r, cy + ly + Math.sin(mid) * ry * r - 6, { fam: 'mono', size: Math.max(22, 26 * rx / 330), weight: 600, color: '#0b0d0c', alpha: famLab, ls: 2 }); } }
   if (labels > 0) SL.slice(1).forEach((sl) => { if (!sl.lab) return; const m = sl.k === 'inv' ? lerp(sl.a0, sl.a1, 0.3) : (sl.a0 + sl.a1) / 2, r = sl.k === 'inv' ? 0.74 : 0.6;
-    txt(sl.lab, cx + Math.cos(m) * rx * r - (sl.k === 'inv' ? 18 : 0), cy + Math.sin(m) * ry * r - (sl.k === 'inv' ? 9 : 0), { fam: 'mono', size: sl.k === 'inv' ? 20 : 22, weight: 600, color: sl.k === 'inv' ? '#0b0d0c' : C.ink, alpha: labels, ls: 1 }); });
+    txt(sl.lab, cx + Math.cos(m) * rx * r - (sl.k === 'inv' ? 16 : 0), cy + Math.sin(m) * ry * r - (sl.k === 'inv' ? 2 : 0), { fam: 'mono', size: sl.k === 'inv' ? 18 : 22, weight: 600, color: sl.k === 'inv' ? '#0b0d0c' : C.ink, alpha: labels, ls: 1 }); });
   x.restore(); }
 /* carrello di lato (fronte a destra in coordinate locali; dir -1 = guarda a sinistra) */
 const CI = [[-92, -196, RGB.lime], [-40, -206, RGB.amber], [12, -200, RGB.ink], [64, -208, RGB.lime], [-66, -150, RGB.amber], [-14, -156, RGB.lime], [38, -152, RGB.amber], [90, -160, RGB.ink]];
