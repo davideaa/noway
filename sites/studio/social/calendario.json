@@ -75,6 +75,18 @@
   "pubblicato_utc": "2026-10-09T10:00:03+0000"
  },
  {
+  "puntata": 6,
+  "titolo": "I consumi",
+  "data": "2026-10-12",
+  "ora": "12:00",
+  "stato": "programmato",
+  "file": "sites/studio/social/pubblicati/2026-10-12-p06.mp4",
+  "thumb_offset": 600,
+  "durata_s": 76.3,
+  "fonti": "sites/studio/reel/noir/p6-fonti.md",
+  "caption": "Il motore più grande dell'economia sei tu, ogni volta che fai la spesa. 🛒\nPuntata 6 di «Dalla teoria alla realtà»: i consumi delle famiglie.\n\n• Le famiglie spendono il 57,2% del PIL: nel 2025 sono 1.296 miliardi su 2.265 (Istat)\n• Nell'area euro la stessa quota è il 51,6% (Eurostat, 2025)\n• Nel secondo trimestre 2026 le famiglie hanno messo da parte il 6,7% del reddito: il resto, il 93,3%, l'hanno speso (Istat)\n• Fiducia dei consumatori a settembre 2026: 91,2, da 94,5 di agosto. Il calo è in parte tecnico: è cambiato l'operatore che raccoglie le risposte (Istat)\n\nDomani, puntata 7: gli investimenti.\nUna puntata al giorno, dal lunedì al venerdì, alle 12:00.\n\nFonti: Istat, conti economici nazionali (22/09/2026); Istat, conto trimestrale II trim. 2026 (05/10/2026); Istat, fiducia dei consumatori (30/09/2026); Eurostat, nama_10_gdp.\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #consumi #macroeconomia #università #studenti #educazionefinanziaria #economiaitaliana"
+ },
+ {
   "puntata": 8,
   "titolo": "La spesa pubblica",
   "data": "2026-10-14",
