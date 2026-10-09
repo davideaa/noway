@@ -146,7 +146,8 @@ function esempio(t, hotP = null) {
   const ki = oC(seg(t, tI - 0.1, tI + 0.3)) * (1 - 0.2 * seg(t, tR, tR + 0.5)), ry = (g ? (g.sy + g.split) / 2 : 984) + 10;
   globe(560, ry, 28, C.red, 4, ki, t * 0.8); txt('import', 610, ry - 16, { size: 40, weight: 800, color: C.red, align: 'left', alpha: ki }); txt('prodotto fuori', 610, ry + 24, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', alpha: ki, ls: 1 });
   const gk = seg(t, tI, tI + 0.6); if (gk > 0 && gk < 1 && g) { const e = ioC(gk), [mx, my] = FX(4, 1, 620), bw = lerp(g.sw, 88, e), bh = lerp(g.split - g.sy, 88, e), bx = lerp(cx, mx, e), by = lerp((g.sy + g.split) / 2, my, e) - Math.sin(Math.PI * e) * 60;
-    x.save(); x.globalAlpha *= 1 - seg(gk, 0.8, 1); glow(bx, by, bw, '255,90,78', 0.3); x.fillStyle = 'rgba(255,90,78,0.55)'; rr(bx - bw / 2, by - bh / 2, bw, bh, 18); x.fill(); x.strokeStyle = C.red; x.lineWidth = 3; x.stroke(); x.restore(); }
+    x.save(); x.globalAlpha *= 1 - seg(gk, 0.8, 1); glow(bx, by, bw, '255,90,78', 0.3); x.fillStyle = 'rgba(255,90,78,0.55)'; rr(bx - bw / 2, by - bh / 2, bw, bh, 18); x.fill(); x.strokeStyle = C.red; x.lineWidth = 3; x.stroke(); x.restore();
+    txt('700 €', cx, (g.sy + g.split) / 2 + 10, { size: 66, weight: 800, color: '#f1f4ee' }); }   /* la copia che vola non copre il numero */
   /* i 300 € che restano: tre voci, una per parola */
   const lb = oC(seg(t, t3 + 0.1, t3 + 0.5)); if (lb > 0 && g) { x.save(); x.globalAlpha *= lb; x.strokeStyle = C.lime; x.lineWidth = 3; const bx = 478;
     x.beginPath(); x.moveTo(bx - 14, g.split + 6); x.lineTo(bx, g.split + 6); x.lineTo(bx, g.sy + g.sh + 26); x.lineTo(bx - 14, g.sy + g.sh + 26); x.stroke(); x.restore(); }
