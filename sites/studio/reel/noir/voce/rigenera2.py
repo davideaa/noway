@@ -15,7 +15,7 @@ idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tu
 CACHE = os.path.expanduser("~/reel-lavoro/cache"); os.makedirs(CACHE, exist_ok=True)
 chiave = lambda s: os.path.join(CACHE, hashlib.sha1(s.encode()).hexdigest()[:16] + ".wav")
 NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove|otto|sette|sei|cinque|quattro|tre|due|uno)\b"   # numeri in lettere: Whisper li scrive in cifre
-NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
+NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|cent|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
 def norm(s, heard=False):
     s = s.lower().replace("’", "'").replace("è", "e").replace("toch", "tok").replace("'", " ").replace("%", " per cento ").replace("g7", "gi sette").replace("€", " euro ")
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))     # numeri tolti da ENTRAMBI i lati ("ci sei dentro")
