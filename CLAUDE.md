@@ -73,6 +73,7 @@ gli altri sono lapidi**. Prima di cestinarne uno, leggere questa tabella.
 | `tools/estrai.py` | dal report HTML alle operazioni attribuite per strategia |
 | `tools/montecarlo.py` | bootstrap a quattro metodi |
 | `tools/report_finale.py` | genera il dossier PDF (`--rischio`, `--due`) |
+| `algo-business/6 - Simulatore Darwinex.html` | simulatore Darwinex Zero (voto 75, allocazioni, incasso) per Portafoglio + UK100 in un conto: quattro metodi Monte Carlo e il Combinato che tiene il più prudente. Si apre con doppio clic. I trade dentro vengono dalla pagina "Due portafogli" di Davide, non da questo repository |
 | `docs/` | una scheda per ogni decisione, con i numeri che l'hanno motivata |
 
 Ogni `.mq5` dichiara la propria ipotesi nel commento di testa, scritta
