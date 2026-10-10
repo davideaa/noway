@@ -1,0 +1,1 @@
+{ "name": "reel-studio", "private": true, "description": "Motore dei reel: comp.html + render.cjs", "dependencies": { "playwright-core": "1.56.1" } }

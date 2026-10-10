@@ -1,0 +1,80 @@
+[
+ {
+  "id": "18431705470197561",
+  "permalink": "https://www.instagram.com/reel/Dd9EfP1AaEO/",
+  "pubblicato_utc": "2026-10-01T13:58:55Z",
+  "ora_italia": "15:58",
+  "titolo": "Tokenization",
+  "lingua": "en",
+  "durata_s": 71.4,
+  "formato": "noir · voce Chatterbox · base Run! (loop 12,4 s)",
+  "filone": "notizia/spiegazione finanza",
+  "sorgente_tema": "video 1 di riferimento (0x100x), rifatto con fonti nostre",
+  "fonti": "sites/studio/reel/noir/t1-fonti.md"
+ },
+ {
+  "id": "17961034626218820",
+  "permalink": "https://www.instagram.com/reel/DeG8cAdH-3q/",
+  "pubblicato_utc": "2026-10-05T10:00:49+0000",
+  "ora_italia": "12:00",
+  "titolo": "Come gira l'economia",
+  "puntata": 1,
+  "lingua": "it",
+  "durata_s": 80.1,
+  "formato": "noir · serie Dalla teoria alla realtà",
+  "filone": "corso",
+  "fonti": "sites/studio/reel/noir/l1-fonti.md"
+ },
+ {
+  "id": "17876047239576728",
+  "permalink": "https://www.instagram.com/reel/DeJg2rgFfSZ/",
+  "pubblicato_utc": "2026-10-06T10:00:03+0000",
+  "ora_italia": "12:00",
+  "titolo": "Il PIL: cosa misura",
+  "puntata": 2,
+  "lingua": "it",
+  "durata_s": 76.3,
+  "formato": "noir · serie Dalla teoria alla realtà",
+  "filone": "corso",
+  "fonti": "sites/studio/reel/noir/p2-fonti.md"
+ },
+ {
+  "id": "17913167370495648",
+  "permalink": "https://www.instagram.com/reel/DeMFSuhii7_/",
+  "pubblicato_utc": "2026-10-07T10:00:03+0000",
+  "ora_italia": "12:00",
+  "titolo": "Cosa il PIL non misura",
+  "puntata": 3,
+  "lingua": "it",
+  "durata_s": 82.5,
+  "formato": "noir · serie Dalla teoria alla realtà",
+  "filone": "corso",
+  "fonti": "sites/studio/reel/noir/p3-fonti.md"
+ },
+ {
+  "id": "18244416958312370",
+  "permalink": "https://www.instagram.com/reel/DeOqF5qDoNI/",
+  "pubblicato_utc": "2026-10-08T10:00:04+0000",
+  "ora_italia": "12:00",
+  "titolo": "PIL nominale e PIL reale",
+  "puntata": 4,
+  "lingua": "it",
+  "durata_s": 75.7,
+  "formato": "noir · serie Dalla teoria alla realtà",
+  "filone": "corso",
+  "fonti": "sites/studio/reel/noir/p4-fonti.md"
+ },
+ {
+  "id": "17896382010412600",
+  "permalink": "https://www.instagram.com/reel/DeRO62CCiRh/",
+  "pubblicato_utc": "2026-10-09T10:00:03+0000",
+  "ora_italia": "12:00",
+  "titolo": "Il 2020: crollo e rimbalzo",
+  "puntata": 5,
+  "lingua": "it",
+  "durata_s": 72.0,
+  "formato": "noir · serie Dalla teoria alla realtà",
+  "filone": "corso",
+  "fonti": "sites/studio/reel/noir/p5-fonti.md"
+ }
+]
