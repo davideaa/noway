@@ -256,3 +256,27 @@ Resa media per operazione, dentro → fuori campione:
 | `sites/studio/SOCIAL.md` | piano e regole dell'account Instagram/TikTok «Macro & Algo» |
 | `sites/studio/reel/noir/PROCEDURA-PUNTATE.md` | **procedura di produzione delle puntate** (passi, controlli, errori da non ripetere) |
 | `sites/studio/reel/esempi/` | sceneggiature a tempo: il campionario per sincronizzare con la musica |
+
+---
+
+## 7. Vetrina e contatti ai clienti (ottobre 2026)
+
+- **Vetrina** (`sites/vetrina/`): il curriculum di Davide con il prima/dopo di Cosmo, Boulevard e Primevo.
+  - `python3 build.py --leggera`: crea il file da allegare, `out/Davide-prima-e-dopo.html` (17 MB, entra in Gmail).
+  - `--tel "+39 …"`: aggiunge il telefono in fondo alla pagina.
+  - Anteprima: https://claude.ai/artifact/KyhgV4cgvHB8gmezaa4arL
+  - Le catture (`cattura/`) e i file di Davide (`lavori/`) **non sono nel repo**.
+- **Mail di lavoro: `ciao.davidestudio@gmail.com`.** Mai la gmail personale. Il telefono non l'ha ancora dato.
+- **Contatti** (`sites/contatti/`):
+  - `RICERCA.md`: le regole per trovare le attività.
+  - `scripts/guarda.cjs`: fotografa i loro siti.
+  - `build.py`: crea la pagina delle bozze, con i messaggi composti da blocchi comuni (presentazione, vetrina, bonifico) più le parti di ogni attività.
+  - Pagina: https://claude.ai/artifact/37VsUq5TteiVFYE1f6pgdp. Dentro c'è **tutto** (destinatari, oggetti, testi): `dati/` non è nel repo perché il repo è pubblico, quindi in una sessione nuova si recupera leggendo l'artifact.
+- **Cosa vuole Davide nei messaggi:**
+  - presentarsi come nella vetrina;
+  - indicare con calma i difetti del loro sito (apertura da PC e da telefono, prenotazioni, pulsanti, cose belle che non si vedono) e cosa farebbe lui;
+  - pagamento «con bonifico», senza spiegazioni;
+  - **niente anteprime gratis**.
+- **Gmail:** il connettore di questa sessione era collegato alla gmail **personale**. Per creare le bozze in ciao.davidestudio Davide deve ricollegare Gmail con quell'account in https://claude.ai/customize/connectors e aprire una sessione nuova.
+  - L'allegato da 17 MB non passa dallo strumento: va aggiunto a mano, oppure si mette un link a Drive.
+  - Non inviare nulla senza il suo via esplicito.

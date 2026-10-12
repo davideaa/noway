@@ -44,8 +44,10 @@ CONGEDO = "Se invece non è il momento, nessun problema: basta una riga e non vi
 def messaggio(b):
     """Il messaggio intero: aggancio, chi sono, cosa ho visto, cosa farei, vetrina, come funziona, invito, firma."""
     aggancio = b["aggancio"][0].upper() + b["aggancio"][1:]
-    invito = ("Se vi incuriosisce, rispondete a questa email o chiamatemi al " + (TELEFONO or "[IL TUO NUMERO]") +
-              ": in dieci minuti capiamo insieme se posso esservi utile.")
+    invito = (("Se vi incuriosisce, rispondete a questa email o chiamatemi al " + TELEFONO +
+               ": in dieci minuti capiamo insieme se posso esservi utile.") if TELEFONO else
+              ("Se vi incuriosisce, rispondete pure a questa email, anche solo con un numero e un orario in cui chiamarvi: "
+               "in dieci minuti al telefono capiamo insieme se posso esservi utile."))
     note = "\n".join("– " + n for n in b["note"])
     parti = ["Buongiorno,", aggancio, PRESENTAZIONE, GUARDATO + "\n\n" + note, b["proposta"], VETRINA, COME, invito, CONGEDO, firma()]
     return "\n\n".join(parti)
@@ -53,7 +55,7 @@ def messaggio(b):
 
 def firma():
     righe = ["Davide", "Web designer freelance · siti, restyling, motion graphic"]
-    righe.append(" · ".join(x for x in (TELEFONO or "[IL TUO NUMERO]", EMAIL) if x))
+    righe.append(" · ".join(x for x in (TELEFONO, EMAIL) if x))
     return "\n".join(righe)
 
 
@@ -101,11 +103,16 @@ def main():
         "{{DATI}}": json.dumps(schede, ensure_ascii=False).replace("<", "\\u003c"),
         "{{FILTRI}}": filtri, "{{TOTALE}}": str(len(schede)), "{{ALLEGATO}}": e(ALLEGATO), "{{EMAIL}}": e(EMAIL),
         "{{TEL_STATO}}": (f"il tuo numero ({e(TELEFONO)})" if TELEFONO else
-                          '<mark>manca il tuo numero</mark>: nei messaggi c\'è scritto [IL TUO NUMERO]'),
+                          'nessun numero: i messaggi chiedono di rispondere alla mail (con --tel il numero entra nell\'invito e nella firma)'),
     }
     for k, v in sostituzioni.items():
         pagina = pagina.replace(k, v)
     os.makedirs(os.path.join(QUI, "out"), exist_ok=True)
+    pronte = [{"id": s["id"], "a": s["email"], "oggetto": s["oggetto"], "testo": s["testo"]} for s in schede if s["email"]]
+    json.dump(pronte, open(os.path.join(DATI, "per-gmail.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    senza = [s["nome"] for s in schede if not s["email"]]
+    if senza:
+        print("  senza email (solo modulo o telefono):", ", ".join(senza))
     f = os.path.join(QUI, "out", "bozze.html")
     open(f, "w", encoding="utf-8").write(pagina)
     print(f, len(schede), "bozze", round(os.path.getsize(f) / 1e6, 2), "MB")
