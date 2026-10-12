@@ -277,4 +277,9 @@ Resa media per operazione, dentro → fuori campione:
   - indicare con calma i difetti del loro sito (apertura da PC e da telefono, prenotazioni, pulsanti, cose belle che non si vedono) e cosa farebbe lui;
   - pagamento «con bonifico», senza spiegazioni;
   - **niente anteprime gratis**.
+  - **testo attuale** (in `build.py`, voluto da lui il 12/10/2026): scritto come lo scriverebbe un ragazzo, non come un'IA;
+  - difetti solo **accennati**, perché se li dettagli li sistemano da soli;
+  - lui come collegamento fra l'attività e chi la cerca online;
+  - l'allegato si chiama **«portfolio»** (`Davide-portfolio.html`), non «vetrina»;
+  - niente complimenti iniziali né frasi di congedo.
 - **Gmail:** il connettore è collegato a **ciao.davidestudio@gmail.com** (12/10/2026). Ci sono **22 bozze** pronte, una per attività, **senza allegato**: l'allegato va aggiunto a mano oppure sostituito con un link a Drive. Cantine Isola non ha un'email, solo il modulo contatti. Non inviare nulla senza il via esplicito di Davide.

@@ -22,34 +22,32 @@ def opzione(nome, predefinito):
 
 TELEFONO = opzione("--tel", "")
 EMAIL = opzione("--email", "ciao.davidestudio@gmail.com")      # la mail di lavoro, come nella vetrina
-ALLEGATO = "Davide-prima-e-dopo.html"
+ALLEGATO = "Davide-portfolio.html"
 GRUPPI = [("lead-hotel-milano.json", "milano-hotel", "Hotel a Milano"),
           ("lead-montagna.json", "montagna", "Hotel in montagna"),
           ("lead-ristoranti-milano.json", "milano-tavola", "Ristoranti e locali a Milano")]
 
 
-PRESENTAZIONE = ("Mi chiamo Davide, ho 22 anni, sono laureato in Economia delle banche e da tre anni lavoro come freelance: "
-                 "rifaccio i siti di hotel, ristoranti e locali perché siano belli, chiari e veloci, e li collego a prenotazioni, "
-                 "ordini e logistica. Mi occupo anche di grafica e motion graphic: animazioni, reel e video.")
-GUARDATO = ("Ho guardato il vostro sito con gli occhi di un cliente che vi cerca per la prima volta, e ci sono alcune cose "
-            "che vi fanno perdere più di quanto sembri:")
-VETRINA = ("Vi allego la mia vetrina, così vedete come lavoro: è un file che si apre con un doppio clic, anche senza internet. "
-           "Dentro ci sono tre siti reali che ho ridisegnato, un hotel e due ristoranti dell'area di Milano: a sinistra com'erano, "
-           "a destra come li ho rifatti, da computer e da telefono. Bastano due minuti.")
-COME = ("Come funziona: mi raccontate cosa vi serve e che budget avete in mente, e io vi mando una proposta chiara con cosa faccio, "
-        "in quanto tempo e a che prezzo. Parlate sempre e solo con me, dall'inizio alla consegna, e il pagamento è semplice: con bonifico.")
-CONGEDO = "Se invece non è il momento, nessun problema: basta una riga e non vi scrivo più.\n\nUn saluto,"
+# Testo voluto da Davide (12/10/2026): scritto come lo scriverebbe un ragazzo, difetti solo accennati (se no li
+# sistemano da soli), il suo ruolo di collegamento fra l'attività e chi la cerca online, il "portfolio" allegato,
+# come funziona e bonifico, l'invito a rispondere. Niente complimenti iniziali né frasi di congedo.
+PRESENTAZIONE = ("Mi chiamo Davide, ho 22 anni, mi sono laureato in Economia delle banche e da tre anni lavoro come freelance. "
+                 "Rifaccio siti per hotel, ristoranti e locali, curando la grafica, le animazioni e il collegamento con prenotazioni e ordini.")
+RUOLO = ("Il mio lavoro è proprio questo: fare da collegamento tra la vostra attività e chi vi cerca online, e valorizzarla al meglio, "
+         "sia nella grafica sia nel modo in cui il cliente vi trova, vi scopre e vi contatta.")
+PORTFOLIO = ("Vi allego il mio portfolio, così potete vedere cosa so fare. È un file che si apre con un doppio clic, anche senza internet, "
+             "e dentro ci sono tre siti reali che ho rifatto, un hotel e due ristoranti della zona di Milano, con il prima e il dopo "
+             "da computer e da telefono.")
+COME = ("Se vi interessa vi spiego volentieri come lavoro. Mi dite di cosa avete bisogno e che budget avete in mente, e io vi preparo "
+        "una proposta con tempi e costi. Parlate sempre direttamente con me e il pagamento è con bonifico.")
 
 
 def messaggio(b):
-    """Il messaggio intero: aggancio, chi sono, cosa ho visto, cosa farei, vetrina, come funziona, invito, firma."""
-    aggancio = b["aggancio"][0].upper() + b["aggancio"][1:]
-    invito = (("Se vi incuriosisce, rispondete a questa email o chiamatemi al " + TELEFONO +
-               ": in dieci minuti capiamo insieme se posso esservi utile.") if TELEFONO else
-              ("Se vi incuriosisce, rispondete pure a questa email, anche solo con un numero e un orario in cui chiamarvi: "
-               "in dieci minuti al telefono capiamo insieme se posso esservi utile."))
-    note = "\n".join("– " + n for n in b["note"])
-    parti = ["Buongiorno,", aggancio, PRESENTAZIONE, GUARDATO + "\n\n" + note, b["proposta"], VETRINA, COME, invito, CONGEDO, firma()]
+    """Il messaggio intero: chi sono, cosa ho notato (accennato) e cosa meriterebbe spazio, il mio ruolo, portfolio, come funziona, invito, firma."""
+    notato = "Ho guardato il vostro sito e ho notato qualche problema, " + b["problemi"] + ". " + b["valore"]
+    invito = ("Se vi incuriosisce, rispondete pure a questa mail o chiamatemi al " + TELEFONO + "." if TELEFONO else
+              "Se vi incuriosisce, rispondete pure a questa mail, anche solo con un numero e un orario in cui chiamarvi.")
+    parti = ["Buongiorno,", PRESENTAZIONE, notato, RUOLO, PORTFOLIO, COME, invito, "Un saluto,", firma()]
     return "\n\n".join(parti)
 
 
