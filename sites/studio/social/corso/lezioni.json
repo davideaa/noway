@@ -111,12 +111,12 @@
   "gancio": "Un'impresa che compra un macchinario oggi decide i salari di domani.",
   "spiega": [
    "In macroeconomia investire significa comprare capitale: macchinari, edifici, software, case nuove. Non è comprare azioni.",
-   "È la voce più instabile del PIL: sale molto nei periodi buoni e crolla nelle crisi.",
+   "È una voce molto instabile: oscilla circa il doppio del PIL, sale molto nei periodi buoni e crolla nelle crisi.",
    "Dipende da attese di vendita e dal costo del denaro: se prendere a prestito costa di più, si investe meno."
   ],
   "esempio": "Un panificio compra un forno da 50.000 € per raddoppiare la produzione: è investimento. Comprare azioni di un'altra impresa no.",
   "ti_serve": "Evita una confusione tipica agli esami: investimento macro e investimento finanziario sono cose diverse.",
-  "visual": "Fabbrica di vetro che cresce pezzo per pezzo; barra investimenti che oscilla più delle altre.",
+  "visual": "Fabbrica di vetro che cresce pezzo per pezzo; barra investimenti che oscilla il doppio del PIL.",
   "collega": [
    3,
    6
@@ -145,11 +145,11 @@
   "n": 9,
   "titolo": "Export e import",
   "caso_reale": false,
-  "gancio": "Ogni volta che compri un iPhone, il PIL italiano non sale. Perché?",
+  "gancio": "Compri un telefono fatto all'estero: il PIL italiano sale molto meno del prezzo. Perché?",
   "spiega": [
    "L'export è domanda estera per beni italiani: aggiunge al PIL. L'import è spesa verso l'estero: si sottrae.",
    "La formula completa è PIL = consumi + investimenti + spesa pubblica + export netto.",
-   "L'export netto dipende da prezzi, qualità dei prodotti, cambio e crescita dei Paesi che comprano."
+   "L'import si toglie non perché sia un danno, ma perché è stato prodotto altrove."
   ],
   "esempio": "Prendere il saldo commerciale italiano dell'ultimo anno dal comunicato ISTAT sul commercio estero e confrontare i principali settori esportatori.",
   "ti_serve": "Chiude la formula del PIL che userai in ogni esame di macroeconomia.",
@@ -167,11 +167,11 @@
   "caso_reale": true,
   "gancio": "La Germania vende al mondo più di quanto compra, da anni. Il segreto?",
   "spiega": [
-   "Industria specializzata in auto, macchinari e chimica: beni che il resto del mondo compra quando investe.",
-   "Riforme del lavoro dei primi anni 2000 e salari moderati hanno reso i prodotti tedeschi più competitivi.",
-   "Secondo molti economisti, l'euro è più debole di quanto sarebbe stato il marco: export tedesco più conveniente."
+   "Industria specializzata: auto, macchinari e chimica fanno circa il 40% delle merci esportate.",
+   "Secondo alcuni economisti hanno aiutato le riforme del lavoro dei primi anni 2000 e i salari moderati; ma la moderazione era iniziata prima e il peso delle riforme è discusso.",
+   "C'è chi sostiene che l'euro sia più debole di quanto sarebbe stato il marco (è un'opinione); il FMI stima il cambio reale tedesco più basso di circa il 7% rispetto ai fondamentali."
   ],
-  "esempio": "Le regole UE segnalano squilibrio un surplus delle partite correnti sopra il 6% del PIL: verificare la serie tedesca su Eurostat.",
+  "esempio": "Per le regole UE un surplus delle partite correnti sopra il 6% del PIL (media di tre anni) è una soglia indicativa che fa scattare un esame: verificare la serie tedesca su Eurostat.",
   "ti_serve": "Mostra come export, investimenti e cambio si combinano: utile per macro e economia internazionale.",
   "visual": "Mappa dell'Europa in vetro: dalla Germania escono frecce di macchinari più grandi di quelle in entrata.",
   "collega": [

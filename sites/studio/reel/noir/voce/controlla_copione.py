@@ -16,6 +16,7 @@ for s, k in R:
     if re.search(r"\b[A-Z]{2,}\b", s): out("ERRORE", k, f"sigla maiuscola {re.findall(r'[A-Z]{2,}', s)}: la voce la legge lettera per lettera (scrivere «Pil», «Bce» o per esteso)")
     if re.search(r"\bPil\b[^,;:]{0,12}[.?!]\s*$", s): out("ERRORE", k, "«Pil» in fondo alla riga: fallisce sempre («PIN»); scrivere «prodotto interno lordo»")
     elif re.search(r"\bPil\s*[.?!]", s): out("AVVISO", k, "«Pil» prima di un punto: a rischio, meglio a metà frase")
+    if re.search(r"\blordo\s+[aiouàìò]", s, re.I): out("ERRORE", k, "«lordo» seguito da vocale: la voce lo lega («lordo italiano» → «all'orda italiano», 8 su 8 nella Puntata 9); metti dopo una consonante («lordo dell'Italia»); «lordo è» invece passa (Puntate 2 e 7)")
     if re.search(r"\bPil\s+[aeiouàèéìòù]", s, re.I): out("ERRORE", k, "«Pil» seguito da vocale: la voce dice «Pilo» («Pil invece» → «Pilo invece»); metti dopo una consonante («il Pil conta»)")
     if re.search(r"\s[oO]\s", s) and k not in FISSE: out("ERRORE", k, "«o» da sola tra due parole: la voce la salta («cose in più o solo» → «cose in più solo», Puntata 4); scrivere «oppure»")
     if len(w) <= 3: out("ERRORE", k, "frase di 3 parole o meno: la voce le sbaglia spesso")

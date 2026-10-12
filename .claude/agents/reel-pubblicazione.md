@@ -15,7 +15,8 @@ fonti `noir/pN-fonti.md`, titolo della puntata N+1 in `social/corso/lezioni.json
    · 3–4 punti con i dati (presi da pN-fonti.md) · «Domani, puntata N+1: …» (il venerdì: «Lunedì, puntata N+1: …»)
    · «Una puntata al giorno, dal lunedì al venerdì, alle 12:00.» · «Fonti: …» · «Contenuto educativo · Non è consulenza finanziaria.»
    · 8 hashtag italiani. La **prima riga deve essere diversa** da tutte quelle già in calendario (serve contro i doppioni).
-2. `cp ~/reel-lavoro/pN/PuntataN.mp4 sites/studio/social/pubblicati/AAAA-MM-GG-pNN.mp4`
+2. `cp ~/reel-lavoro/pN/PuntataN.mp4 sites/studio/social/pubblicati/AAAA-MM-GG-pNN.mp4` e subito `cmp` tra i due file: devono essere
+   IDENTICI. Mai ricodificare, ridimensionare o prendere altri file (Puntata 4: era finito in calendario un video orizzontale senza audio).
 3. Voce in `social/calendario.json` (stessi campi della puntata 2, stato `programmato`, thumb_offset 600, durata_s dal video).
 4. Commit di video + calendario sul ramo `claude/creazione-siti-web-u1dyzg` e push (righe finali del commit come i precedenti).
 5. `python3 sites/studio/social/pubblica.py --prova --data AAAA-MM-GG` deve finire con «PROVA: tutto pronto, non pubblico.»
