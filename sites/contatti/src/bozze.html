@@ -1,0 +1,173 @@
+<title>Bozze contatti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Banco di lavoro: una colonna di schede, ognuna con la prova (il sito da telefono) a sinistra e il messaggio a destra. */
+:root {
+  --fondo: #EEF1F5; --foglio: #FFFFFF; --inchiostro: #0D1420; --testo: #2B3442; --tenue: #5A6577; --linea: #D6DCE5;
+  --azzurro: #0A6FA0; --azzurro-tenue: #E1F0F8; --ok: #1B7A4B; --attenzione: #9A5B00; --attenzione-tenue: #FFF1DA;
+  --f-tit: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-testo: "Figtree", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fondo: #070A10; --foglio: #10151E; --inchiostro: #F2F5F9; --testo: #CBD3DE; --tenue: #8E9AAB; --linea: #252D3A;
+  --azzurro: #4CC2EE; --azzurro-tenue: #0E2A3A; --ok: #4CC98A; --attenzione: #F0B456; --attenzione-tenue: #2D2210; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --fondo: #070A10; --foglio: #10151E; --inchiostro: #F2F5F9; --testo: #CBD3DE; --tenue: #8E9AAB; --linea: #252D3A;
+  --azzurro: #4CC2EE; --azzurro-tenue: #0E2A3A; --ok: #4CC98A; --attenzione: #F0B456; --attenzione-tenue: #2D2210; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--fondo); color: var(--testo); font: 400 16px/1.55 var(--f-testo); }
+.pagina { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-tit); color: var(--inchiostro); text-wrap: balance; margin: 0; letter-spacing: -.015em; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 800; line-height: 1.02; }
+.testa { display: grid; gap: 14px; }
+.testa p { margin: 0; max-width: 68ch; }
+.etichetta { font: 600 .74rem/1 var(--f-testo); text-transform: uppercase; letter-spacing: .09em; color: var(--tenue); }
+mark { background: var(--attenzione-tenue); color: var(--attenzione); padding: 0 .3em; border-radius: 4px; font-weight: 600; }
+
+.prima { background: var(--foglio); border: 1px solid var(--linea); border-radius: 14px; padding: 18px 20px; display: grid; gap: 12px; }
+.prima ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 74ch; }
+.prima code { font: .88em var(--f-mono); background: var(--azzurro-tenue); color: var(--inchiostro); padding: .1em .35em; border-radius: 4px; overflow-wrap: anywhere; }
+.legale { font-size: .9rem; color: var(--tenue); max-width: 80ch; margin: 0; }
+
+.barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--fondo); padding-block: 10px; }
+.filtro { font: 600 .9rem var(--f-testo); color: var(--testo); background: var(--foglio); border: 1px solid var(--linea); border-radius: 999px; padding: 9px 14px; min-height: 40px; cursor: pointer; }
+.filtro span { color: var(--tenue); font-variant-numeric: tabular-nums; margin-left: 2px; }
+.filtro[aria-pressed="true"] { background: var(--inchiostro); color: var(--foglio); border-color: var(--inchiostro); }
+.filtro[aria-pressed="true"] span { color: inherit; opacity: .7; }
+.filtro:focus-visible, .copia:focus-visible, .scatto:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--azzurro); outline-offset: 2px; }
+
+.elenco { display: grid; gap: 22px; }
+.scheda { background: var(--foglio); border: 1px solid var(--linea); border-radius: 16px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 22px; padding: 20px; }
+.prova { display: grid; gap: 8px; align-content: start; }
+.telefono { border: 1px solid var(--linea); border-radius: 22px; overflow: hidden; background: var(--fondo); aspect-ratio: 390 / 844; max-width: 100%; }
+.telefono img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.scatti { display: flex; gap: 6px; }
+.scatto { flex: 1; font: 500 .8rem var(--f-testo); color: var(--tenue); background: none; border: 1px solid var(--linea); border-radius: 8px; padding: 7px 4px; min-height: 36px; cursor: pointer; }
+.scatto[aria-pressed="true"] { color: var(--inchiostro); border-color: var(--inchiostro); }
+.prova small { color: var(--tenue); font-size: .78rem; }
+
+.corpo { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.titolo { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+.titolo h2 { font-size: 1.45rem; font-weight: 700; }
+.pr { font: 700 .72rem/1 var(--f-testo); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; }
+.pr-1 { background: var(--azzurro-tenue); color: var(--azzurro); }
+.pr-2, .pr-3 { background: var(--fondo); color: var(--tenue); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--tenue); font-size: .92rem; margin: -6px 0 0; }
+.meta a { color: var(--azzurro); }
+.contatti { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+.contatto { display: flex; align-items: center; gap: 8px; justify-content: space-between; border: 1px solid var(--linea); border-radius: 10px; padding: 8px 8px 8px 12px; min-width: 0; }
+.contatto div { min-width: 0; }
+.contatto .etichetta { display: block; margin-bottom: 4px; }
+.contatto b { display: block; font-weight: 600; color: var(--inchiostro); overflow-wrap: anywhere; font-size: .95rem; }
+.messaggio { border: 1px solid var(--linea); border-radius: 12px; overflow: hidden; }
+.riga-ogg { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--linea); background: var(--fondo); }
+.riga-ogg div { min-width: 0; }
+.riga-ogg b { display: block; color: var(--inchiostro); font-weight: 600; overflow-wrap: anywhere; }
+.testo { margin: 0; padding: 14px 16px; white-space: pre-wrap; font: 400 .97rem/1.6 var(--f-testo); color: var(--testo); max-height: 330px; overflow: auto; overflow-wrap: anywhere; }
+.testo .segnaposto { background: var(--attenzione-tenue); color: var(--attenzione); font-weight: 600; border-radius: 3px; }
+.piede { display: flex; justify-content: flex-end; padding: 10px 12px; border-top: 1px solid var(--linea); }
+.copia { font: 600 .88rem var(--f-testo); color: var(--azzurro); background: var(--azzurro-tenue); border: 0; border-radius: 8px; padding: 9px 13px; min-height: 40px; cursor: pointer; white-space: nowrap; }
+.copia.fatto { color: var(--ok); }
+.copia.grande { background: var(--azzurro); color: var(--foglio); }
+details { font-size: .9rem; color: var(--tenue); }
+details summary { cursor: pointer; font-weight: 600; color: var(--attenzione); min-height: 32px; display: flex; align-items: center; }
+details p { margin: 6px 0 0; max-width: 80ch; }
+
+@media (max-width: 720px) {
+  .scheda { grid-template-columns: 1fr; padding: 16px; }
+  .prova { grid-template-columns: 120px 1fr; align-items: start; }
+  .prova .scatti { flex-direction: column; }
+}
+@media (prefers-reduced-motion: no-preference) { .copia, .filtro { transition: background .2s, color .2s; } }
+</style>
+
+<div class="pagina">
+  <header class="testa">
+    <span class="etichetta">Contatti · ottobre 2026</span>
+    <h1>Bozze contatti</h1>
+    <p>{{TOTALE}} messaggi pronti, uno per attività, ciascuno con un difetto vero del loro sito che ho visto con i miei occhi (la foto a sinistra è il loro sito aperto da telefono, oggi). Ordinati per priorità: in cima quelli dove il sito è più da rifare.</p>
+  </header>
+
+  <section class="prima" aria-labelledby="t-prima">
+    <h2 id="t-prima" style="font-size:1.15rem">Prima di mandarne uno</h2>
+    <ol>
+      <li>Firma: {{TEL_STATO}}. L'email nella firma è <code>{{EMAIL}}</code>, quella provvisoria della vetrina: va cambiata con quella vera dello studio.</li>
+      <li>Allega la vetrina <code>{{ALLEGATO}}</code> (17 MB, entra in Gmail). Si apre col doppio clic anche senza internet.</li>
+      <li>Rileggi il messaggio e apri il loro sito un attimo: se nel frattempo hanno sistemato la cosa che cito, togli quella frase.</li>
+      <li>Mandane pochi al giorno (5–10), uno per uno, dalla mail di lavoro: nessun invio di massa.</li>
+    </ol>
+    <p class="legale">In Italia l'email commerciale non richiesta è regolata (art. 130 del Codice privacy) anche verso le aziende. Messaggi singoli e personali, mandati agli indirizzi pubblicati sul loro sito e con la riga per non essere più contattati, sono la forma più rispettosa. Non è un parere legale: se vuoi andare sul sicuro, la stessa bozza funziona anche come messaggio dal modulo contatti del loro sito o su Instagram.</p>
+  </section>
+
+  <nav class="barra" aria-label="Filtra per gruppo">
+    <button type="button" class="filtro" data-gruppo="" aria-pressed="true">Tutti <span>{{TOTALE}}</span></button>
+    {{FILTRI}}
+  </nav>
+
+  <main class="elenco" id="elenco" aria-live="polite"></main>
+</div>
+
+<script>
+const SCHEDE = {{DATI}};
+const elenco = document.getElementById('elenco');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const conSegnaposto = s => esc(s).replace(/\[IL TUO NUMERO\]/g, '<span class="segnaposto">[IL TUO NUMERO]</span>');
+
+function contatto(etichetta, valore) {
+  if (!valore) return '';
+  return `<div class="contatto"><div><span class="etichetta">${etichetta}</span><b>${esc(valore)}</b></div>` +
+         `<button type="button" class="copia" data-copia="${esc(valore)}">Copia</button></div>`;
+}
+
+function scheda(s) {
+  const dominio = s.sito.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
+  const scatti = s.foto2 ? `<div class="scatti"><button type="button" class="scatto" aria-pressed="true" data-img="${s.foto}">Apertura</button>` +
+                           `<button type="button" class="scatto" aria-pressed="false" data-img="${s.foto2}">Più sotto</button></div>` : '';
+  return `<article class="scheda" data-gruppo="${s.gruppo}" id="${s.id}">
+    <div class="prova">
+      <div class="telefono">${s.foto ? `<img src="${s.foto}" alt="Il sito di ${esc(s.nome)} aperto da telefono, ottobre 2026" loading="lazy">` : ''}</div>
+      <div>${scatti}<small>Il loro sito oggi, da telefono</small></div>
+    </div>
+    <div class="corpo">
+      <div class="titolo"><h2>${esc(s.nome)}</h2><span class="pr pr-${s.priorita}">Priorità ${s.priorita}</span></div>
+      <p class="meta"><span>${esc(s.livello)}</span><span>${esc(s.citta)}${s.zona && s.zona !== s.citta ? ' · ' + esc(s.zona) : ''}</span>${s.rec ? `<span>${esc(s.rec)}</span>` : ''}<a href="${esc(s.sito)}" target="_blank" rel="noopener">${esc(dominio)}</a></p>
+      <div class="contatti">${contatto('Email', s.email)}${contatto('Telefono', s.tel)}${contatto('Instagram', s.ig)}${!s.email && s.modulo ? contatto('Modulo contatti', s.modulo) : ''}</div>
+      <div class="messaggio">
+        <div class="riga-ogg"><div><span class="etichetta">Oggetto</span><b>${esc(s.oggetto)}</b></div><button type="button" class="copia" data-copia="${esc(s.oggetto)}">Copia</button></div>
+        <p class="testo">${conSegnaposto(s.testo)}</p>
+        <div class="piede"><button type="button" class="copia grande" data-copia="${esc(s.testo)}">Copia il messaggio</button></div>
+      </div>
+      ${s.nota ? `<details><summary>Da sapere prima di scrivere</summary><p>${esc(s.nota)}</p></details>` : ''}
+    </div>
+  </article>`;
+}
+elenco.innerHTML = SCHEDE.map(scheda).join('');
+
+document.addEventListener('click', ev => {
+  const c = ev.target.closest('.copia');
+  if (c) {
+    const testo = c.dataset.copia, prima = c.textContent;
+    const fatto = ok => { c.textContent = ok ? 'Copiato' : 'Seleziona e copia'; c.classList.toggle('fatto', ok); setTimeout(() => { c.textContent = prima; c.classList.remove('fatto'); }, 1600); };
+    const ripiego = () => { const p = c.closest('.messaggio')?.querySelector('.testo') || c.parentElement.querySelector('b');
+      if (p) { const r = document.createRange(); r.selectNodeContents(p); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); } fatto(false); };
+    try { navigator.clipboard.writeText(testo).then(() => fatto(true), ripiego); } catch (e) { ripiego(); }
+    return;
+  }
+  const sc = ev.target.closest('.scatto');
+  if (sc) {
+    const box = sc.closest('.prova');
+    box.querySelector('img').src = sc.dataset.img;
+    box.querySelectorAll('.scatto').forEach(b => b.setAttribute('aria-pressed', String(b === sc)));
+    return;
+  }
+  const f = ev.target.closest('.filtro');
+  if (f) {
+    document.querySelectorAll('.filtro').forEach(b => b.setAttribute('aria-pressed', String(b === f)));
+    elenco.querySelectorAll('.scheda').forEach(a => { a.hidden = !!f.dataset.gruppo && a.dataset.gruppo !== f.dataset.gruppo; });
+  }
+});
+</script>
