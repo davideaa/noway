@@ -20,10 +20,18 @@ QUI = os.path.dirname(os.path.abspath(__file__))
 SITI = os.path.dirname(QUI)
 OUT = os.path.join(QUI, "out")
 ARTIFACT = "--artifact" in sys.argv
+LEGGERA = "--leggera" in sys.argv      # versione da allegare a una email (Gmail: 25 MB compresa la codifica -> file sotto i 18 MB)
 e = html.escape
 
-# Indirizzo provvisorio: Davide sceglierà il nome dello studio e creerà la mail di lavoro.
-EMAIL = "ciao@davidestudio.it"
+
+def opzione(nome, predefinito):
+    return sys.argv[sys.argv.index(nome) + 1] if nome in sys.argv else predefinito
+
+
+# La mail di lavoro di Davide (mai la gmail personale).
+EMAIL = opzione("--email", "ciao.davidestudio@gmail.com")
+# Telefono di lavoro (es. --tel "+39 333 123 4567"): se manca, nella pagina non compare.
+TELEFONO = opzione("--tel", "")
 
 PAGINE_COSMO = [  # (nome, percorso: uguale sul sito originale e sul nuovo)
     ("Home", ""), ("Camere & Suites", "camere-suites/"), ("Classic Double Room", "camere-suites/camere/classic-room/"),
@@ -91,7 +99,7 @@ def anteprima(png, lato=760):
     im = Image.open(png).convert("RGB")
     im = im.crop((0, 0, im.width, round(im.width * 10 / 16)))
     im.thumbnail((lato, lato), Image.LANCZOS)
-    return webp_uri(im, 66)
+    return webp_uri(im, 56 if LEGGERA else 66)
 
 
 # ------------------------------------------------------------------ font (dentro la pagina, per l'uso offline)
@@ -134,6 +142,10 @@ FOTO_SITO_Q = 72                                     # foto del sito vivo multip
 # immagini incorporate nei "dopo" a pagina unica (copie in memoria: i file in lavori/ non si toccano)
 UNICA_FOTO = dict(lato=1000, q=48, lato_grande=1600, q_grande=52, soglia_grande=1400)
 UNICA_FOTOGRAMMI = dict(prefisso="seq/", scala=0.7, q=45)   # fotogrammi dei video a scorrimento (chiavi seq/...)
+if LEGGERA:   # stessa definizione (mai ingrandito), solo più compresso
+    # il prima da computer a 1,5x: nitido in "Affiancati" (dove occupa mezzo schermo), appena più morbido in "Solo prima"
+    PRIMA_PC.update(larghezza=2160, q=33); PRIMA_TEL.update(q=33); FOTO_SITO_Q = 46
+    UNICA_FOTO.update(lato=600, q=40, lato_grande=1400, q_grande=42); UNICA_FOTOGRAMMI.update(scala=0.45, q=36)
 
 
 def fette(png, larghezza, q, fetta, css):
@@ -190,13 +202,16 @@ def sito_unica(p):
     (ricompresse, una sola volta ciascuna) e al loro posto restano segnaposto @@I:chiave@@."""
     import hashlib
     h = open(os.path.join(QUI, p["dopo"]), encoding="utf-8").read()
-    risorse, per_hash, peso0 = {}, {}, 0
+    risorse, per_hash, peso0, ultimo_fotogramma = {}, {}, 0, []
     def togli(m):
         nonlocal peso0
         chiave_js, mime, b = m.group(1) or "", m.group(2), base64.b64decode(m.group(3))
         peso0 += len(m.group(3))
         if mime.startswith("image/") and mime != "image/svg+xml" and mime != "image/gif":
             if chiave_js.strip('"').startswith(UNICA_FOTOGRAMMI["prefisso"]):
+                ff = re.search(r"(\d+)", chiave_js)
+                if LEGGERA and ff and int(ff.group(1)) % 2 == 0 and ultimo_fotogramma:
+                    return (m.group(1) or "") + "@@I:" + ultimo_fotogramma[0] + "@@"   # un fotogramma sì e uno no: il pari ripete il dispari
                 nb, nm = ricomprimi(b, 99999, UNICA_FOTOGRAMMI["q"], UNICA_FOTOGRAMMI["scala"])
             else:
                 lato = max(Image.open(io.BytesIO(b)).size)
@@ -208,6 +223,8 @@ def sito_unica(p):
         if hsh not in per_hash:
             per_hash[hsh] = "r%d" % len(per_hash)
             risorse[per_hash[hsh]] = f"data:{mime};base64," + base64.b64encode(b).decode()
+        if chiave_js.strip('"').startswith(UNICA_FOTOGRAMMI["prefisso"]):
+            ultimo_fotogramma[:] = [per_hash[hsh]]
         return (m.group(1) or "") + "@@I:" + per_hash[hsh] + "@@"
     h = re.sub(r'("(?:[^"\\\n]){1,120}"\s*:\s*")?data:([\w/+.-]+);base64,([A-Za-z0-9+/=]+)', togli, h)
     h, n = re.subn(r"(<head(?:\s[^>]*)?>)", lambda m: m.group(1) + "@@CF:TESTA@@", h, count=1)
@@ -267,7 +284,10 @@ def sito_dopo(p, font_dopo):
             canonica[k] = per_hash[hsh]; continue
         per_hash[hsh] = canonica[k] = k
         if mime == "image/webp":
-            ricompressa = webp_bytes(Image.open(io.BytesIO(b)).convert("RGB"), FOTO_SITO_Q)
+            im = Image.open(io.BytesIO(b)).convert("RGB")
+            if LEGGERA and max(im.size) > 760:
+                im.thumbnail((760, 760), Image.LANCZOS)
+            ricompressa = webp_bytes(im, FOTO_SITO_Q)
             if len(ricompressa) < len(b):
                 b = ricompressa
         img[k] = f"data:{mime};base64," + base64.b64encode(b).decode()
@@ -348,7 +368,12 @@ def main():
     librerie = "".join(f"<script>{leggi('vendor', f)}</script>\n" for f in ordine)
     stili = font_css({"Bricolage Grotesque", "Figtree"}) + "\n" + leggi("src", "vetrina.css") + "\n" + leggi("src", "confronto.css")
     pagina = leggi("src", "pagina.html")
-    for k, v in {"{{EMAIL}}": e(EMAIL), "{{CONFRONTO}}": leggi("src", "confronto.html")}.items():
+    tel = "".join(c for c in TELEFONO if c.isdigit() or c == "+")
+    blocco_tel = (f'<p class="tel-riga rv">oppure chiamami o scrivimi su WhatsApp: <a href="tel:{tel}">{e(TELEFONO)}</a>'
+                  f' · <a href="https://wa.me/{tel.lstrip("+")}">WhatsApp</a></p>') if tel else ""
+    if not tel:
+        print("  ATTENZIONE: nessun telefono (--tel): nella pagina c'è solo la mail")
+    for k, v in {"{{EMAIL}}": e(EMAIL), "{{TELEFONO}}": blocco_tel, "{{CONFRONTO}}": leggi("src", "confronto.html")}.items():
         pagina = pagina.replace(k, v)
     blocchi = "" if ARTIFACT else "".join(
         f'<script type="application/json" id="cf-dati-{k}-{t}">{json_sicuro(pd)}</script>\n'
@@ -379,13 +404,14 @@ def main():
         open(os.path.join(d, "FILES.txt"), "w", encoding="utf-8").write("\n".join(elenco) + "\n")
         print(os.path.join(d, "FILES.txt"), "->", ", ".join(elenco))
     else:
-        f = os.path.join(OUT, "vetrina-davide.html")
+        f = os.path.join(OUT, "vetrina-davide-email.html" if LEGGERA else "vetrina-davide.html")
         open(f, "w", encoding="utf-8").write(
             '<!doctype html>\n<html lang="it">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
             + testa + "\n</head>\n<body>\n" + corpo + "\n</body>\n</html>\n")
         mb = os.path.getsize(f) / 1e6
-        print(f, round(mb, 2), "MB" + ("   ATTENZIONE: sopra i 40 MB" if mb > 40 else ""))
+        limite = 18 if LEGGERA else 40
+        print(f, round(mb, 2), "MB" + (f"   ATTENZIONE: sopra i {limite} MB" if mb > limite else ""))
 
 
 if __name__ == "__main__":

@@ -526,3 +526,8 @@ html.intro .ap { display: block; }
   .canale:hover, .canale:focus-visible { transform: none; }
   .mono-box { position: relative; top: 0; }
 }
+
+/* telefono sotto la mail (compare solo se build.py riceve --tel) */
+.tel-riga { margin-top: 18px; font-size: clamp(1rem, 1.4vw, 1.15rem); color: var(--sotto); }
+.tel-riga a { color: var(--luce); font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--azzurro); padding: 10px 0 2px; }
+@media (hover: hover) { .tel-riga a:hover { color: var(--azzurro-chiaro); } }
