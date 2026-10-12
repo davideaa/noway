@@ -282,4 +282,10 @@ Resa media per operazione, dentro → fuori campione:
   - lui come collegamento fra l'attività e chi la cerca online;
   - l'allegato si chiama **«portfolio»** (`Davide-portfolio.html`), non «vetrina»;
   - niente complimenti iniziali né frasi di congedo.
-- **Gmail:** il connettore è collegato a **ciao.davidestudio@gmail.com** (12/10/2026). Ci sono **22 bozze** pronte, una per attività, **senza allegato**: l'allegato va aggiunto a mano oppure sostituito con un link a Drive. Cantine Isola non ha un'email, solo il modulo contatti. Non inviare nulla senza il via esplicito di Davide.
+- **Primo invio, 12/10/2026:** Davide ha mandato tutte le 22 email con il portfolio allegato.
+  - Nella prima ora sono arrivate solo due **risposte automatiche**:
+    - Nuovo Macello, risposta delle prenotazioni;
+    - Excelsior Planet, chiuso fino a fine novembre.
+  - Nessun rimbalzo.
+- **Regola per i prossimi contatti:** usare le email **di lavoro** dell'attività (direzione, marketing, commerciale, amministrazione, titolare), non `info@` o `prenotazioni@`. Vedi `sites/contatti/RICERCA.md`.
+- **Gmail:** il connettore è collegato a ciao.davidestudio@gmail.com.

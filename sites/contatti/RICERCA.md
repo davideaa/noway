@@ -30,6 +30,16 @@ manderà a ognuna un messaggio personale: per scriverlo servono osservazioni **v
 3. Annota anche **cosa hanno di bello** (posizione, storia, foto, cucina, panorama): il messaggio deve
    partire da un complimento vero, non solo da critiche.
 4. Contatti **pubblicati sul loro sito** (email, telefono, modulo, Instagram). Mai inventarli.
+   **Che email cercare (regola di Davide, 12/10/2026).** Serve l'indirizzo che l'attività usa per i rapporti di lavoro, non quello dei clienti. `info@` e `prenotazioni@` finiscono alla reception o in una risposta automatica: il primo invio l'ha dimostrato con il Nuovo Macello.
+   - **In ordine di preferenza:** `direzione@` / `direttore@`, `marketing@`, `commerciale@` / `sales@`, `amministrazione@`, `ufficio stampa` / `press@`, l'email personale del titolare o del manager (nome.cognome@) se è pubblicata.
+   - **Dove guardarle:**
+     - pagina Contatti;
+     - piè di pagina e dati societari;
+     - **informativa privacy e cookie**, dove il «titolare del trattamento» ha spesso un'email amministrativa;
+     - «Lavora con noi», area stampa, pagina eventi e gruppi;
+     - scheda Google dell'attività.
+   - **Esclusa la PEC** (posta certificata: serve per atti formali, non per proposte).
+   - Nel JSON: `contatti.email_lavoro` (con `dove` = la pagina in cui l'hai trovata). `contatti.email` resta come riserva.
 5. Recensioni e prezzo: solo se li trovi con una fonte (risultato di ricerca, scheda TripAdvisor/Booking/
    Michelin/Gambero Rosso). Se non li trovi, `null`. **Nessun numero inventato o stimato.**
 
