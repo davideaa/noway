@@ -8,7 +8,7 @@ Si costruisce con `python3 build.py` → `out/vetrina-davide.html` (e `--artifac
 - 22 anni, laureato in Economia delle banche.
 - Da tre anni lavora come freelance: siti web, web design, restyling, motion graphic (animazioni, reel, video),
   e collegamento dei siti a prenotazioni, ordini e logistica.
-- Email PROVVISORIA: `ciao@davidestudio.com` (costante `EMAIL` in build.py, segnaposto `{{EMAIL}}` in pagina.html).
+- Email di lavoro: `ciao.davidestudio@gmail.com` (costante `EMAIL` in build.py, segnaposto `{{EMAIL}}` in pagina.html).
   **Mai** usare la gmail personale. Nessun telefono, nessun cognome, nessuna foto di Davide.
 - Niente prezzi, niente numeri di clienti, recensioni o premi inventati.
 - Lavori: 1 pronto (Cosmo Hotel Palace, hotel e centro congressi a Cinisello Balsamo, Milano). Altri 2 "in arrivo"

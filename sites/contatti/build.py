@@ -21,7 +21,7 @@ def opzione(nome, predefinito):
 
 
 TELEFONO = opzione("--tel", "")
-EMAIL = opzione("--email", "ciao@davidestudio.com")      # provvisoria, come nella vetrina
+EMAIL = opzione("--email", "ciao.davidestudio@gmail.com")      # la mail di lavoro, come nella vetrina
 ALLEGATO = "Davide-prima-e-dopo.html"
 GRUPPI = [("lead-hotel-milano.json", "milano-hotel", "Hotel a Milano"),
           ("lead-montagna.json", "montagna", "Hotel in montagna"),

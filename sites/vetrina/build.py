@@ -28,8 +28,8 @@ def opzione(nome, predefinito):
     return sys.argv[sys.argv.index(nome) + 1] if nome in sys.argv else predefinito
 
 
-# Indirizzo provvisorio: Davide sceglierà il nome dello studio e creerà la mail di lavoro.
-EMAIL = opzione("--email", "ciao@davidestudio.com")
+# La mail di lavoro di Davide (mai la gmail personale).
+EMAIL = opzione("--email", "ciao.davidestudio@gmail.com")
 # Telefono di lavoro (es. --tel "+39 333 123 4567"): se manca, nella pagina non compare.
 TELEFONO = opzione("--tel", "")
 
