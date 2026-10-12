@@ -277,6 +277,4 @@ Resa media per operazione, dentro → fuori campione:
   - indicare con calma i difetti del loro sito (apertura da PC e da telefono, prenotazioni, pulsanti, cose belle che non si vedono) e cosa farebbe lui;
   - pagamento «con bonifico», senza spiegazioni;
   - **niente anteprime gratis**.
-- **Gmail:** il connettore di questa sessione era collegato alla gmail **personale**. Per creare le bozze in ciao.davidestudio Davide deve ricollegare Gmail con quell'account in https://claude.ai/customize/connectors e aprire una sessione nuova.
-  - L'allegato da 17 MB non passa dallo strumento: va aggiunto a mano, oppure si mette un link a Drive.
-  - Non inviare nulla senza il suo via esplicito.
+- **Gmail:** il connettore è collegato a **ciao.davidestudio@gmail.com** (12/10/2026). Ci sono **22 bozze** pronte, una per attività, **senza allegato**: l'allegato va aggiunto a mano oppure sostituito con un link a Drive. Cantine Isola non ha un'email, solo il modulo contatti. Non inviare nulla senza il via esplicito di Davide.
