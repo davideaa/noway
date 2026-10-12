@@ -29,7 +29,7 @@ def opzione(nome, predefinito):
 
 
 # Indirizzo provvisorio: Davide sceglierà il nome dello studio e creerà la mail di lavoro.
-EMAIL = opzione("--email", "ciao@davidestudio.it")
+EMAIL = opzione("--email", "ciao@davidestudio.com")
 # Telefono di lavoro (es. --tel "+39 333 123 4567"): se manca, nella pagina non compare.
 TELEFONO = opzione("--tel", "")
 

@@ -21,11 +21,34 @@ def opzione(nome, predefinito):
 
 
 TELEFONO = opzione("--tel", "")
-EMAIL = opzione("--email", "ciao@davidestudio.it")      # provvisoria, come nella vetrina
+EMAIL = opzione("--email", "ciao@davidestudio.com")      # provvisoria, come nella vetrina
 ALLEGATO = "Davide-prima-e-dopo.html"
 GRUPPI = [("lead-hotel-milano.json", "milano-hotel", "Hotel a Milano"),
           ("lead-montagna.json", "montagna", "Hotel in montagna"),
           ("lead-ristoranti-milano.json", "milano-tavola", "Ristoranti e locali a Milano")]
+
+
+PRESENTAZIONE = ("Mi chiamo Davide, ho 22 anni, sono laureato in Economia delle banche e da tre anni lavoro come freelance: "
+                 "rifaccio i siti di hotel, ristoranti e locali perché siano belli, chiari e veloci, e li collego a prenotazioni, "
+                 "ordini e logistica. Mi occupo anche di grafica e motion graphic: animazioni, reel e video.")
+GUARDATO = ("Ho guardato il vostro sito con gli occhi di un cliente che vi cerca per la prima volta, e ci sono alcune cose "
+            "che vi fanno perdere più di quanto sembri:")
+VETRINA = ("Vi allego la mia vetrina, così vedete come lavoro: è un file che si apre con un doppio clic, anche senza internet. "
+           "Dentro ci sono tre siti reali che ho ridisegnato, un hotel e due ristoranti dell'area di Milano: a sinistra com'erano, "
+           "a destra come li ho rifatti, da computer e da telefono. Bastano due minuti.")
+COME = ("Come funziona: mi raccontate cosa vi serve e che budget avete in mente, e io vi mando una proposta chiara con cosa faccio, "
+        "in quanto tempo e a che prezzo. Parlate sempre e solo con me, dall'inizio alla consegna, e il pagamento è semplice: con bonifico.")
+CONGEDO = "Se invece non è il momento, nessun problema: basta una riga e non vi scrivo più.\n\nUn saluto,"
+
+
+def messaggio(b):
+    """Il messaggio intero: aggancio, chi sono, cosa ho visto, cosa farei, vetrina, come funziona, invito, firma."""
+    aggancio = b["aggancio"][0].upper() + b["aggancio"][1:]
+    invito = ("Se vi incuriosisce, rispondete a questa email o chiamatemi al " + (TELEFONO or "[IL TUO NUMERO]") +
+              ": in dieci minuti capiamo insieme se posso esservi utile.")
+    note = "\n".join("– " + n for n in b["note"])
+    parti = ["Buongiorno,", aggancio, PRESENTAZIONE, GUARDATO + "\n\n" + note, b["proposta"], VETRINA, COME, invito, CONGEDO, firma()]
+    return "\n\n".join(parti)
 
 
 def firma():
@@ -63,7 +86,7 @@ def main():
             c = l.get("contatti") or {}
             email = (c.get("email") or "").split(" ")[0]
             tel = c.get("telefono") or ""
-            testo = b["testo"].rstrip() + "\n\n" + firma()
+            testo = messaggio(b) if "aggancio" in b else b["testo"].rstrip() + "\n\n" + firma()
             conta[gruppo] = conta.get(gruppo, 0) + 1
             schede.append(dict(id=l["id"], gruppo=gruppo, priorita=b.get("priorita", l.get("priorita", 3)), nome=l["nome"],
                                citta=l.get("citta", ""), zona=l.get("zona") or "", livello=l.get("livello", ""), sito=l["sito"],
