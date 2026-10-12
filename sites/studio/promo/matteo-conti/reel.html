@@ -1,0 +1,139 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>html,body{margin:0;background:#050403}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+/* Parte 2 del reel «Matteo Conti»: il suo video (fascia 16:9) in una scheda nello stile del video dell'università.
+   t = secondi dall'inizio del suo video. render(t) è pura funzione del tempo. 0–28,30 video; 28,30–29,90 chiusura. */
+const x = document.getElementById('c').getContext('2d');
+const W = 1080, H = 1920, FPS = 30, CUT = 28.30, END = 29.90;
+const GOLD = '#F5A524', GOLDr = '245,165,36', INK = '#F3EFE6', MUTED = '#9C958A';
+const CARD = { x: 40, y: 780, w: 1000, h: Math.round(1000 * 604 / 1080) };
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const oC = (k) => 1 - Math.pow(1 - k, 3), ioC = (k) => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const lerp = (a, b, k) => a + (b - a) * k;
+function txt(s, px, py, o = {}) {
+  const { size = 40, weight = 800, color = INK, align = 'center', fam = 'Montserrat', italic = false, alpha = 1, ls = 0, blur = 0 } = o;
+  if (alpha <= 0.003 || !s) return;
+  x.save(); x.globalAlpha *= alpha; x.font = `${italic ? 'italic ' : ''}${weight} ${size}px "${fam}"`; x.letterSpacing = ls + 'px';
+  x.textAlign = align; x.textBaseline = 'middle'; x.fillStyle = color; if (blur > 0.2) x.filter = `blur(${blur}px)`;
+  x.fillText(s, px, py); x.restore();
+}
+function tw(s, size, weight = 800, fam = 'Montserrat', italic = false, ls = 0) { x.save(); x.font = `${italic ? 'italic ' : ''}${weight} ${size}px "${fam}"`; x.letterSpacing = ls + 'px'; const w = x.measureText(s).width; x.restore(); return w; }
+function rr(px, py, w, h, r) { x.beginPath(); x.roundRect(px, py, w, h, r); }
+
+/* ---------- sfondo: nero caldo, bagliore arancio, griglia e formule che scorrono (come nel video dell'università) ---------- */
+const FORM = ['E[Ri] = Rf + β (Rm − Rf)', 'dS = μS dt + σS dW', 'Sharpe = (Rp − Rf) / σp', 'σ² = Σ (xᵢ − μ)² / n', 'Δ = ∂C/∂S',
+  'C = S·N(d₁) − K·e^(−rT)·N(d₂)', 'P/E = Price / EPS', 'VaR₉₉ = μ − 2.33σ', 'r = ln(Pₜ / Pₜ₋₁)', 'β = Cov(Ri,Rm) / Var(Rm)'];
+function bg(t) {
+  x.fillStyle = '#060504'; x.fillRect(0, 0, W, H);
+  let g = x.createRadialGradient(540, 600, 0, 540, 600, 800); g.addColorStop(0, `rgba(${GOLDr},0.16)`); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  g = x.createRadialGradient(540, 1420, 0, 540, 1420, 700); g.addColorStop(0, `rgba(${GOLDr},0.09)`); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.strokeStyle = 'rgba(245,165,36,0.035)'; x.lineWidth = 1;
+  for (let i = 0; i <= W; i += 72) { x.beginPath(); x.moveTo(i + .5, 0); x.lineTo(i + .5, H); x.stroke(); }
+  for (let j = 0; j <= H; j += 72) { x.beginPath(); x.moveTo(0, j + .5); x.lineTo(W, j + .5); x.stroke(); }
+  FORM.forEach((f, i) => { const y = 150 + i * 180, sp = 14 + (i % 3) * 6, x0 = ((i * 337) % 700) - 200 + ((t * sp) % 1400) * (i % 2 ? -1 : 1);
+    txt(f, ((x0 % 1400) + 1400) % 1400 - 200, y, { fam: 'Playfair Display', weight: 600, size: 34, italic: false, color: i % 4 === 1 ? GOLD : INK, alpha: 0.055, align: 'left', blur: 1.2 }); });
+  const v = x.createRadialGradient(540, 960, 500, 540, 960, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+}
+
+/* ---------- intestazione: chi è ---------- */
+const LAB = [[0, 'MA CHI LO DICE?'], [11.62, 'EX MARKET MAKER'], [17.24, 'IL LAVORO VERO: 90% RICERCA'], [21.80, '10% ESECUZIONE'], [25.44, '…E L’ESECUZIONE È AUTOMATIZZATA']];
+function header(t) {
+  /* etichetta: si riscrive a macchina quando cambia */
+  let k = 0; for (let i = 0; i < LAB.length; i++) if (t >= LAB[i][0]) k = i;
+  const [a0, s] = LAB[k], n = Math.floor(clamp((t - a0 - 0.12) * 34, 0, s.length)), out = k + 1 < LAB.length ? 1 - seg(t, LAB[k + 1][0] - 0.12, LAB[k + 1][0]) : 1;
+  const lw = tw(s, 26, 600, 'IBM Plex Mono', false, 6);
+  txt(s.slice(0, n), 540 - lw / 2, 390, { fam: 'IBM Plex Mono', weight: 600, size: 26, ls: 6, color: GOLD, align: 'left', alpha: out });
+  if (n < s.length && Math.floor(t * 4) % 2 === 0) { x.fillStyle = GOLD; x.fillRect(540 - lw / 2 + tw(s.slice(0, n), 26, 600, 'IBM Plex Mono', false, 6) + 4, 374, 3, 32); }
+  /* il nome: lettere che salgono, sottolineatura d'oro */
+  const name = 'Matteo Conti', size = 118, nw = tw(name, size, 800, 'Playfair Display', false, -1); let cx = 540 - nw / 2;
+  for (let i = 0; i < name.length; i++) { const ch = name[i], w = tw(ch, size, 800, 'Playfair Display', false, -1), kk = oC(seg(t, 0.35 + i * 0.035, 0.85 + i * 0.035));
+    x.save(); x.beginPath(); x.rect(0, 430, W, 130); x.clip(); txt(ch, cx, 495 + (1 - kk) * 160, { fam: 'Playfair Display', weight: 800, size, ls: -1, color: INK, align: 'left' }); x.restore(); cx += w; }
+  const ku = ioC(seg(t, 0.95, 1.55)), pulse = Math.sin(Math.PI * seg(t, 11.96, 12.9));
+  if (pulse > 0) { const g = x.createRadialGradient(540, 560, 0, 540, 560, 420); g.addColorStop(0, `rgba(${GOLDr},${0.22 * pulse})`); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 390, W, 340); }
+  x.fillStyle = GOLD; x.fillRect(540 - nw / 2, 564, nw * ku, 4 + 2 * pulse);
+  /* due tessere e la riga della banca */
+  const chips = [['7 ANNI DA MARKET MAKER', 1.05, 13.94], ['HEDGE FUND MANAGER', 1.25, -9]];
+  const cw = chips.map(([s]) => tw(s, 25, 700, 'Montserrat', false, 2) + 56), gap = 22, tot = cw[0] + cw[1] + gap; let px = 540 - tot / 2;
+  chips.forEach(([s, a, hot], i) => { const kc = oC(seg(t, a, a + 0.45)), hl = Math.sin(Math.PI * seg(t, hot, hot + 1.1)); if (kc <= 0) { px += cw[i] + gap; return; }
+    x.save(); x.globalAlpha = kc; x.translate(0, (1 - kc) * 24);
+    if (hl > 0) { x.shadowColor = `rgba(${GOLDr},${0.8 * hl})`; x.shadowBlur = 30 * hl; }
+    rr(px, 606, cw[i], 58, 29); x.fillStyle = `rgba(${GOLDr},${0.10 + 0.25 * hl})`; x.fill(); x.shadowBlur = 0; x.strokeStyle = `rgba(${GOLDr},${0.75 + 0.25 * hl})`; x.lineWidth = 2; x.stroke();
+    txt(s, px + cw[i] / 2, 636, { size: 25, weight: 700, ls: 2, color: hl > 0.3 ? '#FFFFFF' : INK }); x.restore(); px += cw[i] + gap; });
+  const kb = oC(seg(t, 1.5, 2.0)), hb = Math.sin(Math.PI * seg(t, 15.22, 16.6));
+  txt('nella più grande banca dei paesi nordici', 540, 708, { fam: 'IBM Plex Mono', weight: 500, size: 26, ls: 1, color: hb > 0.3 ? GOLD : '#C9C2B6', alpha: kb });
+}
+
+/* ---------- la scheda con il suo video ---------- */
+const IMG = {}; let need = null;
+function card(t) {
+  const kin = oC(seg(t, 0, 0.45)), kout = ioC(seg(t, CUT - 0.05, CUT + 0.45)), a = kin * (1 - kout), s = lerp(0.94, 1, kin) * lerp(1, 0.96, kout);
+  if (a <= 0) return;
+  const { x: cx0, y: cy0, w, h } = CARD, mx = cx0 + w / 2, my = cy0 + h / 2;
+  x.save(); x.globalAlpha = a; x.translate(mx, my); x.scale(s, s); x.translate(-mx, -my);
+  x.shadowColor = `rgba(${GOLDr},0.35)`; x.shadowBlur = 70; rr(cx0, cy0, w, h, 26); x.fillStyle = '#111'; x.fill(); x.shadowBlur = 0;
+  const im = IMG.cur; if (im) { x.save(); rr(cx0, cy0, w, h, 26); x.clip(); x.drawImage(im, cx0, cy0, w, h); x.restore(); }
+  rr(cx0, cy0, w, h, 26); x.strokeStyle = `rgba(${GOLDr},0.85)`; x.lineWidth = 2.5; x.stroke();
+  /* angoli da mirino, piccoli, in oro */
+  x.strokeStyle = GOLD; x.lineWidth = 3; const L = 34, o = 16;
+  [[cx0 - o, cy0 - o, 1, 1], [cx0 + w + o, cy0 - o, -1, 1], [cx0 - o, cy0 + h + o, 1, -1], [cx0 + w + o, cy0 + h + o, -1, -1]].forEach(([px, py, dx, dy]) => {
+    x.beginPath(); x.moveTo(px, py + dy * L); x.lineTo(px, py); x.lineTo(px + dx * L, py); x.stroke(); });
+  x.restore();
+}
+
+/* ---------- sottotitoli nello stile del primo video (maiuscolo corsivo, parola chiave in oro) ---------- */
+let WORDS = [], CH = [];
+const KEY = /^(100%|CHARTS|REALITY|DIFFERENT|MATTEO|CONTI|MARKET|MAKER|SEVEN|YEARS|LARGEST|BANK|NORDICS|90%|RESEARCH|10%|EXECUTION|AUTOMATED)$/;
+function chunks() { const out = []; let cur = [];
+  WORDS.forEach((w, i) => { cur.push(w); const end = /[.,]$/.test(w[0]) || cur.length >= 3 || (WORDS[i + 1] && WORDS[i + 1][1] - w[2] > 0.25);
+    if (end || i === WORDS.length - 1) { out.push(cur); cur = []; } }); return out; }
+function captions(t) {
+  if (t > CUT) return;
+  let c = null; for (let i = 0; i < CH.length; i++) { const a = CH[i][0][1], b = i + 1 < CH.length ? CH[i + 1][0][1] : CH[i][CH[i].length - 1][2] + 0.4; if (t >= a - 0.02 && t < b) c = [CH[i], a]; }
+  if (!c) return; const [ws, a] = c, pop = oC(seg(t, a - 0.02, a + 0.14)), sc = lerp(1.12, 1, pop);
+  const parts = ws.map((w) => [w[0].replace(/[.,]$/, '').toUpperCase(), w[1]]), sp = 16, sz = 56;
+  const tot = parts.reduce((s, [p]) => s + tw(p, sz, 900, 'Montserrat', true), 0) + sp * (parts.length - 1); let px = 540 - tot / 2;
+  x.save(); x.translate(540, 1425); x.scale(sc, sc); x.translate(-540, -1425); x.globalAlpha = pop;
+  parts.forEach(([p, ws0]) => { const on = t >= ws0 - 0.03, key = KEY.test(p);
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.9)'; x.shadowBlur = 18;
+    txt(p, px, 1425, { size: sz, weight: 900, italic: true, color: key ? GOLD : '#FFFFFF', align: 'left', alpha: on ? 1 : 0.35 }); x.restore();
+    px += tw(p, sz, 900, 'Montserrat', true) + sp; });
+  x.restore();
+}
+
+/* ---------- chiusura: il titolo della serie ---------- */
+function outro(t) {
+  const k = oC(seg(t, CUT + 0.25, CUT + 0.75)), k2 = oC(seg(t, CUT + 0.55, CUT + 1.0)), kf = seg(t, END - 0.35, END);
+  if (k <= 0) return; x.save(); x.globalAlpha = 1 - kf;
+  txt('Dalla teoria', 540, 1000 + (1 - k) * 40, { fam: 'Playfair Display', weight: 800, size: 104, color: INK, alpha: k });
+  txt('alla realtà.', 540, 1120 + (1 - k2) * 40, { fam: 'Playfair Display', weight: 800, size: 104, color: GOLD, alpha: k2 });
+  txt('@macro.algo.desk', 540, 1260, { fam: 'IBM Plex Mono', weight: 600, size: 28, ls: 4, color: MUTED, alpha: k2 });
+  x.restore();
+}
+
+function render(t) {
+  bg(t); header(t); card(t); captions(t); outro(t);
+  const kf = seg(t, END - 0.3, END); if (kf > 0) { x.fillStyle = `rgba(0,0,0,${kf})`; x.fillRect(0, 0, W, H); }
+}
+async function frameImg(t) {
+  const n = Math.min(Math.floor(Math.min(t, CUT) * FPS + 1e-6) + 1, 851);
+  const im = new Image(); im.src = 'bf/' + String(n).padStart(4, '0') + '.jpg'; await im.decode(); IMG.cur = im;
+}
+window.seek = async (t) => { await frameImg(t); render(t); };
+(async () => {
+  WORDS = (await (await fetch('b.json')).json()).flatMap((s) => s.words).filter((w) => w[1] < CUT).map((w) => [w[0].trim().replace('Mattoconti.', 'Matteo Conti.'), w[1], w[2]]);
+  /* «Matteo Conti» è una parola sola per Whisper: la spezzo in due per i sottotitoli */
+  WORDS = WORDS.flatMap((w) => w[0] === 'Matteo Conti.' ? [['Matteo', w[1], (w[1] + w[2]) / 2], ['Conti.', (w[1] + w[2]) / 2, w[2]]] : [w]);
+  { const m = []; WORDS.forEach((w) => { if (w[0] === '%' && m.length) { const p = m[m.length - 1]; p[0] += '%'; p[2] = w[2]; } else m.push([...w]); }); WORDS = m; }
+  CH = chunks();
+  await Promise.all(['800 118px "Playfair Display"', '600 34px "Playfair Display"', 'italic 900 56px "Montserrat"', '700 25px "Montserrat"', '600 26px "IBM Plex Mono"', '500 26px "IBM Plex Mono"'].map((f) => document.fonts.load(f)));
+  await document.fonts.ready; window.READY = true;
+})();
+</script></body></html>
