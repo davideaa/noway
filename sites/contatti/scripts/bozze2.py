@@ -10,12 +10,15 @@ import build  # noqa: E402
 ver = json.load(open(os.path.join(QUI, "dati", "verifica-email.json"), encoding="utf-8"))
 gia = {l["sito"].split("//")[-1].strip("/").removeprefix("www.").split("/")[0]
        for f in glob.glob(os.path.join(QUI, "dati", "lead-*.json")) for l in json.load(open(f, encoding="utf-8"))}
+escludi = set(json.load(open(os.path.join(QUI, "dati", "escludi2.json")))) if os.path.exists(os.path.join(QUI, "dati", "escludi2.json")) else set()
+fatte = set(json.load(open(os.path.join(QUI, "dati", "bozze-create.json")))) if os.path.exists(os.path.join(QUI, "dati", "bozze-create.json")) else set()
+escludi |= fatte   # già in bozza: non rifarle
 out, visti = [], set()
 for f in sorted(glob.glob(os.path.join(QUI, "dati", "lead2-*.json"))):
     for l in json.load(open(f, encoding="utf-8")):
         v = ver.get(l["id"])
         dom = l["sito"].split("//")[-1].strip("/").removeprefix("www.").split("/")[0]
-        if not v or not v["ok"] or dom in gia or v["email"] in visti:
+        if not v or not v["ok"] or dom in gia or v["email"] in visti or l["id"] in escludi:
             print("fuori:", l["id"], (v or {}).get("motivi"), "(già contattato)" if dom in gia else "")
             continue
         visti.add(v["email"])
