@@ -287,5 +287,9 @@ Resa media per operazione, dentro → fuori campione:
     - Nuovo Macello, risposta delle prenotazioni;
     - Excelsior Planet, chiuso fino a fine novembre.
   - Nessun rimbalzo.
+- **Secondo giro, 13/10/2026:** 54 bozze nuove in ciao.davidestudio.
+  - Istruzioni in `sites/contatti/GIRO2.md`, controllo delle email con `scripts/verifica_email.py` (email scritta sul loro sito + record MX), messaggi composti con `scripts/bozze2.py`.
+  - Le attività già in bozza sono in `dati/bozze-create.json` e quelle escluse in `dati/escludi2.json`.
+  - Solo 15 su 54 hanno un'email di lavoro: i piccoli indipendenti pubblicano quasi sempre solo `info@`.
 - **Regola per i prossimi contatti:** usare le email **di lavoro** dell'attività (direzione, marketing, commerciale, amministrazione, titolare), non `info@` o `prenotazioni@`. Vedi `sites/contatti/RICERCA.md`.
 - **Gmail:** il connettore è collegato a ciao.davidestudio@gmail.com.
