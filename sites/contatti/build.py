@@ -35,9 +35,12 @@ PRESENTAZIONE = ("Mi chiamo Davide, ho 22 anni, mi sono laureato in Economia del
                  "Rifaccio siti per hotel, ristoranti e locali, curando la grafica, le animazioni e il collegamento con prenotazioni e ordini.")
 RUOLO = ("Il mio lavoro è proprio questo: fare da collegamento tra la vostra attività e chi vi cerca online, e valorizzarla al meglio, "
          "sia nella grafica sia nel modo in cui il cliente vi trova, vi scopre e vi contatta.")
-PORTFOLIO = ("Vi allego il mio portfolio, così potete vedere cosa so fare. È un file che si apre con un doppio clic, anche senza internet, "
-             "e dentro ci sono tre siti reali che ho rifatto, un hotel e due ristoranti della zona di Milano, con il prima e il dopo "
-             "da computer e da telefono.")
+# Niente allegato: Gmail segnala il file HTML come virus (falso positivo: foto in base64 + blob URL somigliano all'"HTML smuggling").
+# Nelle bozze create col connettore Gmail il link diventa google.com/url?q=…: lì si scrive ">>> INCOLLA QUI IL LINK <<<" e Davide incolla.
+PORTFOLIO_URL = "https://claude.ai/artifact/KyhgV4cgvHB8gmezaa4arL"
+PORTFOLIO = ("Il mio portfolio lo trovate qui, così potete vedere cosa so fare:\n" + PORTFOLIO_URL + "\n"
+             "Si apre con un clic, anche da telefono, e dentro ci sono tre siti reali che ho rifatto, un hotel e due ristoranti "
+             "della zona di Milano, con il prima e il dopo da computer e da telefono.")
 COME = ("Se vi interessa vi spiego volentieri come lavoro. Mi dite di cosa avete bisogno e che budget avete in mente, e io vi preparo "
         "una proposta con tempi e costi. Parlate sempre direttamente con me e il pagamento è con bonifico.")
 

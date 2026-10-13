@@ -280,7 +280,7 @@ Resa media per operazione, dentro → fuori campione:
   - **testo attuale** (in `build.py`, voluto da lui il 12/10/2026): scritto come lo scriverebbe un ragazzo, non come un'IA;
   - difetti solo **accennati**, perché se li dettagli li sistemano da soli;
   - lui come collegamento fra l'attività e chi la cerca online;
-  - l'allegato si chiama **«portfolio»** (`Davide-portfolio.html`), non «vetrina»;
+  - si chiama **«portfolio»**, non «vetrina», e dal 13/10 si manda come link (vedi sotto);
   - niente complimenti iniziali né frasi di congedo.
 - **Primo invio, 12/10/2026:** Davide ha mandato tutte le 22 email con il portfolio allegato.
   - Nella prima ora sono arrivate solo due **risposte automatiche**:
@@ -293,3 +293,10 @@ Resa media per operazione, dentro → fuori campione:
   - Solo 15 su 54 hanno un'email di lavoro: i piccoli indipendenti pubblicano quasi sempre solo `info@`.
 - **Regola per i prossimi contatti:** usare le email **di lavoro** dell'attività (direzione, marketing, commerciale, amministrazione, titolare), non `info@` o `prenotazioni@`. Vedi `sites/contatti/RICERCA.md`.
 - **Gmail:** il connettore è collegato a ciao.davidestudio@gmail.com.
+- **Niente più allegati (13/10/2026).** Gmail segnala il portfolio HTML come **virus** e non lo fa scaricare. È un falso positivo: le foto in base64 e i blob URL somigliano all'«HTML smuggling».
+  - Il portfolio si manda come **link all'artifact**: https://claude.ai/artifact/KyhgV4cgvHB8gmezaa4arL.
+- **Errore mio, 12/10/2026.** Le 22 email del primo giro, e Capitol del 13/10, sono partite con il vecchio file `Davide-prima-e-dopo.html`, che riportava `ciao@davidestudio.it`. Quel dominio esiste e appartiene a qualcun altro.
+  - Per tutte e 23 c'è in bozza una risposta di correzione, dentro la loro conversazione.
+- **I link non si possono scrivere con il connettore.** Ogni link scritto tramite il connettore Gmail viene riscritto come `https://www.google.com/url?q=…&ust=…`, sia nel testo sia negli `href` dell'HTML, anche senza `https://`.
+  - Per questo nelle bozze c'è la riga **`>>> INCOLLA QUI IL LINK <<<`**: Davide la sostituisce con il link quando apre la bozza per inviarla.
+  - Mai provare ad aggirare la riscrittura.
