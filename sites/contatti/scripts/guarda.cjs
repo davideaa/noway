@@ -17,7 +17,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   const QUI = path.join(__dirname, '..', 'dati'), SCH = path.join(QUI, 'schermate'); fs.mkdirSync(SCH, { recursive: true });
   const lead = process.argv.slice(2).flatMap(f => JSON.parse(fs.readFileSync(f, 'utf8')));
-  const vistiF = path.join(QUI, 'visti.json'); const visti = fs.existsSync(vistiF) ? JSON.parse(fs.readFileSync(vistiF, 'utf8')) : {};
+  const vistiF = process.env.VISTI ? path.resolve(process.env.VISTI) : path.join(QUI, 'visti.json'); const visti = fs.existsSync(vistiF) ? JSON.parse(fs.readFileSync(vistiF, 'utf8')) : {};
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
   for (const l of lead) {
     if (visti[l.id] && !process.env.RIFAI) continue;
