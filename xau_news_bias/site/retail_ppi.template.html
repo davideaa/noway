@@ -1,0 +1,172 @@
+<title>Retail e PPI sull'oro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: una colonna da quaderno di trading; riassunto in alto, poi anni → release → grafico */
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#1b1d1f; --mute:#62676d; --line:#dcdad3;
+  --accent:#a8761a; --up:#1f8a5b; --down:#c2413b; --soft:#efece4;
+  --f-disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131518; --panel:#1b1e22; --ink:#ebe8e1; --mute:#9aa0a6; --line:#2e3238;
+  --accent:#e0a947; --up:#45c48a; --down:#f06b62; --soft:#22262b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131518; --panel:#1b1e22; --ink:#ebe8e1; --mute:#9aa0a6; --line:#2e3238;
+  --accent:#e0a947; --up:#45c48a; --down:#f06b62; --soft:#22262b; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+main{max-width:860px;margin:0 auto;display:grid;gap:28px}
+h1{font:800 clamp(28px,6vw,44px)/1.05 var(--f-disp);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 22px/1.2 var(--f-disp);margin:0 0 10px;text-wrap:balance}
+.lead{color:var(--mute);max-width:62ch;margin:8px 0 0}
+.eyebrow{font:600 11px/1 var(--f-num);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.big div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.big b{display:block;font:600 30px/1.1 var(--f-num);color:var(--ink)}
+.big span{font-size:13px;color:var(--mute)}
+.note{background:var(--soft);border-radius:8px;padding:12px 14px;font-size:14px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font:600 11px/1.2 var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+th:first-child,td:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+td{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.bar{display:inline-block;height:8px;background:var(--accent);border-radius:2px;vertical-align:middle;margin-left:6px;opacity:.75}
+details.year{border-top:1px solid var(--line)}
+details.year>summary{cursor:pointer;padding:12px 2px;display:flex;justify-content:space-between;gap:12px;font:600 18px var(--f-disp);list-style:none}
+details.year>summary::-webkit-details-marker{display:none}
+details.year>summary .num{font-size:13px;color:var(--mute);font-weight:400}
+details.ev{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:0 0 8px}
+details.ev>summary{cursor:pointer;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;list-style:none}
+details.ev>summary::-webkit-details-marker{display:none}
+.tag{font:600 10px/1 var(--f-num);letter-spacing:.08em;padding:3px 6px;border-radius:4px;background:var(--soft);color:var(--mute);margin-left:6px}
+.pill{font:600 12px var(--f-num);padding:2px 8px;border-radius:999px}
+.pill.up{color:var(--up);background:color-mix(in srgb,var(--up) 14%,transparent)}
+.pill.dn{color:var(--down);background:color-mix(in srgb,var(--down) 14%,transparent)}
+.evbody{padding:0 12px 12px;display:grid;gap:10px;min-width:0}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px 12px;font-size:13px}
+.kv span{color:var(--mute)} .kv b{font:600 13px var(--f-num)}
+.chart{width:100%;height:auto;display:block}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer{color:var(--mute);font-size:12.5px}
+</style>
+<main>
+<header>
+  <div class="eyebrow">XAUUSD · Retail Sales e PPI · 14:30</div>
+  <h1>Retail e PPI sull'oro</h1>
+  <p class="lead">Quanto si muove l'oro quando escono Retail Sales e PPI, release per release dal 2011. Non è il foglio NFP e non dà una bias: serve a sapere quanto spazio lasciare.</p>
+</header>
+
+<section>
+  <h2>Quanto muove adesso</h2>
+  <div class="big" id="big"></div>
+  <p class="note" id="bignote"></p>
+</section>
+
+<section>
+  <h2>Anno per anno</h2>
+  <div class="tw"><table id="years"></table></div>
+  <p class="lead">Range della candela delle 14:30 sul bid (come la vedi in MT5), mediana dell'anno. Prezzo Dukascopy: il tuo broker alla news allarga lo spread di più, quindi sul tuo grafico la wick può essere più lunga.</p>
+</section>
+
+<section>
+  <h2>C'è una direzione?</h2>
+  <p class="note"><b>No.</b> <span id="dirnote"></span></p>
+  <div class="tw"><table id="dir"></table></div>
+</section>
+
+<section>
+  <h2>Tutte le release</h2>
+  <div id="list"></div>
+</section>
+
+<footer id="foot"></footer>
+</main>
+<script>
+const D = __DATA__;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const f0 = x => x == null ? "–" : Math.round(x).toLocaleString("it-IT");
+const med = a => { const s = a.filter(x => x != null).sort((p, q) => p - q); if (!s.length) return null; const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const q = (a, p) => { const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * (s.length - 1) + .5))]; };
+const MESI = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+const dt = d => { const [y, m, g] = d.slice(0, 10).split("-"); const h = +d.slice(11, 13) + (+d.slice(11,13) >= 0 ? 0 : 0); return `${+g} ${MESI[m - 1]} ${y}`; };
+const TIPO = {"RETAIL": "Retail", "PPI": "PPI", "RETAIL+PPI": "Retail + PPI"};
+
+// riassunto: ultime 12 release
+const ev = D.ev, last = ev.slice(-12), r12 = last.map(e => e.m1_bid);
+document.getElementById("big").innerHTML = [
+  [f0(med(r12)), "pips, candela tipica 14:30 (ultime 12)"],
+  [`${f0(q(r12, .1))}–${f0(q(r12, .9))}`, "pips, 8 release su 10 stanno qui"],
+  [f0(Math.max(...r12)), "pips, la più grande delle ultime 12"],
+  [f0(med(last.map(e => e.m5_mid))), "pips, range tipico dei primi 5 minuti"]
+].map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+document.getElementById("bignote").innerHTML =
+  `Ultime 12 release, da ${dt(last[0].d)} a ${dt(last[last.length - 1].d)}. ATR 14 H1 di oggi: <b class="num">${f0(D.atr_oggi)}</b> pips. ` +
+  `L'ATR da solo non basta a prevedere la candela: nel test (scritto prima) la stima dall'ATR ha preso l'intervallo solo il ${Math.round(D.amp.cop * 100)}% delle volte invece dell'80%. ` +
+  `Per questo la stima onesta è la distribuzione delle ultime release.`;
+
+// anni
+const yrs = [...new Set(ev.map(e => e.y))].sort();
+const maxM = Math.max(...yrs.map(y => med(ev.filter(e => e.y === y).map(e => e.m1_bid))));
+document.getElementById("years").innerHTML = "<tr><th>Anno</th><th>Release</th><th>Candela 14:30</th><th>Più grande</th><th>Primi 5 min</th><th>ATR H1</th><th>Spread max</th></tr>" +
+  yrs.map(y => { const g = ev.filter(e => e.y === y), m = med(g.map(e => e.m1_bid));
+    return `<tr><td>${y}</td><td>${g.length}</td><td>${f0(m)}<span class="bar" style="width:${Math.round(60 * m / maxM)}px"></span></td><td>${f0(Math.max(...g.map(e => e.m1_bid)))}</td><td>${f0(med(g.map(e => e.m5_mid)))}</td><td>${f0(med(g.map(e => e.atr)))}</td><td>${f0(med(g.map(e => e.spmax)))}</td></tr>`; }).join("");
+
+// direzione
+const NOMI = {C1:"RSI M1 ipercomprato/ipervenduto",C2:"RSI M5 ipercomprato/ipervenduto",C3:"RSI M15 ipercomprato/ipervenduto",C4:"Vicino al massimo/minimo delle 24 ore (supply/demand)",C5:"Vicino al massimo/minimo delle 4 ore",C6:"Sopra/sotto la media 20 H1",C7:"Sopra/sotto la media 20 M5",C8:"Regime: trend o range",C9:"Sopra/sotto l'apertura del giorno"};
+document.getElementById("dirnote").textContent = `Ho provato ${Object.keys(NOMI).length} indicatori del contesto alle 14:29 su ${D.n_ricerca} release 2011–2019, regole scritte prima. Nessuno indovina la direzione della candela più del caso: stanno tutti fra il 46% e il 55%.`;
+document.getElementById("dir").innerHTML = "<tr><th>Contesto alle 14:29</th><th>Gruppo</th><th>Segnali</th><th>Indovina</th></tr>" +
+  D.dir.map(r => `<tr><td style="white-space:normal;font-family:var(--f-body)">${NOMI[r.regola]}</td><td>${TIPO[r.gruppo] || "Tutte"}</td><td>${r.n}</td><td>${Math.round(r.quota * 100)}%</td></tr>`).join("") +
+  `<tr><td style="white-space:normal;font-family:var(--f-body)" colspan="4">RSI oltre 70 o sotto 30 alle 14:29: troppo raro (meno di 25 volte) per misurarlo.</td></tr>`;
+
+// lista
+function chart(e) {
+  const W = 640, H = 220, L = 44, R = 8, T = 10, B = 26, c = e.cand, n = c.length;
+  const vals = c.filter(Boolean).flatMap(k => [k[1], k[2]]); let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  const pad = (hi - lo) * .08 || 5; lo -= pad; hi += pad;
+  const y = v => T + (hi - v) / (hi - lo) * (H - T - B), cw = (W - L - R) / n;
+  const step = [5, 10, 20, 25, 50, 100, 200][[5, 10, 20, 25, 50, 100, 200].findIndex(s => (hi - lo) / s <= 6)] || 200;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Candele da 10 secondi, pips dal prezzo prima della news">`;
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step)
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${css("--line")}" stroke-width="1"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" text-anchor="end" fill="${css("--mute")}" font-family="JetBrains Mono,monospace">${v > 0 ? "+" : ""}${v}</text>`;
+  const x0 = L + 6 * cw;
+  s += `<rect x="${x0}" y="${T}" width="${6 * cw}" height="${H - T - B}" fill="${css("--accent")}" opacity=".10"/>`;
+  s += `<line x1="${x0}" x2="${x0}" y1="${T}" y2="${H - B}" stroke="${css("--accent")}" stroke-dasharray="3 3"/>`;
+  [["14:29", 0], ["14:30", 6], ["14:31", 12], ["14:33", 24], ["14:35", 36]].forEach(([t, i]) =>
+    s += `<text x="${Math.min(W - R - 16, L + i * cw)}" y="${H - 8}" font-size="11" text-anchor="middle" fill="${css("--mute")}" font-family="JetBrains Mono,monospace">${t}</text>`);
+  c.forEach((k, i) => { if (!k) return; const [o, h, l, cl] = k, col = cl >= o ? css("--up") : css("--down"), cx = L + (i + .5) * cw;
+    s += `<line x1="${cx}" x2="${cx}" y1="${y(h)}" y2="${y(l)}" stroke="${col}" stroke-width="1.2"/><rect x="${cx - cw * .32}" y="${y(Math.max(o, cl))}" width="${cw * .64}" height="${Math.max(1, Math.abs(y(o) - y(cl)))}" fill="${col}"/>`; });
+  return s + "</svg>";
+}
+const list = document.getElementById("list");
+yrs.slice().reverse().forEach((yy, yi) => {
+  const g = ev.filter(e => e.y === yy).reverse();
+  const det = document.createElement("details"); det.className = "year"; if (yi === 0) det.open = true;
+  det.innerHTML = `<summary><span>${yy}</span><span class="num">${g.length} release · candela tipica ${f0(med(g.map(e => e.m1_bid)))} pips</span></summary>`;
+  g.forEach(e => {
+    const d = document.createElement("details"); d.className = "ev";
+    const up = e.m1_mov > 0, ora = e.d.slice(11, 16) === "12:30" ? "14:30" : (e.d.slice(11, 16) === "13:30" ? "14:30" : e.d.slice(11, 16) + " UTC");
+    d.innerHTML = `<summary><span><b>${dt(e.d)}</b><span class="tag">${TIPO[e.tipo]}</span></span><span class="pill ${up ? "up" : "dn"}">${up ? "▲" : "▼"} ${f0(e.m1_bid)} pips</span></summary><div class="evbody"></div>`;
+    d.addEventListener("toggle", () => { if (!d.open || d.dataset.ok) return; d.dataset.ok = 1;
+      const rel = e.dati.filter(x => x.act).map(x => `<tr><td style="font-family:var(--f-body)">${x.nome}</td><td>${x.act}</td><td>${x.fc || "–"}</td></tr>`).join("");
+      d.querySelector(".evbody").innerHTML = `<div class="kv">
+        <div><span>Candela 14:30 (bid)</span><br><b>${f0(e.m1_bid)} pips</b></div>
+        <div><span>Chiusura 14:31</span><br><b>${e.m1_mov > 0 ? "+" : ""}${f0(e.m1_mov)} pips</b></div>
+        <div><span>Primi 5 minuti</span><br><b>${f0(e.m5_mid)} pips</b></div>
+        <div><span>A 15 minuti</span><br><b>${e.mov15 > 0 ? "+" : ""}${f0(e.mov15)} pips</b></div>
+        <div><span>Spread max primi 10 s</span><br><b>${f0(e.spmax)} pips</b></div>
+        <div><span>ATR 14 H1 prima</span><br><b>${f0(e.atr)} pips</b></div></div>
+        ${chart(e)}
+        ${rel ? `<div class="tw"><table><tr><th>Dato uscito</th><th>Effettivo</th><th>Atteso</th></tr>${rel}</table></div>` : ""}`; });
+    det.appendChild(d);
+  });
+  list.appendChild(det);
+});
+document.getElementById("foot").textContent = `Prezzi tick Dukascopy (bid/ask), candele da 10 secondi dalle 14:29 alle 14:35 ora italiana; pips = 0,10 $. Dati usciti dal calendario ForexFactory. Aggiornato ${D.creato.replace("T", " ")} UTC. Studio: docs/IPOTESI-HX16-RETAIL-PPI.md.`;
+</script>
