@@ -9,3 +9,4 @@ __pycache__/
 
 # percorsi tick grezzi (dati Dukascopy): ricostruibili dalla cache, non nel repository
 research_output/phase2/p2_paths.parquet
+research_output/phase2/hx16/contesto_cache.json
