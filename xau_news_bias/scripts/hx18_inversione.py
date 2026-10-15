@@ -17,6 +17,16 @@ from xnb.config import get_settings  # noqa: E402
 FAMS = ["FOMC", "VERBALI", "PIL", "ISM_M", "ISM_S", "ADP", "FIDUCIA", "MICHIGAN", "CLAIMS"]
 
 
+def fetch_retry(t0):
+    import time
+    for k in range(7):
+        try:
+            return fetch_final(t0)
+        except Exception:  # noqa: BLE001  (il datafeed risponde a volte 503)
+            time.sleep(5 * 2 ** k)
+    raise RuntimeError(f"tick non scaricabili per {t0}")
+
+
 def measure(p: Path):
     z = np.load(p)
     t, bid, ask = z["t"], z["bid"], z["ask"]
@@ -57,8 +67,8 @@ if __name__ == "__main__":
               & (cal.t0 < pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=1))].reset_index(drop=True)
     flag = R / "hx15" / "HX18_2024_26_APERTO.json"
     flag.write_text(json.dumps({"aperto_utc": pd.Timestamp.now(tz="UTC").isoformat(), "famiglie": FAMS, "slot": len(new)}))
-    with ThreadPoolExecutor(8) as ex:
-        paths = list(ex.map(fetch_final, new.t0))
+    with ThreadPoolExecutor(4) as ex:
+        paths = list(ex.map(fetch_retry, new.t0))
     rows = []
     for (_, r), p in zip(new.iterrows(), paths):
         m = measure(p)
