@@ -45,3 +45,21 @@ Scritta il 15/10/2026 **prima** di calcolare.
 - Anche se passa: i dati NFP/CPI 2019–26 sono già stati visti per altre
   domande. Quindi al massimo **"da registrare dal vivo"**.
 - Riportati comunque NFP e CPI separati e per anno.
+
+## Risultati (dopo i commit della pre-registrazione `5c4fe60` e dello script)
+
+File: `research_output/phase2/hx16/hx17_deriva.json`. Codice:
+`scripts/hx17_deriva.py`.
+
+| Periodo | Release | Giuste a 5 min | Pips medi a 5 min | Giuste a 15 min | Pips medi a 15 min |
+|---|---|---|---|---|---|
+| Studio 2011–18 | 123 | 57,7% | +10,6 | 52,0% | +11,8 |
+| **Conferma 2019–26** | 141 | **49,6%** | **+0,1** | 53,2% | +2,9 |
+| Ultimi 3 anni | 54 | 53,7% | +7,1 | 53,7% | +8,1 |
+
+- **Non passa.** Holm sulla conferma: 0,57 (5 min) e 0,50 (15 min).
+  Movimento medio lontano dai 20 pips richiesti.
+- Per anno non c'è una crescita con la volatilità. Pips medi a 15 min:
+  2021 −28, 2022 +20, 2023 +27, 2024 −13, 2025 +27, 2026 0.
+- Sulle NFP e sul CPI la deriva delle news minori (H-X15) **non c'è**, o
+  è troppo piccola e instabile per lo spread.
