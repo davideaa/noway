@@ -17,6 +17,10 @@ if __name__ == "__main__":
     out = {"ev": data["ev"], "atr_oggi": data["atr_oggi"], "creato": data["creato"], "n_ricerca": an["n_ricerca"],
            "amp": {"cop": an["ampiezza"]["m1_bid"]["copertura_2020_26"]},
            "dir": [{k: r[k] for k in ("gruppo", "regola", "n", "quota")} for r in dir_rows]}
+    import pandas as pd
+    cal = pd.read_parquet(R.parent / "hx15" / "calendario_tutti.parquet")
+    nxt = cal[cal.fam.isin(["RETAIL", "PPI"]) & (cal.t0 > pd.Timestamp.now(tz="UTC"))].head(3)
+    out["prossime"] = [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)]
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

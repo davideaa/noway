@@ -31,6 +31,36 @@ def atr14_h1(h1: pd.DataFrame, t0) -> float:
     return float(tr.mean()) if len(tr) == 14 else np.nan
 
 
+TFS = {"M1": 1, "M5": 5, "M15": 15, "M30": 30}
+
+
+def tf_candles(duka, t0, b0) -> dict:
+    """Candele bid Dukascopy (come MT5): 15 prima della news, quella della news, 9 dopo, per M1/M5/M15/M30. Pips dal bid prima della news."""
+    import time as _t
+    for k in range(6):
+        try:
+            m1 = duka.m1_range("XAUUSD", (t0 - pd.Timedelta(days=4)).date(), t0.date())
+            break
+        except Exception:  # noqa: BLE001
+            _t.sleep(5 * 2 ** k)
+    if m1.empty or m1.index.max() < t0 + pd.Timedelta(minutes=10):  # giorno non ancora pubblicato: M1 dai tick bid
+        tk = duka.ticks("XAUUSD", (t0 - pd.Timedelta(hours=8)).to_pydatetime(), (t0 + pd.Timedelta(hours=5)).to_pydatetime())
+        sb = pd.Series(tk.bid.to_numpy(float), index=pd.to_datetime(tk.ts_ms, unit="ms", utc=True))
+        g = sb.resample("1min", label="left", closed="left")
+        m1 = pd.DataFrame({"o": g.first(), "h": g.max(), "l": g.min(), "c": g.last()}).dropna()
+    out = {}
+    for name, mins in TFS.items():
+        g = m1.resample(f"{mins}min", label="left", closed="left")
+        b = pd.DataFrame({"o": g.o.first(), "h": g.h.max(), "l": g.l.min(), "c": g.c.last()}).dropna()
+        b = b[(b.index >= t0 - pd.Timedelta(minutes=15 * mins)) & (b.index < t0 + pd.Timedelta(minutes=10 * mins))]
+        before = b[b.index < t0].iloc[-15:]
+        after = b[b.index >= t0].iloc[:10]
+        rows = pd.concat([before, after])
+        out[name] = {"n0": len(before), "c": [[round((v - b0) / PIP, 1) for v in (r.o, r.h, r.l, r.c)] for r in rows.itertuples()],
+                     "t": [int((ix - t0).total_seconds() // 60) for ix in rows.index]}
+    return out
+
+
 def releases(ff: pd.DataFrame, t0) -> list[dict]:
     g = ff[(ff.currency == "USD") & (ff.t0 == t0)]
     return [{"nome": r.event, "imp": r.impact if isinstance(r.impact, str) else "", "act": r.actual if isinstance(r.actual, str) else "",
@@ -68,7 +98,7 @@ def event(p: Path, t0, h1) -> dict | None:
             "mov15": round((at(mid, 900_000) - m0) / PIP, 1), "mov60": round((at(mid, 3_600_000) - m0) / PIP, 1) if t.max() > 3_600_000 else None,
             "sp0": round(float(ask[pre[-1]] - bid[pre[-1]]) / PIP, 1),
             "spmax": round(float((ask - bid)[(t >= 0) & (t < 10_000)].max(initial=0)) / PIP, 1),
-            "atr": round(atr14_h1(h1, t0) / PIP, 1), "prezzo": round(m0, 2)}
+            "atr": round(atr14_h1(h1, t0) / PIP, 1), "prezzo": round(m0, 2), "b0": round(b0, 2)}
 
 
 if __name__ == "__main__":
@@ -81,7 +111,8 @@ if __name__ == "__main__":
     d = pd.to_datetime(ff.date, format="%a %b %d %Y", errors="coerce")
     hm = ff.time.str.extract(r"^(\d+):(\d+)$").astype(float)
     ff["t0"] = (d + pd.to_timedelta(hm[0], unit="h") + pd.to_timedelta(hm[1], unit="m")).dt.tz_localize("UTC")
-    h1 = DukascopyProvider().h1_range("XAUUSD", date(2010, 12, 1), now.date())
+    duka = DukascopyProvider()
+    h1 = duka.h1_range("XAUUSD", date(2010, 12, 1), now.date())
     CACHE.mkdir(parents=True, exist_ok=True)
     rows = []
     for r in sel.itertuples():
@@ -89,6 +120,7 @@ if __name__ == "__main__":
         if e is None:
             print("saltato", r.t0)
             continue
+        e["tf"] = tf_candles(duka, r.t0, e["b0"])
         rel = releases(ff, r.t0)
         main = next((x for x in rel if x["nome"] == "Retail Sales m/m"), None) or next((x for x in rel if x["nome"] == "PPI m/m"), None)
         a, f = (num(main["act"]), num(main["fc"])) if main else (None, None)
