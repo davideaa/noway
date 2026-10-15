@@ -53,7 +53,14 @@ def event(p: Path, t0, h1) -> dict | None:
     for x in BINS:
         m = (t >= x * 1000) & (t < (x + 10) * 1000)
         cand.append(None if not m.any() else [round((v - b0) / PIP, 1) for v in (bid[m][0], bid[m].max(), bid[m].min(), bid[m][-1])])
-    return {"cand": cand,
+    m1c = []  # candele M1 bid dalle 14:25 alle 14:45 (ora italiana), pips dal bid prima della news
+    for k in range(-5, 15):
+        m = (t >= k * 60_000) & (t < (k + 1) * 60_000)
+        m1c.append(None if not m.any() else [round((v - b0) / PIP, 1) for v in (bid[m][0], bid[m].max(), bid[m].min(), bid[m][-1])])
+    a60 = at(mid, 60_000)
+    return {"cand": cand, "m1c": m1c,
+            "dopo5": round((at(mid, 300_000) - a60) / PIP, 1), "dopo15": round((at(mid, 900_000) - a60) / PIP, 1),
+            "m5_bid": round((max(bid[w5].max(), b0) - min(bid[w5].min(), b0)) / PIP, 1),
             "m1_bid": round((max(bid[w1].max(), b0) - min(bid[w1].min(), b0)) / PIP, 1),
             "m1_mid": round((max(mid[w1].max(), m0) - min(mid[w1].min(), m0)) / PIP, 1),
             "m1_mov": round((at(mid, 60_000) - m0) / PIP, 1),
