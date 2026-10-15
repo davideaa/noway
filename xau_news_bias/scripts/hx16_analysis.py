@@ -62,7 +62,7 @@ def context(duka, h1, t0) -> dict:
 
 
 def excursions(t0) -> tuple[float, float]:
-    z = np.load(CACHE / f"{pd.Timestamp(t0, tz='UTC'):%Y%m%d_%H%M}.npz")
+    z = np.load(CACHE / f"{t0:%Y%m%d_%H%M}.npz")
     t, mid = z["t"], (z["bid"] + z["ask"]) / 2
     j = int(np.searchsorted(t, -60_000, side="right") - 1)
     w = mid[(t > t[j]) & (t < 60_000)]
@@ -70,7 +70,7 @@ def excursions(t0) -> tuple[float, float]:
 
 
 def fit(x, y):
-    X = np.column_stack([np.ones(len(x))] + list(x))
+    X = np.column_stack([np.ones(len(x[0]))] + [np.asarray(v, float) for v in x])
     beta, *_ = np.linalg.lstsq(X, y, rcond=None)
     return beta
 

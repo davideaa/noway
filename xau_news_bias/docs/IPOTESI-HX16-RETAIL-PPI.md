@@ -89,3 +89,58 @@ il contrario.
   controllo.
 - Il risultato della parte B, qualunque sia, anche se è tutto zero.
 - Tutte le release con candele da 10 s e tutti i dati usciti.
+
+## Risultati (dopo i commit `5852508` e `1b4e986`)
+
+File: `research_output/phase2/hx16/hx16_analisi.json`. Codice:
+`scripts/hx16_analysis.py`.
+
+**Errori trovati durante il calcolo**, tutti corretti prima di leggere un
+risultato:
+- il datafeed Dukascopy rispondeva 503: aggiunti tentativi ripetuti e una
+  cache;
+- un fuso orario passato due volte;
+- la matrice della regressione costruita male.
+
+Il 1° calcolo è stato fermato dal limite di tempo e ripreso dalla cache.
+
+Release: 166 nella ricerca 2011–19, 128 nella conferma 2020–26.
+
+### A — quanto muove: la stima dall'ATR H1 NON è affidabile
+
+| Grandezza | Copertura 10–90% nel 2020–26 (serviva 75–85%) | Errore mediano |
+|---|---|---|
+| Range bid prima M1 | **55%** | 103% |
+| Range 5 min | 60% | 76% |
+| Massimo sopra entro fine M1 | 62% | 120% |
+| Massimo sotto entro fine M1 | 57% | 136% |
+
+- Nel 2011–19 il range cresce poco con l'ATR (elasticità 0,33).
+- Dal 2023 la news muove molto più di quanto dica l'ATR. Range prima M1,
+  vero contro previsto: 2023 59 / 19 pips, 2024 65 / 21, 2026 120 / 32.
+- **Per la regola scritta prima la stima dall'ATR non passa.**
+
+Descrittivo, non è un test: le ultime 12 release (feb–set 2026) hanno un
+range bid della prima M1 con:
+- mediana **120 pips**;
+- 10° percentile 60, 90° percentile 143;
+- massimo 157 pips.
+
+### B — direzione dal contesto tecnico: niente
+
+- RSI M1, M5 e M15 oltre 70 o sotto 30 alle 14:29: meno di 25 segnali per
+  gruppo nel 2011–19, quindi non valutabili.
+- Tutte le altre regole indovinano fra il 46% e il 55%. Il miglior |z| è
+  0,73, quando il caso arriva a 1,85 di mediana. p familywise 1,00
+  ovunque.
+  - Regole: posizione nel range 24 h e 4 h (supply/demand), trend H1 e M5,
+    regime range/trend, apertura del giorno.
+- **Nessun candidato**: la conferma non si apre.
+
+## VERDETTO
+
+- **Direzione della candela Retail/PPI dal contesto tecnico: nessun
+  vantaggio.**
+- **Ampiezza**: l'ATR H1 non basta a prevederla. La stima più onesta è la
+  distribuzione delle ultime release (oggi circa 60–145 pips, mediana
+  120).
