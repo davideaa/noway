@@ -321,3 +321,15 @@ altre rosse fanno circa metà.
 Né prima della news né dopo il primo minuto, dopo i costi. L'unica
 informazione di direzione trovata (seguire la sorpresa per 4 minuti) vale
 2–3 pips e i costi la cancellano. Il 2024–26 non è stato aperto.
+
+## Emendamento 3 (15/10/2026): apertura del 2024–26 per RETAIL e PPI, su richiesta di Davide
+
+- **Cosa si apre.** Davide chiede un sito con tutte le Retail Sales e i PPI,
+  anni recenti compresi, per vedere quanto si muove l'oro. Per queste due
+  famiglie il 2024–26 si apre, **solo per descrivere** (ampiezza, candele,
+  dati usciti).
+- **Conseguenza.** Il test finale non è mai stato aperto. Da oggi, però,
+  il 2024–26 di RETAIL e PPI **non è più vergine**: una regola futura su
+  queste due news non potrà usarlo come test finale.
+- **Le altre 9 famiglie** restano chiuse.
+- **Nessuna regola nuova** si cerca su questi dati per il sito.
