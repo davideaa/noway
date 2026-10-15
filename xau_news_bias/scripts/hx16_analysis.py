@@ -1,6 +1,7 @@
 """H-X16 (docs/IPOTESI-HX16-RETAIL-PPI.md): A) quanto muove la prima M1 dato l'ATR H1; B) direzione dal contesto tecnico."""
 import json
 import sys
+import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -97,7 +98,20 @@ if __name__ == "__main__":
     df["t0"] = pd.to_datetime(df.d).dt.tz_localize("UTC")
     duka = DukascopyProvider()
     h1 = duka.h1_range("XAUUSD", (df.t0.min() - timedelta(days=10)).date(), df.t0.max().date())
-    ctx = [context(duka, h1, t) for t in df.t0]
+    cpath = R / "contesto_cache.json"
+    cache = json.loads(cpath.read_text()) if cpath.exists() else {}
+    for t in df.t0:
+        if str(t) in cache:
+            continue
+        for k in range(6):  # il datafeed Dukascopy risponde a volte 503: si riprova
+            try:
+                cache[str(t)] = context(duka, h1, t)
+                break
+            except Exception as e:  # noqa: BLE001
+                print("riprovo", t, e, flush=True)
+                time.sleep(5 * 2 ** k)
+        cpath.write_text(json.dumps(cache))
+    ctx = [cache[str(t)] for t in df.t0]
     df = pd.concat([df, pd.DataFrame(ctx)], axis=1)
     ex = [excursions(t) for t in df.t0]
     df["su"], df["giu"] = [e[0] for e in ex], [e[1] for e in ex]
