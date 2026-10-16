@@ -411,10 +411,14 @@ function tpRender(T, name, el, cls) {
   const yrs = Object.entries(T.per_anno);
   const bias = u.C_bias != null;
   el.innerHTML = `
-  <div class="${cls.note}"><p><b>Aspetta la chiusura delle 14:31, non mettere un take profit sui livelli tipici.</b></p>
-    <p>Quando la direzione è giusta, chiudere alle 14:31 ha reso <b>${r(u.C_giusta)}</b> a trade nel 2023–26; con il TP a ${f(o.B_pips)} pips solo ${r(u.TPb_giusta)}, con il TP a ${f(o.A_pips)} pips ${r(u.TPa_giusta)}.
-    Il TP ti fa perdere i colpi grandi, e valgono più delle wick che tornano indietro. Vale anche nel 2019–22 (${r(u0.C_giusta)} contro ${r(u0.TPb_giusta)}).
-    ${name === "NFP" ? "Per la NFP conviene anche tenere fino alle 14:35 (studio H-X13)." : "Per Retail e PPI la differenza è piccola: un TP alto (circa " + f(o.P90_pips * 0.6) + " pips) rende come la chiusura."}</p></div>
+  ${bias ? `<div class="${cls.note}"><p><b>Aspetta la chiusura delle 14:31, non mettere un take profit sui livelli tipici.</b></p>
+    <p>Seguendo la bias, nel 2023–26 chiudere alle 14:31 ha reso <b>${r(u.C_bias)}</b> a trade; con il TP a ${f(o.B_pips)} pips solo ${r(u.TPb_bias)}, con il TP a ${f(o.A_pips)} pips ${r(u.TPa_bias)}.
+    Il TP ti fa perdere i colpi grandi, e valgono più delle wick che tornano indietro. Nel 2019–22 la chiusura non era peggio: ${r(u0.C_bias)} contro ${r(u0.TPb_bias)} e ${r(u0.TPa_bias)}.
+    Per la NFP conviene anche tenere fino alle 14:35 (studio H-X13).</p></div>`
+  : `<div class="${cls.note}"><p><b>Chiusura delle 14:31 o take profit: si pareggiano.</b></p>
+    <p>Su ${name} non c'è una regola che dica la direzione prima, quindi il trade vero non si può misurare.
+    Anche prendendo la direzione della candela, che si sa solo dopo e favorisce la chiusura, nel 2023–26 rendono uguale: ${r(u.C_giusta)} chiudendo alle 14:31, ${r(u.TPb_giusta)} con il TP a ${f(o.B_pips)} pips.
+    Nessuno dei due è dimostrato migliore: scegli quello che ti fa eseguire meglio.</p></div>`}
   <div class="${cls.tiles}">
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 2 volte su 3</span><b class="${cls.v}">${f(o.A_pips)} pips</b></div>
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 1 volta su 2</span><b class="${cls.v}">${f(o.B_pips)} pips</b></div>
