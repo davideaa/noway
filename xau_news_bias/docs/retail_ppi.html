@@ -146,6 +146,11 @@ details.fold>.fb{padding:0 14px 14px;display:grid;gap:12px;min-width:0}
 .pay div{background:var(--bg);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
 .pay span{font-size:13px;color:var(--mute)}
 .pay b{font:700 22px/1.2 var(--f-num);font-variant-numeric:tabular-nums}
+
+.it .m{justify-self:start;font:600 12.5px/1.3 var(--f-num);color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,transparent);padding:3px 8px;border-radius:6px;margin:2px 0}
+.nope{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;padding:10px 14px;display:grid;gap:4px}
+.nope b{font:700 12.5px/1 var(--f-num);letter-spacing:.08em;text-transform:uppercase;color:var(--bad)}
+.nope ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px;color:var(--ink2)}
 </style>
 <main>
 <header>
@@ -168,7 +173,7 @@ details.fold>.fb{padding:0 14px 14px;display:grid;gap:12px;min-width:0}
 
 <section class="sec" aria-labelledby="h-sum">
   <div class="sechead"><h3 id="h-sum">In breve</h3><h2>Cosa funziona e cosa no</h2></div>
-  <div class="board" id="board"></div>
+  <div id="board" style="display:grid;gap:10px"></div>
 </section>
 
 <section class="sec" aria-labelledby="h-vol">
@@ -537,11 +542,15 @@ function pipsWhy(P, group, name, el, cls) {
 pipsWaterfall(document.getElementById("whyW"), D.pips29, "RETAIL_PPI", "Retail/PPI", {grid:"--grid", mute:"--mute", ink:"--ink", accent:"--accent"});
 pipsWhy(D.pips29, "RETAIL_PPI", "Retail/PPI", document.getElementById("whyT"), "small");
 
-function board(el, lanes) {
+function board(el, lanes, nope) {
   if (!el) return;
-  el.innerHTML = lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
-    L.items.map(x => `<div class="it"><b>${x.t}</b><p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("");
+  el.innerHTML = `<div class="board">` + lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
+    L.items.map(x => `<div class="it"><b>${x.t}</b>${x.m ? `<span class="m">${x.m}</span>` : ""}<p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("") + `</div>` +
+    (nope ? `<div class="nope"><b>Non usare</b><ul>${nope.map(x => `<li>${x}</li>`).join("")}</ul></div>` : "");
 }
+const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
+const pm = e => "±" + Math.round((Math.exp(e) - 1) * 100) + "%";
+const dec = (v, d = 2) => v.toFixed(d).replace(".", ",");
 function folds() {
   document.querySelectorAll("details.fold").forEach(d => d.addEventListener("toggle", () => { if (d.open) { dispatchEvent(new Event("resize")); if (typeof drawRegs === "function") drawRegs(); } }));
 }
@@ -711,19 +720,19 @@ drawRegs();
   const LQ = D.liv && D.liv.giorno ? D.liv.giorno.metodi[D.liv.giorno.scelto]["2023-26"] : null, Z = D.pips29 ? D.pips29.scomposizione_vs_2019.RETAIL_PPI["2026"] : null;
   const x = v => "×" + v.toFixed(1).replace(".", ","), pc = v => Math.round(v * 100) + "%", r2 = v => (v > 0 ? "+" : "−") + Math.abs(v).toFixed(2).replace(".", ",") + "R";
   const C = D.tp.uscite["2023-26"];
+  const RD = D.vol && D.vol.D ? D.vol.D.previsori[D.vol.D.scelto]["2023-26"] : null, RR = D.reg && D.reg.RETAIL_PPI ? D.reg.RETAIL_PPI.tabella[D.reg.RETAIL_PPI.scelto]["2023-26"] : null;
   board(document.getElementById("board"), [
     {k: "good", t: "Funziona", items: [
-      mY && {t: "Quanto muove la prima candela", d: `Nel ${Y} circa ${Math.round(mY)} pips dal minimo al massimo, wick compresa. Nel 2019–22 erano ${Math.round(m19)}.`, u: "Sai quanto spazio aspettarti. La direzione no."},
-      LQ && {t: "Fin dove può arrivare oggi", d: `Il livello "9 su 10" ha tenuto il ${pc(LQ.cop90_su)} delle volte (2023–26).`, u: "Mai un take profit oltre quel prezzo. Lo calcoli qui sotto con i tuoi prezzi."},
-      Z && {t: "Perché fa più pips di prima", d: `L'oro costa ${x(Z.prezzo)} rispetto al 2019 ed è più volatile (${x(Z.volatilita)}). I dati non sono più sorprendenti.`, u: "Ragiona in % del prezzo, non in pips fissi."}].filter(Boolean)},
-    {k: "warn", t: "Da verificare", items: [
-      {t: "Chiudere alle 14:31 o col take profit", d: `Rendono uguale: ${r2(C.C_giusta)} e ${r2(C.TPb_giusta)} a trade, sapendo la direzione. Nessuno dei due è dimostrato migliore.`, u: "Scegli quello che esegui meglio."},
-      uY.length && {t: `Release del ${Y} più grandi del solito`, d: `Il livello tipico "1 volta su 2" è stato superato ${kB} volte su ${uY.length}.`, u: "Aspettati candele più grandi dei livelli tipici."},
-      {t: "Retail: consensus e dato precedente", d: "Sulle sole Retail Sales l'oro ha seguito questa regola il 67% delle volte, ma l'ho trovata guardando i dati.", u: "Va provata dal vivo prima di usarla."}].filter(Boolean)},
-    {k: "bad", t: "Non funziona", items: [
-      {t: "Indovinare la direzione", d: "Analisi tecnica, nowcast, consensus, stop hunt, posizione nell'ADR: niente batte il caso.", u: `Senza direzione ogni uscita perde (${r2(C.C_caso)} a trade): non entrare prima per indovinarla.`},
-      {t: "Retail e PPI nello stesso giorno", d: "Negli ultimi anni non muovono più delle release da sole.", u: "Non aspettarti di più nei giorni doppi."},
-      {t: "Livelli della settimana e del massimo di ieri", d: "L'oro sale e li supera più spesso di quanto dica il passato.", u: "Per questo non sono sul sito."}]}]);
+      mY && {t: "Quanto muove la prima candela", m: `${Math.round(mY)} pips di mediana nel ${Y}${RR ? ` · stima: errore ${pm(RR.errore)}, fascia "1 su 2" giusta ${Math.round(RR.copertura * 100)} su 100` : ""}`, d: `Dal minimo al massimo, wick compresa. Nel 2019–22 erano ${Math.round(m19)}. Si sa quanto spazio aspettarsi, non la direzione.`, u: "Lo trovi in cima, alla voce Prossima news."},
+      LQ && {t: "Fin dove può arrivare oggi", m: `livello 9 su 10: tiene ${pc(LQ.cop90_su).replace("%", "")} su 100${RD ? ` · range del giorno: errore ${pm(RD.errore_mediano)}, correlazione ${dec(RD.spearman)}` : ""}`, d: "Prevede la giornata, non la candela della news e non la direzione.", u: "Mai un take profit oltre quel prezzo. Lo calcoli qui sotto con i tuoi prezzi."}].filter(Boolean)},
+    {k: "warn", t: "Funziona poco o da verificare", items: [
+      {t: "Chiudere alle 14:31 o col take profit", m: `${r2(C.C_giusta)} contro ${r2(C.TPb_giusta)} a trade: uguale`, d: "Nessuno dei due è dimostrato migliore.", u: "Scegli quello che esegui meglio."},
+      uY.length && {t: `Release del ${Y} più grandi del solito`, m: `livello "1 su 2" superato ${kB} volte su ${uY.length}`, d: "I livelli tipici usano anche periodi più calmi: per quest'anno sono bassi.", u: "Aspettati candele più grandi dei livelli tipici."},
+      {t: "Retail: forecast contro dato precedente", m: "66–68% giuste, ma +0,02R a trade · trovata a posteriori", d: "Se il forecast è sopra l'ultimo dato, oro giù; se è sotto, su. La candela Retail è piccola: con stop 100 pips rende quasi zero.", u: "Va provata dal vivo prima di usarla."}].filter(Boolean)}],
+    ["la direzione della prima candela con analisi tecnica, nowcast, consensus, stop hunt o posizione nell'ADR: niente batte il caso",
+     `entrare prima della news senza direzione: ogni uscita perde (${r2(C.C_caso)} a trade)`,
+     "aspettarsi di più quando Retail e PPI escono insieme: negli ultimi anni non muovono di più",
+     "i livelli della settimana e del massimo di ieri: non affidabili"]);
   folds();
 })();
 </script>

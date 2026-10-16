@@ -155,6 +155,11 @@ details.fold>.fb{padding:0 14px 14px;display:grid;gap:12px;min-width:0}
 .pay div{background:var(--bg);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
 .pay span{font-size:13px;color:var(--muted)}
 .pay b{font:700 22px/1.2 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+
+.it .m{justify-self:start;font:600 12.5px/1.3 "IBM Plex Mono",monospace;color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,transparent);padding:3px 8px;border-radius:6px;margin:2px 0}
+.nope{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:10px;padding:10px 14px;display:grid;gap:4px}
+.nope b{font:700 12.5px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--bad)}
+.nope ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px;color:var(--ink2)}
 </style>
 
 <div class="wrap">
@@ -172,7 +177,7 @@ details.fold>.fb{padding:0 14px 14px;display:grid;gap:12px;min-width:0}
 
 <section>
   <h2>In breve: cosa funziona</h2>
-  <div class="board" id="board"></div>
+  <div id="board" style="display:grid;gap:10px"></div>
 </section>
 
 <section>
@@ -691,11 +696,15 @@ function pipsWhy(P, group, name, el, cls) {
 pipsWaterfall(document.getElementById("whyW"), D.pips29, "NFP", "NFP", {grid:"--grid", mute:"--muted", ink:"--ink", accent:"--gold"});
 pipsWhy(D.pips29, "NFP", "NFP", document.getElementById("whyT"), "small muted");
 
-function board(el, lanes) {
+function board(el, lanes, nope) {
   if (!el) return;
-  el.innerHTML = lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
-    L.items.map(x => `<div class="it"><b>${x.t}</b><p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("");
+  el.innerHTML = `<div class="board">` + lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
+    L.items.map(x => `<div class="it"><b>${x.t}</b>${x.m ? `<span class="m">${x.m}</span>` : ""}<p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("") + `</div>` +
+    (nope ? `<div class="nope"><b>Non usare</b><ul>${nope.map(x => `<li>${x}</li>`).join("")}</ul></div>` : "");
 }
+const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
+const pm = e => "±" + Math.round((Math.exp(e) - 1) * 100) + "%";
+const dec = (v, d = 2) => v.toFixed(d).replace(".", ",");
 function folds() {
   document.querySelectorAll("details.fold").forEach(d => d.addEventListener("toggle", () => { if (d.open) { dispatchEvent(new Event("resize")); if (typeof drawRegs === "function") drawRegs(); } }));
 }
@@ -867,20 +876,21 @@ drawRegs();
   const LQ = D.liv && D.liv.giorno ? D.liv.giorno.metodi[D.liv.giorno.scelto]["2023-26"] : null;
   const Z = D.pips29 ? D.pips29.scomposizione_vs_2019.NFP["2026"] : null;
   const x = v => "×" + v.toFixed(1).replace(".", ",");
+  const fx = v => "×" + v.toFixed(1).replace(".", ",");
+  const RD = D.vol && D.vol.D ? D.vol.D.previsori[D.vol.D.scelto]["2023-26"] : null, NR = D.reg && D.reg.NFP ? D.reg.NFP.tabella[D.reg.NFP.scelto]["2023-26"] : null;
   board($("#board"), [
     {k: "good", t: "Funziona", items: [
-      {t: "La regola NFP", d: `Fai il contrario della NFP precedente. Direzione giusta ${sA.k} volte su ${sA.n} dal 2014 (${fPct(sA.k / sA.n)})${res.length ? `; dal vivo ${lk} su ${res.length}` : ""}.`, u: "Entra alle 14:29:30 nella direzione scritta in alto, stop 60–100 pips."},
-      U.C_bias != null && {t: "Chiudere alle 14:31", d: `Nel 2023–26 chiudere a fine minuto ha reso ${fR(U.C_bias)} a NFP; il take profit sui livelli tipici ${fR(U.TPb_bias)}.`, u: "Niente take profit: aspetta la chiusura della candela."},
-      LQ && {t: "Fin dove può arrivare oggi", d: `Il livello "9 su 10" ha tenuto il ${fPct(LQ.cop90_su)} delle volte (2023–26).`, u: "Mai un take profit oltre quel prezzo. Lo calcoli qui sotto con i tuoi prezzi."},
-      Z && {t: "Perché fa più pips di prima", d: `L'oro costa ${x(Z.prezzo)} rispetto al 2019 ed è più volatile (${x(Z.volatilita)}). I dati non sono più sorprendenti.`, u: "Ragiona in % del prezzo, non in pips fissi."}].filter(Boolean)},
-    {k: "warn", t: "Da verificare dal vivo", items: [
-      {t: "Tenere fino alle 14:35", d: "Nel passato un po' meglio delle 14:31, ma di poco.", u: "La registro dal vivo dalla NFP del 6 novembre."},
-      med && {t: `NFP del ${Y} più grandi del solito`, d: `Quest'anno la candela è arrivata a ${Math.round(med)} pips di mediana: i livelli tipici del sito sono bassi.`, u: "Quando hai ragione, prendi molto più di 1R."},
-      {t: "Giorni di NFP e livelli di ieri", d: "Se alle 14:00 il massimo o il minimo di ieri non è ancora toccato, nei giorni di NFP viene toccato circa 1 volta su 2; in un giorno normale 1 su 4.", u: "Solo un'indicazione: circa 30 casi."}].filter(Boolean)},
-    {k: "bad", t: "Non funziona", items: [
-      {t: "Indovinare la direzione in altri modi", d: "Analisi tecnica, posizione nel range (ADR), stop hunt, sorpresa prevista: tutti vicini al 50%.", u: "Per la direzione usa solo la regola NFP."},
-      {t: "La stessa regola sul CPI", d: "Indovina il 49% e perde 0,21R a trade.", u: "Sul CPI non tradare la direzione."},
-      {t: "Livelli della settimana e del massimo di ieri", d: "L'oro sale e li supera più spesso di quanto dica il passato: non sono affidabili.", u: "Per questo non sono sul sito."}]}]);
+      {t: "La regola NFP: c'è edge", m: `${fPct(sA.k / sA.n)} giuste (${sA.k} su ${sA.n}) · ${fR(sA.mean).replace(".", ",")} a trade · p ${dec(pOne(sA.k, sA.n), 3)}`, d: `Fai il contrario della NFP precedente. Dal 2014 batte il caso, ma l'ho trovata guardando questi dati e prima del 2014 non funzionava (49%)${res.length ? `. Dal vivo: ${lk} su ${res.length}` : ""}.`, u: "Entra alle 14:29:30 nella direzione scritta in alto, stop 60–100 pips."},
+      U.C_bias != null && {t: "Chiudere alle 14:31", m: `${fR(U.C_bias).replace(".", ",")} a trade contro ${fR(U.TPb_bias).replace(".", ",")} col take profit (2023–26)`, d: "Il take profit taglia le candele grandi, che valgono più delle wick che tornano indietro.", u: "Niente take profit: aspetta la chiusura della candela."},
+      LQ && {t: "Fin dove può arrivare oggi", m: `livello 9 su 10: tiene ${Math.round(LQ.cop90_su * 100)} su 100${RD ? ` · range del giorno: errore ${pm(RD.errore_mediano)}, correlazione ${dec(RD.spearman)}` : ""}`, d: "Prevede la giornata, non la candela della news e non la direzione.", u: "Mai un take profit oltre quel prezzo. Lo calcoli qui sotto con i tuoi prezzi."}].filter(Boolean)},
+    {k: "warn", t: "Funziona poco o da verificare", items: [
+      {t: "Quanti pips farà la prossima NFP", m: `errore tipico ${NR ? pm(NR.errore) : "±50%"} · correlazione quasi zero (0–0,3)`, d: "Si sa l'ordine di grandezza, non quale NFP sarà grande. Nel 2026 è stata spesso più grande della stima.", u: "Usala come idea, non come take profit."},
+      {t: "Tenere fino alle 14:35", m: "+0,24R di vantaggio contro +0,20R alle 14:31 (2014–26)", d: "Un po' meglio, ma di poco.", u: "La registro dal vivo dalla NFP del 6 novembre."},
+      med && {t: `NFP del ${Y} più grandi del solito`, m: `${Math.round(med)} pips di mediana · livello "1 su 2" superato ${(D.tp.ultime || []).filter(r => r.d.startsWith(Y) && r.arr_pips >= r.B_pips).length} volte su ${ult.length}`, d: "I livelli tipici del sito usano anche il 2025, più calmo: per quest'anno sono bassi.", u: "Quando hai ragione, prendi molto più di 1R."},
+      {t: "Giorni di NFP e livelli di ieri", m: "toccati 47–50% contro 23–28% previsto · circa 30 casi", d: "Se alle 14:00 il massimo o il minimo di ieri non è toccato, nei giorni di NFP viene toccato circa il doppio delle volte.", u: "Solo un'indicazione."}].filter(Boolean)}],
+    ["la direzione con analisi tecnica, posizione nel range (ADR), stop hunt o sorpresa prevista: tutti fra 45% e 53%",
+     "la stessa regola sul CPI: 49% giuste, −0,21R a trade",
+     "i livelli della settimana e del massimo di ieri: non affidabili, l'oro li supera più spesso del previsto"]);
   const box = $("#tradebox");
   if (box) {
     const w = Math.round(sA.k / sA.n * 10), r = v => v.toFixed(1).replace(".", ",");
