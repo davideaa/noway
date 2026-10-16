@@ -171,6 +171,9 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 16/10 | tutte | Davide: migliorare puntata dopo puntata guardando i dati, senza cambiare la linea editoriale | `social/metriche.py` dopo ogni pubblicazione → `social/metriche.json`; ogni sabato `reel-analista` aggiorna `social/PUBBLICO.md` e sceglie UNA prova; i limiti sono in `social/LINEA-EDITORIALE.md` |
 | 16/10 | tutte | Davide: niente righe con le fonti scritte nel video | tolta da `serie.js` (scena finale) e dalle regole del regista; le fonti restano in `pN-fonti.md` e nella caption |
 | 16/10 | 11–15 | Prova della settimana 3: le persone guardano in media 5–17 s su 75–80 s | la voce parte a 0,62 s invece di 1,24 s (`FIRST` in `produci.sh`), numero iniziale più breve |
+| 16/10 | 13, 15 | Verifica finale sul mix: frasi segnalate per la musica sotto (P13 tutte a posto sulla voce da sola); P15 «crollano» detto «corollano», «proprio i» detto «propri», «dov'eri» scritto «dove eri» | sempre ricontrollare su `pulite/narrazione.wav`; rifatte solo le due frasi vere; «dove eri» = «dov'eri» in `rigenera2.py` E `verifica_finale.py` |
+| 16/10 | 15 | `rigenera2.py N` rilanciato con il numero di riga sbagliato (contavo dalla prima frase parlata, ma l'indice 0 è `num`) | prima di rifare una frase: `python3 -c "import json;[print(i,k) for i,(_,k) in enumerate(json.load(open('righe.json')))]"` e usare l'indice stampato |
+| 16/10 | 15 | Foglio provini con fotogrammi grigi scambiati per un difetto | è il `flash` dei cambi scena (terzo argomento di `serie()`), voluto e uguale in tutte le puntate dalla 2: non è sfarfallio |
 
 ### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
 Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):
