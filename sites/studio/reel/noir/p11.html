@@ -202,22 +202,30 @@ function sDuemilaventi(t, a, b) { bg('60,26,24', 0.7); x.save();
   glassPill(540, 1408, 'IN UN ANNO', seg(t, tAp - 0.15, tAp + 0.3), C.red, 40);
   x.restore(); finish(t); }
 
-/* ================= FRIGO: in teoria, se il futuro è incerto il frigo si rimanda, il pane no ================= */
+/* ================= FRIGO: in teoria, con il futuro incerto, le spese grosse (frigo, auto, casa) si rimandano =================
+   Romer 1990 (teoria) + BCE 2026 (intenzione dichiarata: «delay major purchases, e.g. home, car, appliances»). Niente pane: la BCE vede calare anche i non durevoli. */
+function icoHouse(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath();
+  x.moveTo(cx - 50, cy - 6); x.lineTo(cx, cy - 46); x.lineTo(cx + 50, cy - 6); x.moveTo(cx - 38, cy - 14); x.lineTo(cx - 38, cy + 40); x.lineTo(cx + 38, cy + 40); x.lineTo(cx + 38, cy - 14); x.stroke();
+  rr(cx - 12, cy + 12, 24, 28, 4); x.stroke(); x.restore(); }
+function bigBuy(cx, cy, k, ghost, fn, label) { if (k <= 0) return; const s = lerp(0.8, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy);
+  x.save(); x.globalAlpha *= 1 - 0.65 * ghost; glass(cx, cy, 200, 170, 28, clamp(k * 2)); x.globalAlpha *= clamp(k * 2); fn(); x.restore();
+  if (ghost > 0) { x.save(); x.globalAlpha *= ghost; x.strokeStyle = C.amber; x.lineWidth = 3; x.setLineDash([10, 8]); rr(cx - 110, cy - 95, 220, 190, 32); x.stroke(); x.restore(); }
+  x.restore(); lab(label, cx, cy + 128, clamp(k * 2), C.ink, { size: 24 }); }
 function sFrigo(t, a, b) { bg('48,40,22', 0.55); x.save(); zoom(t, a, b, 1.04);
-  const tTe = WT('frigo', 'teoria', 1, 2.61), tFu = WT('frigo', 'futuro', 1, 3.56), tIn = WT('frigo', 'incerto', 1, 4.67), tRi = WT('frigo', 'rimandi', 1, 5.45), tPa = WT('frigo', 'pane', 1, 6.23);
-  phrase(t, a + 0.05, [['Torna il frigo:', C.ink]], 345, { size: 92 });
-  phrase(t, tRi - 0.1, [['lo rimandi, il pane no.', C.amber]], Y2, { size: 92 });
+  const tTo = WT('frigo', 'torna', 1, 0.94), tTe = WT('frigo', 'teoria', 1, 2.45), tIn = WT('frigo', 'incerto', 1, 3.81), tGr = WT('frigo', 'grosse', 1, 4.9), tRi = WT('frigo', 'rimandano', 1, 5.53);
+  phrase(t, tTo - 0.25, [['Torna il frigo:', C.ink]], 345, { size: 92, out: tGr - 0.45 });
+  phrase(t, tGr - 0.2, [['Spese grosse:', C.ink]], 345, { size: 92 });
+  phrase(t, tRi - 0.1, [['si rimandano.', C.amber]], Y2, { size: 92 });
   honestTag(540, 570, 'IN TEORIA', t, tTe - 0.1);
   /* nebbia del futuro incerto */
-  const kF = oC(seg(t, tFu - 0.2, tIn + 0.3)); if (kF > 0) for (let i = 0; i < 6; i++) { const fx = 160 + ((i * 160 + (t - tFu) * 40) % 820), fy = 700 + 40 * Math.sin(i * 1.7 + t * 0.6); glow(fx, fy, 150, '139,149,143', 0.1 * kF); }
+  const kF = oC(seg(t, tIn - 0.5, tIn + 0.3)); if (kF > 0) for (let i = 0; i < 6; i++) { const fx = 160 + ((i * 160 + (t - tIn) * 40) % 820), fy = 700 + 40 * Math.sin(i * 1.7 + t * 0.6); glow(fx, fy, 150, '139,149,143', 0.1 * kF); }
   glassPill(690, 680, 'FUTURO INCERTO?', seg(t, tIn - 0.2, tIn + 0.25), C.amber, 34);
-  const kR = oC(seg(t, tRi - 0.1, tRi + 0.5));
-  x.save(); x.translate(-30 * kR, 20 * kR); fridge(320, 1200, 250, 470, { k: seg(t, a, a + 0.45), ghost: 0.85 * kR, light: oC(seg(t, a + 0.3, a + 0.9)) * (1 - kR) }); x.restore();
-  lab('SI RIMANDA', 300, 1275, seg(t, tRi, tRi + 0.4), C.amber, { size: 28 });
-  const kP = seg(t, tPa - 0.15, tPa + 0.4), bounce = kP > 0 && kP < 1 ? Math.sin(Math.PI * kP) * 26 : 0;
-  if (kP > 0) glow(760, 1140, 220, '200,250,114', 0.3 * clamp(kP * 2));
-  loaf(760, 1200 - bounce, 0.9, oC(seg(t, a + 0.15, a + 0.6)), 'PANE');
-  lab('NON SI RIMANDA', 760, 1275, seg(t, tPa, tPa + 0.4), C.lime, { size: 28 });
+  const kR = oC(seg(t, tRi - 0.1, tRi + 0.45)), dx = 26 * kR;
+  /* il frigo è a schermo dall'inizio; auto e casa si aggiungono su «grosse»; su «rimandano» tutto diventa tratteggiato */
+  x.save(); x.translate(dx, 0); fridge(540, 1215, 230, 430, { k: seg(t, a, a + 0.4), ghost: 0.85 * kR, light: oC(seg(t, a + 0.2, a + 0.8)) * (1 - kR) }); x.restore();
+  bigBuy(240 + dx, 1050, seg(t, tGr - 0.1, tGr + 0.3), kR, () => icoCar(240 + dx, 1050, C.ink), 'AUTO');
+  bigBuy(830 + dx, 1050, seg(t, tGr + 0.05, tGr + 0.45), kR, () => icoHouse(830 + dx, 1050, C.ink), 'CASA');
   x.restore(); finish(t); }
 
 /* ================= DUREVOLI: tre tubi, il puck oscilla con ampiezza in scala con la deviazione standard ================= */
