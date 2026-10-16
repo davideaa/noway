@@ -288,12 +288,12 @@ function pilChart(t, o = {}) { const { kIn = 1, span = 2.5, n20 = 0, n08 = 0, la
   /* linea 2020 */
   if (n20 > 0) { const PT = I20.map((v, q) => [X(q), GY(v)]); x.save(); x.globalAlpha *= 1 - 0.45 * dim20; x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = 7; x.strokeStyle = C.red; polyTo(PT, n20); x.stroke(); x.restore();
     if (n20 < 7) dot(...tip(PT, n20), 11, C.red, 1, '255,90,78');
-    if (lab20 > 0) { dot(...PT[2], 10, C.red, lab20); txt('IL MINIMO', PT[2][0] + 24, PT[2][1] + 2, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'left', ls: 2, alpha: lab20 }); } /* niente cifra: la voce qui dice «quasi il nove» */
+    if (lab20 > 0) { dot(...PT[2], 10, C.red, lab20); txt('MINIMO TRIMESTRALE', PT[2][0] + 24, PT[2][1] + 2, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'left', ls: 2, alpha: lab20 }); } /* niente cifra: la voce qui dice «quasi il nove» */
     if (est > 0) { dot(...PT[7], 12, C.lime, est, '200,250,114'); txt('ESTATE 2021', PT[7][0] + 24, PT[7][1] - 60, { fam: 'mono', size: 26, weight: 600, color: C.lime, align: 'left', ls: 2, alpha: est }); } }
 }
 function sVu(t, a, b) { bg('52,26,24', 0.5); x.save();
   const tPe = WT('vu', 'perde', 1, 0.9), tQu = WT('vu', 'quasi', 1, 1.2), tRi = WT('vu', 'risale', 1, 2.9), tLi = WT('vu', 'livello', 1, 4.6), tFi = WT('vu', 'fine', 1, 5.1), tEs = WT('vu', 'estate', 1, 7.5);
-  phrase(t, a + 0.05, [['In un anno', C.ink]], 345, { size: 92, out: tLi - 0.35 });
+  phrase(t, a + 0.05, [['In media d’anno', C.ink]], 345, { size: 92, out: tLi - 0.35 }); /* −8,7% è la media 2020, il grafico è trimestrale */
   phrase(t, tQu - 0.1, [['quasi −9%.', C.red]], Y2, { size: 92, out: tLi - 0.35 });
   phrase(t, tFi - 0.1, [['Fine 2019 di nuovo', C.ink]], 345, { size: 92 });
   phrase(t, tEs - 0.1, [['nell’estate 2021.', C.lime]], Y2, { size: 92 });
