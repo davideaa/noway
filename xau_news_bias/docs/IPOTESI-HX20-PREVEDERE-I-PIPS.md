@@ -55,3 +55,47 @@ Per NFP e per Retail/PPI, ogni release dal 2014 al 2026:
   siti, con la sua fascia e l'errore dichiarato.
 - Se nessun V batte N24, la stima resta quella di H-X19 (ultime 24
   release).
+
+## Risultati (dopo i commit `8b4a245` e dello script)
+
+File: `research_output/phase2/hx16/hx20_prevedere.json`. Codice:
+`scripts/hx20_prevedere.py`.
+
+Errore mediano |log(vero ÷ previsto)|: 0,20 = sbaglia di circa il 20%,
+0,40 = circa il 50%. I migliori 4:
+
+| | 2019–22 | 2023–26 | Spearman 2023–26 |
+|---|---|---|---|
+| **NFP, candela M1**: N3 | 0,33 | **0,23** | 0,19 |
+| N24 | **0,25** | 0,34 | −0,40 |
+| V252 | 0,34 | 0,35 | 0,00 |
+| V126 | 0,35 | 0,36 | 0,07 |
+| **NFP, arrivo**: V21 | 0,47 | 0,41 | 0,17 |
+| N24 | 0,35 | 0,42 | −0,30 |
+| **Retail/PPI, candela M1**: N12 | 0,33 | **0,19** | 0,43 |
+| N3 | 0,33 | 0,19 | 0,46 |
+| V126 | 0,39 | 0,24 | 0,03 |
+| **Retail/PPI, arrivo**: N12 | 0,51 | **0,32** | 0,22 |
+| N3 | 0,54 | 0,34 | 0,27 |
+
+- **La volatilità generale dell'oro NON prevede la candela della news.**
+  Nessun orizzonte funziona (settimana, mese, trimestre, semestre, anno,
+  ATR H1): lo Spearman fra la volatilità di prima e la candela è circa
+  zero in quasi tutti i casi.
+- Il rapporto (arrivo ÷ volatilità del mese) cambia molto da un anno
+  all'altro:
+  - NFP: 0,20 (2020), 0,48 (2024), 0,29 (2026);
+  - Retail/PPI: 0,08 (2020), 0,21 (2023), **0,05 (2026)**.
+  - Nel 2026 l'oro si muove il doppio tutti i giorni (range giornaliero
+    medio 2,2–2,5% contro 1,2–1,5%), ma le news, **in proporzione**, meno.
+- **Funziona meglio la memoria della news stessa**: le ultime release
+  della stessa news.
+  - **Retail/PPI**: N12 o N3, errore di circa il 20% nel 2023–26.
+  - **NFP**: nessun previsore vince in tutti e due i periodi. N3 vince nel
+    2023–26, N24 nel 2019–22; l'errore resta del 25–40%.
+- **Decisione**: per Retail/PPI la stima "quanto aspettarsi" usa le ultime
+  12 release (N12). Per la NFP restano le ultime 24 (H-X19), con
+  l'avvertenza che la NFP è la meno prevedibile.
+- Volatilità di oggi (range giornaliero medio): settimana 1,77%, mese
+  1,88%, trimestre 2,17%, semestre 2,28%, anno 2,54%. Sta **scendendo**
+  dal picco del 2026.
