@@ -210,5 +210,5 @@ Moltiplicatori della media geometrica del range M1:
   passo, perché la sensibilità cambia nel tempo. Resta il modello di
   H-X23 (memoria + tensione prima della news).
 - 🟡 **NFP 2026**: metà delle release è 2–3 volte più grande di quello
-  che la formula spiega. Si registra dal vivo dalla NFP del 6/11, senza
-  cambiare niente adesso.
+  che la formula spiega. Da registrare dal vivo, se Davide lo vuole,
+  senza cambiare niente adesso.

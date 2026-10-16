@@ -64,3 +64,66 @@ sul sito.
   candela H1 chiusa prima della news, probabilità prevista contro quota
   vera. Dice se la news fa toccare il livello più spesso del previsto.
   Non è un test, perché i giorni di news sono pochi e già visti.
+
+## Risultati (dopo i commit `082c4e4` e `cdc3cf8`)
+
+File: `research_output/phase2/hx16/hx30_ieri.json`. Codice:
+`scripts/hx30_ieri.py`.
+- Primo giro fermato da un 503 di Dukascopy sui tick di oggi.
+- Aggiunti dei nuovi tentativi in `fresh` (solo stato di adesso), poi
+  rigirato. La prova non cambia.
+
+### Minimo di ieri: 🟢 calibrato
+
+| | Prevista | Vera | Fasce (≥200 casi), scarto massimo |
+|---|---|---|---|
+| 2019–22 (17.255 controlli) | 24,6% | 23,8% | 4,0 punti (30–40%: 34,1 contro 30,1) |
+| 2023–26 (16.223) | 22,8% | 22,3% | 3,3 punti (40–50%: 46,2 contro 42,9) |
+
+### Massimo di ieri: 🔴 non calibrato
+
+| | Prevista | Vera | Fasce (≥200 casi), scarto massimo |
+|---|---|---|---|
+| 2019–22 (15.530) | 23,7% | **27,0%** | **13,7 punti** (50–60%: 57,6 contro 71,3) |
+| 2023–26 (14.308) | 25,0% | 26,0% | **7,4 punti** (60–70%: 64,7 contro 72,1) |
+
+- Nelle fasce centrali il massimo di ieri viene toccato **più spesso** del
+  previsto, di 6–14 punti nel 2019–22 e di 7 nel 2023–26.
+- È lo stesso motivo per cui la settimana non passa in H-X28. Dal 2019
+  l'oro sale, e le tabelle dal 2012 comprendono gli anni in discesa.
+- **Per la regola scritta prima (massimo E minimo) H-X30 non passa.** Non
+  va sul sito.
+
+### Descrittivo
+
+Giorni 2023–26 (2019–22 quasi uguale):
+- toccato il massimo di ieri: 52,8%;
+- toccato il minimo di ieri: 43,7%;
+- tutti e due: 10,8%;
+- nessuno dei due: 14,4%.
+
+**Giorni di news**, al controllo dell'ultima H1 chiusa prima della news,
+2023–26 (n circa 30–50):
+
+| | Massimo di ieri, previsto → vero | Minimo di ieri, previsto → vero |
+|---|---|---|
+| NFP | 28% → **47%** | 23% → **50%** |
+| CPI | 28% → 37% | 24% → 31% |
+| Retail/PPI | 22% → 22% | 17% → 25% |
+
+- Nei giorni di NFP il livello di ieri non ancora toccato viene toccato
+  circa **il doppio** delle volte rispetto a un giorno normale nella
+  stessa situazione.
+- È descrittivo, con pochi casi già visti. Al massimo è un'idea da
+  registrare dal vivo.
+
+## VERDETTO
+
+- 🔴 **Non passa**: la probabilità sul massimo di ieri sottostima di 7–14
+  punti nelle fasce centrali. Nessuna probabilità sul massimo o minimo di
+  ieri va sul sito.
+- 🟢 Il lato minimo da solo è calibrato. Non basta, perché la regola
+  chiedeva tutti e due.
+- Per correggere il trend servirebbe un metodo nuovo, per esempio tabelle
+  sugli ultimi 3 anni. Andrebbe pre-registrato e provato **dal vivo**,
+  perché il 2019–26 è già visto.

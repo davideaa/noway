@@ -136,8 +136,16 @@ def fresh(h1: pd.DataFrame) -> pd.DataFrame:
     start, end = h1.index[-1] + pd.Timedelta(hours=1), pd.Timestamp.now(tz="UTC").floor("h")
     if end <= start:
         return h1
-    tk = DukascopyProvider().ticks("XAUUSD", start.to_pydatetime(), end.to_pydatetime())
-    if not len(tk):
+    import time
+    tk = None
+    for wait in (0, 5, 15, 30):
+        time.sleep(wait)
+        try:
+            tk = DukascopyProvider().ticks("XAUUSD", start.to_pydatetime(), end.to_pydatetime())
+            break
+        except Exception as e:  # il datafeed risponde 503 a volte
+            print("tick di oggi non disponibili, riprovo:", e)
+    if tk is None or not len(tk):
         return h1
     s = pd.Series(tk.bid.to_numpy(), index=pd.to_datetime(tk.ts_ms, unit="ms", utc=True))
     o = s.resample("1h").ohlc().dropna().rename(columns={"open": "o", "high": "h", "low": "l", "close": "c"})
