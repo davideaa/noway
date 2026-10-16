@@ -11,6 +11,7 @@ NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|un
 def norm(s):
     s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ").replace("g7", "gi sette").replace("€", " euro ")
     s = re.sub(r"\be mezzo\b", " ", s)
+    s = s.replace("dov eri", "doveri")   # «dov'eri» Whisper lo scrive attaccato
     s = re.sub(r"\bw\b", " doppia vu ", s); s = re.sub(r"\bv\b", " vu ", s)   # Whisper scrive «W» e «V» per «doppia vu» e «vu»                      # «quattro e mezzo» = «4,5»
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))
     import unicodedata
