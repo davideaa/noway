@@ -186,7 +186,7 @@
   "gancio": "L'economia non cresce in linea retta: respira, tra espansioni e contrazioni.",
   "spiega": [
    "Il PIL oscilla attorno a una tendenza di lungo periodo: fasi di espansione, picco, contrazione, minimo.",
-   "Le fasi sono guidate soprattutto dai motori instabili, come investimenti e consumi di beni durevoli.",
+   "Le oscillazioni più ampie si vedono negli investimenti e nei consumi di beni durevoli, come auto e grandi elettrodomestici.",
    "Non ha durata fissa: nessuno sa prevedere con certezza quando arriva il prossimo picco."
   ],
   "esempio": "Usare la serie del PIL trimestrale italiano dal 2000 di ISTAT ed evidenziare espansioni e contrazioni.",
@@ -203,7 +203,7 @@
   "caso_reale": false,
   "gancio": "Due trimestri di PIL in calo: basta per dire recessione?",
   "spiega": [
-   "Regola pratica: recessione è un calo del PIL per due trimestri consecutivi.",
+   "Regola pratica, non ufficiale: recessione è un calo del PIL per due trimestri consecutivi.",
    "Negli Stati Uniti la data la fissa il NBER, guardando anche occupazione, redditi e produzione.",
    "In recessione calano produzione e ore lavorate, salgono i licenziamenti: gli effetti durano oltre il PIL."
   ],
@@ -219,13 +219,13 @@
   "n": 13,
   "titolo": "Domanda e offerta aggregata",
   "caso_reale": false,
-  "gancio": "Come domanda e offerta di un mercato, ma per l'economia intera.",
+  "gancio": "Lo schema somiglia a quello di un mercato, ma il significato è un altro: qui c'è l'economia intera.",
   "spiega": [
    "La domanda aggregata è la spesa totale: consumi, investimenti, spesa pubblica, export netto, a ogni livello dei prezzi.",
    "L'offerta aggregata è quanto le imprese producono, a seconda di prezzi e costi.",
    "Il loro incrocio dà insieme produzione e livello generale dei prezzi: il punto di equilibrio."
   ],
-  "esempio": "Grafico AD-AS da manuale: livello dei prezzi sulle ordinate, PIL reale sulle ascisse. Stesso schema di micro, ma per tutta l'economia.",
+  "esempio": "Grafico AD-AS da manuale: livello medio dei prezzi sulle ordinate, PIL reale sulle ascisse. Somiglia allo schema di un singolo mercato, ma le curve hanno un significato diverso.",
   "ti_serve": "È il modello su cui si basano gli esercizi di macro su crisi e politiche.",
   "visual": "Due curve di vetro che si incrociano; il punto di equilibrio brilla e proietta valori sugli assi.",
   "collega": [
@@ -256,9 +256,9 @@
   "caso_reale": true,
   "gancio": "Due crisi enormi in dodici anni. Ma sono nate in modo diverso.",
   "spiega": [
-   "2008: crisi finanziaria nata dai mutui USA; dopo il fallimento di Lehman Brothers credito e spesa crollano. Shock di domanda.",
-   "2020: il Covid ferma insieme produzione e spesa. Shock di offerta e di domanda contemporaneamente.",
-   "Il 2008 ha avuto una ripresa lenta, il 2020 un rimbalzo rapido: la causa cambia la forma della crisi."
+   "2008: crisi finanziaria nata dai mutui USA; dopo il fallimento di Lehman Brothers credito, export e investimenti crollano.",
+   "2020: la pandemia ferma insieme produzione e spesa, ma il sistema finanziario regge.",
+   "Il 2008 ha avuto una ripresa lenta, con una seconda caduta; il 2020 un rimbalzo rapido. Il livello del 2008 è tornato solo nel 2022."
   ],
   "esempio": "Lehman Brothers fallisce il 15 settembre 2008; l'OMS dichiara la pandemia l'11 marzo 2020. Confrontare il PIL italiano 2009 e 2020 su ISTAT.",
   "ti_serve": "Applicare AD-AS a fatti veri: è il ragionamento richiesto agli esami e nei colloqui.",
