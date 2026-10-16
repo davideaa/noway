@@ -24,6 +24,10 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
    più uno a fine scena per i contatori. Guardi il foglio provini e correggi finché è pulito.
 
 ## Regole nate dai controlli (non ripetere)
+- Prima di cominciare leggi `sites/studio/social/PUBBLICO.md` e `sites/studio/social/LINEA-EDITORIALE.md`: lo stile della serie non si cambia,
+  si migliora (fluidità, varietà, leggibilità). La prima scena dopo il numero deve agganciare subito.
+- **Niente righe con le fonti scritte nel video** (Davide, 16/10/2026): niente diciture tipo «ISTAT · CONTI NAZIONALI …» nelle scene.
+  Restano le etichette di onestà («ESEMPIO · CIFRE INVENTATE», «dato provvisorio», «in teoria») e la riga «Contenuto educativo».
 - Titolo `phrase` su 2 righe a size 92: y di partenza ≥ 345 (a 320 la prima riga esce dalla zona sicura).
 - Nessuna scritta sotto 22 px; etichette vicine mai a contatto (misurarle con `tw`); linee e frecce mai sopra le scritte.
 - Più etichette sulle stesse curve (es. flussi del circuito): posizioni diverse lungo la curva, non tutte a metà.

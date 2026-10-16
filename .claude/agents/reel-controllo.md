@@ -25,6 +25,7 @@ Numero N e cartella di lavoro `~/reel-lavoro/pN/` (video `PuntataN.mp4`, `mix.wa
 5. **Struttura**: numero gigante iniziale, «Oggi è <giorno giusto>: lezione X di 5», «Domani: …» = titolo della puntata N+1 in `lezioni.json`,
    like/commento/segui, firma col numero, riga «Contenuto educativo · Non è consulenza finanziaria».
 6. **Stile del testo**: `voce/controlla_copione.py` senza errori; il testo letto di fila scorre (niente elenchi «Primo/Secondo»).
+7. **Linea editoriale**: nessuna riga con le fonti scritta nel video (Davide, 16/10/2026); la serie resta riconoscibile (`social/LINEA-EDITORIALE.md`).
 
 ## Tempo
 Massimo ~5 minuti. Niente analisi oltre la lista (niente formanti o spettrogrammi): un dubbio di pronuncia confermato sulla voce

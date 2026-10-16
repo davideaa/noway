@@ -168,6 +168,9 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 09/10 | 8 | `produci.sh` avrebbe fatto il render con un `p8.html` non finito | se il regista non ha finito, `produci.sh` si ferma dopo il montaggio e si riprende con `DA=4` |
 | 09/10 | tutte | Disco al 99% | prima di produrre: cancellare `out-pN` vecchi, cache pip/uv, `node_modules`; MAI `~/.cache/huggingface` (modelli) |
 | 09/10 | 7, 9, 10 | Voce lenta (~25–40 min a puntata) mentre i registi e i render usano il processore | una voce alla volta (`flock`); mettere in coda, non in parallelo |
+| 16/10 | tutte | Davide: migliorare puntata dopo puntata guardando i dati, senza cambiare la linea editoriale | `social/metriche.py` dopo ogni pubblicazione → `social/metriche.json`; ogni sabato `reel-analista` aggiorna `social/PUBBLICO.md` e sceglie UNA prova; i limiti sono in `social/LINEA-EDITORIALE.md` |
+| 16/10 | tutte | Davide: niente righe con le fonti scritte nel video | tolta da `serie.js` (scena finale) e dalle regole del regista; le fonti restano in `pN-fonti.md` e nella caption |
+| 16/10 | 11–15 | Prova della settimana 3: le persone guardano in media 5–17 s su 75–80 s | la voce parte a 0,62 s invece di 1,24 s (`FIRST` in `produci.sh`), numero iniziale più breve |
 
 ### Miglioramento FATTO il 02/10 (prima era «il prossimo»)
 Le scene leggono i **tempi delle parole** (`taglia.py` → `rNN.parole.json` → `monta_cues.py` → `cues.json` «words» → `window.WORDS`; helper `WT()` in serie.js):

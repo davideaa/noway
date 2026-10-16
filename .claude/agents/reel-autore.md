@@ -31,6 +31,8 @@ Una frase può continuare nella riga dopo (riga che finisce con la virgola): il 
 - Righe tra 6 e 30 parole; niente righe di 3 parole o meno. Totale 190–235 parole (≈ 75–85 s).
 - Parole straniere o difficili: grafia come si pronunciano in italiano (es. «tochenizzato»).
 - Usa solo i dati di `pN-fonti.md`, detti come lì suggerito. Nessun dato in più.
+- Prima di scrivere leggi `sites/studio/social/PUBBLICO.md` (cosa funziona col pubblico e la prova della settimana) e
+  `sites/studio/social/LINEA-EDITORIALE.md` (cosa non si cambia). Il gancio conta più di tutto: le persone decidono nei primi 3 secondi.
 - Niente affermazioni più forti delle fonti: superlativi («la voce più…»), «mai/sempre», «la maggior parte», «molti economisti»,
   nessi causali («perché…») solo se `pN-fonti.md` li verifica. Altrimenti: «una voce che…», «alcuni», «c'è chi sostiene».
 

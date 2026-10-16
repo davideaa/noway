@@ -65,7 +65,7 @@ function circuit(t, o = {}) {
 
 // ---------- scene nuove della struttura fissa ----------
 function sNum(t, a, b) { bg('30,44,26'); x.save();
-  const k = oC(seg(t, 0, 0.5)), ko = ioC(seg(t, b - 0.45, b));
+  const L = b - a, k = oC(seg(t, a, a + Math.min(0.5, L * 0.4))), ko = ioC(seg(t, b - Math.min(0.45, L * 0.35), b));   /* adatta: dal 16/10 il numero dura 0,6 s (la voce parte prima) */
   const s = lerp(1.25, 1, k) * lerp(1, 0.25, ko), y = lerp(960, 330, ko);
   glow(540, y, 520 * s, '200,250,114', 0.25 * k * (1 - ko));
   x.save(); x.translate(540, y); x.scale(s, s); txt(String(P.EP), 0, 0, { size: 820, weight: 800, color: C.ink, alpha: k * (1 - ko * 0.9), blur: (1 - k) * 20, ls: -30 }); x.restore();
@@ -127,7 +127,7 @@ function sEnd2(t, a) { bg('30,44,26'); x.save();
   x.save(); x.translate(540, 820); x.scale(clamp(k, 0, 1.2), clamp(k, 0, 1.2)); txt(String(P.EP), 0, 0, { size: 520, weight: 800, color: C.lime, ls: -20 }); x.restore();
   txt(typed('@macro.algo.desk', t, a + 0.5, 28), 540, 1160, { size: 54, weight: 800, color: C.ink, ls: -1 });
   txt('CONTENUTO EDUCATIVO · NON È CONSULENZA FINANZIARIA', 540, 1300, { fam: 'mono', size: 20, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, a + 0.8, a + 1.2)) });
-  txt(P.FONTE, 540, 1340, { fam: 'mono', size: 20, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, a + 0.8, a + 1.2)) });
+  /* dal 16/10/2026 niente riga delle fonti nel video (Davide): le fonti stanno in pN-fonti.md e nella caption */
   x.restore(); finish(t); }
 
 function flash(t, a2, d = 0.14) { const k = seg(t, a2 - d / 2, a2 + d / 2); if (k <= 0 || k >= 1) return; x.fillStyle = `rgba(255,255,255,${Math.sin(k * Math.PI) * 0.55})`; x.fillRect(0, 0, W, H); }
