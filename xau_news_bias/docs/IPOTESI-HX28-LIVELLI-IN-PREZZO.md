@@ -121,3 +121,75 @@ Si dice che quantile è davvero, cioè quante volte il massimo resta sotto.
   - i livelli in dollari su una scala di prezzo.
 - I livelli **non sono un segnale di direzione**. H-X23 ha già mostrato
   che la posizione nel range non dice dove va la news.
+
+## Risultati (dopo i commit `e7aa680` e `7b02edf`)
+
+File: `research_output/phase2/hx16/hx28_livelli.json`. Codice:
+`scripts/hx28_livelli.py`. Pips al prezzo del 16/10/2026 (4.177 $).
+
+**Giorno** (2019–22 / 2023–26):
+
+| Metodo | Massimo sotto Su_90 | Minimo sopra Giù_90 | Tutto dentro | Nuovo massimo, previsto–vero | Nuovo minimo, previsto–vero | Si ferma prima del tipico (su, giù) | Larghezza fascia 90 (pips) | Affidabile |
+|---|---|---|---|---|---|---|---|---|
+| A | 90% / 90% | 92% / 92% | 82% / 83% | 50–52% / 51–51% | 50–49% / 50–46% | 47, 54% / 48, 52% | 962 / 1.074 | **sì** |
+| B | 90% / 90% | 91% / 92% | 82% / 83% | 50–52% / 50–51% | 49–49% / 48–46% | 46, 54% / 48, 52% | 962 / 1.067 | **sì** |
+| **C** | 91% / 92% | 92% / 93% | 83% / 85% | 50–52% / 51–51% | 49–49% / 48–46% | 46, 54% / 48, 52% | **930 / 1.034** | **sì** |
+
+- **Tutti e tre affidabili per la regola scritta prima.** Vince **C**: la
+  fascia del 2023–26 è più stretta di A del 3,7% (sopra la soglia del 3%).
+- La fascia si stringe durante il giorno. Mediana 2023–26 con C, per
+  fascia di 2 ore dalle 22:00 UTC:
+  - 1.285 pips all'inizio;
+  - 1.046 alle 10–12 UTC;
+  - **908 alle 12–14 UTC**, prima delle news delle 14:30;
+  - 604 alla fine.
+- **ADR classico di TradingView** (L + ADR21 sopra, H − ADR21 sotto):
+  - è un livello da 7 su 10, non da 9 su 10: il massimo resta sotto il
+    73% / 71% delle volte, il minimo sopra il 74% / 74%;
+  - è più stretto: 796 / 876 pips.
+
+**Settimana**:
+
+| Metodo | Massimo sotto Su_90 | Minimo sopra Giù_90 | Nuovo massimo, previsto–vero | Nuovo minimo, previsto–vero | Affidabile |
+|---|---|---|---|---|---|
+| A | 89% / **86%** | 91% / 94% | 49–56% / 51–56% | 51–48% / 49–**40%** | no |
+| B | 89% / **86%** | 91% / 94% | 48–56% / 50–56% | 50–48% / 49–**40%** | no |
+| C | 89% / 89% | 92% / 94% | **50–56%** / 54–56% | 49–48% / 46–**40%** | no |
+
+- **Nessun metodo è affidabile per la settimana.** Dal 2019 l'oro fa nuovi
+  massimi settimanali più spesso di quanto dica il passato (56% contro
+  49–51%) e nuovi minimi meno spesso (40% contro 46–49%). È il trend
+  rialzista. Le tabelle, stimate dal 2012, comprendono il 2013–15 in
+  discesa.
+- Per la regola scritta prima, sul sito non vanno livelli in prezzo per la
+  settimana. Resta il range settimanale di H-X21, che è affidabile.
+
+**Livelli del 16/10/2026** dopo la candela delle 09:00 UTC:
+- prezzo 4.176,94 $; massimo 4.192,02; minimo 4.147,05; ADR21 1,87%;
+- nuovo massimo 53%: di solito fino a 4.214,98 (+380 pips), 9 su 10 non
+  oltre 4.238,71 (+618);
+- nuovo minimo 45%: di solito fino a 4.123,59 (−534), 9 su 10 non sotto
+  4.101,20 (−757).
+
+**Cambi e limiti, dichiarati**:
+- Dopo il primo giro ho corretto **solo lo stato di adesso**. La H1 di
+  Dukascopy del giorno in corso non era ancora pubblicata, e lo script
+  mostrava il giorno prima. Ora le ore mancanti si rifanno dai tick bid
+  (`fresh`), e solo per i livelli di oggi. I numeri della prova sono
+  identici nei due giri.
+- Nella prova è escluso per errore anche il 15/10/2026, che era già
+  finito: lo script toglie "l'ultimo giorno", e il 16/10 non c'era ancora.
+  È un giorno su circa 2.800: non cambia niente.
+- Il giorno parte alle 22:00 UTC. D'estate l'MT5 di Davide lo fa
+  probabilmente partire alle 21:00 UTC. Per questo la pagina permette di
+  inserire massimo e minimo del proprio grafico.
+
+## VERDETTO
+
+- **Giorno: affidabile.** Va sui siti con il metodo C, in una pagina
+  interattiva.
+- **La fascia "9 su 10" è larga** perché l'oro oggi fa circa 780 pips al
+  giorno. I numeri utili per stringere sono:
+  - la probabilità di un nuovo massimo o minimo;
+  - il livello "di solito", che è un livello 1 su 2.
+- **Settimana: non affidabile.** Niente livelli in prezzo per la settimana.

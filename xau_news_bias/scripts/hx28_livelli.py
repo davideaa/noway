@@ -131,31 +131,55 @@ def run(df: pd.DataFrame, freq: str, price: float) -> dict:
     return res
 
 
-def live(df: pd.DataFrame, m: str, freq: str) -> dict:
-    last = df.key.max()
-    tr = df[df.key < last]
-    t = table(tr, KEYS[m]).reset_index()
-    a = table(tr, KEYS["A"]).reset_index()
-    cur = df[df.key == last].iloc[-1]
-    x = apply(df[df.key == last].iloc[[-1]], tr, m).iloc[0]
-    fmt = lambda d: [{k: (None if (isinstance(v, float) and not np.isfinite(v)) else (round(float(v), 4) if isinstance(v, (float, np.floating)) else int(v))) for k, v in r.items()} for r in d.to_dict("records")]
-    return {"metodo": m, "S_pct": round(float(cur.S), 4), "apertura": float(cur.O), "massimo": float(cur.H), "minimo": float(cur.L),
-            "prezzo": float(cur.P), "k": int(cur.k), "inizio": str(last.date()), "ora_candela_utc": str(cur.name),
-            "livelli": {k: round(float(x[k]), 2) for k in ("su90", "giu90", "su_tip", "giu_tip")} | {"p_su": round(float(x.pu), 3), "p_giu": round(float(x.pv), 3)},
-            "tabella": fmt(t), "tabella_A": fmt(a), "min_n": MIN_N, "fascia_ore": CFG[freq]["tb"]}
+def fresh(h1: pd.DataFrame) -> pd.DataFrame:
+    """Ore complete dopo l'ultima H1 pubblicata, rifatte dai tick bid. Solo per lo stato di adesso, mai nella prova."""
+    start, end = h1.index[-1] + pd.Timedelta(hours=1), pd.Timestamp.now(tz="UTC").floor("h")
+    if end <= start:
+        return h1
+    tk = DukascopyProvider().ticks("XAUUSD", start.to_pydatetime(), end.to_pydatetime())
+    if not len(tk):
+        return h1
+    s = pd.Series(tk.bid.to_numpy(), index=pd.to_datetime(tk.ts_ms, unit="ms", utc=True))
+    o = s.resample("1h").ohlc().dropna().rename(columns={"open": "o", "high": "h", "low": "l", "close": "c"})
+    return pd.concat([h1[["o", "h", "l", "c"]], o]).sort_index()
+
+
+def live(h1: pd.DataFrame, df: pd.DataFrame, m: str, freq: str) -> dict:
+    c = CFG[freq]
+    day = (h1.index + H2).normalize().tz_localize(None)
+    key = day if freq == "D" else day - pd.to_timedelta(day.dayofweek, unit="D")
+    cur_key = key[-1]
+    cur = h1[key == cur_key]
+    b = bars(h1, freq)
+    S = float(b.r[b.index < cur_key].iloc[-c["win"]:].mean())
+    O, H, L, P = float(cur.o.iat[0]), float(cur.h.max()), float(cur.l.min()), float(cur.c.iat[-1])
+    k = int(min(c["kmax"], ((cur.index[-1] + H2).tz_localize(None) - cur_key) // pd.Timedelta(hours=1)))
+    sc = O / 100 * S
+    row = pd.DataFrame([{"O": O, "H": H, "L": L, "P": P, "S": S, "k": k, "tb": k // c["tb"],
+                         "ub": int(np.digitize((H - L) / sc, [.5, 1.0])), "pb": int(np.digitize((P - L) / (H - L) if H > L else .5, [1 / 3, 2 / 3]))}])
+    tr = df[df.key < cur_key]
+    x = apply(row, tr, m).iloc[0]
+    fmt = lambda d: [{kk: (None if (isinstance(v, float) and not np.isfinite(v)) else (round(float(v), 4) if isinstance(v, (float, np.floating)) else int(v))) for kk, v in r.items()} for r in d.to_dict("records")]
+    return {"metodo": m, "S_pct": round(S, 4), "apertura": O, "massimo": H, "minimo": L, "prezzo": P, "k": k,
+            "inizio": str(cur_key.date()), "ultima_candela_utc": str(cur.index[-1]),
+            "livelli": {kk: round(float(x[kk]), 2) for kk in ("su90", "giu90", "su_tip", "giu_tip")} | {"p_su": round(float(x.pu), 3), "p_giu": round(float(x.pv), 3)},
+            "tabella": fmt(table(tr, KEYS[m]).reset_index()), "tabella_A": fmt(table(tr, KEYS["A"]).reset_index()),
+            "min_n": MIN_N, "fascia_ore": c["tb"]}
 
 
 if __name__ == "__main__":
     R = get_settings().research_dir / "phase2" / "hx16"
     h1 = DukascopyProvider().h1_range("XAUUSD", date(2012, 1, 1), date.today())
     price = float(h1.c.iat[-1])
-    out = {"prezzo_oggi": price, "ultima_candela_utc": str(h1.index[-1])}
+    h1_now = fresh(h1)
+    price = float(h1_now.c.iat[-1])
+    out = {"prezzo_oggi": price, "ultima_candela_utc": str(h1_now.index[-1])}
     for freq, lab in (("D", "giorno"), ("W", "settimana")):
         df = checkpoints(h1, freq)
         out[lab] = run(df[df.key < df.key.max()], freq, price)  # il giorno/la settimana in corso non è finito
         out[lab]["n_controlli"] = int(len(df))
         if out[lab]["scelto"]:
-            out[lab]["oggi"] = live(df, out[lab]["scelto"], freq)
+            out[lab]["oggi"] = live(h1_now, df, out[lab]["scelto"], freq)
         print(lab, "scelto", out[lab]["scelto"])
         for m, q in out[lab]["metodi"].items():
             print(" ", m, q["affidabile"], {p: {k: q[p][k] for k in ("cop90_su", "cop90_giu", "dentro_90", "p_su_prevista", "p_su_vera", "tipico_su", "tipico_giu", "larghezza_pips_oggi")} for p in PERIODS})
