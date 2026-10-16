@@ -14,6 +14,7 @@ if __name__ == "__main__":
     for k in ("ultime",):
         data["tp"].pop(k, None)
     data["vol"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx21_range.json").read_text(encoding="utf-8"))
+    data["reg"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx22_regime.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")

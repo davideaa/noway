@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>XAU News Bias</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,11 +138,14 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 <section>
   <h2>Oggi e questa settimana: quanto si muove l'oro</h2>
   <div id="volbox" style="display:grid;gap:10px"></div>
+  <div id="regD"></div>
 </section>
 
 <section>
   <h2>Dove chiudere</h2>
   <div id="tpbox" style="display:grid;gap:12px"></div>
+  <h3 style="margin-top:6px">Il regime della news nel tempo</h3>
+  <div id="regN"></div>
 </section>
 
 <section>
@@ -581,4 +585,36 @@ function volRender(V, el, cls) {
   <p class="${cls.small}">"Livello tipico": il prezzo di solito arriva, dal lato dove va, all'${Math.round(D.escursione_dall_apertura.max_lato_mediana * 100)}% del range del giorno. Non sai da che lato: il livello è sopra o sotto. Alla news invece questo non funziona: la candela delle 14:30 non segue la volatilità del mese (studio H-X20). Calcolato il ${D.periodo} sui prezzi fino alle ${V.ora.slice(11)} UTC.</p>`;
 }
 volRender(D.vol, document.getElementById("volbox"), {tw:"tw", table:"pt", sub:"sub", small:"small muted"});
+function regimeChart(host, rows, opt) {
+  // rows: [data, vero %, stima %, basso %, alto %, prezzo]; tutto in pips al prezzo di quel giorno
+  if (!host || !rows || !rows.length) return;
+  const cs = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const NS = "http://www.w3.org/2000/svg", mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const P = rows.map(r => ({d: r[0], v: r[1] / 100 * r[5] * 10, p: r[2] / 100 * r[5] * 10, lo: r[3] / 100 * r[5] * 10, hi: r[4] / 100 * r[5] * 10})).filter(r => isFinite(r.p));
+  const W = Math.max(330, Math.min(900, host.clientWidth || 720)), H = W < 520 ? 250 : 290, L = 48, R = 12, T = 16, B = 26;
+  const t0 = new Date(P[0].d).getTime(), t1 = new Date(P[P.length - 1].d).getTime();
+  const x = d => L + (new Date(d).getTime() - t0) / Math.max(1, t1 - t0) * (W - L - R);
+  const vmax = Math.max(...P.map(r => Math.max(r.hi, Math.min(r.v, r.hi * 1.6)))) * 1.05, y = v => T + (1 - Math.min(v, vmax) / vmax) * (H - T - B);
+  const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img", "aria-label": opt.aria, style: "display:block;height:auto;touch-action:pan-y"});
+  const step = [10, 20, 25, 50, 100, 200, 250, 500, 1000].find(s => vmax / s <= 5) || 1000;
+  for (let v = 0; v <= vmax; v += step) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: cs(opt.grid)})); svg.append(mk("text", {x: L - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: cs(opt.mute), "font-family": "monospace"}, Math.round(v))); }
+  const yrs = [...new Set(P.map(r => r.d.slice(0, 4)))];
+  yrs.forEach(yy => { const xx = x(yy + "-01-01"); if (xx >= L && xx <= W - R) { svg.append(mk("line", {x1: xx, x2: xx, y1: T, y2: H - B, stroke: cs(opt.grid)})); svg.append(mk("text", {x: xx + 3, y: H - 8, "font-size": 11, fill: cs(opt.mute), "font-family": "monospace"}, yy)); } });
+  const band = P.map(r => `${x(r.d)},${y(r.hi)}`).join(" ") + " " + P.slice().reverse().map(r => `${x(r.d)},${y(r.lo)}`).join(" ");
+  svg.append(mk("polygon", {points: band, fill: cs(opt.accent), opacity: .14}));
+  P.forEach(r => svg.append(mk("circle", {cx: x(r.d), cy: y(r.v), r: opt.dot || 2, fill: cs(opt.mute), opacity: r.v > vmax ? .9 : .45})));
+  svg.append(mk("polyline", {points: P.map(r => `${x(r.d)},${y(r.p)}`).join(" "), fill: "none", stroke: cs(opt.accent), "stroke-width": 2}));
+  const last = P[P.length - 1];
+  svg.append(mk("circle", {cx: x(last.d), cy: y(last.p), r: 4, fill: cs(opt.accent)}));
+  svg.append(mk("text", {x: x(last.d) - 6, y: y(last.p) - 8, "text-anchor": "end", "font-size": 12, "font-weight": 700, fill: cs(opt.ink), "font-family": "monospace"}, `${Math.round(last.p)} pips`));
+  const wrap = document.createElement("div"); wrap.style.position = "relative"; wrap.append(svg);
+  const tip = document.createElement("div"); tip.hidden = true; tip.style.cssText = `position:absolute;pointer-events:none;background:${cs(opt.ink)};color:${cs(opt.bg)};font:12px/1.4 monospace;padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-115%)`; wrap.append(tip);
+  const show = e => { const rc = svg.getBoundingClientRect(), sx = (e.clientX - rc.left) / rc.width * W; let best = P[0], bd = 1e9; for (const r of P) { const dd = Math.abs(x(r.d) - sx); if (dd < bd) { bd = dd; best = r; } }
+    tip.innerHTML = `${best.d}<br>vero ${Math.round(best.v)} pips<br>stima ${Math.round(best.p)} (fascia ${Math.round(best.lo)}–${Math.round(best.hi)})`; tip.style.left = Math.min(rc.width - 70, Math.max(70, x(best.d) / W * rc.width)) + "px"; tip.style.top = (y(best.v) / H * rc.height) + "px"; tip.hidden = false; };
+  svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+  host.innerHTML = ""; host.append(wrap);
+  if (opt.legend) { const lg = document.createElement("p"); lg.style.cssText = "margin:6px 0 0;font-size:12.5px;color:" + cs(opt.mute); lg.innerHTML = opt.legend; host.append(lg); }
+}
+regimeChart(document.getElementById("regD"), D.reg.giorno.serie, {...{accent:"--gold", mute:"--muted", grid:"--grid", ink:"--ink", bg:"--bg"}, aria: "Range giornaliero vero e stimato", legend: "Punti: range vero di ogni giorno, dal minimo al massimo. Linea: la stima fatta la mattina con gli ultimi 21 giorni. Fascia: dove cade 8 giorni su 10. La stima si adatta da sola quando la volatilità cambia."});
+regimeChart(document.getElementById("regN"), D.reg.NFP.serie, {...{accent:"--gold", mute:"--muted", grid:"--grid", ink:"--ink", bg:"--bg"}, dot: 4, aria: "Arrivo della news vero e stimato", legend: "Punti: quanto è arrivata ogni NFP dentro il minuto, dalla parte giusta, entrando alle 14:29:30. Linea: la stima prima di ogni NFP (mediana delle 24 precedenti, in % del prezzo). Fascia: metà delle volte. Il metodo che si adatta da solo al regime qui non è stabile: resta la finestra di 24."});
 </script>
