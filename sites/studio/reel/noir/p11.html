@@ -136,7 +136,7 @@ function sTrimestri(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
   for (let r = 0; r < 9; r++) txt(String(2000 + r * 3), QG.x0 - 18, QG.y0 + r * QG.rp + QG.c / 2, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'right', alpha: clamp(kIn * 2 - r * 0.12) });
   const pul = Math.sin(Math.PI * seg(t, tSc - 0.1, tSc + 0.8));
   for (let i = 0; i < GDP.length; i++) { const [cx, cy] = qPos(i), tf = tS + D * i / GDP.length, u = seg(t, tf, tf + 0.28), ki = clamp(kIn * 2 - i / 140);
-    if (ki <= 0) continue; const shown = u >= 0.5, red = NEG[i], sx = Math.max(0.06, Math.abs(Math.cos(Math.PI * u))), sc = shown && red ? 1 + 0.16 * pul : 1;
+    if (ki <= 0) continue; const shown = u >= 0.5, red = NEG[i], sx = Math.max(0.06, Math.abs(Math.cos(Math.PI * u))), sc = shown && red ? 1 + 0.06 * pul : 1; /* 52 × 1,06 = 55: restano 4 px d'aria tra le tessere */
     if (shown && red && pul > 0) glow(cx, cy, 60, '255,90,78', 0.35 * pul);
     x.save(); x.globalAlpha *= ki; x.translate(cx, cy); x.scale(sx * sc, sc);
     rr(-QG.c / 2, -QG.c / 2, QG.c, QG.c, 10);
