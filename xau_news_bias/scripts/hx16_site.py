@@ -1,33 +1,29 @@
-"""Costruisce docs/retail_ppi.html (sito Retail Sales e PPI, separato dal foglio NFP) da hx16/retail_ppi.json e hx16_analisi.json."""
+"""Costruisce docs/retail_ppi.html (sito Retail Sales e PPI, separato dal foglio NFP): solo i dati che la pagina usa."""
 import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from build_site import livelli, load, pips29, volatilita  # noqa: E402
 from xnb.config import get_settings  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
 if __name__ == "__main__":
-    R = get_settings().research_dir / "phase2" / "hx16"
-    data = json.loads((R / "retail_ppi.json").read_text())
-    an = json.loads((R / "hx16_analisi.json").read_text())
-    dir_rows = [r for r in an["direzione"] if r["gruppo"] in ("TUTTE",)] + [r for r in an["direzione"] if r["gruppo"] != "TUTTE"]
-    out = {"ev": data["ev"], "atr_oggi": data["atr_oggi"], "creato": data["creato"], "n_ricerca": an["n_ricerca"],
-           "amp": {"cop": an["ampiezza"]["m1_bid"]["copertura_2020_26"]},
-           "dir": [{k: r[k] for k in ("gruppo", "regola", "n", "quota")} for r in dir_rows]}
     import pandas as pd
+    R = get_settings().research_dir / "phase2" / "hx16"
+    data = load(R / "retail_ppi.json")
+    ev = [{"d": e["d"], "y": e["y"], "tipo": e["tipo"], "prezzo": e["prezzo"], "m1_bid": e["m1_bid"], "m1_mov": e["m1_mov"],
+           "m1c5": e["m1c"][5] if e.get("m1c") and len(e["m1c"]) > 5 else None} for e in data["ev"]]
     cal = pd.read_parquet(R.parent / "hx15" / "calendario_tutti.parquet")
     nxt = cal[cal.fam.isin(["RETAIL", "PPI"]) & (cal.t0 > pd.Timestamp.now(tz="UTC"))].head(3)
-    out["prossime"] = [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)]
-    tp = json.loads((R / "hx19_tp.json").read_text())
-    out["tp"] = {**tp["RETAIL_PPI"], "prezzo": tp["prezzo_oggi"]}
-    out["vol"] = json.loads((R / "hx21_range.json").read_text(encoding="utf-8"))
-    out["liv"] = json.loads((R / "hx28_livelli.json").read_text(encoding="utf-8"))
-    out["liv"]["per_ora"] = json.loads((R / "hx28_per_ora.json").read_text(encoding="utf-8"))
-    out["pips29"] = {k: v for k, v in json.loads((R / "hx29_pips.json").read_text(encoding="utf-8")).items() if k in ("copertura", "modello", "scomposizione_vs_2019")}
-    out["reg"] = json.loads((R / "hx22_regime.json").read_text(encoding="utf-8"))
+    tp = load(R / "hx19_tp.json")["RETAIL_PPI"]
+    reg = load(R / "hx22_regime.json")["RETAIL_PPI"]
+    out = {"ev": ev, "prossime": [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)],
+           "tp": {k: tp[k] for k in ("uscite", "ultime")}, "reg": {"scelto": reg["scelto"], "tabella": reg["tabella"]},
+           "vol": volatilita(), "liv": livelli(), "pips29": pips29("RETAIL_PPI")}
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

@@ -172,7 +172,10 @@ def live(h1: pd.DataFrame, df: pd.DataFrame, m: str, freq: str) -> dict:
             "inizio": str(cur_key.date()), "ultima_candela_utc": str(cur.index[-1]),
             "livelli": {kk: round(float(x[kk]), 2) for kk in ("su90", "giu90", "su_tip", "giu_tip")} | {"p_su": round(float(x.pu), 3), "p_giu": round(float(x.pv), 3)},
             "tabella": fmt(table(tr, KEYS[m]).reset_index()), "tabella_A": fmt(table(tr, KEYS["A"]).reset_index()),
-            "min_n": MIN_N, "fascia_ore": c["tb"]}
+            "min_n": MIN_N, "fascia_ore": c["tb"],
+            # solo per il grafico del sito: candele H1 di ieri e di oggi
+            "candele": [[str(t), round(float(r.o), 2), round(float(r.h), 2), round(float(r.l), 2), round(float(r.c), 2)]
+                        for t, r in h1[key >= sorted(set(key[key < cur_key]))[-1]].iterrows()] if (key < cur_key).any() else []}
 
 
 if __name__ == "__main__":

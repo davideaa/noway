@@ -95,7 +95,10 @@ def decompose(df: pd.DataFrame, beta: float, gamma: float, yfe: dict, ffe: dict)
                             "totale": round(float(np.exp(tot)), 2), "prezzo": round(float(np.exp(pr)), 2),
                             "volatilita": round(float(np.exp(vo)), 2), "sorpresa": round(float(np.exp(su)), 2),
                             "famiglie": round(float(np.exp(fm)), 2), "resto": round(float(np.exp(tot - pr - vo - su - fm)), 2),
-                            "S_mediana": round(float(s.S[s.y == y].median()), 2)}
+                            "S_mediana": round(float(s.S[s.y == y].median()), 2),
+                            # valori assoluti (medie geometriche) per il simulatore del sito
+                            "prezzo_usd": round(float(np.exp(mean.l_px[y])), 1), "adr_pct": round(float(np.exp(mean.l_adr21[y])), 4),
+                            "S_geo": round(float(np.exp(mean.l_S[y]) - 1), 3)}
         res[g] = rows
     return res
 

@@ -120,7 +120,10 @@
     "sorpresa": 1.0,
     "famiglie": 1.0,
     "resto": 1.0,
-    "S_mediana": 0.79
+    "S_mediana": 0.79,
+    "prezzo_usd": 1388.4,
+    "adr_pct": 1.0736,
+    "S_geo": 0.921
    },
    "2020": {
     "n": 75,
@@ -131,7 +134,10 @@
     "sorpresa": 1.22,
     "famiglie": 0.98,
     "resto": 0.64,
-    "S_mediana": 1.67
+    "S_mediana": 1.67,
+    "prezzo_usd": 1746.2,
+    "adr_pct": 1.644,
+    "S_geo": 3.232
    },
    "2021": {
     "n": 70,
@@ -142,7 +148,10 @@
     "sorpresa": 1.1,
     "famiglie": 1.0,
     "resto": 0.89,
-    "S_mediana": 2.02
+    "S_mediana": 2.02,
+    "prezzo_usd": 1798.8,
+    "adr_pct": 1.3131,
+    "S_geo": 1.8
    },
    "2022": {
     "n": 86,
@@ -153,7 +162,10 @@
     "sorpresa": 1.05,
     "famiglie": 0.96,
     "resto": 1.06,
-    "S_mediana": 1.32
+    "S_mediana": 1.32,
+    "prezzo_usd": 1797.0,
+    "adr_pct": 1.3721,
+    "S_geo": 1.321
    },
    "2023": {
     "n": 114,
@@ -164,7 +176,10 @@
     "sorpresa": 1.0,
     "famiglie": 0.86,
     "resto": 1.56,
-    "S_mediana": 0.76
+    "S_mediana": 0.76,
+    "prezzo_usd": 1942.1,
+    "adr_pct": 1.1912,
+    "S_geo": 0.915
    },
    "2024": {
     "n": 125,
@@ -175,7 +190,10 @@
     "sorpresa": 0.97,
     "famiglie": 0.85,
     "resto": 1.33,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 2369.3,
+    "adr_pct": 1.349,
+    "S_geo": 0.715
    },
    "2025": {
     "n": 110,
@@ -186,7 +204,10 @@
     "sorpresa": 0.99,
     "famiglie": 0.86,
     "resto": 0.82,
-    "S_mediana": 0.72
+    "S_mediana": 0.72,
+    "prezzo_usd": 3312.3,
+    "adr_pct": 1.5713,
+    "S_geo": 0.819
    },
    "2026": {
     "n": 69,
@@ -197,7 +218,10 @@
     "sorpresa": 0.98,
     "famiglie": 0.89,
     "resto": 1.05,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 4636.4,
+    "adr_pct": 2.7484,
+    "S_geo": 0.744
    }
   },
   "NFP": {
@@ -210,7 +234,10 @@
     "sorpresa": 1.0,
     "famiglie": 1.0,
     "resto": 1.0,
-    "S_mediana": 1.44
+    "S_mediana": 1.44,
+    "prezzo_usd": 1385.2,
+    "adr_pct": 1.0662,
+    "S_geo": 1.456
    },
    "2020": {
     "n": 12,
@@ -221,7 +248,10 @@
     "sorpresa": 1.37,
     "famiglie": 1.0,
     "resto": 0.45,
-    "S_mediana": 5.06
+    "S_mediana": 5.06,
+    "prezzo_usd": 1767.5,
+    "adr_pct": 1.6217,
+    "S_geo": 7.686
    },
    "2021": {
     "n": 11,
@@ -232,7 +262,10 @@
     "sorpresa": 1.15,
     "famiglie": 1.0,
     "resto": 0.79,
-    "S_mediana": 2.7
+    "S_mediana": 2.7,
+    "prezzo_usd": 1798.2,
+    "adr_pct": 1.3617,
+    "S_geo": 3.3
    },
    "2022": {
     "n": 12,
@@ -243,7 +276,10 @@
     "sorpresa": 1.03,
     "famiglie": 1.0,
     "resto": 0.68,
-    "S_mediana": 1.43
+    "S_mediana": 1.43,
+    "prezzo_usd": 1799.5,
+    "adr_pct": 1.3899,
+    "S_geo": 1.795
    },
    "2023": {
     "n": 11,
@@ -254,7 +290,10 @@
     "sorpresa": 1.0,
     "famiglie": 1.0,
     "resto": 1.05,
-    "S_mediana": 1.35
+    "S_mediana": 1.35,
+    "prezzo_usd": 1928.9,
+    "adr_pct": 1.1569,
+    "S_geo": 1.494
    },
    "2024": {
     "n": 12,
@@ -265,7 +304,10 @@
     "sorpresa": 0.96,
     "famiglie": 1.0,
     "resto": 1.32,
-    "S_mediana": 1.22
+    "S_mediana": 1.22,
+    "prezzo_usd": 2370.2,
+    "adr_pct": 1.3288,
+    "S_geo": 1.1
    },
    "2025": {
     "n": 11,
@@ -276,7 +318,10 @@
     "sorpresa": 0.94,
     "famiglie": 1.0,
     "resto": 0.75,
-    "S_mediana": 0.89
+    "S_mediana": 0.89,
+    "prezzo_usd": 3310.5,
+    "adr_pct": 1.5824,
+    "S_geo": 0.936
    },
    "2026": {
     "n": 8,
@@ -287,7 +332,10 @@
     "sorpresa": 0.96,
     "famiglie": 1.0,
     "resto": 1.26,
-    "S_mediana": 1.02
+    "S_mediana": 1.02,
+    "prezzo_usd": 4571.0,
+    "adr_pct": 2.5225,
+    "S_geo": 1.092
    }
   },
   "CPI": {
@@ -300,7 +348,10 @@
     "sorpresa": 1.0,
     "famiglie": 1.0,
     "resto": 1.0,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 1390.2,
+    "adr_pct": 1.0486,
+    "S_geo": 0.627
    },
    "2020": {
     "n": 11,
@@ -311,7 +362,10 @@
     "sorpresa": 1.09,
     "famiglie": 1.0,
     "resto": 0.65,
-    "S_mediana": 1.35
+    "S_mediana": 1.35,
+    "prezzo_usd": 1769.1,
+    "adr_pct": 1.4944,
+    "S_geo": 1.319
    },
    "2021": {
     "n": 12,
@@ -322,7 +376,10 @@
     "sorpresa": 1.08,
     "famiglie": 1.0,
     "resto": 1.77,
-    "S_mediana": 1.01
+    "S_mediana": 1.01,
+    "prezzo_usd": 1796.1,
+    "adr_pct": 1.3269,
+    "S_geo": 1.224
    },
    "2022": {
     "n": 12,
@@ -333,7 +390,10 @@
     "sorpresa": 1.11,
     "famiglie": 1.0,
     "resto": 2.96,
-    "S_mediana": 1.35
+    "S_mediana": 1.35,
+    "prezzo_usd": 1807.6,
+    "adr_pct": 1.3528,
+    "S_geo": 1.43
    },
    "2023": {
     "n": 12,
@@ -344,7 +404,10 @@
     "sorpresa": 1.02,
     "famiglie": 1.0,
     "resto": 3.35,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 1936.4,
+    "adr_pct": 1.1993,
+    "S_geo": 0.764
    },
    "2024": {
     "n": 12,
@@ -355,7 +418,10 @@
     "sorpresa": 1.02,
     "famiglie": 1.0,
     "resto": 3.23,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 2370.1,
+    "adr_pct": 1.326,
+    "S_geo": 0.775
    },
    "2025": {
     "n": 11,
@@ -366,7 +432,10 @@
     "sorpresa": 1.06,
     "famiglie": 1.0,
     "resto": 1.9,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 3321.4,
+    "adr_pct": 1.589,
+    "S_geo": 1.087
    },
    "2026": {
     "n": 9,
@@ -377,7 +446,10 @@
     "sorpresa": 0.99,
     "famiglie": 1.0,
     "resto": 2.71,
-    "S_mediana": 0.67
+    "S_mediana": 0.67,
+    "prezzo_usd": 4559.6,
+    "adr_pct": 2.6249,
+    "S_geo": 0.595
    }
   },
   "RETAIL_PPI": {
@@ -390,7 +462,10 @@
     "sorpresa": 1.0,
     "famiglie": 1.0,
     "resto": 1.0,
-    "S_mediana": 1.03
+    "S_mediana": 1.03,
+    "prezzo_usd": 1371.0,
+    "adr_pct": 1.0502,
+    "S_geo": 1.29
    },
    "2020": {
     "n": 12,
@@ -401,7 +476,10 @@
     "sorpresa": 1.13,
     "famiglie": 1.0,
     "resto": 0.77,
-    "S_mediana": 1.74
+    "S_mediana": 1.74,
+    "prezzo_usd": 1757.6,
+    "adr_pct": 1.6374,
+    "S_geo": 2.712
    },
    "2021": {
     "n": 18,
@@ -412,7 +490,10 @@
     "sorpresa": 1.13,
     "famiglie": 1.0,
     "resto": 0.91,
-    "S_mediana": 2.25
+    "S_mediana": 2.25,
+    "prezzo_usd": 1798.7,
+    "adr_pct": 1.2949,
+    "S_geo": 2.715
    },
    "2022": {
     "n": 24,
@@ -423,7 +504,10 @@
     "sorpresa": 1.02,
     "famiglie": 1.0,
     "resto": 1.2,
-    "S_mediana": 1.32
+    "S_mediana": 1.32,
+    "prezzo_usd": 1801.7,
+    "adr_pct": 1.3962,
+    "S_geo": 1.472
    },
    "2023": {
     "n": 20,
@@ -434,7 +518,10 @@
     "sorpresa": 0.99,
     "famiglie": 1.0,
     "resto": 1.95,
-    "S_mediana": 1.21
+    "S_mediana": 1.21,
+    "prezzo_usd": 1945.7,
+    "adr_pct": 1.2209,
+    "S_geo": 1.241
    },
    "2024": {
     "n": 22,
@@ -445,7 +532,10 @@
     "sorpresa": 0.97,
     "famiglie": 1.0,
     "resto": 1.62,
-    "S_mediana": 0.96
+    "S_mediana": 0.96,
+    "prezzo_usd": 2379.8,
+    "adr_pct": 1.3447,
+    "S_geo": 1.003
    },
    "2025": {
     "n": 18,
@@ -456,7 +546,10 @@
     "sorpresa": 1.01,
     "famiglie": 1.0,
     "resto": 0.94,
-    "S_mediana": 1.24
+    "S_mediana": 1.24,
+    "prezzo_usd": 3229.8,
+    "adr_pct": 1.5132,
+    "S_geo": 1.345
    },
    "2026": {
     "n": 14,
@@ -467,7 +560,10 @@
     "sorpresa": 1.01,
     "famiglie": 1.0,
     "resto": 1.09,
-    "S_mediana": 1.24
+    "S_mediana": 1.24,
+    "prezzo_usd": 4657.0,
+    "adr_pct": 2.7806,
+    "S_geo": 1.396
    }
   }
  },
