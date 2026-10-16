@@ -63,3 +63,55 @@ stessa):
     0,05 R.
 - I dati 2019–26 delle NFP sono già stati visti per altre domande: il
   risultato è una **indicazione**, da registrare dal vivo come U5.
+
+## Risultati (dopo i commit `eeab616` e dello script)
+
+File: `research_output/phase2/hx16/hx19_tp.json`. Codice:
+`scripts/hx19_tp.py`.
+
+### Finestra
+
+| Finestra | NFP: tocca A / B nel 2023–26 (obiettivo 67% / 50%) | Retail/PPI: tocca A / B |
+|---|---|---|
+| ultime 6 | 60% / 54% | 67% / 56% |
+| ultime 12 | 67% / 56% | 65% / 52% |
+| **ultime 24** | **65% / 51%** | **67% / 52%** |
+| tutte dal 2014 | 72% / 54% | 83% / 68% |
+
+- Scelta: **ultime 24 release**, la più precisa per tutte e due le news. È
+  circa 2 anni per la NFP e circa 1 anno per Retail/PPI.
+- Usare tutto dal 2014 sottostima i livelli. È l'effetto che temeva
+  Davide.
+
+### Livelli di oggi (prezzo 4.156 $, ultime 24 release)
+
+| | A (2 volte su 3) | B (1 volta su 2) |
+|---|---|---|
+| NFP | 0,30% = **126 pips** | 0,38% = **157 pips** |
+| Retail/PPI | 0,12% = **50 pips** | 0,18% = **75 pips** |
+
+### Il take profit conviene? No
+
+R medio a trade, ingresso T0 − 30 s, stop 100 pips:
+
+| | C chiusura M1 | TP A | TP B | TP A poi 5 min |
+|---|---|---|---|---|
+| NFP, direzione giusta, 2019–22 | **+0,37** | +0,29 | +0,31 | +0,27 |
+| NFP, direzione giusta, 2023–26 | **+1,10** | +0,63 | +0,73 | +0,55 |
+| NFP, con la bias H-X8, 2023–26 | **+0,57** | +0,23 | +0,30 | +0,18 |
+| Retail/PPI, direzione giusta, 2019–22 | **+0,15** | +0,10 | +0,12 | +0,11 |
+| Retail/PPI, direzione giusta, 2023–26 | **+0,32** | +0,28 | +0,31 | +0,27 |
+
+- **Per la regola scritta prima nessun take profit conviene.** Il TP fa
+  perdere i colpi grandi, che valgono più delle wick che tornano indietro.
+  - 2026: NFP chiusura mediana 365 pips, arrivo 416.
+- **Esplorativo, non pre-registrato**: livelli più alti (67°, 80° e 90°
+  percentile dell'arrivo).
+  - NFP: +0,84, +0,93, +0,93 R, sempre sotto la chiusura (+1,10).
+  - Retail/PPI: +0,33, +0,34, +0,32 contro +0,32. Uguale.
+- **Per anno**, mediana dell'arrivo dentro il minuto quando la direzione è
+  giusta (pips, % del prezzo):
+  - NFP: 2019 49 (0,37%), 2021 85, 2023 83, 2024 114 (0,56%), 2025 102
+    (0,33%), 2026 416 (0,97%);
+  - Retail/PPI: 2019 23, 2022 25, 2023 47, 2024 53, 2025 40, 2026 96
+    (0,19%).

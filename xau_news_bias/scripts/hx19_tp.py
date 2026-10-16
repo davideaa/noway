@@ -73,7 +73,7 @@ def build(events: list[dict]) -> pd.DataFrame:
         arr = float((d * (mid[w] - mid[j])).max()) / mid[j] * 100
         clo = float(d * (mid[i1] - mid[j])) / mid[j] * 100
         rows.append({**{k: v for k, v in e.items() if k != "t0"}, "t0": e["t0"], "y": e["t0"].year, "px": float(mid[j]),
-                     "d": d, "arr": arr, "clo": clo, "_p": (t, b, a, j)})
+                     "d": d, "arr": arr, "clo": clo, "path": (t, b, a, j)})
     return pd.DataFrame(rows).sort_values("t0").reset_index(drop=True)
 
 
@@ -109,7 +109,7 @@ def evaluate(df: pd.DataFrame, fam: str, bias_col=None):
         r = {k: [] for k in ("C_giusta", "TPa_giusta", "TPb_giusta", "TPa5_giusta", "C_caso", "TPa_caso", "TPb_caso", "TPa5_caso",
                              "C_bias", "TPa_bias", "TPb_bias", "TPa5_bias")}
         for e in g.itertuples():
-            t, b, a, j = e._p
+            t, b, a, j = e.path
             ta, tb = e.A / 100 * e.px, e.B / 100 * e.px
             sides = {"giusta": [e.d], "caso": [1, -1]}
             if bias_col and getattr(e, bias_col) in ("LONG", "SHORT"):
