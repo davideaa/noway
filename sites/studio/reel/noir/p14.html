@@ -144,7 +144,7 @@ const EM = { base: 1320, u: 34.33, lx: 380, rx: 700, w: 180 };
 function sEmbargo(t, a, b) { bg('48,40,22', 0.8); x.save(); zoom(t, a, b, 1.04);
   const tPa = WT('embargo', 'paesi', 1, 1.0), tF = WT('embargo', 'fermarono', 1, 2.6), tSt = WT('embargo', 'stati', 1, 3.5), tG = WT('embargo', 'greggio', 1, 4.5),
     tCo = WT('embargo', 'costo', 1, 4.9), tCi = WT('embargo', 'circa', 1, 5.2), tV = WT('embargo', 'volte', 1, 5.8);
-  phrase(t, a + 0.05, [['1973, embargo', C.ink]], 345, { size: 92 });
+  phrase(t, Math.max(a + 0.05, WT('embargo', 'nel', 1, 0.2)), [['1973, embargo', C.ink]], 345, { size: 92 });   /* l'anno entra sulla parola */
   phrase(t, tF - 0.1, [['sul petrolio', C.amber]], 345 + 92 * 1.12, { size: 92 });
   /* la rotta: dai paesi arabi esportatori agli Stati Uniti */
   const kA = seg(t, tPa - 0.2, tPa + 0.3), kU = seg(t, tSt - 0.2, tSt + 0.3);
@@ -153,21 +153,22 @@ function sEmbargo(t, a, b) { bg('48,40,22', 0.8); x.save(); zoom(t, a, b, 1.04);
   flag(858, 628, 150, 96, kU, t, 92); lab('STATI UNITI', 852, 748, oC(kU), C.ink, 22, { ls: 1 });
   const kp = oC(seg(t, tPa, tPa + 0.5)); if (kp > 0) { x.save(); x.globalAlpha *= kp; x.strokeStyle = 'rgba(241,244,238,0.12)'; x.lineWidth = 50; x.lineCap = 'round'; x.beginPath(); x.moveTo(340, 640); x.lineTo(lerp(340, 752, kp), 640); x.stroke(); x.restore();
     const stop = t >= tF, tt = Math.min(t, tF);
-    for (let j = 0; j < 5; j++) { const px = 352 + (((tt - tPa) * 120 + j * 80) % 400 + 400) % 400; const past = px > 545;
+    const xs = [...Array(5).keys()].map((j) => 352 + (((tt - tPa) * 120 + j * 80) % 400 + 400) % 400).sort((p, q) => q - p); let q = 0;
+    for (let j = 0; j < 5; j++) { let px = xs[j]; const past = px > 579; if (stop && !past && px > 511 - 34 * q) { px = 511 - 34 * q; q++; }   /* in coda davanti alla sbarra, mai sotto */
       const al = kp * (stop ? (past ? 1 - seg(t, tF, tF + 0.45) : 1 - 0.45 * seg(t, tF, tF + 0.4)) : clamp((px - 352) / 30) * clamp((752 - px) / 30)); drum(px, 640, al); } }
   const kb = oC(seg(t, tF - 0.1, tF + 0.3)); if (kb > 0) { x.save(); x.globalAlpha *= kb; x.fillStyle = C.red; rr(539, 640 - 56 * kb, 12, 112 * kb, 6); x.fill(); x.restore(); glow(545, 640, 110, '255,90,78', 0.3 * kb); }
   /* il prezzo, in scala: 2,90 → 11,65 dollari al barile */
-  const kL = ioC(seg(t, tG - 0.2, tG + 0.4)), kR = ioC(seg(t, tCo - 0.15, tCo + 0.9)), hL = 2.90 * EM.u, hR = 11.65 * EM.u;
+  const kL = ioC(seg(t, tG - 0.2, tG + 0.4)), kR = ioC(seg(t, tCo - 0.15, tCo + 0.6)), hL = 2.90 * EM.u, hR = 11.65 * EM.u;
   const col = (cx, h, kk, hi) => { if (kk <= 0) return; const hh = h * kk, g = x.createLinearGradient(0, EM.base - hh, 0, EM.base); g.addColorStop(0, `rgba(245,165,36,${hi})`); g.addColorStop(1, 'rgba(245,165,36,0.35)'); x.fillStyle = g; rr(cx - EM.w / 2, EM.base - hh, EM.w, hh, Math.min(12, hh / 2)); x.fill(); };
   col(EM.lx, hL, kL, 0.7); col(EM.rx, hR, kR, 0.92);
   const kax = oC(seg(t, tG - 0.2, tG + 0.2)); if (kax > 0) { x.save(); x.globalAlpha *= kax; x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.beginPath(); x.moveTo(230, EM.base); x.lineTo(850, EM.base); x.stroke(); x.restore(); }
   txt('2,90 $', EM.lx, EM.base - hL - 38, { size: 44, weight: 800, color: C.ink, alpha: oC(seg(t, tG + 0.1, tG + 0.45)) });
-  txt('11,65 $', EM.rx, EM.base - hR - 40, { size: 50, weight: 800, color: C.amber, alpha: oC(seg(t, tCo + 0.55, tCo + 0.95)) });
+  txt('11,65 $', EM.rx, EM.base - hR - 40, { size: 50, weight: 800, color: C.amber, alpha: oC(seg(t, tCo + 0.35, tCo + 0.7)) });
   lab('PRIMA DELL’EMBARGO', EM.lx, EM.base + 40, oC(seg(t, tG, tG + 0.4)), C.ink, 22, { ls: 1 });
   lab('GENNAIO 1974', EM.rx, EM.base + 40, oC(seg(t, tCo, tCo + 0.4)), C.ink, 22, { ls: 1 });
   lab('DOLLARI AL BARILE', 540, 1412, oC(seg(t, tG, tG + 0.4)), C.muted, 22, { ls: 2 });
   /* circa 4 volte: la colonna di destra contiene quattro colonne di sinistra */
-  for (let i = 0; i < 4; i++) { const ti = tCi + i * 0.2, kk = seg(t, ti - 0.1, ti + 0.2); if (kk <= 0) continue; const y1 = EM.base - (i + 1) * hL, y0 = EM.base - i * hL;
+  for (let i = 0; i < 4; i++) { const ti = tCi + 0.1 + i * 0.16, kk = seg(t, ti - 0.1, ti + 0.2); if (kk <= 0) continue; const y1 = EM.base - (i + 1) * hL, y0 = EM.base - i * hL;
     const fl = Math.sin(Math.PI * seg(t, ti - 0.1, ti + 0.4)); if (fl > 0) { x.fillStyle = `rgba(255,255,255,${0.3 * fl})`; x.fillRect(EM.rx - EM.w / 2 + 6, y1 + 3, EM.w - 12, hL - 6); }
     if (i < 3) { x.save(); x.globalAlpha *= oC(kk); x.strokeStyle = 'rgba(5,6,7,0.8)'; x.lineWidth = 3; x.setLineDash([8, 6]); x.beginPath(); x.moveTo(EM.rx - EM.w / 2 + 6, y1); x.lineTo(EM.rx + EM.w / 2 - 6, y1); x.stroke(); x.restore(); } }
   const k4 = oC(seg(t, tV - 0.2, tV + 0.2)); lab('CIRCA', 880, 1090, k4, C.amber, 24); txt('×4', 880, 1146, { size: 76, weight: 800, color: C.amber, alpha: k4, blur: (1 - k4) * 10 });
@@ -247,7 +248,7 @@ function italia(t, o) { const { kF = 1, kQ = 0, kTag = 0, tTag = 0, kG = 0, kP =
 function sPrezzi(t, a, b) { bg('48,40,22', 0.6); x.save();
   const tI = WA('prezzi', ['italia', 'litalia'], 1, 0.4), tS = WT('prezzi', 'saliti', 1, 1.6);
   phrase(t, Math.max(a + 0.05, tI - 0.25), [['Italia, 2022:', C.ink]], 345, { size: 92 });
-  phrase(t, tS - 0.1, [['prezzi +8,1%', C.amber]], 345 + 92 * 1.12, { size: 92 });
+  phrase(t, WA('prezzi', ['dell', 'otto', '8'], 1, 1.9) - 0.1, [['prezzi +8,1%', C.amber]], 345 + 92 * 1.12, { size: 92 });
   italia(t, { kQm: oC(seg(t, a + 0.3, a + 0.7)), kF: oC(seg(t, a + 0.05, a + 0.45)), kQ: ioC(seg(t, tS - 0.1, tS + 0.6)), kTag: seg(t, tS + 0.35, tS + 0.7), tTag: tS + 0.35 });
   x.restore(); finish(t); }
 function sEppure(t, a, b) { bg('30,44,26', 0.7); x.save();
@@ -277,9 +278,9 @@ function sConfine(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   mono('PER LA BANCA D’ITALIA', 540, 640, t, tC - 0.1, { size: 26, color: C.ink });
   const kd = seg(t, tD - 0.2, tD + 0.3), ko = seg(t, tD, tD + 0.5), cy = 950;
   /* la linea: netta, poi una fascia sfumata dal lime all'ambra */
-  const ksf = ioC(seg(t, tSf - 0.4, tSf + 0.9)), kl = oC(seg(t, tD + 0.2, tD + 0.6));
+  const ksf = ioC(seg(t, tSf - 0.5, tSf + 0.45)), kl = oC(seg(t, tD + 0.2, tD + 0.6));
   if (kl > 0) { const bw = lerp(6, 330, ksf);
-    if (ksf > 0.02) { x.save(); x.filter = `blur(${lerp(0, 34, ksf)}px)`; const g = x.createLinearGradient(540 - bw / 2, 0, 540 + bw / 2, 0); g.addColorStop(0, 'rgba(200,250,114,0)'); g.addColorStop(0.3, `rgba(200,250,114,${0.4 * ksf})`); g.addColorStop(0.7, `rgba(245,165,36,${0.4 * ksf})`); g.addColorStop(1, 'rgba(245,165,36,0)');
+    if (ksf > 0.02) { x.save(); x.filter = `blur(${lerp(0, 34, ksf)}px)`; const g = x.createLinearGradient(540 - bw / 2, 0, 540 + bw / 2, 0); g.addColorStop(0, 'rgba(200,250,114,0)'); g.addColorStop(0.3, `rgba(200,250,114,${0.3 * ksf})`); g.addColorStop(0.7, `rgba(245,165,36,${0.3 * ksf})`); g.addColorStop(1, 'rgba(245,165,36,0)');
       x.fillStyle = g; x.fillRect(540 - bw / 2, 720, bw, 460); x.restore(); }
     x.save(); x.globalAlpha *= kl * (1 - ksf); x.fillStyle = C.ink; x.fillRect(537, cy - 230 * kl, 6, 460 * kl); x.restore(); }
   card(300, cy, 'd', kd); card(780, cy, 'o', ko);
