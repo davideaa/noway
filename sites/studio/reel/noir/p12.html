@@ -130,11 +130,11 @@ function sRivisti(t, a, b) { bg(); x.save();
   itPanel(PL, 1, 'NEI DATI DI ALLORA', C.ink); qbar(PL - 90, -0.1, 1, C.red, '255,90,78'); qbar(PL + 90, -0.1, 1, C.red, '255,90,78');
   mono('PIL ITALIA · VARIAZIONE SUL TRIMESTRE PRECEDENTE', 540, 1320, t, -9, { size: 22, color: C.muted, ls: 2 });
   /* la regola riceve il timbro «NON UFFICIALE», poi esce a destra */
-  const kx = ioC(seg(t, tRf - 0.2, tRf + 0.35));
+  const kx = ioC(seg(t, tRf - 0.25, tRf + 0.15)); /* la tessera è uscita del tutto prima che entri il pannello: mai sovrapposti */
   if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; x.translate(320 * kx, 0); ruleCard(PR, 1, 1, 1);
     stamp(PR, 1128, 'NON UFFICIALE', C.amber, '245,165,36', seg(t, tU - 0.05, tU + 0.3), -0.08, 30); x.restore(); }
   /* pannello «dati rivisti»: stessi trimestri, stessa scala */
-  const kp = oC(seg(t, tRf + 0.05, tRf + 0.5)); itPanel(PR, kp, 'NEI DATI RIVISTI', C.lime);
+  const kp = oC(seg(t, tRf + 0.2, tRf + 0.65)); itPanel(PR, kp, 'NEI DATI RIVISTI', C.lime);
   if (kp > 0) { x.save(); x.globalAlpha = 0.55 * kp; x.strokeStyle = C.red; x.lineWidth = 2; x.setLineDash([6, 6]); [PR - 90, PR + 90].forEach((cx) => { rr(cx - 55, IZ, 110, IU, [0, 0, 12, 12]); x.stroke(); }); x.restore(); }
   chevron(540, 915, 1, C.lime, kp);
   qbar(PR - 90, 0.1, seg(t, tDi - 0.3, tDi + 0.4), C.lime, '200,250,114'); qbar(PR + 90, 0.4, seg(t, tDi + 0.1, tCr + 0.5), C.lime, '200,250,114');
