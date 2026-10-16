@@ -277,3 +277,8 @@ LONG.
    e non lo uso.
 4. Lo script è stato messo nel commit prima di provarlo. È girato al primo
    colpo e non è stato toccato dopo.
+5. Nella prima stesura dei risultati avevo scritto a mano due numeri
+   sbagliati: "fra 41% e 59%, 4 anni su 16 sotto il 50%" (giusto: 42,7%
+   e 3 anni) e "qualche stop pieno" sulle Retail (giusto: uno solo, più 9
+   perdite oltre mezzo R). Corretti nel commit `e82279f`. I file `.json`
+   e `.csv` non sono cambiati.
