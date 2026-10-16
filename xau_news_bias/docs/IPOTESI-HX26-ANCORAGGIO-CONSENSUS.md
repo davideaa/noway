@@ -231,8 +231,8 @@ e due i periodi.
 - **CPI con il Core** al posto dell'headline:
   - CPI da solo: oro 47,9% nello studio e 49,2% nella conferma;
   - tutti insieme: 53,2% e 53,0%.
-- **Per anno**, l'oro con la regola sta fra 41% (2013) e 59% (2014); solo
-  4 anni su 16 sono sotto il 50% (2013, 2021, 2023, 2026).
+- **Per anno**, l'oro con la regola sta fra il 42,7% (2013) e il 59,5%
+  (2014). Solo 3 anni su 16 sono sotto il 50%: 2013, 2021 e 2023.
 
 ### La cosa che salta fuori: le Retail Sales (esplorativa, NON pre-registrata)
 
@@ -248,9 +248,10 @@ LONG.
 - Il trade di Davide a 60 s rende poco: +0,039 R (t 1,57, 58% vinti) e
   +0,022 R (t 0,61, 60% vinti). Sono circa 11 trade l'anno. A 5 minuti:
   +0,029 R e 0,000 R.
-- Perché l'R è così basso: la prima M1 Retail muove molto meno dello stop
-  da 100 pips, e qualche stop pieno si mangia le vincite piccole (nella
-  conferma la mediana è +0,074 R, la media +0,022 R).
+- Perché l'R è così basso: la prima M1 Retail muove in mediana 14 pips
+  (studio) e 20 pips (conferma), contro uno stop da 100. Nella conferma
+  un solo stop pieno e 9 perdite oltre mezzo R si mangiano le vincite
+  piccole: la mediana è +0,074 R, la media +0,022 R.
 - Non è un verdetto. È stata scelta **dopo** aver visto 12 famiglie, e
   le Retail 2011–2026 sono già passate da H-X15/H-X16/H-X19 (con altre
   regole). Se interessa, va **pre-registrata adesso e contata solo dal
@@ -261,8 +262,8 @@ LONG.
 1. **La colonna `previous` di ForexFactory è la cifra rivista**, come
    diceva il compito. Coincide con l'actual precedente sempre per CPI,
    Core CPI, ISM e FOMC, l'84% delle volte per il PPI, il 21% per le
-   Claims, il 16% per le Retail, il 5% per il PIL, il 3–4% per ADP,
-   Fiducia e Michigan, e solo l'**1,8% per gli NFP**. La riga 60 di
+   Claims, il 16% per le Retail, il 5% per il PIL, circa il 3% per
+   ADP, Fiducia e Michigan, e solo l'**1,8% per gli NFP**. La riga 60 di
    `FEATURE-REGISTRY.md` e il commento in `xnb/phase2/memory.py`
    (`consensus_features`) dicono che il `previous` FF degli NFP è la prima
    stampa nel 99,5% dei casi: con questo file **non è vero**, oppure la
