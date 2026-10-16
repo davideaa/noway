@@ -10,7 +10,7 @@
 <script src="serie.js"></script>
 <script>
 /* Puntata 12 — «La recessione». Numeri SOLO da p12-fonti.md:
-   Italia 2018, III e IV trimestre, Pil sul trimestre precedente: −0,1 e −0,1 nei dati di allora (Istat 13/03/2019: «secondo trimestre
+   Italia 2018, III e IV trimestre, Pil sul trimestre precedente: −0,1 e −0,1 nei dati di allora (il −0,1 del III: Istat, conti trimestrali III trim. 2018 del 30/11/2018, verificato in p12-fonti.md) (Istat 13/03/2019: «secondo trimestre
    consecutivo», il III solo implicito → a schermo nessuna data del comunicato), oggi +0,1 e +0,4 (Eurostat namq_10_gdp, 15/10/2026).
    Le barre dei due pannelli sono nella STESSA scala: 75 px per 0,1 punti (−0,1 = 75 px giù, +0,4 = 300 px su).
    Area euro (EA20): IV trim. 2022 −0,1, I trim. 2023 −0,2 (Eurostat); comitato CEPR 30/06/2023: «premature». Scala 240 px per punto,
@@ -68,7 +68,7 @@ function sHook(t, a, b) { bg('50,24,22', 0.7); x.save(); zm(t, a, b);
   const kc = oB(seg(t, tN - 0.1, tN + 0.45)); if (kc <= 0) { x.restore(); finish(t); return; }
   x.save(); x.translate(CX, CY); x.scale(lerp(0.9, 1, clamp(kc)), lerp(0.9, 1, clamp(kc))); x.translate(-CX, -CY);
   glass(CX, CY, CW, CH, 30, clamp(kc));
-  txt('ITALIA · 2019', CX, top + 52, { fam: 'mono', size: 30, weight: 600, color: C.ink, ls: 4, alpha: clamp(kc) });
+  txt('ITALIA · FINE 2018', CX, top + 52, { fam: 'mono', size: 30, weight: 600, color: C.ink, ls: 4, alpha: clamp(kc) });
   x.save(); x.globalAlpha = clamp(kc); x.fillStyle = 'rgba(241,244,238,0.16)'; [0.82, 0.64, 0.74].forEach((f, i) => { rr(CX - CW / 2 + 60, top + 108 + i * 34, (CW - 120) * f, 12, 6); x.fill(); }); x.restore();
   /* scansione «dati rivisti»: dall'alto al basso tra «oggi» e «rivisti» */
   const SY = CY + 50, ks = ioC(seg(t, tO, tV + 0.5)), scanY = lerp(top + 120, top + CH - 92, ks), scanOn = ks > 0 && ks < 1 ? 1 : 0;
@@ -100,17 +100,26 @@ function qbar(cx, v, kk, col, rgb) { if (kk <= 0) return; const h = (v / 0.1) * 
   x.save(); x.globalAlpha *= clamp(kk * 3); x.fillStyle = `rgba(${rgb},0.85)`; rr(cx - 55, y0, 110, Math.abs(h), v < 0 ? [0, 0, 12, 12] : [12, 12, 0, 0]); x.fill(); x.restore();
   const shown = Math.round(v * oC(kk) * 10) / 10, ly = v < 0 ? IZ + Math.abs(h) + 40 : IZ - Math.abs(h) - 40;
   txt(it(shown) + '%', cx, ly, { size: 44, weight: 800, color: col, alpha: clamp(kk * 3) }); }
+/* tessera della regola pratica: «LA REGOLA DEI 2 TRIMESTRI» (due frecce giù, simboliche) = «RECESSIONE?» */
+function ruleCard(cx, k, kE, kR) { if (k <= 0) return; const s = lerp(0.9, 1, oB(clamp(k))); x.save(); x.translate(cx, 905); x.scale(s, s); x.translate(-cx, -905);
+  glass(cx, 905, 400, 580, 28, clamp(k)); txt('LA REGOLA DEI', cx, 668, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 2, alpha: clamp(k) });
+  txt('2 TRIMESTRI', cx, 708, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 2, alpha: clamp(k) });
+  downArrow(cx - 60, 812, 0.9, C.red, clamp(k * 1.5)); downArrow(cx + 60, 812, 0.9, C.red, clamp(k * 1.5 - 0.3));
+  txt('IN CALO', cx, 888, { fam: 'mono', size: 26, weight: 600, color: C.red, ls: 3, alpha: clamp(k) });
+  if (kE > 0) { x.save(); x.translate(cx, 948); x.scale(clamp(oB(kE), 0, 1.2), clamp(oB(kE), 0, 1.2)); txt('=', 0, 0, { size: 76, weight: 800, color: C.ink }); x.restore(); }
+  let rs = 56; while (rs > 30 && tw('RECESSIONE?', rs) > 350) rs -= 2;
+  if (kR > 0) txt('RECESSIONE?', cx, 1020 + (1 - oC(kR)) * 30, { size: rs, weight: 800, color: C.red, alpha: oC(kR), blur: (1 - oC(kR)) * 10 });
+  x.restore(); }
 function sAllora(t, a, b) { bg(); x.save();
-  const tT = WT('allora', 'trimestri', 1, 2.1), tP = WT('allora', 'prodotto', 1, 4.1), tG = WT('allora', 'giornali', 1, 6.6), tR = WT('allora', 'recess', 1, 7.2);
+  const tT = WT('allora', 'trimestri', 1, 2.1), tP = WT('allora', 'prodotto', 1, 4.1), tG = WT('allora', 'regola', 1, 5.9), tC = WT('allora', 'citata', 1, 6.6), tR = WT('allora', 'recess', 1, 7.2);
   phrase(t, a + 0.05, [['Nei dati di allora:', C.ink]], 345, { size: 92 });
   phrase(t, tT - 0.4, [['due cali di fila.', C.red]], Y2, { size: 92 }); /* «due» sulla parola */
   const kp = oC(seg(t, a + 0.15, a + 0.6)); itPanel(PL, kp, 'NEI DATI DI ALLORA', C.ink);
   qbar(PL - 90, -0.1, seg(t, tT - 0.3, tT + 0.3), C.red, '255,90,78'); qbar(PL + 90, -0.1, seg(t, tT + 0.1, tT + 0.7), C.red, '255,90,78');
   mono('PIL ITALIA · VARIAZIONE SUL TRIMESTRE PRECEDENTE', 540, 1320, t, tP - 0.1, { size: 22, color: C.muted, ls: 2 });
-  /* i giornali: il titolo «RECESSIONE» */
-  const kg = oC(seg(t, tG - 0.3, tG + 0.3)); if (kg > 0) { x.save(); x.translate(0, -(1 - kg) * 90); paper(PR, 900, 400, 560, kg, 'RECESSIONE', '#b8322a', 0.03); x.restore();
-    txt('I GIORNALI', PR, 1228, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 3, alpha: kg }); }
-  if (tR > tG) glow(PR, 790, 200, '255,90,78', 0.12 * oC(seg(t, tR - 0.1, tR + 0.4)));
+  /* la regola molto citata: entra su «regola», «=» su «citata», «RECESSIONE?» su «recessione» */
+  const kg = oC(seg(t, tG - 0.3, tG + 0.3)); if (kg > 0) { x.save(); x.translate(0, -(1 - kg) * 90); ruleCard(PR, kg, seg(t, tC - 0.1, tC + 0.3), seg(t, tR - 0.1, tR + 0.35)); x.restore(); }
+  if (tR > tG) glow(PR, 1020, 200, '255,90,78', 0.12 * oC(seg(t, tR - 0.1, tR + 0.4)));
   x.restore(); finish(t); }
 function sRivisti(t, a, b) { bg(); x.save();
   const tU = WT('rivisti', 'ufficiale', 1, 2.4), tRf = WT('rivisti', 'rifatti', 1, 3.1), tDi = WT('rivisti', 'diventati', 1, 5.5), tCr = WT('rivisti', 'crescite', 1, 6.2); /* non «cali»: la voce lo dice «cadi» */
@@ -120,11 +129,10 @@ function sRivisti(t, a, b) { bg(); x.save();
   phrase(t, tDi - 0.1, [['piccole crescite.', C.lime]], Y2, { size: 92 });
   itPanel(PL, 1, 'NEI DATI DI ALLORA', C.ink); qbar(PL - 90, -0.1, 1, C.red, '255,90,78'); qbar(PL + 90, -0.1, 1, C.red, '255,90,78');
   mono('PIL ITALIA · VARIAZIONE SUL TRIMESTRE PRECEDENTE', 540, 1320, t, -9, { size: 22, color: C.muted, ls: 2 });
-  /* il giornale riceve il timbro «NON UFFICIALE», poi esce a destra */
+  /* la regola riceve il timbro «NON UFFICIALE», poi esce a destra */
   const kx = ioC(seg(t, tRf - 0.2, tRf + 0.35));
-  if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; x.translate(320 * kx, 0); paper(PR, 900, 400, 560, 1, 'RECESSIONE', '#b8322a', 0.03);
-    stamp(PR, 1010, 'NON UFFICIALE', C.amber, '245,165,36', seg(t, tU - 0.05, tU + 0.3), -0.1, 30);
-    txt('I GIORNALI', PR, 1228, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 3 }); x.restore(); }
+  if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; x.translate(320 * kx, 0); ruleCard(PR, 1, 1, 1);
+    stamp(PR, 1128, 'NON UFFICIALE', C.amber, '245,165,36', seg(t, tU - 0.05, tU + 0.3), -0.08, 30); x.restore(); }
   /* pannello «dati rivisti»: stessi trimestri, stessa scala */
   const kp = oC(seg(t, tRf + 0.05, tRf + 0.5)); itPanel(PR, kp, 'NEI DATI RIVISTI', C.lime);
   if (kp > 0) { x.save(); x.globalAlpha = 0.55 * kp; x.strokeStyle = C.red; x.lineWidth = 2; x.setLineDash([6, 6]); [PR - 90, PR + 90].forEach((cx) => { rr(cx - 55, IZ, 110, IU, [0, 0, 12, 12]); x.stroke(); }); x.restore(); }
@@ -295,13 +303,13 @@ function sDisoccupazione(t, a, b) { bg(); x.save(); zm(t, a, b);
   x.restore(); finish(t); }
 
 /* ================= CASA: davanti a un titolo, chi l'ha detto e su che dati ================= */
-function chips(cx, top, head, A, B, k, kSel, t, tTap) { if (k <= 0) return; glass(cx, top + 130, 420, 260, 28, k);
+function chips(cx, top, head, A, B, k, t, tA, tB) { /* tocca entrambe le opzioni: nessuna è «la risposta giusta» */ if (k <= 0) return; glass(cx, top + 130, 420, 260, 28, k);
   txt(head, cx, top + 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 3, alpha: k });
-  [A, B].forEach((lab, i) => { const y = top + 108 + i * 80, on = (i === 0 ? kSel : 0), w = 340;
-    x.save(); x.globalAlpha = k; x.fillStyle = on > 0.5 ? 'rgba(200,250,114,0.95)' : 'rgba(241,244,238,0.06)'; rr(cx - w / 2, y - 30, w, 60, 30); x.fill();
+  [A, B].forEach((lab, i) => { const y = top + 108 + i * 80, on = seg(t, [tA, tB][i], [tA, tB][i] + 0.15), w = 340;
+    x.save(); x.globalAlpha = k; x.fillStyle = on > 0.5 ? 'rgba(200,250,114,0.14)' : 'rgba(241,244,238,0.06)'; rr(cx - w / 2, y - 30, w, 60, 30); x.fill();
     x.strokeStyle = on > 0.5 ? C.lime : 'rgba(241,244,238,0.3)'; x.lineWidth = 2; x.stroke(); x.restore();
-    txt(lab, cx, y + 1, { fam: 'mono', size: 26, weight: 600, color: on > 0.5 ? '#15200C' : C.ink, ls: 1, alpha: k }); });
-  tap(cx + 120, top + 108, t, tTap); }
+    txt(lab, cx, y + 1, { fam: 'mono', size: 26, weight: 600, color: on > 0.5 ? C.lime : C.ink, ls: 1, alpha: k }); });
+  tap(cx + 162, top + 108, t, tA); tap(cx + 162, top + 188, t, tB); }
 function sCasa(t, a, b) { bg('30,44,26'); x.save();
   const tT = WT('casa', 'titolo', 1, 3.1), tR = WT('casa', 'recess', 1, 3.8), tCh = WA('casa', ['chiederti', 'chieder'], 1, 4.5), tC2 = WT('casa', 'chi', 2, 4.8), tD = WT('casa', 'detto', 1, 5.5), tDa = WT('casa', 'dati', 1, 6.9);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 330, { size: 70, out: tC2 - 0.4 });
@@ -312,8 +320,8 @@ function sCasa(t, a, b) { bg('30,44,26'); x.save();
       const q = seg(t, tCh - 0.1, tCh + 0.3), sx = Math.abs(Math.cos(q * Math.PI)), ex = hw / 2 + 24, ka = seg(t, tR + 0.2, tR + 0.4); if (ka <= 0) return;
       x.save(); x.translate(ex, hy); x.scale(Math.max(0.05, sx), 1); txt(q < 0.5 ? '!' : '?', 0, 0, { size: hs, weight: 800, color: q < 0.5 ? '#b8322a' : '#8a5a00', alpha: ka }); x.restore(); });
     x.restore(); }
-  chips(300, 1110, 'CHI', 'COMITATO', 'REGOLA PRATICA', oC(seg(t, tC2 - 0.2, tC2 + 0.3)), seg(t, tD, tD + 0.15), t, tD);
-  chips(780, 1110, 'QUALI DATI', 'RIVISTI', 'DI ALLORA', oC(seg(t, tDa - 0.6, tDa - 0.1)), seg(t, tDa + 0.1, tDa + 0.25), t, tDa + 0.1);
+  chips(300, 1110, 'CHI', 'COMITATO', 'REGOLA PRATICA', oC(seg(t, tC2 - 0.2, tC2 + 0.3)), t, tD - 0.15, tD + 0.45);
+  chips(780, 1110, 'QUALI DATI', 'DI ALLORA', 'RIVISTI', oC(seg(t, tDa - 0.6, tDa - 0.1)), t, tDa + 0.05, tDa + 0.65);
   x.restore(); finish(t); }
 
 serie({ hook: sHook, allora: sAllora, rivisti: sRivisti, comitato: sComitato, europa: sEuropa, bastano: sBastano, duemilauno: sDuemilauno,
