@@ -26,6 +26,7 @@ if __name__ == "__main__":
     out["vol"] = json.loads((R / "hx21_range.json").read_text(encoding="utf-8"))
     out["liv"] = json.loads((R / "hx28_livelli.json").read_text(encoding="utf-8"))
     out["liv"]["per_ora"] = json.loads((R / "hx28_per_ora.json").read_text(encoding="utf-8"))
+    out["pips29"] = {k: v for k, v in json.loads((R / "hx29_pips.json").read_text(encoding="utf-8")).items() if k in ("copertura", "modello", "scomposizione_vs_2019")}
     out["reg"] = json.loads((R / "hx22_regime.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))

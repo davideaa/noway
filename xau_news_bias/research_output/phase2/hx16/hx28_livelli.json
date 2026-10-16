@@ -1,6 +1,6 @@
 {
- "prezzo_oggi": 4176.945,
- "ultima_candela_utc": "2026-10-16 09:00:00+00:00",
+ "prezzo_oggi": 4174.021,
+ "ultima_candela_utc": "2026-10-16 10:00:00+00:00",
  "giorno": {
   "metodi": {
    "A": {
@@ -16,7 +16,7 @@
      "tipico_su": 0.466,
      "tipico_giu": 0.542,
      "larghezza_pct": 2.3022,
-     "larghezza_pips_oggi": 962.0
+     "larghezza_pips_oggi": 961.0
     },
     "2023-26": {
      "n": 22393,
@@ -30,7 +30,7 @@
      "tipico_su": 0.478,
      "tipico_giu": 0.518,
      "larghezza_pct": 2.5703,
-     "larghezza_pips_oggi": 1074.0
+     "larghezza_pips_oggi": 1073.0
     },
     "affidabile": true,
     "per_anno": {
@@ -132,7 +132,7 @@
      "tipico_su": 0.485,
      "tipico_giu": 0.522,
      "larghezza_pct": 2.5542,
-     "larghezza_pips_oggi": 1067.0
+     "larghezza_pips_oggi": 1066.0
     },
     "affidabile": true,
     "per_anno": {
@@ -220,7 +220,7 @@
      "tipico_su": 0.461,
      "tipico_giu": 0.538,
      "larghezza_pct": 2.2268,
-     "larghezza_pips_oggi": 930.0
+     "larghezza_pips_oggi": 929.0
     },
     "2023-26": {
      "n": 22393,
@@ -234,7 +234,7 @@
      "tipico_su": 0.485,
      "tipico_giu": 0.519,
      "larghezza_pct": 2.4752,
-     "larghezza_pips_oggi": 1034.0
+     "larghezza_pips_oggi": 1033.0
     },
     "affidabile": true,
     "per_anno": {
@@ -330,17 +330,17 @@
    "apertura": 4170.995,
    "massimo": 4192.015,
    "minimo": 4147.045,
-   "prezzo": 4176.945,
-   "k": 11,
+   "prezzo": 4174.021,
+   "k": 12,
    "inizio": "2026-10-16",
-   "ultima_candela_utc": "2026-10-16 09:00:00+00:00",
+   "ultima_candela_utc": "2026-10-16 10:00:00+00:00",
    "livelli": {
-    "su90": 4238.71,
-    "giu90": 4101.2,
-    "su_tip": 4214.98,
-    "giu_tip": 4123.59,
-    "p_su": 0.527,
-    "p_giu": 0.447
+    "su90": 4235.19,
+    "giu90": 4105.22,
+    "su_tip": 4211.67,
+    "giu_tip": 4126.11,
+    "p_su": 0.491,
+    "p_giu": 0.433
    },
    "tabella": [
     {
@@ -2021,7 +2021,7 @@
      "tipico_su": 0.527,
      "tipico_giu": 0.58,
      "larghezza_pct": 5.0684,
-     "larghezza_pips_oggi": 2117.0
+     "larghezza_pips_oggi": 2116.0
     },
     "2023-26": {
      "n": 22324,
@@ -2035,7 +2035,7 @@
      "tipico_su": 0.446,
      "tipico_giu": 0.532,
      "larghezza_pct": 5.7696,
-     "larghezza_pips_oggi": 2410.0
+     "larghezza_pips_oggi": 2408.0
     },
     "affidabile": false,
     "per_anno": {
@@ -2121,7 +2121,7 @@
      "tipico_su": 0.523,
      "tipico_giu": 0.593,
      "larghezza_pct": 5.0689,
-     "larghezza_pips_oggi": 2117.0
+     "larghezza_pips_oggi": 2116.0
     },
     "2023-26": {
      "n": 22324,
@@ -2135,7 +2135,7 @@
      "tipico_su": 0.449,
      "tipico_giu": 0.53,
      "larghezza_pct": 5.7531,
-     "larghezza_pips_oggi": 2403.0
+     "larghezza_pips_oggi": 2401.0
     },
     "affidabile": false,
     "per_anno": {
@@ -2221,7 +2221,7 @@
      "tipico_su": 0.525,
      "tipico_giu": 0.588,
      "larghezza_pct": 4.815,
-     "larghezza_pips_oggi": 2011.0
+     "larghezza_pips_oggi": 2010.0
     },
     "2023-26": {
      "n": 22324,
@@ -2235,7 +2235,7 @@
      "tipico_su": 0.462,
      "tipico_giu": 0.529,
      "larghezza_pct": 5.4999,
-     "larghezza_pips_oggi": 2297.0
+     "larghezza_pips_oggi": 2296.0
     },
     "affidabile": false,
     "per_anno": {

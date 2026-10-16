@@ -149,6 +149,18 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
 </section>
 
 <section>
+  <h2>Perché la NFP muove più pips di prima</h2>
+  <div class="panel"><div id="whyW"></div><div id="whyT"></div></div>
+  <details style="margin-top:8px"><summary style="display:block;font-size:14px">▸ Cosa dicono gli studi (5 fonti)</summary><ul class="small muted" style="padding:0 14px 10px 30px;margin:0">
+    <li><b>La formula esiste già</b>: volatilità alla news = volatilità del giorno + grandezza della sorpresa + un effetto "annuncio" anche a sorpresa zero. <a href="https://www.nber.org/papers/w8959" target="_blank" rel="noopener">Andersen, Bollerslev, Diebold, Vega 2003</a></li>
+    <li><b>Le sorprese enormi contano meno di quanto sembra</b>: la risposta si appiattisce. <a href="https://www.economics.ku.dk/research/workingpapers/centerpapers/fru-wp/archive/2008-01.pdf" target="_blank" rel="noopener">Hautsch, Hess, Müller 2012</a></li>
+    <li><b>Con l'inflazione alta il CPI muove più di 10 volte tanto</b>, la NFP no. Lo stesso nei nostri dati: CPI × 2,7, NFP × 1,26. <a href="https://doi.org/10.17016/FEDS.2025.022" target="_blank" rel="noopener">Kroner, Fed 2025</a> · <a href="https://www.clevelandfed.org/publications/economic-commentary/2025/ec-202512-markets-of-fomcs-reaction-changed-since-covid-19" target="_blank" rel="noopener">Cline, Jia, Cleveland Fed 2025</a></li>
+    <li><b>Sull'oro la NFP è la news più forte</b>: −0,3% in 5 minuti per una sorpresa tipica (2002–08), oggi circa 125 pips. <a href="https://mountainscholar.org/handle/10217/206884" target="_blank" rel="noopener">Elder, Miao, Ramchander 2012</a></li>
+    <li><b>La liquidità sottile prima della news</b> fa saltare il prezzo più della sorpresa stessa. <a href="https://ideas.repec.org/a/cup/jfinqa/v46y2011i02p527-551_00.html" target="_blank" rel="noopener">Jiang, Lo, Verdelhan 2011</a></li>
+  </ul></details>
+</section>
+
+<section>
   <h2>C'è edge?</h2>
   <div class="bar" role="group" aria-label="Spread">
     <span class="lab">Spread</span>
@@ -580,6 +592,51 @@ function tpRender(T, name, el, cls) {
   <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p>`;
 }
 tpRender(D.tp, "NFP", document.getElementById("tpbox"), {note:"note", tiles:"tiles", tile:"tile", lab:"small muted", v:"v", small:"small muted", tw:"tw", table:"pt"});
+function pipsWaterfall(host, P, group, name, opt) {
+  if (!host || !P || !P.scomposizione_vs_2019 || !P.scomposizione_vs_2019[group]) return;
+  const S = P.scomposizione_vs_2019[group], ys = Object.keys(S).sort(), y0 = ys[0], y1 = ys[ys.length - 1], A = S[y0], Z = S[y1];
+  const cs = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const f = x => Math.round(x).toLocaleString("it-IT"), m = x => "× " + x.toFixed(2).replace(".", ",");
+  const steps = [{t: `${y0}: candela tipica`, a: 0, b: A.pips_geo, kind: "base"}];
+  let v = A.pips_geo;
+  for (const [k, lab] of [["prezzo", "prezzo dell'oro"], ["volatilita", "volatilità del giorno (ADR)"], ["sorpresa", "grandezza della sorpresa"], ["resto", "il resto: quanto il mercato reagisce"]]) {
+    const nv = v * Z[k]; steps.push({t: `${m(Z[k])} ${lab}`, a: v, b: nv, kind: Z[k] >= 1 ? "up" : "down"}); v = nv; }
+  steps.push({t: `${y1}: candela tipica`, a: 0, b: Z.pips_geo, kind: "end"});
+  const NS = "http://www.w3.org/2000/svg", mk = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const W = Math.max(320, Math.min(760, host.clientWidth || 640)), row = 40, T = 8, B = 22, H = T + B + steps.length * row;
+  const vmax = Math.max(...steps.map(s => Math.max(s.a, s.b))) * 1.08, L = 10, R = 64, x = val => L + val / vmax * (W - L - R);
+  const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, width: "100%", role: "img", "aria-label": `Da dove vengono i pips in più della ${name}`, style: "display:block;height:auto"});
+  for (let g = 0; g <= vmax; g += [50, 100, 200, 500].find(s => vmax / s <= 5) || 500) {
+    svg.append(mk("line", {x1: x(g), x2: x(g), y1: T, y2: H - B, stroke: cs(opt.grid)}));
+    svg.append(mk("text", {x: x(g), y: H - 6, "text-anchor": "middle", "font-size": 11, fill: cs(opt.mute), "font-family": "ui-monospace,Menlo,monospace"}, f(g))); }
+  steps.forEach((s, i) => {
+    const y = T + i * row, lo = Math.min(s.a, s.b), hi = Math.max(s.a, s.b);
+    const col = s.kind === "base" || s.kind === "end" ? cs(opt.ink) : s.kind === "up" ? cs(opt.accent) : cs(opt.mute);
+    svg.append(mk("text", {x: L, y: y + 13, "font-size": 12.5, fill: cs(opt.ink)}, s.t));
+    svg.append(mk("rect", {x: x(lo), y: y + 18, width: Math.max(2, x(hi) - x(lo)), height: 14, rx: 3, fill: col, opacity: s.kind === "base" ? .45 : s.kind === "end" ? .9 : .85}));
+    svg.append(mk("text", {x: x(hi) + 6, y: y + 30, "font-size": 12.5, "font-weight": s.kind === "end" ? 700 : 500, fill: cs(opt.ink), "font-family": "ui-monospace,Menlo,monospace"}, f(s.b)));
+    if (i && i < steps.length - 1) svg.append(mk("line", {x1: x(s.a), x2: x(s.a), y1: y + 2 - row + 32, y2: y + 18, stroke: cs(opt.mute), "stroke-dasharray": "2 2"}));
+  });
+  host.innerHTML = ""; host.append(svg);
+}
+function pipsWhy(P, group, name, el, cls) {
+  if (!el || !P) return;
+  const S = P.scomposizione_vs_2019, Z = S[group]["2026"], A = S[group]["2019"], C = S.CPI["2026"], G = P.modello.per_periodo;
+  const m = x => "× " + x.toFixed(2).replace(".", ","), f = x => Math.round(x).toLocaleString("it-IT");
+  const k = g => Math.pow(3, g).toFixed(1).replace(".", ",");
+  el.innerHTML = `<p class="${cls}" style="margin-top:6px"><b>La formula</b>, su ${f(P.copertura.con_S)} news rosse dal 2011 (studio H-X29): <b>pips della news = prezzo dell'oro × volatilità del giorno × grandezza della sorpresa × quanto il mercato reagisce</b>. Dal 2019 al 2026 la candela tipica della ${name} è passata da ${f(A.pips_geo)} a ${f(Z.pips_geo)} pips (${m(Z.totale)}):</p>
+  <ul class="${cls}" style="margin:4px 0 0;padding-left:18px">
+    <li>🟢 <b>${m(Z.prezzo)} è solo il prezzo dell'oro</b>: lo stesso movimento in % oggi vale ${m(Z.prezzo).slice(2)} volte i pips. È la causa principale.</li>
+    <li>🟢 <b>${m(Z.volatilita)} la volatilità generale</b> (ADR): l'oro oggi si muove di più tutto il giorno, non solo alle news.</li>
+    <li>🟢 <b>${m(Z.sorpresa)} la sorpresa</b>: i dati non escono più lontani dalle attese di prima. Non è "il dato è più sorprendente".</li>
+    <li>${Z.resto > 1.15 ? "🟡" : "🟢"} <b>${m(Z.resto)} il resto</b>, cioè quanto il mercato reagisce a quella news. ${group === "NFP" ? "Nel 2026 metà delle NFP sono state 2–3 volte più grandi di quanto spiegano prezzo, volatilità e sorpresa: c'è qualcosa in più che la formula non vede." : ""} Per il CPI il resto è ${m(C.resto)}: dal 2021, da quando l'inflazione è il tema della Fed, lo stesso CPI muove molto di più.</li>
+  </ul>
+  <p class="${cls}" style="margin-top:6px"><b>Il mercato reagisce alla grandezza della sorpresa molto più di prima.</b> Un dato lontano dalle attese (2 volte lo scarto tipico) fa una candela circa ${k(G["2023-26"].gamma).replace(",", ",")} volte quella di un dato in linea nel 2023–26, contro ${k(G["2019-22"].gamma)} nel 2019–22 e ${k(G["2011-18"].gamma)} nel 2011–18 (tutte le news).</p>
+  <p class="${cls}" style="margin-top:6px">🔴 <b>Prima della news non serve</b>: la sorpresa si conosce solo alle 14:30:00, e siccome la sensibilità cambia da un periodo all'altro, aggiungerla non ha migliorato la stima dei pips con la prova passo per passo. 🟡 <b>Dopo l'uscita sì, come indicazione</b>: se il dato è molto lontano dalle attese, aspettati una candela più grande del solito; se è in linea, più piccola.</p>`;
+}
+
+pipsWaterfall(document.getElementById("whyW"), D.pips29, "NFP", "NFP", {grid:"--grid", mute:"--muted", ink:"--ink", accent:"--gold"});
+pipsWhy(D.pips29, "NFP", "NFP", document.getElementById("whyT"), "small muted");
 function volRender(V, LV, el, cls, opt) {
   if (!el) return;
   const G = LV && LV.giorno, O = G && G.oggi;
@@ -609,11 +666,11 @@ function volRender(V, LV, el, cls, opt) {
   el.innerHTML = `
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
     <label ${lab}>Prezzo adesso<input ${inp} id="lvP" type="number" step="0.01" inputmode="decimal" value="${O.prezzo.toFixed(2)}"></label>
-    <label ${lab}>Massimo di oggi<input ${inp} id="lvH" type="number" step="0.01" inputmode="decimal" value="${O.massimo.toFixed(2)}"></label>
-    <label ${lab}>Minimo di oggi<input ${inp} id="lvL" type="number" step="0.01" inputmode="decimal" value="${O.minimo.toFixed(2)}"></label>
+    <label ${lab}>Massimo di oggi, finora<input ${inp} id="lvH" type="number" step="0.01" inputmode="decimal" value="${O.massimo.toFixed(2)}"></label>
+    <label ${lab}>Minimo di oggi, finora<input ${inp} id="lvL" type="number" step="0.01" inputmode="decimal" value="${O.minimo.toFixed(2)}"></label>
     <label ${lab}>Ora (Italia)<select ${inp} id="lvK">${Array.from({length: 24}, (_, k) => `<option value="${k}"${k === O.k ? " selected" : ""}>dopo le ${hhmm(k)}</option>`).join("")}</select></label>
   </div>
-  <p class="${cls.small}" id="lvMsg" style="margin:6px 0 0">Già compilato con i prezzi Dukascopy delle ${hhmm(O.k)}. Metti quelli del tuo MT5: i livelli si ricalcolano subito.</p>
+  <p class="${cls.small}" id="lvMsg" style="margin:6px 0 0">Già compilato con i prezzi Dukascopy delle ${hhmm(O.k)}.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px" id="lvCards"></div>
   <div id="lvChart" style="margin-top:10px"></div>
   <div ${card} id="lvHow" style="margin-top:10px"></div>
@@ -634,7 +691,7 @@ function volRender(V, LV, el, cls, opt) {
   function draw() {
     const P = +$("lvP").value, H = +$("lvH").value, L = +$("lvL").value, k = +$("lvK").value;
     const ok = [P, H, L].every(x => isFinite(x) && x > 0) && H >= L && P <= H + 1e-9 && P >= L - 1e-9;
-    $("lvMsg").textContent = ok ? `Livelli per la giornata iniziata il ${O.inizio.split("-").reverse().join("/")} (sera prima, 22:00 UTC). Dati Dukascopy fino alle ${hhmm(O.k)}.` : "Controlla i numeri: il prezzo deve stare fra minimo e massimo di oggi.";
+    $("lvMsg").innerHTML = ok ? `"Massimo" e "minimo" = i più estremi toccati <b>oggi finora</b>, dall'inizio della giornata: ${start.toLocaleString("it-IT", {timeZone: "Europe/Rome", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"})} ora italiana. Non sono quelli di ieri. Dati Dukascopy fino alle ${hhmm(O.k)}: metti i tuoi dal MT5 e si ricalcola tutto.` : "Controlla i numeri: il prezzo deve stare fra minimo e massimo di oggi.";
     if (!ok) { $("lvCards").innerHTML = ""; $("lvChart").innerHTML = ""; return; }
     const v = levels(k, H, L, P);
     const side = (arrow, name, p, tip, far, word) => `<div ${card}>
@@ -664,13 +721,13 @@ function volRender(V, LV, el, cls, opt) {
         return `<tr style="${r.tb === cur ? `background:color-mix(in srgb, var(${opt.accent}) 12%, transparent);font-weight:600` : ""}"><td ${td}>${hhmm(2 * r.tb).slice(0, 2)}–${hhmm(2 * r.tb + 1).slice(0, 2)}${r.tb === cur ? " ◀" : ""}</td>
           <td ${td}>${dot(e1 < .03, e1 < .05)} ${Math.round(r.p_su_prev * 100)}→${Math.round(r.p_su_vera * 100)}</td><td ${td}>${dot(e2 < .03, e2 < .05)} ${Math.round(r.p_giu_prev * 100)}→${Math.round(r.p_giu_vera * 100)}</td>
           <td ${td}>${cov} ${Math.round(r.cop_su * 100)}/${Math.round(r.cop_giu * 100)}</td>${wide ? `<td ${td}>${f(w)}</td>` : ""}</tr>`; }).join("") + "</tbody>";
-    $("lvCards").innerHTML = side("↑", "Probabilità di un nuovo massimo oggi", v.pu, v.suT, v.su90, "non oltre") + side("↓", "Probabilità di un nuovo minimo oggi", v.pv, v.giuT, v.giu90, "non sotto");
+    $("lvCards").innerHTML = side("↑", "Probabilità che superi il massimo fatto finora oggi", v.pu, v.suT, v.su90, "non oltre") + side("↓", "Probabilità che scenda sotto il minimo fatto finora oggi", v.pv, v.giuT, v.giu90, "non sotto");
     ladder($("lvChart"), [
       {p: v.su90, t: "9 su 10 non oltre", w: 1.5, d: "6 4", c: opt.ink},
       {p: v.suT, t: "di solito, se sale", w: 1.5, d: "2 3", c: opt.ink},
-      {p: H, t: "massimo di oggi", w: 1, d: "", c: opt.mute},
+      {p: H, t: "massimo finora", w: 1, d: "", c: opt.mute},
       {p: P, t: "prezzo adesso", w: 3, d: "", c: opt.accent, bold: true},
-      {p: L, t: "minimo di oggi", w: 1, d: "", c: opt.mute},
+      {p: L, t: "minimo finora", w: 1, d: "", c: opt.mute},
       {p: v.giuT, t: "di solito, se scende", w: 1.5, d: "2 3", c: opt.ink},
       {p: v.giu90, t: "9 su 10 non sotto", w: 1.5, d: "6 4", c: opt.ink}], P, H, L, v);
   }

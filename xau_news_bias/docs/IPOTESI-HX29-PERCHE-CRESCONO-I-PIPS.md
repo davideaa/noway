@@ -212,3 +212,41 @@ Moltiplicatori della media geometrica del range M1:
 - 🟡 **NFP 2026**: metà delle release è 2–3 volte più grande di quello
   che la formula spiega. Da registrare dal vivo, se Davide lo vuole,
   senza cambiare niente adesso.
+
+## Cosa dicono gli studi (ricerca del 16/10/2026)
+
+Raccolti da un agente di ricerca. [T] = testo letto per intero, [A] = solo
+abstract. Non li ho riletti io uno per uno.
+
+- **La formula di base esiste già.** Andersen, Bollerslev, Diebold e Vega
+  (2003, *AER*) [T]: la volatilità alla news = volatilità del giorno +
+  |sorpresa standardizzata| + un effetto "annuncio" anche quando la
+  sorpresa è zero. Coincide con la nostra: famiglia + ADR + sorpresa.
+- **La risposta alla sorpresa è concava.** Hautsch, Hess e Müller (2012)
+  [T]: le sorprese molto grandi contano meno di quanto direbbe una retta.
+  È per questo che usiamo log(1 + S).
+- **La sensibilità cambia nel tempo.**
+  - Swanson e Williams (2014, *AER*) [T]: una sensibilità per anno, come
+    il nostro effetto anno.
+  - Kroner (2025, Fed FEDS 2025-022) [T]: nel periodo di inflazione alta
+    l'effetto del CPI è **più di 10 volte** quello del periodo prima. Per
+    NFP e Retail no, anzi cala. Coincide col nostro resto CPI × 2,7 dal
+    2021, e con NFP e Retail vicini a 1.
+  - Cline e Jia (2025, Cleveland Fed) [lettura della pagina]: il tasso a 2
+    anni si muove 0,13 per punto di sorpresa core CPI nel 2015–20 e 0,71
+    nel 2022–24.
+  - Il motivo indicato è l'attenzione del mercato e quanto la Fed guarda
+    quel dato (Kroner; Bauer e Swanson 2023).
+- **Oro.**
+  - Elder, Miao e Ramchander (2012) [T]: nel 2002–08 l'oro si muove
+    −0,305% in 5 minuti per 1 sigma di sorpresa NFP. Il CPI non era
+    significativo: allora l'oro non reagiva all'inflazione.
+  - Smales e Yang (2015) [A]: la reazione è più grande quando i previsori
+    sono in disaccordo.
+- **Liquidità.** Jiang, Lo e Verdelhan (2011) [A]: i salti alle news sono
+  spiegati poco dalla sorpresa e di più dalla liquidità sottile prima
+  della news.
+- **Prezzo.** Nessuno studio confronta i pips con le %: tutti lavorano in
+  %. Il nostro punto 1, che il prezzo spiega × 3,3, è conto e non
+  ricerca.
+- **Non trovato**: uno studio sull'oro nel regime 2021–26.

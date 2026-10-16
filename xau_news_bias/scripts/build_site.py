@@ -14,6 +14,7 @@ if __name__ == "__main__":
     data["vol"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx21_range.json").read_text(encoding="utf-8"))
     data["liv"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx28_livelli.json").read_text(encoding="utf-8"))
     data["liv"]["per_ora"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx28_per_ora.json").read_text(encoding="utf-8"))
+    data["pips29"] = {k: v for k, v in json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx29_pips.json").read_text(encoding="utf-8")).items() if k in ("copertura", "modello", "scomposizione_vs_2019")}
     data["reg"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx22_regime.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
