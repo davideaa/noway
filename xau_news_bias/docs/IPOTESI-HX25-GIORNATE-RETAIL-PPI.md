@@ -282,3 +282,23 @@ Spearman fra S e grandezza della candela (p unilaterale):
   massimo **da registrare dal vivo**.
 - **Senza la direzione nessuna uscita salva il trade**: da −0,03 a −0,09
   R a trade.
+
+## Correzione dopo la revisione (16/10/2026)
+
+Trovata dal revisore, dopo i risultati:
+- **La "direzione giusta" è il segno a T0 + 60 s.** Si conosce solo
+  guardando il risultato, e regala un vantaggio a E60: per costruzione la
+  chiusura M1 è sempre dalla parte giusta, le uscite più lunghe e i TP no.
+- Quindi "nessuna uscita batte E60" vale per chi conosce il segno della
+  M1, non per un trader vero. Per Retail/PPI non esiste una direzione vera
+  da usare (H-X15, H-X24, H-X26, H-X27 tutte bocciate).
+- Senza oracolo restano le colonne **a caso**, che non favoriscono
+  nessuna uscita: tutte perdono, fra −0,03 e −0,09 R. TP50_5 è la meno
+  peggio (−0,03 / −0,04), E300 la peggiore nel 2023–26 (−0,09). Le
+  differenze sono piccole e non testate.
+- Per le NFP il controllo con la direzione vera esiste già (H-X19, riga
+  "con la bias H-X8"): la chiusura M1 resta la migliore.
+- La parte 3 (sorpresa e ampiezza) **passa** per la regola scritta prima,
+  come scritto sopra. Un riassunto fuori dal documento diceva il
+  contrario: era sbagliato.
+

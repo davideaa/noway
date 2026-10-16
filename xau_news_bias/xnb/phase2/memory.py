@@ -136,8 +136,9 @@ def consensus_features(tab: pd.DataFrame, family: str, t0: pd.Timestamp) -> dict
         if len(acts) >= 6:
             sd = float(np.std(acts[-24:])) if len(acts) >= 12 else np.nan
             f[f"cons_{k}_z_vs_recent"] = (fc - float(np.mean(acts[-6:]))) / sd if sd and sd == sd and sd > 0 else np.nan
-        # (le revisioni NON si leggono da FF: il suo "previous" è la prima stampa
-        # nel 99,5% dei casi verificati; vengono dai comunicati BLS, vedi nfp_bls)
+        # (le revisioni NON si leggono da FF; vengono dai comunicati BLS, vedi nfp_bls.
+        # Il "previous" FF è la cifra rivista, non la prima stampa: per NFP coincide
+        # con l'actual precedente solo l'1,7% delle volte. Qui si usa l'actual.)
     return f
 
 

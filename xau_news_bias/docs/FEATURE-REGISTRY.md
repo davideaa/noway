@@ -57,4 +57,5 @@ FED è un sottoinsieme trasversale (5 feature: giorni da/al FOMC, 3M, 2Y − 3M,
 
 - `f_xau_px_age_min`, `f_rates_age_days`, `f_cot_age_days`: età del dato, solo controllo qualità.
 - Una feature diventa primitiva di regola solo con copertura ≥ 70% nella scoperta del gruppo.
-- Le revisioni NFP del 'previous' ForexFactory sono state tolte: FF riporta la prima stampa, non la revisione (verificato: 99,5% dei casi). Le revisioni vengono dai comunicati BLS.
+- Le revisioni NFP del 'previous' ForexFactory sono state tolte. Le revisioni vengono dai comunicati BLS.
+- **Errore corretto il 16/10/2026** (trovato in H-X26): qui era scritto che il 'previous' FF è la prima stampa nel 99,5% dei casi. È falso: è la cifra **rivista**. Coincide con l'actual della release prima solo l'1,7% delle volte per NFP, il 3% per ADP, il 17% per Retail, il 20% per Claims; il 100% per CPI, core CPI, ISM M e disoccupazione. Sui risultati della fase 2 non cambia niente: le feature `f_cons_*` usano l'actual della release prima, mai la colonna 'previous'.

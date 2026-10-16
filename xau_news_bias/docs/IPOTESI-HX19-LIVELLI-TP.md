@@ -115,3 +115,22 @@ R medio a trade, ingresso T0 − 30 s, stop 100 pips:
     (0,33%), 2026 416 (0,97%);
   - Retail/PPI: 2019 23, 2022 25, 2023 47, 2024 53, 2025 40, 2026 96
     (0,19%).
+
+## Correzione dopo la revisione (16/10/2026, trovata in H-X25)
+
+- Le righe "direzione giusta" usano il segno della chiusura M1, che si
+  conosce solo dopo. Questo favorisce C per costruzione: non sono il
+  confronto giusto per un trader vero.
+- Il confronto giusto per le NFP è quello **con la bias H-X8**, che usa la
+  direzione decisa prima della news (`hx19_tp.json`):
+
+| NFP, con la bias H-X8 | C chiusura M1 | TP A | TP B | TP A poi 5 min |
+|---|---|---|---|---|
+| 2019–22 (47) | −0,03 | −0,05 | −0,03 | −0,08 |
+| 2023–26 (43) | **+0,57** | +0,23 | +0,30 | +0,18 |
+
+- Anche **a caso** C è la migliore: nel 2019–22 −0,07 contro fra −0,08 e
+  −0,10 dei TP; nel 2023–26 +0,13 contro fra −0,04 e −0,12.
+- Il verdetto non cambia: sulle NFP il TP costa. Per Retail/PPI vedi la
+  correzione di H-X25.
+
