@@ -213,8 +213,14 @@ utile a T0 + 60 s). A caso il trade rende −0,046 R (60 s) e −0,052 R
   da questa scelta.
 - La continuazione forte del 2011–13 potrebbe essere in parte dovuta ai
   tick Dukascopy più radi di quegli anni.
-- In `cpi_nfp.parquet` mancano 10 release CPI/NFP del 2011–26 tolte in
-  fase 2 per dati incompleti, il CPI del 14/10/2026 e le NFP successive.
+- Rispetto al calendario ForexFactory (impatto alto), in
+  `cpi_nfp.parquet` mancano 8 release: 6 cadute il Venerdì Santo (CPI
+  14/04/2017 e 10/04/2020; NFP 03/04/2015, 02/04/2021, 07/04/2023,
+  03/04/2026), più la NFP del 02/10/2026 e il CPI del 14/10/2026, uscite
+  dopo che il file è stato fatto. **Errore nella pre-registrazione**:
+  scrivevo che mancava solo il CPI del 14/10; manca anche la NFP del
+  02/10. Due release in più non cambiano un verdetto con p corretti a
+  1,00.
 - Dukascopy non è il broker di Davide; ingresso a T0 + 5 s senza
   slittamento: dal vivo andrebbe peggio, non meglio.
 
