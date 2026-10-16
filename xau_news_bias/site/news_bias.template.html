@@ -562,12 +562,8 @@ function tpRender(T, name, el, cls) {
   Perché 24 release: ho provato 6, 12, 24 e tutte dal 2014, calcolando ogni volta il livello solo con le release prima e guardando se la release dopo lo toccava. Con 24 il livello "2 volte su 3" è stato toccato il ${Math.round(T.finestre["24"].tocca_A_2023_26 * 100)}% delle volte e quello "1 su 2" il ${Math.round(T.finestre["24"].tocca_B_2023_26 * 100)}% nel 2023–26; con tutto dal 2014 i livelli vengono troppo bassi (${Math.round(T.finestre.tutte.tocca_A_2023_26 * 100)}% e ${Math.round(T.finestre.tutte.tocca_B_2023_26 * 100)}%).</p>
   <div class="${cls.tw}"><table class="${cls.table}"><thead><tr><th>Anno</th><th>Arriva (mediana)</th><th>Chiusura 14:31</th><th>In % del prezzo</th><th>Prezzo oro</th></tr></thead><tbody>
     ${yrs.map(([y, v]) => `<tr><td>${y}</td><td>${f(v.arrivo_pips)}</td><td>${f(v.chiusura_pips)}</td><td>${v.arrivo_pct.toFixed(2).replace(".", ",")}%</td><td>${f(v.prezzo)} $</td></tr>`).join("")}</tbody></table></div>
-  <div class="${cls.tw}"><table class="${cls.table}"><thead><tr><th>R a trade, stop 100 pips</th><th>Chiusura 14:31</th><th>TP ${f(o.A_pips)}</th><th>TP ${f(o.B_pips)}</th><th>TP ${f(o.A_pips)} poi 14:35</th></tr></thead><tbody>
-    <tr><td>Direzione giusta 2019–22</td><td><b>${r(u0.C_giusta)}</b></td><td>${r(u0.TPa_giusta)}</td><td>${r(u0.TPb_giusta)}</td><td>${r(u0.TPa5_giusta)}</td></tr>
-    <tr><td>Direzione giusta 2023–26</td><td><b>${r(u.C_giusta)}</b></td><td>${r(u.TPa_giusta)}</td><td>${r(u.TPb_giusta)}</td><td>${r(u.TPa5_giusta)}</td></tr>
-    ${bias ? `<tr><td>Con la bias NFP 2023–26</td><td><b>${r(u.C_bias)}</b></td><td>${r(u.TPa_bias)}</td><td>${r(u.TPb_bias)}</td><td>${r(u.TPa5_bias)}</td></tr>` : `<tr><td>Direzione a caso 2023–26</td><td>${r(u.C_caso)}</td><td>${r(u.TPa_caso)}</td><td>${r(u.TPb_caso)}</td><td>${r(u.TPa5_caso)}</td></tr>`}
-  </tbody></table></div>
-  <p class="${cls.small}"><b>La volatilità generale dell'oro non basta.</b> Ho provato a prevedere la candela della news con la volatilità dell'ultima settimana, mese, trimestre, semestre e anno, e con l'ATR H1: nessuna funziona (correlazione circa zero). Nel 2026 l'oro si muove il doppio tutti i giorni, ma le news in proporzione meno. Prevede meglio <b>la memoria della news stessa</b>, cioè quanto si sono mosse le ultime release: ${name === "NFP" ? "per la NFP l'errore tipico resta del 25–40%, è la news meno prevedibile." : "per Retail e PPI le ultime 12 release sbagliano di circa il 20%."}</p>
+
+
   <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p>`;
 }
 tpRender(D.tp, "NFP", document.getElementById("tpbox"), {note:"note", tiles:"tiles", tile:"tile", lab:"small muted", v:"v", small:"small muted", tw:"tw", table:"pt"});
