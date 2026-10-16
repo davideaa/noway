@@ -101,6 +101,100 @@ dollaro, quindi l'oro scende.
 - Niente filtri su ore o giorni. Niente soglie diverse da 0 e 0,1 dopo
   aver visto i dati.
 
-## Risultati
+## Risultati (dopo i commit della pre-registrazione `02eaf5d` e dello script `045cdbc`)
 
-(da aggiungere dopo il commit di questa pre-registrazione e dello script)
+File: `research_output/phase2/hx16/hx24_nowcast.json` e
+`hx24_nowcast_release.csv`, con una riga per release. Codice:
+`scripts/hx24_nowcast.py`.
+
+### Verdetto: NON PASSA
+
+Nessuna delle 4 regole indovina l'oro nella conferma 2019–26. Il
+meccanismo non regge nemmeno lui: nella conferma il nowcast non indovina
+più la sorpresa.
+
+### L'oro (T2), cioè quello che conta per il trade
+
+| Regola | Studio 2013–18 | Conferma 2019–26 | p Holm | R a 60 s regola / caso | R a 5 min regola / caso |
+|---|---|---|---|---|---|
+| H0 | 35/63 = 55,6% | 49/90 = **54,4%** | 0,92 | +0,05 / −0,02 | +0,08 / −0,02 |
+| H1 | 5/6 | 10/24 = 41,7% | 1,00 | −0,02 / +0,05 | +0,04 / +0,01 |
+| C0 | 33/63 = 52,4% | 47/90 = **52,2%** | 1,00 | +0,03 / −0,02 | +0,06 / −0,02 |
+| C1 | 0 segnali | 7/16 = 43,8% | 1,00 | −0,12 / −0,00 | +0,06 / −0,03 |
+
+- "Caso" vuol dire direzione a caso: la media di LONG e SHORT sulle stesse
+  release.
+- Regola meno caso, nella conferma a 60 s: H0 +0,07 R (t 0,90), C0
+  +0,05 R (t 0,58). È rumore.
+- Lo spread mediano a T0 − 30 s è di 3,5 pips, quindi il caso costa solo
+  0,02 R.
+
+### Il meccanismo (T1): il nowcast indovina il segno della sorpresa?
+
+| Regola | Studio 2013–18 | Conferma 2019–26 | p Holm | Correlazione scarto/sorpresa: studio → conferma |
+|---|---|---|---|---|
+| H0 | 25/34 = **73,5%** | 30/57 = 52,6% | 1,00 | ρ +0,47 (p 0,0001) → **−0,10** (p 0,37) |
+| H1 | 4/4 | 5/16 = 31,3% | 1,00 | |
+| C0 | 28/37 = **75,7%** | 36/62 = 58,1% | 0,51 | ρ +0,31 (p 0,014) → **−0,02** (p 0,85) |
+| C1 | 0 segnali | 5/12 = 41,7% | 1,00 | |
+
+- Nel 2013–18 il nowcast funzionava davvero sulla sorpresa: 3 volte su 4.
+  Eppure l'oro andava nel verso giusto solo il 52–56% delle volte.
+- Ci sono due ragioni:
+  - circa il 45% dei CPI esce **esattamente in linea** con il consensus,
+    e lì il nowcast non ha niente da indovinare. Contando quelle release
+    come sbagliate, la quota scende al 40–44%;
+  - anche conoscendo la sorpresa, l'oro la segue solo il ~73% delle volte
+    (il tetto teorico di `RISULTATI-CPI.md` §7).
+- Nel 2019–26 il vantaggio sulla sorpresa sparisce. L'anno peggiore è il
+  2021: 1 giusta su 8 per H0, 3 su 9 per C0. Il nowcast segue soprattutto
+  benzina e petrolio, e quel CPI lo hanno mosso auto usate, affitti e
+  colli di bottiglia.
+- Le regole a soglia 0,1 sono le peggiori. Quando il nowcast si stacca
+  molto dal consensus (2020–23), sbaglia più spesso.
+
+### Per anno (descrittivo): il segnale cambia verso
+
+C0 sull'oro: 2019 6/12, 2020 4/11, 2021 4/12, 2022 5/12, 2023 4/12, poi
+2024 8/12, 2025 9/10, 2026 7/9.
+
+- Negli **ultimi 3 anni** (2024–26), C0 fa 24 giuste su 31 (77%), con
+  R +0,35 a 60 s, e la sorpresa giusta 17 su 21.
+- Ma nel **2019–23** la stessa regola fa 23 su 59 (**39%**): sbagliava più
+  del caso. Questo spezzamento non era pre-registrato. Lo riporto solo per
+  mostrare che il 77% recente segue un 39%, e non è un trend stabile.
+- È lo stesso schema già visto in fase 2: i segnali cambiano verso fra un
+  periodo e l'altro.
+- Il 77% recente non è un risultato. Al massimo è una cosa da guardare dal
+  vivo, e andrebbe pre-registrata come ipotesi nuova prima delle prossime
+  release.
+
+### Controlli fatti
+
+- **Release**: 155 dal 2013-08, 64 nello studio e 91 nella conferma.
+  - Sono tolte 2 release: 15/08/2013, senza nowcast perché la serie non
+    era ancora partita, e 18/12/2025 (CPI di novembre dopo lo shutdown),
+    senza forecast su ForexFactory.
+  - Tick validi per tutte le 155. Una sola (12/05/2026) era da scaricare.
+- **Nowcast**: quello usato è sempre di un giorno lavorativo prima della
+  release (mediana 1 giorno). Nessuno è del giorno stesso o successivo.
+- **Sorpresa headline**: quella calcolata qui coincide con la colonna
+  `sorpresa` di `cpi_nfp.parquet` in 136 casi su 136.
+
+### Errori e limiti dichiarati
+
+1. **Il test non era nuovo** (vedi sopra). Conoscevo già il risultato di
+   fase 1 sull'oro (50%). Il fallimento era atteso, ed è arrivato.
+2. **C1 non poteva passare.** Nel 2013–18 lo scarto core non arriva mai a
+   0,1. H1 ha solo 6 segnali nello studio. Non avevo guardato la
+   distribuzione dello scarto prima di fissare la soglia: le soglie 0,1
+   erano mal tarate per lo studio. Non cambia il verdetto, perché nella
+   conferma H1 e C1 sono sotto il 50%.
+3. **ForexFactory**: il forecast è quello mostrato al momento della
+   release. Non è garantito che fosse il consensus di qualche giorno
+   prima.
+4. **Cleveland Fed**: che i valori siano davvero quelli pubblicati in
+   tempo reale lo dice la fonte. Qui non si può verificare.
+5. Il 2019–26 del CPI era già stato guardato (fase 1, fase 2, H-X17).
+   Quindi anche un passaggio sarebbe valso solo come "da registrare dal
+   vivo". Qui non c'è nemmeno quello.
