@@ -83,3 +83,64 @@ Descrittivo: per famiglia e il verso opposto (segui l'estensione).
 
 Se passa: è un'indicazione da registrare dal vivo, non un trade. I dati
 sono già stati visti per altre domande.
+
+## Risultati (dopo i commit `afab956` e dello script)
+
+File: `research_output/phase2/hx16/hx23_modello.json` e
+`hx23_dataset.parquet`. Codice: `scripts/hx23_modello.py`.
+
+2.216 release valide 2011–2026: 13 famiglie, di cui NFP 183, CPI 186,
+Retail 168, PPI 127.
+
+### A — quanti pips
+
+Errore mediano |log(vero ÷ previsto)| 2019–22 / 2023–26 (Spearman
+2023–26):
+
+| | M0 memoria (12 release) | M1 lineare | M2 LightGBM |
+|---|---|---|---|
+| Tutte | 0,409 / 0,373 (0,67) | 0,409 / **0,328** (0,70) | 0,413 / 0,325 (0,69) |
+| NFP | 0,357 / 0,373 (−0,02) | 0,354 / **0,331** (0,28) | 0,368 / 0,306 (0,04) |
+| CPI | 0,452 / 0,467 (0,01) | **0,326 / 0,413** (0,36) | 0,428 / 0,370 (0,28) |
+| Retail/PPI | 0,391 / 0,327 (0,20) | **0,351 / 0,282** (0,32) | 0,378 / 0,289 (0,35) |
+
+- **Per la regola scritta prima il modello NON sostituisce la memoria**:
+  su tutte le news insieme nel 2019–22 non migliora (0,409 contro 0,409).
+- Per le news che contano a Davide il modello lineare è meglio in tutti e
+  due i periodi:
+  - CPI: errore da 0,45 a 0,33 e da 0,47 a 0,41;
+  - Retail/PPI: da 0,39 a 0,35 e da 0,33 a 0,28;
+  - NFP: solo nel 2023–26.
+- Questo **non era il criterio** (che guardava "tutte"). Il modello
+  lineare si registra quindi dal vivo in parallelo alla memoria, non lo
+  sostituisce.
+- **Cosa conta**, in ordine (pesi del lineare e importanza in LightGBM):
+  1. memoria delle ultime 3 release (+0,25);
+  2. memoria delle ultime 12 (+0,17);
+  3. range degli ultimi 15 minuti e dell'ultima ora prima della news
+     (+0,06, +0,05);
+  4. ADR (+0,03–0,05).
+  - Il GVZ quasi niente (+0,04 relativo, −0,04 livello). Il VIX va al
+    contrario (−0,05). Il range già fatto oggi pesa pochissimo (−0,03).
+  - Coerente con gli studi: il volume della news è memoria della news
+    più la tensione subito prima. La volatilità generale e quella
+    implicita aggiungono poco.
+
+### B — direzione dalla posizione nel range (ipotesi di Davide)
+
+| Regola (sfuma l'estensione) | Release con segnale | Giuste | p Holm | 2011–18 / 2019–26 |
+|---|---|---|---|---|
+| E50 giorno ±0,5 ADR | 501 | 47,5% | 1,00 | 46,6% / 48,6% |
+| E80 giorno ±0,8 ADR | 188 | 44,7% | 1,00 | 47,1% / 41,7% |
+| W50 settimana ±0,5 AWR | 647 | 50,9% | 1,00 | 50,9% / 50,7% |
+| W80 settimana ±0,8 AWR | 262 | 52,7% | 0,84 | 53,2% / 51,9% |
+
+- **Non passa.** Quando il prezzo ha già fatto molto range nel giorno, la
+  news non spara di più dall'altra parte.
+- Descrittivo, verso opposto, non testato: con estensione ≥ 0,8 ADR la news
+  **continua** nella stessa direzione il 55,3% delle volte (104 su 188, p
+  unilaterale circa 0,08; 52,9% nel 2011–18 e 58,3% nel 2019–26).
+  - È coerente con gli studi, che trovano continuazione e non inversione
+    (Kurov et al. 2019, intraday momentum).
+  - Non è significativo, e il verso è stato scelto guardando i dati: al
+    massimo un'idea da registrare dal vivo.
