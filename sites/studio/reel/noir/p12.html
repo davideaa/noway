@@ -309,7 +309,7 @@ function chips(cx, top, head, A, B, k, t, tA, tB) { /* tocca entrambe le opzioni
     x.save(); x.globalAlpha = k; x.fillStyle = on > 0.5 ? 'rgba(200,250,114,0.14)' : 'rgba(241,244,238,0.06)'; rr(cx - w / 2, y - 30, w, 60, 30); x.fill();
     x.strokeStyle = on > 0.5 ? C.lime : 'rgba(241,244,238,0.3)'; x.lineWidth = 2; x.stroke(); x.restore();
     txt(lab, cx, y + 1, { fam: 'mono', size: 26, weight: 600, color: on > 0.5 ? C.lime : C.ink, ls: 1, alpha: k }); });
-  tap(cx + 162, top + 108, t, tA); tap(cx + 162, top + 188, t, tB); }
+  tap(cx + 178, top + 108, t, tA); tap(cx + 178, top + 188, t, tB); }
 function sCasa(t, a, b) { bg('30,44,26'); x.save();
   const tT = WT('casa', 'titolo', 1, 3.1), tR = WT('casa', 'recess', 1, 3.8), tCh = WA('casa', ['chiederti', 'chieder'], 1, 4.5), tC2 = WT('casa', 'chi', 2, 4.8), tD = WT('casa', 'detto', 1, 5.5), tDa = WT('casa', 'dati', 1, 6.9);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 330, { size: 70, out: tC2 - 0.4 });
