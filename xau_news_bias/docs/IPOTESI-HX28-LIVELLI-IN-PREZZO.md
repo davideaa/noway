@@ -108,6 +108,8 @@ Si dice che quantile è davvero, cioè quante volte il massimo resta sotto.
   - le coperture 90% (su e giù) stanno fra 87% e 93%;
   - p_su e p_giù sbagliano la quota vera di meno di 5 punti;
   - i livelli tipici stanno fra 45% e 55%.
+- Giorno e settimana si giudicano **separatamente**: possono vincere metodi
+  diversi.
 - Fra i metodi affidabili vince quello con la **fascia [Giù_90, Su_90] più
   stretta nel 2023–26**. Se la differenza è sotto il 3%, vince il più
   semplice (A, poi B, poi C).
