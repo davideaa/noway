@@ -101,6 +101,7 @@ th{font:600 11px var(--f-num);letter-spacing:.06em;text-transform:uppercase;colo
 th:first-child,td:first-child{text-align:left}
 tr:last-child td{border-bottom:0}
 td{font-family:var(--f-num)}
+td .small{display:block;font-size:11.5px}
 .res{gap:12px}.ri{font-size:14.5px;color:var(--ink2);padding-left:12px;border-left:3px solid var(--line)}.ri b{color:var(--ink)}.ri a{color:var(--accent);font-size:12.5px;font-family:var(--f-num);white-space:nowrap}
 .big-callout{background:var(--accent-soft);border-left:5px solid var(--accent);border-radius:10px;padding:18px 20px;display:grid;gap:10px;font-size:15.5px;line-height:1.6}
 .big-callout ol{margin:0;padding-left:20px;display:grid;gap:8px}
@@ -127,6 +128,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="sechead"><h3>Candela delle 14:30 al prezzo di oggi, dal minimo al massimo (wick compresa)</h3><p class="small" id="sample"></p></div>
     <svg class="gauge" id="gauge" viewBox="0 0 640 110" role="img" aria-label="Fascia di ampiezza attesa della candela della news"></svg>
   </div>
+</section>
+
+<section class="sec" aria-labelledby="h-vol">
+  <div class="sechead"><h3 id="h-vol">Oggi e questa settimana</h3><h2>Quanto si muove l'oro</h2></div>
+  <div class="panel" id="volbox"></div>
 </section>
 
 <section class="sec" aria-labelledby="h-tp">
@@ -429,4 +435,18 @@ function tpRender(T, name, el, cls) {
   <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p>`;
 }
 tpRender(D.tp, "Retail e PPI", document.getElementById("tpbox"), {note:"big-callout", tiles:"steps", tile:"step", lab:"", v:"", small:"small", tw:"tw", table:""});
+function volRender(V, el, cls) {
+  if (!V || !el) return;
+  const f = x => Math.round(x).toLocaleString("it-IT"), p2 = x => x.toLocaleString("it-IT", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const row = (lab, X, per) => { const q = X.previsione_pips, e = X.escursione_dall_apertura, o = X.apertura, lato = q.p50 * e.max_lato_mediana, raro = q.p90 * e.max_lato_mediana;
+    return `<tr><td>${lab}<span class="${cls.sub}">apertura ${p2(o)} $</span></td><td><b>${f(q.p50)}</b></td><td>${f(q.p75)}</td><td>${f(q.p90)}</td>
+      <td>${p2(o + lato / 10)} / ${p2(o - lato / 10)}<span class="${cls.sub}">± ${f(lato)} pips</span></td><td>${p2(o + raro / 10)} / ${p2(o - raro / 10)}<span class="${cls.sub}">± ${f(raro)} pips</span></td></tr>`; };
+  const D = V.D, W = V.W, err = x => Math.round((Math.exp(x) - 1) * 100);
+  el.innerHTML = `
+  <div class="${cls.tw}"><table class="${cls.table}"><thead><tr><th></th><th>Range atteso</th><th>3 volte su 4 sotto</th><th>9 volte su 10 sotto</th><th>Livello tipico dall'apertura (su / giù)</th><th>Livello raro (su / giù)</th></tr></thead><tbody>
+    ${row("Oggi", D)}${row("Questa settimana", W)}</tbody></table></div>
+  <p class="${cls.small}"><b>Qui la volatilità prevede davvero.</b> Il range di domani si prevede con la media degli ultimi 21 giorni, quello della settimana con la media delle ultime 4 settimane: errore tipico circa ${err(D.previsori[D.scelto]["2023-26"].errore_mediano)}%, e la fascia "9 su 10" ci ha preso il ${Math.round(D.previsori[D.scelto]["2023-26"].copertura_10_90 * 100)}% dei giorni e il ${Math.round(W.previsori[W.scelto]["2023-26"].copertura_10_90 * 100)}% delle settimane nel 2023–26 (prova passo per passo, solo con i dati di prima). La settimana prima da sola (W1) o il giorno prima da solo (D1) sbagliano di più.</p>
+  <p class="${cls.small}">"Livello tipico": il prezzo di solito arriva, dal lato dove va, all'${Math.round(D.escursione_dall_apertura.max_lato_mediana * 100)}% del range del giorno. Non sai da che lato: il livello è sopra o sotto. Alla news invece questo non funziona: la candela delle 14:30 non segue la volatilità del mese (studio H-X20). Calcolato il ${D.periodo} sui prezzi fino alle ${V.ora.slice(11)} UTC.</p>`;
+}
+volRender(D.vol, document.getElementById("volbox"), {tw:"tw", table:"", sub:"small", small:"small"});
 </script>

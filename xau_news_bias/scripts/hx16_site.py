@@ -23,6 +23,7 @@ if __name__ == "__main__":
     out["prossime"] = [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)]
     tp = json.loads((R / "hx19_tp.json").read_text())
     out["tp"] = {**{k: v for k, v in tp["RETAIL_PPI"].items() if k != "ultime"}, "prezzo": tp["prezzo_oggi"]}
+    out["vol"] = json.loads((R / "hx21_range.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

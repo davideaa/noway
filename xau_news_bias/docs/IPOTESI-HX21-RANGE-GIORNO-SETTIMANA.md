@@ -58,3 +58,46 @@ Solo dati chiusi prima del giorno o della settimana da prevedere.
     previsto, sugli ultimi 250 giorni o 50 settimane.
 - **Collegamento con le news**: H-X20 ha già mostrato che il range del
   mese non prevede la candela della news. Qui non si riapre.
+
+## Risultati (dopo i commit `829a6ca` e dello script)
+
+File: `research_output/phase2/hx16/hx21_range.json`. Codice:
+`scripts/hx21_range.py`.
+
+**Giorno** (errore mediano 2019–22 / 2023–26; Spearman 2023–26; copertura
+10–90% 2023–26):
+
+| | Errore | Spearman | Copertura 10–90 |
+|---|---|---|---|
+| D1 (ieri) | 0,37 / 0,35 | 0,47 | 80% |
+| D5 (5 giorni) | 0,29 / 0,28 | 0,60 | 81% |
+| **D21 (21 giorni)** | 0,29 / 0,27 | 0,58 | **79%** |
+| HAR | 0,28 / 0,26 | 0,61 | 81% |
+
+**Settimana**:
+
+| | Errore | Spearman | Copertura 10–90 |
+|---|---|---|---|
+| W1 | 0,38 / 0,34 | 0,48 | 76% |
+| **W4 (4 settimane)** | 0,29 / 0,26 | 0,55 | **77%** |
+| W13 | 0,29 / 0,30 | 0,43 | 77% |
+| HAR | 0,29 / 0,27 | 0,51 | 76% |
+
+- **Scelti**: D21 per il giorno (HAR è meglio di meno di 0,02, quindi
+  vince il più semplice) e W4 per la settimana.
+- **Affidabili** per la regola scritta prima: copertura 10–90% fra il 75%
+  e l'85%.
+- **A differenza delle news, qui la volatilità prevede davvero**
+  (Spearman 0,55–0,60). L'errore tipico è circa il 27%.
+- **Previsione del 16/10/2026** (apertura del giorno 4.155,86 $, della
+  settimana 4.193,32 $):
+
+| | Mediana | 3 volte su 4 sotto | 9 volte su 10 sotto |
+|---|---|---|---|
+| Range del giorno | **682 pips** | 911 | 1.209 |
+| Range della settimana | **1.388 pips** | 1.717 | 2.600 |
+
+- **Dall'apertura** (mediana sugli ultimi 250 giorni / 50 settimane):
+  - il lato più lungo arriva all'82% del range nel giorno e all'80% nella
+    settimana;
+  - in media il giorno sale il 55% del range e scende il 45%.
