@@ -64,24 +64,25 @@ function fridge(cx, by, w, h, o = {}) { const { k = 1, ghost = 0, light = 0, tag
     x.fillStyle = '#050607'; x.beginPath(); x.arc(-58, 0, 5, 0, 7); x.fill();
     txt('NUOVO', 12, 2, { size: 26, weight: 800, color: '#15200C', ls: 2 }); x.restore(); }
   x.restore(); }
-function stamp(cx, cy, label, k, col = C.amber, rot = 0.12, size = 60) { if (k <= 0) return; const kk = oC(clamp(k)), s = lerp(1.7, 1, kk), w = tw(label, size, 800, 'Manrope', 4) + 60, h = size + 40;
-  x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(s, s); x.globalAlpha *= clamp(k * 2.5);
-  x.fillStyle = 'rgba(5,6,7,0.78)'; rr(-w / 2, -h / 2, w, h, 14); x.fill(); x.strokeStyle = col; x.lineWidth = 6; rr(-w / 2, -h / 2, w, h, 14); x.stroke();
-  txt(label, 0, 3, { size, weight: 800, color: col, ls: 4, blur: (1 - kk) * 8 }); x.restore();
-  if (k > 0.35 && k < 1) { const kr = seg(k, 0.35, 1); x.save(); x.strokeStyle = `rgba(245,165,36,${0.6 * (1 - kr)})`; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, 120 + 180 * oC(kr), 0, 7); x.stroke(); x.restore(); } }
-
-/* ================= HOOK: il frigo nuovo, rimandato; sotto, l'onda del ciclo ================= */
+/* ================= HOOK: anche il frigo nuovo che compri fa parte del PIL, che sale e scende col ciclo ================= */
 function sHook(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.05);
-  const tFr = WT('hook', 'frigorifero', 1, 0.23), tRi = WT('hook', 'rimandi', 1, 1.35), tAn = WA('hook', ['anno', 'allanno'], 1, 1.97), tPe = WT('hook', 'pezzo', 1, 3.05), tCi = WT('hook', 'ciclo', 1, 3.58);
-  phrase(t, a + 0.03, [['Il frigo che rimandi', C.ink]], 345, { size: 92, st: 0.1 });
-  phrase(t, tPe - 0.1, [['è un pezzo del ciclo.', C.lime]], Y2, { size: 92 });
-  const kS = seg(t, tRi - 0.12, tRi + 0.3);
-  fridge(540, 1190, 300, 560, { k: seg(t, a, a + 0.4), light: oC(seg(t, a + 0.1, a + 0.6)) * (1 - oC(kS)), tag: seg(t, tFr - 0.05, tFr + 0.4), t });
-  stamp(540, 950, 'RIMANDATO', kS, C.amber, 0.12, 60);
-  glassPill(540, 1285, 'ALL’ANNO PROSSIMO', seg(t, tAn - 0.15, tAn + 0.3), C.amber, 36);
-  /* l'onda del ciclo che si disegna sotto, con un punto che la percorre */
-  const kW = ioC(seg(t, tCi - 0.3, tCi + 0.6)); if (kW > 0) { const fy = (xx) => 1400 - 30 * Math.sin((xx - 140) / 200 * Math.PI * 2), xe = lerp(140, 940, kW);
-    slopeStroke(fy, 140, xe, 5, 3); const u = ((t - tCi + 0.3) * 0.3) % 1, px = lerp(140, xe, u); dot(px, fy(px), 10, C.ink, kW, '200,250,114'); }
+  const tFr = WT('hook', 'frigorifero', 1, 0.6), tCo = WT('hook', 'compri', 1, 1.84), tPa = WT('hook', 'parte', 1, 2.43), tPr = WT('hook', 'prodotto', 1, 3.03),
+    tSa = WT('hook', 'sale', 1, 4.61), tSc = WT('hook', 'scende', 1, 5.06), tCi = WT('hook', 'ciclo', 1, 5.9);
+  phrase(t, a + 0.03, [['Anche il frigo', C.ink]], 345, { size: 92, st: 0.1 });
+  phrase(t, tPa - 0.1, [['fa parte del PIL.', C.lime]], Y2, { size: 92 });
+  const FR = { cx: 540, by: 1130, w: 280, h: 500 };
+  fridge(FR.cx, FR.by, FR.w, FR.h, { k: seg(t, a, a + 0.4), light: oC(seg(t, a + 0.1, a + 0.6)), tag: seg(t, tFr - 0.05, tFr + 0.4), t });
+  tap(FR.cx + FR.w / 2 - 26, FR.by - FR.h * 0.5, t, tCo);
+  /* la scatola del PIL: un cubetto parte dal frigo e ci entra */
+  const kB = oC(seg(t, tPa - 0.3, tPa + 0.2)), kC = seg(t, tPr - 0.45, tPr + 0.15), hit = Math.sin(Math.PI * seg(t, tPr + 0.1, tPr + 0.8));
+  if (kB > 0) { if (hit > 0) glow(540, 1258, 240, '200,250,114', 0.35 * hit); glass(540, 1258, 380, 96, 48, kB);
+    if (hit > 0) { x.save(); x.globalAlpha = hit; x.strokeStyle = C.lime; x.lineWidth = 4; rr(350, 1210, 380, 96, 48); x.stroke(); x.restore(); }
+    txt('PIL', 540, 1260, { size: 48, weight: 800, color: hit > 0.3 ? C.lime : C.ink, alpha: kB, ls: 2 }); }
+  if (kC > 0 && kC < 1) { const u = ioC(kC), cx = lerp(FR.cx + 90, 640, u), cy = lerp(FR.by - 260, 1212, u) - Math.sin(Math.PI * u) * 120, s = lerp(1, 0.6, u);
+    glow(cx, cy, 50, '200,250,114', 0.4); x.save(); x.translate(cx, cy); x.rotate(u * 2.5); x.scale(s, s); rr(-18, -18, 36, 36, 7); x.fillStyle = C.lime; x.fill(); x.restore(); }
+  /* l'onda del ciclo: sale (lime) e scende (rosso) sulle parole */
+  const kW = ioC(seg(t, tSa - 0.25, Math.max(tCi + 0.4, tSc + 0.8))); if (kW > 0) { const fy = (xx) => 1395 + 30 * Math.cos((xx - 140) / 200 * Math.PI * 2), xe = lerp(140, 940, kW);
+    slopeStroke(fy, 140, xe, 5, 3); dot(xe, fy(xe), 10, C.ink, kW, '200,250,114'); }
   x.restore(); finish(t); }
 
 /* ================= FASI: la linea retta che comincia a respirare ================= */
@@ -91,7 +92,7 @@ const fWv = (xx, m = 1) => fTr(xx) - FW.A * m * Math.sin(Math.PI / 2 + (xx - FW.
 const FX = { peak: FW.xp, trough: FW.xp + FW.L / 2 };
 function keyX(t, K) { if (t <= K[0][0]) return K[0][1]; for (let i = 0; i < K.length - 1; i++) { const [ta, xa] = K[i], [tb, xb] = K[i + 1]; if (t <= tb) return lerp(xa, xb, ioC(seg(t, ta, tb))); } return K[K.length - 1][1]; }
 function sFasi(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
-  const tLi = WT('fasi', 'linea', 1, 1.85), tRs = WT('fasi', 'respira', 1, 2.73), tSa = WT('fasi', 'sale', 1, 3.19), tEs = WA('fasi', ['espansione', 'nellespansione'], 1, 3.75),
+  const tLi = WT('fasi', 'linea', 1, 1.67), tRs = WT('fasi', 'respira', 1, 2.57), tSa = WT('fasi', 'sale', 1, 3.19), tEs = WA('fasi', ['espansione', 'nellespansione'], 1, 3.75),
     tPi = WT('fasi', 'picco', 1, 4.95), tCo = WT('fasi', 'contrazione', 1, 6.01), tMi = WT('fasi', 'minimo', 1, 7.21), tRp = WT('fasi', 'riparte', 1, 7.76);
   phrase(t, a + 0.05, [['Non in linea retta:', C.ink]], 345, { size: 92 });
   phrase(t, tRs - 0.1, [['respira.', C.lime]], Y2, { size: 92 });
@@ -228,9 +229,11 @@ function icoCar(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x
 function icoWasher(cx, cy, col, t) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; rr(cx - 34, cy - 40, 68, 80, 10); x.stroke();
   x.beginPath(); x.moveTo(cx - 34, cy - 22); x.lineTo(cx + 34, cy - 22); x.stroke(); x.beginPath(); x.arc(cx, cy + 10, 19, 0, 7); x.stroke();
   x.lineWidth = 4; x.beginPath(); x.arc(cx, cy + 10, 10, t * 6, t * 6 + 2.4); x.stroke(); x.restore(); }
+function icoFridge(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; rr(cx - 28, cy - 42, 56, 84, 9); x.stroke();
+  x.beginPath(); x.moveTo(cx - 28, cy - 12); x.lineTo(cx + 28, cy - 12); x.stroke(); x.beginPath(); x.moveTo(cx + 16, cy - 32); x.lineTo(cx + 16, cy - 22); x.moveTo(cx + 16, cy - 2); x.lineTo(cx + 16, cy + 18); x.stroke(); x.restore(); }
 function sDurevoli(t, a, b) { bg(); x.save();
-  const tW = [WT('durevoli', 'investimenti', 1, 0.68), WT('durevoli', 'durevoli', 1, 1.72), WT('durevoli', 'consumi', 1, 5.07)],
-    tAu = WT('durevoli', 'auto', 1, 2.49), tEl = WT('durevoli', 'elettrodomestici', 1, 2.95), tOs = WT('durevoli', 'oscillano', 1, 3.8), tPi = WT('durevoli', 'piu', 1, 4.62);
+  const tW = [WT('durevoli', 'investimenti', 1, 0.68), WT('durevoli', 'durevoli', 1, 1.72), WT('durevoli', 'consumi', 1, 5.41)],
+    tAu = WT('durevoli', 'auto', 1, 2.49), tEl = WT('durevoli', 'grandi', 1, 2.91), tOs = WT('durevoli', 'oscillano', 1, 4.14), tPi = WT('durevoli', 'piu', 1, 4.96);
   phrase(t, a + 0.05, [['Investimenti e durevoli', C.ink]], 345, { size: 84 });
   phrase(t, tOs - 0.1, [['oscillano di più.', C.amber]], 345 + 84 * 1.12, { size: 84 });
   TB.X.forEach((cx, i) => { const k = seg(t, tW[i] - 0.25, tW[i] + 0.25); if (k <= 0) return; const col = TB.COL[i], amp = TB.SD[i] * TB.pp, ka = oC(seg(t, tW[i], tW[i] + 0.6)),
@@ -246,17 +249,20 @@ function sDurevoli(t, a, b) { bg(); x.save();
     x.restore(); x.restore();
     lab(TB.N[i], cx, 1258, k, C.ink, { size: 24 });
     const tM = i < 2 ? tPi + i * 0.15 : tW[2] + 0.1; popTxt(TB.M[i], cx, 1312, seg(t, tM - 0.05, tM + 0.4), { size: 38, color: `rgb(${col})` }); });
-  /* auto ed elettrodomestici sopra il tubo dei durevoli */
-  const ka = oB(seg(t, tAu - 0.1, tAu + 0.35)), ke = oB(seg(t, tEl - 0.1, tEl + 0.35));
-  if (ka > 0) { x.save(); x.globalAlpha = clamp(ka); x.translate(470, 592); x.scale(clamp(ka, 0, 1.2), clamp(ka, 0, 1.2)); icoCar(0, 0, C.red); x.restore(); }
-  if (ke > 0) { x.save(); x.globalAlpha = clamp(ke); x.translate(610, 590); x.scale(clamp(ke, 0, 1.2), clamp(ke, 0, 1.2)); icoWasher(0, 0, C.red, t); x.restore(); }
+  /* «auto · grandi elettrodomestici»: icone e parole sopra i tubi, ognuna sulla sua parola */
+  const ka = oB(seg(t, tAu - 0.1, tAu + 0.35)), ke = oB(seg(t, tEl - 0.1, tEl + 0.35)), LF = { size: 22, weight: 600, fam: 'mono', ls: 1 };
+  const sA = 'AUTO · ', sE = 'GRANDI ELETTRODOMESTICI', wA = tw(sA, 22, 600, 'mono', 1), wE = tw(sE, 22, 600, 'mono', 1), lx0 = 540 - (wA + wE) / 2;
+  const cA = lx0 + tw('AUTO', 22, 600, 'mono', 1) / 2, cE = lx0 + wA + wE / 2;
+  const ico = (k, px, fn) => { if (k <= 0) return; x.save(); x.globalAlpha = clamp(k); x.translate(px, 560); const z = 0.8 * clamp(k, 0, 1.2); x.scale(z, z); fn(); x.restore(); };
+  ico(ka, cA, () => icoCar(0, 0, C.red)); ico(ke, cE - 44, () => icoWasher(0, 0, C.red, t)); ico(ke, cE + 44, () => icoFridge(0, 0, C.red));
+  txt('AUTO ·', lx0, 620, { ...LF, color: C.red, align: 'left', alpha: clamp(ka) }); txt(sE, lx0 + wA, 620, { ...LF, color: C.red, align: 'left', alpha: clamp(ke) });
   mono('OSCILLAZIONE TIPICA IN UN TRIMESTRE · 2000–2019', 540, 1390, t, tOs, { size: 22, ls: 1 });
   x.restore(); finish(t); }
 
 /* ================= INVESTIMENTI: 2008–09, barre appese allo zero, in scala (−12,7 contro −2,7) ================= */
 const IV = { z: 720, pp: 41, X: [360, 720], w: 200 };
 function sInvestimenti(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
-  const tIn = WT('investimenti', 'investimenti', 1, 1.8), tSc = WT('investimenti', 'scesi', 1, 2.86), tO = WT('investimenti', 'oltre', 1, 3.45), tCo = WT('investimenti', 'consumi', 1, 5.09), tMe = WT('investimenti', 'meno', 1, 6.69);
+  const tIn = WT('investimenti', 'investimenti', 1, 1.24), tSc = WT('investimenti', 'scesi', 1, 2.28), tO = WT('investimenti', 'oltre', 1, 2.85), tCo = WT('investimenti', 'consumi', 1, 4.46), tMe = WT('investimenti', 'meno', 1, 6.02);
   phrase(t, a + 0.05, [['Nel primo calo,', C.ink]], 345, { size: 92 });
   phrase(t, a + 0.35, [['chi scende di più?', C.amber]], Y2, { size: 92 });
   const kIn = oC(seg(t, a + 0.2, a + 0.7));
