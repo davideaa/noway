@@ -11,10 +11,9 @@ if __name__ == "__main__":
     data["cal"] = json.loads((ROOT / "live" / "calendar.json").read_text(encoding="utf-8"))["eventi"]
     tp = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx19_tp.json").read_text(encoding="utf-8"))
     data["tp"] = {**tp["NFP"], "prezzo": tp["prezzo_oggi"]}
-    for k in ("ultime",):
-        data["tp"].pop(k, None)
     data["vol"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx21_range.json").read_text(encoding="utf-8"))
     data["liv"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx28_livelli.json").read_text(encoding="utf-8"))
+    data["liv"]["per_ora"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx28_per_ora.json").read_text(encoding="utf-8"))
     data["reg"] = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx22_regime.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))

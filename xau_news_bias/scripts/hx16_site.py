@@ -22,9 +22,10 @@ if __name__ == "__main__":
     nxt = cal[cal.fam.isin(["RETAIL", "PPI"]) & (cal.t0 > pd.Timestamp.now(tz="UTC"))].head(3)
     out["prossime"] = [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)]
     tp = json.loads((R / "hx19_tp.json").read_text())
-    out["tp"] = {**{k: v for k, v in tp["RETAIL_PPI"].items() if k != "ultime"}, "prezzo": tp["prezzo_oggi"]}
+    out["tp"] = {**tp["RETAIL_PPI"], "prezzo": tp["prezzo_oggi"]}
     out["vol"] = json.loads((R / "hx21_range.json").read_text(encoding="utf-8"))
     out["liv"] = json.loads((R / "hx28_livelli.json").read_text(encoding="utf-8"))
+    out["liv"]["per_ora"] = json.loads((R / "hx28_per_ora.json").read_text(encoding="utf-8"))
     out["reg"] = json.loads((R / "hx22_regime.json").read_text(encoding="utf-8"))
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))

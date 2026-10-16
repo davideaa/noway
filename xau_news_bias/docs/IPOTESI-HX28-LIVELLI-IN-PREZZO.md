@@ -140,9 +140,13 @@ File: `research_output/phase2/hx16/hx28_livelli.json`. Codice:
 - La fascia si stringe durante il giorno. Mediana 2023–26 con C, per
   fascia di 2 ore dalle 22:00 UTC:
   - 1.285 pips all'inizio;
-  - 1.046 alle 10–12 UTC;
-  - **908 alle 12–14 UTC**, prima delle news delle 14:30;
+  - **1.046 dopo le 11:00 e le 12:00 UTC**, prima delle news delle 14:30
+    italiane;
+  - 908 dopo le 13:00 e le 14:00 UTC, subito dopo le news;
   - 604 alla fine.
+  - (Corretto dopo: la prima stesura chiamava "prima delle news" la
+    fascia sbagliata, quella delle 13–14 UTC, e la pagina diceva 908
+    invece di 1.046.)
 - **ADR classico di TradingView** (L + ADR21 sopra, H − ADR21 sotto):
   - è un livello da 7 su 10, non da 9 su 10: il massimo resta sotto il
     73% / 71% delle volte, il minimo sopra il 74% / 74%;
@@ -193,3 +197,38 @@ File: `research_output/phase2/hx16/hx28_livelli.json`. Codice:
   - la probabilità di un nuovo massimo o minimo;
   - il livello "di solito", che è un livello 1 su 2.
 - **Settimana: non affidabile.** Niente livelli in prezzo per la settimana.
+
+## Descrittivo, dopo i risultati: affidabilità ora per ora
+
+Chiesto da Davide ("è da fidarsi? in che momento?"). Non cambia il
+verdetto. Script `scripts/hx28_per_ora.py`, file `hx28_per_ora.json`.
+Metodo C, 2023–26; ore italiane d'estate = chiusura della candela UTC + 2.
+
+| Dopo le (Italia) | Nuovo massimo, previsto → vero | Nuovo minimo, previsto → vero | 9 su 10 tiene, su / giù |
+|---|---|---|---|
+| 01–02 | 91 → 90% | 89 → 87% | 89 / 90% |
+| 03–04 | 82 → 81% | 79 → 75% | 90 / 91% |
+| 05–06 | 74 → 74% | 71 → 67% | 90 / 92% |
+| 07–08 | 71 → 71% | 68 → 64% | 90 / 93% |
+| 09–10 | 65 → 66% | 63 → 58% | 90 / 93% |
+| 11–12 | 61 → 60% | 55 → 53% | 90 / 92% |
+| 13–14 | 58 → 56% | 50 → 50% | 91 / 91% |
+| 15–16 | 44 → 45% | 39 → 40% | 92 / 90% |
+| 17–18 | 29 → 29% | 23 → 23% | 94 / 93% |
+| 19–20 | 19 → 18% | 15 → 15% | 94 / 95% |
+| 21–22 | 9 → 10% | 7 → 7% | 95 / 96% |
+| 23–24 | 1 → 2% | 1 → 1% | 98 / 99% |
+
+- **La probabilità di un nuovo massimo è calibrata a ogni livello**:
+  - prevista 2% → vera 2%;
+  - 24% → 25%;
+  - 44% → 43%;
+  - 64% → 63%;
+  - 88% → 88%.
+- **Il nuovo minimo nel mattino è previsto 3–5 punti troppo alto.** È il
+  trend rialzista: lo stesso motivo per cui la settimana non passa.
+- **Dopo le 17:00 il livello 9 su 10 tiene 94–99 volte su 100**: è più
+  prudente del necessario, e il vero estremo resta più vicino.
+- La probabilità scende con l'ora perché resta meno tempo per fare un
+  nuovo estremo.
+

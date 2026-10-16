@@ -134,3 +134,26 @@ R medio a trade, ingresso T0 − 30 s, stop 100 pips:
 - Il verdetto non cambia: sulle NFP il TP costa. Per Retail/PPI vedi la
   correzione di H-X25.
 
+## Nota del 16/10/2026: nel 2026 i livelli a 24 release sono in ritardo (descrittivo)
+
+Davide: "mi sembra strano che la NFP faccia solo 126 pips, di solito ne fa
+200–400".
+
+- **Ha ragione per il 2026.** Arrivo nella direzione giusta dentro la M1,
+  per le 9 NFP del 2026: 126, 635, 398, 64, 170, 561, 416, 797, 431 pips.
+  - mediana 416 pips;
+  - nel 2025 era 102.
+- **I livelli A (126) e B (157)** sono le ultime 24 NFP, dal 6/9/2024, e
+  metà sono del 2025. Nel 2026:
+  - il livello B "1 volta su 2" è stato superato 6 volte su 9 (obiettivo
+    4,5);
+  - il livello A "2 volte su 3" 7 volte su 9 (obiettivo 6).
+  - Su 9 release non è significativo (binomiale unilaterale per B circa
+    0,25), ma va nella direzione del regime nuovo.
+- Anche Retail/PPI 2026: B superato 9 volte su 12 (obiettivo 6), mediana
+  96 pips contro il livello B di 75.
+- **Non si cambia la finestra guardando il 2026**: sarebbe scegliere sui
+  dati già visti. Sul sito c'è un avviso giallo con i numeri dell'anno.
+- Il verdetto sull'uscita non cambia. Anche con livelli più alti (80° e
+  90° percentile, esplorativo sopra) la chiusura M1 rende di più.
+

@@ -556,6 +556,15 @@ function tpRender(T, name, el, cls) {
     <p>Su ${name} non c'è una regola che dica la direzione prima, quindi il trade vero non si può misurare.
     Anche prendendo la direzione della candela, che si sa solo dopo e favorisce la chiusura, nel 2023–26 rendono uguale: ${r(u.C_giusta)} chiudendo alle 14:31, ${r(u.TPb_giusta)} con il TP a ${f(o.B_pips)} pips.
     Nessuno dei due è dimostrato migliore: scegli quello che ti fa eseguire meglio.</p></div>`}
+  ${(() => { const U = T.ultime || []; if (!U.length) return ""; const Y = U[U.length - 1].d.slice(0, 4), u = U.filter(r => r.d.startsWith(Y));
+      const med = a => { const b = a.slice().sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+      const kB = u.filter(r => r.arr_pips >= r.B_pips).length, kA = u.filter(r => r.arr_pips >= r.A_pips).length, prev = T.per_anno[String(+Y - 1)];
+      const hot = kB / u.length > .6;
+      return `<div style="border-left:4px solid var(${hot ? "--warn" : "--good"});background:color-mix(in srgb, var(${hot ? "--warn" : "--good"}) 12%, transparent);padding:10px 12px;border-radius:6px">
+        <p style="margin:0"><b>${hot ? "🟡 Attenzione: quest'anno è un altro regime." : "🟢 Quest'anno i livelli sono in linea."}</b> Nel ${Y} (${u.length} ${name}) l'oro è arrivato a <b>${f(med(u.map(r => r.arr_pips)))} pips</b> di mediana${prev ? `, contro ${f(prev.arrivo_pips)} nel ${+Y - 1}` : ""}.
+        Il livello "1 volta su 2" è stato superato ${kB} volte su ${u.length}, quello "2 volte su 3" ${kA} su ${u.length}.</p>
+        <p style="margin:6px 0 0;font-family:var(--f-num,ui-monospace,monospace);font-size:13px">${u.map(r => `${r.d.slice(8, 10)}/${r.d.slice(5, 7)} ${f(r.arr_pips)}`).join(" · ")}</p>
+        ${hot ? `<p style="margin:6px 0 0">I livelli qui sotto usano le ultime ${o.n} ${name}, dal ${d(o.finestra_da)}: dentro c'è anche il periodo più calmo, quindi per il regime di adesso sono <b>probabilmente troppo bassi</b>. Con ${u.length} release non è ancora dimostrato. Per decidere dove chiudere non cambia niente: anche con livelli più alti la chiusura delle 14:31 ha reso di più (studio H-X19).</p>` : ""}</div>`; })()}
   <div class="${cls.tiles}">
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 2 volte su 3</span><b class="${cls.v}">${f(o.A_pips)} pips</b></div>
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 1 volta su 2</span><b class="${cls.v}">${f(o.B_pips)} pips</b></div>
@@ -592,7 +601,7 @@ function volRender(V, LV, el, cls, opt) {
     const kk = O.metodo === "A" ? tb + "||" : O.metodo === "B" ? tb + "|" + ub + "|" : tb + "|" + ub + "|" + pb;
     const r = T.get(kk), a = TA.get(tb), big = r && r.n >= O.min_n, s = big ? r : a;
     const mu = r && r.nu >= O.min_n ? r.mu : a.mu, mv = r && r.nv >= O.min_n ? r.mv : a.mv;
-    return {su90: H + s.qu * sc, giu90: L - s.qv * sc, suT: H + mu * sc, giuT: L - mv * sc, pu: s.pu, pv: s.pv};
+    return {su90: H + s.qu * sc, giu90: L - s.qv * sc, suT: H + mu * sc, giuT: L - mv * sc, pu: s.pu, pv: s.pv, qu: s.qu, qv: s.qv, mu, mv, n: s.n, used, pb, big, sc};
   }
   const inp = `style="font:inherit;font-family:var(--f-num,ui-monospace,monospace);width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(${opt.line});border-radius:8px;background:var(${opt.panel});color:var(${opt.ink})"`;
   const lab = `style="display:grid;gap:4px;font-size:13px;color:var(${opt.mute})"`;
@@ -607,13 +616,17 @@ function volRender(V, LV, el, cls, opt) {
   <p class="${cls.small}" id="lvMsg" style="margin:6px 0 0">Già compilato con i prezzi Dukascopy delle ${hhmm(O.k)}. Metti quelli del tuo MT5: i livelli si ricalcolano subito.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px" id="lvCards"></div>
   <div id="lvChart" style="margin-top:10px"></div>
+  <div ${card} id="lvHow" style="margin-top:10px"></div>
+  <div style="margin-top:12px"><b>Quanto è affidabile, ora per ora</b> <span class="${cls.small}">(2023–26, ogni giorno calcolato solo con i dati di prima)</span></div>
+  <div style="overflow-x:auto;margin-top:6px"><table style="border-collapse:collapse;width:100%;font-size:12.5px" id="lvRel"></table></div>
+  <p class="${cls.small}" style="margin-top:4px"><b>Ora</b> = dopo le ore italiane. <b>Max</b> e <b>Min</b> = probabilità in % di un nuovo massimo o minimo, prevista → vera. <b>9/10</b> = quante volte su 100 il livello "9 su 10" ha tenuto, sopra / sotto. <b>Pips</b> (su schermi larghi) = larghezza della fascia 9 su 10 al prezzo di oggi.<br>🟢 affidabile · 🟡 un po' fuori: la probabilità sbaglia di 3–5 punti, oppure il livello "9 su 10" tiene più di 93 volte su 100 (è più prudente del necessario: il vero estremo resta un po' più vicino) · 🔴 non affidabile. Nessuna casella è rossa.</p>
   <div class="${cls.small}"><b>È affidabile, provato giorno per giorno dal 2016</b>, ogni volta solo con i dati di prima. Nel 2023–26:
     <ul class="${cls.small}" style="margin:2px 0 0;padding-left:18px">
       <li>il massimo è rimasto sotto il livello "9 su 10" il ${pc(Q.cop90_su)} delle volte, il minimo sopra il ${pc(Q.cop90_giu)};</li>
       <li>la probabilità di un nuovo massimo era prevista al ${pc(Q.p_su_prevista)} ed è stata vera il ${pc(Q.p_su_vera)}; per il nuovo minimo ${pc(Q.p_giu_prevista)} contro ${pc(Q.p_giu_vera)};</li>
       <li>quando il prezzo faceva un nuovo massimo, si è fermato prima del livello "di solito" il ${pc(Q.tipico_su)} delle volte; per il minimo il ${pc(Q.tipico_giu)}.</li>
     </ul></div>
-  <p class="${cls.small}"><b>La fascia si stringe da sola durante il giorno.</b> Nel 2023–26, al prezzo di oggi, la fascia "9 su 10" era larga in mediana ${f(M.larghezza_per_fascia_2023_26["0"] / 100 * O.prezzo * 10)} pips a inizio giornata, ${f(M.larghezza_per_fascia_2023_26["7"] / 100 * O.prezzo * 10)} prima delle news delle 14:30 e ${f(M.larghezza_per_fascia_2023_26["11"] / 100 * O.prezzo * 10)} a fine giornata. Più stretta di così non è affidabile: oggi l'oro fa in media ${f(O.S_pct / 100 * O.prezzo * 10)} pips al giorno (ADR21).</p>
+  <p class="${cls.small}"><b>La fascia si stringe da sola durante il giorno.</b> Nel 2023–26, al prezzo di oggi, la fascia "9 su 10" era larga in mediana ${f(M.larghezza_per_fascia_2023_26["0"] / 100 * O.prezzo * 10)} pips a inizio giornata, ${f(M.larghezza_per_fascia_2023_26["6"] / 100 * O.prezzo * 10)} prima delle news delle 14:30, ${f(M.larghezza_per_fascia_2023_26["7"] / 100 * O.prezzo * 10)} subito dopo e ${f(M.larghezza_per_fascia_2023_26["11"] / 100 * O.prezzo * 10)} a fine giornata. Più stretta di così non è affidabile: oggi l'oro fa in media ${f(O.S_pct / 100 * O.prezzo * 10)} pips al giorno (ADR21).</p>
   <p class="${cls.small}"><b>L'ADR classico di TradingView</b> (minimo + ADR sopra, massimo − ADR sotto) è più stretto, ma vale circa 7 volte su 10: nel 2023–26 il massimo l'ha superato il ${pc(1 - CL["massimo_sotto_L+ADR"])} dei giorni, il minimo il ${pc(1 - CL["minimo_sopra_H-ADR"])}.</p>
   <p class="${cls.small}"><b>La settimana</b>: range tipico ${f(V.W.previsione_pips.p50)} pips (${p2(V.W.previsione_pips.p50 / 10)} $), 3 volte su 4 sotto ${f(V.W.previsione_pips.p75)}. Il range è affidabile (studio H-X21). I livelli in prezzo della settimana invece <b>non hanno passato il test</b> (H-X28): dal 2019 l'oro sale e fa nuovi massimi settimanali più spesso del previsto. Per questo non li metto.</p>
   <p class="${cls.small}">I livelli dicono fin dove può arrivare, <b>non la direzione</b>: la posizione nel range non dice dove va la news (studio H-X23). La giornata parte alle 22:00 UTC. Il tuo MT5 può iniziarla un'ora prima d'estate e ha uno spread diverso: per questo conviene mettere i tuoi massimo e minimo.</p>`;
@@ -629,6 +642,28 @@ function volRender(V, LV, el, cls, opt) {
       <div style="font:700 26px/1.2 var(--f-num,ui-monospace,monospace);margin:2px 0 6px">${pc(p)}</div>
       <div style="font-size:14px">Se ci va, di solito fino a <b>${p2(tip)} $</b> <span style="color:var(${opt.mute})">(${pips(tip - P)} pips)</span></div>
       <div style="font-size:14px">9 volte su 10 ${word} <b>${p2(far)} $</b> <span style="color:var(${opt.mute})">(${pips(far - P)} pips)</span></div></div>`;
+    const dot = (ok, mid) => ok ? "🟢" : mid ? "🟡" : "🔴";
+    $("lvHow").innerHTML = `<div style="font-size:13px;color:var(${opt.mute})">Come l'ho calcolato, con i numeri di adesso</div>
+      <div style="font-size:14px;margin-top:4px">Non è analisi tecnica: è statistica sui prezzi veri: le candele H1 Dukascopy dal 2012, circa 3.700 giornate.</div>
+      <ol style="font-size:14px;margin:6px 0 0;padding-left:20px">
+        <li>Oggi l'oro fa in media <b>${f(v.sc * 10)} pips</b> al giorno (ADR21, media degli ultimi 21 giorni).</li>
+        <li>Fino a adesso ha già fatto ${f((H - L) * 10)} pips, cioè il <b>${pc(v.used)}</b> dell'ADR, e il prezzo sta nel terzo ${["basso", "centrale", "alto"][v.pb]} del range.</li>
+        <li>Ho preso dal passato i momenti simili: stessa ora, stessa parte di ADR già fatta, prezzo nella stessa zona${v.big ? "" : " (pochi casi: uso solo la stessa ora)"}. Sono <b>${f(v.n)}</b> momenti.</li>
+        <li>In quei momenti l'oro ha fatto un nuovo massimo il <b>${pc(v.pu)}</b> delle volte. Quando l'ha fatto, a metà dei casi è salito meno di ${(v.mu).toFixed(2).replace(".", ",")} ADR, 9 volte su 10 meno di ${(v.qu).toFixed(2).replace(".", ",")} ADR.</li>
+        <li>Rimoltiplico per l'ADR di oggi e lo aggiungo al massimo: ${p2(H)} + ${f(v.mu * v.sc * 10)} pips = <b>${p2(v.suT)} $</b> (di solito), ${p2(H)} + ${f(v.qu * v.sc * 10)} pips = <b>${p2(v.su90)} $</b> (9 su 10). Per il minimo è lo stesso, verso il basso.</li>
+      </ol>
+      <div style="font-size:14px;margin-top:6px"><b>Perché cambia con l'ora:</b> più tardi è, meno tempo resta per fare un nuovo massimo, come in una partita al 90° minuto. Conta anche dove sta il prezzo: vicino al massimo la probabilità sale, lontano scende.</div>
+      <div style="font-size:12.5px;margin-top:6px;color:var(${opt.mute})">È il metodo dei risk manager delle banche (simulazione storica filtrata, Barone-Adesi 1999): le mosse del passato divise per la volatilità di allora, rimoltiplicate per quella di oggi. Così segue il regime da solo.</div>`;
+    const R = (LV.per_ora || {}).per_fascia_oraria_2023_26 || [];
+    const td = `style="padding:6px 3px;border-top:1px solid var(${opt.line});white-space:nowrap;text-align:left;font-family:inherit"`, th = `style="text-align:left;padding:6px 5px;font:600 12px/1.3 inherit;text-transform:none;letter-spacing:0;color:var(${opt.mute});font-weight:600"`;
+    const cur = Math.floor(k / O.fascia_ore), wide = $("lvRel").parentElement.clientWidth >= 330;
+    $("lvRel").innerHTML = `<thead><tr><th ${th}>Ora</th><th ${th}>Max</th><th ${th}>Min</th><th ${th}>9/10</th>${wide ? `<th ${th}>Pips</th>` : ""}</tr></thead><tbody>` +
+      R.map(r => { const e1 = Math.abs(r.p_su_prev - r.p_su_vera), e2 = Math.abs(r.p_giu_prev - r.p_giu_vera), c = [r.cop_su, r.cop_giu];
+        const cov = dot(c.every(x => x >= .87 && x <= .93), c.every(x => x >= .87));
+        const w = M.larghezza_per_fascia_2023_26[String(r.tb)] / 100 * O.prezzo * 10;
+        return `<tr style="${r.tb === cur ? `background:color-mix(in srgb, var(${opt.accent}) 12%, transparent);font-weight:600` : ""}"><td ${td}>${hhmm(2 * r.tb).slice(0, 2)}–${hhmm(2 * r.tb + 1).slice(0, 2)}${r.tb === cur ? " ◀" : ""}</td>
+          <td ${td}>${dot(e1 < .03, e1 < .05)} ${Math.round(r.p_su_prev * 100)}→${Math.round(r.p_su_vera * 100)}</td><td ${td}>${dot(e2 < .03, e2 < .05)} ${Math.round(r.p_giu_prev * 100)}→${Math.round(r.p_giu_vera * 100)}</td>
+          <td ${td}>${cov} ${Math.round(r.cop_su * 100)}/${Math.round(r.cop_giu * 100)}</td>${wide ? `<td ${td}>${f(w)}</td>` : ""}</tr>`; }).join("") + "</tbody>";
     $("lvCards").innerHTML = side("↑", "Probabilità di un nuovo massimo oggi", v.pu, v.suT, v.su90, "non oltre") + side("↓", "Probabilità di un nuovo minimo oggi", v.pv, v.giuT, v.giu90, "non sotto");
     ladder($("lvChart"), [
       {p: v.su90, t: "9 su 10 non oltre", w: 1.5, d: "6 4", c: opt.ink},
