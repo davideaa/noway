@@ -131,3 +131,148 @@ l'oro (T2) no.
   prevista, per sapere quanto vale indovinare la sorpresa.
 - Niente filtri su ore o giorni. Niente soglie sullo scarto
   forecast − precedente dopo aver visto i dati.
+
+## Risultati (dopo i commit della pre-registrazione `8ddbb61` e dello script `4ac5552`)
+
+File: `research_output/phase2/hx16/hx26_ancoraggio.json`,
+`hx26_release.csv` (una riga per release, T1) e `hx26_slot.csv` (una
+riga per slot, T2/T3). Codice: `scripts/hx26_ancoraggio.py`, girato una
+volta, senza modifiche dopo il commit. Tick: 73 file mancanti scaricati
+(CPI/NFP 2008–2010 e il CPI del 14/10/2026), nessun errore di download.
+
+### Verdetto: NON PASSA
+
+| Criterio | Risultato | |
+|---|---|---|
+| 1. Conferma, sorpresa indovinata > 55% con p < 0,01 | 612/1215 = **50,4%**, p 0,41 | **no** |
+| 2. Conferma, oro indovinato > 52% con p < 0,05 | 424/797 = **53,2%**, p 0,038 | sì |
+| 3. Studio, stesso verso | sorpresa 51,7%, oro 53,1% | sì |
+
+Il meccanismo, cioè l'ancoraggio degli economisti, sui dati
+ForexFactory 2011–2026 **non c'è** se si guardano tutte le famiglie
+insieme. L'oro va nel verso della regola il 53% delle volte in tutti e
+due i periodi, ma **non per il motivo dichiarato**: la sorpresa non
+viene indovinata. In più quasi tutto il 53% viene dalle Retail Sales
+(vedi sotto). Il trade di Davide, con tutte le famiglie, perde in tutti
+e due i periodi.
+
+### T1 — la sorpresa si indovina? (quota giusta, binomiale unilaterale)
+
+| Gruppo | Studio 2011–18 | Conferma 2019–26 |
+|---|---|---|
+| **Tutti** | 652/1261 = 51,7% (p 0,12) | 612/1215 = **50,4%** (p 0,41) |
+| RETAIL | 46/78 = 59,0% (p 0,07) | 57/85 = **67,1%** (p 0,001) |
+| FIDUCIA | 60/94 = **63,8%** (p 0,005) | 48/92 = 52,2% |
+| ISM_S | 54/91 = 59,3% (p 0,05) | 51/90 = 56,7% (p 0,12) |
+| MICHIGAN | 46/95 = 48,4% | 52/89 = 58,4% (p 0,07) |
+| PIL | 46/80 = 57,5% | 38/70 = 54,3% |
+| ISM_M | 53/92 = 57,6% | 40/88 = 45,5% |
+| PPI | 37/69 = 53,6% | 34/63 = 54,0% |
+| ADP | 49/95 = 51,6% | 47/89 = 52,8% |
+| NFP | 53/94 = 56,4% | 42/92 = 45,7% |
+| CPI | 25/46 = 54,3% | 24/49 = 49,0% |
+| CORE_CPI | 9/29 = **31,0%** | 17/43 = **39,5%** |
+| CLAIMS | 174/398 = **43,7%** | 160/363 = **44,1%** |
+| FOMC | 0 casi (sempre in linea o nessuna previsione) | 2/2 |
+
+- Claims e Core CPI vanno **al contrario** in tutti e due i periodi.
+  Quando il forecast sale rispetto al dato precedente, il dato vero tende
+  a uscire sotto il forecast. Le Claims sono il 30% dei casi e tirano giù
+  la quota di tutti. Senza Claims, guardando a posteriori, sarebbe 55,4%
+  nello studio e 53,1% nella conferma: comunque sotto il 55% richiesto.
+- Il nullo di indipendenza dà una quota attesa del 49,3% (studio) e del
+  49,1% (conferma). Il p a permutazioni è 0,044 nello studio e 0,21 nella
+  conferma.
+- Molte release escono in linea, e lì non c'è niente da indovinare: CPI
+  35 + 30, Core CPI 19 + 17, FOMC 9 + 19. Contando quelle come sbagliate,
+  la quota prudente è 47,5% nello studio e 45,9% nella conferma.
+- Campbell & Sharpe trovano l'ancoraggio su quasi tutte le serie MMS
+  1990–2006. Qui regge solo nelle Retail Sales (tutti e due i periodi) e,
+  a tratti, in Fiducia, ISM Services e Michigan.
+
+### T2 e T3 — l'oro e il trade di Davide
+
+| Gruppo | Oro studio | Oro conferma | R a 60 s regola / caso, studio | R a 60 s regola / caso, conferma |
+|---|---|---|---|---|
+| **Tutti** | 591/1112 = **53,1%** (p 0,019) | 424/797 = **53,2%** (p 0,038) | −0,020 / −0,033 | −0,024 / −0,049 |
+| RETAIL | 50/76 = **65,8%** (p 0,004) | 56/83 = **67,5%** (p 0,001) | **+0,039** / −0,033 | **+0,022** / −0,053 |
+| PPI | 26/53 = 49,1% | 30/49 = 61,2% (p 0,08) | −0,032 / −0,030 | −0,001 / −0,065 |
+| FIDUCIA | 51/91 = 56,0% | 28/46 = 60,9% (p 0,09) | −0,028 / −0,032 | −0,007 / −0,039 |
+| ISM_S | 53/91 = 58,2% | 41/77 = 53,2% | +0,004 / −0,032 | −0,025 / −0,071 |
+| PIL | 49/79 = 62,0% (p 0,02) | 33/68 = 48,5% | +0,014 / −0,031 | −0,072 / −0,042 |
+| NFP | 50/93 = 53,8% | 47/90 = 52,2% | −0,025 / −0,039 | +0,191 / +0,024 |
+| CPI | 40/80 = 50,0% | 41/78 = 52,6% | −0,034 / −0,034 | +0,007 / −0,028 |
+| ISM_M | 55/93 = 59,1% (p 0,05) | 35/82 = 42,7% | −0,007 / −0,031 | −0,129 / −0,059 |
+| ADP | 44/92 = 47,8% | 39/70 = 55,7% | −0,028 / −0,033 | −0,069 / −0,049 |
+| MICHIGAN | 35/75 = 46,7% | 21/37 = 56,8% | −0,046 / −0,032 | −0,059 / −0,065 |
+| CLAIMS | 133/280 = 47,5% | 45/96 = 46,9% | −0,037 / −0,033 | −0,095 / −0,073 |
+| FOMC | 5/9 | 8/21 = 38,1% | −0,029 / −0,066 | −0,244 / −0,155 |
+
+- Su tutti gli slot, regola meno caso a 60 s: +0,013 R (t 1,78) nello
+  studio e +0,024 R (t 1,33) nella conferma. A 5 minuti: +0,014 R
+  (t 1,40) e +0,025 R (t 1,23). La regola resta **negativa in assoluto**
+  in tutti e due i periodi: −0,020 R e −0,024 R a 60 s, −0,016 R e
+  −0,029 R a 5 minuti.
+- Lo spread mediano a T0 − 30 s è di 3,8 pips.
+- Controllo non pre-registrato: con i due segni indipendenti la quota
+  attesa dell'oro sarebbe 49,3% e 49,2%; a permutazioni p 0,006 e 0,010.
+  Il 53% quindi non viene da una preferenza LONG o SHORT. **Senza le
+  Retail** però scende a 52,2% (541/1036) e a 51,5% (368/714).
+- Il tetto: conoscendo la sorpresa **vera**, l'oro la segue il 76,6%
+  (studio) e il 78,6% (conferma) delle volte.
+
+### Varianti (solo descrizione)
+
+- **Ultimo valore pubblicato** (PIL a catena, Michigan con il Revised):
+  - sorpresa: 51,5% nello studio e 50,6% nella conferma;
+  - oro: 52,6% e 53,1%.
+  - Il Michigan con il Revised come precedente sale al 63,6% sulla
+    sorpresa nella conferma (56/88), ma l'oro resta al 57% (20/35).
+- **CPI con il Core** al posto dell'headline:
+  - CPI da solo: oro 47,9% nello studio e 49,2% nella conferma;
+  - tutti insieme: 53,2% e 53,0%.
+- **Per anno**, l'oro con la regola sta fra 41% (2013) e 59% (2014); solo
+  4 anni su 16 sono sotto il 50% (2013, 2021, 2023, 2026).
+
+### La cosa che salta fuori: le Retail Sales (esplorativa, NON pre-registrata)
+
+Fra 12 famiglie, l'unica coerente in tutto è **Retail Sales m/m**. Regola:
+se il forecast è sopra l'ultimo dato pubblicato, SHORT oro; se è sotto,
+LONG.
+
+- Sorpresa: 59% nello studio, 67% nella conferma.
+- Oro: 65,8% e 67,5%. Moltiplicando i p per 12 famiglie (Bonferroni)
+  restano 0,047 e 0,012.
+- Gli anni sopra il 50% sono 13 su 16; il 2018 è sotto (3/10), il 2019 e
+  il 2026 sono pari.
+- Il trade di Davide a 60 s rende poco: +0,039 R (t 1,57, 58% vinti) e
+  +0,022 R (t 0,61, 60% vinti). Sono circa 11 trade l'anno. A 5 minuti:
+  +0,029 R e 0,000 R.
+- Perché l'R è così basso: la prima M1 Retail muove molto meno dello stop
+  da 100 pips, e qualche stop pieno si mangia le vincite piccole (nella
+  conferma la mediana è +0,074 R, la media +0,022 R).
+- Non è un verdetto. È stata scelta **dopo** aver visto 12 famiglie, e
+  le Retail 2011–2026 sono già passate da H-X15/H-X16/H-X19 (con altre
+  regole). Se interessa, va **pre-registrata adesso e contata solo dal
+  vivo**, dalla release del 17/11/2026.
+
+### Errori e cose da dichiarare
+
+1. **La colonna `previous` di ForexFactory è la cifra rivista**, come
+   diceva il compito. Coincide con l'actual precedente sempre per CPI,
+   Core CPI, ISM e FOMC, l'84% delle volte per il PPI, il 21% per le
+   Claims, il 16% per le Retail, il 5% per il PIL, il 3–4% per ADP,
+   Fiducia e Michigan, e solo l'**1,8% per gli NFP**. La riga 60 di
+   `FEATURE-REGISTRY.md` e il commento in `xnb/phase2/memory.py`
+   (`consensus_features`) dicono che il `previous` FF degli NFP è la prima
+   stampa nel 99,5% dei casi: con questo file **non è vero**, oppure la
+   frase si riferiva all'`actual`. Sui risultati passati non cambia
+   niente: le feature `f_cons_*_minus_last` usavano l'actual precedente,
+   non la colonna `previous`. La frase però va corretta.
+2. Per CPI e NFP la regola era già nella fase 2 (vedi sopra). Il
+   risultato qui è coerente: CPI 50–53%, NFP 52–54%, niente.
+3. Le Claims e il Core CPI vanno al contrario dell'ipotesi in tutti e due
+   i periodi. Con un test bilaterale sarebbe un effetto. Non era previsto
+   e non lo uso.
+4. Lo script è stato messo nel commit prima di provarlo. È girato al primo
+   colpo e non è stato toccato dopo.
