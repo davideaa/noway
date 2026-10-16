@@ -21,6 +21,8 @@ if __name__ == "__main__":
     cal = pd.read_parquet(R.parent / "hx15" / "calendario_tutti.parquet")
     nxt = cal[cal.fam.isin(["RETAIL", "PPI"]) & (cal.t0 > pd.Timestamp.now(tz="UTC"))].head(3)
     out["prossime"] = [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)]
+    tp = json.loads((R / "hx19_tp.json").read_text())
+    out["tp"] = {**{k: v for k, v in tp["RETAIL_PPI"].items() if k != "ultime"}, "prezzo": tp["prezzo_oggi"]}
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

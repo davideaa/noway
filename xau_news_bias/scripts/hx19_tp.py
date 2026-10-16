@@ -133,7 +133,8 @@ def evaluate(df: pd.DataFrame, fam: str, bias_col=None):
                        for y, g in df[df.y >= 2019].groupby("y")}
     n = WINDOWS[best]
     last = df.tail(n) if n else df[df.y >= 2014]
-    out["oggi_pct"] = {"A": float(np.quantile(last.arr, 1 / 3)), "B": float(np.median(last.arr)), "finestra_da": str(last.t0.iloc[0])[:10],
+    out["oggi_pct"] = {"A": float(np.quantile(last.arr, 1 / 3)), "B": float(np.median(last.arr)), "C": float(np.median(last.clo)),
+                       "P90": float(np.quantile(last.arr, 0.9)), "finestra_da": str(last.t0.iloc[0])[:10],
                        "finestra_a": str(last.t0.iloc[-1])[:10], "n": len(last)}
     out["ultime"] = [{"d": str(e.t0)[:10], "arr_pips": round(e.arr / 100 * e.px * 10), "clo_pips": round(e.clo / 100 * e.px * 10),
                       "A_pips": None if e.A != e.A else round(e.A / 100 * e.px * 10), "B_pips": None if e.B != e.B else round(e.B / 100 * e.px * 10)}
@@ -154,6 +155,7 @@ if __name__ == "__main__":
            "NFP": evaluate(build(nfp), "NFP", bias_col="rule"), "RETAIL_PPI": evaluate(build(rpe), "RETAIL/PPI")}
     for k in ("NFP", "RETAIL_PPI"):
         o = out[k]["oggi_pct"]
-        o["A_pips"], o["B_pips"] = round(o["A"] / 100 * px_now * 10), round(o["B"] / 100 * px_now * 10)
+        for k2 in ("A", "B", "C", "P90"):
+            o[k2 + "_pips"] = round(o[k2] / 100 * px_now * 10)
     (R / "hx16" / "hx19_tp.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     print("oggi:", px_now, {k: out[k]["oggi_pct"] for k in ("NFP", "RETAIL_PPI")})

@@ -9,6 +9,10 @@ if __name__ == "__main__":
     log = ROOT / "live" / "hx8_live.jsonl"
     data["live"] = [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else []
     data["cal"] = json.loads((ROOT / "live" / "calendar.json").read_text(encoding="utf-8"))["eventi"]
+    tp = json.loads((ROOT / "research_output" / "phase2" / "hx16" / "hx19_tp.json").read_text(encoding="utf-8"))
+    data["tp"] = {**tp["NFP"], "prezzo": tp["prezzo_oggi"]}
+    for k in ("ultime",):
+        data["tp"].pop(k, None)
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")

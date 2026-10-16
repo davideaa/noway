@@ -118,6 +118,7 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
   .r{min-width:56px;font-size:13px}
   th,td{padding:7px 7px} table{font-size:14px}
 }
+.tw{overflow-x:auto}
 </style>
 
 <div class="wrap">
@@ -131,6 +132,11 @@ ul{margin:0;padding-left:20px;display:grid;gap:4px}
   <h2>Prossima NFP</h2>
   <div class="live" id="live"></div>
   <p class="small muted" id="livenote"></p>
+</section>
+
+<section>
+  <h2>Dove chiudere</h2>
+  <div id="tpbox" style="display:grid;gap:12px"></div>
 </section>
 
 <section>
@@ -525,4 +531,34 @@ live(); setInterval(tick, 1000);
 edge(); money(); lower();
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { cum(); redrawOpen(); }, 150); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { cum(); redrawOpen(); });
+function tpRender(T, name, el, cls) {
+  if (!T || !el) return;
+  const o = T.oggi_pct, u = T.uscite["2023-26"], u0 = T.uscite["2019-22"], f = x => Math.round(x).toLocaleString("it-IT");
+  const r = x => (x > 0 ? "+" : "") + x.toFixed(2).replace(".", ",") + "R";
+  const d = s => { const [y, m, g] = s.split("-"); return `${+g}/${+m}/${y}`; };
+  const yrs = Object.entries(T.per_anno);
+  const bias = u.C_bias != null;
+  el.innerHTML = `
+  <div class="${cls.note}"><p><b>Aspetta la chiusura delle 14:31, non mettere un take profit sui livelli tipici.</b></p>
+    <p>Quando la direzione è giusta, chiudere alle 14:31 ha reso <b>${r(u.C_giusta)}</b> a trade nel 2023–26; con il TP a ${f(o.B_pips)} pips solo ${r(u.TPb_giusta)}, con il TP a ${f(o.A_pips)} pips ${r(u.TPa_giusta)}.
+    Il TP ti fa perdere i colpi grandi, e valgono più delle wick che tornano indietro. Vale anche nel 2019–22 (${r(u0.C_giusta)} contro ${r(u0.TPb_giusta)}).
+    ${name === "NFP" ? "Per la NFP conviene anche tenere fino alle 14:35 (studio H-X13)." : "Per Retail e PPI la differenza è piccola: un TP alto (circa " + f(o.P90_pips * 0.6) + " pips) rende come la chiusura."}</p></div>
+  <div class="${cls.tiles}">
+    <div class="${cls.tile}"><span class="${cls.lab}">Arriva 2 volte su 3</span><b class="${cls.v}">${f(o.A_pips)} pips</b></div>
+    <div class="${cls.tile}"><span class="${cls.lab}">Arriva 1 volta su 2</span><b class="${cls.v}">${f(o.B_pips)} pips</b></div>
+    <div class="${cls.tile}"><span class="${cls.lab}">Chiusura 14:31 tipica</span><b class="${cls.v}">${f(o.C_pips)} pips</b></div>
+    <div class="${cls.tile}"><span class="${cls.lab}">1 volta su 10 oltre</span><b class="${cls.v}">${f(o.P90_pips)} pips</b></div>
+  </div>
+  <p class="${cls.small}">Quanto arriva il prezzo <b>dentro il minuto della news</b>, entrando alle 14:29:30 nella direzione giusta. Misurato in % del prezzo sulle <b>ultime ${o.n} ${name}</b> (dal ${d(o.finestra_da)} al ${d(o.finestra_a)}) e riportato al prezzo di oggi, ${f(T.prezzo)} $.
+  Perché 24 release: ho provato 6, 12, 24 e tutte dal 2014, calcolando ogni volta il livello solo con le release prima e guardando se la release dopo lo toccava. Con 24 il livello "2 volte su 3" è stato toccato il ${Math.round(T.finestre["24"].tocca_A_2023_26 * 100)}% delle volte e quello "1 su 2" il ${Math.round(T.finestre["24"].tocca_B_2023_26 * 100)}% nel 2023–26; con tutto dal 2014 i livelli vengono troppo bassi (${Math.round(T.finestre.tutte.tocca_A_2023_26 * 100)}% e ${Math.round(T.finestre.tutte.tocca_B_2023_26 * 100)}%).</p>
+  <div class="${cls.tw}"><table class="${cls.table}"><thead><tr><th>Anno</th><th>Arriva (mediana)</th><th>Chiusura 14:31</th><th>In % del prezzo</th><th>Prezzo oro</th></tr></thead><tbody>
+    ${yrs.map(([y, v]) => `<tr><td>${y}</td><td>${f(v.arrivo_pips)}</td><td>${f(v.chiusura_pips)}</td><td>${v.arrivo_pct.toFixed(2).replace(".", ",")}%</td><td>${f(v.prezzo)} $</td></tr>`).join("")}</tbody></table></div>
+  <div class="${cls.tw}"><table class="${cls.table}"><thead><tr><th>R a trade, stop 100 pips</th><th>Chiusura 14:31</th><th>TP ${f(o.A_pips)}</th><th>TP ${f(o.B_pips)}</th><th>TP ${f(o.A_pips)} poi 14:35</th></tr></thead><tbody>
+    <tr><td>Direzione giusta 2019–22</td><td><b>${r(u0.C_giusta)}</b></td><td>${r(u0.TPa_giusta)}</td><td>${r(u0.TPb_giusta)}</td><td>${r(u0.TPa5_giusta)}</td></tr>
+    <tr><td>Direzione giusta 2023–26</td><td><b>${r(u.C_giusta)}</b></td><td>${r(u.TPa_giusta)}</td><td>${r(u.TPb_giusta)}</td><td>${r(u.TPa5_giusta)}</td></tr>
+    ${bias ? `<tr><td>Con la bias NFP 2023–26</td><td><b>${r(u.C_bias)}</b></td><td>${r(u.TPa_bias)}</td><td>${r(u.TPb_bias)}</td><td>${r(u.TPa5_bias)}</td></tr>` : `<tr><td>Direzione a caso 2023–26</td><td>${r(u.C_caso)}</td><td>${r(u.TPa_caso)}</td><td>${r(u.TPb_caso)}</td><td>${r(u.TPa5_caso)}</td></tr>`}
+  </tbody></table></div>
+  <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p>`;
+}
+tpRender(D.tp, "NFP", document.getElementById("tpbox"), {note:"note", tiles:"tiles", tile:"tile", lab:"small muted", v:"v", small:"small muted", tw:"tw", table:"pt"});
 </script>
