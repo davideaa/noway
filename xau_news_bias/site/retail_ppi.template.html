@@ -8,16 +8,17 @@
 :root{
   --bg:#f4f3ef; --panel:#ffffff; --ink:#17191c; --ink2:#3b4047; --mute:#6b7178; --line:#e1dfd8; --grid:#ecebe6;
   --accent:#9c6a12; --accent-soft:#f3e7cf; --up:#1d7f54; --down:#bf3b35; --soft:#eeece6;
+  --good:#1d7f54; --warn:#9a6a00; --bad:#bf3b35;
   --f-disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
   --f-body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
   --f-num:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
-  --accent:#e3ab48; --accent-soft:#3a2f1c; --up:#4cc58c; --down:#f2716a; --soft:#22262b; color-scheme:dark}}
+  --accent:#e3ab48; --accent-soft:#3a2f1c; --up:#4cc58c; --down:#f2716a; --soft:#22262b; --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
-  --accent:#e3ab48; --accent-soft:#3a2f1c; --up:#4cc58c; --down:#f2716a; --soft:#22262b; color-scheme:dark}
+  --accent:#e3ab48; --accent-soft:#3a2f1c; --up:#4cc58c; --down:#f2716a; --soft:#22262b; --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px}
@@ -110,6 +111,41 @@ td .small{display:block;font-size:11.5px}
 footer{color:var(--mute);font-size:12.5px;max-width:70ch}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:no-preference){.track i{transition:width .3s ease}}
+
+/* riassunto: tre corsie per stato, poi dettagli piegati */
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;align-items:start}
+.lane{--lc:var(--good);background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:12px;padding:12px 14px 4px;display:grid;min-width:0}
+.lane.good{--lc:var(--good)} .lane.warn{--lc:var(--warn)} .lane.bad{--lc:var(--bad)}
+.lane-h{display:flex;align-items:center;gap:8px;font:700 12.5px/1 var(--f-num);letter-spacing:.08em;text-transform:uppercase;color:var(--lc);padding-bottom:10px}
+.lane-h i{width:10px;height:10px;border-radius:50%;background:var(--lc);display:inline-block;flex:none}
+.it{padding:10px 0;border-top:1px solid var(--line);display:grid;gap:3px;min-width:0}
+.it b{font-size:15.5px;line-height:1.3}
+.it p{margin:0;font-size:14.5px;line-height:1.45;color:var(--ink2)}
+.it p.use{color:var(--ink);font-size:14px}
+.it p.use::before{content:"→ ";color:var(--lc);font-weight:700}
+details.fold{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+details.fold[open]{border-color:var(--line)}
+details.fold>summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;font-size:14.5px;font-weight:600;padding:11px 14px;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"";width:0;height:0;border-left:6px solid var(--mute);border-top:5px solid transparent;border-bottom:5px solid transparent;flex:none;transition:transform .15s}
+details.fold[open]>summary::before{transform:rotate(90deg)}
+details.fold>.fb{padding:0 14px 14px;display:grid;gap:12px;min-width:0}
+.trade{display:grid;gap:14px}
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.tl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ts{border-top:3px solid var(--line);padding-top:8px;display:grid;gap:2px;min-width:0}
+.ts.hl{border-top-color:var(--accent)}
+.ts span{font:600 13px var(--f-num);color:var(--mute)}
+.ts b{font-size:17px}
+.ts em{font-style:normal;font-size:13.5px;color:var(--ink2)}
+.odds{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.waffle{display:grid;grid-template-columns:repeat(10,18px);gap:4px}
+.waffle i{width:18px;height:18px;border-radius:4px;background:var(--bad);opacity:.75}
+.waffle i.y{background:var(--good);opacity:1}
+.pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.pay div{background:var(--bg);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.pay span{font-size:13px;color:var(--mute)}
+.pay b{font:700 22px/1.2 var(--f-num);font-variant-numeric:tabular-nums}
 </style>
 <main>
 <header>
@@ -119,7 +155,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </header>
 
 <section class="sec" aria-labelledby="h-next">
-  <div class="sechead"><h3 id="h-next">1 · Prossima news</h3><h2>Cosa aspettarsi</h2></div>
+  <div class="sechead"><h3 id="h-next">Prossima news</h3><h2>Cosa aspettarsi</h2></div>
   <div class="panel next">
     <div class="when" id="when"></div>
     <div class="verdict" id="verdict"></div>
@@ -130,38 +166,42 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </div>
 </section>
 
+<section class="sec" aria-labelledby="h-sum">
+  <div class="sechead"><h3 id="h-sum">In breve</h3><h2>Cosa funziona e cosa no</h2></div>
+  <div class="board" id="board"></div>
+</section>
+
 <section class="sec" aria-labelledby="h-vol">
-  <div class="sechead"><h3 id="h-vol">Oggi e questa settimana</h3><h2>Fin dove può arrivare oggi</h2></div>
+  <div class="sechead"><h3 id="h-vol">Oggi</h3><h2>Fin dove può arrivare oggi</h2></div>
   <div class="panel" id="volbox"></div>
-  <div id="regD"></div>
+  <details class="fold"><summary>Il range del giorno nel tempo (grafico)</summary><div class="fb"><div id="regD"></div></div></details>
 </section>
 
 <section class="sec" aria-labelledby="h-tp">
   <div class="sechead"><h3 id="h-tp">Dove chiudere</h3><h2>Take profit o chiusura delle 14:31?</h2></div>
   <div class="panel" id="tpbox"></div>
-  <h3 style="margin-top:6px">Il regime della news nel tempo</h3>
-  <div id="regN"></div>
+  <details class="fold"><summary>Il regime della news nel tempo (grafico)</summary><div class="fb"><div id="regN"></div></div></details>
 </section>
 
 <section class="sec" aria-labelledby="h-last">
-  <div class="sechead"><h3 id="h-last">2 · Ultima release</h3><h2 id="lastt"></h2></div>
+  <div class="sechead"><h3 id="h-last">Ultima release</h3><h2 id="lastt"></h2></div>
   <div class="panel" id="lastpanel"></div>
 </section>
 
 <section class="sec" aria-labelledby="h-why">
-  <div class="sechead"><h3 id="h-why">3 · Perché prima si muoveva poco</h3><h2>Non è la news che è cambiata: è il prezzo dell'oro</h2></div>
+  <div class="sechead"><h3 id="h-why">Perché muove più pips</h3><h2>Non è la news che è cambiata: è il prezzo dell'oro</h2></div>
   <div class="panel">
-    <div class="trio" id="trio"></div>
-    <p class="lead" id="whynote"></p>
-    <h3 style="margin-top:14px">Da dove vengono i pips in più</h3>
     <div id="whyW"></div><div id="whyT"></div>
-
+    <details class="fold"><summary>Prezzo, pips e % anno per anno (4 grafici)</summary><div class="fb">
+    <div class="trio" id="trio"></div>
+    <p class="lead" id="whynote"></p></div></details>
   </div>
 </section>
 
 
 <section class="sec" aria-labelledby="h-res">
-  <div class="sechead"><h3 id="h-res">4 · Cosa dice la ricerca</h3><h2>Perché oggi le news muovono di più</h2></div>
+  <div class="sechead"><h3 id="h-res">Cosa dice la ricerca</h3><h2>Perché oggi le news muovono di più</h2></div>
+  <details class="fold"><summary>Le cause in parole semplici e le fonti</summary><div class="fb">
   <div class="big-callout">
     <p><b>In parole semplici.</b> La news non è diventata "più forte". Sono cambiate tre cose:</p>
     <ol>
@@ -180,11 +220,12 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="ri"><b>La formula esiste già, e la sensibilità cambia nel tempo.</b> Volatilità alla news = volatilità del giorno + grandezza della sorpresa + effetto "annuncio", con le sorprese enormi che contano meno. Con l'inflazione alta il CPI muove più di 10 volte tanto, Retail e NFP no: lo stesso nei nostri dati (H-X29, resto CPI × 2,7, Retail/PPI × 1,1). <a href="https://www.nber.org/papers/w8959" target="_blank" rel="noopener">Andersen et al. 2003</a> · <a href="https://www.economics.ku.dk/research/workingpapers/centerpapers/fru-wp/archive/2008-01.pdf" target="_blank" rel="noopener">Hautsch, Hess, Müller 2012</a> · <a href="https://www.clevelandfed.org/publications/economic-commentary/2025/ec-202512-markets-of-fomcs-reaction-changed-since-covid-19" target="_blank" rel="noopener">Cline, Jia 2025</a></div>
     <div class="ri"><b>Order flow e CVD.</b> Il flusso degli ordini spiega il movimento nello stesso momento, ma lo prevede poco e solo per pochi minuti; vicino alla news è ancora meno informativo. Il volume di un CFD come XAUUSD non è il vero flusso del COMEX. Non esiste uno studio che lo provi sull'oro alle news. <a href="https://www.nber.org/papers/w9433.pdf" target="_blank" rel="noopener">Evans, Lyons 2008</a> · <a href="https://arxiv.org/abs/1011.6402" target="_blank" rel="noopener">Cont, Kukanov, Stoikov 2014</a></div>
     <p class="small">Nessuno studio misura direttamente la crescita della reazione dell'oro alle news nel 2023–26: le spiegazioni sopra vengono da studi vicini (tassi, volatilità dell'oro, liquidità). La scomposizione «Da dove vengono i pips in più» qui sopra è la nostra misura.</p>
-  </div></details></section>
+  </div></details></div></details></section>
 
 <section class="sec" aria-labelledby="h-all">
-  <div class="sechead"><h3 id="h-all">5 · Archivio</h3><h2>Tutte le release dal 2019</h2>
+  <div class="sechead"><h3 id="h-all">Archivio</h3><h2>Tutte le release dal 2019</h2>
     <p class="small">Tocca una riga per aprire il grafico. La barra è l'ampiezza della candela delle 14:30 in pips, wick compresa.</p></div>
+  <details class="fold"><summary>Apri l'archivio delle release</summary><div class="fb">
   <div class="filters">
     <span class="flabel">News</span><div class="chips" id="fType"></div>
     <span class="flabel">Periodo</span><div class="chips" id="fYear"></div>
@@ -192,6 +233,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </div>
   <div class="rows" id="rows"></div>
   <button class="more" id="more" type="button">Mostra altre</button>
+  </div></details>
 </section>
 
 <footer id="foot"></footer>
@@ -431,6 +473,7 @@ function tpRender(T, name, el, cls) {
         Il livello "1 volta su 2" è stato superato ${kB} volte su ${u.length}, quello "2 volte su 3" ${kA} su ${u.length}.</p>
         <p style="margin:6px 0 0;font-family:var(--f-num,ui-monospace,monospace);font-size:13px">${u.map(r => `${r.d.slice(8, 10)}/${r.d.slice(5, 7)} ${f(r.arr_pips)}`).join(" · ")}</p>
         ${hot ? `<p style="margin:6px 0 0">I livelli qui sotto usano le ultime ${o.n} ${name}, dal ${d(o.finestra_da)}: dentro c'è anche il periodo più calmo, quindi per il regime di adesso sono <b>probabilmente troppo bassi</b>. Con ${u.length} release non è ancora dimostrato. Per decidere dove chiudere non cambia niente: anche con livelli più alti la chiusura delle 14:31 ha reso di più (studio H-X19).</p>` : ""}</div>`; })()}
+  <details class="fold"><summary>I livelli tipici della news, anno per anno</summary><div class="fb">
   <div class="${cls.tiles}">
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 2 volte su 3</span><b class="${cls.v}">${f(o.A_pips)} pips</b></div>
     <div class="${cls.tile}"><span class="${cls.lab}">Arriva 1 volta su 2</span><b class="${cls.v}">${f(o.B_pips)} pips</b></div>
@@ -443,7 +486,7 @@ function tpRender(T, name, el, cls) {
     ${yrs.map(([y, v]) => `<tr><td>${y}</td><td>${f(v.arrivo_pips)}</td><td>${f(v.chiusura_pips)}</td><td>${v.arrivo_pct.toFixed(2).replace(".", ",")}%</td><td>${f(v.prezzo)} $</td></tr>`).join("")}</tbody></table></div>
 
 
-  <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p>`;
+  <p class="${cls.small}">I livelli in tabella sono quelli di ogni release al suo prezzo, calcolati solo con le release prima. Prezzi Dukascopy: lo spread del tuo broker alla news sposta un po' i livelli.</p></div></details>`;
 }
 tpRender(D.tp, "Retail e PPI", document.getElementById("tpbox"), {note:"big-callout", tiles:"steps", tile:"step", lab:"", v:"", small:"small", tw:"tw", table:""});
 function pipsWaterfall(host, P, group, name, opt) {
@@ -478,19 +521,30 @@ function pipsWhy(P, group, name, el, cls) {
   const S = P.scomposizione_vs_2019, Z = S[group]["2026"], A = S[group]["2019"], C = S.CPI["2026"], G = P.modello.per_periodo;
   const m = x => "× " + x.toFixed(2).replace(".", ","), f = x => Math.round(x).toLocaleString("it-IT");
   const k = g => Math.pow(3, g).toFixed(1).replace(".", ",");
-  el.innerHTML = `<p class="${cls}" style="margin-top:6px"><b>La formula</b>, su ${f(P.copertura.con_S)} news rosse dal 2011 (studio H-X29): <b>pips della news = prezzo dell'oro × volatilità del giorno × grandezza della sorpresa × quanto il mercato reagisce</b>. Dal 2019 al 2026 la candela tipica della ${name} è passata da ${f(A.pips_geo)} a ${f(Z.pips_geo)} pips (${m(Z.totale)}):</p>
-  <ul class="${cls}" style="margin:4px 0 0;padding-left:18px">
-    <li>🟢 <b>${m(Z.prezzo)} è solo il prezzo dell'oro</b>: lo stesso movimento in % oggi vale ${m(Z.prezzo).slice(2)} volte i pips. È la causa principale.</li>
-    <li>🟢 <b>${m(Z.volatilita)} la volatilità generale</b> (ADR): l'oro oggi si muove di più tutto il giorno, non solo alle news.</li>
-    <li>🟢 <b>${m(Z.sorpresa)} la sorpresa</b>: i dati non escono più lontani dalle attese di prima. Non è "il dato è più sorprendente".</li>
-    <li>${Z.resto > 1.15 ? "🟡" : "🟢"} <b>${m(Z.resto)} il resto</b>, cioè quanto il mercato reagisce a quella news. ${group === "NFP" ? "Nel 2026 metà delle NFP sono state 2–3 volte più grandi di quanto spiegano prezzo, volatilità e sorpresa: c'è qualcosa in più che la formula non vede." : ""} Per il CPI il resto è ${m(C.resto)}: dal 2021, da quando l'inflazione è il tema della Fed, lo stesso CPI muove molto di più.</li>
+  el.innerHTML = `<p style="margin:8px 0 4px"><b>Pips della news = prezzo dell'oro × volatilità del giorno × sorpresa × reazione del mercato.</b> Dal 2019 al 2026 la ${name} tipica è passata da ${f(A.pips_geo)} a ${f(Z.pips_geo)} pips:</p>
+  <ul style="margin:0;padding-left:18px">
+    <li>🟢 <b>Prezzo dell'oro ${m(Z.prezzo)}</b>: è la causa principale.</li>
+    <li>🟢 <b>Volatilità del giorno ${m(Z.volatilita)}</b>: l'oro si muove di più tutto il giorno.</li>
+    <li>🟢 <b>Sorpresa ${m(Z.sorpresa)}</b>: i dati non escono più lontani dalle attese di prima.</li>
+    <li>${Z.resto > 1.15 ? "🟡" : "🟢"} <b>Reazione del mercato ${m(Z.resto)}</b>${group === "NFP" ? ": nel 2026 metà delle NFP è stata 2–3 volte più grande della formula" : ""}. Per il CPI ${m(C.resto)} dal 2021.</li>
   </ul>
-  <p class="${cls}" style="margin-top:6px"><b>Il mercato reagisce alla grandezza della sorpresa molto più di prima.</b> Un dato lontano dalle attese (2 volte lo scarto tipico) fa una candela circa ${k(G["2023-26"].gamma).replace(",", ",")} volte quella di un dato in linea nel 2023–26, contro ${k(G["2019-22"].gamma)} nel 2019–22 e ${k(G["2011-18"].gamma)} nel 2011–18 (tutte le news).</p>
-  <p class="${cls}" style="margin-top:6px">🔴 <b>Prima della news non serve</b>: la sorpresa si conosce solo alle 14:30:00, e siccome la sensibilità cambia da un periodo all'altro, aggiungerla non ha migliorato la stima dei pips con la prova passo per passo. 🟡 <b>Dopo l'uscita sì, come indicazione</b>: se il dato è molto lontano dalle attese, aspettati una candela più grande del solito; se è in linea, più piccola.</p>`;
+  <details class="fold" style="margin-top:10px"><summary>Cosa vuol dire e come usarlo</summary><div class="fb ${cls}">
+    <p><b>Una sorpresa grande oggi pesa molto di più.</b> Un dato lontano dalle attese (2 volte lo scarto tipico) fa una candela circa ${k(G["2023-26"].gamma)} volte quella di un dato in linea nel 2023–26, contro ${k(G["2019-22"].gamma)} nel 2019–22 (tutte le news).</p>
+    <p>🔴 <b>Prima della news non serve</b>: la sorpresa la sai solo alle 14:30:00, e aggiungerla non ha migliorato la stima dei pips. 🟡 <b>Dopo l'uscita è un'indicazione</b>: dato molto lontano dalle attese, candela più grande del solito.</p>
+    <p>Per il CPI il mercato reagisce molto di più da quando l'inflazione è il tema della Fed (dal 2021): lo dicono anche gli studi (Kroner, Fed 2025; Cline e Jia, Cleveland Fed 2025). Calcolo su ${f(P.copertura.con_S)} news rosse dal 2011 (studio H-X29).</p>
+  </div></details>`;
 }
-
 pipsWaterfall(document.getElementById("whyW"), D.pips29, "RETAIL_PPI", "Retail/PPI", {grid:"--grid", mute:"--mute", ink:"--ink", accent:"--accent"});
 pipsWhy(D.pips29, "RETAIL_PPI", "Retail/PPI", document.getElementById("whyT"), "small");
+
+function board(el, lanes) {
+  if (!el) return;
+  el.innerHTML = lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
+    L.items.map(x => `<div class="it"><b>${x.t}</b><p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("");
+}
+function folds() {
+  document.querySelectorAll("details.fold").forEach(d => d.addEventListener("toggle", () => { if (d.open) { dispatchEvent(new Event("resize")); if (typeof drawRegs === "function") drawRegs(); } }));
+}
 function volRender(V, LV, el, cls, opt) {
   if (!el) return;
   const G = LV && LV.giorno, O = G && G.oggi;
@@ -527,7 +581,9 @@ function volRender(V, LV, el, cls, opt) {
   <p class="${cls.small}" id="lvMsg" style="margin:6px 0 0">Già compilato con i prezzi Dukascopy delle ${hhmm(O.k)}.</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px" id="lvCards"></div>
   <div id="lvChart" style="margin-top:10px"></div>
-  <div ${card} id="lvHow" style="margin-top:10px"></div>
+  <p class="${cls.small}" style="margin-top:8px">🟢 <b>Affidabile</b>: nel 2023–26 il massimo è rimasto sotto il "9 su 10" il ${pc(Q.cop90_su)} delle volte, il minimo sopra il ${pc(Q.cop90_giu)}. 🔴 Non dice la direzione.</p>
+  <details class="fold" id="lvFold" style="margin-top:8px"><summary>Come è calcolato e quanto è affidabile, ora per ora</summary><div class="fb">
+  <div ${card} id="lvHow"></div>
   <div style="margin-top:12px"><b>Quanto è affidabile, ora per ora</b> <span class="${cls.small}">(2023–26, ogni giorno calcolato solo con i dati di prima)</span></div>
   <div style="overflow-x:auto;margin-top:6px"><table style="border-collapse:collapse;width:100%;font-size:12.5px" id="lvRel"></table></div>
   <p class="${cls.small}" style="margin-top:4px"><b>Ora</b> = dopo le ore italiane. <b>Max</b> e <b>Min</b> = probabilità in % di un nuovo massimo o minimo, prevista → vera. <b>9/10</b> = quante volte su 100 il livello "9 su 10" ha tenuto, sopra / sotto. <b>Pips</b> (su schermi larghi) = larghezza della fascia 9 su 10 al prezzo di oggi.<br>🟢 affidabile · 🟡 un po' fuori: la probabilità sbaglia di 3–5 punti, oppure il livello "9 su 10" tiene più di 93 volte su 100 (è più prudente del necessario: il vero estremo resta un po' più vicino) · 🔴 non affidabile. Nessuna casella è rossa.</p>
@@ -540,7 +596,7 @@ function volRender(V, LV, el, cls, opt) {
   <p class="${cls.small}"><b>La fascia si stringe da sola durante il giorno.</b> Nel 2023–26, al prezzo di oggi, la fascia "9 su 10" era larga in mediana ${f(M.larghezza_per_fascia_2023_26["0"] / 100 * O.prezzo * 10)} pips a inizio giornata, ${f(M.larghezza_per_fascia_2023_26["6"] / 100 * O.prezzo * 10)} prima delle news delle 14:30, ${f(M.larghezza_per_fascia_2023_26["7"] / 100 * O.prezzo * 10)} subito dopo e ${f(M.larghezza_per_fascia_2023_26["11"] / 100 * O.prezzo * 10)} a fine giornata. Più stretta di così non è affidabile: oggi l'oro fa in media ${f(O.S_pct / 100 * O.prezzo * 10)} pips al giorno (ADR21).</p>
   <p class="${cls.small}"><b>L'ADR classico di TradingView</b> (minimo + ADR sopra, massimo − ADR sotto) è più stretto, ma vale circa 7 volte su 10: nel 2023–26 il massimo l'ha superato il ${pc(1 - CL["massimo_sotto_L+ADR"])} dei giorni, il minimo il ${pc(1 - CL["minimo_sopra_H-ADR"])}.</p>
   <p class="${cls.small}"><b>La settimana</b>: range tipico ${f(V.W.previsione_pips.p50)} pips (${p2(V.W.previsione_pips.p50 / 10)} $), 3 volte su 4 sotto ${f(V.W.previsione_pips.p75)}. Il range è affidabile (studio H-X21). I livelli in prezzo della settimana invece <b>non hanno passato il test</b> (H-X28): dal 2019 l'oro sale e fa nuovi massimi settimanali più spesso del previsto. Per questo non li metto.</p>
-  <p class="${cls.small}">I livelli dicono fin dove può arrivare, <b>non la direzione</b>: la posizione nel range non dice dove va la news (studio H-X23). La giornata parte alle 22:00 UTC. Il tuo MT5 può iniziarla un'ora prima d'estate e ha uno spread diverso: per questo conviene mettere i tuoi massimo e minimo.</p>`;
+  <p class="${cls.small}">I livelli dicono fin dove può arrivare, <b>non la direzione</b>: la posizione nel range non dice dove va la news (studio H-X23). La giornata parte alle 22:00 UTC. Il tuo MT5 può iniziarla un'ora prima d'estate e ha uno spread diverso: per questo conviene mettere i tuoi massimo e minimo.</p></div></details>`;
   const $ = id => el.querySelector("#" + id);
   function draw() {
     const P = +$("lvP").value, H = +$("lvH").value, L = +$("lvL").value, k = +$("lvK").value;
@@ -608,6 +664,7 @@ function volRender(V, LV, el, cls, opt) {
     host.innerHTML = ""; host.append(svg);
   }
   ["lvP", "lvH", "lvL", "lvK"].forEach(id => $(id).addEventListener("input", draw));
+  $("lvFold").addEventListener("toggle", draw);
   draw();
 }
 volRender(D.vol, D.liv, document.getElementById("volbox"), {tw:"tw", table:"", sub:"small", small:"small"}, {line:"--line", panel:"--panel", ink:"--ink", mute:"--mute", accent:"--accent"});
@@ -641,6 +698,32 @@ function regimeChart(host, rows, opt) {
   host.innerHTML = ""; host.append(wrap);
   if (opt.legend) { const lg = document.createElement("p"); lg.style.cssText = "margin:6px 0 0;font-size:12.5px;color:" + cs(opt.mute); lg.innerHTML = opt.legend; host.append(lg); }
 }
+function drawRegs() {
 regimeChart(document.getElementById("regD"), D.reg.giorno.serie, {...{accent:"--accent", mute:"--mute", grid:"--grid", ink:"--ink", bg:"--bg"}, aria: "Range giornaliero vero e stimato", legend: "Punti: range vero di ogni giorno, dal minimo al massimo. Linea: la stima fatta la mattina con gli ultimi 21 giorni. Fascia: dove cade 8 giorni su 10. La stima si adatta da sola quando la volatilità cambia."});
 regimeChart(document.getElementById("regN"), D.reg.RETAIL_PPI.serie, {...{accent:"--accent", mute:"--mute", grid:"--grid", ink:"--ink", bg:"--bg"}, dot: 4, aria: "Arrivo della news vero e stimato", legend: "Punti: quanto è arrivata ogni release dentro il minuto, dalla parte giusta, entrando alle 14:29:30. Linea: la stima prima di ogni release, che riparte da capo quando la news cambia regime (metodo che ha battuto le finestre fisse). Fascia: metà delle volte. Linea = il tuo livello mediano, bordo alto della fascia = il livello alto."});
+}
+drawRegs();
+
+(() => {
+  const med = a => { const b = a.filter(v => v != null).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
+  const Y = Math.max(...D.ev.map(e => e.y)), mY = med(D.ev.filter(e => e.y === Y).map(e => e.m1_bid)), m19 = med(D.ev.filter(e => e.y >= 2019 && e.y <= 2022).map(e => e.m1_bid));
+  const U = (D.tp && D.tp.ultime) || [], uY = U.filter(r => r.d.startsWith(String(Y))), kB = uY.filter(r => r.arr_pips >= r.B_pips).length;
+  const LQ = D.liv && D.liv.giorno ? D.liv.giorno.metodi[D.liv.giorno.scelto]["2023-26"] : null, Z = D.pips29 ? D.pips29.scomposizione_vs_2019.RETAIL_PPI["2026"] : null;
+  const x = v => "×" + v.toFixed(1).replace(".", ","), pc = v => Math.round(v * 100) + "%", r2 = v => (v > 0 ? "+" : "−") + Math.abs(v).toFixed(2).replace(".", ",") + "R";
+  const C = D.tp.uscite["2023-26"];
+  board(document.getElementById("board"), [
+    {k: "good", t: "Funziona", items: [
+      mY && {t: "Quanto muove la prima candela", d: `Nel ${Y} circa ${Math.round(mY)} pips dal minimo al massimo, wick compresa. Nel 2019–22 erano ${Math.round(m19)}.`, u: "Sai quanto spazio aspettarti. La direzione no."},
+      LQ && {t: "Fin dove può arrivare oggi", d: `Il livello "9 su 10" ha tenuto il ${pc(LQ.cop90_su)} delle volte (2023–26).`, u: "Mai un take profit oltre quel prezzo. Lo calcoli qui sotto con i tuoi prezzi."},
+      Z && {t: "Perché fa più pips di prima", d: `L'oro costa ${x(Z.prezzo)} rispetto al 2019 ed è più volatile (${x(Z.volatilita)}). I dati non sono più sorprendenti.`, u: "Ragiona in % del prezzo, non in pips fissi."}].filter(Boolean)},
+    {k: "warn", t: "Da verificare", items: [
+      {t: "Chiudere alle 14:31 o col take profit", d: `Rendono uguale: ${r2(C.C_giusta)} e ${r2(C.TPb_giusta)} a trade, sapendo la direzione. Nessuno dei due è dimostrato migliore.`, u: "Scegli quello che esegui meglio."},
+      uY.length && {t: `Release del ${Y} più grandi del solito`, d: `Il livello tipico "1 volta su 2" è stato superato ${kB} volte su ${uY.length}.`, u: "Aspettati candele più grandi dei livelli tipici."},
+      {t: "Retail: consensus e dato precedente", d: "Sulle sole Retail Sales l'oro ha seguito questa regola il 67% delle volte, ma l'ho trovata guardando i dati.", u: "Va provata dal vivo prima di usarla."}].filter(Boolean)},
+    {k: "bad", t: "Non funziona", items: [
+      {t: "Indovinare la direzione", d: "Analisi tecnica, nowcast, consensus, stop hunt, posizione nell'ADR: niente batte il caso.", u: `Senza direzione ogni uscita perde (${r2(C.C_caso)} a trade): non entrare prima per indovinarla.`},
+      {t: "Retail e PPI nello stesso giorno", d: "Negli ultimi anni non muovono più delle release da sole.", u: "Non aspettarti di più nei giorni doppi."},
+      {t: "Livelli della settimana e del massimo di ieri", d: "L'oro sale e li supera più spesso di quanto dica il passato.", u: "Per questo non sono sul sito."}]}]);
+  folds();
+})();
 </script>
