@@ -231,7 +231,6 @@ function sConsumi(t, a, b) { bg('52,26,24', 0.6); x.save();
   /* croce sanitaria accanto al titolo dell'anno: l'origine della crisi */
   const kX = oC(seg(t, tSa - 0.1, tSa + 0.3)); if (kX > 0) { x.save(); x.globalAlpha = kX; const cx = 540, cy = 1300, s = lerp(0.6, 1, oB(clamp(seg(t, tSa - 0.1, tSa + 0.4))));
     x.translate(cx, cy); x.scale(s, s); x.fillStyle = 'rgba(255,90,78,0.9)'; rr(-10, -30, 20, 60, 5); x.fill(); rr(-30, -10, 60, 20, 5); x.fill(); x.restore(); }
-  ring(BR.gx[2] + BR.off, BR.y0 + 10.6 * BR.ppp, 30, t, tOl, '255,90,78', 0.7);
   x.restore(); finish(t); }
 
 /* ================= FINANZA: 2008 la rete si spezza, 2020 tiene ================= */
@@ -247,7 +246,6 @@ function sFinanza(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   txt('2020', 790, 760, { size: 48, weight: 800, color: C.red, alpha: k20 });
   ring(790, 960, 150, t, tFi - 0.1, '200,250,114', 0.8, 14); /* resta sotto la scritta 2020 */
   txt('LA RETE TIENE', 790, 1180, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, alpha: oC(seg(t, tFi - 0.1, tFi + 0.3)) });
-  txt('LA FIDUCIA SI ROMPE', 290, 1180, { fam: 'mono', size: 26, weight: 600, color: C.red, ls: 2, alpha: k08 });
   x.restore(); finish(t); }
 
 /* ================= IL GRAFICO VERO (vu, doppiavu, ritorno): PIL trimestrale, 100 = prima della crisi ================= */
@@ -290,8 +288,7 @@ function pilChart(t, o = {}) { const { kIn = 1, span = 2.5, n20 = 0, n08 = 0, la
   /* linea 2020 */
   if (n20 > 0) { const PT = I20.map((v, q) => [X(q), GY(v)]); x.save(); x.globalAlpha *= 1 - 0.45 * dim20; x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = 7; x.strokeStyle = C.red; polyTo(PT, n20); x.stroke(); x.restore();
     if (n20 < 7) dot(...tip(PT, n20), 11, C.red, 1, '255,90,78');
-    if (lab20 > 0) { dot(...PT[2], 10, C.red, lab20); popTxt('−17,3%', PT[2][0] + 24, PT[2][1] + 2, lab20, { size: 40, color: C.red, align: 'left' });
-      txt('IN DUE TRIMESTRI', PT[2][0] + 26, PT[2][1] + 48, { fam: 'mono', size: 24, weight: 600, color: C.red, align: 'left', ls: 1, alpha: lab20 }); }
+    if (lab20 > 0) { dot(...PT[2], 10, C.red, lab20); txt('IL MINIMO', PT[2][0] + 24, PT[2][1] + 2, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'left', ls: 2, alpha: lab20 }); } /* niente cifra: la voce qui dice «quasi il nove» */
     if (est > 0) { dot(...PT[7], 12, C.lime, est, '200,250,114'); txt('ESTATE 2021', PT[7][0] + 24, PT[7][1] - 60, { fam: 'mono', size: 26, weight: 600, color: C.lime, align: 'left', ls: 2, alpha: est }); } }
 }
 function sVu(t, a, b) { bg('52,26,24', 0.5); x.save();
@@ -330,26 +327,26 @@ function arrowV(px, y0, y1, k, col) { if (k <= 0) return; const y = lerp(y0, y1,
   x.beginPath(); x.moveTo(px, y + 2); x.lineTo(px - 10, y - 14); x.lineTo(px + 10, y - 14); x.closePath(); x.fill(); x.fillRect(px - 12, y0 - 2, 24, 4); x.restore(); }
 function arrowH(x0, x1, py, k, col) { if (k <= 0) return; const xx = lerp(x0, x1, oC(k)); x.save(); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 4; x.beginPath(); x.moveTo(x0, py); x.lineTo(xx, py); x.stroke();
   x.beginPath(); x.moveTo(xx + 2, py); x.lineTo(xx - 14, py - 10); x.lineTo(xx - 14, py + 10); x.closePath(); x.fill(); x.fillRect(x0 - 2, py - 12, 4, 24); x.restore(); }
-function sCasa(t, a, b) { bg('30,44,26'); x.save();
+function sCasa(t, a, b) { bg('30,44,26'); x.save(); const g08 = 1180; /* in casa la fossa 2008 scende: la freccia dei 14 anni resta sotto la fossa 2020 */
   const tMi = WT('casa', 'misura', 1, 3.0), tCa = WT('casa', 'cadi', 1, 3.9), tMe = WT('casa', 'metti', 1, 5.6), tTo = WT('casa', 'tornare', 1, 6.1);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tMi - 0.4 });
   phrase(t, tCa - 0.3, [['Quanto cadi', C.red]], 345, { size: 92 });
   phrase(t, tMe - 0.3, [['e quanto ci metti.', C.lime]], Y2, { size: 92 });
   const kT = oC(seg(t, a + 0.2, a + 0.8));
   trench(TR.g20, TR.w20 * TR.qpx, TR.d20 * TR.dpp, kT, '255,90,78', '2020', kT);
-  trench(TR.g08, TR.w08 * TR.qpx, TR.d08 * TR.dpp, kT, '245,165,36', '2008', kT);
+  trench(g08, TR.w08 * TR.qpx, TR.d08 * TR.dpp, kT, '245,165,36', '2008', kT);
   /* quanto cadi: frecce verticali */
   const kD = seg(t, tCa - 0.2, tCa + 0.4), kD2 = seg(t, tCa, tCa + 0.6);
   arrowV(TR.x0 + TR.w20 * TR.qpx / 2, TR.g20 + 4, TR.g20 + TR.d20 * TR.dpp - 8, kD, C.red);
-  arrowV(TR.x0 + TR.w08 * TR.qpx / 2, TR.g08 + 4, TR.g08 + TR.d08 * TR.dpp - 8, kD2, C.red);
+  arrowV(TR.x0 + TR.w08 * TR.qpx / 2, g08 + 4, g08 + TR.d08 * TR.dpp - 8, kD2, C.red);
   txt('−17,3%', 300, TR.g20 + TR.d20 * TR.dpp * 0.55, { size: 40, weight: 800, color: C.red, align: 'left', alpha: oC(seg(t, tCa + 0.2, tCa + 0.5)) });
-  txt('−9,7%', TR.x0 + TR.w08 * TR.qpx / 2 + 24, TR.g08 + TR.d08 * TR.dpp * 0.5, { size: 40, weight: 800, color: C.red, align: 'left', alpha: oC(seg(t, tCa + 0.4, tCa + 0.7)) });
+  txt('−9,7%', TR.x0 + TR.w08 * TR.qpx / 2 + 24, g08 + TR.d08 * TR.dpp * 0.5, { size: 40, weight: 800, color: C.red, align: 'left', alpha: oC(seg(t, tCa + 0.4, tCa + 0.7)) });
   /* quanto ci metti: frecce orizzontali sopra le fosse */
   const kW = seg(t, tMe - 0.2, tMe + 0.4), kW2 = seg(t, tMe, tTo + 0.6);
   arrowH(TR.x0, TR.x0 + TR.w20 * TR.qpx, 616, kW, C.lime);
-  arrowH(TR.x0, TR.x0 + TR.w08 * TR.qpx, TR.g08 - 74, kW2, C.lime);
+  arrowH(TR.x0, TR.x0 + TR.w08 * TR.qpx, g08 - 74, kW2, C.lime);
   txt('MENO DI 2 ANNI', 300, 614, { fam: 'mono', size: 26, weight: 600, color: C.lime, align: 'left', ls: 2, alpha: oC(seg(t, tMe + 0.1, tMe + 0.5)) });
-  txt('14 ANNI', TR.x0 + TR.w08 * TR.qpx / 2, TR.g08 - 110, { size: 40, weight: 800, color: C.lime, alpha: oC(seg(t, tTo + 0.3, tTo + 0.7)) });
+  txt('14 ANNI', TR.x0 + TR.w08 * TR.qpx / 2, g08 - 110, { size: 40, weight: 800, color: C.lime, alpha: oC(seg(t, tTo + 0.3, tTo + 0.7)) });
   mono('ILLUSTRAZIONE · PROFONDITÀ E DURATA IN SCALA', 540, 1420, t, a + 0.8, { size: 22 });
   x.restore(); finish(t); }
 
