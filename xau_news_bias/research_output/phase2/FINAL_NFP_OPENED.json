@@ -1,0 +1,18 @@
+{
+ "opened_utc": "2026-09-26T12:00:17.127Z",
+ "inputs": {
+  "rules_sha": "9cd49684bce4",
+  "models_sha": "60beb63518b9",
+  "features_sha": "6bbc2c066951",
+  "events_sha": "0a1e6ca76066"
+ },
+ "tests": [
+  "RULE-NFP-1",
+  "RULE-NFP-2",
+  "RULE-NFP-3",
+  "MODEL-NFP",
+  "MODEL-SHARED"
+ ],
+ "holm_m": 5,
+ "code_commit": "9d0a778"
+}

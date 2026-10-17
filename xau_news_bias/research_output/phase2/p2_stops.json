@@ -1,0 +1,1120 @@
+{
+ "n_events": 310,
+ "note": "regime principale 2013-07 \u2192 2026-09, CPI e NFP",
+ "oracle": [
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 0.3,
+   "n": 156,
+   "mean_R": -0.12999196967758114,
+   "win": 0.3782051282051282,
+   "stopped": 0.5448717948717948
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 0.42,
+   "n": 156,
+   "mean_R": 0.12209729462064729,
+   "win": 0.5128205128205128,
+   "stopped": 0.358974358974359
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 0.5,
+   "n": 156,
+   "mean_R": 0.25484646210814105,
+   "win": 0.5897435897435898,
+   "stopped": 0.25
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 0.6,
+   "n": 156,
+   "mean_R": 0.39157988293747703,
+   "win": 0.6410256410256411,
+   "stopped": 0.1858974358974359
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 0.78,
+   "n": 156,
+   "mean_R": 0.46420056444763036,
+   "win": 0.6730769230769231,
+   "stopped": 0.1346153846153846
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 1.0,
+   "n": 156,
+   "mean_R": 0.7374997003152183,
+   "win": 0.7371794871794872,
+   "stopped": 0.057692307692307696
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 1.5,
+   "n": 156,
+   "mean_R": 0.8429964138904089,
+   "win": 0.7564102564102564,
+   "stopped": 0.019230769230769232
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": 2.0,
+   "n": 156,
+   "mean_R": 0.9129175142103342,
+   "win": 0.7756410256410257,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "base",
+   "k": "none",
+   "n": 156,
+   "mean_R": 0.9129175142103342,
+   "win": 0.7756410256410257,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 0.3,
+   "n": 156,
+   "mean_R": -0.7466389982899371,
+   "win": 0.2564102564102564,
+   "stopped": 0.6602564102564102
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 0.42,
+   "n": 156,
+   "mean_R": -0.5280177860732047,
+   "win": 0.358974358974359,
+   "stopped": 0.4807692307692308
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 0.5,
+   "n": 156,
+   "mean_R": -0.43582267344146575,
+   "win": 0.3974358974358974,
+   "stopped": 0.4166666666666667
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 0.6,
+   "n": 156,
+   "mean_R": -0.19732441509199197,
+   "win": 0.48717948717948717,
+   "stopped": 0.28846153846153844
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 0.78,
+   "n": 156,
+   "mean_R": -0.012758556056549634,
+   "win": 0.5384615384615384,
+   "stopped": 0.19230769230769232
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 1.0,
+   "n": 156,
+   "mean_R": 0.12063823623710015,
+   "win": 0.5705128205128205,
+   "stopped": 0.11538461538461539
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 1.5,
+   "n": 156,
+   "mean_R": 0.4518745713501484,
+   "win": 0.6217948717948718,
+   "stopped": 0.03205128205128205
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": 2.0,
+   "n": 156,
+   "mean_R": 0.5678372746890914,
+   "win": 0.6346153846153846,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "conservative",
+   "k": "none",
+   "n": 156,
+   "mean_R": 0.5678372746890914,
+   "win": 0.6346153846153846,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 0.3,
+   "n": 156,
+   "mean_R": 0.4596060069162022,
+   "win": 0.5448717948717948,
+   "stopped": 0.391025641025641
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 0.42,
+   "n": 156,
+   "mean_R": 0.6649934808448539,
+   "win": 0.6987179487179487,
+   "stopped": 0.22435897435897437
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 0.5,
+   "n": 156,
+   "mean_R": 0.7075532872817637,
+   "win": 0.7243589743589743,
+   "stopped": 0.19230769230769232
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 0.6,
+   "n": 156,
+   "mean_R": 0.7988597625621983,
+   "win": 0.7756410256410257,
+   "stopped": 0.14102564102564102
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 0.78,
+   "n": 156,
+   "mean_R": 0.8596073017439821,
+   "win": 0.8076923076923077,
+   "stopped": 0.10256410256410256
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 1.0,
+   "n": 156,
+   "mean_R": 1.0759107254906024,
+   "win": 0.8717948717948718,
+   "stopped": 0.038461538461538464
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 1.5,
+   "n": 156,
+   "mean_R": 1.1827764067288025,
+   "win": 0.9038461538461539,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": 2.0,
+   "n": 156,
+   "mean_R": 1.1827764067288025,
+   "win": 0.9038461538461539,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "optimistic",
+   "k": "none",
+   "n": 156,
+   "mean_R": 1.1827764067288025,
+   "win": 0.9038461538461539,
+   "stopped": 0.0
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 0.3,
+   "n": 156,
+   "mean_R": -1.7995752241193774,
+   "win": 0.11538461538461539,
+   "stopped": 0.8269230769230769
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 0.42,
+   "n": 156,
+   "mean_R": -1.583105418500432,
+   "win": 0.20512820512820512,
+   "stopped": 0.6666666666666666
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 0.5,
+   "n": 156,
+   "mean_R": -1.4742128518644175,
+   "win": 0.23717948717948717,
+   "stopped": 0.5961538461538461
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 0.6,
+   "n": 156,
+   "mean_R": -1.295186085429949,
+   "win": 0.30128205128205127,
+   "stopped": 0.47435897435897434
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 0.78,
+   "n": 156,
+   "mean_R": -1.0808121371297865,
+   "win": 0.3333333333333333,
+   "stopped": 0.33974358974358976
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 1.0,
+   "n": 156,
+   "mean_R": -0.8132265848138235,
+   "win": 0.36538461538461536,
+   "stopped": 0.21794871794871795
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 1.5,
+   "n": 156,
+   "mean_R": -0.5096896849345083,
+   "win": 0.40384615384615385,
+   "stopped": 0.08974358974358974
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": 2.0,
+   "n": 156,
+   "mean_R": -0.07802553269629056,
+   "win": 0.4230769230769231,
+   "stopped": 0.00641025641025641
+  },
+  {
+   "family": "CPI",
+   "scenario": "stress",
+   "k": "none",
+   "n": 156,
+   "mean_R": -0.047101857350635254,
+   "win": 0.4230769230769231,
+   "stopped": 0.0
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 0.3,
+   "n": 154,
+   "mean_R": 0.4216903411508247,
+   "win": 0.6233766233766234,
+   "stopped": 0.3246753246753247
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 0.42,
+   "n": 154,
+   "mean_R": 0.6728231232410572,
+   "win": 0.7337662337662337,
+   "stopped": 0.19480519480519481
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 0.5,
+   "n": 154,
+   "mean_R": 0.7182223622355417,
+   "win": 0.7532467532467533,
+   "stopped": 0.16883116883116883
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 0.6,
+   "n": 154,
+   "mean_R": 0.7741160139851723,
+   "win": 0.7792207792207793,
+   "stopped": 0.12987012987012986
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 0.78,
+   "n": 154,
+   "mean_R": 0.7961751283482118,
+   "win": 0.8051948051948052,
+   "stopped": 0.08441558441558442
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 1.0,
+   "n": 154,
+   "mean_R": 0.9059574250687099,
+   "win": 0.8376623376623377,
+   "stopped": 0.045454545454545456
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 1.5,
+   "n": 154,
+   "mean_R": 0.9675014654953126,
+   "win": 0.8506493506493507,
+   "stopped": 0.012987012987012988
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": 2.0,
+   "n": 154,
+   "mean_R": 0.981427971819331,
+   "win": 0.8506493506493507,
+   "stopped": 0.006493506493506494
+  },
+  {
+   "family": "NFP",
+   "scenario": "base",
+   "k": "none",
+   "n": 154,
+   "mean_R": 1.0140887953424644,
+   "win": 0.8571428571428571,
+   "stopped": 0.0
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 0.3,
+   "n": 154,
+   "mean_R": -0.07869989733819024,
+   "win": 0.44805194805194803,
+   "stopped": 0.487012987012987
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 0.42,
+   "n": 154,
+   "mean_R": 0.22751607088523476,
+   "win": 0.5909090909090909,
+   "stopped": 0.2792207792207792
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 0.5,
+   "n": 154,
+   "mean_R": 0.3492915502167807,
+   "win": 0.6428571428571429,
+   "stopped": 0.21428571428571427
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 0.6,
+   "n": 154,
+   "mean_R": 0.5037515360172797,
+   "win": 0.6818181818181818,
+   "stopped": 0.15584415584415584
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 0.78,
+   "n": 154,
+   "mean_R": 0.5853797864199669,
+   "win": 0.7142857142857143,
+   "stopped": 0.09740259740259741
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 1.0,
+   "n": 154,
+   "mean_R": 0.6181299116937219,
+   "win": 0.7272727272727273,
+   "stopped": 0.07142857142857142
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 1.5,
+   "n": 154,
+   "mean_R": 0.7607671278820899,
+   "win": 0.7597402597402597,
+   "stopped": 0.012987012987012988
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": 2.0,
+   "n": 154,
+   "mean_R": 0.7799652148903322,
+   "win": 0.7597402597402597,
+   "stopped": 0.006493506493506494
+  },
+  {
+   "family": "NFP",
+   "scenario": "conservative",
+   "k": "none",
+   "n": 154,
+   "mean_R": 0.8168583506109213,
+   "win": 0.7662337662337663,
+   "stopped": 0.0
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 0.3,
+   "n": 154,
+   "mean_R": 0.8590806605432143,
+   "win": 0.7597402597402597,
+   "stopped": 0.22077922077922077
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 0.42,
+   "n": 154,
+   "mean_R": 0.9179538158807405,
+   "win": 0.8051948051948052,
+   "stopped": 0.16883116883116883
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 0.5,
+   "n": 154,
+   "mean_R": 0.9463538673355191,
+   "win": 0.8246753246753247,
+   "stopped": 0.14285714285714285
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 0.6,
+   "n": 154,
+   "mean_R": 0.9723013058688718,
+   "win": 0.8571428571428571,
+   "stopped": 0.11038961038961038
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 0.78,
+   "n": 154,
+   "mean_R": 1.0052381276257834,
+   "win": 0.8766233766233766,
+   "stopped": 0.07792207792207792
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 1.0,
+   "n": 154,
+   "mean_R": 1.0864895157718062,
+   "win": 0.9090909090909091,
+   "stopped": 0.03896103896103896
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 1.5,
+   "n": 154,
+   "mean_R": 1.1368943645197718,
+   "win": 0.9285714285714286,
+   "stopped": 0.012987012987012988
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": 2.0,
+   "n": 154,
+   "mean_R": 1.1461844351639343,
+   "win": 0.9285714285714286,
+   "stopped": 0.006493506493506494
+  },
+  {
+   "family": "NFP",
+   "scenario": "optimistic",
+   "k": "none",
+   "n": 154,
+   "mean_R": 1.1746129464896131,
+   "win": 0.935064935064935,
+   "stopped": 0.0
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 0.3,
+   "n": 154,
+   "mean_R": -0.9063178263946479,
+   "win": 0.22727272727272727,
+   "stopped": 0.7142857142857143
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 0.42,
+   "n": 154,
+   "mean_R": -0.6799603654245505,
+   "win": 0.36363636363636365,
+   "stopped": 0.4935064935064935
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 0.5,
+   "n": 154,
+   "mean_R": -0.4059297933942127,
+   "win": 0.44805194805194803,
+   "stopped": 0.35714285714285715
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 0.6,
+   "n": 154,
+   "mean_R": -0.2285163492167916,
+   "win": 0.5,
+   "stopped": 0.2662337662337662
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 0.78,
+   "n": 154,
+   "mean_R": 0.005150103330077856,
+   "win": 0.5714285714285714,
+   "stopped": 0.15584415584415584
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 1.0,
+   "n": 154,
+   "mean_R": 0.18255249673006357,
+   "win": 0.6038961038961039,
+   "stopped": 0.08441558441558442
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 1.5,
+   "n": 154,
+   "mean_R": 0.39716834144661406,
+   "win": 0.6298701298701299,
+   "stopped": 0.012987012987012988
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": 2.0,
+   "n": 154,
+   "mean_R": 0.41374599461671974,
+   "win": 0.6298701298701299,
+   "stopped": 0.006493506493506494
+  },
+  {
+   "family": "NFP",
+   "scenario": "stress",
+   "k": "none",
+   "n": 154,
+   "mean_R": 0.45910375473221904,
+   "win": 0.6298701298701299,
+   "stopped": 0.0
+  }
+ ],
+ "oracle_base_by_era": [
+  {
+   "family": "CPI",
+   "era": "2013-19",
+   "n": 77,
+   "mean_R": 0.16531813965661404,
+   "stopped": 0.18181818181818182
+  },
+  {
+   "family": "CPI",
+   "era": "2020-22",
+   "n": 35,
+   "mean_R": 0.614228292012661,
+   "stopped": 0.2571428571428571
+  },
+  {
+   "family": "CPI",
+   "era": "2023-26",
+   "n": 44,
+   "mean_R": 0.6104312446419091,
+   "stopped": 0.13636363636363635
+  },
+  {
+   "family": "NFP",
+   "era": "2013-19",
+   "n": 77,
+   "mean_R": 0.6877299473238764,
+   "stopped": 0.14285714285714285
+  },
+  {
+   "family": "NFP",
+   "era": "2020-22",
+   "n": 35,
+   "mean_R": 0.7741573305640206,
+   "stopped": 0.11428571428571428
+  },
+  {
+   "family": "NFP",
+   "era": "2023-26",
+   "n": 42,
+   "mean_R": 0.9324560390485075,
+   "stopped": 0.11904761904761904
+  }
+ ],
+ "correct_trade_survival_by_unit": [
+  {
+   "unit": "U_news",
+   "mult_of_q75": 0.5,
+   "correct_not_stopped": 0.41935483870967744,
+   "between_year_sd_log_q75": 0.28350078355387015
+  },
+  {
+   "unit": "U_news",
+   "mult_of_q75": 0.7,
+   "correct_not_stopped": 0.6096774193548387,
+   "between_year_sd_log_q75": 0.28350078355387015
+  },
+  {
+   "unit": "U_news",
+   "mult_of_q75": 1.0,
+   "correct_not_stopped": 0.7483870967741936,
+   "between_year_sd_log_q75": 0.28350078355387015
+  },
+  {
+   "unit": "U_news",
+   "mult_of_q75": 1.3,
+   "correct_not_stopped": 0.8387096774193549,
+   "between_year_sd_log_q75": 0.28350078355387015
+  },
+  {
+   "unit": "U_news",
+   "mult_of_q75": 2.0,
+   "correct_not_stopped": 0.9161290322580645,
+   "between_year_sd_log_q75": 0.28350078355387015
+  },
+  {
+   "unit": "U_m1",
+   "mult_of_q75": 0.5,
+   "correct_not_stopped": 0.3161290322580645,
+   "between_year_sd_log_q75": 0.5007938245196226
+  },
+  {
+   "unit": "U_m1",
+   "mult_of_q75": 0.7,
+   "correct_not_stopped": 0.5483870967741935,
+   "between_year_sd_log_q75": 0.5007938245196226
+  },
+  {
+   "unit": "U_m1",
+   "mult_of_q75": 1.0,
+   "correct_not_stopped": 0.7483870967741936,
+   "between_year_sd_log_q75": 0.5007938245196226
+  },
+  {
+   "unit": "U_m1",
+   "mult_of_q75": 1.3,
+   "correct_not_stopped": 0.8193548387096774,
+   "between_year_sd_log_q75": 0.5007938245196226
+  },
+  {
+   "unit": "U_m1",
+   "mult_of_q75": 2.0,
+   "correct_not_stopped": 0.8870967741935484,
+   "between_year_sd_log_q75": 0.5007938245196226
+  },
+  {
+   "unit": "U_h1",
+   "mult_of_q75": 0.5,
+   "correct_not_stopped": 0.36774193548387096,
+   "between_year_sd_log_q75": 0.48113513138395536
+  },
+  {
+   "unit": "U_h1",
+   "mult_of_q75": 0.7,
+   "correct_not_stopped": 0.5870967741935483,
+   "between_year_sd_log_q75": 0.48113513138395536
+  },
+  {
+   "unit": "U_h1",
+   "mult_of_q75": 1.0,
+   "correct_not_stopped": 0.7483870967741936,
+   "between_year_sd_log_q75": 0.48113513138395536
+  },
+  {
+   "unit": "U_h1",
+   "mult_of_q75": 1.3,
+   "correct_not_stopped": 0.8354838709677419,
+   "between_year_sd_log_q75": 0.48113513138395536
+  },
+  {
+   "unit": "U_h1",
+   "mult_of_q75": 2.0,
+   "correct_not_stopped": 0.8838709677419355,
+   "between_year_sd_log_q75": 0.48113513138395536
+  },
+  {
+   "unit": "U_d1",
+   "mult_of_q75": 0.5,
+   "correct_not_stopped": 0.3258064516129032,
+   "between_year_sd_log_q75": 0.418934357821098
+  },
+  {
+   "unit": "U_d1",
+   "mult_of_q75": 0.7,
+   "correct_not_stopped": 0.5645161290322581,
+   "between_year_sd_log_q75": 0.418934357821098
+  },
+  {
+   "unit": "U_d1",
+   "mult_of_q75": 1.0,
+   "correct_not_stopped": 0.7483870967741936,
+   "between_year_sd_log_q75": 0.418934357821098
+  },
+  {
+   "unit": "U_d1",
+   "mult_of_q75": 1.3,
+   "correct_not_stopped": 0.8225806451612904,
+   "between_year_sd_log_q75": 0.418934357821098
+  },
+  {
+   "unit": "U_d1",
+   "mult_of_q75": 2.0,
+   "correct_not_stopped": 0.8806451612903226,
+   "between_year_sd_log_q75": 0.418934357821098
+  },
+  {
+   "unit": "U_px",
+   "mult_of_q75": 0.5,
+   "correct_not_stopped": 0.36451612903225805,
+   "between_year_sd_log_q75": 0.3242838947562705
+  },
+  {
+   "unit": "U_px",
+   "mult_of_q75": 0.7,
+   "correct_not_stopped": 0.5516129032258065,
+   "between_year_sd_log_q75": 0.3242838947562705
+  },
+  {
+   "unit": "U_px",
+   "mult_of_q75": 1.0,
+   "correct_not_stopped": 0.7483870967741936,
+   "between_year_sd_log_q75": 0.3242838947562705
+  },
+  {
+   "unit": "U_px",
+   "mult_of_q75": 1.3,
+   "correct_not_stopped": 0.8096774193548387,
+   "between_year_sd_log_q75": 0.3242838947562705
+  },
+  {
+   "unit": "U_px",
+   "mult_of_q75": 2.0,
+   "correct_not_stopped": 0.8806451612903226,
+   "between_year_sd_log_q75": 0.3242838947562705
+  }
+ ],
+ "excursions_over_time": [
+  {
+   "family": "CPI",
+   "seconds": 5,
+   "mfe_U_median": 0.5437315597787135,
+   "mae_U_median": 0.01893715419104208,
+   "mae_U_p75": 0.09736525614938261
+  },
+  {
+   "family": "NFP",
+   "seconds": 5,
+   "mfe_U_median": 0.5482348182404395,
+   "mae_U_median": 0.020306806188065022,
+   "mae_U_p75": 0.06721656457779229
+  },
+  {
+   "family": "CPI",
+   "seconds": 10,
+   "mfe_U_median": 0.6396181307373848,
+   "mae_U_median": 0.02320189136859523,
+   "mae_U_p75": 0.11690102010651329
+  },
+  {
+   "family": "NFP",
+   "seconds": 10,
+   "mfe_U_median": 0.6615933316052225,
+   "mae_U_median": 0.020818756885302492,
+   "mae_U_p75": 0.06925371926467278
+  },
+  {
+   "family": "CPI",
+   "seconds": 15,
+   "mfe_U_median": 0.6834033574539108,
+   "mae_U_median": 0.025148481907408673,
+   "mae_U_p75": 0.13652543203464643
+  },
+  {
+   "family": "NFP",
+   "seconds": 15,
+   "mfe_U_median": 0.7115080609441249,
+   "mae_U_median": 0.020818756885302492,
+   "mae_U_p75": 0.08119342085704141
+  },
+  {
+   "family": "CPI",
+   "seconds": 30,
+   "mfe_U_median": 0.7522791790293812,
+   "mae_U_median": 0.02951899804284713,
+   "mae_U_p75": 0.13652543203464643
+  },
+  {
+   "family": "NFP",
+   "seconds": 30,
+   "mfe_U_median": 0.8251106297161421,
+   "mae_U_median": 0.020818756885302492,
+   "mae_U_p75": 0.09542715740360397
+  },
+  {
+   "family": "CPI",
+   "seconds": 45,
+   "mfe_U_median": 0.7955819967844564,
+   "mae_U_median": 0.03375923388343105,
+   "mae_U_p75": 0.15722500838710696
+  },
+  {
+   "family": "NFP",
+   "seconds": 45,
+   "mfe_U_median": 0.8666898453838214,
+   "mae_U_median": 0.020818756885302492,
+   "mae_U_p75": 0.09884247331615535
+  }
+ ],
+ "spread_over_move_by_year": [
+  {
+   "family": "CPI",
+   "year": 2013,
+   "cost_share": 0.6358195230480166
+  },
+  {
+   "family": "CPI",
+   "year": 2014,
+   "cost_share": 0.2075399745197041
+  },
+  {
+   "family": "CPI",
+   "year": 2015,
+   "cost_share": 0.21006915119643055
+  },
+  {
+   "family": "CPI",
+   "year": 2016,
+   "cost_share": 0.2117306811317474
+  },
+  {
+   "family": "CPI",
+   "year": 2017,
+   "cost_share": 0.0872259841615731
+  },
+  {
+   "family": "CPI",
+   "year": 2018,
+   "cost_share": 0.2236567112338268
+  },
+  {
+   "family": "CPI",
+   "year": 2019,
+   "cost_share": 0.4541503084687734
+  },
+  {
+   "family": "CPI",
+   "year": 2020,
+   "cost_share": 0.3832167832165475
+  },
+  {
+   "family": "CPI",
+   "year": 2021,
+   "cost_share": 0.15094721824673105
+  },
+  {
+   "family": "CPI",
+   "year": 2022,
+   "cost_share": 0.0641359117096568
+  },
+  {
+   "family": "CPI",
+   "year": 2023,
+   "cost_share": 0.10873206259547634
+  },
+  {
+   "family": "CPI",
+   "year": 2024,
+   "cost_share": 0.07828675046140339
+  },
+  {
+   "family": "CPI",
+   "year": 2025,
+   "cost_share": 0.1360887096774092
+  },
+  {
+   "family": "CPI",
+   "year": 2026,
+   "cost_share": 0.03881734083078537
+  },
+  {
+   "family": "NFP",
+   "year": 2013,
+   "cost_share": 0.07711230798595939
+  },
+  {
+   "family": "NFP",
+   "year": 2014,
+   "cost_share": 0.09618917875175642
+  },
+  {
+   "family": "NFP",
+   "year": 2015,
+   "cost_share": 0.11832973034474821
+  },
+  {
+   "family": "NFP",
+   "year": 2016,
+   "cost_share": 0.1325223531964415
+  },
+  {
+   "family": "NFP",
+   "year": 2017,
+   "cost_share": 0.1643026943860953
+  },
+  {
+   "family": "NFP",
+   "year": 2018,
+   "cost_share": 0.16637516962934912
+  },
+  {
+   "family": "NFP",
+   "year": 2019,
+   "cost_share": 0.10843697576215063
+  },
+  {
+   "family": "NFP",
+   "year": 2020,
+   "cost_share": 0.27361332487514134
+  },
+  {
+   "family": "NFP",
+   "year": 2021,
+   "cost_share": 0.0719607486825429
+  },
+  {
+   "family": "NFP",
+   "year": 2022,
+   "cost_share": 0.1358352758352896
+  },
+  {
+   "family": "NFP",
+   "year": 2023,
+   "cost_share": 0.10158183579036927
+  },
+  {
+   "family": "NFP",
+   "year": 2024,
+   "cost_share": 0.04301683538137191
+  },
+  {
+   "family": "NFP",
+   "year": 2025,
+   "cost_share": 0.20090600226514904
+  },
+  {
+   "family": "NFP",
+   "year": 2026,
+   "cost_share": 0.03857208821000209
+  }
+ ],
+ "path_classes": {
+  "CPI|2013-19": {
+   "A": 67,
+   "B": 10
+  },
+  "CPI|2020-22": {
+   "A": 25,
+   "B": 10
+  },
+  "CPI|2023-26": {
+   "A": 34,
+   "B": 10
+  },
+  "NFP|2013-19": {
+   "A": 64,
+   "B": 13
+  },
+  "NFP|2020-22": {
+   "A": 30,
+   "B": 5
+  },
+  "NFP|2023-26": {
+   "A": 37,
+   "B": 5
+  }
+ },
+ "oracle_base_by_path_class": [
+  {
+   "family": "CPI",
+   "cls": "A",
+   "n": 126,
+   "mean_R": 0.70539133161043,
+   "stopped": 0.09523809523809523
+  },
+  {
+   "family": "CPI",
+   "cls": "B",
+   "n": 30,
+   "mean_R": -0.9264282014889257,
+   "stopped": 0.5666666666666667
+  },
+  {
+   "family": "NFP",
+   "cls": "A",
+   "n": 131,
+   "mean_R": 1.0575323084487311,
+   "stopped": 0.05343511450381679
+  },
+  {
+   "family": "NFP",
+   "cls": "B",
+   "n": 23,
+   "mean_R": -0.8401246196985765,
+   "stopped": 0.5652173913043478
+  }
+ ]
+}

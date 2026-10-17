@@ -1,0 +1,15 @@
+pandas==3.0.6
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.9.1
+lightgbm==4.7.0
+statsmodels==0.15.0
+pyarrow==25.0.1
+joblib==1.6.0
+fastapi==0.141.1
+uvicorn==0.54.0
+APScheduler==3.11.3
+requests==2.34.2
+pytest==9.1.1
+httpx==0.28.1
+xlrd==2.0.2

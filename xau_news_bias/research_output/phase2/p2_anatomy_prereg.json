@@ -1,0 +1,243 @@
+{
+ "note": "NFP solo fino al 2019; CPI tutti gli anni (gi\u00e0 esposti in fase 1)",
+ "asymmetry": [
+  {
+   "family": "CPI",
+   "era": "2008-12",
+   "n": 60,
+   "news_range_med_usd": 0.9114999999999327,
+   "control_range_med_usd": 0.6119999999999663,
+   "ratio_vs_control_med": 1.6117556071150985,
+   "ratio_vs_control_p25": 1.0549469024526044,
+   "ratio_vs_control_p75": 2.43467975162326,
+   "abs_move_med_usd": 0.5489999999999782,
+   "spread_p0_med": 0.5059999999999718,
+   "spread_max_m1_med": 0.55600000000004
+  },
+  {
+   "family": "CPI",
+   "era": "2013-19",
+   "n": 83,
+   "news_range_med_usd": 2.567500000000109,
+   "control_range_med_usd": 0.5900000000000318,
+   "ratio_vs_control_med": 4.055223400291789,
+   "ratio_vs_control_p25": 2.703569453330842,
+   "ratio_vs_control_p75": 7.251532393940109,
+   "abs_move_med_usd": 1.3670000000001892,
+   "spread_p0_med": 0.40599999999994907,
+   "spread_max_m1_med": 0.8379999999999654
+  },
+  {
+   "family": "CPI",
+   "era": "2020-22",
+   "n": 35,
+   "news_range_med_usd": 4.903999999999996,
+   "control_range_med_usd": 1.1399999999999864,
+   "ratio_vs_control_med": 3.741275167785174,
+   "ratio_vs_control_p25": 2.4108229638009786,
+   "ratio_vs_control_p75": 9.124219079266704,
+   "abs_move_med_usd": 2.776499999999942,
+   "spread_p0_med": 0.46299999999996544,
+   "spread_max_m1_med": 0.8840000000000146
+  },
+  {
+   "family": "CPI",
+   "era": "2023-26",
+   "n": 44,
+   "news_range_med_usd": 13.261999999999944,
+   "control_range_med_usd": 1.594250000000045,
+   "ratio_vs_control_med": 8.738936202915234,
+   "ratio_vs_control_p25": 4.793277751332521,
+   "ratio_vs_control_p75": 12.357897924955761,
+   "abs_move_med_usd": 8.003499999999804,
+   "spread_p0_med": 1.247000000000412,
+   "spread_max_m1_med": 4.308999999999855
+  },
+  {
+   "family": "NFP",
+   "era": "2008-12",
+   "n": 60,
+   "news_range_med_usd": 2.3635000000000446,
+   "control_range_med_usd": 0.6805000000000518,
+   "ratio_vs_control_med": 2.8158021133524382,
+   "ratio_vs_control_p25": 1.4651274628476298,
+   "ratio_vs_control_p75": 4.471172787392887,
+   "abs_move_med_usd": 1.3964999999999463,
+   "spread_p0_med": 0.5060000000000286,
+   "spread_max_m1_med": 0.55600000000004
+  },
+  {
+   "family": "NFP",
+   "era": "2013-19",
+   "n": 83,
+   "news_range_med_usd": 6.792500000000018,
+   "control_range_med_usd": 0.6699999999998454,
+   "ratio_vs_control_med": 9.78494623655831,
+   "ratio_vs_control_p25": 6.771344498895747,
+   "ratio_vs_control_p75": 17.339365351629432,
+   "abs_move_med_usd": 4.3599999999999,
+   "spread_p0_med": 0.6660000000001673,
+   "spread_max_m1_med": 1.7380000000000564
+  }
+ ],
+ "path_classes": {
+  "CPI|2008-12": {
+   "A": 44,
+   "B": 14,
+   "E": 2
+  },
+  "CPI|2013-19": {
+   "A": 71,
+   "B": 12,
+   "E": 0
+  },
+  "CPI|2020-22": {
+   "A": 25,
+   "B": 10,
+   "E": 0
+  },
+  "CPI|2023-26": {
+   "A": 34,
+   "B": 10,
+   "E": 0
+  },
+  "NFP|2008-12": {
+   "A": 50,
+   "B": 6,
+   "E": 4
+  },
+  "NFP|2013-19": {
+   "A": 70,
+   "B": 13,
+   "E": 0
+  }
+ },
+ "time_to_extreme_s": {
+  "CPI": {
+   "median": 33.388999999999996,
+   "p25": 13.895249999999999,
+   "p75": 52.958
+  },
+  "NFP": {
+   "median": 38.791,
+   "p25": 23.125,
+   "p75": 56.1165
+  }
+ },
+ "unit_study": {
+  "U_m1": {
+   "n": 286,
+   "between_year_sd_log": 0.7422828319238278,
+   "spearman_unit_vs_range": -0.04464805779487227,
+   "median_ratio": 5.569244023979887
+  },
+  "U_h1": {
+   "n": 286,
+   "between_year_sd_log": 0.7910054777483546,
+   "spearman_unit_vs_range": -0.2321512798633148,
+   "median_ratio": 1.0590173720328304
+  },
+  "U_d1": {
+   "n": 286,
+   "between_year_sd_log": 0.8147219471424266,
+   "spearman_unit_vs_range": -0.1537436395407822,
+   "median_ratio": 0.14487138855195208
+  },
+  "U_px": {
+   "n": 286,
+   "between_year_sd_log": 0.5537359762559297,
+   "spearman_unit_vs_range": 0.20890391195657512,
+   "median_ratio": 2.0767227355721607
+  },
+  "U_news": {
+   "n": 284,
+   "between_year_sd_log": 0.15591633780344147,
+   "spearman_unit_vs_range": 0.7117656642747282,
+   "median_ratio": 1.0268613217480276
+  },
+  "U_fixed": {
+   "n": 286,
+   "between_year_sd_log": 0.5910150946409893,
+   "spearman_unit_vs_range": null,
+   "median_ratio": 2.7224988521577838
+  }
+ },
+ "unit_choice": {
+  "unit": "U_news",
+  "rule": "rango minimo di (dispersione fra anni) + (\u2212Spearman), dati fino al 2019"
+ },
+ "mae_correct_over_unit_quantiles": {
+  "0.5": 0.3656852633139648,
+  "0.6": 0.4382973915796068,
+  "0.7": 0.5358696752548996,
+  "0.75": 0.6005599074720114,
+  "0.8": 0.746926518987111,
+  "0.9": 0.9157954043932691
+ },
+ "stop_choice": {
+  "unit": "U_news",
+  "k": 0.6,
+  "rule": "75\u00b0 percentile di MAE/U quando la direzione a fine minuto era giusta (fino al 2019)"
+ },
+ "stop_grid": [
+  {
+   "k": 0.3002799537360057,
+   "mult": 0.5,
+   "correct_not_stopped": 0.42857142857142855,
+   "wrong_stopped": 0.9287531806615776
+  },
+  {
+   "k": 0.42039193523040796,
+   "mult": 0.7,
+   "correct_not_stopped": 0.5828571428571429,
+   "wrong_stopped": 0.8982188295165394
+  },
+  {
+   "k": 0.5104759213512097,
+   "mult": 0.85,
+   "correct_not_stopped": 0.6742857142857143,
+   "wrong_stopped": 0.8396946564885496
+  },
+  {
+   "k": 0.6005599074720114,
+   "mult": 1.0,
+   "correct_not_stopped": 0.7485714285714286,
+   "wrong_stopped": 0.7837150127226463
+  },
+  {
+   "k": 0.6906438935928131,
+   "mult": 1.15,
+   "correct_not_stopped": 0.7942857142857143,
+   "wrong_stopped": 0.7379134860050891
+  },
+  {
+   "k": 0.7807278797136148,
+   "mult": 1.3,
+   "correct_not_stopped": 0.8171428571428572,
+   "wrong_stopped": 0.6692111959287532
+  },
+  {
+   "k": 0.9608958519552182,
+   "mult": 1.6,
+   "correct_not_stopped": 0.9257142857142857,
+   "wrong_stopped": 0.5572519083969466
+  },
+  {
+   "k": 1.2011198149440228,
+   "mult": 2.0,
+   "correct_not_stopped": 0.96,
+   "wrong_stopped": 0.44274809160305345
+  },
+  {
+   "k": 1.8016797224160341,
+   "mult": 3.0,
+   "correct_not_stopped": 0.9942857142857143,
+   "wrong_stopped": 0.2366412213740458
+  }
+ ],
+ "always_trade_both_sides": {
+  "n": 568,
+  "mean_pnl_usd": -1.0460264274647855,
+  "mean_cost_note": "LONG e SHORT sullo stesso evento: la media \u00e8 circa \u2212(costi)"
+ }
+}
