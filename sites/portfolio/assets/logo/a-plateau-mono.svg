@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-labelledby="t d">
+  <title id="t">Marchio Plateau, monocromatico</title>
+  <desc id="d">Una linea che sale e diventa piatta, sopra una base più tenue, in un solo colore.</desc>
+  <path d="M5 29 H27" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M5 25 L14.5 8 H27" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

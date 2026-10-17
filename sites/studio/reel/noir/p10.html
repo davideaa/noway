@@ -1,0 +1,369 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 10, DAY: 4, CAP: 0, NEXT: ['Il ciclo', 'economico'], FONTE: 'DATI: DESTATIS · EUROSTAT · COMM. UE AMR 2026 · FMI ESR 2026', QUANDO: 'LUNEDÌ' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 10 — CASO REALE «Perché la Germania esporta così tanto». Numeri SOLO da p10-fonti.md:
+   saldo merci positivo ogni anno 1952–2025 (74 anni; 1950 e 1951 negativi), Destatis tabella storica;
+   2025 export 1.563,8 / import 1.362,2 mld € (provvisorio, tabella storica), saldo «circa 200 mld» (comunicato 200,5);
+   partite correnti % PIL (Eurostat tipsbp20): 2016 8,9 · 2017 8,0 · 2018 8,4 · 2019 7,8 · 2020 6,3 · 2021 6,9 · 2022 4,1 · 2023 5,5 · 2024 5,8 · 2025 4,4 (a voce «circa 4,5»);
+   soglia MIP +6% sulla media di 3 anni, «indicativa» (AMR 2026); media 3 anni (tipsbp10): sopra il 6% dal 2012 (6,2) al 2021 (7,0), massimo 8,4 nel 2018,
+   poi 2022 5,7 · 2023 5,5 · 2024 5,1 · 2025 5,2 (anni 2013–17 e 2019–20 non in fonte: NON disegnati come punti, solo come fascia «sopra»);
+   auto 17% · macchinari 14% · chimica 9% dell'export di merci (quote 2024 calcolate, somma ≈ 40%, Destatis «etwa 40 %»);
+   costo del lavoro per unità (per occupato): 2000→2008 Germania +2,0% · area euro +15,5%; 1995→2000 Germania +0,4% · area euro +3,0% (Eurostat nama_10_lp_ulc);
+   Hartz I–II 2003, III 2004, IV 2005 (Bundesagentur für Arbeit); FMI ESR 2026: cambio reale tedesco 2025 sottovalutato di circa 6,6% (± 1,6).
+   «Euro più debole del marco» = opinione: nessun numero a schermo. Vasi comunicanti della scena soglia = illustrazione, non dati.
+   CAP 0 = capitolo 1 (ottobre 2026, lezioni 1–20): la lezione 10 è ancora nel capitolo 1. */
+const ORDER = ['num', 'hook', 'surplus', 'partite', 'picco', 'soglia', 'sopra', 'industria', 'riforme', 'discusso', 'euro', 'fondo', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+
+const RGB = { lime: [200, 250, 114], red: [255, 90, 78], grey: [139, 149, 143], amber: [245, 165, 36], ink: [241, 244, 238] };
+const rgba = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const mix = (c1, c2, k) => c1.map((v, i) => Math.round(lerp(v, c2[i], k)));
+const it = (v, d = 1) => v.toFixed(d).replace('.', ',');
+function dashLine(x0, y0, x1, y1, col, w = 3, dash = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(dash); x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function dot(cx, cy, r, col, k = 1, g = null) { if (k <= 0) return; if (g) glow(cx, cy, r * 5, g, 0.35 * k); x.save(); x.globalAlpha *= clamp(k); x.fillStyle = col; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.strokeStyle = '#050607'; x.lineWidth = 3; x.stroke(); x.restore(); }
+function polyTo(P2, k) { x.beginPath(); x.moveTo(...P2[0]); const n = Math.floor(k); for (let i = 1; i <= n && i < P2.length; i++) x.lineTo(...P2[i]);
+  if (n < P2.length - 1 && k > n) { const [ax, ay] = P2[n], [bx, by] = P2[n + 1], f = k - n; x.lineTo(lerp(ax, bx, f), lerp(ay, by, f)); } }
+/* testo che entra con un piccolo rimbalzo */
+function popTxt(s, px, py, k, o = {}) { if (k <= 0) return; x.save(); const sc = lerp(0.7, 1, oB(clamp(k))); x.translate(px, py); x.scale(sc, sc); txt(s, 0, 0, { size: 50, weight: 800, ...o, alpha: clamp(k * 2) * (o.alpha ?? 1) }); x.restore(); }
+
+/* ================= HOOK: 76 anni in una griglia per decenni, dal 1952 tutti in verde ================= */
+const YG = { x0: 255, y0: 650, p: 70, c: 60 };
+const ygPos = (yr) => { const i = yr - 1950; return [YG.x0 + (i % 10) * YG.p + YG.c / 2, YG.y0 + Math.floor(i / 10) * YG.p + YG.c / 2]; };
+function yearGrid(t, o = {}) { const { kIn = 1, red = 0, n = 0, lead = 1, t0 = 0 } = o; if (kIn <= 0) return;
+  for (let r = 0; r < 8; r++) txt(String(1950 + r * 10), YG.x0 - 24, YG.y0 + r * YG.p + YG.c / 2, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'right', alpha: clamp(kIn * 2 - r * 0.15) });
+  for (let yr = 1950; yr <= 2025; yr++) { const i = yr - 1950, [cx, cy] = ygPos(yr), ki = clamp(kIn * 2 - i / 76); if (ki <= 0) continue;
+    const kl = yr < 1952 ? red : clamp(n - (yr - 1952)), isRed = yr < 1952, col = isRed ? RGB.red : RGB.lime;
+    const s = kl > 0 && kl < 1 ? 1 + 0.28 * Math.sin(Math.PI * kl) : 1;
+    x.save(); x.globalAlpha *= ki; x.translate(cx, cy); x.scale(s, s);
+    rr(-YG.c / 2, -YG.c / 2, YG.c, YG.c, 12); x.fillStyle = '#0d110f'; x.fill(); x.strokeStyle = 'rgba(241,244,238,0.16)'; x.lineWidth = 2; x.stroke();
+    if (kl > 0) { rr(-YG.c / 2, -YG.c / 2, YG.c, YG.c, 12); x.fillStyle = rgba(col, 0.88 * clamp(kl * 1.5)); x.fill(); }
+    txt(String(yr).slice(2), 0, 1, { size: 24, weight: 800, color: kl > 0.5 ? '#0b0d0c' : 'rgba(241,244,238,0.32)' });
+    x.restore(); }
+  if (n > 0 && n < 74) { const yr = 1952 + Math.min(73, Math.floor(n)), [cx, cy] = ygPos(yr); glow(cx, cy, 120, '200,250,114', 0.45 * lead); }
+}
+function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
+  const tG = WT('hook', 'germania', 1, 1.03), tM = WT('hook', 'mai', 1, 2.07), tV = WT('hook', 'vendesse', 1, 5.52);
+  phrase(t, a + 0.05, [['Dal 1952,', C.ink]], 345, { size: 92 });
+  phrase(t, tM - 0.1, [['mai un anno in rosso.', C.lime]], Y2, { size: 92 });
+  const fill = seg(t, tG - 0.2, tV + 0.1), n = 74 * (fill < 1 ? Math.pow(fill, 1.15) : 1);
+  yearGrid(t, { kIn: seg(t, a + 0.05, a + 0.9), red: oC(seg(t, a + 0.5, a + 0.9)), n });
+  const kL = oC(seg(t, a + 0.6, a + 1.0)); if (kL > 0) { x.save(); x.globalAlpha = kL;
+    rr(330, 1243, 24, 24, 6); x.fillStyle = rgba(RGB.red, 0.88); x.fill(); txt('IN ROSSO', 368, 1256, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', ls: 2 });
+    rr(580, 1243, 24, 24, 6); x.fillStyle = rgba(RGB.lime, 0.88); x.fill(); txt('IN ATTIVO', 618, 1256, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', ls: 2 }); x.restore(); }
+  glassPill(540, 1345, '74 anni di fila', seg(t, tV - 0.1, tV + 0.35), C.lime, 44);
+  mono('DESTATIS · SALDO DELLE MERCI 1950–2025', 540, 1435, t, a + 0.8, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= SURPLUS: export contro import, la differenza si stacca ================= */
+function sSurplus(t, a, b) { bg(); x.save();
+  const tVe = WT('surplus', 'vendute', 1, 1.38), tC = WT('surplus', 'circa', 1, 2.07), tP = WA('surplus', ['piu'], 1, 4.14);
+  phrase(t, a + 0.05, [['Nel 2025, in più:', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.15, [['circa 200 mld €', C.lime]], Y2, { size: 92 }); /* il numero sulla parola */
+  const base = 1290, sc = 700 / 1563.8, hE = 1563.8 * sc, hI = 1362.2 * sc, cw = 170, cxE = 290, cxI = 520, cxS = 800;
+  const kI = ioC(seg(t, a + 0.15, a + 0.9)), kE = ioC(seg(t, a + 0.35, Math.max(a + 1.1, tVe + 0.3))), kc = oC(seg(t, tC - 0.1, tC + 0.3)), mv = ioC(seg(t, tC + 0.2, tC + 1.0));
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(170, base); x.lineTo(930, base); x.stroke();
+  const col = (cx, h, k, top, bot, lab, val) => { if (k <= 0) return; const g = x.createLinearGradient(0, base - h, 0, base); g.addColorStop(0, top); g.addColorStop(1, bot);
+    x.fillStyle = g; rr(cx - cw / 2, base - h * k, cw, h * k, 14); x.fill();
+    txt(lab, cx, base + 40, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 3, alpha: clamp(k * 2) });
+    txt(val, cx, base - 120, { size: 40, weight: 800, color: C.ink, alpha: seg(k, 0.85, 1) }); txt('MLD €', cx, base - 76, { fam: 'mono', size: 24, weight: 600, color: C.ink, alpha: seg(k, 0.85, 1) }); };
+  col(cxI, hI, kI, 'rgba(139,149,143,0.75)', 'rgba(139,149,143,0.25)', 'IMPORT', '1.362');
+  /* export: corpo uguale all'import + la parte in più (che poi si stacca) */
+  col(cxE, hI, kE, 'rgba(241,244,238,0.7)', 'rgba(241,244,238,0.22)', 'EXPORT', '1.564');
+  const capH = hE - hI, capTop0 = base - hE, grow = clamp((kE * hE - hI) / capH);
+  if (grow > 0) { const cx = lerp(cxE, cxS, mv), lift = Math.sin(Math.PI * mv) * 40, top = capTop0 + (1 - grow) * capH - lift;
+    if (mv > 0) { x.save(); x.strokeStyle = 'rgba(200,250,114,0.55)'; x.lineWidth = 2; x.setLineDash([6, 6]); rr(cxE - cw / 2, capTop0, cw, capH, 14); x.stroke(); x.restore(); }
+    if (kc > 0) glow(cx, top + capH / 2, 170, '200,250,114', 0.35 * kc);
+    x.fillStyle = kc > 0 ? rgba(mix([241, 244, 238], RGB.lime, kc), 0.85 + 0.1 * kc) : 'rgba(241,244,238,0.7)'; rr(cx - cw / 2, top, cw, capH * grow, 14); x.fill(); }
+  const kg = oC(seg(t, tC + 0.9, tC + 1.3)); if (kg > 0) { dashLine(cxI + cw / 2 + 10, base - hI, cxS - cw / 2 - 10, base - hI, 'rgba(241,244,238,0.45)', 2, [6, 8], kg);
+    popTxt('≈ 200', cxS, base - hI + 70, kg, { size: 64, color: C.lime }); txt('MLD € IN PIÙ', cxS, base - hI + 122, { fam: 'mono', size: 24, weight: 600, color: C.lime, ls: 2, alpha: kg }); }
+  if (tP > 0) { const kp = seg(t, tP - 0.1, tP + 0.5); if (kp > 0 && kp < 1) { x.save(); x.strokeStyle = `rgba(200,250,114,${1 - kp})`; x.lineWidth = 4; rr(cxS - cw / 2 - 20 * oC(kp), base - hE - 20 * oC(kp), cw + 40 * oC(kp), capH + 40 * oC(kp), 18); x.stroke(); x.restore(); } }
+  mono('DESTATIS · MERCI 2025, DATI PROVVISORI', 540, 1420, t, a + 0.4, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= PARTITE + PICCO: la linea in % del PIL, disegnata all'indietro fino al picco ================= */
+const CA = { v: [8.9, 8.0, 8.4, 7.8, 6.3, 6.9, 4.1, 5.5, 5.8, 4.4] }, cax = (i) => 215 + i * 78, cay = (v) => 1240 - v * 66, CAP2 = CA.v.map((v, i) => [cax(i), cay(v)]);
+function caChart(t, o = {}) { const { kIn = 1, back = 0, last = 0, peak = 0, yr16 = 0, def = 1, tDef = 0 } = o; if (kIn <= 0) return;
+  x.save(); x.globalAlpha *= kIn;
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(200, 1240); x.lineTo(945, 1240); x.stroke();
+  for (const v of [0, 2, 4, 6, 8]) { txt(v + '%', 178, cay(v), { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'right' }); x.fillStyle = 'rgba(241,244,238,0.3)'; x.fillRect(192, cay(v) - 1, 12, 2); }
+  for (let i = 0; i < 10; i++) txt(String(2016 + i), cax(i), 1280, { fam: 'mono', size: 24, weight: 600, color: i === 0 && yr16 > 0.5 ? C.amber : i === 9 && last > 0.5 ? C.lime : C.muted });
+  x.restore();
+  /* linea dal 2025 indietro (back: 0..9 segmenti) */
+  if (back > 0) { const R = CAP2.slice().reverse(); x.save(); x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = 'rgba(241,244,238,0.85)'; x.lineWidth = 7; polyTo(R, back); x.stroke(); x.restore();
+    for (let i = 1; i <= Math.floor(back) && i < 10; i++) dot(...R[i], 8, C.ink);
+    if (back < 9) { const n = Math.floor(back), f = back - n, p = [lerp(R[n][0], R[n + 1][0], f), lerp(R[n][1], R[n + 1][1], f)]; dot(...p, 12, C.amber, 1, '245,165,36'); } }
+  if (last > 0) { const [px, py] = CAP2[9], dy = (1 - oB(clamp(last), 1.2)) * -160; dot(px, py + dy, 13, C.lime, clamp(last * 3), '200,250,114');
+    popTxt('≈ 4,5%', 890, 1006, seg(last, 0.5, 1), { size: 46, color: C.lime }); }
+  if (peak > 0) { const [px, py] = CAP2[0]; glow(px, py, 130, '245,165,36', 0.4 * peak); dot(px, py, 15, C.amber, 1);
+    const kr = seg(peak, 0, 1); if (kr < 1) { x.save(); x.strokeStyle = `rgba(245,165,36,${1 - kr})`; x.lineWidth = 4; x.beginPath(); x.arc(px, py, 20 + 60 * oC(kr), 0, 7); x.stroke(); x.restore(); }
+    popTxt('quasi 9%', 250, 596, peak, { size: 46, color: C.amber }); }
+  if (yr16 > 0) dashLine(cax(0), cay(8.9) + 22, cax(0), 1225, 'rgba(245,165,36,0.6)', 2, [6, 8], yr16);
+  if (def > 0) { x.save(); x.globalAlpha *= def; mono('PARTITE CORRENTI = SALDO CON L’ESTERO', 540, 1360, t, tDef, { size: 24, color: C.ink, ls: 2 }); x.restore(); }
+}
+function sPartite(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tPa = WT('partite', 'partite', 1, 2.07), tC = WT('partite', 'circa', 1, 3.1);
+  phrase(t, a + 0.05, [['Saldo con l’estero:', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.15, [['circa 4,5% del PIL.', C.lime]], Y2, { size: 92 });
+  caChart(t, { kIn: oC(seg(t, a + 0.1, a + 0.6)), last: seg(t, tC - 0.05, tC + 0.6), def: 1, tDef: tPa - 0.1 });
+  mono('EUROSTAT · PARTITE CORRENTI IN % DEL PIL', 540, 1420, t, a + 0.5, { size: 22 });
+  x.restore(); finish(t); }
+function sPicco(t, a, b) { bg('48,40,22', 0.6); x.save();
+  const tQ = WT('picco', 'quasi', 1, 1.38), tN = WT('picco', 'nel', 1, 2.41);
+  phrase(t, a + 0.05, [['Dopo il picco', C.ink]], 345, { size: 92 });
+  phrase(t, tQ - 0.15, [['quasi 9% nel 2016.', C.amber]], Y2, { size: 92 });
+  const back = 9 * ioC(seg(t, a + 0.05, Math.max(a + 0.9, tQ - 0.05)));
+  caChart(t, { back, last: 1, peak: seg(t, tQ - 0.05, tQ + 0.45), yr16: oC(seg(t, tN, tN + 0.4)), def: 1, tDef: a - 9 });
+  mono('EUROSTAT · PARTITE CORRENTI IN % DEL PIL', 540, 1420, t, a - 9, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= SOGLIA: la media di tre anni come vasi comunicanti (illustrazione), poi la lente dell'esame ================= */
+const VT = { X: [290, 480, 670], base: 1180, h: 480, w: 130, L: [0.82, 0.40, 0.66], thr: 0.55 };
+function vessels(t, o = {}) { const { k = 1, eq = 0, thr = 0, over = 0, tags = 0 } = o; if (k <= 0) return;
+  const avg = VT.L.reduce((s, v) => s + v, 0) / 3, e = eq > 0 ? 1 - Math.exp(-5 * eq) * Math.cos(eq * 10) : 0, yT = VT.base - VT.thr * VT.h;
+  x.save(); x.globalAlpha *= k;
+  /* tubo di collegamento con la valvola */
+  x.fillStyle = '#0d110f'; rr(VT.X[0] - 20, VT.base + 6, VT.X[2] - VT.X[0] + 40, 30, 15); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 2; x.stroke();
+  if (eq > 0) { x.save(); x.beginPath(); x.roundRect(VT.X[0] - 16, VT.base + 10, VT.X[2] - VT.X[0] + 32, 22, 11); x.clip(); x.fillStyle = 'rgba(200,250,114,0.45)'; x.fillRect(VT.X[0] - 20, VT.base + 6, (VT.X[2] - VT.X[0] + 40) * oC(clamp(eq * 3)), 30); x.restore(); }
+  for (const vx of [(VT.X[0] + VT.X[1]) / 2, (VT.X[1] + VT.X[2]) / 2]) { x.save(); x.translate(vx, VT.base + 21); x.rotate(eq > 0 ? Math.PI / 2 * oC(clamp(eq * 4)) : 0); x.strokeStyle = eq > 0 ? C.lime : C.muted; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(-16, 0); x.lineTo(16, 0); x.stroke(); x.restore(); }
+  VT.X.forEach((cx, i) => { const lv = lerp(VT.L[i], avg, e), top = VT.base - lv * VT.h, slosh = eq > 0 && eq < 1 ? (1 - eq) : 0;
+    glass(cx, VT.base - VT.h / 2, VT.w, VT.h, 26, 1);
+    x.save(); x.beginPath(); x.roundRect(cx - VT.w / 2 + 6, VT.base - VT.h + 6, VT.w - 12, VT.h - 12, 20); x.clip();
+    const surf = (px) => top + Math.sin(px * 0.06 + t * 8 + i) * 8 * slosh;
+    x.beginPath(); x.moveTo(cx - VT.w / 2, VT.base + 4); for (let px = cx - VT.w / 2; px <= cx + VT.w / 2; px += 6) x.lineTo(px, surf(px)); x.lineTo(cx + VT.w / 2, VT.base + 4); x.closePath();
+    const g = x.createLinearGradient(0, top, 0, VT.base); g.addColorStop(0, 'rgba(200,250,114,0.85)'); g.addColorStop(1, 'rgba(200,250,114,0.25)'); x.fillStyle = g; x.fill();
+    if (over > 0 && top < yT) { x.save(); x.clip(); x.fillStyle = `rgba(245,165,36,${0.85 * over})`; x.fillRect(cx - VT.w / 2, top - 20, VT.w, yT - top + 20); x.restore(); }
+    x.restore();
+    txt('ANNO ' + (i + 1), cx, 1252, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: tags }); });
+  x.restore();
+  if (thr > 0) { dashLine(200, yT, lerp(200, 760, oC(thr)), yT, over > 0.5 ? C.amber : 'rgba(241,244,238,0.85)', 4, [14, 10], 1);
+    txt('SOGLIA', 790, yT - 17, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'left', ls: 2, alpha: seg(thr, 0.6, 1) });
+    txt('6%', 790, yT + 19, { fam: 'mono', size: 30, weight: 600, color: C.amber, align: 'left', ls: 2, alpha: seg(thr, 0.6, 1) }); }
+}
+function lens(cx, cy, r, k, t) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 2); const s = lerp(0.6, 1, oB(clamp(k)));
+  x.translate(cx, cy); x.scale(s, s); glow(0, 0, r * 1.6, '245,165,36', 0.25);
+  x.fillStyle = 'rgba(245,165,36,0.07)'; x.beginPath(); x.arc(0, 0, r, 0, 7); x.fill();
+  x.strokeStyle = C.amber; x.lineWidth = 10; x.beginPath(); x.arc(0, 0, r, 0, 7); x.stroke();
+  x.strokeStyle = 'rgba(255,255,255,0.35)'; x.lineWidth = 5; x.beginPath(); x.arc(0, 0, r - 18, -2.6, -1.9); x.stroke();
+  x.strokeStyle = C.amber; x.lineWidth = 22; x.lineCap = 'round'; x.beginPath(); x.moveTo(r * 0.72, r * 0.72); x.lineTo(r * 1.45, r * 1.45); x.stroke(); x.restore(); }
+function sSoglia(t, a, b) { bg(); x.save();
+  const tSo = WT('soglia', 'soglia', 1, 1.38), tI = WT('soglia', 'indicativa', 1, 1.72), tM = WT('soglia', 'media', 1, 4.14), tSu = WT('soglia', 'superarla', 1, 5.86), tE = WT('soglia', 'esame', 1, 7.24);
+  phrase(t, a + 0.05, [['La soglia europea:', C.ink]], 345, { size: 92 });
+  phrase(t, tI + 0.1, [['6% del PIL.', C.amber]], Y2, { size: 92 }); /* il numero sulla parola */
+  vessels(t, { k: oC(seg(t, a + 0.1, a + 0.6)), eq: seg(t, tM - 0.1, tM + 1.5), thr: seg(t, tSo - 0.1, tI + 0.4), over: oC(seg(t, tSu - 0.1, tSu + 0.4)), tags: oC(seg(t, a + 0.4, a + 0.8)) });
+  const kE = seg(t, tE - 0.35, tE + 0.25); lens(lerp(980, 560, oC(kE)), lerp(760, 860, oC(kE)), 92, kE, t);
+  const kM = oC(seg(t, tM - 0.1, tM + 0.3)) * (1 - oC(seg(t, tE - 0.3, tE - 0.05)));
+  glassPill(540, 1335, 'MEDIA DI 3 ANNI', kM, C.lime, 36);
+  glassPill(540, 1335, 'SOPRA LA SOGLIA: SCATTA UN ESAME', seg(t, tE - 0.05, tE + 0.35), C.amber, 34);
+  mono('ILLUSTRAZIONE · NON IN SCALA', 540, 1430, t, a + 0.6, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= SOPRA: la media di tre anni, dieci anni nella fascia «sopra», oggi intorno al 5 ================= */
+const sx = (yr) => 205 + (yr - 2012) * 56, sy = (v) => 1300 - v * 72, SV = { 2012: 6.2, 2018: 8.4, 2021: 7.0, 2022: 5.7, 2023: 5.5, 2024: 5.1, 2025: 5.2 };
+function sSopra(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tSo = WT('sopra', 'sopra', 1, 2.07), tC = WT('sopra', 'circa', 1, 2.76), tA = WT('sopra', 'anni', 1, 3.45), tMe = WT('sopra', 'mentre', 1, 3.79), tIn = WT('sopra', 'intorno', 1, 4.83);
+  phrase(t, a + 0.05, [['Sopra la soglia', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.15, [['per circa dieci anni.', C.lime]], Y2, { size: 92 });
+  const kIn = oC(seg(t, a + 0.1, a + 0.6)), yT = sy(6);
+  x.save(); x.globalAlpha = kIn;
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(190, 1300); x.lineTo(950, 1300); x.stroke();
+  for (const v of [0, 2, 4, 6, 8]) { txt(v + '%', 172, sy(v), { fam: 'mono', size: 24, weight: 600, color: v === 6 ? C.amber : C.muted, align: 'right' }); }
+  for (const yr of [2012, 2015, 2018, 2021, 2025]) txt(String(yr), sx(yr), 1340, { fam: 'mono', size: 24, weight: 600, color: C.muted });
+  x.restore();
+  /* fascia «sopra» 2012–2021: cresce da sinistra a destra */
+  const kb = ioC(seg(t, tSo - 0.1, Math.max(tSo + 0.6, tA + 0.2))); if (kb > 0) { const x0 = sx(2012) - 24, x1 = lerp(x0, sx(2021) + 24, kb);
+    const g = x.createLinearGradient(0, 640, 0, yT); g.addColorStop(0, 'rgba(245,165,36,0.03)'); g.addColorStop(1, 'rgba(245,165,36,0.24)'); x.fillStyle = g; rr(x0, 640, x1 - x0, yT - 640, 14); x.fill(); }
+  dashLine(190, yT, lerp(190, 950, oC(seg(t, a + 0.2, a + 0.9))), yT, C.amber, 4, [14, 10], kIn);
+  txt('SOGLIA 6%', 950, yT - 28, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'right', ls: 2, alpha: oC(seg(t, a + 0.6, a + 1.0)) });
+  txt('2012 → 2021: SOPRA', sx(2012) - 14, 676, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'left', ls: 1, alpha: oC(seg(t, tA - 0.1, tA + 0.3)) });
+  /* punti noti della media di tre anni (gli anni senza dato in fonte non si disegnano) */
+  [[2012, 0], [2018, 0.15], [2021, 0.3]].forEach(([yr, d]) => dot(sx(yr), sy(SV[yr]), 11, C.amber, oC(seg(t, tSo + d, tSo + d + 0.3)), '245,165,36'));
+  txt('max 8,4% (2018)', sx(2018) + 24, sy(8.4), { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', alpha: oC(seg(t, tSo + 0.3, tSo + 0.7)) });
+  const kd = seg(t, tMe - 0.1, Math.max(tMe + 0.9, tIn)); if (kd > 0) { const PT = [2021, 2022, 2023, 2024, 2025].map((yr) => [sx(yr), sy(SV[yr])]), kk = 4 * ioC(kd);
+    x.save(); x.strokeStyle = C.lime; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round'; polyTo(PT, kk); x.stroke(); x.restore();
+    for (let i = 1; i <= Math.floor(kk) && i < 5; i++) dot(...PT[i], 10, C.lime);
+    if (kk < 4) { const n = Math.floor(kk), f = kk - n; dot(lerp(PT[n][0], PT[n + 1][0], f), lerp(PT[n][1], PT[n + 1][1], f), 12, C.lime, 1, '200,250,114'); } }
+  const kO = seg(t, tIn - 0.15, tIn + 0.35); if (kO > 0) { glow(sx(2025), sy(5.2), 110, '200,250,114', 0.35 * clamp(kO)); popTxt('oggi ≈ 5%', 950, 990, kO, { size: 44, color: C.lime, align: 'right' }); }
+  mono('EUROSTAT · MEDIA DI 3 ANNI · COMMISSIONE UE', 540, 1420, t, a + 0.5, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= INDUSTRIA: l'anello dell'export, tre spicchi che si accendono sulla parola ================= */
+const DN = { cx: 540, cy: 990, R: 230, r: 150, ri: 330 };
+const SEG = [['auto', 17, 'AUTO', '17%'], ['macchinari', 14, 'MACCHINARI', '14%'], ['chimica', 9, 'CHIMICA', '9%']];
+function icoCar(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath();
+  x.moveTo(cx - 52, cy + 12); x.lineTo(cx - 52, cy - 4); x.lineTo(cx - 30, cy - 8); x.lineTo(cx - 14, cy - 28); x.lineTo(cx + 22, cy - 28); x.lineTo(cx + 38, cy - 8); x.lineTo(cx + 52, cy - 4); x.lineTo(cx + 52, cy + 12); x.stroke();
+  for (const dx of [-28, 28]) { x.beginPath(); x.arc(cx + dx, cy + 14, 12, 0, 7); x.stroke(); } x.restore(); }
+function icoGear(cx, cy, col, rot) { x.save(); x.translate(cx, cy); x.rotate(rot); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.beginPath();
+  for (let i = 0; i < 16; i++) x.arc(0, 0, i % 2 ? 26 : 36, i * Math.PI / 8, (i + 1) * Math.PI / 8); x.closePath(); x.stroke(); x.beginPath(); x.arc(0, 0, 11, 0, 7); x.stroke(); x.restore(); }
+function icoFlask(cx, cy, col, t) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath();
+  x.moveTo(cx - 11, cy - 38); x.lineTo(cx - 11, cy - 12); x.lineTo(cx - 36, cy + 30); x.lineTo(cx + 36, cy + 30); x.lineTo(cx + 11, cy - 12); x.lineTo(cx + 11, cy - 38); x.moveTo(cx - 18, cy - 38); x.lineTo(cx + 18, cy - 38); x.stroke();
+  x.fillStyle = col; x.globalAlpha *= 0.5; x.beginPath(); x.moveTo(cx - 25, cy + 12); x.lineTo(cx + 25, cy + 12); x.lineTo(cx + 34, cy + 28); x.lineTo(cx - 34, cy + 28); x.closePath(); x.fill();
+  x.globalAlpha /= 0.5; x.fillStyle = col; for (const [dx, ph] of [[-6, 0], [8, 1.3]]) { const u = (t * 0.8 + ph) % 1; x.beginPath(); x.arc(cx + dx, cy + 8 - u * 30, 3 + 2 * (1 - u), 0, 7); x.fill(); } x.restore(); }
+function arcSeg(a0, a1, R, r) { x.beginPath(); x.arc(DN.cx, DN.cy, R, a0, a1); x.arc(DN.cx, DN.cy, r, a1, a0, true); x.closePath(); }
+function sIndustria(t, a, b) { bg(); x.save();
+  const tP2 = WT('industria', 'soprattutto', 1, 1.2), tW = [WT('industria', 'auto', 1, 2.07), WT('industria', 'macchinari', 1, 2.41), WT('industria', 'chimica', 1, 3.1)], tC = WT('industria', 'circa', 1, 3.79);
+  phrase(t, a + 0.05, [['Cosa vende?', C.lime]], 345, { size: 92, out: tP2 - 0.3 });
+  phrase(t, tP2 - 0.05, [['Tre settori fanno', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.15, [['circa il 40%.', C.lime]], Y2, { size: 92 }); /* il numero sulla parola */
+  const kR = oC(seg(t, a + 0.15, a + 0.8)), rot0 = -Math.PI / 2 - (1 - kR) * 0.8, A = (p) => rot0 + p / 100 * Math.PI * 2;
+  /* anello di fondo: il resto dell'export */
+  if (kR > 0) { x.save(); x.globalAlpha = kR; x.fillStyle = 'rgba(241,244,238,0.07)'; arcSeg(rot0, rot0 + Math.PI * 2 * kR, DN.R, DN.r); x.fill();
+    x.strokeStyle = 'rgba(241,244,238,0.18)'; x.lineWidth = 2; x.beginPath(); x.arc(DN.cx, DN.cy, DN.R, 0, 7); x.stroke(); x.beginPath(); x.arc(DN.cx, DN.cy, DN.r, 0, 7); x.stroke(); x.restore(); }
+  let acc = 0; const COLS = ['200,250,114', '245,165,36', '241,244,238'];
+  SEG.forEach(([, p, lab, val], i) => { const k = ioC(seg(t, tW[i] - 0.1, tW[i] + 0.45)), a0 = A(acc), a1 = A(acc + p * k), mid = A(acc + p / 2), hot = Math.sin(Math.PI * seg(t, tW[i], tW[i] + 0.9)), off = 16 * hot;
+    if (k > 0) { x.save(); x.translate(Math.cos(mid) * off, Math.sin(mid) * off); if (hot > 0) glow(DN.cx + Math.cos(mid) * DN.R, DN.cy + Math.sin(mid) * DN.R, 140, COLS[i], 0.3 * hot);
+      x.fillStyle = `rgba(${COLS[i]},${0.88})`; arcSeg(a0, a1, DN.R, DN.r); x.fill(); x.strokeStyle = '#050607'; x.lineWidth = 4; x.stroke(); x.restore(); }
+    const ki = oB(seg(t, tW[i] - 0.05, tW[i] + 0.4)); if (ki > 0) { const ix = DN.cx + Math.cos(mid) * DN.ri, iy = DN.cy + Math.sin(mid) * DN.ri, s = clamp(ki, 0, 1.2), col = `rgb(${COLS[i]})`;
+      x.save(); x.translate(ix, iy); x.scale(s, s); x.translate(-ix, -iy); x.globalAlpha = clamp(ki);
+      if (i === 0) icoCar(ix, iy, col); if (i === 1) icoGear(ix, iy, col, t * 1.2); if (i === 2) icoFlask(ix, iy, col, t); x.restore();
+      const kl = oC(seg(t, tW[i] + 0.1, tW[i] + 0.5));
+      if (i === 0) { txt(lab, ix + 76, iy - 15, { fam: 'mono', size: 26, weight: 600, color: col, align: 'left', ls: 2, alpha: kl }); txt(val, ix + 76, iy + 21, { size: 34, weight: 800, color: col, align: 'left', alpha: kl }); }
+      else { txt(lab, ix, iy + 66, { fam: 'mono', size: 26, weight: 600, color: col, ls: 2, alpha: kl }); txt(val, ix, iy + 104, { size: 34, weight: 800, color: col, alpha: kl }); } }
+    acc += p; });
+  const rm = A(40 + 30); txt('ALTRE MERCI', DN.cx + Math.cos(rm) * 365, DN.cy + Math.sin(rm) * 365, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a + 0.7, a + 1.1)) });
+  const kc = seg(t, tC - 0.05, tC + 0.45);
+  txt('EXPORT', DN.cx, DN.cy, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 3, alpha: kR * (1 - oC(kc * 2)) });
+  if (kc > 0) { popTxt('≈ 40%', DN.cx, DN.cy - 14, kc, { size: 76, color: C.lime }); txt('DELL’EXPORT', DN.cx, DN.cy + 46, { fam: 'mono', size: 22, weight: 600, color: C.lime, ls: 2, alpha: oC(kc) }); }
+  mono('DESTATIS · QUOTE 2024, CALCOLO NOSTRO', 540, 1420, t, a + 0.6, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= RIFORME + DISCUSSO: linea del tempo 1995–2008 e la corsa del costo del lavoro ================= */
+const TLx = (yr) => 150 + (yr - 1995) * 60, TLY = 800;
+function opinionTag(cx, cy, label, t, t0, col = C.amber) { const k = oC(seg(t, t0, t0 + 0.35)); if (k <= 0) return; const s = typed(label, t, t0 + 0.1, 40), w = tw(label, 26, 600, 'mono', 3) + 110;
+  x.save(); x.globalAlpha = k; x.strokeStyle = col; x.lineWidth = 3; x.setLineDash([10, 7]); rr(cx - w / 2, cy - 32, w * lerp(0.6, 1, k), 64, 32); x.stroke(); x.setLineDash([]);
+  txt('“', cx - w / 2 + 38, cy + 10, { size: 64, weight: 800, color: col }); txt(s, cx - w / 2 + 70, cy + 1, { fam: 'mono', size: 26, weight: 600, color: col, align: 'left', ls: 3 }); x.restore(); }
+function reformBoard(t, o) { const { kIn = 1, hz = [0, 0, 0], q = 0, band = 0, pre = 0, bars = 0, morph = 0 } = o;
+  x.save(); x.globalAlpha *= kIn;
+  x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.beginPath(); x.moveTo(TLx(1995), TLY); x.lineTo(TLx(2008), TLY); x.stroke();
+  for (let yr = 1995; yr <= 2008; yr++) { x.fillStyle = 'rgba(241,244,238,0.35)'; x.fillRect(TLx(yr) - 1, TLY - 8, 2, 16); }
+  for (const yr of [1995, 2000, 2003, 2005, 2008]) txt(String(yr), TLx(yr), TLY + 40, { fam: 'mono', size: 24, weight: 600, color: (yr >= 2003 && yr <= 2005 && hz[0] > 0.5) ? C.lime : C.muted });
+  x.restore();
+  if (band > 0) { x.fillStyle = 'rgba(200,250,114,0.35)'; rr(TLx(2000), TLY - 9, (TLx(2008) - TLx(2000)) * oC(band), 18, 9); x.fill(); }
+  if (pre > 0) { const w = (TLx(2000) - TLx(1995)) * oC(pre); x.fillStyle = 'rgba(245,165,36,0.55)'; rr(TLx(2000) - w, TLY - 9, w, 18, 9); x.fill(); }
+  ['I–II', 'III', 'IV'].forEach((l, i) => { const k = hz[i]; if (k <= 0) return; const cx = TLx(2003 + i), cy = TLY - 56, s = clamp(oB(clamp(k)), 0, 1.2);
+    x.save(); x.translate(cx, cy + (1 - clamp(k)) * 30); x.scale(s, s); x.globalAlpha = clamp(k * 2);
+    rr(-27, -32, 54, 64, 10); x.fillStyle = q > 0.5 ? 'rgba(200,250,114,0.25)' : 'rgba(200,250,114,0.88)'; x.fill();
+    if (q > 0) { x.save(); x.strokeStyle = C.amber; x.lineWidth = 3; x.setLineDash([6, 5]); x.lineDashOffset = -t * 20; rr(-31, -36, 62, 72, 12); x.stroke(); x.restore(); }
+    txt(l, 0, 1, { size: 22, weight: 800, color: q > 0.5 ? C.lime : '#0b0d0c' }); x.restore(); });
+  txt('RIFORME HARTZ', TLx(2004), TLY - 124, { fam: 'mono', size: 24, weight: 600, color: q > 0.5 ? C.amber : C.lime, ls: 2, alpha: Math.min(1, hz[0] * 2) });
+  if (q > 0) popTxt('?', TLx(2005) + 66, TLY - 60, q, { size: 64, color: C.amber });
+  if (bars > 0) { x.save(); x.globalAlpha *= bars;
+    txt('COSTO DEL LAVORO PER UNITÀ DI PRODOTTO', 540, 930, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 1 });
+    txt('2000 → 2008', 540, 968, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, alpha: 1 - morph });
+    txt('1995 → 2000', 540, 968, { fam: 'mono', size: 26, weight: 600, color: C.amber, ls: 2, alpha: morph });
+    const gw = (v) => v * 38 * oC(bars);
+    [['GERMANIA', 2.0, 0.4, 1060, RGB.lime], ['AREA EURO', 15.5, 3.0, 1180, RGB.grey]].forEach(([n, v0, v1, y, c]) => { const v = lerp(v0, v1, ioC(morph)), w = Math.max(6, gw(v));
+      txt(n, 150, y - 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', ls: 2 });
+      x.fillStyle = rgba(c, 0.85); rr(150, y - 25, w, 50, 12); x.fill();
+      txt('+' + it(v0) + '%', 150 + gw(v0) + 20, y + 1, { size: 38, weight: 800, color: rgba(c === RGB.grey ? RGB.ink : c), align: 'left', alpha: seg(bars, 0.8, 1) * (1 - clamp(morph * 2)) });
+      txt('+' + it(v1) + '%', 150 + w + 20, y + 1, { size: 38, weight: 800, color: rgba(c === RGB.grey ? RGB.ink : c), align: 'left', alpha: clamp(morph * 2 - 1) }); });
+    x.restore(); }
+}
+function sRiforme(t, a, b) { bg(); x.save();
+  const tSe = WT('riforme', 'secondo', 1, 0.34), tR = WT('riforme', 'riforme', 1, 2.41), tPr = WT('riforme', 'primi', 1, 3.79), tSa = WT('riforme', 'salari', 1, 5.17);
+  phrase(t, a + 0.05, [['Riforme del lavoro', C.ink]], 345, { size: 88 });
+  phrase(t, tSa - 0.1, [['e salari cresciuti poco.', C.lime]], 345 + 88 * 1.12, { size: 88 });
+  opinionTag(540, 580, 'SECONDO ALCUNI ECONOMISTI', t, tSe - 0.05);
+  reformBoard(t, { kIn: oC(seg(t, a + 0.2, a + 0.7)), hz: [0, 1, 2].map((i) => seg(t, tR - 0.15 + i * 0.16, tR + 0.3 + i * 0.16)), band: seg(t, tSa - 0.1, tSa + 0.6), bars: seg(t, tSa, tSa + 0.9) });
+  mono('EUROSTAT · COSTO DEL LAVORO PER UNITÀ, PER OCCUPATO', 540, 1420, t, a + 0.5, { size: 22 });
+  x.restore(); finish(t); }
+function sDiscusso(t, a, b) { bg('48,40,22', 0.55); x.save();
+  const tI = WT('discusso', 'iniziata', 1, 2.41), tPr = WT('discusso', 'prima', 1, 2.76), tPe = WT('discusso', 'peso', 1, 3.79), tD = WT('discusso', 'discusso', 1, 5.17);
+  phrase(t, a + 0.05, [['Ma la frenata', C.ink]], 345, { size: 92 });
+  phrase(t, tI - 0.1, [['era iniziata prima.', C.amber]], Y2, { size: 92 });
+  opinionTag(540, 580, 'SECONDO ALCUNI ECONOMISTI', t, a - 9);
+  reformBoard(t, { hz: [1, 1, 1], band: 1, pre: seg(t, tPr - 0.15, tPr + 0.6), bars: 1, morph: seg(t, tPr - 0.05, tPr + 0.8), q: oC(seg(t, tPe - 0.1, tPe + 0.4)) });
+  glassPill(540, 1320, 'PESO DELLE RIFORME: DISCUSSO', seg(t, tD - 0.2, tD + 0.2), C.amber, 34);
+  mono('EUROSTAT · COSTO DEL LAVORO PER UNITÀ, PER OCCUPATO', 540, 1420, t, a - 9, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= EURO: la moneta vera e il marco ipotetico, tra virgolette ================= */
+function faceCoin(cx, cy, R, label, o = {}) { const { k = 1, flip = 0, ghost = false, col = C.ink, size = 150 } = o; if (k <= 0) return;
+  const sxs = Math.max(0.04, Math.abs(Math.cos(flip * Math.PI * 2)));
+  x.save(); x.translate(cx, cy); x.scale(sxs, 1); x.globalAlpha *= clamp(k);
+  if (ghost) { x.fillStyle = 'rgba(241,244,238,0.04)'; x.beginPath(); x.arc(0, 0, R, 0, 7); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 4; x.setLineDash([12, 10]); x.beginPath(); x.arc(0, 0, R, 0, 7); x.stroke(); x.setLineDash([]);
+    x.beginPath(); x.arc(0, 0, R - 22, 0, 7); x.strokeStyle = 'rgba(241,244,238,0.2)'; x.lineWidth = 2; x.stroke(); txt(label, 0, 6, { size, weight: 800, color: 'rgba(241,244,238,0.45)' }); }
+  else { const g = x.createLinearGradient(-R, -R, R, R); g.addColorStop(0, '#2a312d'); g.addColorStop(0.5, '#121714'); g.addColorStop(1, '#262c28'); x.fillStyle = g; x.beginPath(); x.arc(0, 0, R, 0, 7); x.fill();
+    x.strokeStyle = col; x.lineWidth = 6; x.beginPath(); x.arc(0, 0, R - 3, 0, 7); x.stroke(); x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 2; x.beginPath(); x.arc(0, 0, R - 22, 0, 7); x.stroke();
+    for (let i = 0; i < 12; i++) { const an = i / 12 * Math.PI * 2; x.fillStyle = col; x.beginPath(); x.arc(Math.cos(an) * (R - 40), Math.sin(an) * (R - 40), 4, 0, 7); x.fill(); }
+    txt(label, 0, 6, { size, weight: 800, color: col }); }
+  x.restore(); }
+function sEuro(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
+  const tE = WA('euro', ['leuro', 'euro'], 1, 1.38), tD = WT('euro', 'debole', 1, 2.41), tM = WT('euro', 'marco', 1, 4.48), tO = WA('euro', ['unopin', 'opinion'], 1, 5.52);
+  phrase(t, a + 0.05, [['L’euro più debole', C.ink]], 345, { size: 92 });
+  phrase(t, tM - 0.1, [['del marco?', C.amber]], Y2, { size: 92 });
+  const kE = seg(t, tE - 0.3, tE + 0.5), sink = oC(seg(t, tD - 0.1, tD + 0.6)), kM = seg(t, tM - 0.25, tM + 0.5);
+  const ey = 1000 + 70 * sink + (kE > 0 && kE < 1 ? -60 * Math.sin(Math.PI * kE) : 0);
+  if (kE > 0) glow(380, ey, 220, '200,250,114', 0.18 * clamp(kE));
+  faceCoin(380, ey, 130, '€', { k: oC(kE), flip: oC(kE), col: C.lime });
+  txt('PIÙ DEBOLE', 380, 1250, { fam: 'mono', size: 26, weight: 600, color: C.red, ls: 3, alpha: oC(seg(t, tD, tD + 0.4)) });
+  if (sink > 0 && sink < 1) for (let i = 0; i < 3; i++) dashLine(250 + i * 130, ey - 160 - 20 * i, 250 + i * 130, ey - 140 - 20 * i + 30 * sink, 'rgba(255,90,78,0.5)', 3, [6, 6], 1 - sink);
+  faceCoin(700, 820 - 40 * (1 - oC(kM)), 130, 'DM', { k: oC(kM), flip: oC(kM) * 0.5, ghost: true, size: 110 });
+  txt('MARCO (IPOTETICO)', 700, 990, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tM + 0.2, tM + 0.6)) });
+  /* le virgolette dell'opinione si chiudono attorno alle due monete */
+  const kq = seg(t, tO - 0.2, tO + 0.35); if (kq > 0) { const s = lerp(1.6, 1, oC(kq)), bl = (1 - oC(kq)) * 14;
+    x.save(); x.translate(170, 690); x.scale(s, s); txt('“', 0, 0, { size: 260, weight: 800, color: C.amber, alpha: clamp(kq * 2), blur: bl }); x.restore();
+    x.save(); x.translate(915, 1250); x.scale(s, s); txt('”', 0, 0, { size: 260, weight: 800, color: C.amber, alpha: clamp(kq * 2), blur: bl }); x.restore(); }
+  glassPill(540, 1380, 'OPINIONE', seg(t, tO - 0.1, tO + 0.3), C.amber, 44);
+  x.restore(); finish(t); }
+
+/* ================= FONDO: il righello del cambio reale, il cursore scivola a −6,6% ================= */
+const RX = (v) => 800 + v * 65, RY = 960;
+function sFondo(t, a, b) { bg(); x.save();
+  const tF = WT('fondo', 'fondo', 1, 0.69), tCa = WT('fondo', 'cambio', 1, 2.41), tB = WT('fondo', 'basso', 1, 3.79), tC = WT('fondo', 'circa', 1, 4.48), tG = WT('fondo', 'giustificherebbe', 1, 6.9);
+  phrase(t, a + 0.05, [['Stima del FMI:', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.15, [['circa −7%.', C.lime]], Y2, { size: 92 }); /* il numero sulla parola */
+  const kR = oC(seg(t, a + 0.1, a + 0.7));
+  if (kR > 0) { x.save(); x.globalAlpha = kR; glass(540, RY, 820, 40, 20, 1);
+    for (let v = -10; v <= 2; v++) { const big = v % 2 === 0; x.fillStyle = 'rgba(241,244,238,0.55)'; x.fillRect(RX(v) - 1.5, RY + (big ? -18 : -10), 3, big ? 36 : 20);
+      if (big) txt((v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + '%', RX(v), RY + 52, { fam: 'mono', size: 24, weight: 600, color: v === 0 ? C.lime : C.muted }); }
+    x.restore(); }
+  /* livello coerente con l'economia: il paletto sullo zero */
+  const kP = oC(seg(t, a + 0.4, a + 0.9)), pul = Math.sin(Math.PI * seg(t, tG - 0.1, tG + 0.8));
+  if (kP > 0) { if (pul > 0) glow(RX(0), RY, 160, '200,250,114', 0.35 * pul); x.save(); x.globalAlpha = kP; x.fillStyle = C.lime; rr(RX(0) - 4, RY - 30, 8, 60, 4); x.fill(); x.restore();
+    txt('COERENTE CON', RX(0), RY - 150, { fam: 'mono', size: 24, weight: 600, color: C.lime, ls: 2, alpha: kP }); txt('L’ECONOMIA', RX(0), RY - 120, { fam: 'mono', size: 24, weight: 600, color: C.lime, ls: 2, alpha: kP }); }
+  /* fascia d'incertezza della stima: da −8,2 a −5,0 */
+  const kBd = oC(seg(t, tC - 0.05, tC + 0.5)); if (kBd > 0) { x.save(); x.globalAlpha = kBd; x.fillStyle = 'rgba(255,90,78,0.22)'; rr(RX(-8.2), RY - 34, RX(-5.0) - RX(-8.2), 68, 12); x.fill(); x.restore(); }
+  /* cursore */
+  const kC = oC(seg(t, tCa - 0.2, tCa + 0.3)), mv = clamp(oB(seg(t, tB - 0.35, tB + 0.6), 1.3), 0, 1.15), v = lerp(0, -6.6, mv), cx = RX(v);
+  if (kC > 0) { x.save(); x.globalAlpha = kC; if (mv > 0.05) { x.strokeStyle = 'rgba(255,90,78,0.85)'; x.lineWidth = 4; x.beginPath(); x.moveTo(RX(0) - 14, RY - 66); x.lineTo(cx + 20, RY - 66); x.stroke();
+      x.fillStyle = 'rgba(255,90,78,0.85)'; x.beginPath(); x.moveTo(cx + 8, RY - 66); x.lineTo(cx + 26, RY - 76); x.lineTo(cx + 26, RY - 56); x.closePath(); x.fill(); }
+    glow(cx, RY, 90, '255,90,78', 0.35); x.fillStyle = '#121714'; x.beginPath(); x.arc(cx, RY, 30, 0, 7); x.fill(); x.strokeStyle = C.red; x.lineWidth = 6; x.stroke(); x.fillStyle = C.red; x.beginPath(); x.arc(cx, RY, 10, 0, 7); x.fill();
+    x.restore(); txt('CAMBIO REALE', cx, RY + 100, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 2, alpha: kC }); txt('TEDESCO', cx, RY + 130, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 2, alpha: kC }); }
+  txt('PIÙ BASSO', (RX(0) + RX(-6.6)) / 2 + 10, RY - 98, { fam: 'mono', size: 24, weight: 600, color: C.red, ls: 2, alpha: oC(seg(t, tB + 0.2, tB + 0.6)) });
+  const kN = seg(t, tC - 0.05, tC + 0.4); if (kN > 0) popTxt('≈ −7%', RX(-6.6), RY + 210, kN, { size: 72, color: C.red });
+  txt('STIMA FMI 2025: −6,6% (± 1,6)', 540, 1300, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 1, alpha: oC(seg(t, tC + 0.5, tC + 0.9)) });
+  mono('FMI · EXTERNAL SECTOR REPORT 2026', 540, 1420, t, tF, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= CASA: tre correnti che si uniscono nel surplus ================= */
+const CS = { src: [[235, 700, 'PRODOTTI', 'prodotti'], [235, 880, 'COSTI', 'costi'], [235, 1060, 'CAMBIO', 'cambio']], node: [800, 880], nr: 118 };
+function sCasa(t, a, b) { bg('30,44,26'); x.save();
+  const tS = WT('casa', 'discute', 1, 4.14), tW = CS.src.map(([, , , w]) => WT('casa', w, 1, w === 'prodotti' ? 4.83 : w === 'costi' ? 5.17 : 5.86)), tIn = WT('casa', 'cambio', 1, 5.86) + 0.5;
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tS - 0.55 });
+  phrase(t, tS - 0.3, [['Se ne discute', C.ink], ['su tre fronti.', C.lime]], 345, { size: 92 });
+  const [nx, ny] = CS.node, kN = oC(seg(t, a + 0.3, a + 0.9)), kJ = seg(t, tIn - 0.1, tIn + 0.6);
+  const COL = ['200,250,114', '245,165,36', '241,244,238'];
+  CS.src.forEach(([px, py, lab], i) => { const k = seg(t, tW[i] - 0.2, tW[i] + 0.3), kl = ioC(seg(t, tW[i], tW[i] + 0.6)); if (k <= 0) return;
+    const p0 = [px + 140, py], c1 = [560, py], c2 = [600, ny], p1 = [nx - CS.nr - 6, ny];
+    const bz = (u) => [Math.pow(1 - u, 3) * p0[0] + 3 * Math.pow(1 - u, 2) * u * c1[0] + 3 * (1 - u) * u * u * c2[0] + u * u * u * p1[0], Math.pow(1 - u, 3) * p0[1] + 3 * Math.pow(1 - u, 2) * u * c1[1] + 3 * (1 - u) * u * u * c2[1] + u * u * u * p1[1]];
+    x.save(); x.strokeStyle = `rgba(${COL[i]},0.6)`; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(...p0); for (let u = 0; u <= kl + 0.001; u += 0.02) x.lineTo(...bz(Math.min(u, kl))); x.stroke(); x.restore();
+    if (kl >= 1) for (let j = 0; j < 3; j++) { const u = ((t - tW[i]) * 0.55 + j / 3) % 1, [qx, qy] = bz(u); x.fillStyle = `rgb(${COL[i]})`; x.beginPath(); x.arc(qx, qy, 7, 0, 7); x.fill(); glow(qx, qy, 28, COL[i], 0.35); }
+    glassPill(px, py, lab, k, `rgb(${COL[i]})`, 36); });
+  if (kN > 0) { if (kJ > 0) glow(nx, ny, 260, '200,250,114', 0.35 * clamp(kJ)); glass(nx, ny, CS.nr * 2, CS.nr * 2, CS.nr, kN);
+    if (kJ > 0 && kJ < 1) { x.save(); x.strokeStyle = `rgba(200,250,114,${1 - kJ})`; x.lineWidth = 5; x.beginPath(); x.arc(nx, ny, CS.nr + 70 * oC(kJ), 0, 7); x.stroke(); x.restore(); }
+    if (kJ > 0) { x.save(); x.globalAlpha = clamp(kJ * 2); x.strokeStyle = C.lime; x.lineWidth = 5; x.beginPath(); x.arc(nx, ny, CS.nr, 0, 7); x.stroke(); x.restore(); }
+    txt('SURPLUS', nx, ny + 2, { size: 40, weight: 800, color: kJ > 0.3 ? C.lime : C.ink, alpha: kN }); }
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, surplus: sSurplus, partite: sPartite, picco: sPicco, soglia: sSoglia, sopra: sSopra, industria: sIndustria,
+  riforme: sRiforme, discusso: sDiscusso, euro: sEuro, fondo: sFondo, casa: sCasa }, ORDER, ['hook', 'picco', 'industria', 'euro', 'casa']);
+</script></body></html>
