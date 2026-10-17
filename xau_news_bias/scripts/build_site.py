@@ -28,11 +28,11 @@ def pips29(group):
 
 if __name__ == "__main__":
     site = load(ROOT / "research_output" / "phase2" / "hx11" / "site.json")
-    ev = [{"f": e["f"], "d": e["d"], "y": e["y"], "mv": e["mv"], "rule": e["rule"],
-           "rL": e["sc"]["S1"]["L"]["r"], "rS": e["sc"]["S1"]["S"]["r"]} for e in site["ev"] if e["f"] == "NFP"]
+    ev = [{k: e[k] for k in ("id", "f", "d", "y", "live", "mv", "stop", "ref", "rule")} | {"sc": {"S1": e["sc"]["S1"]}}
+          for e in site["ev"] if e["f"] == "NFP"]
     log = ROOT / "live" / "hx8_live.jsonl"
     tp = load(HX16 / "hx19_tp.json")["NFP"]
-    data = {"ev": ev,
+    data = {"ev": ev, "bins": site["bins"],
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
             "tp": {k: tp[k] for k in ("uscite", "per_anno", "ultime")},
             "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP")}
