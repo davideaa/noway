@@ -132,6 +132,12 @@ details.more[open]{display:grid;gap:12px}
 .facts{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px;color:var(--ink2)}
 .facts b{color:var(--ink)}
 .h3{font:700 19px/1.2 var(--f-disp);margin:8px 0 0}
+.cbar{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;background:var(--panel)}
+.cbar i{display:block;height:100%}
+.cbar .in,.cleg .in{background:var(--accent)} .cbar .su,.cleg .su{background:var(--ink2)} .cbar .giu,.cleg .giu{background:var(--line)}
+.cleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink2)}
+.cleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.cleg b{font-family:var(--f-num);color:var(--ink)}
 .next{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
 @media (max-width:720px){.next{grid-template-columns:1fr}}
 .when b{display:block;font:700 26px/1.15 var(--f-disp)}
@@ -155,11 +161,6 @@ details.more[open]{display:grid;gap:12px}
   <p class="one">Quanto si sono mosse, contro la stima fatta <b>prima</b>. Tocca una release.</p>
   <div class="strip" id="strip" role="group" aria-label="Scegli una release"></div>
   <div class="panel" id="prec"></div>
-</section>
-
-<section class="sec" aria-labelledby="h-vol">
-  <h2 id="h-vol">La volatilità adesso</h2>
-  <div class="panel" id="vt"></div>
 </section>
 
 <section class="sec" aria-labelledby="h-day">
@@ -436,40 +437,13 @@ function bandChart(ch, P, name) {
 }
 
 
-// ---------- volatilità adesso (H-X34): una linea, le esplosioni in rosso, il punto di adesso
-function volMini(host, VT) {
-  if (!host || !VT) return;
-  const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
-  const S = VT.serie.map(([m, V, Vp, px, E, g]) => ({m, y: +m.slice(0, 4), mo: +m.slice(5, 7), t0: Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1, 1), t1: Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 1), V, Vp, E: !!E, g})).filter(s => s.y >= 2019);
-  S.forEach(s => s.t = (s.t0 + s.t1) / 2);
-  const A = VT.adesso, hot = A.W1 || A.W2;
-  host.innerHTML = `<div class="state"><b class="${hot ? "hot" : "ok"}">${hot ? "In esplosione" : "Calma"}</b>
-      <span>ultimi 21 giorni <b>${dec(A.media_21g)}%</b> al giorno · 6 mesi prima <b>${dec(A.media_126g_prima)}%</b></span></div>
-    <div class="chart" id="vmChart"></div>
-    <p class="one">Quando esplode, <b>continua</b> anche il mese dopo (1 volta su 3). <b>L'inizio non si vede</b> prima.</p>`;
-  const ch = host.querySelector("#vmChart");
-  const draw = () => {
-    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 170 : 200, L = 34, R = 56, T = 10, B = 22;
-    const ta = S[0].t0, tb = S[S.length - 1].t1, x = t => L + (t - ta) / (tb - ta) * (W - L - R);
-    const vm = Math.max(...S.map(s => s.V)) * 1.1, y = v => T + (H - T - B) * (1 - v / vm);
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Volatilità del giorno, media del mese, dal 2019"});
-    S.filter(s => s.E).forEach(s => svg.append(mk("rect", {x: x(s.t0), y: T, width: Math.max(2, x(s.t1) - x(s.t0)), height: H - T - B, fill: css("--bad"), opacity: .16})));
-    for (const v of [1, 2, 3, 4]) if (v < vm) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")}));
-      svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v + "%")); }
-    [...new Set(S.map(s => s.y))].forEach(yy => { const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 6, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, W < 520 ? "'" + String(yy).slice(2) : yy)); });
-    svg.append(mk("polyline", {points: S.map(s => `${x(s.t)},${y(s.V)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round"}));
-    const l = S[S.length - 1];
-    svg.append(mk("circle", {cx: x(l.t), cy: y(l.V), r: 5, fill: css(hot ? "--bad" : "--good"), stroke: css("--panel"), "stroke-width": 2}));
-    svg.append(mk("text", {x: x(l.t) + 8, y: y(l.V) + 4, "font-size": 12, "font-weight": 700, fill: css("--ink")}, "adesso"));
-    const hl = mk("circle", {r: 4, fill: css("--accent"), opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; svg.append(hl);
-    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width, s = S.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, S[0]);
-      hl.setAttribute("cx", x(s.t)); hl.setAttribute("cy", y(s.V)); hl.setAttribute("opacity", 1);
-      tip.innerHTML = `${MESI[s.mo - 1]} ${s.y}${s.E ? " · esplosione" : ""}<br><b>${dec(s.V)}%</b> al giorno · ${it0(s.Vp)} pips`; tip.hidden = false;
-      tip.style.transform = "none"; const tw = tip.offsetWidth, px = x(s.t) * r.width / W; tip.style.left = Math.max(0, Math.min(r.width - tw, px - tw / 2)) + "px"; tip.style.top = "0px"; };
-    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
-    ch.innerHTML = ""; ch.append(svg, tip);
-  };
-  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+// ---------- quante volte la candela è caduta dentro la stima, più grande o più piccola
+function contaBar(P) {
+  const n = P.length, k = P.filter(p => p.in).length, su = P.filter(p => p.v > p.hi).length, giu = n - k - su, w = v => (100 * v / n).toFixed(1) + "%";
+  const d10 = v => Math.round(10 * v / n);
+  return `<div class="cbar" role="img" aria-label="Dentro ${k}, più grande ${su}, più piccola ${giu} su ${n}">
+      <i class="giu" style="width:${w(giu)}"></i><i class="in" style="width:${w(k)}"></i><i class="su" style="width:${w(su)}"></i></div>
+    <div class="cleg"><span><i class="giu"></i>più piccola <b>${d10(giu)} su 10</b></span><span><i class="in"></i>dentro <b>${d10(k)} su 10</b></span><span><i class="su"></i>più grande <b>${d10(su)} su 10</b></span></div>`;
 }
 // ---------- Retail / PPI
 const MONO = "JetBrains Mono,ui-monospace,monospace";
@@ -483,7 +457,7 @@ const toPips = p => p / 100 * PX * 10, r10 = v => Math.round(v / 10) * 10;
 const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct, tipo: e.tipo})).filter(e => e.pips > 0);
 const BT = bandTest(evs, 12), NXT = BT.next(PX), RC = BT.since(2023);
 const contro90 = toPips(qt(recent.map(e => e.contropct), .9));
-const NEXT = D.prossime[0], VA = D.vt ? D.vt.adesso : null, HOT = VA && (VA.W1 || VA.W2);
+const NEXT = D.prossime[0];
 
 // 1 · prossima release
 (() => {
@@ -494,7 +468,6 @@ const NEXT = D.prossime[0], VA = D.vt ? D.vt.adesso : null, HOT = VA && (VA.W1 |
     <div class="kpis">
       <div class="kpi"><b>${Math.round(10 * RC.k / RC.n)} su 10</b><span>la stima ci prende, dal 2023 (${RC.k} su ${RC.n})</span></div>
       <div class="kpi"><b>~${r10(contro90)} pips</b><span>il massimo che va contro, 9 volte su 10</span></div>
-      ${VA ? `<div class="kpi"><b class="${HOT ? "r" : "g"}">${HOT ? "Esplosione" : "Calma"}</b><span>volatilità adesso</span></div>` : ""}
     </div>`;
   if (!n) return;
   const tick = () => { const ms = new Date(n.t0) - Date.now(), c = document.getElementById("cd"); if (ms <= 0) { c.textContent = "uscita"; return; }
@@ -508,8 +481,10 @@ const NEXT = D.prossime[0], VA = D.vt ? D.vt.adesso : null, HOT = VA && (VA.W1 |
   const dd = t => new Date(t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", timeZone: "UTC"});
   let cur = L12[L12.length - 1];
   strip.innerHTML = L12.map((p, i) => `<button data-i="${i}" class="${p.in ? "w" : "l"}" aria-pressed="false">${dd(p.t)}<b>${it0(p.v)}</b></button>`).join("");
-  host.innerHTML = `<p class="one" id="sel"></p><div class="chart" id="prChart"></div>
-    <p class="small">Ci prende ${Math.round(10 * RC.k / RC.n)} volte su 10 dal 2023 · ● dentro la stima · ○ fuori · tocca un punto</p>`;
+  host.innerHTML = `<p class="one" id="sel"></p>${contaBar(P)}
+    <p class="one">La fascia è fatta per prenderne metà: quelle fuori non sono errori, un po' sopra e un po' sotto.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Dal 2019, ogni punto è una release · ● dentro · ○ fuori · tocca un punto</p>`;
   const sel = () => { strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(L12[+b.dataset.i] === cur)));
     const e = evs.find(x => x.t === cur.t);
     document.getElementById("sel").innerHTML = `${dd(cur.t)} · ${e ? e.tipo.replace("+", " + ") : ""}: <b>${it0(cur.v)} pips</b> · stima ${r10(cur.lo)}–${r10(cur.hi)} → <b class="${cur.in ? "g" : "r"}">${cur.in ? "dentro" : cur.v > cur.hi ? "più grande" : "più piccola"}</b>`; };
@@ -518,7 +493,6 @@ const NEXT = D.prossime[0], VA = D.vt ? D.vt.adesso : null, HOT = VA && (VA.W1 |
   bandChart(host.querySelector("#prChart"), P, "release");
 })();
 
-volMini(document.getElementById("vt"), D.vt);
 oggi(D.liv, document.getElementById("oggi"));
 simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
 document.getElementById("simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));

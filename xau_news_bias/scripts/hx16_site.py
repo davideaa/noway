@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from build_site import livelli, load, pips29, vol_tempo  # noqa: E402
+from build_site import livelli, load, pips29  # noqa: E402
 from xnb.config import get_settings  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     cal = pd.read_parquet(R.parent / "hx15" / "calendario_tutti.parquet")
     nxt = cal[cal.fam.isin(["RETAIL", "PPI"]) & (cal.t0 > pd.Timestamp.now(tz="UTC"))].head(3)
     out = {"ev": ev, "prossime": [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)],
-           "liv": livelli(), "pips29": pips29("RETAIL_PPI"), "vt": vol_tempo(["RP"])}
+           "liv": livelli(), "pips29": pips29("RETAIL_PPI")}
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

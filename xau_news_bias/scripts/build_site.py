@@ -27,15 +27,6 @@ def ampiezza():
             "prossima": {k: a["prossima"][k] for k in ("stima_pct", "lo_pct", "hi_pct")} if a["prossima"] else None}
 
 
-def vol_tempo(fams):
-    """H-X34: volatilità del mese dal 2011, candele delle news della famiglia, risultati della prova e situazione di adesso."""
-    v = load(HX16 / "hx34_volatilita_tempo.json")
-    return {"serie": [[x["m"], x["V"], x["Vp"], x["px"], int(x["esplosione"]), x["giorni"]] for x in v["serie_mese"]],
-            "news": [[x["d"], x["pips"], x["pct"], x.get("stima")] for x in v["news"] if x["f"] in fams],
-            "m1": v["M1_mese_dopo"], "m2": {k: v["M2_nfp_nel_tempo"][k] for k in ("2019-22", "2023-26")},
-            "m3": v["M3_esplosioni"], "inizi": v["M3_inizi_descrittivo"], "adesso": v["adesso"]}
-
-
 def stop60():
     """Risultato con stop fisso 60 pips per ogni NFP: H-X12 (fisso_60, S1) e, per le NFP dal vivo, hx12_live.py."""
     R11 = ROOT / "research_output" / "phase2" / "hx11"
@@ -59,7 +50,7 @@ if __name__ == "__main__":
     log = ROOT / "live" / "hx8_live.jsonl"
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
-            "liv": livelli(), "pips29": pips29("NFP"), "vt": vol_tempo(["NFP"]), "r60": stop60(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
+            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")
