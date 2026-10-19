@@ -101,6 +101,18 @@ def m3(b: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
     return out, c
 
 
+def adesso(b: pd.DataFrame) -> dict:
+    """Situazione all'ultimo giorno completo: i due segnali di M3 e la volatilità del mese in corso (per il sito, non per la prova)."""
+    r = b.r.reset_index(drop=True)
+    g = pd.read_csv(ROOT / "data" / "cache" / "cboe" / "GVZCLS.csv")
+    gvz = pd.Series(pd.to_numeric(g.GVZCLS, errors="coerce").values, index=pd.to_datetime(g.observation_date)).dropna()
+    past21, prev126 = float(r.iloc[-21:].mean()), float(r.iloc[-147:-21].mean())
+    gv = gvz[gvz.index <= b.index[-1]]
+    gmed = float(gv.iloc[-253:-1].median())
+    return {"giorno": str(b.index[-1].date()), "media_21g": round(past21, 3), "media_126g_prima": round(prev126, 3), "W1": bool(past21 >= 1.2 * prev126),
+            "gvz": float(gv.iat[-1]), "gvz_data": str(gv.index[-1].date()), "gvz_mediana_252": round(gmed, 2), "W2": bool(gv.iat[-1] >= 1.2 * gmed)}
+
+
 if __name__ == "__main__":
     R = get_settings().research_dir / "phase2" / "hx16"
     h1 = DukascopyProvider().h1_range("XAUUSD", date(2010, 11, 1), date(2026, 10, 16))
@@ -110,6 +122,11 @@ if __name__ == "__main__":
     o1 = m1(b, M)
     o2, n = m2()
     o3, c = m3(b)
+    # descrittivo, controllo fatto dopo i risultati: quante esplosioni partono da un mese calmo e quante il segnale le annunciava
+    c["inizio"] = c.E & ~c.E.shift(1, fill_value=False)
+    inizi = {k: {"inizi": int(s.inizio.sum()), "W1": int((s.inizio & s.W1).sum()), "W2": int((s.inizio & s.W2).sum()),
+                 "W2_senza_esplosione_in_corso": int((s.W2 & ~s.E.shift(1, fill_value=False)).sum())}
+             for k, (a, z) in PER2.items() for s in [c[c.y.between(a, z)]]}
     M1ok = bool(any(all(o1[k][p] is not None and o1[k][p] <= .15 for k in PER3) for p in ("P1_mese", "P2_mese")))
     d = pd.read_parquet(R / "hx23_dataset.parquet")
     news = d[d.fam.isin(["NFP", "RETAIL", "PPI"]) & (d.r1 > 0) & (d.y >= 2011)]
@@ -120,8 +137,8 @@ if __name__ == "__main__":
     punti = [{"d": t.strftime("%Y-%m-%d"), "f": "NFP" if f == "NFP" else "RP", "pct": round(float(v), 4), "pips": round(float(v * px / 10)),
               **({"stima": round(float(est[t.strftime("%Y-%m-%d")] * px / 10))} if f == "NFP" and t.strftime("%Y-%m-%d") in est else {})}
              for t, f, v, px in zip(news.t0, news.fam, news.r1, news.px)]
-    out = {"M1_mese_dopo": o1, "M1_prevedibile": M1ok, "M2_nfp_nel_tempo": o2, "M3_esplosioni": o3,
-           "esplosioni": c[c.E].mese.tolist(), "serie_mese": serie, "news": punti}
+    out = {"M1_mese_dopo": o1, "M1_prevedibile": M1ok, "M2_nfp_nel_tempo": o2, "M3_esplosioni": o3, "M3_inizi_descrittivo": inizi,
+           "esplosioni": c[c.E].mese.tolist(), "adesso": adesso(b), "serie_mese": serie, "news": punti}
     (R / "hx34_volatilita_tempo.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     print(json.dumps({k: out[k] for k in ("M1_mese_dopo", "M1_prevedibile", "M3_esplosioni")}, indent=1))
     print(json.dumps({k: v for k, v in o2.items()}, indent=1))

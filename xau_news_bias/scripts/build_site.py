@@ -32,6 +32,15 @@ def ampiezza():
             "prossima": {k: a["prossima"][k] for k in ("stima_pct", "lo_pct", "hi_pct")} if a["prossima"] else None}
 
 
+def vol_tempo(fams):
+    """H-X34: volatilità del mese dal 2011, candele delle news della famiglia, risultati della prova e situazione di adesso."""
+    v = load(HX16 / "hx34_volatilita_tempo.json")
+    return {"serie": [[x["m"], x["V"], x["Vp"], x["px"], int(x["esplosione"]), x["giorni"]] for x in v["serie_mese"]],
+            "news": [[x["d"], x["pips"], x["pct"], x.get("stima")] for x in v["news"] if x["f"] in fams],
+            "m1": v["M1_mese_dopo"], "m2": {k: v["M2_nfp_nel_tempo"][k] for k in ("2019-22", "2023-26")},
+            "m3": v["M3_esplosioni"], "inizi": v["M3_inizi_descrittivo"], "adesso": v["adesso"]}
+
+
 def pips29(group):
     p = load(HX16 / "hx29_pips.json")
     return {"copertura": p["copertura"], "modello": {k: p["modello"][k] for k in ("beta", "gamma")},
@@ -47,7 +56,7 @@ if __name__ == "__main__":
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
             "tp": {k: tp[k] for k in ("uscite", "per_anno", "ultime")},
-            "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP")}
+            "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP"), "vt": vol_tempo(["NFP"])}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")

@@ -134,6 +134,20 @@
   "W1_funziona": true,
   "W2_funziona": true
  },
+ "M3_inizi_descrittivo": {
+  "2011-18": {
+   "inizi": 4,
+   "W1": 0,
+   "W2": 1,
+   "W2_senza_esplosione_in_corso": 9
+  },
+  "2019-26": {
+   "inizi": 7,
+   "W1": 1,
+   "W2": 3,
+   "W2_senza_esplosione_in_corso": 14
+  }
+ },
  "esplosioni": [
   "2011-07",
   "2011-08",
@@ -155,6 +169,16 @@
   "2026-01",
   "2026-02"
  ],
+ "adesso": {
+  "giorno": "2026-10-15",
+  "media_21g": 1.874,
+  "media_126g_prima": 2.443,
+  "W1": false,
+  "gvz": 22.78,
+  "gvz_data": "2026-10-14",
+  "gvz_mediana_252": 26.05,
+  "W2": false
+ },
  "serie_mese": [
   {
    "m": "2010-11",
