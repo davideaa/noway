@@ -15,11 +15,6 @@ def livelli():
     return {"giorno": {"scelto": lv["scelto"], "metodi": {lv["scelto"]: {"2023-26": lv["metodi"][lv["scelto"]]["2023-26"]}}, "oggi": lv["oggi"]}}
 
 
-def volatilita():
-    d = load(HX16 / "hx21_range.json")["D"]
-    return {"scelto": d["scelto"], "previsori": {d["scelto"]: d["previsori"][d["scelto"]]}}
-
-
 def ampiezza():
     """H-X32: il metodo vincente per stimare la candela NFP, NFP per NFP, e la stima della prossima in % del prezzo."""
     a = load(HX16 / "hx32_ampiezza_nfp.json")
@@ -41,6 +36,16 @@ def vol_tempo(fams):
             "m3": v["M3_esplosioni"], "inizi": v["M3_inizi_descrittivo"], "adesso": v["adesso"]}
 
 
+def stop60():
+    """Risultato con stop fisso 60 pips per ogni NFP: H-X12 (fisso_60, S1) e, per le NFP dal vivo, hx12_live.py."""
+    R11 = ROOT / "research_output" / "phase2" / "hx11"
+    out = {r["id"]: r["res"]["fisso_60"]["S1"] for r in load(R11 / "hx12_atr_stop.json")}
+    live = R11 / "hx12_live_60.json"
+    if live.exists():
+        out |= {k: v["S1"] for k, v in load(live).items()}
+    return out
+
+
 def pips29(group):
     p = load(HX16 / "hx29_pips.json")
     return {"copertura": p["copertura"], "modello": {k: p["modello"][k] for k in ("beta", "gamma")},
@@ -52,11 +57,9 @@ if __name__ == "__main__":
     ev = [{k: e[k] for k in ("id", "f", "d", "y", "live", "mv", "stop", "ref", "rule")} | {"sc": {"S1": e["sc"]["S1"]}}
           for e in site["ev"] if e["f"] == "NFP"]
     log = ROOT / "live" / "hx8_live.jsonl"
-    tp = load(HX16 / "hx19_tp.json")["NFP"]
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
-            "tp": {k: tp[k] for k in ("uscite", "per_anno", "ultime")},
-            "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP"), "vt": vol_tempo(["NFP"])}
+            "liv": livelli(), "pips29": pips29("NFP"), "vt": vol_tempo(["NFP"]), "r60": stop60()}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")

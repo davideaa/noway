@@ -35,22 +35,6 @@ header,section{display:grid;gap:12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* la strategia, in ordine di tempo */
-.steps{list-style:none;margin:0;padding:0;display:grid}
-.steps li{position:relative;display:flex;gap:12px;padding-bottom:16px}
-.steps li:last-child{padding-bottom:0}
-.steps li::after{content:"";position:absolute;left:15px;top:34px;bottom:2px;width:2px;background:var(--line)}
-.steps li:last-child::after{display:none}
-.steps .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--panel);font:700 15px/32px var(--f-num);text-align:center}
-.steps .c{display:grid;gap:3px;min-width:0;padding-top:4px}
-.steps .tm{font:600 12px/1.2 var(--f-num);letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
-.steps .c>b{font-size:17px;line-height:1.3}
-.steps .k{justify-self:start;font:600 14px/1.4 var(--f-num);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
-.steps p{font-size:14.5px;color:var(--ink2)}
-.steps a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
-.steps a:hover{text-decoration:underline}
-.sec-tm{font:600 12px/1 var(--f-num);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
-
 /* il trade, in ordine di tempo */
 .tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 @media (max-width:640px){.tl{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -108,6 +92,38 @@ footer{color:var(--mute);font-size:12.5px;max-width:72ch}
 .yt td{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 .yt .bar{display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--grid);margin-right:8px;vertical-align:middle;overflow:hidden}
 .yt .bar i{display:block;height:100%;background:var(--accent)}
+/* minimal: un numero grande, una riga, un grafico */
+.wrap{gap:44px}
+.hero{display:grid;gap:14px}
+.hero .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero .when{font:600 14px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.hero .cd{font:600 14px var(--f-num);color:var(--mute)}
+.hero .big{font:800 clamp(64px,17vw,112px)/.9 var(--f-disp);letter-spacing:-.02em}
+.hero .why{color:var(--ink2);font-size:15.5px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:3px;align-content:start}
+.kpi b{font:700 clamp(24px,5.4vw,32px)/1.05 var(--f-num);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--mute);line-height:1.3}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}.kpi{grid-template-columns:auto 1fr;align-items:center;gap:12px}.kpi b{min-width:96px}}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:600 13px var(--f-num);color:var(--ink2)}
+.flow span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+.flow i{color:var(--mute);font-style:normal}
+.sec{display:grid;gap:12px}
+.sec .lead1{font:700 clamp(22px,4.6vw,28px)/1.15 var(--f-disp)}
+.one{font-size:15px;color:var(--ink2)}
+.one b{color:var(--ink)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px}
+.strip button{flex:none;min-width:60px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:6px 7px;font:600 11.5px var(--f-num);color:var(--mute);cursor:pointer;display:grid;gap:1px;text-align:center}
+.strip button b{font-size:13.5px;color:var(--ink)}
+.strip button.w b{color:var(--good)} .strip button.l b{color:var(--bad)}
+.strip button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.state{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.state b.ok,.state b.hot{font:800 30px/1 var(--f-disp)}
+.state .ok{color:var(--good)} .state .hot{color:var(--bad)}
+.state span{font-size:14px;color:var(--ink2)}
+details.mt5 summary,details.more summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14.5px}
+details.more{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+details.more[open]{display:grid;gap:12px}
 /* la volatilità nel tempo */
 .vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)}
 .vleg i{display:inline-block;width:16px;height:2.5px;border-radius:2px;vertical-align:middle;margin-right:6px}
@@ -132,50 +148,26 @@ footer{color:var(--mute);font-size:12.5px;max-width:72ch}
 .cap{font:600 12.5px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 </style>
 <div class="wrap">
-<header>
-  <div class="eyebrow">XAUUSD · Retail Sales e PPI · ora italiana</div>
-  <h1>Retail e PPI: quanto si muove l'oro</h1>
-  <p class="lead">Quando escono, quanto si muove la prima candela e fin dove può arrivare l'oro oggi: lo spazio per mettere stop e take profit. Qui sotto, nell'ordine in cui lo usi.</p>
-</header>
+<section class="hero" id="hero" aria-label="Prossima release"></section>
 
-<section aria-labelledby="h-plan">
-  <h2 id="h-plan">In 4 passi</h2>
-  <div class="panel" id="steps"></div>
-</section>
-
-<section aria-labelledby="h-next" id="s1">
-  <span class="sec-tm">1 · Prima</span>
-  <h2 id="h-next">Prossima release</h2>
-  <div class="panel"><div class="when" id="when"></div></div>
-</section>
-
-<section aria-labelledby="h-size" id="s2">
-  <span class="sec-tm">2 · La mattina</span>
-  <h2 id="h-size">Quanto si muoverà la candela</h2>
-  <div class="panel"><span class="cap">Candela delle 14:30 al prezzo di oggi, dal minimo al massimo (wick compresa)</span><svg class="gauge" id="gauge" viewBox="0 0 640 110" role="img" aria-label="Fascia di ampiezza attesa della candela della news"></svg><p class="small" id="sample"></p></div>
+<section class="sec" aria-labelledby="h-ex">
+  <h2 id="h-ex">Le ultime release</h2>
+  <p class="one">Quanto si sono mosse, contro la stima fatta <b>prima</b>. Tocca una release.</p>
+  <div class="strip" id="strip" role="group" aria-label="Scegli una release"></div>
   <div class="panel" id="prec"></div>
-  <h3 class="h3">La volatilità nel tempo: il livello si prevede, la singola release no</h3>
+</section>
+
+<section class="sec" aria-labelledby="h-vol">
+  <h2 id="h-vol">La volatilità adesso</h2>
   <div class="panel" id="vt"></div>
 </section>
 
-<section aria-labelledby="h-day" id="s3">
-  <span class="sec-tm">3 · La mattina e dopo la news</span>
-  <h2 id="h-day">Fin dove può arrivare l'oro oggi</h2>
+<section class="sec" aria-labelledby="h-day">
+  <h2 id="h-day">Oggi: fin dove arriva l'oro</h2>
   <div class="panel" id="oggi"></div>
 </section>
 
-<section aria-labelledby="h-sl" id="s4">
-  <span class="sec-tm">4 · Alle 14:30</span>
-  <h2 id="h-sl">Stop e take profit</h2>
-  <div class="panel verdict" id="verdict"></div>
-</section>
-
-<section aria-labelledby="h-why" id="s5">
-  <span class="sec-tm">Per capire</span>
-  <h2 id="h-why">Perché Retail e PPI fanno più pips di prima</h2>
-  <p class="lead">Muovi i cursori o premi un anno: vedi quanto pesa ogni cosa, prezzo, volatilità del giorno, sorpresa del dato e reazione del mercato.</p>
-  <div class="panel" id="sim"></div>
-</section>
+<details class="more" id="simbox"><summary>Per capire: perché Retail e PPI fanno più pips di prima</summary><div id="sim"></div></details>
 
 <footer id="foot"></footer>
 </div>
@@ -195,12 +187,6 @@ const pipsTxt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + it0(Math.abs(d) * 10
 const median = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
 const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
 
-// la strategia in ordine di tempo: ogni passo ha quando, cosa, il numero che conta e dove trovare il resto
-function passi(el, steps) {
-  if (!el) return;
-  el.innerHTML = `<ol class="steps">` + steps.filter(Boolean).map((x, i) => `<li><span class="n">${i + 1}</span><div class="c">
-    <span class="tm">${x.tm}</span><b>${x.t}</b>${x.k ? `<span class="k">${x.k}</span>` : ""}${x.d ? `<p>${x.d}${x.a ? ` <a href="#${x.a}">dettagli ↓</a>` : ""}</p>` : ""}</div></li>`).join("") + `</ol>`;
-}
 
 // ---------- oggi: candele con i livelli sopra (H-X28, metodo scelto)
 function oggi(LV, el) {
@@ -223,30 +209,24 @@ function oggi(LV, el) {
     return {su90: H + s.qu * sc, giu90: L - s.qv * sc, suT: H + mu * sc, giuT: L - mv * sc, pu: s.pu, pv: s.pv};
   }
   el.innerHTML = `
-    <div class="fields">
+    <div class="chips" id="lvChips"></div>
+    <div class="chart" id="lvChart"></div>
+    <p class="small" id="lvNote"></p>
+    <details class="mt5"><summary>Usa i prezzi del tuo MT5</summary><div class="fields">
       <label>Prezzo adesso<input id="lvP" type="number" step="0.01" inputmode="decimal" value="${O.prezzo.toFixed(2)}"></label>
       <label>Massimo di oggi<input id="lvH" type="number" step="0.01" inputmode="decimal" value="${O.massimo.toFixed(2)}"></label>
       <label>Minimo di oggi<input id="lvL" type="number" step="0.01" inputmode="decimal" value="${O.minimo.toFixed(2)}"></label>
       <label>Ora (Italia)<select id="lvK">${Array.from({length: 24}, (_, k) => `<option value="${k}"${k === O.k ? " selected" : ""}>dopo le ${hhmm(k)}</option>`).join("")}</select></label>
-    </div>
-    <div class="chips" id="lvChips"></div>
-    <div class="chart" id="lvChart"></div>
-    <p class="small" id="lvNote"></p>`;
+    </div></details>`;
   const $ = id => el.querySelector("#" + id);
   const draw = () => {
     const P = +$("lvP").value, H = +$("lvH").value, L = +$("lvL").value, k = +$("lvK").value;
     if (![P, H, L].every(x => isFinite(x) && x > 0) || H < L || P > H + 1e-9 || P < L - 1e-9) {
       $("lvChips").innerHTML = `<span class="chip">Controlla i numeri: il prezzo deve stare fra il minimo e il massimo di oggi.</span>`; return; }
     const v = levels(k, H, L, P);
-    $("lvChips").innerHTML = `<span class="chip">↑ Supera il massimo di oggi: <b>${pct(v.pu)}</b></span><span class="chip">↓ Scende sotto il minimo di oggi: <b>${pct(v.pv)}</b></span>`;
+    $("lvChips").innerHTML = `<span class="chip">↑ nuovo massimo oggi <b>${pct(v.pu)}</b></span><span class="chip">↓ nuovo minimo oggi <b>${pct(v.pv)}</b></span>`;
     chart($("lvChart"), {P, H, L}, v);
-    $("lvNote").innerHTML = `<b>Come leggerlo.</b> Il numero colorato accanto a ogni livello è la probabilità che il prezzo ci arrivi entro fine giornata.
-      <br>· <b>Massimo e minimo di oggi</b> (linee grigie): probabilità di superarli ancora.
-      <br>· <b>Di solito</b> (puntinate): se li supera, metà delle volte si ferma qui.
-      <br>· <b>9 su 10</b> (tratteggiate, fascia colorata): solo 1 volta su 10 il prezzo va oltre.
-      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Servono per stop e take profit, non per decidere dove entrare: non dicono la direzione.
-      <br>🟢 Provato dal 2016 giorno per giorno: nel 2023–26 il "9 su 10" ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100 sopra e ${Math.round(Q.cop90_giu * 100)} sotto.
-      <br>Si aggiorna da solo ogni ora, dalle 08 alle 22 dal lunedì al venerdì. Ultima candela: ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {weekday: "long", hour: "2-digit", minute: "2-digit"})}. Puoi mettere i prezzi del tuo MT5 qui sopra: i livelli si spostano subito.`;
+    $("lvNote").innerHTML = `Oltre il "9 su 10" l'oro va solo 1 giorno su 10 (nel 2023–26 ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100). Usalo per take profit e stop. Aggiornato alle ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {hour: "2-digit", minute: "2-digit"})}.`;
   };
   function chart(host, s, v) {
     // candele una dopo l'altra come in MT5/TradingView: niente buchi per la notte o il weekend
@@ -279,13 +259,13 @@ function oggi(LV, el) {
       svg.append(mk("rect", {x: cx - bw / 2, y: y(Math.max(c.o, c.c)), width: bw, height: Math.max(1, Math.abs(y(c.o) - y(c.c))), fill: up ? css("--panel") : col, stroke: col, "stroke-width": 1.2}));
     });
     const rows = [
-      {p: v.su90, t: "9 su 10 non oltre", pr: .10, d: "6 4", w: 1.6, c: "--ink", from: iNow},
+      {p: v.su90, t: "9 su 10 non oltre", pr: Math.min(.10, v.pu), d: "6 4", w: 1.6, c: "--ink", from: iNow},
       {p: v.suT, t: "di solito, se sale", pr: v.pu * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
       {p: s.H, t: "massimo di oggi", pr: v.pu, d: "", w: 1.2, c: "--mute", from: iOggi},
       {p: s.P, t: "prezzo adesso", d: "", w: 2.4, c: "--accent", from: 0, bold: true},
       {p: s.L, t: "minimo di oggi", pr: v.pv, d: "", w: 1.2, c: "--mute", from: iOggi},
       {p: v.giuT, t: "di solito, se scende", pr: v.pv * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
-      {p: v.giu90, t: "9 su 10 non sotto", pr: .10, d: "6 4", w: 1.6, c: "--ink", from: iNow}];
+      {p: v.giu90, t: "9 su 10 non sotto", pr: Math.min(.10, v.pv), d: "6 4", w: 1.6, c: "--ink", from: iNow}];
     rows.sort((a, b) => b.p - a.p);
     const ys = rows.map(r => y(r.p)), gap = narrow ? 27 : 29, lab = ys.slice();
     for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
@@ -455,81 +435,38 @@ function bandChart(ch, P, name) {
   draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
 }
 
-// ---------- la volatilità nel tempo (H-X34): sopra il range del giorno medio del mese, sotto la candela di ogni news; stesso asse del tempo
-function volTempo(host, VT, name, conStima) {
+
+// ---------- volatilità adesso (H-X34): una linea, le esplosioni in rosso, il punto di adesso
+function volMini(host, VT) {
   if (!host || !VT) return;
-  const MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-  const S = VT.serie.map(([m, V, Vp, px, E, g]) => ({m, y: +m.slice(0, 4), mo: +m.slice(5, 7), t0: Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1, 1), t1: Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 1), V, Vp, px, E: !!E, g}));
+  const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+  const S = VT.serie.map(([m, V, Vp, px, E, g]) => ({m, y: +m.slice(0, 4), mo: +m.slice(5, 7), t0: Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1, 1), t1: Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 1), V, Vp, E: !!E, g})).filter(s => s.y >= 2019);
   S.forEach(s => s.t = (s.t0 + s.t1) / 2);
-  const last = S[S.length - 1], parz = last.g < 15;
-  const N = VT.news.map(([d, pips, pct, st]) => ({d, t: Date.parse(d + "T12:00:00Z"), pips, pct, st, stp: st != null ? st * pct / pips : null}));
-  N.forEach((n, i) => { if (i < 5) return; const w = N.slice(i - 5, i + 1); n.m6 = median(w.map(x => x.pips)); n.m6p = median(w.map(x => x.pct));
-    const ws = w.filter(x => x.st != null); if (ws.length === 6) { n.s6 = median(ws.map(x => x.st)); n.s6p = median(ws.map(x => x.stp)); } });
-  const A = VT.adesso, on = A.W1 || A.W2, P2 = ["2011-18", "2019-22", "2023-26"].map(k => VT.m1[k].P2_mese), pc = e => Math.round((Math.exp(e) - 1) * 100);
-  const M3 = VT.m3, con = ["2011-18", "2019-26"].map(k => Math.max(M3[k].W1.esplosioni_col_segnale, M3[k].W2.esplosioni_col_segnale)),
-        senza = ["2011-18", "2019-26"].map(k => Math.min(M3[k].W1.esplosioni_senza, M3[k].W2.esplosioni_senza));
-  const I = VT.inizi, inizi = I["2011-18"].inizi + I["2019-26"].inizi, presiG = I["2011-18"].W2 + I["2019-26"].W2;
-  const m2 = VT.m2, sing = [m2["2019-22"].singola, m2["2023-26"].singola], sei = [m2["2019-22"].mediana_di_6, m2["2023-26"].mediana_di_6];
-  host.innerHTML = `
-    <div class="chips"><span class="chip big">${on ? "⚠️ Segnale di esplosione <b>acceso</b>" : "Segnale di esplosione <b>spento</b>"}</span>
-      <span class="chip">ultimi 21 giorni <b>${dec(A.media_21g)}%</b> al giorno · 6 mesi prima <b>${dec(A.media_126g_prima)}%</b></span>
-      <span class="chip">GVZ <b>${dec(A.gvz, 1)}</b> · mediana dell'anno <b>${dec(A.gvz_mediana_252, 1)}</b></span></div>
-    <div class="presets" role="group" aria-label="Unità"><button data-u="pips" aria-pressed="true">pips</button><button data-u="pct" aria-pressed="false">% del prezzo</button>
-      <span style="width:10px"></span><button data-f="2011" aria-pressed="true">dal 2011</button><button data-f="2019" aria-pressed="false">dal 2019</button><button data-f="2024" aria-pressed="false">ultimi 3 anni</button></div>
-    <div class="chart" id="vtChart"></div>
-    <div class="vleg"><span><i style="background:var(--accent)"></i>volatilità del giorno, media del mese</span><span><i style="background:var(--mute)"></i>la stima fatta il mese prima</span>
-      <span><i class="box"></i>mese di esplosione</span><span><i class="dot"></i>candela di ogni ${name}</span><span><i style="background:var(--ink)"></i>mediana delle ultime 6</span>${conStima ? `<span><i style="background:var(--long)"></i>stima fatta prima (mediana di 6)</span>` : ""}</div>
-    <ol class="facts">
-      <li><b>Il mese dopo si stima con circa ±${Math.min(...P2.map(pc))}–${Math.max(...P2.map(pc))}%.</b> Il singolo giorno ±31%, la singola news ±33% o più: nel tempo la stima è molto più precisa.</li>
-      ${conStima ? `<li><b>Sulla media di 6 NFP l'errore si dimezza</b>: ±${pc(Math.min(...sei))}–${pc(Math.max(...sei))}% contro ±${pc(Math.min(...sing))}–${pc(Math.max(...sing))}% della singola NFP. Il 2026 è l'eccezione: la stima è rimasta indietro rispetto all'esplosione.</li>` : ""}
-      <li><b>Un'esplosione già iniziata continua.</b> Con la volatilità già salita o il GVZ alto, il mese dopo esplode circa ${Math.round(100 * Math.min(...con))}–${Math.round(100 * Math.max(...con))} volte su 100; senza segnale ${Math.round(100 * Math.min(...senza))}–${Math.round(100 * Math.max(...senza))} su 100.</li>
-      <li><b>L'inizio di un'esplosione invece quasi non si vede</b>: delle ${inizi} partite da un periodo calmo, il GVZ ne ha annunciate ${presiG}, e si è acceso anche in molti mesi rimasti tranquilli.</li></ol>
-    <p class="small">Esplosione = la volatilità media del mese dopo è almeno 1,5 volte quella dei 6 mesi prima. Segnale = gli ultimi 21 giorni almeno 1,2 volte i 6 mesi prima, oppure il GVZ (la volatilità che il mercato si aspetta per i prossimi 30 giorni) almeno 1,2 volte la sua mediana dell'anno. ${parz ? `L'ultimo mese è in corso (${last.g} giorni).` : ""} Studio H-X34, regole scritte prima.</p>`;
-  let U = "pips", F = 2011;
-  const btn = host.querySelectorAll(".presets button");
-  btn.forEach(b => b.onclick = () => { if (b.dataset.u) U = b.dataset.u; if (b.dataset.f) F = +b.dataset.f;
-    btn.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.u ? x.dataset.u === U : +x.dataset.f === F))); draw(); });
-  const nice = (hi, n) => { const raw = hi / n, p = Math.pow(10, Math.floor(Math.log10(raw))), k = raw / p; return (k < 1.5 ? 1 : k < 3 ? 2 : k < 7 ? 5 : 10) * p; };
-  const ch = host.querySelector("#vtChart");
+  const A = VT.adesso, hot = A.W1 || A.W2;
+  host.innerHTML = `<div class="state"><b class="${hot ? "hot" : "ok"}">${hot ? "In esplosione" : "Calma"}</b>
+      <span>ultimi 21 giorni <b>${dec(A.media_21g)}%</b> al giorno · 6 mesi prima <b>${dec(A.media_126g_prima)}%</b></span></div>
+    <div class="chart" id="vmChart"></div>
+    <p class="one">Quando esplode, <b>continua</b> anche il mese dopo (1 volta su 3). <b>L'inizio non si vede</b> prima.</p>`;
+  const ch = host.querySelector("#vmChart");
   const draw = () => {
-    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), mob = W < 560, L = mob ? 40 : 48, R = 10, T1 = 22, H1 = mob ? 170 : 200, G = 34, H2 = mob ? 130 : 150, B = 24, H = T1 + H1 + G + H2 + B;
-    const s = S.filter(x => x.y >= F), n = N.filter(x => +x.d.slice(0, 4) >= F), ta = s[0].t0, tb = s[s.length - 1].t1;
-    const x = t => L + (t - ta) / (tb - ta) * (W - L - R);
-    const v = o => U === "pips" ? o.Vp : o.V, nv = o => U === "pips" ? o.pips : o.pct, m6 = o => U === "pips" ? o.m6 : o.m6p, s6 = o => U === "pips" ? o.s6 : o.s6p;
-    const v1 = Math.max(...s.map(v)) * 1.08, st1 = nice(v1, 4), y1 = val => T1 + H1 - val / v1 * H1;
-    const nvals = n.map(nv), v2 = Math.max(...nvals) * 1.06, st2 = nice(v2, 3), top2 = T1 + H1 + G, y2 = val => top2 + H2 - val / v2 * H2;
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Volatilità dell'oro mese per mese e candela di ogni ${name}`});
-    s.filter(o => o.E).forEach(o => { for (const [a, h] of [[T1, H1], [top2, H2]]) svg.append(mk("rect", {x: x(o.t0), y: a, width: Math.max(1.5, x(o.t1) - x(o.t0)), height: h, fill: css("--bad"), opacity: .13})); });
-    for (const [st, vm, yy, a, h] of [[st1, v1, y1, T1, H1], [st2, v2, y2, top2, H2]]) {
-      for (let val = 0; val <= vm; val += st) { svg.append(mk("line", {x1: L, x2: W - R, y1: yy(val), y2: yy(val), stroke: css("--grid")}));
-        svg.append(mk("text", {x: L - 5, y: yy(val) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, U === "pips" ? it0(val) : dec(val, st < .1 ? 2 : 1) + "%")); }
-    }
-    svg.append(mk("text", {x: L, y: T1 - 8, "font-size": 12, "font-weight": 600, fill: css("--ink2")}, mob ? `Volatilità del giorno (${U === "pips" ? "pips" : "%"})` : `Volatilità del giorno, media del mese (${U === "pips" ? "pips" : "% del prezzo"})`));
-    svg.append(mk("text", {x: L, y: top2 - 8, "font-size": 12, "font-weight": 600, fill: css("--ink2")}, mob ? `Candela del primo minuto, ${name}` : `Candela del primo minuto, ogni ${name}`));
-    const yrs = [...new Set(s.map(o => o.y))], every = yrs.length > 10 ? (mob ? 3 : 2) : 1;
-    yrs.forEach((yy, i) => { const xx = x(Date.UTC(yy, 0, 1)); if (xx >= L) svg.append(mk("line", {x1: xx, x2: xx, y1: T1, y2: H - B, stroke: css("--grid")}));
-      if (i % every === 0) { const xm = x(Date.UTC(yy, 6, 1)); if (xm > L + 8 && xm < W - R - 8) svg.append(mk("text", {x: xm, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, mob && yrs.length > 6 ? "'" + String(yy).slice(2) : yy)); } });
-    const full = parz ? s.slice(0, -1) : s;
-    svg.append(mk("polyline", {points: full.slice(1).map((o, i) => `${x(o.t)},${y1(v(full[i]))}`).join(" "), fill: "none", stroke: css("--mute"), "stroke-width": 1.5, opacity: .75}));
-    svg.append(mk("polyline", {points: full.map(o => `${x(o.t)},${y1(v(o))}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round"}));
-    if (parz && full.length) svg.append(mk("line", {x1: x(full[full.length - 1].t), y1: y1(v(full[full.length - 1])), x2: x(last.t), y2: y1(v(last)), stroke: css("--accent"), "stroke-width": 2, "stroke-dasharray": "3 3"}));
-    n.forEach(o => svg.append(mk("circle", {cx: x(o.t), cy: y2(nv(o)), r: 2.6, fill: css("--ink2"), opacity: .5})));
-    const p6 = n.filter(o => m6(o) != null);
-    svg.append(mk("polyline", {points: p6.map(o => `${x(o.t)},${y2(m6(o))}`).join(" "), fill: "none", stroke: css("--ink"), "stroke-width": 2}));
-    if (conStima) { const q6 = n.filter(o => s6(o) != null); if (q6.length) svg.append(mk("polyline", {points: q6.map(o => `${x(o.t)},${y2(s6(o))}`).join(" "), fill: "none", stroke: css("--long"), "stroke-width": 1.8})); }
-    const cross = mk("line", {y1: T1, y2: H - B, stroke: css("--ink2"), "stroke-width": 1, opacity: 0}), dotA = mk("circle", {r: 4.5, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 2, opacity: 0});
-    svg.append(cross, dotA);
-    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
-    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
-      const o = s.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, s[0]), i = S.indexOf(o), prev = S[i - 1];
-      cross.setAttribute("x1", x(o.t)); cross.setAttribute("x2", x(o.t)); cross.setAttribute("opacity", .5); dotA.setAttribute("cx", x(o.t)); dotA.setAttribute("cy", y1(v(o))); dotA.setAttribute("opacity", 1);
-      const nn = N.filter(q => q.d.slice(0, 7) === o.m);
-      tip.innerHTML = `<b>${MESI[o.mo - 1]} ${o.y}</b>${o.g < 15 ? " (in corso)" : ""}${o.E ? " · esplosione" : ""}<br>volatilità ${it0(o.Vp)} pips al giorno (${dec(o.V)}%)${prev ? `<br>stima del mese prima ${it0(prev.Vp)} pips` : ""}<br>prezzo ${it0(o.px)} $` +
-        nn.map(q => `<br>${name} ${q.d.slice(8, 10)}/${q.d.slice(5, 7)}: <b>${it0(q.pips)} pips</b>${q.st != null ? ` (stima ${it0(q.st)})` : ""}`).join("");
-      tip.hidden = false; tip.style.transform = "none"; const tw = tip.offsetWidth, px = x(o.t) * r.width / W;
-      tip.style.left = Math.max(0, Math.min(r.width - tw, px + (px > r.width / 2 ? -tw - 12 : 12))) + "px"; tip.style.top = (T1 + 10) * r.height / H + "px"; };
-    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
-    svg.addEventListener("pointerleave", () => { tip.hidden = true; cross.setAttribute("opacity", 0); dotA.setAttribute("opacity", 0); });
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 170 : 200, L = 34, R = 56, T = 10, B = 22;
+    const ta = S[0].t0, tb = S[S.length - 1].t1, x = t => L + (t - ta) / (tb - ta) * (W - L - R);
+    const vm = Math.max(...S.map(s => s.V)) * 1.1, y = v => T + (H - T - B) * (1 - v / vm);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Volatilità del giorno, media del mese, dal 2019"});
+    S.filter(s => s.E).forEach(s => svg.append(mk("rect", {x: x(s.t0), y: T, width: Math.max(2, x(s.t1) - x(s.t0)), height: H - T - B, fill: css("--bad"), opacity: .16})));
+    for (const v of [1, 2, 3, 4]) if (v < vm) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")}));
+      svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v + "%")); }
+    [...new Set(S.map(s => s.y))].forEach(yy => { const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 6, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, W < 520 ? "'" + String(yy).slice(2) : yy)); });
+    svg.append(mk("polyline", {points: S.map(s => `${x(s.t)},${y(s.V)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round"}));
+    const l = S[S.length - 1];
+    svg.append(mk("circle", {cx: x(l.t), cy: y(l.V), r: 5, fill: css(hot ? "--bad" : "--good"), stroke: css("--panel"), "stroke-width": 2}));
+    svg.append(mk("text", {x: x(l.t) + 8, y: y(l.V) + 4, "font-size": 12, "font-weight": 700, fill: css("--ink")}, "adesso"));
+    const hl = mk("circle", {r: 4, fill: css("--accent"), opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; svg.append(hl);
+    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width, s = S.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, S[0]);
+      hl.setAttribute("cx", x(s.t)); hl.setAttribute("cy", y(s.V)); hl.setAttribute("opacity", 1);
+      tip.innerHTML = `${MESI[s.mo - 1]} ${s.y}${s.E ? " · esplosione" : ""}<br><b>${dec(s.V)}%</b> al giorno · ${it0(s.Vp)} pips`; tip.hidden = false;
+      tip.style.transform = "none"; const tw = tip.offsetWidth, px = x(s.t) * r.width / W; tip.style.left = Math.max(0, Math.min(r.width - tw, px - tw / 2)) + "px"; tip.style.top = "0px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
     ch.innerHTML = ""; ch.append(svg, tip);
   };
   draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
@@ -542,63 +479,48 @@ const utc = d => d.replace(" ", "T") + ":00Z";
 const ev = D.ev.map(e => { const k = e.m1c5 || [0, 0, 0, 0], su = Math.max(0, k[1]), giu = Math.max(0, -k[2]);
   return {...e, iso: utc(e.d), pct: e.m1_bid * 0.1 / e.prezzo * 100, contropct: (e.m1_mov > 0 ? giu : su) * 0.1 / e.prezzo * 100}; });
 const LAST = ev[ev.length - 1], LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PX = LV ? LV.oggi.prezzo : LAST.prezzo, recent = ev.slice(-12);
-const toPips = p => p / 100 * PX * 10;
-const qi = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
-const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct})).filter(e => e.pips > 0);
+const toPips = p => p / 100 * PX * 10, r10 = v => Math.round(v / 10) * 10;
+const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct, tipo: e.tipo})).filter(e => e.pips > 0);
 const BT = bandTest(evs, 12), NXT = BT.next(PX), RC = BT.since(2023);
-const band = {p25: NXT.lo, p50: NXT.md, p75: NXT.hi, p90: toPips(qi(evs.slice(-12).map(e => e.pct), .9))};
-const contro80 = toPips(qt(recent.map(e => e.contropct), .8)), contro90 = toPips(qt(recent.map(e => e.contropct), .9));
-const NEXT = D.prossime[0];
-
-// la strategia in ordine
-(() => {
-  const L = LV ? LV.oggi.livelli : null, ora = LV ? new Date(LV.oggi.ultima_candela_utc).getTime() + 36e5 : null;
-  passi(document.getElementById("steps"), [
-    {tm: "Prima", t: NEXT ? `Prossima: ${rome(NEXT.t0, {weekday: "long", day: "numeric", month: "long"})} · ${rome(NEXT.t0, {hour: "2-digit", minute: "2-digit"})}` : "Nessuna data in calendario", k: NEXT ? NEXT.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).join(" · ") : "", a: "s1", d: "Escono alle 14:30 italiane."},
-    {tm: "La mattina", t: `La candela farà circa ${it0(band.p50)} pips`, k: `metà delle volte fra ${it0(band.p25)} e ${it0(band.p75)} pips`, d: `Dal minimo al massimo del primo minuto. Dal 2023 la fascia ci ha preso ${RC.k} volte su ${RC.n}.${D.vt ? (D.vt.adesso.W1 || D.vt.adesso.W2 ? " Segnale di esplosione della volatilità acceso: aspettati di più." : " Nessun segnale di esplosione della volatilità.") : ""}`, a: "s2"},
-    L && {tm: "La mattina e dopo la news", t: "Fin dove può arrivare l'oro oggi", k: `su fino a ${it2(L.su90)} · giù fino a ${it2(L.giu90)} (9 su 10)`, d: `Mai un take profit oltre questi prezzi. Aggiornato alle ${new Date(ora).toLocaleTimeString("it-IT", {timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit"})}.`, a: "s3"},
-    {tm: "14:30", t: "Stop e take profit", k: `stop oltre ${it0(contro90)} pips · take profit entro il 9 su 10`, d: "Lo spazio che la candela concede contro, e il tetto della giornata.", a: "s4"}]);
-})();
+const contro90 = toPips(qt(recent.map(e => e.contropct), .9));
+const NEXT = D.prossime[0], VA = D.vt ? D.vt.adesso : null, HOT = VA && (VA.W1 || VA.W2);
 
 // 1 · prossima release
 (() => {
-  const n = NEXT, box = document.getElementById("when");
-  if (!n) { box.innerHTML = "<b>Nessuna data in calendario</b>"; return; }
-  const names = n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).map(t => `<span>${t}</span>`).join("");
-  box.innerHTML = `<span class="small">${rome(n.t0, {weekday: "long"})}</span><b>${rome(n.t0, {day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}</b><div class="cd" id="cd"></div><div class="titles">${names}</div>`;
-  const tick = () => { const ms = new Date(n.t0) - Date.now(); if (ms <= 0) { document.getElementById("cd").textContent = "uscita"; return; }
-    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; document.getElementById("cd").textContent = `tra ${d ? d + " g " : ""}${h} h ${m} min`; };
+  const n = NEXT, names = n ? n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).join(" + ") : "";
+  document.getElementById("hero").innerHTML = `<div class="top"><span class="when">${n ? `${names} · ${rome(n.t0, {weekday: "long", day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}` : "Nessuna data in calendario"}</span><span class="cd" id="cd"></span></div>
+    <div class="big">~${r10(NXT.md)} <span style="font-size:.4em">pips</span></div>
+    <p class="why">La prima candela, dal minimo al massimo. Metà delle volte ${r10(NXT.lo)}–${r10(NXT.hi)}.</p>
+    <div class="kpis">
+      <div class="kpi"><b>${Math.round(10 * RC.k / RC.n)} su 10</b><span>la stima ci prende, dal 2023 (${RC.k} su ${RC.n})</span></div>
+      <div class="kpi"><b>~${r10(contro90)} pips</b><span>il massimo che va contro, 9 volte su 10</span></div>
+      ${VA ? `<div class="kpi"><b class="${HOT ? "r" : "g"}">${HOT ? "Esplosione" : "Calma"}</b><span>volatilità adesso</span></div>` : ""}
+    </div>`;
+  if (!n) return;
+  const tick = () => { const ms = new Date(n.t0) - Date.now(), c = document.getElementById("cd"); if (ms <= 0) { c.textContent = "uscita"; return; }
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; c.textContent = `fra ${d ? d + " g " : ""}${h} h ${d ? "" : m + " min"}`; };
   tick(); setInterval(tick, 30000);
 })();
 
-// 2 · la candela: fascia al prezzo di oggi, poi quanto ci ha preso release per release
+// 2 · le ultime release contro la stima di allora
 (() => {
-  document.getElementById("sample").textContent = `Dalle ultime ${recent.length} release Retail e PPI, in % del prezzo di quel giorno, riportate al prezzo di oggi (${it0(PX)} $).`;
-  const g = document.getElementById("gauge"), W = Math.max(330, Math.round(g.parentElement.clientWidth - 36)), L = 20, R = 20, y0 = 52;
-  g.setAttribute("viewBox", `0 0 ${W} 110`);
-  const vmax = Math.ceil(Math.max(band.p90, LAST.m1_bid) * 1.15 / 50) * 50, x = v => L + v / vmax * (W - L - R);
-  g.append(mk("rect", {x: L, y: y0 - 7, width: W - L - R, height: 14, rx: 7, fill: css("--soft")}));
-  g.append(mk("rect", {x: x(band.p25), y: y0 - 7, width: x(band.p75) - x(band.p25), height: 14, rx: 7, fill: css("--accent"), opacity: .85}));
-  g.append(mk("line", {x1: x(band.p90), x2: x(band.p90), y1: y0 - 12, y2: y0 + 12, stroke: css("--accent"), "stroke-width": 2}));
-  for (let v = 0; v <= vmax; v += vmax / (W < 520 ? 3 : 5)) g.append(mk("text", {x: x(v), y: 96, "text-anchor": "middle", "font-size": 11, fill: css("--mute"), "font-family": MONO}, it0(v)));
-  g.append(mk("text", {x: (x(band.p25) + x(band.p75)) / 2, y: 80, "text-anchor": "middle", "font-size": 12, fill: css("--ink"), "font-weight": 600, "font-family": MONO}, `metà delle volte ${it0(band.p25)}–${it0(band.p75)}`));
-  g.append(mk("text", {x: Math.min(x(band.p90) + 6, W - R - 90), y: y0 - 14, "font-size": 11, fill: css("--accent"), "font-family": MONO}, `1 su 10 oltre ${it0(band.p90)}`));
-  g.append(mk("circle", {cx: x(LAST.m1_bid), cy: y0, r: 6, fill: css("--panel"), stroke: css("--ink"), "stroke-width": 2.5}));
-  g.append(mk("text", {x: Math.min(W - R - 4, Math.max(L + 4, x(LAST.m1_bid))), y: 24, "text-anchor": x(LAST.m1_bid) > W - 120 ? "end" : x(LAST.m1_bid) < 120 ? "start" : "middle", "font-size": 12, fill: css("--ink2"), "font-family": MONO}, `ultima: ${it0(LAST.m1_bid)} pips`));
-  precisione(document.getElementById("prec"), evs, 12, PX, "release");
-  volTempo(document.getElementById("vt"), D.vt, "Retail/PPI", false);
+  const P = BT.P.filter(p => p.y >= 2019), L12 = P.slice(-12), host = document.getElementById("prec"), strip = document.getElementById("strip");
+  const dd = t => new Date(t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", timeZone: "UTC"});
+  let cur = L12[L12.length - 1];
+  strip.innerHTML = L12.map((p, i) => `<button data-i="${i}" class="${p.in ? "w" : "l"}" aria-pressed="false">${dd(p.t)}<b>${it0(p.v)}</b></button>`).join("");
+  host.innerHTML = `<p class="one" id="sel"></p><div class="chart" id="prChart"></div>
+    <p class="small">Ci prende ${Math.round(10 * RC.k / RC.n)} volte su 10 dal 2023 · ● dentro la stima · ○ fuori · tocca un punto</p>`;
+  const sel = () => { strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(L12[+b.dataset.i] === cur)));
+    const e = evs.find(x => x.t === cur.t);
+    document.getElementById("sel").innerHTML = `${dd(cur.t)} · ${e ? e.tipo.replace("+", " + ") : ""}: <b>${it0(cur.v)} pips</b> · stima ${r10(cur.lo)}–${r10(cur.hi)} → <b class="${cur.in ? "g" : "r"}">${cur.in ? "dentro" : cur.v > cur.hi ? "più grande" : "più piccola"}</b>`; };
+  strip.querySelectorAll("button").forEach(b => b.onclick = () => { cur = L12[+b.dataset.i]; sel(); });
+  sel(); strip.scrollLeft = strip.scrollWidth;
+  bandChart(host.querySelector("#prChart"), P, "release");
 })();
 
-// 4 · stop e take profit
-(() => {
-  const L = LV ? LV.oggi.livelli : null;
-  document.getElementById("verdict").innerHTML = `
-    <div class="vrow"><span>Stop</span><div><b>oltre ${it0(contro80)}–${it0(contro90)} pips</b><em>quando la direzione è giusta, 8 e 9 volte su 10 la candela non va contro di più prima di chiudere (ultime ${recent.length} release)</em></div></div>
-    <div class="vrow"><span>Take profit</span><div><b>${L ? `su entro ${it2(L.su90)}<br>giù entro ${it2(L.giu90)}` : "entro il livello 9 su 10"}</b><em>il livello 9 su 10 di oggi: oltre, 9 giorni su 10 l'oro non arriva (passo 3)</em></div></div>
-    <div class="vrow"><span>La candela</span><div><b>${it0(band.p25)}–${it0(band.p75)} pips</b><em>metà delle volte; 1 su 10 oltre ${it0(band.p90)} (passo 2)</em></div></div>`;
-})();
-
+volMini(document.getElementById("vt"), D.vt);
 oggi(D.liv, document.getElementById("oggi"));
 simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
-document.getElementById("foot").textContent = "Prezzi: tick e candele Dukascopy. Dati e attese: calendario ForexFactory. Ogni numero viene da un test con le regole scritte prima (studi H-X15–H-X32 nella cartella docs del progetto).";
+document.getElementById("simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));
+document.getElementById("foot").textContent = "Dati: tick Dukascopy, calendario ForexFactory. Ogni numero viene da una prova con le regole scritte prima (docs del progetto).";
 </script>
