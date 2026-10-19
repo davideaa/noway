@@ -285,63 +285,72 @@ function oggi(LV, el) {
     const v = levels(k, H, L, P);
     $("lvChips").innerHTML = `<span class="chip">↑ Supera il massimo di oggi: <b>${pct(v.pu)}</b></span><span class="chip">↓ Scende sotto il minimo di oggi: <b>${pct(v.pv)}</b></span>`;
     chart($("lvChart"), {P, H, L}, v);
-    $("lvNote").innerHTML = `🟢 <b>Affidabile</b>: nel 2023–26 il livello "9 su 10" ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100 sopra e ${Math.round(Q.cop90_giu * 100)} sotto. Non dice la direzione. ` +
-      `"Massimo" e "minimo" sono quelli di oggi finora, dalle ${rome(start, {hour: "2-digit", minute: "2-digit"})} italiane. Candele Dukascopy fino alle ${hhmm(O.k)}: metti i prezzi del tuo MT5 e i livelli si spostano subito.`;
+    $("lvNote").innerHTML = `<b>Come leggerlo.</b> Il numero colorato accanto a ogni livello è la probabilità che il prezzo ci arrivi entro fine giornata.
+      <br>· <b>Massimo e minimo di oggi</b> (linee grigie): probabilità di superarli ancora.
+      <br>· <b>Di solito</b> (puntinate): se li supera, metà delle volte si ferma qui.
+      <br>· <b>9 su 10</b> (tratteggiate, fascia colorata): solo 1 volta su 10 il prezzo va oltre.
+      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Non dicono la direzione.
+      <br>🟢 Provato dal 2016 giorno per giorno: nel 2023–26 il "9 su 10" ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100 sopra e ${Math.round(Q.cop90_giu * 100)} sotto.
+      <br>Si aggiorna da solo ogni ora, dalle 08 alle 22 dal lunedì al venerdì. Ultima candela: ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {weekday: "long", hour: "2-digit", minute: "2-digit"})}. Puoi mettere i prezzi del tuo MT5 qui sopra: i livelli si spostano subito.`;
   };
   function chart(host, s, v) {
-    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), H = W < 520 ? 330 : 380, Lm = W < 520 ? 40 : 46, R = W < 520 ? 104 : 150, T = 12, B = 24;
+    // candele una dopo l'altra come in MT5/TradingView: niente buchi per la notte o il weekend
+    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), narrow = W < 520, H = narrow ? 360 : 400, Lm = narrow ? 40 : 46, R = narrow ? 118 : 170, T = 12, B = 26;
     const C = O.candele.map(c => ({t: new Date(c[0]).getTime(), o: c[1], h: c[2], l: c[3], c: c[4]}));
-    const t0 = C[0].t, t1 = end.getTime(), now = C[C.length - 1].t + 3600e3;
-    const lo0 = Math.min(...C.map(c => c.l), v.giu90, s.L), hi0 = Math.max(...C.map(c => c.h), v.su90, s.H), pad = (hi0 - lo0) * .04;
-    const lo = lo0 - pad, hi = hi0 + pad;
-    const x = t => Lm + (t - t0) / (t1 - t0) * (W - Lm - R), y = p => T + (hi - p) / (hi - lo) * (H - T - B);
+    const lastEnd = C[C.length - 1].t + 3600e3, friday = new Date(start.getTime() + 2 * 3600e3).getUTCDay() === 5;
+    const dayEnd = start.getTime() + (friday ? 23 : 24) * 3600e3, futuro = Math.max(0, Math.round((dayEnd - lastEnd) / 3600e3));
+    const slots = C.length + futuro, x = i => Lm + (i + .5) / slots * (W - Lm - R), xe = i => Lm + i / slots * (W - Lm - R);
+    const iOggi = Math.max(0, C.findIndex(c => c.t >= start.getTime())), iNow = C.length;
+    const lo0 = Math.min(...C.map(c => c.l), v.giu90, v.giuT, s.L), hi0 = Math.max(...C.map(c => c.h), v.su90, v.suT, s.H), pad = (hi0 - lo0) * .04;
+    const lo = lo0 - pad, hi = hi0 + pad, y = p => T + (hi - p) / (hi - lo) * (H - T - B);
     const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Candele H1 di ieri e di oggi con i livelli fino a fine giornata"});
     const step = [1, 2, 5, 10, 20, 25, 50, 100].find(st => (hi - lo) / st <= 6) || 100;
     for (let p = Math.ceil(lo / step) * step; p <= hi; p += step) {
       svg.append(mk("line", {x1: Lm, x2: W - R, y1: y(p), y2: y(p), stroke: css("--grid")}));
       svg.append(mk("text", {x: Lm - 5, y: y(p) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(p)));
     }
-    svg.append(mk("rect", {x: x(now), y: T, width: Math.max(0, x(t1) - x(now)), height: H - T - B, fill: css("--accent"), opacity: .05}));
-    svg.append(mk("rect", {x: x(now), y: y(v.su90), width: Math.max(0, x(t1) - x(now)), height: y(v.giu90) - y(v.su90), fill: css("--accent"), opacity: .10}));
-    svg.append(mk("line", {x1: x(start.getTime()), x2: x(start.getTime()), y1: T, y2: H - B, stroke: css("--mute"), "stroke-dasharray": "3 3"}));
-    svg.append(mk("text", {x: x(start.getTime()) + 4, y: H - B - 6, "font-size": 11, fill: css("--mute")}, "oggi"));
-    if (x(start.getTime()) - Lm > 40) svg.append(mk("text", {x: x(start.getTime()) - 4, y: H - B - 6, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, "ieri"));
-    svg.append(mk("text", {x: x(now) + 4, y: H - B - 6, "font-size": 11, fill: css("--mute")}, "resto del giorno"));
-    for (let tt = Math.ceil(t0 / 216e5) * 216e5; tt <= t1; tt += 216e5)
-      svg.append(mk("text", {x: x(tt), y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, rome(new Date(tt), {hour: "2-digit"})));
-    const bw = Math.max(2, (x(t0 + 3600e3) - x(t0)) * .64);
-    C.forEach(c => { const up = c.c >= c.o, col = css(up ? "--up" : "--down"), cx = x(c.t + 1800e3);
+    svg.append(mk("rect", {x: xe(iNow), y: T, width: Math.max(0, xe(slots) - xe(iNow)), height: H - T - B, fill: css("--accent"), opacity: .05}));
+    svg.append(mk("rect", {x: xe(iNow), y: y(v.su90), width: Math.max(0, xe(slots) - xe(iNow)), height: y(v.giu90) - y(v.su90), fill: css("--accent"), opacity: .11}));
+    if (iOggi > 0) { svg.append(mk("line", {x1: xe(iOggi), x2: xe(iOggi), y1: T, y2: H - B, stroke: css("--mute"), "stroke-dasharray": "3 3"}));
+      svg.append(mk("text", {x: xe(iOggi) - 4, y: T + 12, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, rome(new Date(C[0].t), {weekday: "short"})));
+      svg.append(mk("text", {x: xe(iOggi) + 4, y: T + 12, "font-size": 11, fill: css("--mute")}, "oggi")); }
+    if (futuro) svg.append(mk("text", {x: (xe(iNow) + xe(slots)) / 2, y: H - B + 0, dy: "-0.4em", "text-anchor": "middle", "font-size": 10.5, fill: css("--mute")}, futuro > 3 ? "resto del giorno" : ""));
+    const every = narrow ? 6 : 4;
+    for (let i = 0; i < slots; i++) { const t = i < C.length ? C[i].t : lastEnd + (i - C.length) * 3600e3;
+      if (new Date(t).getUTCHours() % every === 0) svg.append(mk("text", {x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, rome(new Date(t), {hour: "2-digit"}))); }
+    const bw = Math.max(2, (xe(1) - xe(0)) * .64);
+    C.forEach((c, i) => { const up = c.c >= c.o, col = css(up ? "--up" : "--down"), cx = x(i);
       svg.append(mk("line", {x1: cx, x2: cx, y1: y(c.h), y2: y(c.l), stroke: col, "stroke-width": 1.2}));
       svg.append(mk("rect", {x: cx - bw / 2, y: y(Math.max(c.o, c.c)), width: bw, height: Math.max(1, Math.abs(y(c.o) - y(c.c))), fill: up ? css("--panel") : col, stroke: col, "stroke-width": 1.2}));
     });
     const rows = [
-      {p: v.su90, t: "9 su 10 non oltre", d: "6 4", w: 1.6, c: "--ink", from: now},
-      {p: v.suT, t: "di solito, se sale", d: "2 3", w: 1.6, c: "--ink", from: now},
-      {p: s.H, t: "massimo di oggi", d: "", w: 1, c: "--mute", from: start.getTime()},
-      {p: s.P, t: "prezzo", d: "", w: 2.4, c: "--accent", from: t0, bold: true},
-      {p: s.L, t: "minimo di oggi", d: "", w: 1, c: "--mute", from: start.getTime()},
-      {p: v.giuT, t: "di solito, se scende", d: "2 3", w: 1.6, c: "--ink", from: now},
-      {p: v.giu90, t: "9 su 10 non sotto", d: "6 4", w: 1.6, c: "--ink", from: now}];
-    rows.sort((a, b) => b.p - a.p);  // le etichette vanno dall'alto in basso anche se un livello "di solito" supera il "9 su 10"
-    const ys = rows.map(r => y(r.p)), gap = W < 520 ? 24 : 26, lab = ys.slice();
+      {p: v.su90, t: "9 su 10 non oltre", pr: .10, d: "6 4", w: 1.6, c: "--ink", from: iNow},
+      {p: v.suT, t: "di solito, se sale", pr: v.pu * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: s.H, t: "massimo di oggi", pr: v.pu, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: s.P, t: "prezzo adesso", d: "", w: 2.4, c: "--accent", from: 0, bold: true},
+      {p: s.L, t: "minimo di oggi", pr: v.pv, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: v.giuT, t: "di solito, se scende", pr: v.pv * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: v.giu90, t: "9 su 10 non sotto", pr: .10, d: "6 4", w: 1.6, c: "--ink", from: iNow}];
+    rows.sort((a, b) => b.p - a.p);
+    const ys = rows.map(r => y(r.p)), gap = narrow ? 27 : 29, lab = ys.slice();
     for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
-    for (let i = lab.length - 1; i >= 0; i--) { lab[i] = Math.min(lab[i], H - B + 6 - (lab.length - 1 - i) * gap); }
+    for (let i = lab.length - 1; i >= 0; i--) lab[i] = Math.min(lab[i], H - B + 4 - (lab.length - 1 - i) * gap);
     for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
     rows.forEach((r, i) => {
-      svg.append(mk("line", {x1: x(r.from), x2: W - R + 4, y1: ys[i], y2: ys[i], stroke: css(r.c), "stroke-width": r.w, "stroke-dasharray": r.d}));
+      svg.append(mk("line", {x1: xe(r.from), x2: W - R + 4, y1: ys[i], y2: ys[i], stroke: css(r.c), "stroke-width": r.w, "stroke-dasharray": r.d}));
       svg.append(mk("line", {x1: W - R + 4, x2: W - R + 10, y1: ys[i], y2: lab[i] - 4, stroke: css(r.c), opacity: .6}));
-      svg.append(mk("text", {x: W - R + 12, y: lab[i] - 12, "font-size": W < 520 ? 9.5 : 10.5, fill: css("--mute")}, r.t));
-      svg.append(mk("text", {x: W - R + 12, y: lab[i], "font-size": W < 520 ? 11.5 : 12.5, "font-weight": r.bold ? 700 : 600, fill: css(r.bold ? "--ink" : r.c === "--mute" ? "--ink2" : "--ink"), "font-family": "ui-monospace,Menlo,monospace"},
-        r.bold ? it2(r.p) : `${it2(r.p)} ${W < 520 ? "" : pipsTxt(r.p - s.P)}`.trim()));
+      svg.append(mk("text", {x: W - R + 12, y: lab[i] - 13, "font-size": narrow ? 9.5 : 10.5, fill: css("--mute")}, r.t));
+      const tx = mk("text", {x: W - R + 12, y: lab[i], "font-size": narrow ? 11.5 : 12.5, "font-weight": r.bold ? 700 : 600, fill: css("--ink"), "font-family": "ui-monospace,Menlo,monospace"}, it2(r.p));
+      if (r.pr != null) { const sp = mk("tspan", {fill: css(r.pr >= .4 ? "--good" : r.pr >= .2 ? "--warn" : "--bad"), "font-weight": 700}, `  ${Math.round(r.pr * 100)}%`); tx.append(sp); }
+      svg.append(tx);
     });
     host.innerHTML = ""; host.append(svg);
     const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.append(tip);
-    const show = e => { const rc = svg.getBoundingClientRect(), sx = (e.clientX - rc.left) / rc.width * W; let best = null, bd = 1e9;
-      C.forEach(c => { const d = Math.abs(x(c.t + 1800e3) - sx); if (d < bd) { bd = d; best = c; } });
-      if (!best || bd > 20) { tip.hidden = true; return; }
-      tip.innerHTML = `${rome(new Date(best.t), {hour: "2-digit", minute: "2-digit"})} · max ${it2(best.h)} · min ${it2(best.l)}`;
-      tip.style.left = (x(best.t + 1800e3) / W * rc.width) + "px"; tip.style.top = (y(best.h) / H * rc.height) + "px"; tip.hidden = false; };
-    svg.addEventListener("pointermove", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+    const show = e => { const rc = svg.getBoundingClientRect(), sx = (e.clientX - rc.left) / rc.width * W, i = Math.floor((sx - Lm) / (W - Lm - R) * slots);
+      if (i < 0 || i >= C.length) { tip.hidden = true; return; } const c = C[i];
+      tip.innerHTML = `${rome(new Date(c.t), {weekday: "short", hour: "2-digit", minute: "2-digit"})} · apre ${it2(c.o)} · max ${it2(c.h)} · min ${it2(c.l)} · chiude ${it2(c.c)}`;
+      tip.style.left = Math.min(rc.width - 120, Math.max(120, x(i) / W * rc.width)) + "px"; tip.style.top = (y(c.h) / H * rc.height) + "px"; tip.hidden = false; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
   }
   ["lvP", "lvH", "lvL", "lvK"].forEach(id => $(id).addEventListener("input", draw));
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
