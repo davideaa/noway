@@ -36,3 +36,22 @@ Se è calibrata, va sul sito accanto a quella stretta. Ogni release è
 colorata in tre modi: dentro la stretta, dentro solo la larga, fuori.
 Se non è calibrata, sul sito resta solo la stretta, con quante sopra e
 quante sotto.
+
+## Risultati (dopo il commit `8c5f5ac`)
+
+File: `research_output/phase2/hx16/hx36_fascia_larga.json`.
+
+| | Fascia larga 2019–22 | 2023–26 | (stretta, per confronto) |
+|---|---|---|---|
+| NFP | **60%** (11 sopra, 8 sotto, su 47) | 71% (7 sopra, 5 sotto, su 42) | 43% / 43% |
+| 12 famiglie senza NFP | 71% (68 sopra, 34 sotto, su 349) | 72% (61 sopra, 79 sotto, su 499) | 43% / 44% |
+
+**Verdetto: non calibrata.** Sulla NFP del 2019–22 la fascia 10–90 ci
+prende il 60%, sotto il 70% minimo.
+
+- Tutte e due le fasce prendono meno di quanto dovrebbero: la stretta 43%
+  invece di 50%, la larga 60–72% invece di 80%.
+- Le 24 release precedenti fanno sembrare la candela più regolare di
+  quello che è. Le candele estreme arrivano più spesso.
+- Sul sito resta solo la fascia stretta, con quante dentro, sopra e
+  sotto.

@@ -1,0 +1,35 @@
+{
+ "nfp": {
+  "2019-22": {
+   "n": 47,
+   "larga": 0.596,
+   "sopra_larga": 11,
+   "sotto_larga": 8,
+   "stretta": 0.426
+  },
+  "2023-26": {
+   "n": 42,
+   "larga": 0.714,
+   "sopra_larga": 7,
+   "sotto_larga": 5,
+   "stretta": 0.429
+  }
+ },
+ "altre": {
+  "2019-22": {
+   "n": 349,
+   "larga": 0.708,
+   "sopra_larga": 68,
+   "sotto_larga": 34,
+   "stretta": 0.43
+  },
+  "2023-26": {
+   "n": 499,
+   "larga": 0.719,
+   "sopra_larga": 61,
+   "sotto_larga": 79,
+   "stretta": 0.437
+  }
+ },
+ "calibrata": false
+}
