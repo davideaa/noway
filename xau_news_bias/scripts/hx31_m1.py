@@ -3,7 +3,7 @@ import json
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -19,11 +19,18 @@ from xnb.providers.dukascopy import DukascopyProvider  # noqa: E402
 DK = DukascopyProvider()
 
 
+def m1_direct(d):
+    """Stesse candele M1 Dukascopy, prese direttamente dal datafeed storico (jetta per i giorni vecchi risponde 202 e rallenta)."""
+    base = datetime(d.year, d.month, d.day, tzinfo=timezone.utc)
+    rel = f"XAUUSD/{d.year}/{d.month - 1:02d}/{d.day:02d}/BID_candles_min_1.bi5"
+    return DK._candles(rel, base, base + timedelta(days=1), "XAUUSD")
+
+
 def m1_retry(d):
     for wait in (0, 5, 20, 60, 120):
         time.sleep(wait)
         try:
-            return d, DK.m1("XAUUSD", d)
+            return d, m1_direct(d)
         except Exception as e:  # il datafeed risponde 503 a volte
             err = e
     print("M1 non disponibile", d, err)
@@ -40,7 +47,7 @@ if __name__ == "__main__":
     cps = x[x.k.isin(M.KS)].copy()
     cps["t_end"] = cps.index + pd.Timedelta(hours=1)          # fine della candela H1 del controllo
     days = sorted({t.date() for t in cps.t_end})
-    with ThreadPoolExecutor(4) as ex:
+    with ThreadPoolExecutor(8) as ex:
         m1 = dict(ex.map(m1_retry, days))
     rows, mancanti = [], 0
     for r in cps.itertuples():
