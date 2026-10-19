@@ -258,6 +258,7 @@ function oggi(LV, el) {
       {p: s.L, t: "minimo di oggi", d: "", w: 1, c: "--mute", from: start.getTime()},
       {p: v.giuT, t: "di solito, se scende", d: "2 3", w: 1.6, c: "--ink", from: now},
       {p: v.giu90, t: "9 su 10 non sotto", d: "6 4", w: 1.6, c: "--ink", from: now}];
+    rows.sort((a, b) => b.p - a.p);  // le etichette vanno dall'alto in basso anche se un livello "di solito" supera il "9 su 10"
     const ys = rows.map(r => y(r.p)), gap = W < 520 ? 24 : 26, lab = ys.slice();
     for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
     for (let i = lab.length - 1; i >= 0; i--) { lab[i] = Math.min(lab[i], H - B + 6 - (lab.length - 1 - i) * gap); }
