@@ -101,6 +101,21 @@ def recenti(n: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def recenti_con_stima(n: pd.DataFrame, rec: pd.DataFrame, m: str | None) -> list:
+    """Per ogni NFP fuori dal dataset: la candela vera e la stima che il metodo dava prima di quella release (solo EW3)."""
+    out = []
+    for i, r in enumerate(rec.itertuples()):
+        row = {"data": str(r.t0.date()), "vero": round(r.r1 * r.px / 10)}
+        if m == "EW3":
+            prev = pd.concat([n.r1, rec.r1.iloc[:i]], ignore_index=True)
+            e = prev.ewm(halflife=3).mean().iat[-1]
+            rat = (n.r1 / n[m]).dropna().iloc[-NB:]
+            pp = r.px / 10
+            row |= {"stima": round(e * rat.median() * pp), "lo": round(e * rat.quantile(.25) * pp), "hi": round(e * rat.quantile(.75) * pp)}
+        out.append(row)
+    return out
+
+
 def prossima(n: pd.DataFrame, m: str, adr21: float | None, rec: pd.DataFrame) -> dict | None:
     """Stima per la prossima NFP, coi dati di oggi; solo per i metodi che non chiedono le variabili del giorno.
     Le NFP recenti fuori dal dataset entrano nella memoria (N, EW3), non nei rapporti della fascia."""
@@ -145,7 +160,7 @@ if __name__ == "__main__":
         pp = px_oggi / 100 * 10
         nx |= {"prezzo": px_oggi, "adr21_pct": adr_oggi, "stima": round(nx["stima_pct"] * pp), "lo": round(nx["lo_pct"] * pp), "hi": round(nx["hi_pct"] * pp)}
     out = {"nfp": int(len(n)), "ultima": str(n.t0.iat[-1].date()), "metodi": res, "calibrati": cal, "vincitore": vince,
-           "casi_vincitore": casi, "recenti_fuori_dataset": [{"data": str(r.t0.date()), "vero": round(r.r1 * r.px / 10)} for r in rec.itertuples()],
+           "casi_vincitore": casi, "recenti_fuori_dataset": recenti_con_stima(n, rec, vince),
            "prossima": nx}
     (R / "hx32_ampiezza_nfp.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     for m in METODI:
