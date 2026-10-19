@@ -47,3 +47,29 @@ Se passa, il sito mostra prima di ogni news "segnale spento: stima
 affidabile" oppure "segnale acceso: la candela può uscire molto più
 grande", coi numeri di affidabilità dei due casi. Se non passa, il sito
 non lo dice.
+
+## Risultati (dopo il commit `194f103`)
+
+File: `research_output/phase2/hx16/hx35_quando_fidarsi.json`.
+
+**12 famiglie senza NFP** (la prova): errore e copertura, segnale acceso
+contro spento.
+
+| Periodo | Acceso | Spento | Differenza |
+|---|---|---|---|
+| 2019–22 | 0,431, 40% (113 release) | 0,371, 45% (236) | +0,060 |
+| 2023–26 | 0,365, 42% (163) | 0,356, 44% (336) | **+0,009** |
+
+**Verdetto: non passa.** Nel 2023–26 col segnale acceso la stima sbaglia
+quasi come col segnale spento. Il sito non dice "fidati" o "non fidarti"
+in base al segnale.
+
+**NFP, solo descrittivo** (già vista, ha ispirato l'idea):
+
+| Periodo | Acceso | Spento |
+|---|---|---|
+| 2019–22 | 0,474, 27% (15) | 0,313, 50% (32) |
+| 2023–26 | 0,359, 38% (13) | 0,245, 45% (29) |
+
+Sulla NFP la differenza è grande. Ma sulle altre news non si conferma,
+quindi può essere un caso. Si può solo registrare dal vivo, NFP dopo NFP.
