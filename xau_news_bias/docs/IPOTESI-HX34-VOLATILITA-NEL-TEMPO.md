@@ -75,3 +75,69 @@ Si misura, nel 2011–18 e nel 2019–26:
   - candele delle news;
   - la stima mese per mese.
   Le scritte del grafico dicono solo quello che la prova conferma.
+
+## Risultati (dopo i commit `a5f80d6` e `0cba269`)
+
+File: `research_output/phase2/hx16/hx34_volatilita_tempo.json`.
+
+**M1 — La volatilità del mese dopo.** Errore mediano (in % circa):
+
+| Periodo | P1 mese | P2 mese | P1 3 mesi | P2 3 mesi |
+|---|---|---|---|---|
+| 2011–18 | 0,133 (±14%) | 0,132 (±14%) | 0,129 | 0,149 |
+| 2019–22 | 0,181 (±20%) | 0,164 (±18%) | 0,158 | 0,115 |
+| 2023–26 | 0,168 (±18%) | 0,175 (±19%) | 0,221 | 0,139 |
+
+- **Per la regola scritta prima non basta**: sul mese dopo l'errore supera
+  0,15 nel 2019–22 e nel 2023–26.
+- Il livello del mese dopo si stima comunque meglio del singolo giorno
+  (±31–34%) e della singola NFP (±33%): circa ±14–20%.
+- Descrittivo: sulla media dei 3 mesi dopo, P2 sta fra 0,115 e 0,149 in
+  tutti e tre i periodi (±12–16%). Non era la misura della decisione.
+
+**M2 — La NFP nel tempo.** Stesse stime EW3, fatte prima di ogni release:
+
+| Periodo | Singola NFP | Mediana di 6 NFP |
+|---|---|---|
+| 2019–22 | 0,390 | 0,206 |
+| 2023–26 | 0,287 | 0,154 |
+
+- Passando dalla singola alla mediana di 6, l'errore si **dimezza**.
+- Anno per anno l'errore tipico è 0,115 (2019–22) e 0,141 (2023–26).
+- Eccezione 2026: mediana vera 408 pips, stima 229 (errore 0,58). La
+  stima, fatta solo con le NFP passate, è rimasta indietro rispetto
+  all'esplosione della volatilità di gennaio–marzo 2026. Il range del
+  giorno medio è stato 3,1–3,8%, contro 1,2–1,5% del 2025.
+
+**M3 — Le esplosioni.**
+- 19 mesi di esplosione in tutto (7 nel 2011–18, 12 nel 2019–26).
+- Mesi: 2011-08/09, 2013-04/05, 2014-11/12, 2016-02, 2019-06/07/08,
+  2020-03, 2022-03, 2024-04, 2025-04/05, 2025-10, 2026-01/02/03.
+
+| Periodo | Senza segnale | Con W1 (volatilità che sale) | Con W2 (GVZ alto) |
+|---|---|---|---|
+| 2011–18 | 5% (W1) / 4% (W2) | 25% (3 su 12) | 25% (4 su 16) |
+| 2019–26 | 8% (W1) / 7% (W2) | 33% (6 su 18) | 29% (7 su 24) |
+
+- **Per la regola scritta prima tutti e due i segnali passano**: col
+  segnale l'esplosione è 4–6 volte più probabile.
+- **Descrittivo, controllo fatto dopo**, che cambia il senso. Le
+  esplosioni vengono a gruppi di mesi consecutivi. Dei 19 mesi, 11 sono
+  l'**inizio** di un'esplosione (4 nel 2011–18, 7 nel 2019–26):
+  - W1 ne ha annunciato **1** su 11;
+  - W2 (GVZ) **4** su 11: 2014-11, 2020-03, 2022-03, 2025-12;
+  - W2 è acceso anche in 23 mesi tranquilli senza esplosione.
+- Quindi i segnali dicono soprattutto che **un'esplosione già iniziata
+  continua** anche il mese dopo. L'inizio di un'esplosione da un periodo
+  calmo quasi non si vede: il GVZ ne prende circa 1 su 3, con molti falsi
+  allarmi.
+
+**Verdetto.**
+- Nel tempo la volatilità si prevede meglio della singola news:
+  - il mese dopo circa ±14–20%;
+  - la media di 6 NFP circa ±15–21%.
+  - Non abbastanza per la soglia scritta prima (±16% in tutti i periodi
+    sul mese).
+- Un'esplosione in corso continua: col GVZ alto o la volatilità già
+  salita, il mese dopo esplode 1 volta su 3–4 contro 1 su 13–25.
+- L'inizio di un'esplosione non si vede arrivare in modo affidabile.
