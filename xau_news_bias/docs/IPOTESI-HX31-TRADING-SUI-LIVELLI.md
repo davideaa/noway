@@ -75,3 +75,48 @@ Se funziona:
 
 Se nessuna funziona, si dice: i livelli servono per sapere lo spazio e
 mettere take profit e stop, non per entrare.
+
+## Risultati con le candele H1 (dopo i commit `c023049` e `710845e`)
+
+File: `research_output/phase2/hx16/hx31_trading_livelli.json`.
+
+R medio a trade (n) — 2016–18 / 2019–22 / 2023–26:
+
+| Regola | Controllo k=10 | Controllo k=14 |
+|---|---|---|
+| R1 fade al 9 su 10 | −0,26 (135) / −0,23 (178) / −0,14 (175) | −0,25 (128) / −0,23 (184) / −0,20 (147) |
+| R2 fade al tipico | −0,58 (460) / −0,09 (630) / −0,14 (559) | −0,21 (343) / −0,20 (463) / −0,13 (411) |
+| R3 rottura del tipico | −0,26 (460) / −0,29 (630) / −0,26 (559) | −0,45 (343) / −0,48 (463) / −0,41 (411) |
+
+- **Per la regola scritta prima nessuna funziona**: tutte perdono in
+  tutti i periodi.
+- **Controllo descrittivo**, fatto dopo e non pre-registrato
+  (`hx31_ottimista.json`). Stesse regole, ma dentro la candela conta
+  **prima il take profit**, anche nella candela dell'ingresso:
+  - R1: +0,37 / +0,65 / +0,75 (k=10) e +0,47 / +0,65 / +0,69 (k=14);
+  - R2: −0,37 / +0,18 / +0,24 (k=10) e +0,38 / +0,43 / +0,38 (k=14);
+  - R3: resta negativa, da −0,20 a −0,34.
+- **Le H1 non bastano a decidere le regole di fade.** Il risultato
+  cambia segno a seconda di cosa si suppone succeda prima dentro l'ora.
+  L'ipotesi favorevole conta anche take profit toccati **prima**
+  dell'ingresso, quindi è troppo ottimista. Quella prudente può essere
+  troppo pessimista.
+- La rottura (R3) perde con tutte e due le ipotesi: **non funziona**.
+
+## Emendamento 1 — scritto il 19/10/2026 prima di calcolare con le M1
+
+Le H1 non risolvono l'ordine degli eventi. Si rifà la stessa prova con le
+candele **M1** Dukascopy, cambiando solo la risoluzione:
+- stesse regole R1, R2 e R3;
+- stessi controlli k = 10 e k = 14;
+- stessi livelli e tabelle passo per passo;
+- stessi costi e stessa decisione.
+
+Come si usano le M1:
+- dalla fine della candela H1 del controllo fino alle 22:00 UTC dello
+  stesso giorno;
+- dentro **un minuto** restano le regole prudenti: stop prima del take
+  profit, e nella candela M1 d'ingresso conta solo lo stop.
+
+Il verdetto ufficiale diventa questo con le M1. Il 2016–26 è comunque già
+visto: se una regola passa, vale "da registrare dal vivo".
