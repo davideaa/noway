@@ -120,3 +120,36 @@ Come si usano le M1:
 
 Il verdetto ufficiale diventa questo con le M1. Il 2016–26 è comunque già
 visto: se una regola passa, vale "da registrare dal vivo".
+
+## Risultati con le candele M1 — verdetto ufficiale
+
+File: `research_output/phase2/hx16/hx31_m1.json`.
+- 5.570 controlli su 2.785 giorni.
+- M1 trovate per tutti i giorni, nessuno scartato.
+
+R medio a trade (n) — 2016–18 / 2019–22 / 2023–26:
+
+| Regola | Controllo k=10 | Controllo k=14 |
+|---|---|---|
+| R1 fade al 9 su 10 | −0,19 (135) / −0,19 (178) / −0,04 (175) | −0,19 (128) / −0,14 (184) / −0,12 (147) |
+| R2 fade al tipico | −0,56 (460) / −0,08 (630) / −0,13 (559) | −0,19 (343) / −0,19 (463) / −0,12 (411) |
+| R3 rottura del tipico | −0,09 (460) / −0,05 (630) / −0,07 (559) | −0,07 (343) / −0,01 (463) / +0,02 (411) |
+
+Sul 2019–26 insieme:
+- R1: −0,12 e −0,13 R a trade;
+- R2: −0,10 e −0,16;
+- R3 k=10: −0,06;
+- R3 k=14: +0,006 (t 0,25, p 0,40).
+
+Con Holm tutte le p corrette valgono 1.
+
+**Verdetto: nessuna regola funziona.**
+- I fade (R1, R2) perdono in tutti i periodi anche guardando minuto per
+  minuto.
+- Il guadagno del controllo "ottimista" con le H1 veniva dai take profit
+  contati prima dell'ingresso: non esisteva.
+- La rottura (R3) sta intorno a zero: non è un edge.
+
+I livelli del giorno servono per sapere **quanto spazio c'è** e dove
+**non** mettere il take profit. Non servono per entrare. Sul sito restano
+solo così.
