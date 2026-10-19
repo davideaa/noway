@@ -35,18 +35,21 @@ header,section{display:grid;gap:12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* cosa funziona: due corsie per stato */
-.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;align-items:start}
-.lane{--lc:var(--good);background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:12px;padding:12px 16px 4px;display:grid;min-width:0}
-.lane.warn{--lc:var(--warn)}
-.lane-h{display:flex;align-items:center;gap:8px;font:700 12.5px/1 var(--f-num);letter-spacing:.08em;text-transform:uppercase;color:var(--lc);padding-bottom:10px}
-.lane-h i{width:10px;height:10px;border-radius:50%;background:var(--lc);flex:none}
-.it{padding:11px 0;border-top:1px solid var(--line);display:grid;gap:4px;min-width:0}
-.it b{font-size:16px;line-height:1.3}
-.it .m{justify-self:start;font:600 12.5px/1.35 var(--f-num);color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,transparent);padding:3px 8px;border-radius:6px}
-.it p{font-size:14.5px;line-height:1.45;color:var(--ink2)}
-.it p.use{color:var(--ink);font-size:14.5px}
-.it p.use::before{content:"→ ";color:var(--lc);font-weight:700}
+/* la strategia, in ordine di tempo */
+.steps{list-style:none;margin:0;padding:0;display:grid}
+.steps li{position:relative;display:flex;gap:12px;padding-bottom:16px}
+.steps li:last-child{padding-bottom:0}
+.steps li::after{content:"";position:absolute;left:15px;top:34px;bottom:2px;width:2px;background:var(--line)}
+.steps li:last-child::after{display:none}
+.steps .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--panel);font:700 15px/32px var(--f-num);text-align:center}
+.steps .c{display:grid;gap:3px;min-width:0;padding-top:4px}
+.steps .tm{font:600 12px/1.2 var(--f-num);letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.steps .c>b{font-size:17px;line-height:1.3}
+.steps .k{justify-self:start;font:600 14px/1.4 var(--f-num);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
+.steps p{font-size:14.5px;color:var(--ink2)}
+.steps a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
+.steps a:hover{text-decoration:underline}
+.sec-tm{font:600 12px/1 var(--f-num);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 
 /* il trade, in ordine di tempo */
 .tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -73,6 +76,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font-size:14px;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
 .chip b{font-family:var(--f-num)}
+.chip.big{font-size:16px;padding:9px 13px;border-color:var(--accent)}
+.chip.big b{font-size:18px}
 .chart{position:relative;min-width:0}
 .chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 var(--f-num);padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
@@ -121,41 +126,44 @@ footer{color:var(--mute);font-size:12.5px;max-width:72ch}
 <div class="wrap">
 <header>
   <div class="eyebrow">XAUUSD · Retail Sales e PPI · ora italiana</div>
-  <h1>Retail e PPI sull'oro</h1>
-  <p class="lead">Quanto si muove l'oro quando escono Retail Sales e PPI, e fin dove può arrivare oggi. La direzione non si indovina: qui trovi lo spazio, non il verso.</p>
+  <h1>Retail e PPI: quanto si muove l'oro</h1>
+  <p class="lead">Quando escono, quanto si muove la prima candela e fin dove può arrivare l'oro oggi: lo spazio per mettere stop e take profit. Qui sotto, nell'ordine in cui lo usi.</p>
 </header>
 
-<section aria-labelledby="h-next">
+<section aria-labelledby="h-plan">
+  <h2 id="h-plan">In 4 passi</h2>
+  <div class="panel" id="steps"></div>
+</section>
+
+<section aria-labelledby="h-next" id="s1">
+  <span class="sec-tm">1 · Prima</span>
   <h2 id="h-next">Prossima release</h2>
-  <div class="panel next"><div class="when" id="when"></div><div class="verdict" id="verdict"></div></div>
+  <div class="panel"><div class="when" id="when"></div></div>
+</section>
+
+<section aria-labelledby="h-size" id="s2">
+  <span class="sec-tm">2 · La mattina</span>
+  <h2 id="h-size">Quanto si muoverà la candela</h2>
   <div class="panel"><span class="cap">Candela delle 14:30 al prezzo di oggi, dal minimo al massimo (wick compresa)</span><svg class="gauge" id="gauge" viewBox="0 0 640 110" role="img" aria-label="Fascia di ampiezza attesa della candela della news"></svg><p class="small" id="sample"></p></div>
-</section>
-
-<section aria-labelledby="h-ok">
-  <h2 id="h-ok">Cosa funziona</h2>
-  <div id="board"></div>
-</section>
-
-<section aria-labelledby="h-day">
-  <h2 id="h-day">Oggi: fin dove può arrivare l'oro</h2>
-  <div class="panel" id="oggi"></div>
-</section>
-
-<section aria-labelledby="h-size">
-  <h2 id="h-size">La stima della candela e quanto ci prende</h2>
-  <p class="lead">La stima in alto, rifatta per ogni release passata con solo i dati di prima: così vedi anno per anno quando ci ha preso e quando no.</p>
   <div class="panel" id="prec"></div>
 </section>
 
-<section aria-labelledby="h-dir">
-  <h2 id="h-dir">Perché la direzione non si indovina: tutti i metodi provati</h2>
-  <p class="lead">Per ogni idea, quante volte ha indovinato la direzione della prima candela. La barra chiara è il margine del caso: se tocca il 50%, l'idea non si distingue dal lancio di una moneta.</p>
-  <div class="panel"><div class="chart" id="metodi"></div><p class="small">Le Retail Sales col consensus sembrano funzionare, ma l'idea l'ho trovata guardando i dati fra 12 news, e con uno stop di 100 pips rende quasi zero (+0,02R a trade): la candela Retail è troppo piccola. Va provata dal vivo prima di usarla. Studi H-X15, H-X16, H-X23, H-X26, H-X27.</p></div>
+<section aria-labelledby="h-day" id="s3">
+  <span class="sec-tm">3 · La mattina e dopo la news</span>
+  <h2 id="h-day">Fin dove può arrivare l'oro oggi</h2>
+  <div class="panel" id="oggi"></div>
 </section>
 
-<section aria-labelledby="h-why">
+<section aria-labelledby="h-sl" id="s4">
+  <span class="sec-tm">4 · Alle 14:30</span>
+  <h2 id="h-sl">Stop e take profit</h2>
+  <div class="panel verdict" id="verdict"></div>
+</section>
+
+<section aria-labelledby="h-why" id="s5">
+  <span class="sec-tm">Per capire</span>
   <h2 id="h-why">Perché Retail e PPI fanno più pips di prima</h2>
-  <p class="lead">Muovi i cursori o premi un anno: vedi quanto pesa ogni cosa e cosa si può sapere prima della news.</p>
+  <p class="lead">Muovi i cursori o premi un anno: vedi quanto pesa ogni cosa, prezzo, volatilità del giorno, sorpresa del dato e reazione del mercato.</p>
   <div class="panel" id="sim"></div>
 </section>
 
@@ -177,10 +185,11 @@ const pipsTxt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + it0(Math.abs(d) * 10
 const median = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
 const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
 
-function board(el, lanes) {
+// la strategia in ordine di tempo: ogni passo ha quando, cosa, il numero che conta e dove trovare il resto
+function passi(el, steps) {
   if (!el) return;
-  el.innerHTML = `<div class="board">` + lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
-    L.items.filter(Boolean).map(x => `<div class="it"><b>${x.t}</b>${x.m ? `<span class="m">${x.m}</span>` : ""}<p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("") + `</div>`;
+  el.innerHTML = `<ol class="steps">` + steps.filter(Boolean).map((x, i) => `<li><span class="n">${i + 1}</span><div class="c">
+    <span class="tm">${x.tm}</span><b>${x.t}</b>${x.k ? `<span class="k">${x.k}</span>` : ""}${x.d ? `<p>${x.d}${x.a ? ` <a href="#${x.a}">dettagli ↓</a>` : ""}</p>` : ""}</div></li>`).join("") + `</ol>`;
 }
 
 // ---------- oggi: candele con i livelli sopra (H-X28, metodo scelto)
@@ -225,7 +234,7 @@ function oggi(LV, el) {
       <br>· <b>Massimo e minimo di oggi</b> (linee grigie): probabilità di superarli ancora.
       <br>· <b>Di solito</b> (puntinate): se li supera, metà delle volte si ferma qui.
       <br>· <b>9 su 10</b> (tratteggiate, fascia colorata): solo 1 volta su 10 il prezzo va oltre.
-      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Non dicono la direzione.
+      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Servono per stop e take profit, non per decidere dove entrare: non dicono la direzione.
       <br>🟢 Provato dal 2016 giorno per giorno: nel 2023–26 il "9 su 10" ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100 sopra e ${Math.round(Q.cop90_giu * 100)} sotto.
       <br>Si aggiorna da solo ogni ora, dalle 08 alle 22 dal lunedì al venerdì. Ultima candela: ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {weekday: "long", hour: "2-digit", minute: "2-digit"})}. Puoi mettere i prezzi del tuo MT5 qui sopra: i livelli si spostano subito.`;
   };
@@ -370,29 +379,6 @@ function simulatore(P, group, name, el, oggiO) {
   set(); draw();
 }
 
-// ---------- metodi provati per la direzione: % giuste con l'intervallo del caso
-function metodi(host, rows) {
-  if (!host) return;
-  const draw = () => {
-    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), narrow = W < 560, rowH = narrow ? 52 : 40, T = 22, B = 26;
-    const L = narrow ? 12 : 300, R = 54, H = T + B + rows.length * rowH;
-    const lo = 30, hi = 75, x = v => L + (v - lo) / (hi - lo) * (W - L - R);
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Percentuale di direzioni indovinate per ogni metodo provato"});
-    for (const v of [30, 40, 50, 60, 70]) { svg.append(mk("line", {x1: x(v), x2: x(v), y1: T - 6, y2: H - B, stroke: css(v === 50 ? "--ink2" : "--grid"), "stroke-dasharray": v === 50 ? "4 3" : ""}));
-      svg.append(mk("text", {x: x(v), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v + "%")); }
-    svg.append(mk("text", {x: x(50) + 4, y: T - 10, "font-size": 11, fill: css("--ink2")}, "50% = a caso"));
-    rows.forEach((r, i) => {
-      const y0 = T + i * rowH, yc = y0 + (narrow ? 34 : rowH / 2), ci = 196 * Math.sqrt(.25 / r.n), col = css(r.k === "good" ? "--good" : r.k === "warn" ? "--warn" : "--mute");
-      svg.append(mk("text", {x: narrow ? L : L - 10, y: narrow ? y0 + 14 : yc + 4, "text-anchor": narrow ? "start" : "end", "font-size": 12.5, fill: css("--ink"), "font-weight": r.k === "good" ? 700 : 500}, r.t));
-      svg.append(mk("line", {x1: x(Math.max(lo, r.p - ci)), x2: x(Math.min(hi, r.p + ci)), y1: yc, y2: yc, stroke: col, "stroke-width": 6, "stroke-linecap": "round", opacity: .35}));
-      svg.append(mk("circle", {cx: x(r.p), cy: yc, r: 6, fill: col}));
-      svg.append(mk("text", {x: Math.min(W - 4, x(Math.min(hi, r.p + ci)) + 8), y: yc + 4, "font-size": 12, "font-weight": 700, fill: col, "font-family": "ui-monospace,Menlo,monospace"}, Math.round(r.p) + "%"));
-    });
-    host.innerHTML = ""; host.append(svg);
-  };
-  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
-}
-
 // ---------- quanto era precisa la stima della candela, release per release (stessa regola del sito, solo dati di prima)
 function bandTest(evs, N) {
   const q = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
@@ -405,26 +391,33 @@ function bandTest(evs, N) {
   const since = y0 => { const g = P.filter(p => p.y >= y0); return {n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; };
   return {P, next, since};
 }
-function precisione(host, evs, N, price, ml, name) {
+function precisione(host, evs, N, price, name) {
   if (!host || !evs.length) return;
   const B = bandTest(evs, N), P = B.P, nx = B.next(price), rc = B.since(2023), ok = rc.n && rc.k / rc.n >= .4 && rc.k / rc.n <= .6;
-  const yrs = [...new Set(P.map(p => p.y))].sort();
-  const per = yrs.map(y => { const g = P.filter(p => p.y === y); return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, err: median(g.map(p => Math.abs(Math.log(p.v / p.md))))}; });
-  const tot = {n: P.length, k: P.filter(p => p.in).length};
+  const per = perAnno(P), tot = {n: P.length, k: P.filter(p => p.in).length};
   host.innerHTML = `
-    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%)${ok ? "" : `, e ${rc.sopra} volte la candela è uscita sopra`}. Dal ${yrs[0]}: ${tot.k} su ${tot.n}.</p>
-    <div class="chips"><span class="chip">Prossima ${name}: fascia <b>${it0(nx.lo)}–${it0(nx.hi)} pips</b> · mediana <b>${it0(nx.md)}</b></span>${ok ? "" : `<span class="chip">Usala solo come ordine di grandezza: la candela vera esce spesso sopra</span>`}</div>
+    <div class="chips"><span class="chip big">Prossima ${name}: <b>${it0(nx.md)} pips</b> · metà delle volte <b>${it0(nx.lo)}–${it0(nx.hi)}</b></span></div>
+    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%). Dal ${per[0].y}: ${tot.k} su ${tot.n}.</p>
     <div class="chart" id="prChart"></div>
-    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Scala logaritmica: ogni riga raddoppia.</p>
-    <div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Release</th><th>Dentro la fascia</th><th>Sopra</th><th>Errore tipico</th></tr></thead><tbody>
-      ${per.map(r => `<tr><td>${r.y}</td><td>${r.n}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>±${Math.round((Math.exp(r.err) - 1) * 100)}%</td></tr>`).join("")}
-    </tbody></table></div>
-    ${ml ? `<p class="small" style="margin-top:6px"><b>Machine learning a confronto</b> (stessa prova passo per passo, 2023–26, studio H-X23):</p>
-    <div style="overflow-x:auto"><table class="yt"><thead><tr><th>Metodo</th><th>Errore tipico</th><th>Correlazione</th></tr></thead><tbody>
-      ${ml.map(m => `<tr><td>${m.t}</td><td>${pm(m.err)}</td><td>${dec(m.sp)}</td></tr>`).join("")}</tbody></table></div>
-    <p class="small">Correlazione: 0 = non distingue le release grandi dalle piccole, 1 = perfetta. Nessun metodo, nemmeno il machine learning, sa dire prima <b>quale</b> release sarà grande: sa solo l'ordine di grandezza.</p>` : ""}`;
+    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Tocca un punto per i numeri.</p>
+    ${tabAnni(per)}`;
+  bandChart(host.querySelector("#prChart"), P, name);
+}
+function perAnno(P) {
+  return [...new Set(P.map(p => p.y))].sort().map(y => { const g = P.filter(p => p.y === y);
+    return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; });
+}
+function tabAnni(per) {
+  return `<div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Dentro la fascia</th><th>Sopra</th><th>Sotto</th></tr></thead><tbody>
+      ${per.map(r => `<tr><td>${r.y}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>${r.sotto}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+// P: [{t, y, v (vero), lo, md, hi, in}] in pips; scala logaritmica, dettaglio del punto più vicino al tocco
+function bandChart(ch, P, name) {
+  if (!ch || !P.length) return;
+  const yrs = [...new Set(P.map(p => p.y))].sort();
   const draw = () => {
-    const ch = host.querySelector("#prChart"), W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
     const t0 = P[0].t, t1 = P[P.length - 1].t, x = t => L + (t - t0) / Math.max(1, t1 - t0) * (W - L - R);
     const vals = P.flatMap(p => [p.v, p.lo, p.hi]).filter(v => v > 0), lmin = Math.log(Math.max(5, Math.min(...vals) * .85)), lmax = Math.log(Math.max(...vals) * 1.15);
     const y = v => T + (lmax - Math.log(v)) / (lmax - lmin) * (H - T - B);
@@ -436,8 +429,18 @@ function precisione(host, evs, N, price, ml, name) {
       const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, String(yy).slice(W < 520 ? 2 : 0))); });
     svg.append(mk("polygon", {points: P.map(p => `${x(p.t)},${y(p.hi)}`).join(" ") + " " + P.slice().reverse().map(p => `${x(p.t)},${y(p.lo)}`).join(" "), fill: css("--accent"), opacity: .16}));
     svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.md)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 1.6}));
-    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.2, fill: p.in ? css("--ink") : css("--panel"), stroke: css("--ink"), "stroke-width": 1.2})));
-    ch.innerHTML = ""; ch.append(svg);
+    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.4, fill: p.in ? css("--ink") : css("--panel"), stroke: p.v > p.hi ? css("--bad") : css("--ink"), "stroke-width": 1.4})));
+    const hl = mk("circle", {r: 7, fill: "none", stroke: css("--accent"), "stroke-width": 2, opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
+    svg.append(hl);
+    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      const p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
+      hl.setAttribute("cx", x(p.t)); hl.setAttribute("cy", y(p.v)); hl.setAttribute("opacity", 1);
+      const d = new Date(p.t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "UTC"});
+      tip.innerHTML = `${d}: <b>${it0(p.v)} pips</b><br>stima ${it0(p.md)} · fascia ${it0(p.lo)}–${it0(p.hi)}<br>${p.in ? "dentro" : p.v > p.hi ? "sopra la fascia" : "sotto la fascia"}`;
+      tip.hidden = false; tip.style.left = Math.min(r.width - 90, Math.max(90, x(p.t) * r.width / W)) + "px"; tip.style.top = (y(p.v) * r.height / H) + "px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
+    ch.innerHTML = ""; ch.append(svg, tip);
   };
   draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
 }
@@ -448,28 +451,39 @@ const qt = (a, p) => { const s = a.filter(x => x != null && !isNaN(x)).sort((x, 
 const utc = d => d.replace(" ", "T") + ":00Z";
 const ev = D.ev.map(e => { const k = e.m1c5 || [0, 0, 0, 0], su = Math.max(0, k[1]), giu = Math.max(0, -k[2]);
   return {...e, iso: utc(e.d), pct: e.m1_bid * 0.1 / e.prezzo * 100, contropct: (e.m1_mov > 0 ? giu : su) * 0.1 / e.prezzo * 100}; });
-const LAST = ev[ev.length - 1], PX = LAST.prezzo, recent = ev.slice(-12);
+const LAST = ev[ev.length - 1], LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PX = LV ? LV.oggi.prezzo : LAST.prezzo, recent = ev.slice(-12);
 const toPips = p => p / 100 * PX * 10;
-const band = {p25: toPips(qt(recent.map(e => e.pct), .25)), p50: toPips(qt(recent.map(e => e.pct), .5)), p75: toPips(qt(recent.map(e => e.pct), .75)), p90: toPips(qt(recent.map(e => e.pct), .9))};
-const BT = bandTest(ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct})).filter(e => e.pips > 0), 12);
+const qi = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
+const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct})).filter(e => e.pips > 0);
+const BT = bandTest(evs, 12), NXT = BT.next(PX), RC = BT.since(2023);
+const band = {p25: NXT.lo, p50: NXT.md, p75: NXT.hi, p90: toPips(qi(evs.slice(-12).map(e => e.pct), .9))};
 const contro80 = toPips(qt(recent.map(e => e.contropct), .8)), contro90 = toPips(qt(recent.map(e => e.contropct), .9));
+const NEXT = D.prossime[0];
 
-// prossima release
+// la strategia in ordine
 (() => {
-  const n = D.prossime[0], box = document.getElementById("when");
-  if (!n) { box.innerHTML = "<b>Nessuna data in calendario</b>"; }
-  else {
-    const names = n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).map(t => `<span>${t}</span>`).join("");
-    box.innerHTML = `<span class="small">${rome(n.t0, {weekday: "long"})}</span><b>${rome(n.t0, {day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}</b><div class="cd" id="cd"></div><div class="titles">${names}</div>`;
-    const tick = () => { const ms = new Date(n.t0) - Date.now(); if (ms <= 0) { document.getElementById("cd").textContent = "uscita"; return; }
-      const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; document.getElementById("cd").textContent = `tra ${d ? d + " g " : ""}${h} h ${m} min`; };
-    tick(); setInterval(tick, 30000);
-  }
-  document.getElementById("verdict").innerHTML = `
-    <div class="vrow"><span>Candela tipica</span><div><b>${it0(band.p25)}–${it0(band.p75)} pips</b><em>dal 2023 ci è stata ${BT.since(2023).k} volte su ${BT.since(2023).n}, al prezzo di ${it0(PX)} $</em></div></div>
-    <div class="vrow"><span>Spazio contro</span><div><b>${it0(contro80)}–${it0(contro90)} pips</b><em>quanto va contro la direzione finale prima di chiudere, 8 e 9 volte su 10</em></div></div>
-    <div class="vrow"><span>Direzione</span><div><b>nessuna</b><em>nessun metodo la indovina meglio del caso</em></div></div>`;
-  document.getElementById("sample").textContent = `Dalle ultime ${recent.length} release Retail e PPI, in % del prezzo di quel giorno, riportate al prezzo di oggi.`;
+  const L = LV ? LV.oggi.livelli : null, ora = LV ? new Date(LV.oggi.ultima_candela_utc).getTime() + 36e5 : null;
+  passi(document.getElementById("steps"), [
+    {tm: "Prima", t: NEXT ? `Prossima: ${rome(NEXT.t0, {weekday: "long", day: "numeric", month: "long"})} · ${rome(NEXT.t0, {hour: "2-digit", minute: "2-digit"})}` : "Nessuna data in calendario", k: NEXT ? NEXT.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).join(" · ") : "", a: "s1", d: "Escono alle 14:30 italiane."},
+    {tm: "La mattina", t: `La candela farà circa ${it0(band.p50)} pips`, k: `metà delle volte fra ${it0(band.p25)} e ${it0(band.p75)} pips`, d: `Dal minimo al massimo del primo minuto. Dal 2023 la fascia ci ha preso ${RC.k} volte su ${RC.n}.`, a: "s2"},
+    L && {tm: "La mattina e dopo la news", t: "Fin dove può arrivare l'oro oggi", k: `su fino a ${it2(L.su90)} · giù fino a ${it2(L.giu90)} (9 su 10)`, d: `Mai un take profit oltre questi prezzi. Aggiornato alle ${new Date(ora).toLocaleTimeString("it-IT", {timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit"})}.`, a: "s3"},
+    {tm: "14:30", t: "Stop e take profit", k: `stop oltre ${it0(contro90)} pips · take profit entro il 9 su 10`, d: "Lo spazio che la candela concede contro, e il tetto della giornata.", a: "s4"}]);
+})();
+
+// 1 · prossima release
+(() => {
+  const n = NEXT, box = document.getElementById("when");
+  if (!n) { box.innerHTML = "<b>Nessuna data in calendario</b>"; return; }
+  const names = n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).map(t => `<span>${t}</span>`).join("");
+  box.innerHTML = `<span class="small">${rome(n.t0, {weekday: "long"})}</span><b>${rome(n.t0, {day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}</b><div class="cd" id="cd"></div><div class="titles">${names}</div>`;
+  const tick = () => { const ms = new Date(n.t0) - Date.now(); if (ms <= 0) { document.getElementById("cd").textContent = "uscita"; return; }
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; document.getElementById("cd").textContent = `tra ${d ? d + " g " : ""}${h} h ${m} min`; };
+  tick(); setInterval(tick, 30000);
+})();
+
+// 2 · la candela: fascia al prezzo di oggi, poi quanto ci ha preso release per release
+(() => {
+  document.getElementById("sample").textContent = `Dalle ultime ${recent.length} release Retail e PPI, in % del prezzo di quel giorno, riportate al prezzo di oggi (${it0(PX)} $).`;
   const g = document.getElementById("gauge"), W = Math.max(330, Math.round(g.parentElement.clientWidth - 36)), L = 20, R = 20, y0 = 52;
   g.setAttribute("viewBox", `0 0 ${W} 110`);
   const vmax = Math.ceil(Math.max(band.p90, LAST.m1_bid) * 1.15 / 50) * 50, x = v => L + v / vmax * (W - L - R);
@@ -481,34 +495,19 @@ const contro80 = toPips(qt(recent.map(e => e.contropct), .8)), contro90 = toPips
   g.append(mk("text", {x: Math.min(x(band.p90) + 6, W - R - 90), y: y0 - 14, "font-size": 11, fill: css("--accent"), "font-family": MONO}, `1 su 10 oltre ${it0(band.p90)}`));
   g.append(mk("circle", {cx: x(LAST.m1_bid), cy: y0, r: 6, fill: css("--panel"), stroke: css("--ink"), "stroke-width": 2.5}));
   g.append(mk("text", {x: Math.min(W - R - 4, Math.max(L + 4, x(LAST.m1_bid))), y: 24, "text-anchor": x(LAST.m1_bid) > W - 120 ? "end" : x(LAST.m1_bid) < 120 ? "start" : "middle", "font-size": 12, fill: css("--ink2"), "font-family": MONO}, `ultima: ${it0(LAST.m1_bid)} pips`));
+  precisione(document.getElementById("prec"), evs, 12, PX, "release");
 })();
 
-// cosa funziona
+// 4 · stop e take profit
 (() => {
-  const Y = Math.max(...ev.map(e => e.y)), mY = median(ev.filter(e => e.y === Y).map(e => e.m1_bid)), m19 = median(ev.filter(e => e.y >= 2019 && e.y <= 2022).map(e => e.m1_bid));
-  const uY = ((D.tp && D.tp.ultime) || []).filter(r => r.d.startsWith(String(Y))), kB = uY.filter(r => r.arr_pips >= r.B_pips).length;
-  const LQ = D.liv && D.liv.giorno ? D.liv.giorno.metodi[D.liv.giorno.scelto]["2023-26"] : null, RD = D.vol ? D.vol.previsori[D.vol.scelto]["2023-26"] : null;
-  const RR = D.reg ? D.reg.tabella[D.reg.scelto]["2023-26"] : null, C = D.tp ? D.tp.uscite["2023-26"] : null;
-  board(document.getElementById("board"), [
-    {k: "good", t: "Funziona", items: [
-      mY && {t: "Quanto muove la prima candela", m: `${it0(mY)} pips di mediana nel ${Y} · la fascia "metà delle volte" ci ha preso ${BT.since(2023).k} su ${BT.since(2023).n} dal 2023`, d: `Dal minimo al massimo, wick compresa. Nel 2019–22 erano ${it0(m19)}.`, u: "Sai quanto spazio aspettarti: è nella prossima release, qui sopra."},
-      LQ && {t: "Fin dove può arrivare oggi", m: `livello 9 su 10: tiene ${Math.round(LQ.cop90_su * 100)} su 100${RD ? ` · range del giorno: errore ${pm(RD.errore_mediano)}, correlazione ${dec(RD.spearman)}` : ""}`, d: "Prevede la giornata, non la direzione.", u: "Mai un take profit oltre quel prezzo: è nel grafico qui sotto."}]}]);
+  const L = LV ? LV.oggi.livelli : null;
+  document.getElementById("verdict").innerHTML = `
+    <div class="vrow"><span>Stop</span><div><b>oltre ${it0(contro80)}–${it0(contro90)} pips</b><em>quando la direzione è giusta, 8 e 9 volte su 10 la candela non va contro di più prima di chiudere (ultime ${recent.length} release)</em></div></div>
+    <div class="vrow"><span>Take profit</span><div><b>${L ? `su entro ${it2(L.su90)}<br>giù entro ${it2(L.giu90)}` : "entro il livello 9 su 10"}</b><em>il livello 9 su 10 di oggi: oltre, 9 giorni su 10 l'oro non arriva (passo 3)</em></div></div>
+    <div class="vrow"><span>La candela</span><div><b>${it0(band.p25)}–${it0(band.p75)} pips</b><em>metà delle volte; 1 su 10 oltre ${it0(band.p90)} (passo 2)</em></div></div>`;
 })();
 
 oggi(D.liv, document.getElementById("oggi"));
-(() => {
-  const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct})).filter(e => e.pips > 0);
-  const price = D.liv && D.liv.giorno ? D.liv.giorno.oggi.prezzo : PX;
-  const ML = D.ml && D.ml.RETAIL_PPI ? [{t: "Memoria: ultime 12 release", err: D.ml.RETAIL_PPI.M0.errore, sp: D.ml.RETAIL_PPI.M0.spearman}, {t: "Machine learning lineare (11 variabili)", err: D.ml.RETAIL_PPI.M1.errore, sp: D.ml.RETAIL_PPI.M1.spearman}, {t: "Machine learning LightGBM", err: D.ml.RETAIL_PPI.M2.errore, sp: D.ml.RETAIL_PPI.M2.spearman}] : null;
-  precisione(document.getElementById("prec"), evs, 12, price, ML, "release");
-  metodi(document.getElementById("metodi"), [
-    {t: "Analisi tecnica prima della news", p: 50.0, n: 166},
-    {t: "Posizione nel range del giorno (ADR)", p: 47.5, n: 501},
-    {t: "Stop hunt: lo scatto torna indietro", p: 48.8, n: 937},
-    {t: "Consensus contro dato precedente (12 news)", p: 53.2, n: 797},
-    {t: "…solo PPI", p: 61.2, n: 49},
-    {t: "…solo Retail Sales (trovata dopo)", p: 67.5, n: 83, k: "warn"}]);
-})();
-simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), D.liv && D.liv.giorno && D.liv.giorno.oggi);
-document.getElementById("foot").textContent = "Prezzi: tick e candele Dukascopy. Dati e attese: calendario ForexFactory. Ogni numero viene da un test con le regole scritte prima (studi H-X15–H-X30 nella cartella docs del progetto).";
+simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
+document.getElementById("foot").textContent = "Prezzi: tick e candele Dukascopy. Dati e attese: calendario ForexFactory. Ogni numero viene da un test con le regole scritte prima (studi H-X15–H-X32 nella cartella docs del progetto).";
 </script>

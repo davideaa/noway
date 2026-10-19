@@ -146,8 +146,8 @@ Con Holm tutte le p corrette valgono 1.
 **Verdetto: nessuna regola funziona.**
 - I fade (R1, R2) perdono in tutti i periodi anche guardando minuto per
   minuto.
-- Il guadagno del controllo "ottimista" con le H1 veniva dai take profit
-  contati prima dell'ingresso: non esisteva.
+- Il guadagno del controllo "ottimista" con le H1 non c'è: con l'ordine
+  vero dei minuti le stesse regole perdono.
 - La rottura (R3) sta intorno a zero: non è un edge.
 
 I livelli del giorno servono per sapere **quanto spazio c'è** e dove

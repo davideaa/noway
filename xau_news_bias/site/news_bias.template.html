@@ -42,18 +42,21 @@ header,section{display:grid;gap:12px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* cosa funziona: due corsie per stato */
-.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;align-items:start}
-.lane{--lc:var(--good);background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:12px;padding:12px 16px 4px;display:grid;min-width:0}
-.lane.warn{--lc:var(--warn)}
-.lane-h{display:flex;align-items:center;gap:8px;font:700 12.5px/1 var(--f-num);letter-spacing:.08em;text-transform:uppercase;color:var(--lc);padding-bottom:10px}
-.lane-h i{width:10px;height:10px;border-radius:50%;background:var(--lc);flex:none}
-.it{padding:11px 0;border-top:1px solid var(--line);display:grid;gap:4px;min-width:0}
-.it b{font-size:16px;line-height:1.3}
-.it .m{justify-self:start;font:600 12.5px/1.35 var(--f-num);color:var(--lc);background:color-mix(in srgb,var(--lc) 13%,transparent);padding:3px 8px;border-radius:6px}
-.it p{font-size:14.5px;line-height:1.45;color:var(--ink2)}
-.it p.use{color:var(--ink);font-size:14.5px}
-.it p.use::before{content:"→ ";color:var(--lc);font-weight:700}
+/* la strategia, in ordine di tempo */
+.steps{list-style:none;margin:0;padding:0;display:grid}
+.steps li{position:relative;display:flex;gap:12px;padding-bottom:16px}
+.steps li:last-child{padding-bottom:0}
+.steps li::after{content:"";position:absolute;left:15px;top:34px;bottom:2px;width:2px;background:var(--line)}
+.steps li:last-child::after{display:none}
+.steps .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--panel);font:700 15px/32px var(--f-num);text-align:center}
+.steps .c{display:grid;gap:3px;min-width:0;padding-top:4px}
+.steps .tm{font:600 12px/1.2 var(--f-num);letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
+.steps .c>b{font-size:17px;line-height:1.3}
+.steps .k{justify-self:start;font:600 14px/1.4 var(--f-num);background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:7px}
+.steps p{font-size:14.5px;color:var(--ink2)}
+.steps a{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
+.steps a:hover{text-decoration:underline}
+.sec-tm{font:600 12px/1 var(--f-num);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 
 /* il trade, in ordine di tempo */
 .tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -80,6 +83,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font-size:14px;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
 .chip b{font-family:var(--f-num)}
+.chip.big{font-size:16px;padding:9px 13px;border-color:var(--accent)}
+.chip.big b{font-size:18px}
 .chart{position:relative;min-width:0}
 .chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 var(--f-num);padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
@@ -170,28 +175,43 @@ h1,h2{font-stretch:112%}
 
 <div class="wrap">
 <header>
-  <div class="eyebrow">XAUUSD · solo NFP</div>
-  <h1>NFP: fai il contrario della NFP precedente</h1>
-  <p class="lead">Se all'ultima NFP l'oro è salito nel primo minuto, stavolta SHORT. Se è sceso, LONG. Qui trovi la direzione della prossima, come fare il trade e fin dove può arrivare l'oro oggi.</p>
+  <div class="eyebrow">XAUUSD · solo NFP · ora italiana</div>
+  <h1>NFP: la strategia, in ordine</h1>
+  <p class="lead">Fai il contrario della NFP precedente: se l'ultima volta l'oro è salito nel primo minuto, stavolta SHORT; se è sceso, LONG. Qui sotto tutto quello che ti serve, nell'ordine in cui lo usi.</p>
 </header>
 
-<section aria-labelledby="h-next">
-  <h2 id="h-next">Prossima NFP</h2>
+<section aria-labelledby="h-plan">
+  <h2 id="h-plan">La strategia in 6 passi</h2>
+  <div class="panel" id="steps"></div>
+</section>
+
+<section aria-labelledby="h-next" id="s1">
+  <span class="sec-tm">1 · Giorni prima</span>
+  <h2 id="h-next">La direzione della prossima NFP</h2>
   <div class="live" id="live"></div>
-  <p class="small" id="livenote"></p>
+  <div class="panel" id="edge"></div>
 </section>
 
-<section aria-labelledby="h-ok">
-  <h2 id="h-ok">Cosa funziona</h2>
-  <div id="board"></div>
+<section aria-labelledby="h-size" id="s2">
+  <span class="sec-tm">2 · La mattina</span>
+  <h2 id="h-size">Quanto si muoverà la candela</h2>
+  <div class="panel" id="prec"></div>
 </section>
 
-<section aria-labelledby="h-trade">
-  <h2 id="h-trade">Il trade, passo per passo</h2>
+<section aria-labelledby="h-day" id="s3">
+  <span class="sec-tm">3 · La mattina e dopo la news</span>
+  <h2 id="h-day">Fin dove può arrivare l'oro oggi</h2>
+  <div class="panel" id="oggi"></div>
+</section>
+
+<section aria-labelledby="h-trade" id="s4">
+  <span class="sec-tm">4–5 · Dalle 14:29:30 alle 14:31</span>
+  <h2 id="h-trade">Il trade: entrata, stop, uscita</h2>
   <div class="panel" id="tradebox"></div>
 </section>
 
-<section aria-labelledby="h-years">
+<section aria-labelledby="h-years" id="s6">
+  <span class="sec-tm">6 · Dopo</span>
   <h2 id="h-years">Tutte le NFP, anno per anno</h2>
   <div class="bar"><label class="small" for="budget">Budget all'anno</label><input id="budget" type="number" min="100" step="100" value="3000" inputmode="numeric"></div>
   <p class="small">Col tuo metodo: ogni anno riparti dal budget e a ogni NFP rischi cassa ÷ NFP rimaste nell'anno (gennaio 12, dicembre 1). Quando il profitto arriva al budget, metti via il budget e rischi solo il profitto. Tocca un anno, poi una NFP per vedere il grafico. Prezzi con spread fino a 40 pips e costi.</p>
@@ -199,26 +219,10 @@ h1,h2{font-stretch:112%}
   <div class="list" id="ylist"></div>
 </section>
 
-<section aria-labelledby="h-day">
-  <h2 id="h-day">Oggi: fin dove può arrivare l'oro</h2>
-  <div class="panel" id="oggi"></div>
-</section>
-
-<section aria-labelledby="h-size">
-  <h2 id="h-size">Quanto si muove la NFP: la stima e quanto ci prende</h2>
-  <p class="lead">La stima che usi per stop e take profit, rifatta per ogni NFP passata con solo i dati di prima: così vedi anno per anno quando ci ha preso e quando no.</p>
-  <div class="panel" id="prec"></div>
-</section>
-
-<section aria-labelledby="h-dir">
-  <h2 id="h-dir">Perché solo la NFP: tutti i metodi provati</h2>
-  <p class="lead">Per ogni idea, quante volte ha indovinato la direzione della prima candela. La barra chiara è il margine del caso: se tocca il 50%, l'idea non si distingue dal lancio di una moneta.</p>
-  <div class="panel"><div class="chart" id="metodi"></div><div class="chart" id="cumR"></div><p class="small" id="cumNote"></p></div>
-</section>
-
-<section aria-labelledby="h-why">
+<section aria-labelledby="h-why" id="s7">
+  <span class="sec-tm">Per capire</span>
   <h2 id="h-why">Perché la NFP fa più pips di prima</h2>
-  <p class="lead">Muovi i cursori o premi un anno: vedi quanto pesa ogni cosa e cosa si può sapere prima della news.</p>
+  <p class="lead">Muovi i cursori o premi un anno: vedi quanto pesa ogni cosa, prezzo, volatilità del giorno, sorpresa del dato e reazione del mercato.</p>
   <div class="panel" id="sim"></div>
 </section>
 
@@ -241,10 +245,11 @@ const pipsTxt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + it0(Math.abs(d) * 10
 const median = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
 const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
 
-function board(el, lanes) {
+// la strategia in ordine di tempo: ogni passo ha quando, cosa, il numero che conta e dove trovare il resto
+function passi(el, steps) {
   if (!el) return;
-  el.innerHTML = `<div class="board">` + lanes.map(L => `<div class="lane ${L.k}"><div class="lane-h"><i></i>${L.t}</div>` +
-    L.items.filter(Boolean).map(x => `<div class="it"><b>${x.t}</b>${x.m ? `<span class="m">${x.m}</span>` : ""}<p>${x.d}</p>${x.u ? `<p class="use">${x.u}</p>` : ""}</div>`).join("") + `</div>`).join("") + `</div>`;
+  el.innerHTML = `<ol class="steps">` + steps.filter(Boolean).map((x, i) => `<li><span class="n">${i + 1}</span><div class="c">
+    <span class="tm">${x.tm}</span><b>${x.t}</b>${x.k ? `<span class="k">${x.k}</span>` : ""}${x.d ? `<p>${x.d}${x.a ? ` <a href="#${x.a}">dettagli ↓</a>` : ""}</p>` : ""}</div></li>`).join("") + `</ol>`;
 }
 
 // ---------- oggi: candele con i livelli sopra (H-X28, metodo scelto)
@@ -289,7 +294,7 @@ function oggi(LV, el) {
       <br>· <b>Massimo e minimo di oggi</b> (linee grigie): probabilità di superarli ancora.
       <br>· <b>Di solito</b> (puntinate): se li supera, metà delle volte si ferma qui.
       <br>· <b>9 su 10</b> (tratteggiate, fascia colorata): solo 1 volta su 10 il prezzo va oltre.
-      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Non dicono la direzione.
+      <br><b>Come usarli:</b> take profit dentro la fascia, mai oltre il "9 su 10"; uno stop messo oltre il "9 su 10" viene preso di rado. Servono per stop e take profit, non per decidere dove entrare: non dicono la direzione.
       <br>🟢 Provato dal 2016 giorno per giorno: nel 2023–26 il "9 su 10" ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100 sopra e ${Math.round(Q.cop90_giu * 100)} sotto.
       <br>Si aggiorna da solo ogni ora, dalle 08 alle 22 dal lunedì al venerdì. Ultima candela: ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {weekday: "long", hour: "2-digit", minute: "2-digit"})}. Puoi mettere i prezzi del tuo MT5 qui sopra: i livelli si spostano subito.`;
   };
@@ -434,29 +439,6 @@ function simulatore(P, group, name, el, oggiO) {
   set(); draw();
 }
 
-// ---------- metodi provati per la direzione: % giuste con l'intervallo del caso
-function metodi(host, rows) {
-  if (!host) return;
-  const draw = () => {
-    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), narrow = W < 560, rowH = narrow ? 52 : 40, T = 22, B = 26;
-    const L = narrow ? 12 : 300, R = 54, H = T + B + rows.length * rowH;
-    const lo = 30, hi = 75, x = v => L + (v - lo) / (hi - lo) * (W - L - R);
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Percentuale di direzioni indovinate per ogni metodo provato"});
-    for (const v of [30, 40, 50, 60, 70]) { svg.append(mk("line", {x1: x(v), x2: x(v), y1: T - 6, y2: H - B, stroke: css(v === 50 ? "--ink2" : "--grid"), "stroke-dasharray": v === 50 ? "4 3" : ""}));
-      svg.append(mk("text", {x: x(v), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v + "%")); }
-    svg.append(mk("text", {x: x(50) + 4, y: T - 10, "font-size": 11, fill: css("--ink2")}, "50% = a caso"));
-    rows.forEach((r, i) => {
-      const y0 = T + i * rowH, yc = y0 + (narrow ? 34 : rowH / 2), ci = 196 * Math.sqrt(.25 / r.n), col = css(r.k === "good" ? "--good" : r.k === "warn" ? "--warn" : "--mute");
-      svg.append(mk("text", {x: narrow ? L : L - 10, y: narrow ? y0 + 14 : yc + 4, "text-anchor": narrow ? "start" : "end", "font-size": 12.5, fill: css("--ink"), "font-weight": r.k === "good" ? 700 : 500}, r.t));
-      svg.append(mk("line", {x1: x(Math.max(lo, r.p - ci)), x2: x(Math.min(hi, r.p + ci)), y1: yc, y2: yc, stroke: col, "stroke-width": 6, "stroke-linecap": "round", opacity: .35}));
-      svg.append(mk("circle", {cx: x(r.p), cy: yc, r: 6, fill: col}));
-      svg.append(mk("text", {x: Math.min(W - 4, x(Math.min(hi, r.p + ci)) + 8), y: yc + 4, "font-size": 12, "font-weight": 700, fill: col, "font-family": "ui-monospace,Menlo,monospace"}, Math.round(r.p) + "%"));
-    });
-    host.innerHTML = ""; host.append(svg);
-  };
-  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
-}
-
 // ---------- quanto era precisa la stima della candela, release per release (stessa regola del sito, solo dati di prima)
 function bandTest(evs, N) {
   const q = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
@@ -469,26 +451,33 @@ function bandTest(evs, N) {
   const since = y0 => { const g = P.filter(p => p.y >= y0); return {n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; };
   return {P, next, since};
 }
-function precisione(host, evs, N, price, ml, name) {
+function precisione(host, evs, N, price, name) {
   if (!host || !evs.length) return;
   const B = bandTest(evs, N), P = B.P, nx = B.next(price), rc = B.since(2023), ok = rc.n && rc.k / rc.n >= .4 && rc.k / rc.n <= .6;
-  const yrs = [...new Set(P.map(p => p.y))].sort();
-  const per = yrs.map(y => { const g = P.filter(p => p.y === y); return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, err: median(g.map(p => Math.abs(Math.log(p.v / p.md))))}; });
-  const tot = {n: P.length, k: P.filter(p => p.in).length};
+  const per = perAnno(P), tot = {n: P.length, k: P.filter(p => p.in).length};
   host.innerHTML = `
-    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%)${ok ? "" : `, e ${rc.sopra} volte la candela è uscita sopra`}. Dal ${yrs[0]}: ${tot.k} su ${tot.n}.</p>
-    <div class="chips"><span class="chip">Prossima ${name}: fascia <b>${it0(nx.lo)}–${it0(nx.hi)} pips</b> · mediana <b>${it0(nx.md)}</b></span>${ok ? "" : `<span class="chip">Usala solo come ordine di grandezza: la candela vera esce spesso sopra</span>`}</div>
+    <div class="chips"><span class="chip big">Prossima ${name}: <b>${it0(nx.md)} pips</b> · metà delle volte <b>${it0(nx.lo)}–${it0(nx.hi)}</b></span></div>
+    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%). Dal ${per[0].y}: ${tot.k} su ${tot.n}.</p>
     <div class="chart" id="prChart"></div>
-    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Scala logaritmica: ogni riga raddoppia.</p>
-    <div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Release</th><th>Dentro la fascia</th><th>Sopra</th><th>Errore tipico</th></tr></thead><tbody>
-      ${per.map(r => `<tr><td>${r.y}</td><td>${r.n}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>±${Math.round((Math.exp(r.err) - 1) * 100)}%</td></tr>`).join("")}
-    </tbody></table></div>
-    ${ml ? `<p class="small" style="margin-top:6px"><b>Machine learning a confronto</b> (stessa prova passo per passo, 2023–26, studio H-X23):</p>
-    <div style="overflow-x:auto"><table class="yt"><thead><tr><th>Metodo</th><th>Errore tipico</th><th>Correlazione</th></tr></thead><tbody>
-      ${ml.map(m => `<tr><td>${m.t}</td><td>${pm(m.err)}</td><td>${dec(m.sp)}</td></tr>`).join("")}</tbody></table></div>
-    <p class="small">Correlazione: 0 = non distingue le release grandi dalle piccole, 1 = perfetta. Nessun metodo, nemmeno il machine learning, sa dire prima <b>quale</b> release sarà grande: sa solo l'ordine di grandezza.</p>` : ""}`;
+    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Tocca un punto per i numeri.</p>
+    ${tabAnni(per)}`;
+  bandChart(host.querySelector("#prChart"), P, name);
+}
+function perAnno(P) {
+  return [...new Set(P.map(p => p.y))].sort().map(y => { const g = P.filter(p => p.y === y);
+    return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; });
+}
+function tabAnni(per) {
+  return `<div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Dentro la fascia</th><th>Sopra</th><th>Sotto</th></tr></thead><tbody>
+      ${per.map(r => `<tr><td>${r.y}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>${r.sotto}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+// P: [{t, y, v (vero), lo, md, hi, in}] in pips; scala logaritmica, dettaglio del punto più vicino al tocco
+function bandChart(ch, P, name) {
+  if (!ch || !P.length) return;
+  const yrs = [...new Set(P.map(p => p.y))].sort();
   const draw = () => {
-    const ch = host.querySelector("#prChart"), W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
     const t0 = P[0].t, t1 = P[P.length - 1].t, x = t => L + (t - t0) / Math.max(1, t1 - t0) * (W - L - R);
     const vals = P.flatMap(p => [p.v, p.lo, p.hi]).filter(v => v > 0), lmin = Math.log(Math.max(5, Math.min(...vals) * .85)), lmax = Math.log(Math.max(...vals) * 1.15);
     const y = v => T + (lmax - Math.log(v)) / (lmax - lmin) * (H - T - B);
@@ -500,8 +489,18 @@ function precisione(host, evs, N, price, ml, name) {
       const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, String(yy).slice(W < 520 ? 2 : 0))); });
     svg.append(mk("polygon", {points: P.map(p => `${x(p.t)},${y(p.hi)}`).join(" ") + " " + P.slice().reverse().map(p => `${x(p.t)},${y(p.lo)}`).join(" "), fill: css("--accent"), opacity: .16}));
     svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.md)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 1.6}));
-    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.2, fill: p.in ? css("--ink") : css("--panel"), stroke: css("--ink"), "stroke-width": 1.2})));
-    ch.innerHTML = ""; ch.append(svg);
+    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.4, fill: p.in ? css("--ink") : css("--panel"), stroke: p.v > p.hi ? css("--bad") : css("--ink"), "stroke-width": 1.4})));
+    const hl = mk("circle", {r: 7, fill: "none", stroke: css("--accent"), "stroke-width": 2, opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
+    svg.append(hl);
+    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      const p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
+      hl.setAttribute("cx", x(p.t)); hl.setAttribute("cy", y(p.v)); hl.setAttribute("opacity", 1);
+      const d = new Date(p.t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "UTC"});
+      tip.innerHTML = `${d}: <b>${it0(p.v)} pips</b><br>stima ${it0(p.md)} · fascia ${it0(p.lo)}–${it0(p.hi)}<br>${p.in ? "dentro" : p.v > p.hi ? "sopra la fascia" : "sotto la fascia"}`;
+      tip.hidden = false; tip.style.left = Math.min(r.width - 90, Math.max(90, x(p.t) * r.width / W)) + "px"; tip.style.top = (y(p.v) * r.height / H) + "px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
+    ch.innerHTML = ""; ch.append(svg, tip);
   };
   draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
 }
@@ -516,56 +515,59 @@ const rOf = e => e.sc.S1[e.rule[0]].r, hit = e => (e.rule === "LONG") === (e.mv 
 const stats = rows => ({n: rows.length, k: rows.filter(hit).length, mean: rows.reduce((a, e) => a + rOf(e), 0) / (rows.length || 1)});
 const sA = stats(NF), s3 = stats(NF.filter(e => e.d >= "2023-10-01"));
 
-// prossima NFP, dal registro che non si può modificare
+const LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PRICE = LV ? LV.oggi.prezzo : NF[NF.length - 1].ref;
+const RES = LIVE.filter(r => r.type === "result" && r.family === "NFP"), LK = RES.filter(r => r.hit).length;
+const OPEN = LIVE.filter(r => r.type === "prediction" && r.family === "NFP" && !RES.find(x => x.event_id === r.event_id));
+const U = (D.tp && D.tp.uscite && D.tp.uscite["2023-26"]) || {};
+const A = D.amp, toPips = p => p / 100 * PRICE * 10, NX = A && A.prossima ? {md: toPips(A.prossima.stima_pct), lo: toPips(A.prossima.lo_pct), hi: toPips(A.prossima.hi_pct)} : null;
+
+// 1 · la direzione, dal registro che non si può modificare
 (() => {
-  const preds = LIVE.filter(r => r.type === "prediction"), res = LIVE.filter(r => r.type === "result");
-  const open = preds.filter(p => p.family === "NFP" && !res.find(r => r.event_id === p.event_id));
-  $("#live").innerHTML = open.length ? open.map(p => `<div class="nx">
-      <div class="top"><span class="eyebrow">NFP</span><span class="cd" data-t="${p.t0_utc}"></span></div>
+  $("#live").innerHTML = OPEN.length ? OPEN.map(p => `<div class="nx">
+      <div class="top"><span class="eyebrow">Prossima NFP</span><span class="cd" data-t="${p.t0_utc}"></span></div>
       <h3>${romeD(utcOf(p.t0_utc), {weekday: "long", day: "numeric", month: "long"})} · ${romeD(utcOf(p.t0_utc), {hour: "2-digit", minute: "2-digit"})}</h3>
       <div class="top"><div class="bias ${p.bias[0]}">${p.bias}</div><span class="tag">si trada</span></div>
-      <p class="small">NFP del ${romeD(utcOf(p.precedente.t0_utc), {day: "2-digit", month: "2-digit", year: "numeric"})}: ${p.precedente.mv > 0 ? "salito" : "sceso"} di ${pipsOf(p.precedente.mv)} pips → oggi il contrario.</p></div>`).join("")
-    : `<div class="nx"><h3>La prossima bias viene scritta prima della NFP.</h3></div>`;
-  const nfp = res.filter(r => r.family === "NFP"), k = nfp.filter(r => r.hit).length, sR = nfp.reduce((a, r) => a + r.trade.S1.r, 0);
-  $("#livenote").innerHTML = `La direzione è scritta prima della news in un registro che non si può modificare. ${nfp.length ? `<b>Dal vivo: ${k} giuste su ${nfp.length}, ${sgnR(sR)}.</b>` : ""}`;
+      <p class="small">NFP del ${romeD(utcOf(p.precedente.t0_utc), {day: "2-digit", month: "2-digit", year: "numeric"})}: ${p.precedente.mv > 0 ? "salito" : "sceso"} di ${pipsOf(p.precedente.mv)} pips → stavolta il contrario.</p></div>`).join("")
+    : `<div class="nx"><h3>La direzione della prossima NFP viene scritta qui prima della news.</h3></div>`;
   const tick = () => document.querySelectorAll(".cd").forEach(x => { const ms = utcOf(x.dataset.t) - Date.now();
     if (ms <= 0) { x.textContent = "uscita, in attesa del risultato"; return; }
     const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4), s = Math.floor(ms % 6e4 / 1e3);
     x.textContent = d ? `fra ${d} g ${h} h ${m} min` : `fra ${h} h ${m} min ${s} s`; });
   tick(); setInterval(tick, 1000);
+  const w = Math.round(sA.k / sA.n * 10);
+  $("#edge").innerHTML = `<div class="odds"><div class="waffle" role="img" aria-label="${w} su 10">${Array.from({length: 10}, (_, i) => `<i class="${i < w ? "y" : ""}"></i>`).join("")}</div>
+      <p><b>Su 10 NFP la direzione è giusta circa ${w} volte</b>: ${sA.k} su ${sA.n} dal 2014 (${pct(sA.k / sA.n)}), ${sgnR(sA.mean)} a trade in media. Che sia fortuna ha probabilità ${dec(pOne(sA.k, sA.n), 3)}.</p></div>
+    <p class="small">La direzione si scrive prima della news in un registro che non si può modificare.${RES.length ? ` <b>Dal vivo: ${LK} ${LK === 1 ? "giusta" : "giuste"} su ${RES.length}.</b>` : ""} La regola l'ho trovata guardando questi stessi dati: la conferma vera è il dal vivo.</p>`;
 })();
 
-// cosa funziona
+// la strategia in ordine
 (() => {
-  const res = LIVE.filter(r => r.type === "result" && r.family === "NFP"), lk = res.filter(r => r.hit).length;
-  const U = (D.tp && D.tp.uscite && D.tp.uscite["2023-26"]) || {}, Y = D.tp ? Object.keys(D.tp.per_anno).sort().pop() : null;
-  const uY = ((D.tp && D.tp.ultime) || []).filter(r => Y && r.d.startsWith(Y)), med = median(uY.map(r => r.arr_pips)), kB = uY.filter(r => r.arr_pips >= r.B_pips).length;
-  const LQ = D.liv && D.liv.giorno ? D.liv.giorno.metodi[D.liv.giorno.scelto]["2023-26"] : null, RD = D.vol ? D.vol.previsori[D.vol.scelto]["2023-26"] : null;
-  board($("#board"), [
-    {k: "good", t: "Funziona", items: [
-      {t: "La regola NFP: c'è edge", m: `${pct(sA.k / sA.n)} giuste (${sA.k} su ${sA.n}) · ${sgnR(sA.mean)} a trade · p ${dec(pOne(sA.k, sA.n), 3)}`,
-       d: `Dal 2014 batte il caso${res.length ? `; dal vivo ${lk} su ${res.length}` : ""}. L'ho trovata guardando questi dati e prima del 2014 non funzionava (49%): la conferma vera è dal vivo.`, u: "Entra alle 14:29:30 nella direzione scritta in alto."},
-      U.C_bias != null && {t: "Chiudere alle 14:31", m: `${sgnR(U.C_bias)} a trade contro ${sgnR(U.TPb_bias)} col take profit (2023–26)`, d: "Il take profit taglia le candele grandi, che valgono più delle wick che tornano indietro.", u: "Niente take profit: aspetta la chiusura della candela."},
-      LQ && {t: "Fin dove può arrivare oggi", m: `livello 9 su 10: tiene ${Math.round(LQ.cop90_su * 100)} su 100${RD ? ` · range del giorno: errore ${pm(RD.errore_mediano)}, correlazione ${dec(RD.spearman)}` : ""}`, d: "Prevede la giornata, non la direzione.", u: "Mai un take profit oltre quel prezzo: è nel grafico qui sotto."}]}]);
+  const bias = OPEN.length ? OPEN[0].bias : null, L = LV ? LV.oggi.livelli : null;
+  const ora = LV ? new Date(LV.oggi.ultima_candela_utc).getTime() + 36e5 : null;
+  passi($("#steps"), [
+    {tm: "Giorni prima", t: bias ? `Direzione: <span class="${bias[0]}">${bias}</span>` : "Direzione: si scrive prima della NFP", k: `giusta ${sA.k} volte su ${sA.n} dal 2014 (${pct(sA.k / sA.n)})`, d: "Fai il contrario della NFP precedente.", a: "s1"},
+    NX && {tm: "La mattina", t: `La candela farà circa ${it0(NX.md)} pips`, k: `metà delle volte fra ${it0(NX.lo)} e ${it0(NX.hi)} pips`, d: "Dal minimo al massimo del primo minuto. Ti dice quanto spazio aspettarti.", a: "s2"},
+    L && {tm: "La mattina e dopo la news", t: "Fin dove può arrivare l'oro oggi", k: `su fino a ${it2(L.su90)} · giù fino a ${it2(L.giu90)} (9 su 10)`, d: `Mai un take profit oltre questi prezzi. Aggiornato alle ${new Date(ora).toLocaleTimeString("it-IT", {timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit"})}.`, a: "s3"},
+    {tm: "14:29:30", t: bias ? `Entra ${bias}` : "Entra nella direzione del passo 1", k: "stop 60 pips, al massimo 100", d: "Rischi solo quello che hai depositato: al massimo −1R.", a: "s4"},
+    {tm: "14:31:00", t: "Chiudi a fine candela, senza take profit", k: U.C_bias != null ? `${sgnR(U.C_bias)} a trade contro ${sgnR(U.TPb_bias)} col take profit (2023–26)` : "", d: "Il take profit taglia le candele grandi, che pagano più delle wick che tornano indietro.", a: "s4"},
+    {tm: "Dopo", t: "Controlla com'è andata", k: RES.length ? `dal vivo: ${LK} ${LK === 1 ? "giusta" : "giuste"} su ${RES.length}` : "", d: "Ogni NFP dal 2014, col grafico e i soldi col tuo metodo.", a: "s6"}]);
 })();
 
-// il trade in 4 passi
+// 4–5 · il trade
 (() => {
-  const Y = D.tp ? Object.keys(D.tp.per_anno).sort().pop() : null, PA = Y ? D.tp.per_anno[Y] : null, w = Math.round(sA.k / sA.n * 10);
+  const Y = D.tp ? Object.keys(D.tp.per_anno).sort().pop() : null, PA = Y ? D.tp.per_anno[Y] : null;
   $("#tradebox").innerHTML = `<div class="tl">
-      <div class="ts"><span>14:29:30</span><b>Entra</b><em>nella direzione scritta in alto</em></div>
-      <div class="ts"><span>subito</span><b>Stop 60–100 pips</b><em>rischi solo quello che hai depositato</em></div>
+      <div class="ts"><span>14:29:30</span><b>Entra</b><em>nella direzione del passo 1</em></div>
+      <div class="ts"><span>subito</span><b>Stop 60 pips</b><em>al massimo 100; rischi solo il deposito</em></div>
       <div class="ts"><span>14:30:00</span><b>Esce la NFP</b><em>non toccare niente</em></div>
       <div class="ts hl"><span>14:31:00</span><b>Chiudi</b><em>a fine candela, senza take profit</em></div></div>
-    <div class="odds"><div class="waffle" role="img" aria-label="${w} su 10">${Array.from({length: 10}, (_, i) => `<i class="${i < w ? "y" : ""}"></i>`).join("")}</div>
-      <p><b>Su 10 NFP la direzione è giusta circa ${w} volte</b> (${sA.k} su ${sA.n} dal 2014).</p></div>
     <div class="pay">
-      ${PA ? `<div><span>Direzione giusta (${Y}, chiusura tipica ${it0(PA.chiusura_pips)} pips)</span><b class="g">+${dec(PA.chiusura_pips / 100, 1)}R</b><span>con stop 100 pips, se non viene preso prima · +${dec(PA.chiusura_pips / 60, 1)}R con stop 60</span></div>` : ""}
-      <div><span>Direzione sbagliata</span><b class="r">−1R</b><span>lo stop, se la perdita resta il deposito</span></div>
+      ${PA ? `<div><span>Direzione giusta (${Y}, chiusura tipica ${it0(PA.chiusura_pips)} pips)</span><b class="g">+${dec(PA.chiusura_pips / 60, 1)}R</b><span>con stop 60 pips, se non viene preso prima · +${dec(PA.chiusura_pips / 100, 1)}R con stop 100</span></div>` : ""}
+      <div><span>Direzione sbagliata</span><b class="r">−1R</b><span>lo stop: la perdita resta il deposito</span></div>
       <div><span>In media, ultimi 3 anni</span><b>${sgnR(s3.mean)}</b><span>a NFP, con spread fino a 40 pips</span></div></div>
-    <p class="small"><b>Stop</b>: 60 pips è stato il migliore negli ultimi 3 anni (+0,92R a trade contro +0,49R con 100 pips), se la perdita resta il deposito. Con 50 o meno lo spread della news può prenderlo anche quando hai ragione. <b>Take profit</b>: nessuno, chiudi alle 14:31 (studi H-X12 e H-X19). Solo NFP: sul CPI la stessa regola non funziona.</p>`;
+    <p class="small"><b>Stop</b>: 60 pips è stato il migliore negli ultimi 3 anni (+0,92R a trade contro +0,49R con 100 pips). Con 50 o meno lo spread della news può prenderlo anche quando hai ragione.</p>
+    <p class="small"><b>Take profit</b>: nessuno, chiudi alle 14:31${U.C_bias != null ? ` (${sgnR(U.C_bias)} a trade contro ${sgnR(U.TPb_bias)} col take profit, 2023–26)` : ""}. Se lo vuoi comunque, mai oltre il livello 9 su 10 di oggi (passo 3).</p>`;
 })();
-
 
 // ---------- tutte le NFP, anno per anno (come il sito originale)
 const EV = D.ev, BINS = D.bins, st = {s: "S1", b: "rule"};
@@ -791,37 +793,23 @@ money();
 let rtL; addEventListener("resize", () => { clearTimeout(rtL); rtL = setTimeout(redrawOpen, 150); });
 
 oggi(D.liv, $("#oggi"));
-simulatore(D.pips29, "NFP", "NFP", $("#sim"), D.liv && D.liv.giorno && D.liv.giorno.oggi);
-// precisione della stima e metodi provati
+simulatore(D.pips29, "NFP", "NFP", $("#sim"), LV && LV.oggi);
+
+// 2 · quanto si muoverà la candela (H-X32: vince la media esponenziale delle ultime NFP)
 (() => {
-  const nf = EV.filter(e => e.f === "NFP" && e.sc && e.sc.S1 && e.sc.S1.c).map(e => { const pips = rangeOf(e), px = e.ref; return {t: utcOf(e.d).getTime(), y: e.y, pips, px, pct: pips / 10 / px * 100}; }).filter(e => e.pips > 0);
-  const price = D.liv && D.liv.giorno ? D.liv.giorno.oggi.prezzo : nf[nf.length - 1].px;
-  const ML = D.ml && D.ml.NFP ? [{t: "Memoria: ultime 12 NFP", err: D.ml.NFP.M0.errore, sp: D.ml.NFP.M0.spearman}, {t: "Machine learning lineare (11 variabili)", err: D.ml.NFP.M1.errore, sp: D.ml.NFP.M1.spearman}, {t: "Machine learning LightGBM", err: D.ml.NFP.M2.errore, sp: D.ml.NFP.M2.spearman}] : null;
-  precisione($("#prec"), nf, 24, price, ML, "NFP");
-  const C = (D.cpi || []).filter(e => e.rule && e.mv !== 0), ck = C.filter(e => (e.rule === "LONG") === (e.mv > 0)).length;
-  metodi($("#metodi"), [
-    {t: "Regola NFP: contrario della precedente", p: 100 * sA.k / sA.n, n: sA.n, k: "good"},
-    {t: "Stessa regola sul CPI", p: 100 * ck / C.length, n: C.length},
-    {t: "Nowcast Fed di Cleveland (CPI)", p: 54.4, n: 90},
-    {t: "Consensus contro dato precedente", p: 53.2, n: 797},
-    {t: "Analisi tecnica prima della news", p: 50.0, n: 166},
-    {t: "Stop hunt: lo scatto torna indietro", p: 48.8, n: 937},
-    {t: "Posizione nel range del giorno (ADR)", p: 47.5, n: 501}]);
-  const host = $("#cumR"), series = [{lab: "regola NFP", col: "--good", rows: NF.slice().sort((a, b) => a.d < b.d ? -1 : 1).map(e => [utcOf(e.d).getTime(), rOf(e)])},
-    {lab: "stessa regola sul CPI", col: "--bad", rows: C.slice().sort((a, b) => a.d < b.d ? -1 : 1).map(e => [utcOf(e.d).getTime(), e.r])}];
-  series.forEach(s => { let c = 0; s.pts = s.rows.map(([t, r]) => [t, c += r]); });
-  const draw = () => { const W = Math.max(320, Math.min(900, host.clientWidth || 640)), H = 230, L = 44, R = 12, T = 16, B = 24;
-    const all = series.flatMap(s => s.pts), t0 = Math.min(...all.map(p => p[0])), t1 = Math.max(...all.map(p => p[0])), v0 = Math.min(0, ...all.map(p => p[1])), v1 = Math.max(0, ...all.map(p => p[1]));
-    const x = t => L + (t - t0) / (t1 - t0) * (W - L - R), y = v => T + (v1 - v) / (v1 - v0) * (H - T - B);
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "R accumulato: regola NFP contro la stessa regola sul CPI"});
-    const st = [5, 10, 20, 25, 50].find(s => (v1 - v0) / s <= 6) || 50;
-    for (let v = Math.ceil(v0 / st) * st; v <= v1; v += st) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css(v === 0 ? "--ink2" : "--grid")})); svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, (v > 0 ? "+" : "") + v + "R")); }
-    for (let yy = new Date(t0).getUTCFullYear() + 1; yy <= new Date(t1).getUTCFullYear(); yy += W < 520 ? 3 : 2) svg.append(mk("text", {x: x(Date.UTC(yy, 0, 1)), y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, yy));
-    series.forEach(s => { svg.append(mk("polyline", {points: s.pts.map(p => `${x(p[0])},${y(p[1])}`).join(" "), fill: "none", stroke: css(s.col), "stroke-width": 2.2}));
-      const lp = s.pts[s.pts.length - 1]; svg.append(mk("text", {x: x(lp[0]) - 4, y: y(lp[1]) + (lp[1] >= 0 ? -8 : 16), "text-anchor": "end", "font-size": 12, "font-weight": 700, fill: css(s.col)}, `${s.lab} ${lp[1] >= 0 ? "+" : "−"}${Math.abs(lp[1]).toFixed(0)}R`)); });
-    host.innerHTML = ""; host.append(svg); };
-  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
-  $("#cumNote").innerHTML = `Sopra: in verde l'idea che funziona, in grigio quelle che non si distinguono dal caso. Sotto: la somma dei risultati, una NFP o un CPI alla volta dal 2014, con lo spread fino a 40 pips. La stessa regola sulla NFP sale, sul CPI scende: il CPI non ha un edge di direzione. Studi H-X11, H-X15, H-X23, H-X24, H-X26, H-X27.`;
+  const host = $("#prec");
+  if (!A || !NX) { host.innerHTML = `<p>Nessun metodo ha passato la prova: si sa solo l'ordine di grandezza.</p>`; return; }
+  const P = A.casi.map(c => ({t: Date.parse(c.data + "T12:30:00Z"), y: c.y, v: c.vero, lo: c.lo, md: c.stima, hi: c.hi, in: c.vero >= c.lo && c.vero <= c.hi}));
+  const a = A.per["2019-22"], b = A.per["2023-26"], per = perAnno(P), last2 = per.filter(r => r.y >= 2025), k2 = last2.reduce((s, r) => s + r.k, 0), n2 = last2.reduce((s, r) => s + r.n, 0), yl = per[per.length - 1];
+  host.innerHTML = `
+    <div class="chips"><span class="chip big">Prossima NFP: <b>${it0(NX.md)} pips</b> · metà delle volte <b>${it0(NX.lo)}–${it0(NX.hi)}</b></span><span class="chip">al prezzo di ${it0(PRICE)} $</span></div>
+    <p>🟢 <b>Passa la prova</b>: dal 2019 la candela è caduta nella fascia ${a.dentro + b.dentro} volte su ${a.n + b.n} (${pct((a.dentro + b.dentro) / (a.n + b.n))}; giusto sarebbe 50%), sia nel 2019–22 sia nel 2023–26. Errore tipico ${pm(b.errore)}.</p>
+    <p>⚠️ <b>Negli ultimi due anni ci prende meno</b>: ${k2} volte su ${n2}. Nel ${yl.y} la NFP è uscita sopra la fascia ${yl.sopra} volte su ${yl.n}: la candela può essere molto più grande della stima.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Ogni punto è una NFP vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo (wick compresa). La linea è la stima fatta <b>prima</b> di quella NFP, la fascia è dove cade metà delle volte. Punto pieno = dentro, vuoto = fuori, bordo rosso = sopra. Tocca un punto per i numeri.</p>
+    <p class="small"><b>Come si calcola</b>, prima di ogni NFP: 1) la media delle candele NFP passate, in % del prezzo, dove la più recente pesa di più (il peso si dimezza ogni 3 NFP); 2) si corregge con quanto ha sbagliato nelle 24 NFP prima, e la fascia è dove è caduta la metà centrale degli errori; 3) si riporta al prezzo di oggi. Ho provato ${A.n_metodi} modi (ultime 24, 12 o 6 NFP, questa media, la volatilità del giorno, la formula prezzo + volatilità, il machine learning) con le regole scritte prima: ${A.calibrati.length} passano, e questo è il più semplice fra i più precisi (studio H-X32).${A.recenti.length ? ` La NFP del ${A.recenti.map(r => r.data.split("-").reverse().join("/")).join(", ")} (${A.recenti.map(r => it0(r.vero) + " pips").join(", ")}) è già dentro la stima della prossima.` : ""}</p>
+    ${tabAnni(per)}`;
+  bandChart(host.querySelector("#prChart"), P, "NFP");
 })();
-$("#foot").textContent = "Prezzi: tick e candele Dukascopy. Dati e attese: calendario ForexFactory. Ogni numero viene da un test con le regole scritte prima (studi H-X8–H-X30 nella cartella docs del progetto).";
+$("#foot").textContent = "Prezzi: tick e candele Dukascopy. Dati e attese: calendario ForexFactory. Ogni numero viene da un test con le regole scritte prima (studi H-X8–H-X32 nella cartella docs del progetto).";
 </script>

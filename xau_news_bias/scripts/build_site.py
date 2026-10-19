@@ -20,9 +20,16 @@ def volatilita():
     return {"scelto": d["scelto"], "previsori": {d["scelto"]: d["previsori"][d["scelto"]]}}
 
 
-def ml():
-    p = load(HX16 / "hx23_modello.json")["punteggi"]
-    return {g: {m: p[m][f"{g}|2023-26"] for m in ("M0", "M1", "M2")} for g in ("NFP", "RETAIL_PPI")}
+def ampiezza():
+    """H-X32: il metodo vincente per stimare la candela NFP, NFP per NFP, e la stima della prossima in % del prezzo."""
+    a = load(HX16 / "hx32_ampiezza_nfp.json")
+    m = a["vincitore"]
+    if not m:
+        return None
+    r = a["metodi"][m]
+    return {"metodo": m, "calibrati": a["calibrati"], "n_metodi": len(a["metodi"]), "per": {p: r[p] for p in ("2019-22", "2023-26")},
+            "casi": a["casi_vincitore"], "recenti": a["recenti_fuori_dataset"],
+            "prossima": {k: a["prossima"][k] for k in ("stima_pct", "lo_pct", "hi_pct")} if a["prossima"] else None}
 
 
 def pips29(group):
@@ -37,8 +44,7 @@ if __name__ == "__main__":
           for e in site["ev"] if e["f"] == "NFP"]
     log = ROOT / "live" / "hx8_live.jsonl"
     tp = load(HX16 / "hx19_tp.json")["NFP"]
-    cpi = [{"d": e["d"], "mv": e["mv"], "rule": e["rule"], "r": e["sc"]["S1"][e["rule"][0]]["r"]} for e in site["ev"] if e["f"] == "CPI" and e["rule"]]
-    data = {"ev": ev, "bins": site["bins"], "cpi": cpi, "ml": ml(),
+    data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
             "tp": {k: tp[k] for k in ("uscite", "per_anno", "ultime")},
             "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP")}
