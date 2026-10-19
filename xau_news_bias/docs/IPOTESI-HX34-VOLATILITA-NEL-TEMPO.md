@@ -124,8 +124,8 @@ File: `research_output/phase2/hx16/hx34_volatilita_tempo.json`.
 - **Descrittivo, controllo fatto dopo**, che cambia il senso. Le
   esplosioni vengono a gruppi di mesi consecutivi. Dei 19 mesi, 11 sono
   l'**inizio** di un'esplosione (4 nel 2011–18, 7 nel 2019–26):
-  - W1 ne ha annunciato **1** su 11;
-  - W2 (GVZ) **4** su 11: 2014-11, 2020-03, 2022-03, 2025-12;
+  - W1 ne ha annunciato **1** su 11 (2024-04);
+  - W2 (GVZ) **4** su 11 (esplosioni di 2014-11, 2020-03, 2022-03, 2026-01);
   - W2 è acceso anche in 23 mesi tranquilli senza esplosione.
 - Quindi i segnali dicono soprattutto che **un'esplosione già iniziata
   continua** anche il mese dopo. L'inizio di un'esplosione da un periodo
@@ -135,7 +135,7 @@ File: `research_output/phase2/hx16/hx34_volatilita_tempo.json`.
 **Verdetto.**
 - Nel tempo la volatilità si prevede meglio della singola news:
   - il mese dopo circa ±14–20%;
-  - la media di 6 NFP circa ±15–21%.
+  - la media di 6 NFP circa ±17–23%.
   - Non abbastanza per la soglia scritta prima (±16% in tutti i periodi
     sul mese).
 - Un'esplosione in corso continua: col GVZ alto o la volatilità già
