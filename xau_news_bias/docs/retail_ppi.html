@@ -138,6 +138,12 @@ details.more[open]{display:grid;gap:12px}
 .cleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink2)}
 .cleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .cleg b{font-family:var(--f-num);color:var(--ink)}
+.rpbar{display:flex;gap:8px;align-items:stretch;min-width:0}
+.rpbar select{font:600 14px var(--f-num);padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+.rpbar .strip{flex:1;min-width:0}
+.rpctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rpctl>button{font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.rpctl>button.play{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .next{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
 @media (max-width:720px){.next{grid-template-columns:1fr}}
 .when b{display:block;font:700 26px/1.15 var(--f-disp)}

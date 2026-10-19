@@ -145,6 +145,12 @@ details.more[open]{display:grid;gap:12px}
 .cleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink2)}
 .cleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .cleg b{font-family:var(--f-num);color:var(--ink)}
+.rpbar{display:flex;gap:8px;align-items:stretch;min-width:0}
+.rpbar select{font:600 14px var(--f-num);padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+.rpbar .strip{flex:1;min-width:0}
+.rpctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rpctl>button{font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.rpctl>button.play{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 h1,h2{font-stretch:112%}
 .live{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
 .nx{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
@@ -207,9 +213,9 @@ h1,h2{font-stretch:112%}
 <section class="hero" id="hero" aria-label="Prossima NFP"></section>
 
 <section class="sec" aria-labelledby="h-ex">
-  <h2 id="h-ex">Le ultime NFP, rigiocate</h2>
-  <p class="one">Con quello che il sito diceva <b>prima</b> della news. Tocca una NFP.</p>
-  <div class="strip" id="strip" role="group" aria-label="Scegli una NFP"></div>
+  <h2 id="h-ex">Rigioca una NFP</h2>
+  <p class="one">Dal minuto prima, con quello che si sapeva <b>allora</b>. Scegli l'anno e la NFP, poi premi ▶.</p>
+  <div class="rpbar"><select id="rpYear" aria-label="Anno"></select><div class="strip" id="strip" role="group" aria-label="Scegli una NFP"></div></div>
   <div class="panel" id="replay"></div>
 </section>
 
@@ -550,93 +556,102 @@ const r50 = v => Math.round(v / 10) * 10;
 
 // 2 · le ultime NFP rigiocate, con le indicazioni di allora (direzione, stop 60, candela prevista); parte in fondo, dopo le funzioni della lista
 const replayInit = () => {
-  const L12 = NF.filter(e => R60[e.id] != null).slice(-12), host = $("#replay"), strip = $("#strip");
-  if (!L12.length) return;
-  let cur = L12[L12.length - 1], TF = 60;
-  const tot = L12.reduce((a, e) => a + R60[e.id], 0), kk = L12.filter(e => hit(e)).length;
-  strip.innerHTML = L12.map(e => { const r = R60[e.id]; return `<button data-id="${e.id}" class="${r > 0 ? "w" : "l"}" aria-pressed="false">${fDate(e, true).slice(0, 5)}<b>${sgnR(r).replace(",00R", "R")}</b></button>`; }).join("");
-  host.innerHTML = `<div class="presets" role="group" aria-label="Candele"><button data-tf="60" aria-pressed="true">1 minuto</button><button data-tf="5" aria-pressed="false">zoom 5 secondi</button></div>
-    <div class="chart" id="rpChart"></div><p class="one" id="rpTxt"></p>
-    <p class="small">Ultime ${L12.length}: ${kk} giuste, <b>${sgnR(tot)}</b> in totale con stop 60.</p>`;
-  // candele bid ricostruite dai blocchi da 5 secondi, raggruppate nel timeframe scelto
-  const candele = (e, sz) => { const out = new Map();
-    BINS.forEach((b, i) => { const v = e.sc.S1.c[i]; if (!v) return; const k = Math.floor(b / sz) * sz, o = out.get(k), q = v.map(x => e.ref + x / 100);
+  const ALL = NF.filter(e => R60[e.id] != null), host = $("#replay"), strip = $("#strip"), ysel = $("#rpYear");
+  if (!ALL.length) return;
+  const M1 = D.m1 || {}, years = [...new Set(ALL.map(e => e.y))].sort((a, b) => b - a);
+  if (A) (A.tutti || []).forEach(c => { if (!EST[c.data]) EST[c.data] = c; });
+  let cur = ALL[ALL.length - 1], Y = cur.y, TF = 60, tau = -60, timer = null;
+  ysel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+  host.innerHTML = `<div class="rpctl"><button class="play" id="rpPlay">▶ Avvia</button><button id="rpAll">Mostra tutto</button><span style="flex:1"></span>
+      <div class="presets" role="group" aria-label="Candele"><button data-tf="60" aria-pressed="true">1 min</button><button data-tf="5" aria-pressed="false">5 s</button></div></div>
+    <div class="chart" id="rpChart"></div><p class="one" id="rpTxt"></p><p class="small" id="rpYearTxt"></p>`;
+  const candele = (e, sz, upto = Infinity) => { const out = new Map();
+    BINS.forEach((b, i) => { const v = e.sc.S1.c[i]; if (!v || b >= upto) return; const k = Math.floor(b / sz) * sz, o = out.get(k), q = v.map(x => e.ref + x / 100);
       if (!o) out.set(k, {t: k, o: q[0], h: q[1], l: q[2], c: q[3]}); else { o.h = Math.max(o.h, q[1]); o.l = Math.min(o.l, q[2]); o.c = q[3]; } });
     return [...out.values()].sort((a, b) => a.t - b.t); };
-  const M1 = D.m1 || {};
+  const fillStrip = () => {
+    const L = ALL.filter(e => e.y === Y);
+    strip.innerHTML = L.map(e => { const r = R60[e.id]; return `<button data-id="${e.id}" class="${r > 0 ? "w" : "l"}" aria-pressed="${e.id === cur.id}">${fDate(e, true).slice(0, 5)}<b>${sgnR(r).replace(",00R", "R")}</b></button>`; }).join("");
+    strip.querySelectorAll("button").forEach(b => b.onclick = () => { cur = ALL.find(e => e.id === b.dataset.id); reset(); });
+    const tot = L.reduce((a, e) => a + R60[e.id], 0), k = L.filter(e => hit(e)).length;
+    $("#rpYearTxt").innerHTML = `${Y}: ${L.length} NFP, ${k} giuste, <b>${sgnR(tot)}</b> con stop 60.`;
+    strip.scrollLeft = strip.scrollWidth; };
+  const stop = () => { if (timer) { clearInterval(timer); timer = null; } $("#rpPlay").textContent = tau >= 1800 ? "↺ Rigioca" : "▶ Avvia"; };
+  const reset = () => { stop(); tau = -60; draw(); };
   const draw = () => {
     strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === cur.id)));
     host.querySelectorAll(".presets button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.tf === TF)));
-    const e = cur, d = e.rule === "LONG" ? 1 : -1, tr = e.sc.S1[e.rule[0]], r = R60[e.id], st = 6, en = tr.en, sl = en - d * st;
+    const e = cur, d = e.rule === "LONG" ? 1 : -1, tr = e.sc.S1[e.rule[0]], r = R60[e.id], st = 6, en = tr.en, sl = en - d * st, es = EST[e.d.slice(0, 10)];
     const fine = candele(e, 5);
     let exT = 60, ex = en + d * r * st, preso = false;
     if (r <= -0.999) { const hb = fine.find(b => b.t >= -60 && (d > 0 ? b.l <= sl : b.h >= sl)); exT = hb ? hb.t + 5 : 60; ex = sl; preso = true; }
+    const done = tau >= exT;
     const ch = host.querySelector("#rpChart"), W = Math.max(320, Math.min(900, ch.clientWidth || 640)), mob = W < 520;
-    const m1 = TF === 60 && M1[e.id], unit = m1 ? 60 : 5, span = mob ? 22 * 60 : 45 * 60;
-    const C = m1 ? M1[e.id].filter(c => c[0] * 60 >= -span && c[0] * 60 < span).map(c => ({t: c[0] * 60, o: c[1], h: c[2], l: c[3], c: c[4], v: c[5]}))
-                 : fine.filter(c => c.t >= -120 && c.t < 120);
-    const H = mob ? 340 : 420, Lm = 6, R = mob ? 70 : 78, T = 30, VH = m1 ? (mob ? 40 : 56) : 0, B = 24, PB = H - B - VH - (m1 ? 6 : 0);
-    const t0 = C[0].t, t1 = C[C.length - 1].t + unit, x = t => Lm + (t - t0) / (t1 - t0) * (W - Lm - R);
-    let lo = Math.min(...C.map(c => c.l), sl, ex, en), hi = Math.max(...C.map(c => c.h), sl, ex, en); const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+    const m1 = TF === 60 && M1[e.id], unit = m1 ? 60 : 5, span = mob ? 20 * 60 : 30 * 60;
+    // tutte le candele (per la scala) e quelle visibili fino a tau; la candela in corso si forma dai blocchi da 5 secondi
+    const allC = m1 ? M1[e.id].filter(c => c[0] * 60 >= -span && c[0] * 60 < span).map(c => ({t: c[0] * 60, o: c[1], h: c[2], l: c[3], c: c[4], v: c[5]})) : fine.filter(c => c.t >= -120 && c.t < 120);
+    let C = allC.filter(c => c.t + unit <= tau);
+    const part = allC.find(c => c.t < tau && c.t + unit > tau);
+    if (part) { const pc = candele(e, unit, tau).find(c => c.t === part.t); if (pc) C = C.concat([{...pc, v: part.v != null ? part.v * (tau - part.t) / unit : null}]); else C = C.concat([part]); }
+    const H = mob ? 340 : 420, Lm = 6, R = mob ? 70 : 96, T = 30, VH = m1 ? (mob ? 40 : 56) : 0, B = 24, PB = H - B - VH - (m1 ? 6 : 0);
+    const t0 = allC[0].t, t1 = allC[allC.length - 1].t + unit, x = t => Lm + (t - t0) / (t1 - t0) * (W - Lm - R);
+    const tgt = es ? [en + d * es.lo / 10, en + d * es.hi / 10, en + d * es.stima / 10] : [];
+    let lo = Math.min(...allC.map(c => c.l), sl, ex, en, ...tgt), hi = Math.max(...allC.map(c => c.h), sl, ex, en, ...tgt); const pad = (hi - lo) * .06; lo -= pad; hi += pad;
     const y = p => T + (hi - p) / (hi - lo) * (PB - T);
-    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `NFP del ${fDate(e)}: ${e.rule}, stop 60 pips, ${sgnR(r)}`});
-    // griglia e asse dei prezzi a destra
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `NFP del ${fDate(e)}: ${e.rule}, stop 60 pips`});
     const stp = [1, 2, 2.5, 5, 10, 20, 25, 50, 100].find(s => (hi - lo) / s <= 7) || 100;
     for (let p = Math.ceil(lo / stp) * stp; p <= hi; p += stp) { svg.append(mk("line", {x1: Lm, x2: W - R, y1: y(p), y2: y(p), stroke: css("--grid")}));
       svg.append(mk("text", {x: W - R + 6, y: y(p) + 4, "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(p))); }
-    const tstep = m1 ? (mob ? 600 : 900) : 30;
+    const tstep = m1 ? 600 : 30;
     for (let t = Math.ceil(t0 / tstep) * tstep; t < t1; t += tstep) { svg.append(mk("line", {x1: x(t), x2: x(t), y1: T, y2: H - B, stroke: css("--grid")}));
       if (x(t) > Lm + 22 && x(t) < W - R - 22) svg.append(mk("text", {x: x(t), y: H - 8, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, fClock(e, t, !m1))); }
-    svg.append(mk("line", {x1: Lm, x2: W - R, y1: PB, y2: PB, stroke: css("--line")}));
-    // la news
+    if (m1) svg.append(mk("line", {x1: Lm, x2: W - R, y1: PB, y2: PB, stroke: css("--line")}));
     svg.append(mk("line", {x1: x(0), x2: x(0), y1: T, y2: H - B, stroke: css("--accent"), "stroke-dasharray": "4 3"}));
     svg.append(mk("text", {x: x(0) - 5, y: T + 12, "text-anchor": "end", "font-size": 11, "font-weight": 700, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, "NFP"));
-    // strumento posizione: rosso fra entrata e stop, verde fra entrata e uscita
-    const bx = (p1, p2, col, op) => svg.append(mk("rect", {x: x(-60), y: Math.min(y(p1), y(p2)), width: Math.max(2, x(exT) - x(-60)), height: Math.max(1, Math.abs(y(p1) - y(p2))), fill: css(col), opacity: op}));
-    bx(en, sl, "--bad", .22); if (!preso) bx(en, ex, r > 0 ? "--good" : "--bad", .24);
-    // candele e volume
-    const slot = x(unit) - x(0), bw = Math.max(1.5, slot * .7), vmax = m1 ? Math.max(...C.map(c => c.v)) : 1;
+    // candela prevista, nella direzione della regola: zona fra il minimo e il massimo della stima, linea alla stima centrale
+    if (es) { const xa = x(0), xb = x(60) + (x(60) - x(0)) * 2;
+      svg.append(mk("rect", {x: xa, y: Math.min(y(tgt[0]), y(tgt[1])), width: xb - xa, height: Math.abs(y(tgt[0]) - y(tgt[1])), fill: css("--accent"), opacity: .14}));
+      svg.append(mk("line", {x1: xa, x2: xb, y1: y(tgt[2]), y2: y(tgt[2]), stroke: css("--accent"), "stroke-width": 1.4, "stroke-dasharray": "5 3"}));
+      svg.append(mk("text", {x: xa - 6, y: y(tgt[2]) + 4, "text-anchor": "end", "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, `prevista ~${r50(es.stima)} pips`)); }
+    // posizione: dall'entrata fino a tau (o all'uscita)
+    const xe = x(Math.min(Math.max(tau, -60), exT)), wbox = Math.max(2, xe - x(-60));
+    const bx = (p1, p2, col, op) => svg.append(mk("rect", {x: x(-60), y: Math.min(y(p1), y(p2)), width: Math.max(wbox, 2), height: Math.max(1, Math.abs(y(p1) - y(p2))), fill: css(col), opacity: op}));
+    bx(en, sl, "--bad", .2); if (done && !preso) bx(en, ex, r > 0 ? "--good" : "--bad", .24);
+    const slot = x(unit) - x(0), bw = Math.max(1.5, slot * .7), vmax = m1 ? Math.max(...allC.map(c => c.v)) : 1;
     C.forEach(c => { const up = c.c >= c.o, col = css(up ? "--up" : "--dn"), cx = x(c.t) + slot / 2;
       svg.append(mk("line", {x1: cx, x2: cx, y1: y(c.h), y2: y(c.l), stroke: col, "stroke-width": 1}));
       svg.append(mk("rect", {x: cx - bw / 2, y: y(Math.max(c.o, c.c)), width: bw, height: Math.max(1, Math.abs(y(c.o) - y(c.c))), fill: col}));
-      if (m1) svg.append(mk("rect", {x: cx - bw / 2, y: H - B - c.v / vmax * VH, width: bw, height: c.v / vmax * VH, fill: col, opacity: .45})); });
-    // linee del trade
-    const hl = (p, col, w) => svg.append(mk("line", {x1: x(-60), x2: x(exT), y1: y(p), y2: y(p), stroke: css(col), "stroke-width": w}));
-    hl(sl, "--stop", 1.4); hl(en, "--entry", 1.8); if (!preso) hl(ex, r > 0 ? "--good" : "--bad", 1.4);
+      if (m1 && c.v != null) svg.append(mk("rect", {x: cx - bw / 2, y: H - B - c.v / vmax * VH, width: bw, height: c.v / vmax * VH, fill: col, opacity: .45})); });
+    const hl = (p, col, w, x2) => svg.append(mk("line", {x1: x(-60), x2, y1: y(p), y2: y(p), stroke: css(col), "stroke-width": w}));
+    hl(sl, "--stop", 1.4, x(-60) + Math.max(wbox, 30)); hl(en, "--entry", 1.8, x(-60) + Math.max(wbox, 30));
     svg.append(mk("circle", {cx: x(-60), cy: y(en), r: 4, fill: css("--entry"), stroke: css("--panel"), "stroke-width": 1.5}));
-    svg.append(mk("circle", {cx: x(exT), cy: y(ex), r: 4.5, fill: css(r > 0 ? "--good" : "--bad"), stroke: css("--panel"), "stroke-width": 1.5}));
-    // etichette accanto al box (il box è largo 2 candele: le scritte stanno fuori, a destra)
-    const lbl = (p, txt, col) => svg.append(mk("text", {x: x(exT) + 7, y: y(p) + 4, "font-size": mob ? 11 : 12, "font-weight": 700, fill: css(col), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, txt));
-    if (!preso) lbl((en + ex) / 2, mob ? sgnR(r) : `${r > 0 ? "+" : "−"}${Math.abs(Math.round((ex - en) * d * 10))} pips · ${sgnR(r)}`, r > 0 ? "--good" : "--bad");
-    if (preso) svg.append(mk("text", {x: x(-60) - 7, y: y(sl) + 4, "text-anchor": "end", "font-size": mob ? 11 : 12, "font-weight": 700, fill: css("--bad"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, "stop preso · −1R"));
-    else lbl((en + sl) / 2, "stop 60", "--bad");
-    // cartellini sull'asse
-    const tags = [{p: en, c: "--entry", t: it2(en)}, {p: sl, c: "--stop", t: it2(sl)}].concat(preso ? [] : [{p: ex, c: r > 0 ? "--good" : "--bad", t: it2(ex)}])
+    if (done) { if (!preso) hl(ex, r > 0 ? "--good" : "--bad", 1.4, xe);
+      svg.append(mk("circle", {cx: x(exT), cy: y(ex), r: 4.5, fill: css(r > 0 ? "--good" : "--bad"), stroke: css("--panel"), "stroke-width": 1.5}));
+      const txt = preso ? "stop preso · −1R" : (mob ? sgnR(r) : `${r > 0 ? "+" : "−"}${Math.abs(Math.round((ex - en) * d * 10))} pips · ${sgnR(r)}`);
+      svg.append(mk("text", preso ? {x: x(-60) - 7, y: y(sl) + 4, "text-anchor": "end"} : {x: x(exT) + 7, y: y((en + ex) / 2) + 4}, txt));
+      svg.lastChild.setAttribute("font-size", mob ? 11 : 12); svg.lastChild.setAttribute("font-weight", 700); svg.lastChild.setAttribute("fill", css(r > 0 ? "--good" : "--bad"));
+      svg.lastChild.setAttribute("stroke", css("--panel")); svg.lastChild.setAttribute("stroke-width", 3); svg.lastChild.setAttribute("paint-order", "stroke"); }
+    const tags = [{p: en, c: "--entry", t: `${e.rule} ${it2(en)}`}, {p: sl, c: "--stop", t: `SL ${it2(sl)}`}].concat(done && !preso ? [{p: ex, c: r > 0 ? "--good" : "--bad", t: it2(ex)}] : [])
       .map(o => ({...o, y: y(o.p)})).sort((a, b) => a.y - b.y);
     for (let i = 1; i < tags.length; i++) if (tags[i].y - tags[i - 1].y < 16) tags[i].y = tags[i - 1].y + 16;
     tags.forEach(o => { svg.append(mk("rect", {x: W - R + 1, y: o.y - 8, width: R - 2, height: 16, rx: 2, fill: css(o.c)}));
-      svg.append(mk("text", {x: W - R + 5, y: o.y + 4, "font-size": 10.5, "font-weight": 700, fill: css("--panel"), "font-family": "ui-monospace,Menlo,monospace"}, o.t)); });
-    // riga OHLC in alto a sinistra e mirino, come in TradingView
-    const ohlc = mk("text", {x: Lm + 2, y: 14, "font-size": mob ? 9.5 : 11.5, fill: css("--ink2"), "font-family": "ui-monospace,Menlo,monospace"});
-    svg.append(ohlc);
-    const cxv = mk("line", {y1: T, y2: H - B, stroke: css("--mute"), "stroke-dasharray": "2 3", opacity: 0}), cyh = mk("line", {x1: Lm, x2: W - R, stroke: css("--mute"), "stroke-dasharray": "2 3", opacity: 0});
-    svg.append(cxv, cyh);
-    const setO = c => { const up = c.c >= c.o; ohlc.innerHTML = ""; ohlc.append(mk("tspan", {"font-weight": 700, fill: css("--ink")}, `${mob ? "" : `XAUUSD ${m1 ? "1m" : "5s"} `}${fClock(e, c.t, !m1)}  `));
-      for (const [k, v] of [["O", c.o], ["H", c.h], ["L", c.l], ["C", c.c]]) { ohlc.append(mk("tspan", {fill: css("--mute")}, k + " ")); ohlc.append(mk("tspan", {fill: css(up ? "--up" : "--dn"), "font-weight": 600}, it2(v) + "  ")); } };
-    setO(C.find(c => c.t === 0) || C[C.length - 1]);
-    const move = ev => { const rc = svg.getBoundingClientRect(), sx = (ev.clientX - rc.left) * W / rc.width, sy = (ev.clientY - rc.top) * H / rc.height, c = C.find(c => sx >= x(c.t) && sx < x(c.t + unit));
-      if (!c) return; setO(c); const cx = x(c.t) + slot / 2; cxv.setAttribute("x1", cx); cxv.setAttribute("x2", cx); cxv.setAttribute("opacity", 1);
-      if (sy > T && sy < PB) { cyh.setAttribute("y1", sy); cyh.setAttribute("y2", sy); cyh.setAttribute("opacity", 1); } else cyh.setAttribute("opacity", 0); };
-    svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
-    svg.addEventListener("pointerleave", () => { cxv.setAttribute("opacity", 0); cyh.setAttribute("opacity", 0); setO(C.find(c => c.t === 0) || C[C.length - 1]); });
+      svg.append(mk("text", {x: W - R + 4, y: o.y + 4, "font-size": mob ? 9 : 10, "font-weight": 700, fill: css("--panel"), "font-family": "ui-monospace,Menlo,monospace"}, mob ? o.t.replace(/,\d\d$/, "").replace("LONG ", "L ").replace("SHORT ", "S ") : o.t)); });
+    // ora del replay in alto a sinistra
+    svg.append(mk("text", {x: Lm + 2, y: 14, "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--ink2"), "font-family": "ui-monospace,Menlo,monospace"}, `XAUUSD ${m1 ? "1m" : "5s"} · ${fDate(e)} · ${fClock(e, Math.min(tau, t1), true)}`));
     ch.innerHTML = ""; ch.append(svg);
-    const news = fine.filter(b => b.t >= 0 && b.t < 60), rng = news.length ? Math.round((Math.max(...news.map(b => b.h)) - Math.min(...news.map(b => b.l))) * 10) : null, es = EST[e.d.slice(0, 10)];
-    host.querySelector("#rpTxt").innerHTML = `${fDate(e)}: diceva <b class="${e.rule[0]}">${e.rule}</b>, stop 60${es ? `, candela ${r50(es.lo)}–${r50(es.hi)} pips` : ""}. ${preso ? `Il prezzo è andato contro: <b class="r">stop preso, −1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}`;
+    const news = fine.filter(b => b.t >= 0 && b.t < 60), rng = news.length ? Math.round((Math.max(...news.map(b => b.h)) - Math.min(...news.map(b => b.l))) * 10) : null;
+    $("#rpTxt").innerHTML = `${fClock(e, -60)} · diceva <b class="${e.rule[0]}">${e.rule}</b>, stop 60${es ? `, candela prevista ${r50(es.lo)}–${r50(es.hi)} pips` : ""}.` +
+      (done ? ` ${preso ? `Stop preso: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
   };
-  strip.querySelectorAll("button").forEach(b => b.onclick = () => { cur = L12.find(e => e.id === b.dataset.id); draw(); });
+  const play = () => { if (timer) { stop(); return; } if (tau >= 1800) tau = -60;
+    $("#rpPlay").textContent = "❚❚ Pausa";
+    timer = setInterval(() => { tau += tau < 120 ? 5 : 60; draw(); if (tau >= 1800) stop(); }, tau < 120 ? 110 : 110); };
+  $("#rpPlay").onclick = play;
+  $("#rpAll").onclick = () => { stop(); tau = 1800; draw(); stop(); };
+  ysel.onchange = () => { Y = +ysel.value; const L = ALL.filter(e => e.y === Y); cur = L[L.length - 1]; fillStrip(); reset(); };
   host.querySelectorAll(".presets button").forEach(b => b.onclick = () => { TF = +b.dataset.tf; draw(); });
-  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
-  strip.scrollLeft = strip.scrollWidth;
+  ysel.value = Y; fillStrip(); draw();
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
 };
 
 // ---------- tutte le NFP, anno per anno (come il sito originale)

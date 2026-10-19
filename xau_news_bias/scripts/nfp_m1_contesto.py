@@ -1,4 +1,4 @@
-"""Candele M1 bid Dukascopy intorno a ogni NFP recente (45 minuti prima, 45 dopo), per il grafico "NFP rigiocate" del sito.
+"""Candele M1 bid Dukascopy intorno a ogni NFP dal 2014 (30 minuti prima, 30 dopo), per il grafico "NFP rigiocate" del sito.
 Solo per disegnare: nessun risultato dipende da questo file."""
 import json
 import sys
@@ -12,11 +12,11 @@ import pandas as pd  # noqa: E402
 from xnb.config import get_settings  # noqa: E402
 from xnb.providers.dukascopy import DukascopyProvider  # noqa: E402
 
-N, PRIMA, DOPO = 24, 45, 45
+PRIMA, DOPO = 30, 30
 
 if __name__ == "__main__":
     R = get_settings().research_dir / "phase2" / "hx11"
-    ev = [e for e in json.loads((R / "site.json").read_text())["ev"] if e["f"] == "NFP" and e["rule"]][-N:]
+    ev = [e for e in json.loads((R / "site.json").read_text())["ev"] if e["f"] == "NFP" and e["rule"]]
     dk = DukascopyProvider()
     out = {}
     for e in ev:

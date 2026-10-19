@@ -23,7 +23,7 @@ def ampiezza():
         return None
     r = a["metodi"][m]
     return {"metodo": m, "calibrati": a["calibrati"], "n_metodi": len(a["metodi"]), "per": {p: r[p] for p in ("2019-22", "2023-26")},
-            "casi": a["casi_vincitore"], "recenti": a["recenti_fuori_dataset"],
+            "casi": a["casi_vincitore"], "recenti": a["recenti_fuori_dataset"], "tutti": a.get("casi_tutti", []),
             "prossima": {k: a["prossima"][k] for k in ("stima_pct", "lo_pct", "hi_pct")} if a["prossima"] else None}
 
 

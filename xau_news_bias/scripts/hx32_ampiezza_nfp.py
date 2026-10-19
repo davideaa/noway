@@ -155,12 +155,20 @@ if __name__ == "__main__":
             casi.append({"data": str(n.t0[i].date()), "y": int(n.y[i]), "vero": round(float(n.r1[i] * pp)),
                          "stima": round(float(f.stima[i] * pp)), "lo": round(float(f.lo[i] * pp)), "hi": round(float(f.hi[i] * pp))})
     rec = recenti(n)
+    # per il replay del sito: la stima di ogni NFP che ha la fascia, anche prima del 2019 (stesse stime, nessuna prova in più)
+    tutti = []
+    if vince:
+        f = F[vince]
+        for i in n.index[f.stima.notna()]:
+            pp = n.px[i] / 100 * 10
+            tutti.append({"data": str(n.t0[i].date()), "y": int(n.y[i]), "vero": round(float(n.r1[i] * pp)),
+                          "stima": round(float(f.stima[i] * pp)), "lo": round(float(f.lo[i] * pp)), "hi": round(float(f.hi[i] * pp))})
     nx = prossima(n, vince, adr_oggi, rec) if vince else None
     if nx and px_oggi:
         pp = px_oggi / 100 * 10
         nx |= {"prezzo": px_oggi, "adr21_pct": adr_oggi, "stima": round(nx["stima_pct"] * pp), "lo": round(nx["lo_pct"] * pp), "hi": round(nx["hi_pct"] * pp)}
     out = {"nfp": int(len(n)), "ultima": str(n.t0.iat[-1].date()), "metodi": res, "calibrati": cal, "vincitore": vince,
-           "casi_vincitore": casi, "recenti_fuori_dataset": recenti_con_stima(n, rec, vince),
+           "casi_vincitore": casi, "casi_tutti": tutti, "recenti_fuori_dataset": recenti_con_stima(n, rec, vince),
            "prossima": nx}
     (R / "hx32_ampiezza_nfp.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     for m in METODI:
