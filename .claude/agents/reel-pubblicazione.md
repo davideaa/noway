@@ -17,7 +17,7 @@ fonti `noir/pN-fonti.md`, titolo della puntata N+1 in `social/corso/lezioni.json
    · 8 hashtag italiani. La **prima riga deve essere diversa** da tutte quelle già in calendario (serve contro i doppioni).
 2. `cp ~/reel-lavoro/pN/PuntataN.mp4 sites/studio/social/pubblicati/AAAA-MM-GG-pNN.mp4` e subito `cmp` tra i due file: devono essere
    IDENTICI. Mai ricodificare, ridimensionare o prendere altri file (Puntata 4: era finito in calendario un video orizzontale senza audio).
-3. Voce in `social/calendario.json` (stessi campi della puntata 2, stato `programmato`, thumb_offset 600, durata_s dal video).
+3. Voce in `social/calendario.json` (stessi campi della puntata 2, stato `programmato`, durata_s dal video). `thumb_offset` = il millisecondo in cui il numero grande della puntata è pieno e fermo: con la voce a 0,62 s (`FIRST` in `produci.sh`) è **300**; a 600 cade sul lampo del cambio scena e la copertina nella griglia del profilo esce grigia (puntata 11, 19/10). Prima di scriverlo estrai quel fotogramma (`ffmpeg -ss 0.30 -i video -frames:v 1 copertina.png`) e guardalo: numero bianco nitido su fondo scuro, niente grigio.
 4. Commit di video + calendario sul ramo `claude/creazione-siti-web-u1dyzg` e push (righe finali del commit come i precedenti).
 5. `python3 sites/studio/social/pubblica.py --prova --data AAAA-MM-GG` deve finire con «PROVA: tutto pronto, non pubblico.»
 

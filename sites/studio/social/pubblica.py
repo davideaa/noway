@@ -86,7 +86,7 @@ log("Collegamento OK via", BASE_OK.split("/")[2])
 if PROVA: log("PROVA: tutto pronto, non pubblico."); sys.exit(0)
 
 # 3. contenitore del reel ed elaborazione
-c = api(f"{IG}/media", {"media_type": "REELS", "video_url": url, "caption": voce["caption"], "share_to_feed": "true", "thumb_offset": str(voce.get("thumb_offset", 600))})
+c = api(f"{IG}/media", {"media_type": "REELS", "video_url": url, "caption": voce["caption"], "share_to_feed": "true", "thumb_offset": str(voce.get("thumb_offset", 300))})
 cid = c.get("id")
 if not cid: log("ERRORE creazione contenitore:", c); sys.exit(1)
 for _ in range(90):
