@@ -112,3 +112,66 @@ Sotto l'1% di differenza vince il più semplice (ordine A, B, C, D).
 
 **Se nessuno vince**, resta EW3 e si dice: la parte di errore che resta
 non si prevede con la volatilità passata.
+
+## Risultati (dopo i commit `46271c6` e `dd70fb4`)
+
+File: `research_output/phase2/hx16/hx33_fascia_adattiva.json`.
+- Release dove tutti e cinque i metodi hanno la fascia, 12 famiglie senza
+  NFP: 305 nel 2019–22 e 499 nel 2023–26.
+- Ne servono circa 54 per famiglia prima di poter calcolare: le famiglie
+  rare (Michigan, verbali, Claims) entrano tardi.
+
+**12 famiglie senza NFP** (la prova vera):
+
+| Metodo | Dentro 2019–22 | Dentro 2023–26 | Interval score 2019–22 | Interval score 2023–26 | Distanza media dal 50% per famiglia-anno |
+|---|---|---|---|---|---|
+| B0 (H-X32) | 45% | 44% | **1,463** | **1,334** | 0,18 |
+| A fascia che si adatta | 48% | 45% | 1,546 | 1,410 | 0,16 |
+| B centro che si corregge | 46% | 48% | 1,503 | 1,385 | 0,15 |
+| C = A + B | 46% | 45% | 1,510 | 1,392 | 0,15 |
+| D = C sulla volatilità del giorno | 47% | 46% | 1,588 | 1,451 | 0,13 |
+
+Differenza con B0 sul 2019–26, 84 coppie famiglia-anno:
+
+| Metodo | Differenza | t |
+|---|---|---|
+| A | +0,082 | +5,07 |
+| B | +0,071 | +3,34 |
+| C | +0,074 | +3,36 |
+| D | +0,118 | +2,74 |
+
+Tutte le p corrette valgono 1.
+
+**Verdetto: nessun metodo funziona.**
+- Tutti e quattro hanno l'interval score **peggiore** di B0 in tutti e due
+  i periodi. Il peggioramento è netto, non è un caso.
+- Si adattano un po' meglio anno per anno: la distanza dal 50% scende da
+  0,18 a 0,13–0,16. Ma per farlo allargano la fascia (da 0,67 a 0,71–0,73
+  in log), e quando sbagliano sbagliano di più (penalità da 0,71 a
+  0,72–0,78).
+- In pratica la fascia insegue gli ultimi errori. Dopo una release
+  grande si allarga, dopo una calma si stringe. Ma la release successiva
+  non segue quella di prima abbastanza da ripagare.
+
+**NFP, solo descrittivo** (già vista): dentro su totale.
+
+| Anno | B0 | A | B | C | D |
+|---|---|---|---|---|---|
+| 2025 | 2/11 | 2/11 | 4/11 | 5/11 | 3/11 |
+| 2026 | 2/8 | 2/8 | 2/8 | 3/8 | 1/8 |
+
+Il metodo C sulla NFP va un po' meglio nel 2025–26, ma peggio nel 2019–22.
+Sulle altre famiglie, dove non l'ho scelto guardando i dati, peggiora.
+Usarlo sarebbe scegliere a posteriori: non si fa.
+
+**Perché non si riesce a fare meglio: il tetto.** H-X29 aveva già provato
+ad aggiungere la sorpresa vera del dato. È conosciuta solo dopo l'uscita,
+quindi è un vantaggio impossibile nella realtà. Errore NFP:
+- 2019–22: da 0,326 a 0,303;
+- 2023–26: da 0,318 a 0,340.
+
+Anche sapendo in anticipo quanto sarà sorprendente il dato, l'errore resta
+intorno a ±35–40%. Quella parte dipende da come il mercato reagisce in
+quel minuto, e coi dati di prima non si prevede.
+
+Resta EW3 (H-X32). Sul sito non cambia niente.

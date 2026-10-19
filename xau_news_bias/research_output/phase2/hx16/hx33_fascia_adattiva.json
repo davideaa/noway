@@ -1,0 +1,482 @@
+{
+ "release": {
+  "altre": 1097,
+  "nfp": 105
+ },
+ "famiglie": [
+  "ADP",
+  "CLAIMS",
+  "CPI",
+  "FIDUCIA",
+  "FOMC",
+  "ISM_M",
+  "ISM_S",
+  "MICHIGAN",
+  "PIL",
+  "PPI",
+  "RETAIL",
+  "VERBALI"
+ ],
+ "altre": {
+  "B0": {
+   "2019-22": {
+    "n": 305,
+    "copertura": 0.449,
+    "IS": 1.4629,
+    "sopra": 107,
+    "sotto": 61
+   },
+   "2023-26": {
+    "n": 499,
+    "copertura": 0.437,
+    "IS": 1.3336,
+    "sopra": 125,
+    "sotto": 156
+   },
+   "distanza_media_dal_50": 0.182
+  },
+  "A": {
+   "2019-22": {
+    "n": 305,
+    "copertura": 0.475,
+    "IS": 1.5456,
+    "sopra": 103,
+    "sotto": 57
+   },
+   "2023-26": {
+    "n": 499,
+    "copertura": 0.449,
+    "IS": 1.4095,
+    "sopra": 126,
+    "sotto": 149
+   },
+   "distanza_media_dal_50": 0.156,
+   "funziona": false
+  },
+  "B": {
+   "2019-22": {
+    "n": 305,
+    "copertura": 0.462,
+    "IS": 1.5025,
+    "sopra": 91,
+    "sotto": 73
+   },
+   "2023-26": {
+    "n": 499,
+    "copertura": 0.477,
+    "IS": 1.3848,
+    "sopra": 129,
+    "sotto": 132
+   },
+   "distanza_media_dal_50": 0.152,
+   "funziona": false
+  },
+  "C": {
+   "2019-22": {
+    "n": 305,
+    "copertura": 0.456,
+    "IS": 1.51,
+    "sopra": 95,
+    "sotto": 71
+   },
+   "2023-26": {
+    "n": 499,
+    "copertura": 0.451,
+    "IS": 1.392,
+    "sopra": 134,
+    "sotto": 140
+   },
+   "distanza_media_dal_50": 0.148,
+   "funziona": false
+  },
+  "D": {
+   "2019-22": {
+    "n": 305,
+    "copertura": 0.469,
+    "IS": 1.5875,
+    "sopra": 94,
+    "sotto": 68
+   },
+   "2023-26": {
+    "n": 499,
+    "copertura": 0.459,
+    "IS": 1.4505,
+    "sopra": 125,
+    "sotto": 145
+   },
+   "distanza_media_dal_50": 0.126,
+   "funziona": false
+  }
+ },
+ "prova_contro_B0": {
+  "A": {
+   "celle": 84,
+   "diff_media": 0.0817,
+   "t": 5.07,
+   "p": 0.9999988044928805,
+   "p_holm": 1.0
+  },
+  "B": {
+   "celle": 84,
+   "diff_media": 0.0705,
+   "t": 3.34,
+   "p": 0.9993653592630226,
+   "p_holm": 1.0
+  },
+  "C": {
+   "celle": 84,
+   "diff_media": 0.0736,
+   "t": 3.36,
+   "p": 0.9994026761738344,
+   "p_holm": 1.0
+  },
+  "D": {
+   "celle": 84,
+   "diff_media": 0.118,
+   "t": 2.74,
+   "p": 0.9962095161569373,
+   "p_holm": 1.0
+  }
+ },
+ "funzionano": [],
+ "vincitore": null,
+ "nfp_descrittivo": {
+  "B0": {
+   "2019-22": {
+    "n": 47,
+    "copertura": 0.426,
+    "IS": 1.3034,
+    "sopra": 16,
+    "sotto": 11
+   },
+   "2023-26": {
+    "n": 42,
+    "copertura": 0.429,
+    "IS": 1.2713,
+    "sopra": 11,
+    "sotto": 13
+   },
+   "distanza_media_dal_50": 0.19
+  },
+  "A": {
+   "2019-22": {
+    "n": 47,
+    "copertura": 0.447,
+    "IS": 1.3758,
+    "sopra": 15,
+    "sotto": 11
+   },
+   "2023-26": {
+    "n": 42,
+    "copertura": 0.333,
+    "IS": 1.2975,
+    "sopra": 13,
+    "sotto": 15
+   },
+   "distanza_media_dal_50": 0.2
+  },
+  "B": {
+   "2019-22": {
+    "n": 47,
+    "copertura": 0.404,
+    "IS": 1.2901,
+    "sopra": 15,
+    "sotto": 13
+   },
+   "2023-26": {
+    "n": 42,
+    "copertura": 0.381,
+    "IS": 1.2466,
+    "sopra": 12,
+    "sotto": 14
+   },
+   "distanza_media_dal_50": 0.176
+  },
+  "C": {
+   "2019-22": {
+    "n": 47,
+    "copertura": 0.404,
+    "IS": 1.3554,
+    "sopra": 15,
+    "sotto": 13
+   },
+   "2023-26": {
+    "n": 42,
+    "copertura": 0.429,
+    "IS": 1.2617,
+    "sopra": 11,
+    "sotto": 13
+   },
+   "distanza_media_dal_50": 0.149
+  },
+  "D": {
+   "2019-22": {
+    "n": 47,
+    "copertura": 0.489,
+    "IS": 1.4588,
+    "sopra": 13,
+    "sotto": 11
+   },
+   "2023-26": {
+    "n": 42,
+    "copertura": 0.405,
+    "IS": 1.2683,
+    "sopra": 13,
+    "sotto": 12
+   },
+   "distanza_media_dal_50": 0.129
+  }
+ },
+ "nfp_per_anno": {
+  "B0": {
+   "2019": {
+    "dentro": 3,
+    "n": 12,
+    "sopra": 8,
+    "sotto": 1
+   },
+   "2020": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 6
+   },
+   "2021": {
+    "dentro": 8,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 1
+   },
+   "2022": {
+    "dentro": 5,
+    "n": 12,
+    "sopra": 4,
+    "sotto": 3
+   },
+   "2023": {
+    "dentro": 8,
+    "n": 11,
+    "sopra": 1,
+    "sotto": 2
+   },
+   "2024": {
+    "dentro": 6,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 4
+   },
+   "2025": {
+    "dentro": 2,
+    "n": 11,
+    "sopra": 3,
+    "sotto": 6
+   },
+   "2026": {
+    "dentro": 2,
+    "n": 8,
+    "sopra": 5,
+    "sotto": 1
+   }
+  },
+  "A": {
+   "2019": {
+    "dentro": 3,
+    "n": 12,
+    "sopra": 8,
+    "sotto": 1
+   },
+   "2020": {
+    "dentro": 5,
+    "n": 12,
+    "sopra": 1,
+    "sotto": 6
+   },
+   "2021": {
+    "dentro": 8,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 1
+   },
+   "2022": {
+    "dentro": 5,
+    "n": 12,
+    "sopra": 4,
+    "sotto": 3
+   },
+   "2023": {
+    "dentro": 7,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 2
+   },
+   "2024": {
+    "dentro": 3,
+    "n": 12,
+    "sopra": 3,
+    "sotto": 6
+   },
+   "2025": {
+    "dentro": 2,
+    "n": 11,
+    "sopra": 3,
+    "sotto": 6
+   },
+   "2026": {
+    "dentro": 2,
+    "n": 8,
+    "sopra": 5,
+    "sotto": 1
+   }
+  },
+  "B": {
+   "2019": {
+    "dentro": 3,
+    "n": 12,
+    "sopra": 7,
+    "sotto": 2
+   },
+   "2020": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 6
+   },
+   "2021": {
+    "dentro": 8,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 1
+   },
+   "2022": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 4,
+    "sotto": 4
+   },
+   "2023": {
+    "dentro": 6,
+    "n": 11,
+    "sopra": 1,
+    "sotto": 4
+   },
+   "2024": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 6
+   },
+   "2025": {
+    "dentro": 4,
+    "n": 11,
+    "sopra": 4,
+    "sotto": 3
+   },
+   "2026": {
+    "dentro": 2,
+    "n": 8,
+    "sopra": 5,
+    "sotto": 1
+   }
+  },
+  "C": {
+   "2019": {
+    "dentro": 3,
+    "n": 12,
+    "sopra": 7,
+    "sotto": 2
+   },
+   "2020": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 6
+   },
+   "2021": {
+    "dentro": 8,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 1
+   },
+   "2022": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 4,
+    "sotto": 4
+   },
+   "2023": {
+    "dentro": 6,
+    "n": 11,
+    "sopra": 1,
+    "sotto": 4
+   },
+   "2024": {
+    "dentro": 4,
+    "n": 12,
+    "sopra": 2,
+    "sotto": 6
+   },
+   "2025": {
+    "dentro": 5,
+    "n": 11,
+    "sopra": 4,
+    "sotto": 2
+   },
+   "2026": {
+    "dentro": 3,
+    "n": 8,
+    "sopra": 4,
+    "sotto": 1
+   }
+  },
+  "D": {
+   "2019": {
+    "dentro": 5,
+    "n": 12,
+    "sopra": 5,
+    "sotto": 2
+   },
+   "2020": {
+    "dentro": 6,
+    "n": 12,
+    "sopra": 1,
+    "sotto": 5
+   },
+   "2021": {
+    "dentro": 7,
+    "n": 11,
+    "sopra": 3,
+    "sotto": 1
+   },
+   "2022": {
+    "dentro": 5,
+    "n": 12,
+    "sopra": 4,
+    "sotto": 3
+   },
+   "2023": {
+    "dentro": 6,
+    "n": 11,
+    "sopra": 2,
+    "sotto": 3
+   },
+   "2024": {
+    "dentro": 7,
+    "n": 12,
+    "sopra": 1,
+    "sotto": 4
+   },
+   "2025": {
+    "dentro": 3,
+    "n": 11,
+    "sopra": 4,
+    "sotto": 4
+   },
+   "2026": {
+    "dentro": 1,
+    "n": 8,
+    "sopra": 6,
+    "sotto": 1
+   }
+  }
+ }
+}
