@@ -82,9 +82,30 @@ def misura(n: pd.DataFrame, f: pd.DataFrame, sel: pd.Series) -> dict:
             "copertura": round(float(((v >= lo) & (v <= hi)).mean()), 3), "errore": round(float(np.median(np.abs(np.log(v / st)))), 3)}
 
 
-def prossima(n: pd.DataFrame, m: str, adr21: float | None) -> dict | None:
-    """Stima per la prossima NFP, coi dati di oggi; solo per i metodi che non chiedono le variabili del giorno."""
-    r, q = n.r1, n.r1 / n.adr21
+def recenti(n: pd.DataFrame) -> pd.DataFrame:
+    """NFP uscite dopo la fine del dataset (es. 2/10/2026): r1 dai tick, come in hx23. Servono solo alla stima della
+    prossima NFP, non alla prova. ADR21 e le altre variabili non si calcolano: restano vuote."""
+    from hx18_inversione import fetch_retry
+    ev = json.loads((get_settings().research_dir / "phase2" / "hx11" / "site.json").read_text(encoding="utf-8"))["ev"]
+    t_all = [pd.Timestamp(e["d"], tz="UTC") for e in ev if e["f"] == "NFP"]
+    new = [t for t in t_all if t > n.t0.iat[-1] and t < pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=3)]
+    rows = []
+    for t0 in new:
+        z = np.load(fetch_retry(t0))
+        t, mid = z["t"], (z["bid"] + z["ask"]) / 2
+        pre, w1 = np.nonzero(t < 0)[0], (t >= 0) & (t < 60_000)
+        if not len(pre) or w1.sum() < 5:
+            continue
+        m0 = float(mid[pre[-1]])
+        rows.append({"t0": t0, "y": t0.year, "px": m0, "r1": (max(mid[w1].max(), m0) - min(mid[w1].min(), m0)) / m0 * 100})
+    return pd.DataFrame(rows)
+
+
+def prossima(n: pd.DataFrame, m: str, adr21: float | None, rec: pd.DataFrame) -> dict | None:
+    """Stima per la prossima NFP, coi dati di oggi; solo per i metodi che non chiedono le variabili del giorno.
+    Le NFP recenti fuori dal dataset entrano nella memoria (N, EW3), non nei rapporti della fascia."""
+    full = pd.concat([n, rec], ignore_index=True) if len(rec) else n
+    r, q = full.r1, n.r1 / n.adr21
     base = {"N24": r.iloc[-24:].median(), "N12": r.iloc[-12:].median(), "N6": r.iloc[-6:].median(),
             "EW3": r.ewm(halflife=3).mean().iat[-1]}
     if adr21:
@@ -118,12 +139,14 @@ if __name__ == "__main__":
             pp = n.px[i] / 100 * 10
             casi.append({"data": str(n.t0[i].date()), "y": int(n.y[i]), "vero": round(float(n.r1[i] * pp)),
                          "stima": round(float(f.stima[i] * pp)), "lo": round(float(f.lo[i] * pp)), "hi": round(float(f.hi[i] * pp))})
-    nx = prossima(n, vince, adr_oggi) if vince else None
+    rec = recenti(n)
+    nx = prossima(n, vince, adr_oggi, rec) if vince else None
     if nx and px_oggi:
         pp = px_oggi / 100 * 10
-        nx = {"prezzo": px_oggi, "adr21_pct": adr_oggi, "stima": round(nx["stima_pct"] * pp), "lo": round(nx["lo_pct"] * pp), "hi": round(nx["hi_pct"] * pp)}
+        nx |= {"prezzo": px_oggi, "adr21_pct": adr_oggi, "stima": round(nx["stima_pct"] * pp), "lo": round(nx["lo_pct"] * pp), "hi": round(nx["hi_pct"] * pp)}
     out = {"nfp": int(len(n)), "ultima": str(n.t0.iat[-1].date()), "metodi": res, "calibrati": cal, "vincitore": vince,
-           "casi_vincitore": casi, "prossima": nx}
+           "casi_vincitore": casi, "recenti_fuori_dataset": [{"data": str(r.t0.date()), "vero": round(r.r1 * r.px / 10)} for r in rec.itertuples()],
+           "prossima": nx}
     (R / "hx32_ampiezza_nfp.json").write_text(json.dumps(out, indent=1, default=float), encoding="utf-8")
     for m in METODI:
         print(m, {p: (res[m][p]["copertura"], res[m][p]["errore"], res[m][p]["n"]) for p in PER}, "calibrato" if res[m]["calibrato"] else "")
