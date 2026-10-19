@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from build_site import livelli, load, pips29, volatilita  # noqa: E402
+from build_site import livelli, load, ml, pips29, volatilita  # noqa: E402
 from xnb.config import get_settings  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     reg = load(R / "hx22_regime.json")["RETAIL_PPI"]
     out = {"ev": ev, "prossime": [{"t0": t.isoformat(), "titoli": x} for t, x in zip(nxt.t0, nxt.titoli)],
            "tp": {k: tp[k] for k in ("uscite", "ultime")}, "reg": {"scelto": reg["scelto"], "tabella": reg["tabella"]},
-           "vol": volatilita(), "liv": livelli(), "pips29": pips29("RETAIL_PPI")}
+           "vol": volatilita(), "liv": livelli(), "pips29": pips29("RETAIL_PPI"), "ml": ml()}
     tpl = (ROOT / "site" / "retail_ppi.template.html").read_text(encoding="utf-8")
     html = tpl.replace("__DATA__", json.dumps(out, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "retail_ppi.html").write_text(html, encoding="utf-8")

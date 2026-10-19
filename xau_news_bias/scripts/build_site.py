@@ -20,6 +20,11 @@ def volatilita():
     return {"scelto": d["scelto"], "previsori": {d["scelto"]: d["previsori"][d["scelto"]]}}
 
 
+def ml():
+    p = load(HX16 / "hx23_modello.json")["punteggi"]
+    return {g: {m: p[m][f"{g}|2023-26"] for m in ("M0", "M1", "M2")} for g in ("NFP", "RETAIL_PPI")}
+
+
 def pips29(group):
     p = load(HX16 / "hx29_pips.json")
     return {"copertura": p["copertura"], "modello": {k: p["modello"][k] for k in ("beta", "gamma")},
@@ -32,7 +37,8 @@ if __name__ == "__main__":
           for e in site["ev"] if e["f"] == "NFP"]
     log = ROOT / "live" / "hx8_live.jsonl"
     tp = load(HX16 / "hx19_tp.json")["NFP"]
-    data = {"ev": ev, "bins": site["bins"],
+    cpi = [{"d": e["d"], "mv": e["mv"], "rule": e["rule"], "r": e["sc"]["S1"][e["rule"][0]]["r"]} for e in site["ev"] if e["f"] == "CPI" and e["rule"]]
+    data = {"ev": ev, "bins": site["bins"], "cpi": cpi, "ml": ml(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
             "tp": {k: tp[k] for k in ("uscite", "per_anno", "ultime")},
             "vol": volatilita(), "liv": livelli(), "pips29": pips29("NFP")}
