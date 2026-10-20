@@ -80,3 +80,46 @@ Uno stop Q **funziona** se:
 **Se no,** resta H-X37, se con i prezzi S4 batte ancora fisso 60 e 60/100
 nell'IS e nell'OOS. Altrimenti resta il fisso 60. In tutti e due i casi la
 linea nel tempo va sul sito con lo stop che resta.
+
+## Risultati (dopo il commit `a11798e`)
+
+File: `research_output/phase2/hx16/hx38_stop_contro.json`.
+- 148 NFP 2014–2026 provate. Come storia sono servite anche le NFP del
+  2012–13.
+- Il migliore (Q80) non sta sul bordo. Q40 e Q95 sono calcolati comunque
+  e riportati.
+
+R a trade con tetto −1R, prezzi S4. "Salvato" = NFP con la direzione
+giusta in cui lo stop non viene preso.
+
+| Stop | IS 2014–19 | OOS 2020–26 | Ultimi 3 anni | Tutto | Salvato IS / OOS |
+|---|---|---|---|---|---|
+| Fisso 60 | −0,03 | +0,26 | +0,64 | +0,12 | 86% / 83% |
+| 60/100 di Davide | −0,03 | +0,22 | +0,54 | +0,10 | 86% / 89% |
+| **H-X37 (30 + 10% candela)** | **+0,06** | +0,37 | +0,74 | +0,22 | 77% / 75% |
+| Q40 | −0,29 | +0,21 | +0,65 | −0,03 | 44% / 51% |
+| Q50 | −0,32 | +0,19 | +0,57 | −0,05 | 44% / 55% |
+| Q60 | −0,25 | +0,19 | +0,47 | −0,02 | 54% / 64% |
+| Q70 | −0,06 | +0,37 | +0,65 | +0,17 | 65% / 79% |
+| Q80 | −0,02 | **+0,45** | **+0,87** | **+0,23** | 72% / 92% |
+| Q90 | −0,10 | +0,17 | +0,33 | +0,04 | 79% / 92% |
+| Q95 | −0,06 | +0,12 | +0,27 | +0,03 | 84% / 94% |
+
+Stop Q80 mediano: 27 pips nel 2014, 32 nel 2019, 55 nel 2024, 88 nel
+2026.
+
+**Verdetto: nessuno stop Q funziona.**
+- Q80 è il migliore nell'OOS e negli ultimi 3 anni.
+- Nell'IS (−0,02) fa peggio di H-X37 (+0,06), e i vicini Q70 e Q90 non
+  battono i confronti.
+
+**H-X37 regge anche con lo spread del broker (S4).** Batte fisso 60 e
+60/100 sia nell'IS sia nell'OOS. Resta lo stop del sito.
+
+**Da dire.**
+- Lo spread che si apre prima della news costa molto a tutti.
+  - Fisso 60, ultimi 3 anni: da +1,04R (S1) a +0,64R (S4).
+  - H-X37: da +1,18R a +0,74R.
+- Con H-X37, quando la direzione era giusta, lo stop ti ha salvato:
+  - 68 volte su 90 dal 2014;
+  - 35 su 47 dal 2020.
