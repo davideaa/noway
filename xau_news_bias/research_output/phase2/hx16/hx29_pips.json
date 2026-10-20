@@ -1,0 +1,687 @@
+{
+ "copertura": {
+  "release": 2216,
+  "con_S": 1654,
+  "con_S_per_famiglia": {
+   "ADP": [
+    163,
+    163
+   ],
+   "CLAIMS": [
+    386,
+    386
+   ],
+   "CPI": [
+    186,
+    186
+   ],
+   "FIDUCIA": [
+    5,
+    139
+   ],
+   "FOMC": [
+    0,
+    125
+   ],
+   "ISM_M": [
+    183,
+    183
+   ],
+   "ISM_S": [
+    172,
+    172
+   ],
+   "MICHIGAN": [
+    1,
+    113
+   ],
+   "NFP": [
+    183,
+    183
+   ],
+   "PIL": [
+    81,
+    153
+   ],
+   "PPI": [
+    127,
+    127
+   ],
+   "RETAIL": [
+    167,
+    168
+   ],
+   "VERBALI": [
+    0,
+    118
+   ]
+  }
+ },
+ "modello": {
+  "n": 1654,
+  "r2": 0.479,
+  "beta": [
+   0.352,
+   0.238,
+   0.466
+  ],
+  "gamma": [
+   0.252,
+   0.187,
+   0.318
+  ],
+  "p_gamma": 4.932578650442595e-14,
+  "per_periodo": {
+   "2011-18": {
+    "beta": 0.489,
+    "gamma": 0.397,
+    "gamma_se": 0.056
+   },
+   "2019-22": {
+    "beta": 0.294,
+    "gamma": 0.113,
+    "gamma_se": 0.037
+   },
+   "2023-26": {
+    "beta": 0.18,
+    "gamma": 0.53,
+    "gamma_se": 0.074
+   }
+  },
+  "p_wald_gamma": 2.9248627977064545e-08,
+  "p_wald_beta": 0.04617045002654912
+ },
+ "effetto_anno": {
+  "2011": 0.0,
+  "2012": 0.208,
+  "2013": 0.907,
+  "2014": 0.732,
+  "2015": 0.784,
+  "2016": 0.776,
+  "2017": 0.685,
+  "2018": 0.402,
+  "2019": 0.77,
+  "2020": 0.316,
+  "2021": 0.655,
+  "2022": 0.832,
+  "2023": 1.216,
+  "2024": 1.055,
+  "2025": 0.567,
+  "2026": 0.814
+ },
+ "scomposizione_vs_2019": {
+  "TUTTE": {
+   "2019": {
+    "n": 74,
+    "pips_geo": 27.4,
+    "totale": 1.0,
+    "prezzo": 1.0,
+    "volatilita": 1.0,
+    "sorpresa": 1.0,
+    "famiglie": 1.0,
+    "resto": 1.0,
+    "S_mediana": 0.79,
+    "prezzo_usd": 1388.4,
+    "adr_pct": 1.0736,
+    "S_geo": 0.921
+   },
+   "2020": {
+    "n": 75,
+    "pips_geo": 30.4,
+    "totale": 1.11,
+    "prezzo": 1.26,
+    "volatilita": 1.16,
+    "sorpresa": 1.22,
+    "famiglie": 0.98,
+    "resto": 0.64,
+    "S_mediana": 1.67,
+    "prezzo_usd": 1746.2,
+    "adr_pct": 1.644,
+    "S_geo": 3.232
+   },
+   "2021": {
+    "n": 70,
+    "pips_geo": 37.3,
+    "totale": 1.36,
+    "prezzo": 1.3,
+    "volatilita": 1.07,
+    "sorpresa": 1.1,
+    "famiglie": 1.0,
+    "resto": 0.89,
+    "S_mediana": 2.02,
+    "prezzo_usd": 1798.8,
+    "adr_pct": 1.3131,
+    "S_geo": 1.8
+   },
+   "2022": {
+    "n": 86,
+    "pips_geo": 41.2,
+    "totale": 1.5,
+    "prezzo": 1.29,
+    "volatilita": 1.09,
+    "sorpresa": 1.05,
+    "famiglie": 0.96,
+    "resto": 1.06,
+    "S_mediana": 1.32,
+    "prezzo_usd": 1797.0,
+    "adr_pct": 1.3721,
+    "S_geo": 1.321
+   },
+   "2023": {
+    "n": 114,
+    "pips_geo": 53.5,
+    "totale": 1.95,
+    "prezzo": 1.4,
+    "volatilita": 1.04,
+    "sorpresa": 1.0,
+    "famiglie": 0.86,
+    "resto": 1.56,
+    "S_mediana": 0.76,
+    "prezzo_usd": 1942.1,
+    "adr_pct": 1.1912,
+    "S_geo": 0.915
+   },
+   "2024": {
+    "n": 125,
+    "pips_geo": 55.6,
+    "totale": 2.03,
+    "prezzo": 1.71,
+    "volatilita": 1.08,
+    "sorpresa": 0.97,
+    "famiglie": 0.85,
+    "resto": 1.33,
+    "S_mediana": 0.67,
+    "prezzo_usd": 2369.3,
+    "adr_pct": 1.349,
+    "S_geo": 0.715
+   },
+   "2025": {
+    "n": 110,
+    "pips_geo": 51.4,
+    "totale": 1.88,
+    "prezzo": 2.39,
+    "volatilita": 1.14,
+    "sorpresa": 0.99,
+    "famiglie": 0.86,
+    "resto": 0.82,
+    "S_mediana": 0.72,
+    "prezzo_usd": 3312.3,
+    "adr_pct": 1.5713,
+    "S_geo": 0.819
+   },
+   "2026": {
+    "n": 69,
+    "pips_geo": 115.1,
+    "totale": 4.2,
+    "prezzo": 3.34,
+    "volatilita": 1.39,
+    "sorpresa": 0.98,
+    "famiglie": 0.89,
+    "resto": 1.05,
+    "S_mediana": 0.67,
+    "prezzo_usd": 4636.4,
+    "adr_pct": 2.7484,
+    "S_geo": 0.744
+   }
+  },
+  "NFP": {
+   "2019": {
+    "n": 12,
+    "pips_geo": 63.0,
+    "totale": 1.0,
+    "prezzo": 1.0,
+    "volatilita": 1.0,
+    "sorpresa": 1.0,
+    "famiglie": 1.0,
+    "resto": 1.0,
+    "S_mediana": 1.44,
+    "prezzo_usd": 1385.2,
+    "adr_pct": 1.0662,
+    "S_geo": 1.456
+   },
+   "2020": {
+    "n": 12,
+    "pips_geo": 58.0,
+    "totale": 0.92,
+    "prezzo": 1.28,
+    "volatilita": 1.16,
+    "sorpresa": 1.37,
+    "famiglie": 1.0,
+    "resto": 0.45,
+    "S_mediana": 5.06,
+    "prezzo_usd": 1767.5,
+    "adr_pct": 1.6217,
+    "S_geo": 7.686
+   },
+   "2021": {
+    "n": 11,
+    "pips_geo": 81.4,
+    "totale": 1.29,
+    "prezzo": 1.3,
+    "volatilita": 1.09,
+    "sorpresa": 1.15,
+    "famiglie": 1.0,
+    "resto": 0.79,
+    "S_mediana": 2.7,
+    "prezzo_usd": 1798.2,
+    "adr_pct": 1.3617,
+    "S_geo": 3.3
+   },
+   "2022": {
+    "n": 12,
+    "pips_geo": 62.7,
+    "totale": 1.0,
+    "prezzo": 1.3,
+    "volatilita": 1.1,
+    "sorpresa": 1.03,
+    "famiglie": 1.0,
+    "resto": 0.68,
+    "S_mediana": 1.43,
+    "prezzo_usd": 1799.5,
+    "adr_pct": 1.3899,
+    "S_geo": 1.795
+   },
+   "2023": {
+    "n": 11,
+    "pips_geo": 95.1,
+    "totale": 1.51,
+    "prezzo": 1.39,
+    "volatilita": 1.03,
+    "sorpresa": 1.0,
+    "famiglie": 1.0,
+    "resto": 1.05,
+    "S_mediana": 1.35,
+    "prezzo_usd": 1928.9,
+    "adr_pct": 1.1569,
+    "S_geo": 1.494
+   },
+   "2024": {
+    "n": 12,
+    "pips_geo": 147.5,
+    "totale": 2.34,
+    "prezzo": 1.71,
+    "volatilita": 1.08,
+    "sorpresa": 0.96,
+    "famiglie": 1.0,
+    "resto": 1.32,
+    "S_mediana": 1.22,
+    "prezzo_usd": 2370.2,
+    "adr_pct": 1.3288,
+    "S_geo": 1.1
+   },
+   "2025": {
+    "n": 11,
+    "pips_geo": 121.6,
+    "totale": 1.93,
+    "prezzo": 2.39,
+    "volatilita": 1.15,
+    "sorpresa": 0.94,
+    "famiglie": 1.0,
+    "resto": 0.75,
+    "S_mediana": 0.89,
+    "prezzo_usd": 3310.5,
+    "adr_pct": 1.5824,
+    "S_geo": 0.936
+   },
+   "2026": {
+    "n": 8,
+    "pips_geo": 340.8,
+    "totale": 5.41,
+    "prezzo": 3.3,
+    "volatilita": 1.35,
+    "sorpresa": 0.96,
+    "famiglie": 1.0,
+    "resto": 1.26,
+    "S_mediana": 1.02,
+    "prezzo_usd": 4571.0,
+    "adr_pct": 2.5225,
+    "S_geo": 1.092
+   }
+  },
+  "CPI": {
+   "2019": {
+    "n": 12,
+    "pips_geo": 20.8,
+    "totale": 1.0,
+    "prezzo": 1.0,
+    "volatilita": 1.0,
+    "sorpresa": 1.0,
+    "famiglie": 1.0,
+    "resto": 1.0,
+    "S_mediana": 0.67,
+    "prezzo_usd": 1390.2,
+    "adr_pct": 1.0486,
+    "S_geo": 0.627
+   },
+   "2020": {
+    "n": 11,
+    "pips_geo": 21.3,
+    "totale": 1.03,
+    "prezzo": 1.27,
+    "volatilita": 1.13,
+    "sorpresa": 1.09,
+    "famiglie": 1.0,
+    "resto": 0.65,
+    "S_mediana": 1.35,
+    "prezzo_usd": 1769.1,
+    "adr_pct": 1.4944,
+    "S_geo": 1.319
+   },
+   "2021": {
+    "n": 12,
+    "pips_geo": 55.8,
+    "totale": 2.69,
+    "prezzo": 1.29,
+    "volatilita": 1.09,
+    "sorpresa": 1.08,
+    "famiglie": 1.0,
+    "resto": 1.77,
+    "S_mediana": 1.01,
+    "prezzo_usd": 1796.1,
+    "adr_pct": 1.3269,
+    "S_geo": 1.224
+   },
+   "2022": {
+    "n": 12,
+    "pips_geo": 96.9,
+    "totale": 4.66,
+    "prezzo": 1.3,
+    "volatilita": 1.09,
+    "sorpresa": 1.11,
+    "famiglie": 1.0,
+    "resto": 2.96,
+    "S_mediana": 1.35,
+    "prezzo_usd": 1807.6,
+    "adr_pct": 1.3528,
+    "S_geo": 1.43
+   },
+   "2023": {
+    "n": 12,
+    "pips_geo": 103.7,
+    "totale": 4.99,
+    "prezzo": 1.39,
+    "volatilita": 1.05,
+    "sorpresa": 1.02,
+    "famiglie": 1.0,
+    "resto": 3.35,
+    "S_mediana": 0.67,
+    "prezzo_usd": 1936.4,
+    "adr_pct": 1.1993,
+    "S_geo": 0.764
+   },
+   "2024": {
+    "n": 12,
+    "pips_geo": 127.3,
+    "totale": 6.12,
+    "prezzo": 1.7,
+    "volatilita": 1.09,
+    "sorpresa": 1.02,
+    "famiglie": 1.0,
+    "resto": 3.23,
+    "S_mediana": 0.67,
+    "prezzo_usd": 2370.1,
+    "adr_pct": 1.326,
+    "S_geo": 0.775
+   },
+   "2025": {
+    "n": 11,
+    "pips_geo": 116.1,
+    "totale": 5.58,
+    "prezzo": 2.39,
+    "volatilita": 1.16,
+    "sorpresa": 1.06,
+    "famiglie": 1.0,
+    "resto": 1.9,
+    "S_mediana": 0.67,
+    "prezzo_usd": 3321.4,
+    "adr_pct": 1.589,
+    "S_geo": 1.087
+   },
+   "2026": {
+    "n": 9,
+    "pips_geo": 254.1,
+    "totale": 12.22,
+    "prezzo": 3.28,
+    "volatilita": 1.38,
+    "sorpresa": 0.99,
+    "famiglie": 1.0,
+    "resto": 2.71,
+    "S_mediana": 0.67,
+    "prezzo_usd": 4559.6,
+    "adr_pct": 2.6249,
+    "S_geo": 0.595
+   }
+  },
+  "RETAIL_PPI": {
+   "2019": {
+    "n": 18,
+    "pips_geo": 19.7,
+    "totale": 1.0,
+    "prezzo": 1.0,
+    "volatilita": 1.0,
+    "sorpresa": 1.0,
+    "famiglie": 1.0,
+    "resto": 1.0,
+    "S_mediana": 1.03,
+    "prezzo_usd": 1371.0,
+    "adr_pct": 1.0502,
+    "S_geo": 1.29
+   },
+   "2020": {
+    "n": 12,
+    "pips_geo": 25.7,
+    "totale": 1.3,
+    "prezzo": 1.28,
+    "volatilita": 1.17,
+    "sorpresa": 1.13,
+    "famiglie": 1.0,
+    "resto": 0.77,
+    "S_mediana": 1.74,
+    "prezzo_usd": 1757.6,
+    "adr_pct": 1.6374,
+    "S_geo": 2.712
+   },
+   "2021": {
+    "n": 18,
+    "pips_geo": 28.7,
+    "totale": 1.46,
+    "prezzo": 1.31,
+    "volatilita": 1.08,
+    "sorpresa": 1.13,
+    "famiglie": 1.0,
+    "resto": 0.91,
+    "S_mediana": 2.25,
+    "prezzo_usd": 1798.7,
+    "adr_pct": 1.2949,
+    "S_geo": 2.715
+   },
+   "2022": {
+    "n": 24,
+    "pips_geo": 35.1,
+    "totale": 1.78,
+    "prezzo": 1.31,
+    "volatilita": 1.11,
+    "sorpresa": 1.02,
+    "famiglie": 1.0,
+    "resto": 1.2,
+    "S_mediana": 1.32,
+    "prezzo_usd": 1801.7,
+    "adr_pct": 1.3962,
+    "S_geo": 1.472
+   },
+   "2023": {
+    "n": 20,
+    "pips_geo": 57.1,
+    "totale": 2.9,
+    "prezzo": 1.42,
+    "volatilita": 1.05,
+    "sorpresa": 0.99,
+    "famiglie": 1.0,
+    "resto": 1.95,
+    "S_mediana": 1.21,
+    "prezzo_usd": 1945.7,
+    "adr_pct": 1.2209,
+    "S_geo": 1.241
+   },
+   "2024": {
+    "n": 22,
+    "pips_geo": 58.5,
+    "totale": 2.96,
+    "prezzo": 1.74,
+    "volatilita": 1.09,
+    "sorpresa": 0.97,
+    "famiglie": 1.0,
+    "resto": 1.62,
+    "S_mediana": 0.96,
+    "prezzo_usd": 2379.8,
+    "adr_pct": 1.3447,
+    "S_geo": 1.003
+   },
+   "2025": {
+    "n": 18,
+    "pips_geo": 49.8,
+    "totale": 2.53,
+    "prezzo": 2.36,
+    "volatilita": 1.14,
+    "sorpresa": 1.01,
+    "famiglie": 1.0,
+    "resto": 0.94,
+    "S_mediana": 1.24,
+    "prezzo_usd": 3229.8,
+    "adr_pct": 1.5132,
+    "S_geo": 1.345
+   },
+   "2026": {
+    "n": 14,
+    "pips_geo": 103.7,
+    "totale": 5.26,
+    "prezzo": 3.4,
+    "volatilita": 1.41,
+    "sorpresa": 1.01,
+    "famiglie": 1.0,
+    "resto": 1.09,
+    "S_mediana": 1.24,
+    "prezzo_usd": 4657.0,
+    "adr_pct": 2.7806,
+    "S_geo": 1.396
+   }
+  }
+ },
+ "prova_passo_per_passo": {
+  "TUTTE": {
+   "2019-22": {
+    "n": 305,
+    "errore_V": 0.37,
+    "errore_VS": 0.415
+   },
+   "2023-26": {
+    "n": 418,
+    "errore_V": 0.35,
+    "errore_VS": 0.367
+   }
+  },
+  "NFP": {
+   "2019-22": {
+    "n": 47,
+    "errore_V": 0.326,
+    "errore_VS": 0.303
+   },
+   "2023-26": {
+    "n": 42,
+    "errore_V": 0.318,
+    "errore_VS": 0.34
+   }
+  },
+  "CPI": {
+   "2019-22": {
+    "n": 47,
+    "errore_V": 0.445,
+    "errore_VS": 0.434
+   },
+   "2023-26": {
+    "n": 44,
+    "errore_V": 0.476,
+    "errore_VS": 0.44
+   }
+  },
+  "RETAIL_PPI": {
+   "2019-22": {
+    "n": 72,
+    "errore_V": 0.353,
+    "errore_VS": 0.372
+   },
+   "2023-26": {
+    "n": 74,
+    "errore_V": 0.301,
+    "errore_VS": 0.315
+   }
+  },
+  "migliora": false
+ },
+ "nfp_2026": [
+  {
+   "data": "2026-01-09",
+   "S": 0.67,
+   "adr21_pips": 854,
+   "pips_veri": 149,
+   "pips_stimati_VS": 184,
+   "pips_stimati_V": 203
+  },
+  {
+   "data": "2026-02-11",
+   "S": 0.87,
+   "adr21_pips": 2189,
+   "pips_veri": 648,
+   "pips_stimati_VS": 274,
+   "pips_stimati_V": 307
+  },
+  {
+   "data": "2026-03-06",
+   "S": 2.02,
+   "adr21_pips": 1557,
+   "pips_veri": 392,
+   "pips_stimati_VS": 272,
+   "pips_stimati_V": 272
+  },
+  {
+   "data": "2026-05-08",
+   "S": 0.67,
+   "adr21_pips": 1018,
+   "pips_veri": 122,
+   "pips_stimati_VS": 211,
+   "pips_stimati_V": 234
+  },
+  {
+   "data": "2026-06-05",
+   "S": 1.17,
+   "adr21_pips": 938,
+   "pips_veri": 190,
+   "pips_stimati_VS": 209,
+   "pips_stimati_V": 220
+  },
+  {
+   "data": "2026-07-02",
+   "S": 0.77,
+   "adr21_pips": 1131,
+   "pips_veri": 552,
+   "pips_stimati_VS": 198,
+   "pips_stimati_V": 220
+  },
+  {
+   "data": "2026-08-07",
+   "S": 1.46,
+   "adr21_pips": 928,
+   "pips_veri": 454,
+   "pips_stimati_VS": 238,
+   "pips_stimati_V": 244
+  },
+  {
+   "data": "2026-09-04",
+   "S": 1.44,
+   "adr21_pips": 1072,
+   "pips_veri": 826,
+   "pips_stimati_VS": 277,
+   "pips_stimati_V": 286
+  }
+ ]
+}

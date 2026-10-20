@@ -1,0 +1,516 @@
+<meta charset="utf-8">
+<title>Retail e PPI sull'oro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: banco del trader. Prossima release e quanto muove, cosa funziona, il grafico di oggi coi livelli, il simulatore dei pips. */
+:root{
+  --bg:#f4f3ef; --panel:#ffffff; --ink:#17191c; --ink2:#3b4047; --mute:#6b7178; --line:#e1dfd8; --grid:#ecebe6;
+  --accent:#9c6a12; --soft:#eeece6; --up:#1d7f54; --down:#bf3b35;
+  --good:#1d7f54; --warn:#9a6a00; --bad:#bf3b35;
+  --f-disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif; --f-body:"Public Sans",ui-sans-serif,system-ui,sans-serif; --f-num:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
+  --accent:#e3ab48; --soft:#22262b; --up:#4cc58c; --down:#f2716a;
+  --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
+  --accent:#e3ab48; --soft:#22262b; --up:#4cc58c; --down:#f2716a;
+  --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:920px;margin:0 auto;padding-block:24px 56px;display:grid;gap:34px}
+h1,h2{font-family:var(--f-disp);margin:0;text-wrap:balance}
+h1{font-weight:800;font-size:clamp(28px,6vw,42px);line-height:1.06;letter-spacing:-.01em}
+h2{font-weight:700;font-size:clamp(20px,3.4vw,25px);line-height:1.15}
+p{margin:0}
+.eyebrow{font:600 12px/1 var(--f-num);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lead{color:var(--ink2);max-width:64ch}
+.small{font-size:13.5px;color:var(--mute)}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+header,section{display:grid;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* il trade, in ordine di tempo */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.tl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ts{border-top:3px solid var(--line);padding-top:8px;display:grid;gap:2px;min-width:0}
+.ts.hl{border-top-color:var(--accent)}
+.ts span{font:600 13px var(--f-num);color:var(--mute)}
+.ts b{font-size:17px}
+.ts em{font-style:normal;font-size:13.5px;color:var(--ink2)}
+.odds{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.waffle{display:grid;grid-template-columns:repeat(10,18px);gap:4px}
+.waffle i{width:18px;height:18px;border-radius:4px;background:var(--bad);opacity:.7}
+.waffle i.y{background:var(--good);opacity:1}
+.pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.pay div{background:var(--bg);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.pay span{font-size:13px;color:var(--mute)}
+.pay b{font:700 22px/1.2 var(--f-num);font-variant-numeric:tabular-nums}
+.g{color:var(--good)} .r{color:var(--bad)}
+
+/* campi numerici */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.fields label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.fields input,.fields select{font:500 15px var(--f-num);width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:14px;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.chip b{font-family:var(--f-num)}
+.chip.big{font-size:16px;padding:9px 13px;border-color:var(--accent)}
+.chip.big b{font-size:18px}
+.chart{position:relative;min-width:0}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 var(--f-num);padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
+
+/* simulatore */
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:600 13.5px var(--f-body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sim{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:720px){.sim{grid-template-columns:1fr}}
+.sliders{display:grid;gap:14px}
+.sl{display:grid;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.sl .top b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.sl input[type=range]{width:100%;accent-color:var(--accent)}
+.sl em{font-style:normal;font-size:12.5px;color:var(--mute)}
+.out{background:var(--bg);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.out .big{font:800 44px/1 var(--f-disp);font-variant-numeric:tabular-nums}
+.out .band{font:600 14px var(--f-num);color:var(--ink2)}
+.out .mult{font:500 13px var(--f-num);color:var(--mute)}
+.can{display:grid;gap:6px;margin-top:4px}
+.can div{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;font-size:14px;color:var(--ink2)}
+.can i{font-style:normal;font-weight:700}
+footer{color:var(--mute);font-size:12.5px;max-width:72ch}
+.yt{border-collapse:collapse;width:100%;font-size:14px;min-width:320px}
+.yt th,.yt td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.yt th{font:600 11.5px var(--f-num);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.yt td{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.yt .bar{display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--grid);margin-right:8px;vertical-align:middle;overflow:hidden}
+.yt .bar i{display:block;height:100%;background:var(--accent)}
+/* minimal: un numero grande, una riga, un grafico */
+.wrap{gap:44px}
+.hero{display:grid;gap:14px}
+.hero .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero .when{font:600 14px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.hero .cd{font:600 14px var(--f-num);color:var(--mute)}
+.hero .big{font:800 clamp(64px,17vw,112px)/.9 var(--f-disp);letter-spacing:-.02em}
+.hero .why{color:var(--ink2);font-size:15.5px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:3px;align-content:start}
+.kpi b{font:700 clamp(24px,5.4vw,32px)/1.05 var(--f-num);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--mute);line-height:1.3}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}.kpi{grid-template-columns:auto 1fr;align-items:center;gap:12px}.kpi b{min-width:96px}}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:600 13px var(--f-num);color:var(--ink2)}
+.flow span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+.flow i{color:var(--mute);font-style:normal}
+.sec{display:grid;gap:12px}
+.sec .lead1{font:700 clamp(22px,4.6vw,28px)/1.15 var(--f-disp)}
+.one{font-size:15px;color:var(--ink2)}
+.one b{color:var(--ink)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px}
+.strip button{flex:none;min-width:60px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:6px 7px;font:600 11.5px var(--f-num);color:var(--mute);cursor:pointer;display:grid;gap:1px;text-align:center}
+.strip button b{font-size:13.5px;color:var(--ink)}
+.strip button.w b{color:var(--good)} .strip button.l b{color:var(--bad)}
+.strip button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.state{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.state b.ok,.state b.hot{font:800 30px/1 var(--f-disp)}
+.state .ok{color:var(--good)} .state .hot{color:var(--bad)}
+.state span{font-size:14px;color:var(--ink2)}
+details.mt5 summary,details.more summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14.5px}
+details.more{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+details.more[open]{display:grid;gap:12px}
+/* la volatilità nel tempo */
+.vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)}
+.vleg i{display:inline-block;width:16px;height:2.5px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.vleg i.box{height:10px;width:12px;background:var(--bad);opacity:.25}
+.vleg i.dot{width:7px;height:7px;border-radius:50%;background:var(--ink2);opacity:.6}
+.facts{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px;color:var(--ink2)}
+.facts b{color:var(--ink)}
+.h3{font:700 19px/1.2 var(--f-disp);margin:8px 0 0}
+.cbar{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;background:var(--panel)}
+.cbar i{display:block;height:100%}
+.cbar .in,.cleg .in{background:var(--accent)} .cbar .su,.cleg .su{background:var(--ink2)} .cbar .giu,.cleg .giu{background:var(--line)}
+.cleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink2)}
+.cleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.cleg b{font-family:var(--f-num);color:var(--ink)}
+.rpbar{display:flex;gap:8px;align-items:stretch;min-width:0}
+.rpbar select{font:600 14px var(--f-num);padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+.rpbar .strip{flex:1;min-width:0}
+.rpctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rpctl>button{font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.rpctl>button.play{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.yrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px}
+.yrs button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 2px;display:grid;gap:3px;justify-items:center;cursor:pointer;font:600 11px var(--f-num);color:var(--mute)}
+.yrs button i{display:block;width:70%;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--good) var(--p),var(--line) var(--p))}
+.yrs button b{font-size:12px;color:var(--ink)}
+.yrs button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+.tvleg{position:absolute;left:8px;top:6px;z-index:3;pointer-events:none;font:500 11.5px var(--f-num);color:var(--ink2);background:color-mix(in srgb,var(--panel) 82%,transparent);padding:2px 6px;border-radius:5px;max-width:calc(100% - 90px)}
+.tvleg b{color:var(--ink);font-weight:600}
+#rpChart{position:relative}
+@media (max-width:560px){#replay .presets button{padding:6px 9px;font-size:13px}}
+.next{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:720px){.next{grid-template-columns:1fr}}
+.when b{display:block;font:700 26px/1.15 var(--f-disp)}
+.when .cd{font:600 15px var(--f-num);color:var(--accent);margin-top:4px}
+.titles{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.titles span{font:600 12px/1 var(--f-body);padding:6px 10px;border-radius:999px;background:var(--soft);color:var(--ink2)}
+.verdict{display:grid;gap:10px}
+.vrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:baseline;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.vrow:last-child{border-bottom:0;padding-bottom:0}
+.vrow span{font-size:13px;color:var(--mute)}
+.vrow b{font:700 20px/1.2 var(--f-num)}
+.vrow em{font-style:normal;font-size:13px;color:var(--ink2);display:block}
+.gauge{width:100%;height:auto;display:block}
+.cap{font:600 12.5px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+</style>
+<div class="wrap">
+<section class="hero" id="hero" aria-label="Prossima release"></section>
+
+<section class="sec" aria-labelledby="h-ex">
+  <h2 id="h-ex">Le ultime release</h2>
+  <p class="one">Quanto si sono mosse, contro la stima fatta <b>prima</b>. Tocca una release.</p>
+  <div class="strip" id="strip" role="group" aria-label="Scegli una release"></div>
+  <div class="panel" id="prec"></div>
+</section>
+
+<section class="sec" aria-labelledby="h-day">
+  <h2 id="h-day">Oggi: fin dove arriva l'oro</h2>
+  <div class="panel" id="oggi"></div>
+</section>
+
+<details class="more" id="simbox"><summary>Per capire: perché Retail e PPI fanno più pips di prima</summary><div id="sim"></div></details>
+
+<footer id="foot"></footer>
+</div>
+<script>
+const D = {"ev":[{"d":"2011-01-13 13:30","y":2011,"tipo":"PPI","prezzo":1383.54,"m1_bid":11.6,"m1_mov":0.7,"m1c5":[-0.6,5.5,-6.1,2.2]},{"d":"2011-02-15 13:30","y":2011,"tipo":"RETAIL","prezzo":1375.41,"m1_bid":8.9,"m1_mov":6.8,"m1c5":[1.2,8.9,0.4,8.8]},{"d":"2011-02-16 13:30","y":2011,"tipo":"PPI","prezzo":1375.11,"m1_bid":9.0,"m1_mov":-9.6,"m1c5":[-1.4,-1.4,-9.0,-8.6]},{"d":"2011-03-11 13:30","y":2011,"tipo":"RETAIL","prezzo":1413.67,"m1_bid":9.8,"m1_mov":1.3,"m1c5":[0.6,6.3,-3.5,5.6]},{"d":"2011-03-16 12:30","y":2011,"tipo":"PPI","prezzo":1403.46,"m1_bid":7.2,"m1_mov":0.1,"m1c5":[1.5,4.2,-3.0,2.1]},{"d":"2011-04-13 12:30","y":2011,"tipo":"RETAIL","prezzo":1458.8,"m1_bid":3.1,"m1_mov":-2.9,"m1c5":[-0.8,0.6,-2.5,-2.4]},{"d":"2011-04-14 12:30","y":2011,"tipo":"PPI","prezzo":1455.83,"m1_bid":15.8,"m1_mov":5.3,"m1c5":[-0.7,5.4,-10.4,5.4]},{"d":"2011-05-12 12:30","y":2011,"tipo":"RETAIL+PPI","prezzo":1488.07,"m1_bid":20.3,"m1_mov":-15.4,"m1c5":[-0.2,2.5,-17.8,-13.8]},{"d":"2011-06-14 12:30","y":2011,"tipo":"RETAIL+PPI","prezzo":1519.18,"m1_bid":4.7,"m1_mov":-4.4,"m1c5":[-0.2,1.3,-3.4,-3.2]},{"d":"2011-07-14 12:30","y":2011,"tipo":"RETAIL+PPI","prezzo":1588.9,"m1_bid":15.4,"m1_mov":-12.3,"m1c5":[0.0,0.0,-15.4,-11.1]},{"d":"2011-08-12 12:30","y":2011,"tipo":"RETAIL","prezzo":1755.96,"m1_bid":29.2,"m1_mov":-28.8,"m1c5":[-0.2,-0.2,-29.2,-27.7]},{"d":"2011-08-17 12:30","y":2011,"tipo":"PPI","prezzo":1786.25,"m1_bid":19.0,"m1_mov":-3.4,"m1c5":[-0.9,7.8,-11.1,-2.1]},{"d":"2011-09-14 12:30","y":2011,"tipo":"RETAIL+PPI","prezzo":1823.52,"m1_bid":21.3,"m1_mov":19.9,"m1c5":[-0.5,20.5,-0.8,20.5]},{"d":"2011-10-14 12:30","y":2011,"tipo":"RETAIL","prezzo":1681.92,"m1_bid":8.8,"m1_mov":4.8,"m1c5":[0.4,8.6,-0.2,6.8]},{"d":"2011-10-18 12:30","y":2011,"tipo":"PPI","prezzo":1642.32,"m1_bid":17.5,"m1_mov":-5.4,"m1c5":[0.5,1.7,-15.8,-3.1]},{"d":"2011-11-15 13:30","y":2011,"tipo":"RETAIL+PPI","prezzo":1770.34,"m1_bid":13.0,"m1_mov":8.8,"m1c5":[0.2,12.9,-0.1,10.4]},{"d":"2011-12-13 13:30","y":2011,"tipo":"RETAIL","prezzo":1665.22,"m1_bid":6.5,"m1_mov":-4.2,"m1c5":[-0.5,2.2,-4.2,1.5]},{"d":"2011-12-15 13:30","y":2011,"tipo":"PPI","prezzo":1588.96,"m1_bid":33.0,"m1_mov":15.7,"m1c5":[-0.5,31.5,-1.5,21.1]},{"d":"2012-01-12 13:30","y":2012,"tipo":"RETAIL","prezzo":1653.75,"m1_bid":16.4,"m1_mov":3.9,"m1c5":[0.0,10.3,-6.1,10.3]},{"d":"2012-01-18 13:30","y":2012,"tipo":"PPI","prezzo":1653.9,"m1_bid":7.0,"m1_mov":1.3,"m1c5":[-1.0,3.0,-4.0,2.8]},{"d":"2012-02-14 13:30","y":2012,"tipo":"RETAIL","prezzo":1717.12,"m1_bid":21.8,"m1_mov":-11.9,"m1c5":[0.5,3.0,-18.8,-9.0]},{"d":"2012-02-16 13:30","y":2012,"tipo":"PPI","prezzo":1707.2,"m1_bid":22.8,"m1_mov":18.2,"m1c5":[-1.0,21.8,-1.0,21.8]},{"d":"2012-03-13 12:30","y":2012,"tipo":"RETAIL","prezzo":1695.05,"m1_bid":11.9,"m1_mov":-11.0,"m1c5":[0.5,4.4,-7.6,-7.2]},{"d":"2012-03-15 12:30","y":2012,"tipo":"PPI","prezzo":1645.05,"m1_bid":17.5,"m1_mov":-18.0,"m1c5":[-0.5,2.4,-15.1,-14.8]},{"d":"2012-04-12 12:30","y":2012,"tipo":"PPI","prezzo":1653.15,"m1_bid":30.0,"m1_mov":23.5,"m1c5":[-0.3,29.4,-0.6,27.4]},{"d":"2012-04-16 12:30","y":2012,"tipo":"RETAIL","prezzo":1647.65,"m1_bid":10.0,"m1_mov":0.2,"m1c5":[1.0,7.0,-3.0,1.4]},{"d":"2012-05-11 12:30","y":2012,"tipo":"PPI","prezzo":1584.87,"m1_bid":14.3,"m1_mov":8.5,"m1c5":[-2.4,11.7,-2.6,10.2]},{"d":"2012-06-13 12:30","y":2012,"tipo":"RETAIL+PPI","prezzo":1611.74,"m1_bid":42.1,"m1_mov":31.6,"m1c5":[-0.3,41.5,-0.6,31.5]},{"d":"2012-07-13 12:30","y":2012,"tipo":"PPI","prezzo":1584.71,"m1_bid":29.6,"m1_mov":15.3,"m1c5":[0.5,19.4,-10.2,15.5]},{"d":"2012-07-16 12:30","y":2012,"tipo":"RETAIL","prezzo":1580.91,"m1_bid":36.3,"m1_mov":32.2,"m1c5":[0.2,36.3,0.2,32.7]},{"d":"2012-08-14 12:30","y":2012,"tipo":"RETAIL+PPI","prezzo":1614.24,"m1_bid":31.4,"m1_mov":-26.5,"m1c5":[-0.3,-0.3,-31.4,-26.5]},{"d":"2012-09-13 12:30","y":2012,"tipo":"PPI","prezzo":1734.15,"m1_bid":14.0,"m1_mov":6.3,"m1c5":[0.2,14.0,0.2,9.9]},{"d":"2012-10-12 12:30","y":2012,"tipo":"PPI","prezzo":1768.94,"m1_bid":4.6,"m1_mov":-3.6,"m1c5":[-0.2,1.1,-3.5,-3.4]},{"d":"2012-10-15 12:30","y":2012,"tipo":"RETAIL","prezzo":1742.3,"m1_bid":19.6,"m1_mov":8.7,"m1c5":[0.0,11.5,-8.0,8.9]},{"d":"2012-11-14 13:30","y":2012,"tipo":"RETAIL+PPI","prezzo":1728.69,"m1_bid":10.0,"m1_mov":4.3,"m1c5":[-0.2,9.8,-0.2,5.3]},{"d":"2012-12-13 13:30","y":2012,"tipo":"RETAIL+PPI","prezzo":1693.74,"m1_bid":17.5,"m1_mov":-14.1,"m1c5":[0.2,0.2,-17.3,-13.4]},{"d":"2013-01-15 13:30","y":2013,"tipo":"RETAIL+PPI","prezzo":1683.06,"m1_bid":23.2,"m1_mov":-14.7,"m1c5":[-0.2,0.5,-22.7,-14.1]},{"d":"2013-02-13 13:30","y":2013,"tipo":"RETAIL","prezzo":1647.45,"m1_bid":29.9,"m1_mov":29.1,"m1c5":[0.2,29.9,0.2,29.9]},{"d":"2013-02-20 13:30","y":2013,"tipo":"PPI","prezzo":1592.99,"m1_bid":17.5,"m1_mov":9.6,"m1c5":[-0.5,16.5,-1.0,9.5]},{"d":"2013-03-13 12:30","y":2013,"tipo":"RETAIL","prezzo":1595.32,"m1_bid":38.4,"m1_mov":-22.2,"m1c5":[0.0,0.0,-38.4,-21.5]},{"d":"2013-03-14 12:30","y":2013,"tipo":"PPI","prezzo":1581.45,"m1_bid":39.6,"m1_mov":-28.5,"m1c5":[-1.0,-1.0,-39.6,-27.7]},{"d":"2013-04-12 12:30","y":2013,"tipo":"RETAIL+PPI","prezzo":1535.55,"m1_bid":34.1,"m1_mov":21.3,"m1c5":[-0.5,28.3,-5.8,21.0]},{"d":"2013-05-13 12:30","y":2013,"tipo":"RETAIL","prezzo":1435.73,"m1_bid":30.1,"m1_mov":-26.8,"m1c5":[-0.1,-0.1,-30.1,-26.8]},{"d":"2013-05-15 12:30","y":2013,"tipo":"PPI","prezzo":1408.93,"m1_bid":21.7,"m1_mov":20.2,"m1c5":[14.9,20.3,-1.4,20.2]},{"d":"2013-06-13 12:30","y":2013,"tipo":"RETAIL","prezzo":1384.95,"m1_bid":38.6,"m1_mov":-39.4,"m1c5":[-0.5,-0.5,-38.6,-37.9]},{"d":"2013-06-14 12:30","y":2013,"tipo":"PPI","prezzo":1383.49,"m1_bid":33.2,"m1_mov":18.3,"m1c5":[0.0,29.6,-3.6,18.4]},{"d":"2013-07-12 12:30","y":2013,"tipo":"PPI","prezzo":1274.14,"m1_bid":27.0,"m1_mov":-15.4,"m1c5":[-0.2,0.2,-26.8,-14.6]},{"d":"2013-07-15 12:30","y":2013,"tipo":"RETAIL","prezzo":1274.23,"m1_bid":52.9,"m1_mov":44.0,"m1c5":[0.0,51.7,-1.2,44.8]},{"d":"2013-08-13 12:30","y":2013,"tipo":"RETAIL","prezzo":1327.76,"m1_bid":75.1,"m1_mov":41.6,"m1c5":[9.1,75.1,9.1,42.8]},{"d":"2013-08-14 12:30","y":2013,"tipo":"PPI","prezzo":1324.8,"m1_bid":28.3,"m1_mov":4.7,"m1c5":[1.5,28.3,1.3,6.2]},{"d":"2013-09-13 12:30","y":2013,"tipo":"RETAIL+PPI","prezzo":1317.64,"m1_bid":68.8,"m1_mov":44.3,"m1c5":[-0.3,58.9,-9.9,45.3]},{"d":"2013-10-29 12:30","y":2013,"tipo":"RETAIL+PPI","prezzo":1347.14,"m1_bid":16.0,"m1_mov":-7.3,"m1c5":[-2.0,3.3,-12.7,-6.8]},{"d":"2013-11-21 13:30","y":2013,"tipo":"PPI","prezzo":1247.07,"m1_bid":28.4,"m1_mov":-3.6,"m1c5":[1.0,4.9,-23.5,0.0]},{"d":"2013-12-12 13:30","y":2013,"tipo":"RETAIL","prezzo":1234.9,"m1_bid":20.4,"m1_mov":2.9,"m1c5":[1.3,20.4,1.3,6.1]},{"d":"2013-12-13 13:30","y":2013,"tipo":"PPI","prezzo":1231.12,"m1_bid":9.3,"m1_mov":0.4,"m1c5":[1.2,9.3,0.6,0.6]},{"d":"2014-01-14 13:30","y":2014,"tipo":"RETAIL","prezzo":1250.77,"m1_bid":24.5,"m1_mov":1.4,"m1c5":[0.5,2.7,-21.7,1.9]},{"d":"2014-01-15 13:30","y":2014,"tipo":"PPI","prezzo":1239.15,"m1_bid":19.4,"m1_mov":-7.5,"m1c5":[-4.8,-0.6,-19.4,-7.3]},{"d":"2014-02-13 13:30","y":2014,"tipo":"RETAIL","prezzo":1293.53,"m1_bid":15.9,"m1_mov":-2.0,"m1c5":[1.0,15.9,0.0,4.2]},{"d":"2014-02-19 13:30","y":2014,"tipo":"PPI","prezzo":1319.78,"m1_bid":14.5,"m1_mov":-0.9,"m1c5":[0.3,13.8,-0.7,-0.3]},{"d":"2014-03-13 12:30","y":2014,"tipo":"RETAIL","prezzo":1368.76,"m1_bid":19.7,"m1_mov":-13.4,"m1c5":[-0.5,-0.5,-19.7,-11.4]},{"d":"2014-03-14 12:30","y":2014,"tipo":"PPI","prezzo":1375.37,"m1_bid":11.4,"m1_mov":3.2,"m1c5":[0.3,10.0,-1.4,3.2]},{"d":"2014-04-11 12:30","y":2014,"tipo":"PPI","prezzo":1322.42,"m1_bid":14.0,"m1_mov":-11.5,"m1c5":[0.6,0.7,-13.3,-11.5]},{"d":"2014-04-14 12:30","y":2014,"tipo":"RETAIL","prezzo":1323.08,"m1_bid":47.3,"m1_mov":-34.3,"m1c5":[0.0,5.6,-41.7,-33.9]},{"d":"2014-05-13 12:30","y":2014,"tipo":"RETAIL","prezzo":1291.24,"m1_bid":52.6,"m1_mov":31.6,"m1c5":[-1.1,50.7,-1.9,31.3]},{"d":"2014-05-14 12:30","y":2014,"tipo":"PPI","prezzo":1308.01,"m1_bid":12.6,"m1_mov":1.2,"m1c5":[0.0,4.8,-7.8,0.9]},{"d":"2014-06-12 12:30","y":2014,"tipo":"RETAIL","prezzo":1263.99,"m1_bid":33.8,"m1_mov":29.5,"m1c5":[-0.1,31.5,-2.3,29.8]},{"d":"2014-06-13 12:30","y":2014,"tipo":"PPI","prezzo":1273.05,"m1_bid":7.7,"m1_mov":7.4,"m1c5":[0.8,7.7,0.8,7.4]},{"d":"2014-07-15 12:30","y":2014,"tipo":"RETAIL","prezzo":1309.39,"m1_bid":20.7,"m1_mov":-2.5,"m1c5":[-2.2,11.4,-9.3,-2.4]},{"d":"2014-07-16 12:30","y":2014,"tipo":"PPI","prezzo":1297.39,"m1_bid":13.8,"m1_mov":-4.3,"m1c5":[-0.1,3.8,-10.0,-4.4]},{"d":"2014-08-13 12:30","y":2014,"tipo":"RETAIL","prezzo":1306.99,"m1_bid":29.3,"m1_mov":15.8,"m1c5":[2.8,29.3,2.1,16.2]},{"d":"2014-08-15 12:30","y":2014,"tipo":"PPI","prezzo":1302.97,"m1_bid":25.9,"m1_mov":-1.8,"m1c5":[-0.5,13.7,-12.2,-1.4]},{"d":"2014-09-12 12:30","y":2014,"tipo":"RETAIL","prezzo":1237.44,"m1_bid":16.2,"m1_mov":-13.5,"m1c5":[-0.5,1.1,-15.1,-13.0]},{"d":"2014-09-16 12:30","y":2014,"tipo":"PPI","prezzo":1236.85,"m1_bid":6.0,"m1_mov":2.3,"m1c5":[0.0,4.9,-1.1,2.3]},{"d":"2014-10-15 12:30","y":2014,"tipo":"RETAIL+PPI","prezzo":1229.44,"m1_bid":35.2,"m1_mov":32.2,"m1c5":[0.0,34.5,-0.7,32.5]},{"d":"2014-11-14 13:30","y":2014,"tipo":"RETAIL","prezzo":1152.18,"m1_bid":27.9,"m1_mov":-23.3,"m1c5":[0.0,3.3,-24.6,-23.0]},{"d":"2014-11-18 13:30","y":2014,"tipo":"PPI","prezzo":1197.28,"m1_bid":23.5,"m1_mov":-13.7,"m1c5":[0.0,0.4,-23.1,-13.8]},{"d":"2014-12-11 13:30","y":2014,"tipo":"RETAIL","prezzo":1223.79,"m1_bid":37.4,"m1_mov":-32.9,"m1c5":[-0.4,0.8,-36.6,-33.0]},{"d":"2014-12-12 13:30","y":2014,"tipo":"PPI","prezzo":1224.22,"m1_bid":15.1,"m1_mov":-3.0,"m1c5":[0.4,11.1,-4.0,-3.3]},{"d":"2015-01-14 13:30","y":2015,"tipo":"RETAIL","prezzo":1232.81,"m1_bid":37.1,"m1_mov":22.5,"m1c5":[0.1,37.1,0.1,22.8]},{"d":"2015-01-15 13:30","y":2015,"tipo":"PPI","prezzo":1255.72,"m1_bid":16.2,"m1_mov":-15.1,"m1c5":[0.6,1.4,-14.8,-14.8]},{"d":"2015-02-12 13:30","y":2015,"tipo":"RETAIL","prezzo":1223.78,"m1_bid":28.1,"m1_mov":26.1,"m1c5":[4.7,28.1,0.4,26.4]},{"d":"2015-02-18 13:30","y":2015,"tipo":"PPI","prezzo":1205.56,"m1_bid":8.9,"m1_mov":5.9,"m1c5":[0.1,7.3,-1.6,6.4]},{"d":"2015-03-12 12:30","y":2015,"tipo":"RETAIL","prezzo":1156.73,"m1_bid":41.1,"m1_mov":29.2,"m1c5":[-0.1,38.2,-2.8,31.4]},{"d":"2015-03-13 12:30","y":2015,"tipo":"PPI","prezzo":1157.17,"m1_bid":15.6,"m1_mov":7.5,"m1c5":[0.0,15.5,-0.1,7.5]},{"d":"2015-04-14 12:30","y":2015,"tipo":"RETAIL+PPI","prezzo":1184.66,"m1_bid":43.9,"m1_mov":37.0,"m1c5":[-0.2,40.4,-3.5,37.3]},{"d":"2015-05-13 12:30","y":2015,"tipo":"RETAIL","prezzo":1197.99,"m1_bid":80.1,"m1_mov":47.4,"m1c5":[-0.0,78.5,-1.6,48.5]},{"d":"2015-05-14 12:30","y":2015,"tipo":"PPI","prezzo":1218.62,"m1_bid":35.4,"m1_mov":5.5,"m1c5":[0.5,35.4,0.0,6.4]},{"d":"2015-06-11 12:30","y":2015,"tipo":"RETAIL","prezzo":1177.57,"m1_bid":18.0,"m1_mov":-1.3,"m1c5":[-0.4,1.2,-16.8,-0.3]},{"d":"2015-06-12 12:30","y":2015,"tipo":"PPI","prezzo":1179.79,"m1_bid":14.0,"m1_mov":5.7,"m1c5":[0.3,12.6,-1.4,6.3]},{"d":"2015-07-14 12:30","y":2015,"tipo":"RETAIL","prezzo":1155.04,"m1_bid":40.6,"m1_mov":26.2,"m1c5":[0.0,40.6,0.0,26.6]},{"d":"2015-07-15 12:30","y":2015,"tipo":"PPI","prezzo":1154.66,"m1_bid":20.1,"m1_mov":-14.6,"m1c5":[0.0,0.0,-20.1,-14.0]},{"d":"2015-08-13 12:30","y":2015,"tipo":"RETAIL","prezzo":1117.85,"m1_bid":19.4,"m1_mov":-5.0,"m1c5":[0.0,5.3,-14.1,-4.3]},{"d":"2015-08-14 12:30","y":2015,"tipo":"PPI","prezzo":1118.09,"m1_bid":10.3,"m1_mov":-8.5,"m1c5":[0.0,0.0,-10.3,-8.3]},{"d":"2015-09-11 12:30","y":2015,"tipo":"PPI","prezzo":1106.51,"m1_bid":10.0,"m1_mov":2.9,"m1c5":[0.0,4.7,-5.3,3.2]},{"d":"2015-09-15 12:30","y":2015,"tipo":"RETAIL","prezzo":1109.07,"m1_bid":16.9,"m1_mov":-14.2,"m1c5":[0.7,1.0,-15.9,-13.9]},{"d":"2015-10-14 12:30","y":2015,"tipo":"RETAIL+PPI","prezzo":1164.85,"m1_bid":66.9,"m1_mov":56.0,"m1c5":[-0.0,65.2,-1.7,57.1]},{"d":"2015-11-13 13:30","y":2015,"tipo":"RETAIL+PPI","prezzo":1082.39,"m1_bid":63.8,"m1_mov":55.6,"m1c5":[1.3,63.8,1.3,56.0]},{"d":"2015-12-11 13:30","y":2015,"tipo":"RETAIL+PPI","prezzo":1064.45,"m1_bid":25.8,"m1_mov":-9.6,"m1c5":[0.3,7.9,-17.9,-9.4]},{"d":"2016-01-15 13:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1088.16,"m1_bid":35.0,"m1_mov":29.2,"m1c5":[-0.1,34.7,-0.3,29.3]},{"d":"2016-02-12 13:30","y":2016,"tipo":"RETAIL","prezzo":1239.8,"m1_bid":34.0,"m1_mov":-20.7,"m1c5":[-2.2,-2.2,-34.0,-19.0]},{"d":"2016-02-17 13:30","y":2016,"tipo":"PPI","prezzo":1207.81,"m1_bid":15.9,"m1_mov":-1.6,"m1c5":[0.0,2.5,-13.4,-1.4]},{"d":"2016-03-15 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1232.28,"m1_bid":43.9,"m1_mov":9.0,"m1c5":[0.0,32.4,-11.5,9.6]},{"d":"2016-04-13 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1242.74,"m1_bid":29.1,"m1_mov":26.3,"m1c5":[0.2,29.1,0.2,26.6]},{"d":"2016-05-13 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1269.1,"m1_bid":38.9,"m1_mov":-23.4,"m1c5":[0.0,0.0,-38.9,-21.9]},{"d":"2016-06-14 12:30","y":2016,"tipo":"RETAIL","prezzo":1284.8,"m1_bid":25.1,"m1_mov":-1.9,"m1c5":[1.0,1.4,-23.7,-1.7]},{"d":"2016-06-15 12:30","y":2016,"tipo":"PPI","prezzo":1281.74,"m1_bid":10.0,"m1_mov":-7.0,"m1c5":[-0.3,0.0,-10.0,-6.9]},{"d":"2016-07-14 12:30","y":2016,"tipo":"PPI","prezzo":1324.82,"m1_bid":6.4,"m1_mov":-2.9,"m1c5":[0.9,1.0,-5.4,-2.3]},{"d":"2016-08-12 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1342.96,"m1_bid":66.5,"m1_mov":60.1,"m1c5":[0.0,66.4,-0.1,60.6]},{"d":"2016-09-15 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1322.79,"m1_bid":58.6,"m1_mov":24.4,"m1c5":[0.1,58.6,0.1,24.5]},{"d":"2016-10-14 12:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1250.36,"m1_bid":49.2,"m1_mov":-30.6,"m1c5":[0.6,8.3,-40.9,-29.7]},{"d":"2016-11-15 13:30","y":2016,"tipo":"RETAIL","prezzo":1225.08,"m1_bid":28.9,"m1_mov":-20.0,"m1c5":[-0.8,1.0,-27.9,-17.8]},{"d":"2016-11-16 13:30","y":2016,"tipo":"PPI","prezzo":1226.36,"m1_bid":18.0,"m1_mov":14.8,"m1c5":[0.0,17.7,-0.3,14.9]},{"d":"2016-12-14 13:30","y":2016,"tipo":"RETAIL+PPI","prezzo":1160.32,"m1_bid":19.6,"m1_mov":0.4,"m1c5":[1.0,19.6,1.0,5.1]},{"d":"2017-01-13 13:30","y":2017,"tipo":"RETAIL+PPI","prezzo":1199.01,"m1_bid":33.6,"m1_mov":-15.3,"m1c5":[11.1,18.6,-15.0,-13.1]},{"d":"2017-02-14 13:30","y":2017,"tipo":"PPI","prezzo":1234.05,"m1_bid":11.8,"m1_mov":-6.6,"m1c5":[-0.1,0.4,-11.4,-6.2]},{"d":"2017-03-14 12:30","y":2017,"tipo":"PPI","prezzo":1206.02,"m1_bid":12.1,"m1_mov":-12.4,"m1c5":[-0.3,-0.3,-12.1,-12.1]},{"d":"2017-04-13 12:30","y":2017,"tipo":"PPI","prezzo":1286.75,"m1_bid":6.2,"m1_mov":5.3,"m1c5":[0.0,6.2,0.0,6.0]},{"d":"2017-05-11 12:30","y":2017,"tipo":"PPI","prezzo":1222.59,"m1_bid":14.2,"m1_mov":-10.5,"m1c5":[-0.1,-0.1,-14.2,-10.2]},{"d":"2017-06-13 12:30","y":2017,"tipo":"PPI","prezzo":1263.68,"m1_bid":7.5,"m1_mov":-6.9,"m1c5":[0.4,0.4,-7.1,-6.6]},{"d":"2017-07-13 12:30","y":2017,"tipo":"PPI","prezzo":1220.51,"m1_bid":9.3,"m1_mov":4.2,"m1c5":[0.0,7.4,-1.9,5.5]},{"d":"2017-08-10 12:30","y":2017,"tipo":"PPI","prezzo":1281.37,"m1_bid":19.8,"m1_mov":6.1,"m1c5":[0.0,14.4,-5.4,7.0]},{"d":"2017-08-15 12:30","y":2017,"tipo":"RETAIL","prezzo":1272.97,"m1_bid":33.2,"m1_mov":-33.1,"m1c5":[0.5,0.5,-32.7,-32.2]},{"d":"2017-09-13 12:30","y":2017,"tipo":"PPI","prezzo":1332.71,"m1_bid":12.3,"m1_mov":10.1,"m1c5":[-0.0,10.4,-1.9,10.4]},{"d":"2017-09-15 12:30","y":2017,"tipo":"RETAIL","prezzo":1323.73,"m1_bid":28.6,"m1_mov":12.2,"m1c5":[0.0,28.6,0.0,12.8]},{"d":"2017-10-12 12:30","y":2017,"tipo":"PPI","prezzo":1294.41,"m1_bid":14.3,"m1_mov":-7.7,"m1c5":[-0.4,-0.4,-14.3,-7.6]},{"d":"2017-11-14 13:30","y":2017,"tipo":"PPI","prezzo":1274.72,"m1_bid":25.0,"m1_mov":-10.9,"m1c5":[-0.0,0.0,-25.0,-10.8]},{"d":"2017-12-12 13:30","y":2017,"tipo":"PPI","prezzo":1242.71,"m1_bid":12.6,"m1_mov":-9.6,"m1c5":[-0.4,0.0,-12.6,-9.5]},{"d":"2017-12-14 13:30","y":2017,"tipo":"RETAIL","prezzo":1256.84,"m1_bid":21.9,"m1_mov":-12.1,"m1c5":[-11.0,-6.4,-21.9,-11.9]},{"d":"2018-01-11 13:30","y":2018,"tipo":"PPI","prezzo":1320.69,"m1_bid":16.6,"m1_mov":6.1,"m1c5":[0.5,15.6,-1.0,6.3]},{"d":"2018-02-15 13:30","y":2018,"tipo":"PPI","prezzo":1351.45,"m1_bid":12.8,"m1_mov":1.7,"m1c5":[-1.0,4.2,-8.6,2.2]},{"d":"2018-03-14 12:30","y":2018,"tipo":"RETAIL+PPI","prezzo":1325.7,"m1_bid":24.1,"m1_mov":19.3,"m1c5":[8.1,24.1,8.1,19.9]},{"d":"2018-04-10 12:30","y":2018,"tipo":"PPI","prezzo":1338.89,"m1_bid":5.2,"m1_mov":-3.9,"m1c5":[-0.2,-0.2,-5.2,-4.0]},{"d":"2018-04-16 12:30","y":2018,"tipo":"RETAIL","prezzo":1343.92,"m1_bid":19.9,"m1_mov":3.6,"m1c5":[-1.0,13.1,-6.8,3.3]},{"d":"2018-05-09 12:30","y":2018,"tipo":"PPI","prezzo":1311.17,"m1_bid":14.9,"m1_mov":9.6,"m1c5":[-0.2,14.6,-0.3,9.7]},{"d":"2018-05-15 12:30","y":2018,"tipo":"RETAIL","prezzo":1306.41,"m1_bid":10.1,"m1_mov":-4.1,"m1c5":[0.6,3.8,-6.3,-3.3]},{"d":"2018-06-13 12:30","y":2018,"tipo":"PPI","prezzo":1295.49,"m1_bid":8.2,"m1_mov":-6.4,"m1c5":[0.0,0.0,-8.2,-6.2]},{"d":"2018-06-14 12:30","y":2018,"tipo":"RETAIL","prezzo":1308.46,"m1_bid":17.7,"m1_mov":-10.0,"m1c5":[0.0,0.0,-17.7,-9.0]},{"d":"2018-07-16 12:30","y":2018,"tipo":"RETAIL","prezzo":1243.21,"m1_bid":10.4,"m1_mov":-9.3,"m1c5":[-1.9,0.8,-9.6,-9.1]},{"d":"2018-08-09 12:30","y":2018,"tipo":"PPI","prezzo":1216.03,"m1_bid":7.5,"m1_mov":2.9,"m1c5":[0.0,7.4,-0.1,3.3]},{"d":"2018-08-15 12:30","y":2018,"tipo":"RETAIL","prezzo":1186.88,"m1_bid":8.7,"m1_mov":-3.8,"m1c5":[0.1,0.1,-8.6,-3.4]},{"d":"2018-09-12 12:30","y":2018,"tipo":"PPI","prezzo":1194.03,"m1_bid":11.4,"m1_mov":7.1,"m1c5":[0.0,11.4,0.0,7.2]},{"d":"2018-09-14 12:30","y":2018,"tipo":"RETAIL","prezzo":1205.1,"m1_bid":18.9,"m1_mov":9.9,"m1c5":[1.6,18.9,1.6,10.2]},{"d":"2018-10-10 12:30","y":2018,"tipo":"PPI","prezzo":1186.6,"m1_bid":6.2,"m1_mov":-4.4,"m1c5":[0.0,1.6,-4.6,-4.6]},{"d":"2018-10-15 12:30","y":2018,"tipo":"RETAIL","prezzo":1230.28,"m1_bid":8.0,"m1_mov":4.3,"m1c5":[2.0,8.0,0.8,4.7]},{"d":"2018-11-09 13:30","y":2018,"tipo":"PPI","prezzo":1215.12,"m1_bid":14.4,"m1_mov":-9.8,"m1c5":[-0.4,-0.4,-14.4,-9.5]},{"d":"2018-11-15 13:30","y":2018,"tipo":"RETAIL","prezzo":1209.16,"m1_bid":9.5,"m1_mov":-0.3,"m1c5":[0.0,4.4,-5.1,0.6]},{"d":"2018-12-11 13:30","y":2018,"tipo":"PPI","prezzo":1246.58,"m1_bid":4.6,"m1_mov":-2.1,"m1c5":[0.0,0.4,-4.2,-2.1]},{"d":"2018-12-14 13:30","y":2018,"tipo":"RETAIL","prezzo":1237.89,"m1_bid":7.9,"m1_mov":-8.2,"m1c5":[0.0,0.0,-7.9,-7.9]},{"d":"2019-01-15 13:30","y":2019,"tipo":"PPI","prezzo":1288.42,"m1_bid":13.2,"m1_mov":10.8,"m1c5":[0.4,13.1,-0.1,11.0]},{"d":"2019-02-14 13:30","y":2019,"tipo":"RETAIL+PPI","prezzo":1305.49,"m1_bid":34.8,"m1_mov":29.4,"m1c5":[6.0,34.8,6.0,29.7]},{"d":"2019-03-11 12:30","y":2019,"tipo":"RETAIL","prezzo":1295.2,"m1_bid":10.2,"m1_mov":-0.5,"m1c5":[-7.6,-0.3,-10.2,-0.7]},{"d":"2019-03-13 12:30","y":2019,"tipo":"PPI","prezzo":1307.25,"m1_bid":4.8,"m1_mov":-1.9,"m1c5":[0.2,0.5,-4.3,-1.8]},{"d":"2019-04-01 12:30","y":2019,"tipo":"RETAIL","prezzo":1293.17,"m1_bid":25.1,"m1_mov":4.2,"m1c5":[-1.0,22.9,-2.2,4.7]},{"d":"2019-04-11 12:30","y":2019,"tipo":"PPI","prezzo":1299.14,"m1_bid":12.1,"m1_mov":-6.2,"m1c5":[-1.0,0.0,-12.1,-5.4]},{"d":"2019-04-18 12:30","y":2019,"tipo":"RETAIL","prezzo":1276.11,"m1_bid":27.0,"m1_mov":-23.9,"m1c5":[-1.4,-1.4,-27.0,-23.5]},{"d":"2019-05-09 12:30","y":2019,"tipo":"PPI","prezzo":1282.15,"m1_bid":6.5,"m1_mov":5.9,"m1c5":[0.3,6.5,0.0,6.1]},{"d":"2019-05-15 12:30","y":2019,"tipo":"RETAIL","prezzo":1299.07,"m1_bid":11.0,"m1_mov":3.7,"m1c5":[1.5,11.0,0.9,4.0]},{"d":"2019-06-14 12:30","y":2019,"tipo":"RETAIL","prezzo":1355.34,"m1_bid":40.6,"m1_mov":-34.7,"m1c5":[0.0,4.5,-36.1,-34.2]},{"d":"2019-07-12 12:30","y":2019,"tipo":"PPI","prezzo":1406.06,"m1_bid":13.5,"m1_mov":-8.4,"m1c5":[0.2,0.2,-13.3,-8.4]},{"d":"2019-07-16 12:30","y":2019,"tipo":"RETAIL","prezzo":1414.61,"m1_bid":55.1,"m1_mov":-49.5,"m1c5":[-0.1,0.9,-54.2,-49.0]},{"d":"2019-08-15 12:30","y":2019,"tipo":"RETAIL","prezzo":1513.95,"m1_bid":48.8,"m1_mov":-46.0,"m1c5":[-7.1,-7.1,-48.8,-45.2]},{"d":"2019-09-13 12:30","y":2019,"tipo":"RETAIL","prezzo":1506.72,"m1_bid":39.9,"m1_mov":-26.1,"m1c5":[0.0,0.0,-39.9,-25.6]},{"d":"2019-10-16 12:30","y":2019,"tipo":"RETAIL","prezzo":1478.97,"m1_bid":59.7,"m1_mov":37.9,"m1c5":[0.0,59.7,0.0,38.9]},{"d":"2019-11-14 13:30","y":2019,"tipo":"PPI","prezzo":1468.78,"m1_bid":11.3,"m1_mov":5.5,"m1c5":[0.0,9.5,-1.8,6.2]},{"d":"2019-11-15 13:30","y":2019,"tipo":"RETAIL","prezzo":1466.05,"m1_bid":22.6,"m1_mov":20.8,"m1c5":[12.9,22.6,8.9,21.3]},{"d":"2019-12-13 13:30","y":2019,"tipo":"RETAIL","prezzo":1471.41,"m1_bid":22.4,"m1_mov":8.3,"m1c5":[1.6,22.4,1.6,8.5]},{"d":"2020-01-16 13:30","y":2020,"tipo":"RETAIL","prezzo":1555.39,"m1_bid":14.1,"m1_mov":-14.1,"m1c5":[-1.0,-1.0,-14.1,-13.7]},{"d":"2020-02-14 13:30","y":2020,"tipo":"RETAIL","prezzo":1575.98,"m1_bid":16.1,"m1_mov":8.8,"m1c5":[0.0,16.1,0.0,9.4]},{"d":"2020-03-17 12:30","y":2020,"tipo":"RETAIL","prezzo":1483.82,"m1_bid":42.5,"m1_mov":28.5,"m1c5":[0.0,39.2,-3.3,29.8]},{"d":"2020-04-15 12:30","y":2020,"tipo":"RETAIL","prezzo":1720.89,"m1_bid":26.5,"m1_mov":2.4,"m1c5":[-0.1,20.3,-6.2,5.6]},{"d":"2020-05-15 12:30","y":2020,"tipo":"RETAIL","prezzo":1736.6,"m1_bid":28.3,"m1_mov":3.4,"m1c5":[0.3,22.2,-6.1,5.7]},{"d":"2020-06-16 12:30","y":2020,"tipo":"RETAIL","prezzo":1727.48,"m1_bid":67.1,"m1_mov":-65.4,"m1c5":[-4.2,-4.2,-67.1,-63.9]},{"d":"2020-07-16 12:30","y":2020,"tipo":"RETAIL","prezzo":1805.19,"m1_bid":35.2,"m1_mov":13.3,"m1c5":[-0.5,25.2,-10.0,13.3]},{"d":"2020-08-14 12:30","y":2020,"tipo":"RETAIL","prezzo":1946.23,"m1_bid":32.9,"m1_mov":-20.5,"m1c5":[-2.0,10.2,-22.7,-21.1]},{"d":"2020-09-16 12:30","y":2020,"tipo":"RETAIL","prezzo":1969.12,"m1_bid":13.0,"m1_mov":7.2,"m1c5":[0.2,11.7,-1.3,8.0]},{"d":"2020-10-16 12:30","y":2020,"tipo":"RETAIL","prezzo":1910.51,"m1_bid":30.7,"m1_mov":-16.8,"m1c5":[0.2,0.2,-30.5,-16.7]},{"d":"2020-11-17 13:30","y":2020,"tipo":"RETAIL","prezzo":1888.58,"m1_bid":25.6,"m1_mov":13.2,"m1c5":[0.0,16.5,-9.1,14.6]},{"d":"2020-12-16 13:30","y":2020,"tipo":"RETAIL","prezzo":1853.87,"m1_bid":20.9,"m1_mov":-11.5,"m1c5":[2.2,7.2,-13.7,-12.4]},{"d":"2021-01-15 13:30","y":2021,"tipo":"RETAIL","prezzo":1848.42,"m1_bid":18.4,"m1_mov":3.2,"m1c5":[0.7,9.7,-8.6,5.0]},{"d":"2021-02-17 13:30","y":2021,"tipo":"RETAIL","prezzo":1778.6,"m1_bid":26.3,"m1_mov":-25.4,"m1c5":[-2.2,-0.5,-26.3,-25.4]},{"d":"2021-03-16 12:30","y":2021,"tipo":"RETAIL","prezzo":1733.76,"m1_bid":28.1,"m1_mov":-8.2,"m1c5":[-0.9,20.0,-8.2,-8.2]},{"d":"2021-04-15 12:30","y":2021,"tipo":"RETAIL","prezzo":1748.51,"m1_bid":26.2,"m1_mov":5.3,"m1c5":[0.0,6.1,-20.1,6.1]},{"d":"2021-05-14 12:30","y":2021,"tipo":"RETAIL","prezzo":1837.4,"m1_bid":31.2,"m1_mov":-11.4,"m1c5":[-0.4,-0.4,-31.2,-11.4]},{"d":"2021-06-15 12:30","y":2021,"tipo":"RETAIL+PPI","prezzo":1863.37,"m1_bid":33.4,"m1_mov":17.4,"m1c5":[0.3,33.4,0.2,18.7]},{"d":"2021-07-14 12:30","y":2021,"tipo":"PPI","prezzo":1823.98,"m1_bid":39.1,"m1_mov":10.1,"m1c5":[-0.3,34.6,-4.5,10.3]},{"d":"2021-07-16 12:30","y":2021,"tipo":"RETAIL","prezzo":1821.16,"m1_bid":34.6,"m1_mov":-29.0,"m1c5":[0.2,1.2,-33.4,-28.9]},{"d":"2021-08-12 12:30","y":2021,"tipo":"PPI","prezzo":1747.59,"m1_bid":36.3,"m1_mov":-13.4,"m1c5":[0.0,0.9,-35.5,-13.5]},{"d":"2021-08-17 12:30","y":2021,"tipo":"RETAIL","prezzo":1792.4,"m1_bid":39.2,"m1_mov":10.0,"m1c5":[0.1,16.0,-23.2,9.9]},{"d":"2021-09-10 12:30","y":2021,"tipo":"PPI","prezzo":1798.14,"m1_bid":34.3,"m1_mov":-5.5,"m1c5":[0.0,23.8,-10.5,-5.8]},{"d":"2021-09-16 12:30","y":2021,"tipo":"RETAIL","prezzo":1768.52,"m1_bid":38.8,"m1_mov":-20.6,"m1c5":[-0.0,-0.0,-38.8,-19.9]},{"d":"2021-10-14 12:30","y":2021,"tipo":"PPI","prezzo":1796.77,"m1_bid":24.8,"m1_mov":20.7,"m1c5":[0.0,24.7,-0.1,21.1]},{"d":"2021-10-15 12:30","y":2021,"tipo":"RETAIL","prezzo":1774.61,"m1_bid":42.4,"m1_mov":-33.0,"m1c5":[-1.0,-1.0,-42.4,-32.6]},{"d":"2021-11-09 13:30","y":2021,"tipo":"PPI","prezzo":1826.86,"m1_bid":13.2,"m1_mov":7.4,"m1c5":[0.0,10.5,-2.7,8.1]},{"d":"2021-11-16 13:30","y":2021,"tipo":"RETAIL","prezzo":1872.7,"m1_bid":31.8,"m1_mov":-16.8,"m1c5":[0.0,0.1,-31.7,-17.1]},{"d":"2021-12-14 13:30","y":2021,"tipo":"PPI","prezzo":1779.88,"m1_bid":17.6,"m1_mov":10.7,"m1c5":[0.1,11.5,-6.1,10.9]},{"d":"2021-12-15 13:30","y":2021,"tipo":"RETAIL","prezzo":1771.39,"m1_bid":24.2,"m1_mov":9.7,"m1c5":[0.0,24.2,0.0,9.6]},{"d":"2022-01-13 13:30","y":2022,"tipo":"PPI","prezzo":1820.84,"m1_bid":16.1,"m1_mov":9.4,"m1c5":[0.1,10.4,-5.7,9.4]},{"d":"2022-01-14 13:30","y":2022,"tipo":"RETAIL","prezzo":1823.78,"m1_bid":31.9,"m1_mov":12.7,"m1c5":[-0.2,31.7,-0.2,13.0]},{"d":"2022-02-15 13:30","y":2022,"tipo":"PPI","prezzo":1847.61,"m1_bid":35.5,"m1_mov":-6.7,"m1c5":[-0.3,7.0,-28.5,-6.6]},{"d":"2022-02-16 13:30","y":2022,"tipo":"RETAIL","prezzo":1853.66,"m1_bid":19.7,"m1_mov":-5.4,"m1c5":[-0.2,-0.1,-19.7,-5.1]},{"d":"2022-03-15 12:30","y":2022,"tipo":"PPI","prezzo":1923.14,"m1_bid":47.9,"m1_mov":-31.9,"m1c5":[0.0,15.4,-32.5,-31.8]},{"d":"2022-03-16 12:30","y":2022,"tipo":"RETAIL","prezzo":1917.24,"m1_bid":17.0,"m1_mov":-7.9,"m1c5":[0.0,0.5,-16.5,-8.3]},{"d":"2022-04-13 12:30","y":2022,"tipo":"PPI","prezzo":1975.75,"m1_bid":39.8,"m1_mov":8.8,"m1c5":[0.0,9.8,-30.0,8.3]},{"d":"2022-04-14 12:30","y":2022,"tipo":"RETAIL","prezzo":1974.51,"m1_bid":25.2,"m1_mov":-11.9,"m1c5":[-0.1,11.6,-13.6,-11.2]},{"d":"2022-05-12 12:30","y":2022,"tipo":"PPI","prezzo":1844.09,"m1_bid":19.4,"m1_mov":14.0,"m1c5":[0.0,15.4,-4.0,15.4]},{"d":"2022-05-17 12:30","y":2022,"tipo":"RETAIL","prezzo":1831.31,"m1_bid":32.3,"m1_mov":-12.2,"m1c5":[0.1,0.3,-32.0,-11.8]},{"d":"2022-06-14 12:30","y":2022,"tipo":"PPI","prezzo":1819.95,"m1_bid":13.6,"m1_mov":3.5,"m1c5":[0.5,11.2,-2.4,3.8]},{"d":"2022-06-15 12:30","y":2022,"tipo":"RETAIL","prezzo":1830.27,"m1_bid":35.5,"m1_mov":33.6,"m1c5":[0.0,35.5,0.0,34.4]},{"d":"2022-07-14 12:30","y":2022,"tipo":"PPI","prezzo":1712.72,"m1_bid":32.2,"m1_mov":-10.2,"m1c5":[-0.1,8.6,-23.6,-10.6]},{"d":"2022-07-15 12:30","y":2022,"tipo":"RETAIL","prezzo":1704.59,"m1_bid":25.4,"m1_mov":-21.1,"m1c5":[-0.1,-0.1,-25.4,-21.0]},{"d":"2022-08-11 12:30","y":2022,"tipo":"PPI","prezzo":1797.49,"m1_bid":22.1,"m1_mov":-0.7,"m1c5":[0.0,18.1,-4.0,-0.9]},{"d":"2022-08-17 12:30","y":2022,"tipo":"RETAIL","prezzo":1768.38,"m1_bid":58.3,"m1_mov":4.0,"m1c5":[-0.3,33.8,-24.5,3.9]},{"d":"2022-09-14 12:30","y":2022,"tipo":"PPI","prezzo":1703.55,"m1_bid":52.2,"m1_mov":-23.7,"m1c5":[0.0,10.2,-42.0,-23.0]},{"d":"2022-09-15 12:30","y":2022,"tipo":"RETAIL","prezzo":1685.32,"m1_bid":42.1,"m1_mov":9.5,"m1c5":[0.1,10.8,-31.3,10.0]},{"d":"2022-10-12 12:30","y":2022,"tipo":"PPI","prezzo":1670.65,"m1_bid":56.3,"m1_mov":-43.0,"m1c5":[-0.3,-0.3,-56.3,-42.7]},{"d":"2022-10-14 12:30","y":2022,"tipo":"RETAIL","prezzo":1653.31,"m1_bid":41.9,"m1_mov":26.6,"m1c5":[0.4,27.0,-14.9,27.0]},{"d":"2022-11-15 13:30","y":2022,"tipo":"PPI","prezzo":1775.54,"m1_bid":90.8,"m1_mov":71.2,"m1c5":[0.0,90.8,0.0,71.5]},{"d":"2022-11-16 13:30","y":2022,"tipo":"RETAIL","prezzo":1781.0,"m1_bid":65.1,"m1_mov":-47.8,"m1c5":[1.0,1.0,-64.1,-48.1]},{"d":"2022-12-09 13:30","y":2022,"tipo":"PPI","prezzo":1801.45,"m1_bid":150.0,"m1_mov":-85.5,"m1c5":[-0.1,38.1,-111.9,-85.5]},{"d":"2022-12-15 13:30","y":2022,"tipo":"RETAIL","prezzo":1774.74,"m1_bid":36.9,"m1_mov":25.6,"m1c5":[-0.9,28.0,-8.9,26.3]},{"d":"2023-01-18 13:30","y":2023,"tipo":"RETAIL+PPI","prezzo":1918.14,"m1_bid":58.0,"m1_mov":54.1,"m1c5":[-0.1,57.9,-0.1,55.8]},{"d":"2023-02-15 13:30","y":2023,"tipo":"RETAIL","prezzo":1835.63,"m1_bid":40.0,"m1_mov":-8.8,"m1c5":[1.0,1.0,-39.0,-8.8]},{"d":"2023-02-16 13:30","y":2023,"tipo":"PPI","prezzo":1836.47,"m1_bid":56.7,"m1_mov":-24.7,"m1c5":[0.7,0.7,-56.0,-24.3]},{"d":"2023-03-15 12:30","y":2023,"tipo":"RETAIL+PPI","prezzo":1919.4,"m1_bid":60.4,"m1_mov":42.5,"m1c5":[-1.4,59.0,-1.4,42.8]},{"d":"2023-04-13 12:30","y":2023,"tipo":"PPI","prezzo":2028.76,"m1_bid":92.5,"m1_mov":5.4,"m1c5":[0.3,79.8,-12.7,5.9]},{"d":"2023-04-14 12:30","y":2023,"tipo":"RETAIL","prezzo":2036.8,"m1_bid":72.8,"m1_mov":-34.3,"m1c5":[0.0,35.1,-37.7,-33.6]},{"d":"2023-05-11 12:30","y":2023,"tipo":"PPI","prezzo":2033.89,"m1_bid":75.6,"m1_mov":44.0,"m1c5":[5.0,75.6,5.0,44.0]},{"d":"2023-05-16 12:30","y":2023,"tipo":"RETAIL","prezzo":2006.11,"m1_bid":63.2,"m1_mov":-18.6,"m1c5":[22.5,38.4,-24.8,-18.1]},{"d":"2023-06-14 12:30","y":2023,"tipo":"PPI","prezzo":1948.85,"m1_bid":62.3,"m1_mov":16.8,"m1c5":[-0.2,38.1,-24.2,17.3]},{"d":"2023-06-15 12:30","y":2023,"tipo":"RETAIL","prezzo":1927.34,"m1_bid":57.2,"m1_mov":20.1,"m1c5":[-16.1,36.4,-20.8,21.1]},{"d":"2023-07-13 12:30","y":2023,"tipo":"PPI","prezzo":1959.26,"m1_bid":66.8,"m1_mov":21.2,"m1c5":[0.3,47.1,-19.7,24.0]},{"d":"2023-07-18 12:30","y":2023,"tipo":"RETAIL","prezzo":1967.1,"m1_bid":54.1,"m1_mov":10.4,"m1c5":[0.6,41.1,-13.0,10.4]},{"d":"2023-08-11 12:30","y":2023,"tipo":"PPI","prezzo":1920.3,"m1_bid":47.3,"m1_mov":-39.4,"m1c5":[-1.5,-1.1,-47.3,-39.0]},{"d":"2023-08-15 12:30","y":2023,"tipo":"RETAIL","prezzo":1903.23,"m1_bid":66.1,"m1_mov":-48.7,"m1c5":[0.0,16.3,-49.8,-48.7]},{"d":"2023-09-14 12:30","y":2023,"tipo":"RETAIL+PPI","prezzo":1907.78,"m1_bid":62.8,"m1_mov":-53.4,"m1c5":[-0.2,1.1,-61.7,-52.8]},{"d":"2023-10-11 12:30","y":2023,"tipo":"PPI","prezzo":1870.91,"m1_bid":35.6,"m1_mov":-14.6,"m1c5":[-1.3,-0.4,-35.6,-14.0]},{"d":"2023-10-17 12:30","y":2023,"tipo":"RETAIL","prezzo":1926.68,"m1_bid":75.3,"m1_mov":-54.6,"m1c5":[-0.2,-0.2,-75.3,-54.4]},{"d":"2023-11-15 13:30","y":2023,"tipo":"RETAIL+PPI","prezzo":1971.55,"m1_bid":39.4,"m1_mov":16.8,"m1c5":[0.0,38.2,-1.2,17.4]},{"d":"2023-12-13 13:30","y":2023,"tipo":"PPI","prezzo":1981.91,"m1_bid":40.4,"m1_mov":25.7,"m1c5":[-0.4,37.8,-2.6,27.1]},{"d":"2023-12-14 13:30","y":2023,"tipo":"RETAIL","prezzo":2033.57,"m1_bid":58.0,"m1_mov":-53.0,"m1c5":[-0.1,-0.1,-58.0,-51.3]},{"d":"2024-01-12 13:30","y":2024,"tipo":"PPI","prezzo":2048.64,"m1_bid":54.5,"m1_mov":44.1,"m1c5":[-0.1,54.4,-0.1,45.7]},{"d":"2024-01-17 13:30","y":2024,"tipo":"RETAIL","prezzo":2025.41,"m1_bid":62.6,"m1_mov":-45.9,"m1c5":[-0.6,-0.6,-62.6,-44.4]},{"d":"2024-02-15 13:30","y":2024,"tipo":"RETAIL","prezzo":1998.93,"m1_bid":54.1,"m1_mov":24.7,"m1c5":[0.6,54.1,0.6,25.8]},{"d":"2024-02-16 13:30","y":2024,"tipo":"PPI","prezzo":2006.67,"m1_bid":63.0,"m1_mov":-57.4,"m1c5":[0.0,1.1,-61.9,-55.6]},{"d":"2024-03-14 12:30","y":2024,"tipo":"RETAIL+PPI","prezzo":2167.36,"m1_bid":45.0,"m1_mov":-23.8,"m1c5":[-1.0,6.8,-38.2,-22.3]},{"d":"2024-04-11 12:30","y":2024,"tipo":"PPI","prezzo":2335.52,"m1_bid":93.0,"m1_mov":28.2,"m1c5":[0.5,62.4,-30.6,29.5]},{"d":"2024-04-15 12:30","y":2024,"tipo":"RETAIL","prezzo":2357.61,"m1_bid":66.7,"m1_mov":-51.6,"m1c5":[4.4,4.4,-62.3,-47.6]},{"d":"2024-05-14 12:30","y":2024,"tipo":"PPI","prezzo":2343.72,"m1_bid":70.5,"m1_mov":-43.8,"m1c5":[-0.8,-0.8,-70.5,-43.2]},{"d":"2024-06-13 12:30","y":2024,"tipo":"PPI","prezzo":2307.66,"m1_bid":134.6,"m1_mov":95.6,"m1c5":[-2.7,118.0,-16.6,96.8]},{"d":"2024-06-18 12:30","y":2024,"tipo":"RETAIL","prezzo":2312.28,"m1_bid":78.0,"m1_mov":60.7,"m1c5":[1.0,78.0,1.0,62.4]},{"d":"2024-07-12 12:30","y":2024,"tipo":"PPI","prezzo":2403.16,"m1_bid":72.6,"m1_mov":-66.5,"m1c5":[0.0,0.0,-72.6,-66.3]},{"d":"2024-07-16 12:30","y":2024,"tipo":"RETAIL","prezzo":2444.0,"m1_bid":81.4,"m1_mov":-55.7,"m1c5":[0.5,0.5,-80.9,-54.3]},{"d":"2024-08-13 12:30","y":2024,"tipo":"PPI","prezzo":2465.79,"m1_bid":71.3,"m1_mov":23.9,"m1c5":[-0.4,66.2,-5.1,25.2]},{"d":"2024-08-15 12:30","y":2024,"tipo":"RETAIL","prezzo":2467.71,"m1_bid":73.9,"m1_mov":-44.5,"m1c5":[-2.9,-0.9,-73.9,-42.1]},{"d":"2024-09-12 12:30","y":2024,"tipo":"PPI","prezzo":2520.96,"m1_bid":36.5,"m1_mov":-10.9,"m1c5":[0.2,22.0,-14.5,-5.9]},{"d":"2024-09-17 12:30","y":2024,"tipo":"RETAIL","prezzo":2577.09,"m1_bid":76.6,"m1_mov":19.9,"m1c5":[0.1,20.8,-55.8,20.3]},{"d":"2024-10-11 12:30","y":2024,"tipo":"PPI","prezzo":2646.22,"m1_bid":40.5,"m1_mov":7.7,"m1c5":[-0.1,17.7,-22.8,8.9]},{"d":"2024-10-17 12:30","y":2024,"tipo":"RETAIL","prezzo":2679.4,"m1_bid":40.2,"m1_mov":-36.7,"m1c5":[0.0,0.0,-40.2,-39.2]},{"d":"2024-11-14 13:30","y":2024,"tipo":"PPI","prezzo":2555.74,"m1_bid":35.7,"m1_mov":-23.2,"m1c5":[-3.1,7.8,-27.9,-21.4]},{"d":"2024-11-15 13:30","y":2024,"tipo":"RETAIL","prezzo":2570.56,"m1_bid":69.1,"m1_mov":-13.6,"m1c5":[-5.5,19.7,-49.4,-11.5]},{"d":"2024-12-12 13:30","y":2024,"tipo":"PPI","prezzo":2708.6,"m1_bid":50.3,"m1_mov":14.5,"m1c5":[0.9,34.6,-15.7,22.0]},{"d":"2024-12-17 13:30","y":2024,"tipo":"RETAIL","prezzo":2642.7,"m1_bid":29.5,"m1_mov":12.1,"m1c5":[-0.1,28.1,-1.4,16.9]},{"d":"2025-01-14 13:30","y":2025,"tipo":"PPI","prezzo":2666.84,"m1_bid":71.3,"m1_mov":54.4,"m1c5":[-0.5,69.7,-1.6,58.7]},{"d":"2025-01-16 13:30","y":2025,"tipo":"RETAIL","prezzo":2710.02,"m1_bid":54.1,"m1_mov":23.8,"m1c5":[0.1,47.2,-6.9,27.2]},{"d":"2025-02-13 13:30","y":2025,"tipo":"PPI","prezzo":2912.26,"m1_bid":61.2,"m1_mov":-13.0,"m1c5":[1.5,39.8,-21.4,-6.7]},{"d":"2025-02-14 13:30","y":2025,"tipo":"RETAIL","prezzo":2927.47,"m1_bid":42.8,"m1_mov":8.2,"m1c5":[1.8,42.8,0.9,11.3]},{"d":"2025-03-13 12:30","y":2025,"tipo":"PPI","prezzo":2943.44,"m1_bid":52.5,"m1_mov":45.2,"m1c5":[0.0,52.5,0.0,50.5]},{"d":"2025-03-17 12:30","y":2025,"tipo":"RETAIL","prezzo":2993.12,"m1_bid":38.6,"m1_mov":-8.4,"m1c5":[0.0,11.3,-27.3,-6.3]},{"d":"2025-04-11 12:30","y":2025,"tipo":"PPI","prezzo":3225.22,"m1_bid":38.3,"m1_mov":29.1,"m1c5":[-0.2,38.1,-0.2,36.5]},{"d":"2025-04-16 12:30","y":2025,"tipo":"RETAIL","prezzo":3307.1,"m1_bid":35.4,"m1_mov":-6.8,"m1c5":[-0.1,14.1,-21.3,-4.0]},{"d":"2025-05-15 12:30","y":2025,"tipo":"RETAIL+PPI","prezzo":3182.97,"m1_bid":41.2,"m1_mov":16.6,"m1c5":[0.3,41.2,0.3,23.3]},{"d":"2025-06-12 12:30","y":2025,"tipo":"PPI","prezzo":3383.28,"m1_bid":46.2,"m1_mov":28.5,"m1c5":[0.0,43.8,-2.4,32.8]},{"d":"2025-06-17 12:30","y":2025,"tipo":"RETAIL","prezzo":3388.25,"m1_bid":55.9,"m1_mov":-1.1,"m1c5":[-2.3,28.1,-27.8,2.1]},{"d":"2025-07-16 12:30","y":2025,"tipo":"PPI","prezzo":3334.43,"m1_bid":42.1,"m1_mov":14.8,"m1c5":[-7.0,35.1,-7.0,19.1]},{"d":"2025-07-17 12:30","y":2025,"tipo":"RETAIL","prezzo":3326.74,"m1_bid":118.4,"m1_mov":-88.4,"m1c5":[0.5,8.7,-109.7,-83.7]},{"d":"2025-08-14 12:30","y":2025,"tipo":"PPI","prezzo":3353.06,"m1_bid":114.6,"m1_mov":-84.1,"m1c5":[0.0,0.0,-114.6,-78.5]},{"d":"2025-08-15 12:30","y":2025,"tipo":"RETAIL","prezzo":3337.8,"m1_bid":16.6,"m1_mov":-6.6,"m1c5":[0.0,16.4,-0.2,4.6]},{"d":"2025-09-10 12:30","y":2025,"tipo":"PPI","prezzo":3648.11,"m1_bid":91.4,"m1_mov":65.3,"m1c5":[0.0,91.4,0.0,69.1]},{"d":"2025-09-16 12:30","y":2025,"tipo":"RETAIL","prezzo":3691.35,"m1_bid":41.1,"m1_mov":-14.6,"m1c5":[0.5,2.1,-39.0,-10.1]},{"d":"2025-11-25 13:30","y":2025,"tipo":"RETAIL+PPI","prezzo":4141.87,"m1_bid":73.5,"m1_mov":67.6,"m1c5":[-1.0,72.5,-1.0,69.1]},{"d":"2026-01-14 13:30","y":2026,"tipo":"RETAIL+PPI","prezzo":4632.31,"m1_bid":83.1,"m1_mov":-10.8,"m1c5":[0.1,8.0,-75.1,-3.2]},{"d":"2026-01-30 13:30","y":2026,"tipo":"PPI","prezzo":5027.86,"m1_bid":186.1,"m1_mov":-128.7,"m1c5":[-21.2,69.2,-116.9,-106.4]},{"d":"2026-02-10 13:30","y":2026,"tipo":"RETAIL","prezzo":5038.1,"m1_bid":102.0,"m1_mov":55.4,"m1c5":[0.5,98.7,-3.3,60.0]},{"d":"2026-02-27 13:30","y":2026,"tipo":"PPI","prezzo":5235.81,"m1_bid":138.3,"m1_mov":-125.6,"m1c5":[2.3,10.4,-127.9,-119.6]},{"d":"2026-03-18 12:30","y":2026,"tipo":"PPI","prezzo":4902.27,"m1_bid":106.1,"m1_mov":-95.0,"m1c5":[1.3,2.6,-103.5,-88.5]},{"d":"2026-04-01 12:30","y":2026,"tipo":"RETAIL","prezzo":4735.6,"m1_bid":123.1,"m1_mov":38.1,"m1c5":[-6.3,63.8,-59.4,41.4]},{"d":"2026-04-14 12:30","y":2026,"tipo":"PPI","prezzo":4769.39,"m1_bid":57.0,"m1_mov":3.4,"m1c5":[-0.3,52.3,-4.7,10.7]},{"d":"2026-04-21 12:30","y":2026,"tipo":"RETAIL","prezzo":4780.67,"m1_bid":156.8,"m1_mov":-40.1,"m1c5":[0.2,2.3,-154.5,-36.6]},{"d":"2026-05-13 12:30","y":2026,"tipo":"PPI","prezzo":4684.79,"m1_bid":116.4,"m1_mov":-43.2,"m1c5":[-5.0,28.8,-87.6,-39.7]},{"d":"2026-05-14 12:30","y":2026,"tipo":"RETAIL","prezzo":4703.27,"m1_bid":34.4,"m1_mov":-16.0,"m1c5":[1.7,13.1,-21.3,-13.1]},{"d":"2026-06-11 12:30","y":2026,"tipo":"PPI","prezzo":4069.14,"m1_bid":91.8,"m1_mov":29.5,"m1c5":[-0.2,44.5,-47.3,36.3]},{"d":"2026-07-15 12:30","y":2026,"tipo":"PPI","prezzo":4039.47,"m1_bid":124.5,"m1_mov":94.1,"m1c5":[2.4,123.0,-1.5,100.8]},{"d":"2026-08-13 12:30","y":2026,"tipo":"PPI","prezzo":4391.22,"m1_bid":144.0,"m1_mov":-13.2,"m1c5":[0.0,104.0,-40.0,-12.0]},{"d":"2026-09-10 12:30","y":2026,"tipo":"PPI","prezzo":4363.76,"m1_bid":136.3,"m1_mov":-34.7,"m1c5":[1.1,91.1,-45.2,-34.5]},{"d":"2026-10-15 12:30","y":2026,"tipo":"RETAIL+PPI","prezzo":4154.1,"m1_bid":243.4,"m1_mov":-98.1,"m1c5":[-1.8,8.2,-235.2,-96.8]}],"prossime":[{"t0":"2026-11-13T13:30:00+00:00","titoli":"Core PPI m/m + PPI m/m"},{"t0":"2026-11-17T13:30:00+00:00","titoli":"Core Retail Sales m/m + Retail Sales m/m"},{"t0":"2026-12-15T13:30:00+00:00","titoli":"Core PPI m/m + PPI m/m"}],"liv":{"giorno":{"scelto":"C","metodi":{"C":{"2023-26":{"n":22393,"cop90_su":0.918,"cop90_giu":0.928,"dentro_90":0.847,"p_su_prevista":0.513,"p_su_vera":0.511,"p_giu_prevista":0.475,"p_giu_vera":0.457,"tipico_su":0.485,"tipico_giu":0.519,"larghezza_pct":2.4752,"larghezza_pips_oggi":1033.0}}},"oggi":{"metodo":"C","S_pct":1.7847,"apertura":4141.105,"massimo":4147.151,"minimo":4115.515,"prezzo":4120.371,"k":10,"inizio":"2026-10-20","ultima_candela_utc":"2026-10-20 08:00:00+00:00","livelli":{"su90":4182.42,"giu90":4056.17,"su_tip":4165.39,"giu_tip":4093.36,"p_su":0.438,"p_giu":0.88},"tabella":[{"tb":0,"ub":0,"pb":0,"n":1889,"qu":0.9172,"qv":1.0064,"pu":0.8481,"pv":0.9592,"mu":0.3631,"nu":1602.0,"mv":0.351,"nv":1812.0},{"tb":0,"ub":0,"pb":1,"n":2091,"qu":0.9449,"qv":0.9672,"pu":0.9039,"pv":0.911,"mu":0.3554,"nu":1890.0,"mv":0.3544,"nv":1905.0},{"tb":0,"ub":0,"pb":2,"n":2372,"qu":1.0396,"qv":0.9679,"pu":0.9591,"pv":0.8259,"mu":0.345,"nu":2275.0,"mv":0.3724,"nv":1959.0},{"tb":0,"ub":1,"pb":0,"n":42,"qu":1.1856,"qv":1.0423,"pu":0.5238,"pv":0.8571,"mu":0.7394,"nu":22.0,"mv":0.4434,"nv":36.0},{"tb":0,"ub":1,"pb":1,"n":48,"qu":0.8936,"qv":0.983,"pu":0.7292,"pv":0.625,"mu":0.4203,"nu":35.0,"mv":0.3493,"nv":30.0},{"tb":0,"ub":1,"pb":2,"n":59,"qu":1.2987,"qv":0.8346,"pu":0.8475,"pv":0.4915,"mu":0.3851,"nu":50.0,"mv":0.2622,"nv":29.0},{"tb":0,"ub":2,"pb":0,"n":5,"qu":0.5683,"qv":0.4231,"pu":0.2,"pv":0.8,"mu":0.9472,"nu":1.0,"mv":0.2455,"nv":4.0},{"tb":0,"ub":2,"pb":1,"n":10,"qu":0.5684,"qv":2.2926,"pu":0.3,"pv":0.8,"mu":0.5264,"nu":3.0,"mv":0.6303,"nv":8.0},{"tb":0,"ub":2,"pb":2,"n":5,"qu":3.3547,"qv":1.6629,"pu":0.8,"pv":0.6,"mu":0.7602,"nu":4.0,"mv":1.5211,"nv":3.0},{"tb":1,"ub":0,"pb":0,"n":2161,"qu":0.8007,"qv":0.9831,"pu":0.7237,"pv":0.9338,"mu":0.3024,"nu":1564.0,"mv":0.357,"nv":2018.0},{"tb":1,"ub":0,"pb":1,"n":2179,"qu":0.9213,"qv":0.9133,"pu":0.8183,"pv":0.8132,"mu":0.3484,"nu":1783.0,"mv":0.3353,"nv":1772.0},{"tb":1,"ub":0,"pb":2,"n":2585,"qu":0.9414,"qv":0.8295,"pu":0.9277,"pv":0.7029,"mu":0.3386,"nu":2398.0,"mv":0.3302,"nv":1817.0},{"tb":1,"ub":1,"pb":0,"n":181,"qu":0.7994,"qv":1.0285,"pu":0.4199,"pv":0.8177,"mu":0.5127,"nu":76.0,"mv":0.4388,"nv":148.0},{"tb":1,"ub":1,"pb":1,"n":129,"qu":0.8811,"qv":0.7449,"pu":0.6357,"pv":0.5659,"mu":0.41,"nu":82.0,"mv":0.3279,"nv":73.0},{"tb":1,"ub":1,"pb":2,"n":277,"qu":1.0273,"qv":0.6051,"pu":0.8881,"pv":0.3718,"mu":0.4367,"nu":246.0,"mv":0.3279,"nv":103.0},{"tb":1,"ub":2,"pb":0,"n":25,"qu":1.3039,"qv":2.5274,"pu":0.36,"pv":0.72,"mu":0.9472,"nu":9.0,"mv":1.3099,"nv":18.0},{"tb":1,"ub":2,"pb":1,"n":28,"qu":0.6648,"qv":1.592,"pu":0.3929,"pv":0.5,"mu":0.4869,"nu":11.0,"mv":0.8924,"nv":14.0},{"tb":1,"ub":2,"pb":2,"n":24,"qu":2.3956,"qv":1.4922,"pu":0.625,"pv":0.3333,"mu":0.5511,"nu":15.0,"mv":1.4248,"nv":8.0},{"tb":2,"ub":0,"pb":0,"n":1915,"qu":0.6414,"qv":1.002,"pu":0.6209,"pv":0.9185,"mu":0.2759,"nu":1189.0,"mv":0.3775,"nv":1759.0},{"tb":2,"ub":0,"pb":1,"n":2065,"qu":0.8167,"qv":0.8313,"pu":0.7521,"pv":0.7884,"mu":0.312,"nu":1553.0,"mv":0.3314,"nv":1628.0},{"tb":2,"ub":0,"pb":2,"n":2369,"qu":0.9091,"qv":0.7208,"pu":0.897,"pv":0.5969,"mu":0.3258,"nu":2125.0,"mv":0.2927,"nv":1414.0},{"tb":2,"ub":1,"pb":0,"n":350,"qu":0.6224,"qv":0.9811,"pu":0.3314,"pv":0.84,"mu":0.414,"nu":116.0,"mv":0.4031,"nv":294.0},{"tb":2,"ub":1,"pb":1,"n":257,"qu":0.8298,"qv":0.7352,"pu":0.6226,"pv":0.4942,"mu":0.377,"nu":160.0,"mv":0.4034,"nv":127.0},{"tb":2,"ub":1,"pb":2,"n":510,"qu":0.9323,"qv":0.4914,"pu":0.8902,"pv":0.3039,"mu":0.3807,"nu":454.0,"mv":0.3371,"nv":155.0},{"tb":2,"ub":2,"pb":0,"n":31,"qu":0.535,"qv":3.1384,"pu":0.1613,"pv":0.871,"mu":0.535,"nu":5.0,"mv":0.8869,"nv":27.0},{"tb":2,"ub":2,"pb":1,"n":49,"qu":0.9472,"qv":1.7844,"pu":0.2857,"pv":0.5306,"mu":0.7814,"nu":14.0,"mv":0.7922,"nv":26.0},{"tb":2,"ub":2,"pb":2,"n":46,"qu":1.0308,"qv":0.3389,"pu":0.7174,"pv":0.1957,"mu":0.2979,"nu":33.0,"mv":0.3689,"nv":9.0},{"tb":3,"ub":0,"pb":0,"n":1853,"qu":0.6337,"qv":0.9296,"pu":0.5845,"pv":0.9083,"mu":0.2693,"nu":1083.0,"mv":0.3656,"nv":1683.0},{"tb":3,"ub":0,"pb":1,"n":1937,"qu":0.7536,"qv":0.8394,"pu":0.7279,"pv":0.7728,"mu":0.29,"nu":1410.0,"mv":0.3112,"nv":1497.0},{"tb":3,"ub":0,"pb":2,"n":2152,"qu":0.9061,"qv":0.6587,"pu":0.9038,"pv":0.5599,"mu":0.3156,"nu":1945.0,"mv":0.2753,"nv":1205.0},{"tb":3,"ub":1,"pb":0,"n":495,"qu":0.4957,"qv":0.978,"pu":0.3253,"pv":0.8444,"mu":0.2995,"nu":161.0,"mv":0.4008,"nv":418.0},{"tb":3,"ub":1,"pb":1,"n":334,"qu":0.915,"qv":0.7719,"pu":0.6257,"pv":0.4641,"mu":0.3812,"nu":209.0,"mv":0.348,"nv":155.0},{"tb":3,"ub":1,"pb":2,"n":643,"qu":0.8444,"qv":0.4324,"pu":0.8725,"pv":0.2753,"mu":0.3454,"nu":561.0,"mv":0.2706,"nv":177.0},{"tb":3,"ub":2,"pb":0,"n":58,"qu":0.4105,"qv":2.0001,"pu":0.1207,"pv":0.8103,"mu":0.535,"nu":7.0,"mv":0.6167,"nv":47.0},{"tb":3,"ub":2,"pb":1,"n":44,"qu":0.7216,"qv":1.6865,"pu":0.2727,"pv":0.4545,"mu":0.7158,"nu":12.0,"mv":0.8924,"nv":20.0},{"tb":3,"ub":2,"pb":2,"n":76,"qu":0.9534,"qv":0.6121,"pu":0.8026,"pv":0.2632,"mu":0.3156,"nu":61.0,"mv":0.3474,"nv":20.0},{"tb":4,"ub":0,"pb":0,"n":1525,"qu":0.5943,"qv":0.8638,"pu":0.5213,"pv":0.8938,"mu":0.263,"nu":795.0,"mv":0.328,"nv":1363.0},{"tb":4,"ub":0,"pb":1,"n":1707,"qu":0.6891,"qv":0.7947,"pu":0.6872,"pv":0.734,"mu":0.2646,"nu":1173.0,"mv":0.3015,"nv":1253.0},{"tb":4,"ub":0,"pb":2,"n":1762,"qu":0.8367,"qv":0.5744,"pu":0.878,"pv":0.5301,"mu":0.3015,"nu":1547.0,"mv":0.2537,"nv":934.0},{"tb":4,"ub":1,"pb":0,"n":799,"qu":0.4063,"qv":0.9222,"pu":0.2841,"pv":0.8411,"mu":0.2613,"nu":227.0,"mv":0.3756,"nv":672.0},{"tb":4,"ub":1,"pb":1,"n":523,"qu":0.6376,"qv":0.7751,"pu":0.5679,"pv":0.4914,"mu":0.2995,"nu":297.0,"mv":0.3471,"nv":257.0},{"tb":4,"ub":1,"pb":2,"n":982,"qu":0.848,"qv":0.2938,"pu":0.832,"pv":0.2403,"mu":0.3516,"nu":817.0,"mv":0.2434,"nv":236.0},{"tb":4,"ub":2,"pb":0,"n":95,"qu":0.0,"qv":2.0358,"pu":0.0947,"pv":0.7474,"mu":0.5209,"nu":9.0,"mv":0.6018,"nv":71.0},{"tb":4,"ub":2,"pb":1,"n":58,"qu":0.7158,"qv":1.1955,"pu":0.1897,"pv":0.431,"mu":0.7158,"nu":11.0,"mv":0.3689,"nv":25.0},{"tb":4,"ub":2,"pb":2,"n":141,"qu":0.8623,"qv":0.3246,"pu":0.7305,"pv":0.1773,"mu":0.4193,"nu":103.0,"mv":0.3259,"nv":25.0},{"tb":5,"ub":0,"pb":0,"n":1263,"qu":0.4772,"qv":0.803,"pu":0.4378,"pv":0.8804,"mu":0.2468,"nu":553.0,"mv":0.2998,"nv":1112.0},{"tb":5,"ub":0,"pb":1,"n":1393,"qu":0.6161,"qv":0.7404,"pu":0.6475,"pv":0.6755,"mu":0.2457,"nu":902.0,"mv":0.2963,"nv":941.0},{"tb":5,"ub":0,"pb":2,"n":1363,"qu":0.8333,"qv":0.5018,"pu":0.8753,"pv":0.4791,"mu":0.2893,"nu":1193.0,"mv":0.2082,"nv":653.0},{"tb":5,"ub":1,"pb":0,"n":1089,"qu":0.2939,"qv":0.8414,"pu":0.2498,"pv":0.8182,"mu":0.2343,"nu":272.0,"mv":0.3305,"nv":891.0},{"tb":5,"ub":1,"pb":1,"n":774,"qu":0.5974,"qv":0.5867,"pu":0.5271,"pv":0.447,"mu":0.2939,"nu":408.0,"mv":0.3002,"nv":346.0},{"tb":5,"ub":1,"pb":2,"n":1248,"qu":0.7594,"qv":0.2454,"pu":0.8349,"pv":0.2155,"mu":0.2742,"nu":1042.0,"mv":0.2365,"nv":269.0},{"tb":5,"ub":2,"pb":0,"n":169,"qu":0.0,"qv":1.6347,"pu":0.0769,"pv":0.7396,"mu":0.3632,"nu":13.0,"mv":0.4345,"nv":125.0},{"tb":5,"ub":2,"pb":1,"n":82,"qu":0.4427,"qv":0.8272,"pu":0.2439,"pv":0.3049,"mu":0.4426,"nu":20.0,"mv":0.6121,"nv":25.0},{"tb":5,"ub":2,"pb":2,"n":211,"qu":0.8932,"qv":0.1078,"pu":0.6872,"pv":0.1327,"mu":0.3583,"nu":145.0,"mv":0.3259,"nv":28.0},{"tb":6,"ub":0,"pb":0,"n":979,"qu":0.4484,"qv":0.798,"pu":0.4188,"pv":0.8631,"mu":0.2112,"nu":410.0,"mv":0.2892,"nv":845.0},{"tb":6,"ub":0,"pb":1,"n":1265,"qu":0.5921,"qv":0.6367,"pu":0.6103,"pv":0.6364,"mu":0.2559,"nu":772.0,"mv":0.2425,"nv":805.0},{"tb":6,"ub":0,"pb":2,"n":1009,"qu":0.8292,"qv":0.4618,"pu":0.8404,"pv":0.448,"mu":0.2665,"nu":848.0,"mv":0.2028,"nv":452.0},{"tb":6,"ub":1,"pb":0,"n":1261,"qu":0.248,"qv":0.8258,"pu":0.2276,"pv":0.797,"mu":0.2162,"nu":287.0,"mv":0.2931,"nv":1005.0},{"tb":6,"ub":1,"pb":1,"n":954,"qu":0.5524,"qv":0.5351,"pu":0.4906,"pv":0.4329,"mu":0.2515,"nu":468.0,"mv":0.2679,"nv":413.0},{"tb":6,"ub":1,"pb":2,"n":1495,"qu":0.691,"qv":0.2445,"pu":0.7913,"pv":0.2067,"mu":0.2537,"nu":1183.0,"mv":0.2394,"nv":309.0},{"tb":6,"ub":2,"pb":0,"n":230,"qu":0.0,"qv":1.3796,"pu":0.0652,"pv":0.7087,"mu":0.3632,"nu":15.0,"mv":0.3548,"nv":163.0},{"tb":6,"ub":2,"pb":1,"n":116,"qu":0.3756,"qv":0.9368,"pu":0.2328,"pv":0.3362,"mu":0.336,"nu":27.0,"mv":0.501,"nv":39.0},{"tb":6,"ub":2,"pb":2,"n":283,"qu":0.9342,"qv":0.0,"pu":0.6537,"pv":0.0883,"mu":0.3662,"nu":185.0,"mv":0.3246,"nv":25.0},{"tb":7,"ub":0,"pb":0,"n":462,"qu":0.3089,"qv":0.6373,"pu":0.2944,"pv":0.7987,"mu":0.2034,"nu":136.0,"mv":0.2279,"nv":369.0},{"tb":7,"ub":0,"pb":1,"n":851,"qu":0.4262,"qv":0.4667,"pu":0.4712,"pv":0.5053,"mu":0.1909,"nu":401.0,"mv":0.1979,"nv":430.0},{"tb":7,"ub":0,"pb":2,"n":527,"qu":0.6553,"qv":0.3401,"pu":0.7514,"pv":0.3283,"mu":0.2281,"nu":396.0,"mv":0.2,"nv":173.0},{"tb":7,"ub":1,"pb":0,"n":1379,"qu":0.1058,"qv":0.6546,"pu":0.145,"pv":0.7107,"mu":0.1864,"nu":200.0,"mv":0.2409,"nv":980.0},{"tb":7,"ub":1,"pb":1,"n":1391,"qu":0.3653,"qv":0.3674,"pu":0.3494,"pv":0.3494,"mu":0.2133,"nu":486.0,"mv":0.2201,"nv":486.0},{"tb":7,"ub":1,"pb":2,"n":1677,"qu":0.5806,"qv":0.1107,"pu":0.7209,"pv":0.1371,"mu":0.205,"nu":1209.0,"mv":0.1957,"nv":230.0},{"tb":7,"ub":2,"pb":0,"n":527,"qu":0.0,"qv":0.811,"pu":0.0304,"pv":0.6565,"mu":0.425,"nu":16.0,"mv":0.2691,"nv":346.0},{"tb":7,"ub":2,"pb":1,"n":247,"qu":0.3156,"qv":0.341,"pu":0.1741,"pv":0.2065,"mu":0.3877,"nu":43.0,"mv":0.3362,"nv":51.0},{"tb":7,"ub":2,"pb":2,"n":531,"qu":0.6865,"qv":0.0,"pu":0.6535,"pv":0.0584,"mu":0.2617,"nu":347.0,"mv":0.2394,"nv":31.0},{"tb":8,"ub":0,"pb":0,"n":239,"qu":0.0509,"qv":0.4931,"pu":0.1255,"pv":0.5774,"mu":0.1405,"nu":30.0,"mv":0.1456,"nv":138.0},{"tb":8,"ub":0,"pb":1,"n":417,"qu":0.2046,"qv":0.2763,"pu":0.2806,"pv":0.2998,"mu":0.1523,"nu":117.0,"mv":0.1603,"nv":125.0},{"tb":8,"ub":0,"pb":2,"n":259,"qu":0.2965,"qv":0.0957,"pu":0.6139,"pv":0.1236,"mu":0.1364,"nu":159.0,"mv":0.2558,"nv":32.0},{"tb":8,"ub":1,"pb":0,"n":1320,"qu":0.0,"qv":0.4023,"pu":0.0432,"pv":0.5455,"mu":0.1222,"nu":57.0,"mv":0.1632,"nv":720.0},{"tb":8,"ub":1,"pb":1,"n":1555,"qu":0.112,"qv":0.1434,"pu":0.1711,"pv":0.1627,"mu":0.1562,"nu":266.0,"mv":0.1823,"nv":253.0},{"tb":8,"ub":1,"pb":2,"n":1599,"qu":0.3472,"qv":0.0,"pu":0.5666,"pv":0.0444,"mu":0.1364,"nu":906.0,"mv":0.1697,"nv":71.0},{"tb":8,"ub":2,"pb":0,"n":868,"qu":0.0,"qv":0.4327,"pu":0.0069,"pv":0.5069,"mu":0.2107,"nu":6.0,"mv":0.2137,"nv":440.0},{"tb":8,"ub":2,"pb":1,"n":404,"qu":0.0,"qv":0.0,"pu":0.0644,"pv":0.0941,"mu":0.1819,"nu":26.0,"mv":0.315,"nv":38.0},{"tb":8,"ub":2,"pb":2,"n":931,"qu":0.4244,"qv":0.0,"pu":0.5456,"pv":0.0215,"mu":0.1712,"nu":508.0,"mv":0.2796,"nv":20.0},{"tb":9,"ub":0,"pb":0,"n":177,"qu":0.0,"qv":0.1865,"pu":0.0791,"pv":0.4124,"mu":0.358,"nu":14.0,"mv":0.1012,"nv":73.0},{"tb":9,"ub":0,"pb":1,"n":318,"qu":0.0952,"qv":0.1029,"pu":0.1478,"pv":0.1352,"mu":0.1844,"nu":47.0,"mv":0.1761,"nv":43.0},{"tb":9,"ub":0,"pb":2,"n":170,"qu":0.1704,"qv":0.0,"pu":0.4941,"pv":0.0824,"mu":0.0846,"nu":84.0,"mv":0.328,"nv":14.0},{"tb":9,"ub":1,"pb":0,"n":1255,"qu":0.0,"qv":0.2093,"pu":0.0255,"pv":0.3944,"mu":0.1328,"nu":32.0,"mv":0.1123,"nv":495.0},{"tb":9,"ub":1,"pb":1,"n":1484,"qu":0.0,"qv":0.0,"pu":0.0694,"pv":0.0775,"mu":0.1607,"nu":103.0,"mv":0.1692,"nv":115.0},{"tb":9,"ub":1,"pb":2,"n":1535,"qu":0.1919,"qv":0.0,"pu":0.402,"pv":0.0176,"mu":0.0879,"nu":617.0,"mv":0.2285,"nv":27.0},{"tb":9,"ub":2,"pb":0,"n":1044,"qu":0.0,"qv":0.2541,"pu":0.0029,"pv":0.3515,"mu":0.2296,"nu":3.0,"mv":0.1287,"nv":367.0},{"tb":9,"ub":2,"pb":1,"n":511,"qu":0.0,"qv":0.0,"pu":0.0294,"pv":0.0509,"mu":0.0812,"nu":15.0,"mv":0.147,"nv":26.0},{"tb":9,"ub":2,"pb":2,"n":1079,"qu":0.252,"qv":0.0,"pu":0.3874,"pv":0.0074,"mu":0.126,"nu":418.0,"mv":0.3232,"nv":8.0},{"tb":10,"ub":0,"pb":0,"n":148,"qu":0.0,"qv":0.1088,"pu":0.0135,"pv":0.277,"mu":0.3253,"nu":2.0,"mv":0.0733,"nv":41.0},{"tb":10,"ub":0,"pb":1,"n":217,"qu":0.0,"qv":0.0,"pu":0.0323,"pv":0.0461,"mu":0.13,"nu":7.0,"mv":0.1463,"nv":10.0},{"tb":10,"ub":0,"pb":2,"n":103,"qu":0.0491,"qv":0.0,"pu":0.233,"pv":0.0,"mu":0.0466,"nu":24.0,"mv":null,"nv":0.0},{"tb":10,"ub":1,"pb":0,"n":1159,"qu":0.0,"qv":0.0825,"pu":0.0026,"pv":0.2243,"mu":0.327,"nu":3.0,"mv":0.0698,"nv":260.0},{"tb":10,"ub":1,"pb":1,"n":1483,"qu":0.0,"qv":0.0,"pu":0.0196,"pv":0.0142,"mu":0.1439,"nu":29.0,"mv":0.1545,"nv":21.0},{"tb":10,"ub":1,"pb":2,"n":1408,"qu":0.0585,"qv":0.0,"pu":0.2102,"pv":0.0021,"mu":0.0549,"nu":296.0,"mv":0.0931,"nv":3.0},{"tb":10,"ub":2,"pb":0,"n":1150,"qu":0.0,"qv":0.0899,"pu":0.0009,"pv":0.1861,"mu":0.0812,"nu":1.0,"mv":0.1048,"nv":214.0},{"tb":10,"ub":2,"pb":1,"n":593,"qu":0.0,"qv":0.0,"pu":0.0017,"pv":0.0152,"mu":0.0807,"nu":1.0,"mv":0.2347,"nv":9.0},{"tb":10,"ub":2,"pb":2,"n":1184,"qu":0.0956,"qv":0.0,"pu":0.239,"pv":0.0008,"mu":0.0808,"nu":283.0,"mv":0.0132,"nv":1.0},{"tb":11,"ub":0,"pb":0,"n":110,"qu":0.0,"qv":0.0,"pu":0.0,"pv":0.0364,"mu":null,"nu":0.0,"mv":0.0145,"nv":4.0},{"tb":11,"ub":0,"pb":1,"n":115,"qu":0.0,"qv":0.0,"pu":0.0,"pv":0.0,"mu":null,"nu":0.0,"mv":null,"nv":0.0},{"tb":11,"ub":0,"pb":2,"n":56,"qu":0.0,"qv":0.0,"pu":0.0357,"pv":0.0,"mu":0.0349,"nu":2.0,"mv":null,"nv":0.0},{"tb":11,"ub":1,"pb":0,"n":858,"qu":0.0,"qv":0.0,"pu":0.0,"pv":0.0326,"mu":null,"nu":0.0,"mv":0.0346,"nv":28.0},{"tb":11,"ub":1,"pb":1,"n":1074,"qu":0.0,"qv":0.0,"pu":0.0009,"pv":0.0009,"mu":0.2058,"nu":1.0,"mv":0.0289,"nv":1.0},{"tb":11,"ub":1,"pb":2,"n":899,"qu":0.0,"qv":0.0,"pu":0.0356,"pv":0.0,"mu":0.0213,"nu":32.0,"mv":null,"nv":0.0},{"tb":11,"ub":2,"pb":0,"n":868,"qu":0.0,"qv":0.0,"pu":0.0,"pv":0.0161,"mu":null,"nu":0.0,"mv":0.0312,"nv":14.0},{"tb":11,"ub":2,"pb":1,"n":430,"qu":0.0,"qv":0.0,"pu":0.0,"pv":0.0023,"mu":null,"nu":0.0,"mv":0.1078,"nv":1.0},{"tb":11,"ub":2,"pb":2,"n":880,"qu":0.0,"qv":0.0,"pu":0.0261,"pv":0.0,"mu":0.0415,"nu":23.0,"mv":null,"nv":0.0}],"tabella_A":[{"tb":0,"n":6521,"qu":0.9787,"qv":0.9811,"pu":0.902,"pv":0.8873,"mu":0.3558,"nu":5882,"mv":0.3595,"nv":5786},{"tb":1,"n":7589,"qu":0.8979,"qv":0.9128,"pu":0.8149,"pv":0.7868,"mu":0.3364,"nu":6184,"mv":0.343,"nv":5971},{"tb":2,"n":7592,"qu":0.8303,"qv":0.8503,"pu":0.7441,"pv":0.7164,"mu":0.3168,"nu":5649,"mv":0.3371,"nv":5439},{"tb":3,"n":7592,"qu":0.7973,"qv":0.8156,"pu":0.7177,"pv":0.6878,"mu":0.3051,"nu":5449,"mv":0.3254,"nv":5222},{"tb":4,"n":7592,"qu":0.7145,"qv":0.7507,"pu":0.6558,"pv":0.637,"mu":0.2894,"nu":4979,"mv":0.3104,"nv":4836},{"tb":5,"n":7592,"qu":0.6488,"qv":0.6797,"pu":0.5991,"pv":0.5782,"mu":0.2714,"nu":4548,"mv":0.2896,"nv":4390},{"tb":6,"n":7592,"qu":0.5931,"qv":0.626,"pu":0.5526,"pv":0.5342,"mu":0.2564,"nu":4195,"mv":0.2692,"nv":4056},{"tb":7,"n":7592,"qu":0.435,"qv":0.4528,"pu":0.426,"pv":0.4078,"mu":0.2173,"nu":3234,"mv":0.2305,"nv":3096},{"tb":8,"n":7592,"qu":0.2151,"qv":0.2188,"pu":0.2733,"pv":0.242,"mu":0.1503,"nu":2075,"mv":0.1763,"nv":1837},{"tb":9,"n":7573,"qu":0.0863,"qv":0.0829,"pu":0.176,"pv":0.1542,"mu":0.107,"nu":1333,"mv":0.132,"nv":1168},{"tb":10,"n":7445,"qu":0.0,"qv":0.0,"pu":0.0868,"pv":0.0751,"mu":0.0638,"nu":646,"mv":0.0874,"nv":559},{"tb":11,"n":5290,"qu":0.0,"qv":0.0,"pu":0.011,"pv":0.0091,"mu":0.0323,"nu":58,"mv":0.0314,"nv":48}],"min_n":30,"fascia_ore":2,"candele":[["2026-10-18 22:00:00+00:00",4162.34,4178.16,4155.26,4174.97],["2026-10-18 23:00:00+00:00",4174.97,4185.74,4174.23,4184.73],["2026-10-19 00:00:00+00:00",4184.58,4187.55,4171.69,4173.59],["2026-10-19 01:00:00+00:00",4173.59,4178.03,4165.41,4174.06],["2026-10-19 02:00:00+00:00",4174.26,4184.41,4168.9,4176.4],["2026-10-19 03:00:00+00:00",4176.43,4181.97,4173.8,4180.59],["2026-10-19 04:00:00+00:00",4180.59,4184.59,4172.77,4183.36],["2026-10-19 05:00:00+00:00",4183.48,4186.03,4173.77,4184.47],["2026-10-19 06:00:00+00:00",4184.6,4186.43,4170.88,4183.71],["2026-10-19 07:00:00+00:00",4183.71,4190.31,4172.74,4172.74],["2026-10-19 08:00:00+00:00",4172.77,4179.38,4169.49,4170.44],["2026-10-19 09:00:00+00:00",4170.44,4172.6,4166.66,4167.06],["2026-10-19 10:00:00+00:00",4167.11,4172.35,4162.1,4169.49],["2026-10-19 11:00:00+00:00",4169.49,4176.86,4161.11,4161.19],["2026-10-19 12:00:00+00:00",4161.17,4169.92,4158.49,4161.57],["2026-10-19 13:00:00+00:00",4161.56,4167.06,4143.16,4154.49],["2026-10-19 14:00:00+00:00",4154.44,4155.07,4142.56,4145.48],["2026-10-19 15:00:00+00:00",4145.66,4149.52,4139.48,4141.54],["2026-10-19 16:00:00+00:00",4141.52,4144.74,4137.28,4140.9],["2026-10-19 17:00:00+00:00",4140.87,4146.12,4136.43,4145.32],["2026-10-19 18:00:00+00:00",4145.49,4149.33,4143.39,4145.44],["2026-10-19 19:00:00+00:00",4145.44,4145.52,4141.31,4142.27],["2026-10-19 20:00:00+00:00",4142.26,4142.51,4137.53,4140.56],["2026-10-19 22:00:00+00:00",4141.1,4143.85,4136.04,4136.12],["2026-10-19 23:00:00+00:00",4136.17,4136.57,4131.22,4132.09],["2026-10-20 00:00:00+00:00",4132.05,4139.19,4129.21,4131.07],["2026-10-20 01:00:00+00:00",4131.07,4131.27,4115.52,4130.65],["2026-10-20 02:00:00+00:00",4130.65,4140.12,4125.86,4138.43],["2026-10-20 03:00:00+00:00",4138.27,4146.69,4137.9,4146.01],["2026-10-20 04:00:00+00:00",4146.01,4147.15,4141.62,4143.69],["2026-10-20 05:00:00+00:00",4143.7,4143.98,4119.01,4119.44],["2026-10-20 06:00:00+00:00",4119.44,4136.4,4118.35,4134.6],["2026-10-20 07:00:00+00:00",4134.6,4136.42,4117.82,4124.48],["2026-10-20 08:00:00+00:00",4124.43,4126.11,4116.28,4120.37]]}}},"pips29":{"copertura":{"release":2216,"con_S":1654,"con_S_per_famiglia":{"ADP":[163,163],"CLAIMS":[386,386],"CPI":[186,186],"FIDUCIA":[5,139],"FOMC":[0,125],"ISM_M":[183,183],"ISM_S":[172,172],"MICHIGAN":[1,113],"NFP":[183,183],"PIL":[81,153],"PPI":[127,127],"RETAIL":[167,168],"VERBALI":[0,118]}},"modello":{"beta":[0.352,0.238,0.466],"gamma":[0.252,0.187,0.318]},"scomposizione_vs_2019":{"RETAIL_PPI":{"2019":{"n":18,"pips_geo":19.7,"totale":1.0,"prezzo":1.0,"volatilita":1.0,"sorpresa":1.0,"famiglie":1.0,"resto":1.0,"S_mediana":1.03,"prezzo_usd":1371.0,"adr_pct":1.0502,"S_geo":1.29},"2020":{"n":12,"pips_geo":25.7,"totale":1.3,"prezzo":1.28,"volatilita":1.17,"sorpresa":1.13,"famiglie":1.0,"resto":0.77,"S_mediana":1.74,"prezzo_usd":1757.6,"adr_pct":1.6374,"S_geo":2.712},"2021":{"n":18,"pips_geo":28.7,"totale":1.46,"prezzo":1.31,"volatilita":1.08,"sorpresa":1.13,"famiglie":1.0,"resto":0.91,"S_mediana":2.25,"prezzo_usd":1798.7,"adr_pct":1.2949,"S_geo":2.715},"2022":{"n":24,"pips_geo":35.1,"totale":1.78,"prezzo":1.31,"volatilita":1.11,"sorpresa":1.02,"famiglie":1.0,"resto":1.2,"S_mediana":1.32,"prezzo_usd":1801.7,"adr_pct":1.3962,"S_geo":1.472},"2023":{"n":20,"pips_geo":57.1,"totale":2.9,"prezzo":1.42,"volatilita":1.05,"sorpresa":0.99,"famiglie":1.0,"resto":1.95,"S_mediana":1.21,"prezzo_usd":1945.7,"adr_pct":1.2209,"S_geo":1.241},"2024":{"n":22,"pips_geo":58.5,"totale":2.96,"prezzo":1.74,"volatilita":1.09,"sorpresa":0.97,"famiglie":1.0,"resto":1.62,"S_mediana":0.96,"prezzo_usd":2379.8,"adr_pct":1.3447,"S_geo":1.003},"2025":{"n":18,"pips_geo":49.8,"totale":2.53,"prezzo":2.36,"volatilita":1.14,"sorpresa":1.01,"famiglie":1.0,"resto":0.94,"S_mediana":1.24,"prezzo_usd":3229.8,"adr_pct":1.5132,"S_geo":1.345},"2026":{"n":14,"pips_geo":103.7,"totale":5.26,"prezzo":3.4,"volatilita":1.41,"sorpresa":1.01,"famiglie":1.0,"resto":1.09,"S_mediana":1.24,"prezzo_usd":4657.0,"adr_pct":2.7806,"S_geo":1.396}}},"prova":{"RETAIL_PPI":{"2019-22":{"n":72,"errore_V":0.353,"errore_VS":0.372},"2023-26":{"n":74,"errore_V":0.301,"errore_VS":0.315}}}}};
+// ---------- comuni ai due siti
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SVGNS = "http://www.w3.org/2000/svg";
+const mk = (t, a, txt) => { const e = document.createElementNS(SVGNS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+const it0 = x => Math.round(x).toLocaleString("it-IT");
+const it2 = x => x.toLocaleString("it-IT", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const dec = (v, d = 2) => v.toFixed(d).replace(".", ",");
+const pct = v => Math.round(v * 100) + "%";
+const sgnR = v => (v > 0 ? "+" : v < 0 ? "−" : "") + dec(Math.abs(v)) + "R";
+const pm = e => "±" + Math.round((Math.exp(e) - 1) * 100) + "%";
+const pipsTxt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + it0(Math.abs(d) * 10);
+const median = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
+const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
+
+
+// ---------- oggi: candele con i livelli sopra (H-X28, metodo scelto)
+function oggi(LV, el) {
+  const G = LV && LV.giorno, O = G && G.oggi;
+  if (!el) return;
+  if (!O || !O.candele || !O.candele.length) { el.innerHTML = `<p class="small">Livelli del giorno non disponibili.</p>`; return; }
+  const Q = G.metodi[G.scelto]["2023-26"];
+  const key = r => r.tb + "|" + (r.ub ?? "") + "|" + (r.pb ?? "");
+  const T = new Map(O.tabella.map(r => [key(r), r])), TA = new Map(O.tabella_A.map(r => [r.tb, r]));
+  const start = new Date(new Date(O.inizio + "T00:00:00Z").getTime() - 2 * 3600e3), end = new Date(start.getTime() + 24 * 3600e3);
+  const rome = (d, o) => d.toLocaleString("it-IT", {timeZone: "Europe/Rome", ...o});
+  const hhmm = k => rome(new Date(start.getTime() + (k + 1) * 3600e3), {hour: "2-digit", minute: "2-digit"});
+  function levels(k, H, L, P) {
+    const sc = O.apertura / 100 * O.S_pct, tb = Math.floor(k / O.fascia_ore);
+    const used = (H - L) / sc, pos = H > L ? (P - L) / (H - L) : .5;
+    const ub = used < .5 ? 0 : used < 1 ? 1 : 2, pb = pos < 1 / 3 ? 0 : pos < 2 / 3 ? 1 : 2;
+    const kk = O.metodo === "A" ? tb + "||" : O.metodo === "B" ? tb + "|" + ub + "|" : tb + "|" + ub + "|" + pb;
+    const r = T.get(kk), a = TA.get(tb), s = r && r.n >= O.min_n ? r : a;
+    const mu = r && r.nu >= O.min_n ? r.mu : a.mu, mv = r && r.nv >= O.min_n ? r.mv : a.mv;
+    return {su90: H + s.qu * sc, giu90: L - s.qv * sc, suT: H + mu * sc, giuT: L - mv * sc, pu: s.pu, pv: s.pv};
+  }
+  el.innerHTML = `
+    <div class="chips" id="lvChips"></div>
+    <div class="chart" id="lvChart"></div>
+    <p class="small" id="lvNote"></p>
+    <details class="mt5"><summary>Usa i prezzi del tuo MT5</summary><div class="fields">
+      <label>Prezzo adesso<input id="lvP" type="number" step="0.01" inputmode="decimal" value="${O.prezzo.toFixed(2)}"></label>
+      <label>Massimo di oggi<input id="lvH" type="number" step="0.01" inputmode="decimal" value="${O.massimo.toFixed(2)}"></label>
+      <label>Minimo di oggi<input id="lvL" type="number" step="0.01" inputmode="decimal" value="${O.minimo.toFixed(2)}"></label>
+      <label>Ora (Italia)<select id="lvK">${Array.from({length: 24}, (_, k) => `<option value="${k}"${k === O.k ? " selected" : ""}>dopo le ${hhmm(k)}</option>`).join("")}</select></label>
+    </div></details>`;
+  const $ = id => el.querySelector("#" + id);
+  const draw = () => {
+    const P = +$("lvP").value, H = +$("lvH").value, L = +$("lvL").value, k = +$("lvK").value;
+    if (![P, H, L].every(x => isFinite(x) && x > 0) || H < L || P > H + 1e-9 || P < L - 1e-9) {
+      $("lvChips").innerHTML = `<span class="chip">Controlla i numeri: il prezzo deve stare fra il minimo e il massimo di oggi.</span>`; return; }
+    const v = levels(k, H, L, P);
+    $("lvChips").innerHTML = `<span class="chip">↑ nuovo massimo oggi <b>${pct(v.pu)}</b></span><span class="chip">↓ nuovo minimo oggi <b>${pct(v.pv)}</b></span>`;
+    chart($("lvChart"), {P, H, L}, v);
+    $("lvNote").innerHTML = `Oltre il "9 su 10" l'oro va solo 1 giorno su 10 (nel 2023–26 ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100). Usalo per take profit e stop. Aggiornato alle ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {hour: "2-digit", minute: "2-digit"})}.`;
+  };
+  function chart(host, s, v) {
+    // candele una dopo l'altra come in MT5/TradingView: niente buchi per la notte o il weekend
+    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), narrow = W < 520, H = narrow ? 360 : 400, Lm = narrow ? 40 : 46, R = narrow ? 118 : 170, T = 12, B = 26;
+    const C = O.candele.map(c => ({t: new Date(c[0]).getTime(), o: c[1], h: c[2], l: c[3], c: c[4]}));
+    const lastEnd = C[C.length - 1].t + 3600e3, friday = new Date(start.getTime() + 2 * 3600e3).getUTCDay() === 5;
+    const dayEnd = start.getTime() + (friday ? 23 : 24) * 3600e3, futuro = Math.max(0, Math.round((dayEnd - lastEnd) / 3600e3));
+    const slots = C.length + futuro, x = i => Lm + (i + .5) / slots * (W - Lm - R), xe = i => Lm + i / slots * (W - Lm - R);
+    const iOggi = Math.max(0, C.findIndex(c => c.t >= start.getTime())), iNow = C.length;
+    const lo0 = Math.min(...C.map(c => c.l), v.giu90, v.giuT, s.L), hi0 = Math.max(...C.map(c => c.h), v.su90, v.suT, s.H), pad = (hi0 - lo0) * .04;
+    const lo = lo0 - pad, hi = hi0 + pad, y = p => T + (hi - p) / (hi - lo) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Candele H1 di ieri e di oggi con i livelli fino a fine giornata"});
+    const step = [1, 2, 5, 10, 20, 25, 50, 100].find(st => (hi - lo) / st <= 6) || 100;
+    for (let p = Math.ceil(lo / step) * step; p <= hi; p += step) {
+      svg.append(mk("line", {x1: Lm, x2: W - R, y1: y(p), y2: y(p), stroke: css("--grid")}));
+      svg.append(mk("text", {x: Lm - 5, y: y(p) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(p)));
+    }
+    svg.append(mk("rect", {x: xe(iNow), y: T, width: Math.max(0, xe(slots) - xe(iNow)), height: H - T - B, fill: css("--accent"), opacity: .05}));
+    svg.append(mk("rect", {x: xe(iNow), y: y(v.su90), width: Math.max(0, xe(slots) - xe(iNow)), height: y(v.giu90) - y(v.su90), fill: css("--accent"), opacity: .11}));
+    if (iOggi > 0) { svg.append(mk("line", {x1: xe(iOggi), x2: xe(iOggi), y1: T, y2: H - B, stroke: css("--mute"), "stroke-dasharray": "3 3"}));
+      svg.append(mk("text", {x: xe(iOggi) - 4, y: T + 12, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, rome(new Date(C[0].t), {weekday: "short"})));
+      svg.append(mk("text", {x: xe(iOggi) + 4, y: T + 12, "font-size": 11, fill: css("--mute")}, "oggi")); }
+    if (futuro) svg.append(mk("text", {x: (xe(iNow) + xe(slots)) / 2, y: H - B + 0, dy: "-0.4em", "text-anchor": "middle", "font-size": 10.5, fill: css("--mute")}, futuro > 3 ? "resto del giorno" : ""));
+    const every = narrow ? 6 : 4;
+    for (let i = 0; i < slots; i++) { const t = i < C.length ? C[i].t : lastEnd + (i - C.length) * 3600e3;
+      if (new Date(t).getUTCHours() % every === 0) svg.append(mk("text", {x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, rome(new Date(t), {hour: "2-digit"}))); }
+    const bw = Math.max(2, (xe(1) - xe(0)) * .64);
+    C.forEach((c, i) => { const up = c.c >= c.o, col = css(up ? "--up" : "--down"), cx = x(i);
+      svg.append(mk("line", {x1: cx, x2: cx, y1: y(c.h), y2: y(c.l), stroke: col, "stroke-width": 1.2}));
+      svg.append(mk("rect", {x: cx - bw / 2, y: y(Math.max(c.o, c.c)), width: bw, height: Math.max(1, Math.abs(y(c.o) - y(c.c))), fill: up ? css("--panel") : col, stroke: col, "stroke-width": 1.2}));
+    });
+    const rows = [
+      {p: v.su90, t: "9 su 10 non oltre", pr: Math.min(.10, v.pu), d: "6 4", w: 1.6, c: "--ink", from: iNow},
+      {p: v.suT, t: "di solito, se sale", pr: v.pu * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: s.H, t: "massimo di oggi", pr: v.pu, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: s.P, t: "prezzo adesso", d: "", w: 2.4, c: "--accent", from: 0, bold: true},
+      {p: s.L, t: "minimo di oggi", pr: v.pv, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: v.giuT, t: "di solito, se scende", pr: v.pv * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: v.giu90, t: "9 su 10 non sotto", pr: Math.min(.10, v.pv), d: "6 4", w: 1.6, c: "--ink", from: iNow}];
+    rows.sort((a, b) => b.p - a.p);
+    const ys = rows.map(r => y(r.p)), gap = narrow ? 27 : 29, lab = ys.slice();
+    for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
+    for (let i = lab.length - 1; i >= 0; i--) lab[i] = Math.min(lab[i], H - B + 4 - (lab.length - 1 - i) * gap);
+    for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
+    rows.forEach((r, i) => {
+      svg.append(mk("line", {x1: xe(r.from), x2: W - R + 4, y1: ys[i], y2: ys[i], stroke: css(r.c), "stroke-width": r.w, "stroke-dasharray": r.d}));
+      svg.append(mk("line", {x1: W - R + 4, x2: W - R + 10, y1: ys[i], y2: lab[i] - 4, stroke: css(r.c), opacity: .6}));
+      svg.append(mk("text", {x: W - R + 12, y: lab[i] - 13, "font-size": narrow ? 9.5 : 10.5, fill: css("--mute")}, r.t));
+      const tx = mk("text", {x: W - R + 12, y: lab[i], "font-size": narrow ? 11.5 : 12.5, "font-weight": r.bold ? 700 : 600, fill: css("--ink"), "font-family": "ui-monospace,Menlo,monospace"}, it2(r.p));
+      if (r.pr != null) { const sp = mk("tspan", {fill: css(r.pr >= .4 ? "--good" : r.pr >= .2 ? "--warn" : "--bad"), "font-weight": 700}, `  ${Math.round(r.pr * 100)}%`); tx.append(sp); }
+      svg.append(tx);
+    });
+    host.innerHTML = ""; host.append(svg);
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.append(tip);
+    const show = e => { const rc = svg.getBoundingClientRect(), sx = (e.clientX - rc.left) / rc.width * W, i = Math.floor((sx - Lm) / (W - Lm - R) * slots);
+      if (i < 0 || i >= C.length) { tip.hidden = true; return; } const c = C[i];
+      tip.innerHTML = `${rome(new Date(c.t), {weekday: "short", hour: "2-digit", minute: "2-digit"})} · apre ${it2(c.o)} · max ${it2(c.h)} · min ${it2(c.l)} · chiude ${it2(c.c)}`;
+      tip.style.left = Math.min(rc.width - 120, Math.max(120, x(i) / W * rc.width)) + "px"; tip.style.top = (y(c.h) / H * rc.height) + "px"; tip.hidden = false; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+  }
+  ["lvP", "lvH", "lvL", "lvK"].forEach(id => $(id).addEventListener("input", draw));
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+  draw();
+}
+
+// ---------- perché muove più pips: simulatore (H-X29)
+function simulatore(P, group, name, el, oggiO) {
+  if (!el || !P || !P.scomposizione_vs_2019 || !P.scomposizione_vs_2019[group]) return;
+  const S = P.scomposizione_vs_2019[group], ys = Object.keys(S).sort(), A = S[ys[0]], beta = P.modello.beta[0], gamma = P.modello.gamma[0];
+  const err = P.prova && P.prova[group] ? P.prova[group]["2023-26"].errore_VS : .35;
+  const presets = ys.map(y => ({lab: y, P: S[y].prezzo_usd, A: S[y].adr_pct, S: S[y].S_geo, R: S[y].resto, vero: S[y].pips_geo}));
+  const last = S[ys[ys.length - 1]];
+  if (oggiO) presets.push({lab: "Oggi", P: oggiO.prezzo, A: oggiO.S_pct, S: last.S_geo, R: last.resto, vero: null});
+  const st = {...presets[presets.length - 1]};
+  const model = s => A.pips_geo * (s.P / A.prezzo_usd) * Math.pow(s.A / A.adr_pct, beta) * Math.pow((1 + s.S) / (1 + A.S_geo), gamma) * s.R;
+  const parts = s => [s.P / A.prezzo_usd, Math.pow(s.A / A.adr_pct, beta), Math.pow((1 + s.S) / (1 + A.S_geo), gamma), s.R];
+  const sword = v => v < .35 ? "in linea con le attese" : v < 1.6 ? "normale" : v < 2.6 ? "grande" : "enorme";
+  el.innerHTML = `
+    <div class="presets" id="smPre" role="group" aria-label="Valori di un anno">${presets.map((p, i) => `<button type="button" data-i="${i}" aria-pressed="false">${p.lab}</button>`).join("")}</div>
+    <div class="sim">
+      <div class="sliders">
+        <div class="sl"><div class="top"><span>Prezzo dell'oro</span><b id="smPv"></b></div><input id="smP" type="range" min="1000" max="6000" step="10" aria-label="Prezzo dell'oro"><em>Lo sai prima. Più costa l'oro, più pips fa lo stesso movimento.</em></div>
+        <div class="sl"><div class="top"><span>Volatilità del giorno (ADR)</span><b id="smAv"></b></div><input id="smA" type="range" min="0.4" max="4" step="0.05" aria-label="Volatilità del giorno"><em>La sai prima: media dei range degli ultimi 21 giorni.</em></div>
+        <div class="sl"><div class="top"><span>Sorpresa del dato</span><b id="smSv"></b></div><input id="smS" type="range" min="0" max="4" step="0.1" aria-label="Sorpresa del dato"><em>La sai solo alle 14:30:00: quanto il dato esce lontano dalle attese.</em></div>
+        <div class="sl"><div class="top"><span>Reazione del mercato</span><b id="smRv"></b></div><input id="smR" type="range" min="0.4" max="3" step="0.05" aria-label="Reazione del mercato"><em>Quanto il mercato guarda quel dato. Cambia negli anni: non si sa prima.</em></div>
+      </div>
+      <div class="out" aria-live="polite">
+        <span class="small">Candela della ${name}, dal minimo al massimo</span>
+        <span class="big" id="smOut"></span>
+        <span class="band" id="smBand"></span>
+        <span class="mult" id="smMult"></span>
+        <div class="can">
+          <div><i class="g">✓</i><span><b>Prezzo e volatilità</b> li sai prima della news.</span></div>
+          <div><i class="r">✗</i><span><b>La sorpresa</b> la sai solo quando esce il dato.</span></div>
+          <div><i class="r">✗</i><span><b>La reazione del mercato</b> cambia negli anni.</span></div>
+          <div><i style="color:var(--warn)">≈</i><span><b>Si può calcolare? Solo l'ordine di grandezza</b>: prima della news l'errore tipico è ${pm(err)}.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart" id="smChart"></div>
+    <p class="small">Formula su ${it0(P.copertura.con_S)} news rosse dal 2011 (studio H-X29): pips = prezzo × volatilità<sup>${dec(beta)}</sup> × (1 + sorpresa)<sup>${dec(gamma)}</sup> × reazione. Premi un anno per vedere i suoi valori: la formula ridà la candela tipica di quell'anno.</p>`;
+  const $ = id => el.querySelector("#" + id);
+  const set = () => { $("smP").value = st.P; $("smA").value = st.A; $("smS").value = st.S; $("smR").value = st.R; };
+  const draw = () => {
+    const v = model(st), pr = parts(st), tot = pr.reduce((a, b) => a * b, 1);
+    $("smPv").textContent = it0(st.P) + " $";
+    $("smAv").textContent = `${dec(st.A)}% = ${it0(st.A / 100 * st.P * 10)} pips al giorno`;
+    $("smSv").textContent = `${dec(st.S, 1)} · ${sword(st.S)}`;
+    $("smRv").textContent = "×" + dec(st.R);
+    $("smOut").textContent = "≈ " + it0(v) + " pips";
+    $("smBand").textContent = `metà delle volte fra ${it0(v / Math.exp(err))} e ${it0(v * Math.exp(err))} pips`;
+    $("smMult").textContent = `rispetto al ${ys[0]}: prezzo ×${dec(pr[0], 1)} · volatilità ×${dec(pr[1], 2)} · sorpresa ×${dec(pr[2], 2)} · reazione ×${dec(pr[3], 2)} = ×${dec(tot, 1)}`;
+    el.querySelectorAll("#smPre button").forEach((b, i) => { const p = presets[i]; b.setAttribute("aria-pressed", String(["P", "A", "S", "R"].every(k => Math.abs(p[k] - st[k]) < 1e-6))); });
+    bars(v);
+  };
+  function bars(cur) {
+    const host = $("smChart"), W = Math.max(320, Math.min(900, host.clientWidth || 640)), H = 240, L = 40, R = 12, T = 30, B = 26;
+    const rows = ys.map(y => ({y, vero: S[y].pips_geo, prezzo: A.pips_geo * S[y].prezzo, vol: A.pips_geo * S[y].prezzo * S[y].volatilita}));
+    const vmax = Math.max(...rows.map(r => Math.max(r.vero, r.vol)), cur) * 1.12, bw = (W - L - R) / rows.length;
+    const x = i => L + i * bw + bw / 2, y = v => T + (1 - v / vmax) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Candela tipica della ${name} per anno`});
+    const step = [25, 50, 100, 200, 250, 500].find(s => vmax / s <= 5) || 500;
+    for (let v = 0; v <= vmax; v += step) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")})); svg.append(mk("text", {x: L - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(v))); }
+    rows.forEach((r, i) => {
+      svg.append(mk("rect", {x: x(i) - bw * .32, y: y(r.vero), width: bw * .64, height: y(0) - y(r.vero), rx: 3, fill: css("--accent"), opacity: .85}));
+      svg.append(mk("text", {x: x(i), y: y(r.vero) - 5, "text-anchor": "middle", "font-size": 11, "font-weight": 600, fill: css("--ink"), "font-family": "ui-monospace,Menlo,monospace"}, it0(r.vero)));
+      svg.append(mk("text", {x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, r.y));
+    });
+    const line = (k, col, dash) => svg.append(mk("polyline", {points: rows.map((r, i) => `${x(i)},${y(r[k])}`).join(" "), fill: "none", stroke: css(col), "stroke-width": 2, "stroke-dasharray": dash}));
+    line("prezzo", "--ink2", "5 4"); line("vol", "--ink", "");
+    svg.append(mk("text", {x: L + 4, y: T + 2, "font-size": 11, fill: css("--ink2")}, "- - -  solo il prezzo     ——  prezzo + volatilità"));
+        svg.append(mk("line", {x1: L, x2: W - R, y1: y(cur), y2: y(cur), stroke: css("--accent"), "stroke-width": 1.5, "stroke-dasharray": "2 3"}));
+    svg.append(mk("text", {x: L + 4, y: y(cur) - 4, "font-size": 11, fill: css("--accent"), "font-weight": 600}, `simulatore: ${it0(cur)}`));
+    svg.append(mk("text", {x: W - R, y: T + 2, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, "barre: candela vera, pips"));
+    host.innerHTML = ""; host.append(svg);
+  }
+  ["P", "A", "S", "R"].forEach(k => $("sm" + k).addEventListener("input", e => { st[k] = +e.target.value; draw(); }));
+  el.querySelectorAll("#smPre button").forEach(b => b.addEventListener("click", () => { Object.assign(st, presets[+b.dataset.i]); set(); draw(); }));
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+  set(); draw();
+}
+
+// ---------- quanto era precisa la stima della candela, release per release (stessa regola del sito, solo dati di prima)
+function bandTest(evs, N) {
+  const q = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
+  const P = [];
+  evs.forEach((e, i) => { if (i < N) return; const prev = evs.slice(i - N, i).map(x => x.pct);
+    const lo = q(prev, .25) / 100 * e.px * 10, md = q(prev, .5) / 100 * e.px * 10, hi = q(prev, .75) / 100 * e.px * 10;
+    P.push({t: e.t, y: e.y, v: e.pips, lo, md, hi, in: e.pips >= lo && e.pips <= hi}); });
+  const last = evs.slice(-N).map(x => x.pct);
+  const next = price => ({lo: q(last, .25) / 100 * price * 10, md: q(last, .5) / 100 * price * 10, hi: q(last, .75) / 100 * price * 10});
+  const since = y0 => { const g = P.filter(p => p.y >= y0); return {n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; };
+  return {P, next, since};
+}
+function precisione(host, evs, N, price, name) {
+  if (!host || !evs.length) return;
+  const B = bandTest(evs, N), P = B.P, nx = B.next(price), rc = B.since(2023), ok = rc.n && rc.k / rc.n >= .4 && rc.k / rc.n <= .6;
+  const per = perAnno(P), tot = {n: P.length, k: P.filter(p => p.in).length};
+  host.innerHTML = `
+    <div class="chips"><span class="chip big">Prossima ${name}: <b>${it0(nx.md)} pips</b> · metà delle volte <b>${it0(nx.lo)}–${it0(nx.hi)}</b></span></div>
+    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%). Dal ${per[0].y}: ${tot.k} su ${tot.n}.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Tocca un punto per i numeri.</p>
+    ${tabAnni(per)}`;
+  bandChart(host.querySelector("#prChart"), P, name);
+}
+function perAnno(P) {
+  return [...new Set(P.map(p => p.y))].sort().map(y => { const g = P.filter(p => p.y === y);
+    return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; });
+}
+function tabAnni(per) {
+  return `<div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Dentro la fascia</th><th>Sopra</th><th>Sotto</th></tr></thead><tbody>
+      ${per.map(r => `<tr><td>${r.y}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>${r.sotto}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+// P: [{t, y, v (vero), lo, md, hi, in}] in pips; scala logaritmica, dettaglio del punto più vicino al tocco
+function bandChart(ch, P, name) {
+  if (!ch || !P.length) return;
+  const yrs = [...new Set(P.map(p => p.y))].sort();
+  const draw = () => {
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
+    const t0 = P[0].t, t1 = P[P.length - 1].t, x = t => L + (t - t0) / Math.max(1, t1 - t0) * (W - L - R);
+    const vals = P.flatMap(p => [p.v, p.lo, p.hi]).filter(v => v > 0), lmin = Math.log(Math.max(5, Math.min(...vals) * .85)), lmax = Math.log(Math.max(...vals) * 1.15);
+    const y = v => T + (lmax - Math.log(v)) / (lmax - lmin) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Stima prima di ogni ${name} contro la candela vera`});
+    for (const v of [10, 25, 50, 100, 200, 400, 800, 1600]) if (Math.log(v) >= lmin && Math.log(v) <= lmax) {
+      svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")}));
+      svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v)); }
+    yrs.forEach(yy => { const xx = x(Date.UTC(yy, 0, 1)); if (xx > L + 10) { svg.append(mk("line", {x1: xx, x2: xx, y1: T, y2: H - B, stroke: css("--grid")})); }
+      const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, String(yy).slice(W < 520 ? 2 : 0))); });
+    svg.append(mk("polygon", {points: P.map(p => `${x(p.t)},${y(p.hi)}`).join(" ") + " " + P.slice().reverse().map(p => `${x(p.t)},${y(p.lo)}`).join(" "), fill: css("--accent"), opacity: .16}));
+    svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.md)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 1.6}));
+    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.4, fill: p.in ? css("--ink") : css("--panel"), stroke: p.v > p.hi ? css("--bad") : css("--ink"), "stroke-width": 1.4})));
+    const hl = mk("circle", {r: 7, fill: "none", stroke: css("--accent"), "stroke-width": 2, opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
+    svg.append(hl);
+    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      const p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
+      hl.setAttribute("cx", x(p.t)); hl.setAttribute("cy", y(p.v)); hl.setAttribute("opacity", 1);
+      const d = new Date(p.t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "UTC"});
+      tip.innerHTML = `${d}: <b>${it0(p.v)} pips</b><br>stima ${it0(p.md)} · fascia ${it0(p.lo)}–${it0(p.hi)}<br>${p.in ? "dentro" : p.v > p.hi ? "sopra la fascia" : "sotto la fascia"}`;
+      tip.hidden = false; tip.style.left = Math.min(r.width - 90, Math.max(90, x(p.t) * r.width / W)) + "px"; tip.style.top = (y(p.v) * r.height / H) + "px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
+    ch.innerHTML = ""; ch.append(svg, tip);
+  };
+  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+}
+
+
+// ---------- quante volte la candela è caduta dentro la stima, più grande o più piccola
+function contaBar(P) {
+  const n = P.length, k = P.filter(p => p.in).length, su = P.filter(p => p.v > p.hi).length, giu = n - k - su, w = v => (100 * v / n).toFixed(1) + "%";
+  const d10 = v => Math.round(10 * v / n);
+  return `<div class="cbar" role="img" aria-label="Dentro ${k}, più grande ${su}, più piccola ${giu} su ${n}">
+      <i class="giu" style="width:${w(giu)}"></i><i class="in" style="width:${w(k)}"></i><i class="su" style="width:${w(su)}"></i></div>
+    <div class="cleg"><span><i class="giu"></i>più piccola <b>${d10(giu)} su 10</b></span><span><i class="in"></i>dentro <b>${d10(k)} su 10</b></span><span><i class="su"></i>più grande <b>${d10(su)} su 10</b></span></div>`;
+}
+// ---------- Retail / PPI
+const MONO = "JetBrains Mono,ui-monospace,monospace";
+const rome = (iso, o) => new Intl.DateTimeFormat("it-IT", {timeZone: "Europe/Rome", ...o}).format(new Date(iso));
+const qt = (a, p) => { const s = a.filter(x => x != null && !isNaN(x)).sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.max(0, Math.round(p * (s.length - 1))))]; };
+const utc = d => d.replace(" ", "T") + ":00Z";
+const ev = D.ev.map(e => { const k = e.m1c5 || [0, 0, 0, 0], su = Math.max(0, k[1]), giu = Math.max(0, -k[2]);
+  return {...e, iso: utc(e.d), pct: e.m1_bid * 0.1 / e.prezzo * 100, contropct: (e.m1_mov > 0 ? giu : su) * 0.1 / e.prezzo * 100}; });
+const LAST = ev[ev.length - 1], LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PX = LV ? LV.oggi.prezzo : LAST.prezzo, recent = ev.slice(-12);
+const toPips = p => p / 100 * PX * 10, r10 = v => Math.round(v / 10) * 10;
+const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct, tipo: e.tipo})).filter(e => e.pips > 0);
+const BT = bandTest(evs, 12), NXT = BT.next(PX), RC = BT.since(2023);
+const contro90 = toPips(qt(recent.map(e => e.contropct), .9));
+const NEXT = D.prossime[0];
+
+// 1 · prossima release
+(() => {
+  const n = NEXT, names = n ? n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).join(" + ") : "";
+  document.getElementById("hero").innerHTML = `<div class="top"><span class="when">${n ? `${names} · ${rome(n.t0, {weekday: "long", day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}` : "Nessuna data in calendario"}</span><span class="cd" id="cd"></span></div>
+    <div class="big">~${r10(NXT.md)} <span style="font-size:.4em">pips</span></div>
+    <p class="why">La prima candela, dal minimo al massimo. Metà delle volte ${r10(NXT.lo)}–${r10(NXT.hi)}.</p>
+    <div class="kpis">
+      <div class="kpi"><b>${Math.round(10 * RC.k / RC.n)} su 10</b><span>la stima ci prende, dal 2023 (${RC.k} su ${RC.n})</span></div>
+      <div class="kpi"><b>~${r10(contro90)} pips</b><span>il massimo che va contro, 9 volte su 10</span></div>
+    </div>`;
+  if (!n) return;
+  const tick = () => { const ms = new Date(n.t0) - Date.now(), c = document.getElementById("cd"); if (ms <= 0) { c.textContent = "uscita"; return; }
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; c.textContent = `fra ${d ? d + " g " : ""}${h} h ${d ? "" : m + " min"}`; };
+  tick(); setInterval(tick, 30000);
+})();
+
+// 2 · le ultime release contro la stima di allora
+(() => {
+  const P = BT.P.filter(p => p.y >= 2019), L12 = P.slice(-12), host = document.getElementById("prec"), strip = document.getElementById("strip");
+  const dd = t => new Date(t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", timeZone: "UTC"});
+  let cur = L12[L12.length - 1];
+  strip.innerHTML = L12.map((p, i) => `<button data-i="${i}" class="${p.in ? "w" : "l"}" aria-pressed="false">${dd(p.t)}<b>${it0(p.v)}</b></button>`).join("");
+  host.innerHTML = `<p class="one" id="sel"></p>${contaBar(P)}
+    <p class="one">La fascia è fatta per prenderne metà: quelle fuori non sono errori, un po' sopra e un po' sotto.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Dal 2019, ogni punto è una release · ● dentro · ○ fuori · tocca un punto</p>`;
+  const sel = () => { strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(L12[+b.dataset.i] === cur)));
+    const e = evs.find(x => x.t === cur.t);
+    document.getElementById("sel").innerHTML = `${dd(cur.t)} · ${e ? e.tipo.replace("+", " + ") : ""}: <b>${it0(cur.v)} pips</b> · stima ${r10(cur.lo)}–${r10(cur.hi)} → <b class="${cur.in ? "g" : "r"}">${cur.in ? "dentro" : cur.v > cur.hi ? "più grande" : "più piccola"}</b>`; };
+  strip.querySelectorAll("button").forEach(b => b.onclick = () => { cur = L12[+b.dataset.i]; sel(); });
+  sel(); strip.scrollLeft = strip.scrollWidth;
+  bandChart(host.querySelector("#prChart"), P, "release");
+})();
+
+oggi(D.liv, document.getElementById("oggi"));
+simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
+document.getElementById("simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));
+document.getElementById("foot").textContent = "Dati: tick Dukascopy, calendario ForexFactory. Ogni numero viene da una prova con le regole scritte prima (docs del progetto).";
+</script>

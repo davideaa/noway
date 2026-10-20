@@ -1,0 +1,518 @@
+<meta charset="utf-8">
+<title>Retail e PPI sull'oro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: banco del trader. Prossima release e quanto muove, cosa funziona, il grafico di oggi coi livelli, il simulatore dei pips. */
+:root{
+  --bg:#f4f3ef; --panel:#ffffff; --ink:#17191c; --ink2:#3b4047; --mute:#6b7178; --line:#e1dfd8; --grid:#ecebe6;
+  --accent:#9c6a12; --soft:#eeece6; --up:#1d7f54; --down:#bf3b35;
+  --good:#1d7f54; --warn:#9a6a00; --bad:#bf3b35;
+  --f-disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif; --f-body:"Public Sans",ui-sans-serif,system-ui,sans-serif; --f-num:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
+  --accent:#e3ab48; --soft:#22262b; --up:#4cc58c; --down:#f2716a;
+  --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036; --grid:#23272c;
+  --accent:#e3ab48; --soft:#22262b; --up:#4cc58c; --down:#f2716a;
+  --good:#4cc58c; --warn:#e3ab48; --bad:#f2716a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:920px;margin:0 auto;padding-block:24px 56px;display:grid;gap:34px}
+h1,h2{font-family:var(--f-disp);margin:0;text-wrap:balance}
+h1{font-weight:800;font-size:clamp(28px,6vw,42px);line-height:1.06;letter-spacing:-.01em}
+h2{font-weight:700;font-size:clamp(20px,3.4vw,25px);line-height:1.15}
+p{margin:0}
+.eyebrow{font:600 12px/1 var(--f-num);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lead{color:var(--ink2);max-width:64ch}
+.small{font-size:13.5px;color:var(--mute)}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+header,section{display:grid;gap:12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px;min-width:0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* il trade, in ordine di tempo */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.tl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ts{border-top:3px solid var(--line);padding-top:8px;display:grid;gap:2px;min-width:0}
+.ts.hl{border-top-color:var(--accent)}
+.ts span{font:600 13px var(--f-num);color:var(--mute)}
+.ts b{font-size:17px}
+.ts em{font-style:normal;font-size:13.5px;color:var(--ink2)}
+.odds{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.waffle{display:grid;grid-template-columns:repeat(10,18px);gap:4px}
+.waffle i{width:18px;height:18px;border-radius:4px;background:var(--bad);opacity:.7}
+.waffle i.y{background:var(--good);opacity:1}
+.pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.pay div{background:var(--bg);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.pay span{font-size:13px;color:var(--mute)}
+.pay b{font:700 22px/1.2 var(--f-num);font-variant-numeric:tabular-nums}
+.g{color:var(--good)} .r{color:var(--bad)}
+
+/* campi numerici */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.fields label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+.fields input,.fields select{font:500 15px var(--f-num);width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:14px;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.chip b{font-family:var(--f-num)}
+.chip.big{font-size:16px;padding:9px 13px;border-color:var(--accent)}
+.chip.big b{font-size:18px}
+.chart{position:relative;min-width:0}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px/1.4 var(--f-num);padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
+
+/* simulatore */
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:600 13.5px var(--f-body);padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink2);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sim{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:720px){.sim{grid-template-columns:1fr}}
+.sliders{display:grid;gap:14px}
+.sl{display:grid;gap:4px}
+.sl .top{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.sl .top b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.sl input[type=range]{width:100%;accent-color:var(--accent)}
+.sl em{font-style:normal;font-size:12.5px;color:var(--mute)}
+.out{background:var(--bg);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.out .big{font:800 44px/1 var(--f-disp);font-variant-numeric:tabular-nums}
+.out .band{font:600 14px var(--f-num);color:var(--ink2)}
+.out .mult{font:500 13px var(--f-num);color:var(--mute)}
+.can{display:grid;gap:6px;margin-top:4px}
+.can div{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;font-size:14px;color:var(--ink2)}
+.can i{font-style:normal;font-weight:700}
+footer{color:var(--mute);font-size:12.5px;max-width:72ch}
+.yt{border-collapse:collapse;width:100%;font-size:14px;min-width:320px}
+.yt th,.yt td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.yt th{font:600 11.5px var(--f-num);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.yt td{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.yt .bar{display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--grid);margin-right:8px;vertical-align:middle;overflow:hidden}
+.yt .bar i{display:block;height:100%;background:var(--accent)}
+/* minimal: un numero grande, una riga, un grafico */
+.wrap{gap:44px}
+.hero{display:grid;gap:14px}
+.hero .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero .when{font:600 14px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.hero .cd{font:600 14px var(--f-num);color:var(--mute)}
+.hero .big{font:800 clamp(64px,17vw,112px)/.9 var(--f-disp);letter-spacing:-.02em}
+.hero .why{color:var(--ink2);font-size:15.5px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:3px;align-content:start}
+.kpi b{font:700 clamp(24px,5.4vw,32px)/1.05 var(--f-num);font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--mute);line-height:1.3}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}.kpi{grid-template-columns:auto 1fr;align-items:center;gap:12px}.kpi b{min-width:96px}}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:600 13px var(--f-num);color:var(--ink2)}
+.flow span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+.flow i{color:var(--mute);font-style:normal}
+.sec{display:grid;gap:12px}
+.sec .lead1{font:700 clamp(22px,4.6vw,28px)/1.15 var(--f-disp)}
+.one{font-size:15px;color:var(--ink2)}
+.one b{color:var(--ink)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px}
+.strip button{flex:none;min-width:60px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:6px 7px;font:600 11.5px var(--f-num);color:var(--mute);cursor:pointer;display:grid;gap:1px;text-align:center}
+.strip button b{font-size:13.5px;color:var(--ink)}
+.strip button.w b{color:var(--good)} .strip button.l b{color:var(--bad)}
+.strip button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.state{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.state b.ok,.state b.hot{font:800 30px/1 var(--f-disp)}
+.state .ok{color:var(--good)} .state .hot{color:var(--bad)}
+.state span{font-size:14px;color:var(--ink2)}
+details.mt5 summary,details.more summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14.5px}
+details.more{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+details.more[open]{display:grid;gap:12px}
+/* la volatilità nel tempo */
+.vleg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2)}
+.vleg i{display:inline-block;width:16px;height:2.5px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.vleg i.box{height:10px;width:12px;background:var(--bad);opacity:.25}
+.vleg i.dot{width:7px;height:7px;border-radius:50%;background:var(--ink2);opacity:.6}
+.facts{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px;color:var(--ink2)}
+.facts b{color:var(--ink)}
+.h3{font:700 19px/1.2 var(--f-disp);margin:8px 0 0}
+.cbar{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;background:var(--panel)}
+.cbar i{display:block;height:100%}
+.cbar .in,.cleg .in{background:var(--accent)} .cbar .su,.cleg .su{background:var(--ink2)} .cbar .giu,.cleg .giu{background:var(--line)}
+.cleg{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink2)}
+.cleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.cleg b{font-family:var(--f-num);color:var(--ink)}
+.rpbar{display:flex;gap:8px;align-items:stretch;min-width:0}
+.rpbar select{font:600 14px var(--f-num);padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+.rpbar .strip{flex:1;min-width:0}
+.rpctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rpctl>button{font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.rpctl>button.play{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.yrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px}
+.yrs button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 2px;display:grid;gap:3px;justify-items:center;cursor:pointer;font:600 11px var(--f-num);color:var(--mute)}
+.yrs button i{display:block;width:70%;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--good) var(--p),var(--line) var(--p))}
+.yrs button b{font-size:12px;color:var(--ink)}
+.yrs button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+.tvleg{position:absolute;left:8px;top:6px;z-index:3;pointer-events:none;font:500 11.5px var(--f-num);color:var(--ink2);background:color-mix(in srgb,var(--panel) 82%,transparent);padding:2px 6px;border-radius:5px;max-width:calc(100% - 90px)}
+.tvleg b{color:var(--ink);font-weight:600}
+#rpChart{position:relative}
+@media (max-width:560px){#replay .presets button{padding:6px 9px;font-size:13px}}
+.tvov{position:absolute;left:0;top:0;pointer-events:none;z-index:2;overflow:visible}
+.tvov text{font:700 11.5px var(--f-num);paint-order:stroke;stroke:var(--panel);stroke-width:3px}
+.next{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:720px){.next{grid-template-columns:1fr}}
+.when b{display:block;font:700 26px/1.15 var(--f-disp)}
+.when .cd{font:600 15px var(--f-num);color:var(--accent);margin-top:4px}
+.titles{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.titles span{font:600 12px/1 var(--f-body);padding:6px 10px;border-radius:999px;background:var(--soft);color:var(--ink2)}
+.verdict{display:grid;gap:10px}
+.vrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px;align-items:baseline;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.vrow:last-child{border-bottom:0;padding-bottom:0}
+.vrow span{font-size:13px;color:var(--mute)}
+.vrow b{font:700 20px/1.2 var(--f-num)}
+.vrow em{font-style:normal;font-size:13px;color:var(--ink2);display:block}
+.gauge{width:100%;height:auto;display:block}
+.cap{font:600 12.5px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+</style>
+<div class="wrap">
+<section class="hero" id="hero" aria-label="Prossima release"></section>
+
+<section class="sec" aria-labelledby="h-ex">
+  <h2 id="h-ex">Le ultime release</h2>
+  <p class="one">Quanto si sono mosse, contro la stima fatta <b>prima</b>. Tocca una release.</p>
+  <div class="strip" id="strip" role="group" aria-label="Scegli una release"></div>
+  <div class="panel" id="prec"></div>
+</section>
+
+<section class="sec" aria-labelledby="h-day">
+  <h2 id="h-day">Oggi: fin dove arriva l'oro</h2>
+  <div class="panel" id="oggi"></div>
+</section>
+
+<details class="more" id="simbox"><summary>Per capire: perché Retail e PPI fanno più pips di prima</summary><div id="sim"></div></details>
+
+<footer id="foot"></footer>
+</div>
+<script>
+const D = __DATA__;
+// ---------- comuni ai due siti
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SVGNS = "http://www.w3.org/2000/svg";
+const mk = (t, a, txt) => { const e = document.createElementNS(SVGNS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+const it0 = x => Math.round(x).toLocaleString("it-IT");
+const it2 = x => x.toLocaleString("it-IT", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const dec = (v, d = 2) => v.toFixed(d).replace(".", ",");
+const pct = v => Math.round(v * 100) + "%";
+const sgnR = v => (v > 0 ? "+" : v < 0 ? "−" : "") + dec(Math.abs(v)) + "R";
+const pm = e => "±" + Math.round((Math.exp(e) - 1) * 100) + "%";
+const pipsTxt = d => (d > 0 ? "+" : d < 0 ? "−" : "±") + it0(Math.abs(d) * 10);
+const median = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2) : null; };
+const pOne = (k, n) => { const z = (k - .5 - n / 2) / Math.sqrt(n / 4), t = 1 / (1 + .3275911 * z / Math.SQRT2), e = t * (.254829592 + t * (-.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429)))) * Math.exp(-z * z / 2); return z > 0 ? e / 2 : 1 - e / 2; };
+
+
+// ---------- oggi: candele con i livelli sopra (H-X28, metodo scelto)
+function oggi(LV, el) {
+  const G = LV && LV.giorno, O = G && G.oggi;
+  if (!el) return;
+  if (!O || !O.candele || !O.candele.length) { el.innerHTML = `<p class="small">Livelli del giorno non disponibili.</p>`; return; }
+  const Q = G.metodi[G.scelto]["2023-26"];
+  const key = r => r.tb + "|" + (r.ub ?? "") + "|" + (r.pb ?? "");
+  const T = new Map(O.tabella.map(r => [key(r), r])), TA = new Map(O.tabella_A.map(r => [r.tb, r]));
+  const start = new Date(new Date(O.inizio + "T00:00:00Z").getTime() - 2 * 3600e3), end = new Date(start.getTime() + 24 * 3600e3);
+  const rome = (d, o) => d.toLocaleString("it-IT", {timeZone: "Europe/Rome", ...o});
+  const hhmm = k => rome(new Date(start.getTime() + (k + 1) * 3600e3), {hour: "2-digit", minute: "2-digit"});
+  function levels(k, H, L, P) {
+    const sc = O.apertura / 100 * O.S_pct, tb = Math.floor(k / O.fascia_ore);
+    const used = (H - L) / sc, pos = H > L ? (P - L) / (H - L) : .5;
+    const ub = used < .5 ? 0 : used < 1 ? 1 : 2, pb = pos < 1 / 3 ? 0 : pos < 2 / 3 ? 1 : 2;
+    const kk = O.metodo === "A" ? tb + "||" : O.metodo === "B" ? tb + "|" + ub + "|" : tb + "|" + ub + "|" + pb;
+    const r = T.get(kk), a = TA.get(tb), s = r && r.n >= O.min_n ? r : a;
+    const mu = r && r.nu >= O.min_n ? r.mu : a.mu, mv = r && r.nv >= O.min_n ? r.mv : a.mv;
+    return {su90: H + s.qu * sc, giu90: L - s.qv * sc, suT: H + mu * sc, giuT: L - mv * sc, pu: s.pu, pv: s.pv};
+  }
+  el.innerHTML = `
+    <div class="chips" id="lvChips"></div>
+    <div class="chart" id="lvChart"></div>
+    <p class="small" id="lvNote"></p>
+    <details class="mt5"><summary>Usa i prezzi del tuo MT5</summary><div class="fields">
+      <label>Prezzo adesso<input id="lvP" type="number" step="0.01" inputmode="decimal" value="${O.prezzo.toFixed(2)}"></label>
+      <label>Massimo di oggi<input id="lvH" type="number" step="0.01" inputmode="decimal" value="${O.massimo.toFixed(2)}"></label>
+      <label>Minimo di oggi<input id="lvL" type="number" step="0.01" inputmode="decimal" value="${O.minimo.toFixed(2)}"></label>
+      <label>Ora (Italia)<select id="lvK">${Array.from({length: 24}, (_, k) => `<option value="${k}"${k === O.k ? " selected" : ""}>dopo le ${hhmm(k)}</option>`).join("")}</select></label>
+    </div></details>`;
+  const $ = id => el.querySelector("#" + id);
+  const draw = () => {
+    const P = +$("lvP").value, H = +$("lvH").value, L = +$("lvL").value, k = +$("lvK").value;
+    if (![P, H, L].every(x => isFinite(x) && x > 0) || H < L || P > H + 1e-9 || P < L - 1e-9) {
+      $("lvChips").innerHTML = `<span class="chip">Controlla i numeri: il prezzo deve stare fra il minimo e il massimo di oggi.</span>`; return; }
+    const v = levels(k, H, L, P);
+    $("lvChips").innerHTML = `<span class="chip">↑ nuovo massimo oggi <b>${pct(v.pu)}</b></span><span class="chip">↓ nuovo minimo oggi <b>${pct(v.pv)}</b></span>`;
+    chart($("lvChart"), {P, H, L}, v);
+    $("lvNote").innerHTML = `Oltre il "9 su 10" l'oro va solo 1 giorno su 10 (nel 2023–26 ha tenuto ${Math.round(Q.cop90_su * 100)} volte su 100). Usalo per take profit e stop. Aggiornato alle ${rome(new Date(new Date(O.ultima_candela_utc.replace(" ", "T")).getTime() + 3600e3), {hour: "2-digit", minute: "2-digit"})}.`;
+  };
+  function chart(host, s, v) {
+    // candele una dopo l'altra come in MT5/TradingView: niente buchi per la notte o il weekend
+    const W = Math.max(320, Math.min(900, host.clientWidth || 640)), narrow = W < 520, H = narrow ? 360 : 400, Lm = narrow ? 40 : 46, R = narrow ? 118 : 170, T = 12, B = 26;
+    const C = O.candele.map(c => ({t: new Date(c[0]).getTime(), o: c[1], h: c[2], l: c[3], c: c[4]}));
+    const lastEnd = C[C.length - 1].t + 3600e3, friday = new Date(start.getTime() + 2 * 3600e3).getUTCDay() === 5;
+    const dayEnd = start.getTime() + (friday ? 23 : 24) * 3600e3, futuro = Math.max(0, Math.round((dayEnd - lastEnd) / 3600e3));
+    const slots = C.length + futuro, x = i => Lm + (i + .5) / slots * (W - Lm - R), xe = i => Lm + i / slots * (W - Lm - R);
+    const iOggi = Math.max(0, C.findIndex(c => c.t >= start.getTime())), iNow = C.length;
+    const lo0 = Math.min(...C.map(c => c.l), v.giu90, v.giuT, s.L), hi0 = Math.max(...C.map(c => c.h), v.su90, v.suT, s.H), pad = (hi0 - lo0) * .04;
+    const lo = lo0 - pad, hi = hi0 + pad, y = p => T + (hi - p) / (hi - lo) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Candele H1 di ieri e di oggi con i livelli fino a fine giornata"});
+    const step = [1, 2, 5, 10, 20, 25, 50, 100].find(st => (hi - lo) / st <= 6) || 100;
+    for (let p = Math.ceil(lo / step) * step; p <= hi; p += step) {
+      svg.append(mk("line", {x1: Lm, x2: W - R, y1: y(p), y2: y(p), stroke: css("--grid")}));
+      svg.append(mk("text", {x: Lm - 5, y: y(p) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(p)));
+    }
+    svg.append(mk("rect", {x: xe(iNow), y: T, width: Math.max(0, xe(slots) - xe(iNow)), height: H - T - B, fill: css("--accent"), opacity: .05}));
+    svg.append(mk("rect", {x: xe(iNow), y: y(v.su90), width: Math.max(0, xe(slots) - xe(iNow)), height: y(v.giu90) - y(v.su90), fill: css("--accent"), opacity: .11}));
+    if (iOggi > 0) { svg.append(mk("line", {x1: xe(iOggi), x2: xe(iOggi), y1: T, y2: H - B, stroke: css("--mute"), "stroke-dasharray": "3 3"}));
+      svg.append(mk("text", {x: xe(iOggi) - 4, y: T + 12, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, rome(new Date(C[0].t), {weekday: "short"})));
+      svg.append(mk("text", {x: xe(iOggi) + 4, y: T + 12, "font-size": 11, fill: css("--mute")}, "oggi")); }
+    if (futuro) svg.append(mk("text", {x: (xe(iNow) + xe(slots)) / 2, y: H - B + 0, dy: "-0.4em", "text-anchor": "middle", "font-size": 10.5, fill: css("--mute")}, futuro > 3 ? "resto del giorno" : ""));
+    const every = narrow ? 6 : 4;
+    for (let i = 0; i < slots; i++) { const t = i < C.length ? C[i].t : lastEnd + (i - C.length) * 3600e3;
+      if (new Date(t).getUTCHours() % every === 0) svg.append(mk("text", {x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, rome(new Date(t), {hour: "2-digit"}))); }
+    const bw = Math.max(2, (xe(1) - xe(0)) * .64);
+    C.forEach((c, i) => { const up = c.c >= c.o, col = css(up ? "--up" : "--down"), cx = x(i);
+      svg.append(mk("line", {x1: cx, x2: cx, y1: y(c.h), y2: y(c.l), stroke: col, "stroke-width": 1.2}));
+      svg.append(mk("rect", {x: cx - bw / 2, y: y(Math.max(c.o, c.c)), width: bw, height: Math.max(1, Math.abs(y(c.o) - y(c.c))), fill: up ? css("--panel") : col, stroke: col, "stroke-width": 1.2}));
+    });
+    const rows = [
+      {p: v.su90, t: "9 su 10 non oltre", pr: Math.min(.10, v.pu), d: "6 4", w: 1.6, c: "--ink", from: iNow},
+      {p: v.suT, t: "di solito, se sale", pr: v.pu * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: s.H, t: "massimo di oggi", pr: v.pu, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: s.P, t: "prezzo adesso", d: "", w: 2.4, c: "--accent", from: 0, bold: true},
+      {p: s.L, t: "minimo di oggi", pr: v.pv, d: "", w: 1.2, c: "--mute", from: iOggi},
+      {p: v.giuT, t: "di solito, se scende", pr: v.pv * .5, d: "2 3", w: 1.6, c: "--ink", from: iNow},
+      {p: v.giu90, t: "9 su 10 non sotto", pr: Math.min(.10, v.pv), d: "6 4", w: 1.6, c: "--ink", from: iNow}];
+    rows.sort((a, b) => b.p - a.p);
+    const ys = rows.map(r => y(r.p)), gap = narrow ? 27 : 29, lab = ys.slice();
+    for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
+    for (let i = lab.length - 1; i >= 0; i--) lab[i] = Math.min(lab[i], H - B + 4 - (lab.length - 1 - i) * gap);
+    for (let i = 1; i < lab.length; i++) lab[i] = Math.max(lab[i], lab[i - 1] + gap);
+    rows.forEach((r, i) => {
+      svg.append(mk("line", {x1: xe(r.from), x2: W - R + 4, y1: ys[i], y2: ys[i], stroke: css(r.c), "stroke-width": r.w, "stroke-dasharray": r.d}));
+      svg.append(mk("line", {x1: W - R + 4, x2: W - R + 10, y1: ys[i], y2: lab[i] - 4, stroke: css(r.c), opacity: .6}));
+      svg.append(mk("text", {x: W - R + 12, y: lab[i] - 13, "font-size": narrow ? 9.5 : 10.5, fill: css("--mute")}, r.t));
+      const tx = mk("text", {x: W - R + 12, y: lab[i], "font-size": narrow ? 11.5 : 12.5, "font-weight": r.bold ? 700 : 600, fill: css("--ink"), "font-family": "ui-monospace,Menlo,monospace"}, it2(r.p));
+      if (r.pr != null) { const sp = mk("tspan", {fill: css(r.pr >= .4 ? "--good" : r.pr >= .2 ? "--warn" : "--bad"), "font-weight": 700}, `  ${Math.round(r.pr * 100)}%`); tx.append(sp); }
+      svg.append(tx);
+    });
+    host.innerHTML = ""; host.append(svg);
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.append(tip);
+    const show = e => { const rc = svg.getBoundingClientRect(), sx = (e.clientX - rc.left) / rc.width * W, i = Math.floor((sx - Lm) / (W - Lm - R) * slots);
+      if (i < 0 || i >= C.length) { tip.hidden = true; return; } const c = C[i];
+      tip.innerHTML = `${rome(new Date(c.t), {weekday: "short", hour: "2-digit", minute: "2-digit"})} · apre ${it2(c.o)} · max ${it2(c.h)} · min ${it2(c.l)} · chiude ${it2(c.c)}`;
+      tip.style.left = Math.min(rc.width - 120, Math.max(120, x(i) / W * rc.width)) + "px"; tip.style.top = (y(c.h) / H * rc.height) + "px"; tip.hidden = false; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+  }
+  ["lvP", "lvH", "lvL", "lvK"].forEach(id => $(id).addEventListener("input", draw));
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+  draw();
+}
+
+// ---------- perché muove più pips: simulatore (H-X29)
+function simulatore(P, group, name, el, oggiO) {
+  if (!el || !P || !P.scomposizione_vs_2019 || !P.scomposizione_vs_2019[group]) return;
+  const S = P.scomposizione_vs_2019[group], ys = Object.keys(S).sort(), A = S[ys[0]], beta = P.modello.beta[0], gamma = P.modello.gamma[0];
+  const err = P.prova && P.prova[group] ? P.prova[group]["2023-26"].errore_VS : .35;
+  const presets = ys.map(y => ({lab: y, P: S[y].prezzo_usd, A: S[y].adr_pct, S: S[y].S_geo, R: S[y].resto, vero: S[y].pips_geo}));
+  const last = S[ys[ys.length - 1]];
+  if (oggiO) presets.push({lab: "Oggi", P: oggiO.prezzo, A: oggiO.S_pct, S: last.S_geo, R: last.resto, vero: null});
+  const st = {...presets[presets.length - 1]};
+  const model = s => A.pips_geo * (s.P / A.prezzo_usd) * Math.pow(s.A / A.adr_pct, beta) * Math.pow((1 + s.S) / (1 + A.S_geo), gamma) * s.R;
+  const parts = s => [s.P / A.prezzo_usd, Math.pow(s.A / A.adr_pct, beta), Math.pow((1 + s.S) / (1 + A.S_geo), gamma), s.R];
+  const sword = v => v < .35 ? "in linea con le attese" : v < 1.6 ? "normale" : v < 2.6 ? "grande" : "enorme";
+  el.innerHTML = `
+    <div class="presets" id="smPre" role="group" aria-label="Valori di un anno">${presets.map((p, i) => `<button type="button" data-i="${i}" aria-pressed="false">${p.lab}</button>`).join("")}</div>
+    <div class="sim">
+      <div class="sliders">
+        <div class="sl"><div class="top"><span>Prezzo dell'oro</span><b id="smPv"></b></div><input id="smP" type="range" min="1000" max="6000" step="10" aria-label="Prezzo dell'oro"><em>Lo sai prima. Più costa l'oro, più pips fa lo stesso movimento.</em></div>
+        <div class="sl"><div class="top"><span>Volatilità del giorno (ADR)</span><b id="smAv"></b></div><input id="smA" type="range" min="0.4" max="4" step="0.05" aria-label="Volatilità del giorno"><em>La sai prima: media dei range degli ultimi 21 giorni.</em></div>
+        <div class="sl"><div class="top"><span>Sorpresa del dato</span><b id="smSv"></b></div><input id="smS" type="range" min="0" max="4" step="0.1" aria-label="Sorpresa del dato"><em>La sai solo alle 14:30:00: quanto il dato esce lontano dalle attese.</em></div>
+        <div class="sl"><div class="top"><span>Reazione del mercato</span><b id="smRv"></b></div><input id="smR" type="range" min="0.4" max="3" step="0.05" aria-label="Reazione del mercato"><em>Quanto il mercato guarda quel dato. Cambia negli anni: non si sa prima.</em></div>
+      </div>
+      <div class="out" aria-live="polite">
+        <span class="small">Candela della ${name}, dal minimo al massimo</span>
+        <span class="big" id="smOut"></span>
+        <span class="band" id="smBand"></span>
+        <span class="mult" id="smMult"></span>
+        <div class="can">
+          <div><i class="g">✓</i><span><b>Prezzo e volatilità</b> li sai prima della news.</span></div>
+          <div><i class="r">✗</i><span><b>La sorpresa</b> la sai solo quando esce il dato.</span></div>
+          <div><i class="r">✗</i><span><b>La reazione del mercato</b> cambia negli anni.</span></div>
+          <div><i style="color:var(--warn)">≈</i><span><b>Si può calcolare? Solo l'ordine di grandezza</b>: prima della news l'errore tipico è ${pm(err)}.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart" id="smChart"></div>
+    <p class="small">Formula su ${it0(P.copertura.con_S)} news rosse dal 2011 (studio H-X29): pips = prezzo × volatilità<sup>${dec(beta)}</sup> × (1 + sorpresa)<sup>${dec(gamma)}</sup> × reazione. Premi un anno per vedere i suoi valori: la formula ridà la candela tipica di quell'anno.</p>`;
+  const $ = id => el.querySelector("#" + id);
+  const set = () => { $("smP").value = st.P; $("smA").value = st.A; $("smS").value = st.S; $("smR").value = st.R; };
+  const draw = () => {
+    const v = model(st), pr = parts(st), tot = pr.reduce((a, b) => a * b, 1);
+    $("smPv").textContent = it0(st.P) + " $";
+    $("smAv").textContent = `${dec(st.A)}% = ${it0(st.A / 100 * st.P * 10)} pips al giorno`;
+    $("smSv").textContent = `${dec(st.S, 1)} · ${sword(st.S)}`;
+    $("smRv").textContent = "×" + dec(st.R);
+    $("smOut").textContent = "≈ " + it0(v) + " pips";
+    $("smBand").textContent = `metà delle volte fra ${it0(v / Math.exp(err))} e ${it0(v * Math.exp(err))} pips`;
+    $("smMult").textContent = `rispetto al ${ys[0]}: prezzo ×${dec(pr[0], 1)} · volatilità ×${dec(pr[1], 2)} · sorpresa ×${dec(pr[2], 2)} · reazione ×${dec(pr[3], 2)} = ×${dec(tot, 1)}`;
+    el.querySelectorAll("#smPre button").forEach((b, i) => { const p = presets[i]; b.setAttribute("aria-pressed", String(["P", "A", "S", "R"].every(k => Math.abs(p[k] - st[k]) < 1e-6))); });
+    bars(v);
+  };
+  function bars(cur) {
+    const host = $("smChart"), W = Math.max(320, Math.min(900, host.clientWidth || 640)), H = 240, L = 40, R = 12, T = 30, B = 26;
+    const rows = ys.map(y => ({y, vero: S[y].pips_geo, prezzo: A.pips_geo * S[y].prezzo, vol: A.pips_geo * S[y].prezzo * S[y].volatilita}));
+    const vmax = Math.max(...rows.map(r => Math.max(r.vero, r.vol)), cur) * 1.12, bw = (W - L - R) / rows.length;
+    const x = i => L + i * bw + bw / 2, y = v => T + (1 - v / vmax) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Candela tipica della ${name} per anno`});
+    const step = [25, 50, 100, 200, 250, 500].find(s => vmax / s <= 5) || 500;
+    for (let v = 0; v <= vmax; v += step) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")})); svg.append(mk("text", {x: L - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, it0(v))); }
+    rows.forEach((r, i) => {
+      svg.append(mk("rect", {x: x(i) - bw * .32, y: y(r.vero), width: bw * .64, height: y(0) - y(r.vero), rx: 3, fill: css("--accent"), opacity: .85}));
+      svg.append(mk("text", {x: x(i), y: y(r.vero) - 5, "text-anchor": "middle", "font-size": 11, "font-weight": 600, fill: css("--ink"), "font-family": "ui-monospace,Menlo,monospace"}, it0(r.vero)));
+      svg.append(mk("text", {x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, r.y));
+    });
+    const line = (k, col, dash) => svg.append(mk("polyline", {points: rows.map((r, i) => `${x(i)},${y(r[k])}`).join(" "), fill: "none", stroke: css(col), "stroke-width": 2, "stroke-dasharray": dash}));
+    line("prezzo", "--ink2", "5 4"); line("vol", "--ink", "");
+    svg.append(mk("text", {x: L + 4, y: T + 2, "font-size": 11, fill: css("--ink2")}, "- - -  solo il prezzo     ——  prezzo + volatilità"));
+        svg.append(mk("line", {x1: L, x2: W - R, y1: y(cur), y2: y(cur), stroke: css("--accent"), "stroke-width": 1.5, "stroke-dasharray": "2 3"}));
+    svg.append(mk("text", {x: L + 4, y: y(cur) - 4, "font-size": 11, fill: css("--accent"), "font-weight": 600}, `simulatore: ${it0(cur)}`));
+    svg.append(mk("text", {x: W - R, y: T + 2, "text-anchor": "end", "font-size": 11, fill: css("--mute")}, "barre: candela vera, pips"));
+    host.innerHTML = ""; host.append(svg);
+  }
+  ["P", "A", "S", "R"].forEach(k => $("sm" + k).addEventListener("input", e => { st[k] = +e.target.value; draw(); }));
+  el.querySelectorAll("#smPre button").forEach(b => b.addEventListener("click", () => { Object.assign(st, presets[+b.dataset.i]); set(); draw(); }));
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+  set(); draw();
+}
+
+// ---------- quanto era precisa la stima della candela, release per release (stessa regola del sito, solo dati di prima)
+function bandTest(evs, N) {
+  const q = (a, p) => { const s = a.slice().sort((x, y) => x - y), i = (s.length - 1) * p, f = Math.floor(i); return s[f] + (s[Math.min(f + 1, s.length - 1)] - s[f]) * (i - f); };
+  const P = [];
+  evs.forEach((e, i) => { if (i < N) return; const prev = evs.slice(i - N, i).map(x => x.pct);
+    const lo = q(prev, .25) / 100 * e.px * 10, md = q(prev, .5) / 100 * e.px * 10, hi = q(prev, .75) / 100 * e.px * 10;
+    P.push({t: e.t, y: e.y, v: e.pips, lo, md, hi, in: e.pips >= lo && e.pips <= hi}); });
+  const last = evs.slice(-N).map(x => x.pct);
+  const next = price => ({lo: q(last, .25) / 100 * price * 10, md: q(last, .5) / 100 * price * 10, hi: q(last, .75) / 100 * price * 10});
+  const since = y0 => { const g = P.filter(p => p.y >= y0); return {n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; };
+  return {P, next, since};
+}
+function precisione(host, evs, N, price, name) {
+  if (!host || !evs.length) return;
+  const B = bandTest(evs, N), P = B.P, nx = B.next(price), rc = B.since(2023), ok = rc.n && rc.k / rc.n >= .4 && rc.k / rc.n <= .6;
+  const per = perAnno(P), tot = {n: P.length, k: P.filter(p => p.in).length};
+  host.innerHTML = `
+    <div class="chips"><span class="chip big">Prossima ${name}: <b>${it0(nx.md)} pips</b> · metà delle volte <b>${it0(nx.lo)}–${it0(nx.hi)}</b></span></div>
+    <p>${ok ? "🟢" : "🔴"} <b>${ok ? "Affidabile negli ultimi anni" : "Non affidabile"}</b>: dal 2023 la fascia "metà delle volte" ci ha preso ${rc.k} volte su ${rc.n} (${pct(rc.k / rc.n)}; giusto sarebbe 50%). Dal ${per[0].y}: ${tot.k} su ${tot.n}.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Ogni punto è una ${name} vera: quanto si è mosso l'oro nel primo minuto, dal minimo al massimo. La fascia è la stima fatta <b>prima</b> di quella release con le ${N} precedenti, in % del prezzo e riportata al prezzo di quel giorno. Punto pieno = dentro la fascia, vuoto = fuori. Tocca un punto per i numeri.</p>
+    ${tabAnni(per)}`;
+  bandChart(host.querySelector("#prChart"), P, name);
+}
+function perAnno(P) {
+  return [...new Set(P.map(p => p.y))].sort().map(y => { const g = P.filter(p => p.y === y);
+    return {y, n: g.length, k: g.filter(p => p.in).length, sopra: g.filter(p => p.v > p.hi).length, sotto: g.filter(p => p.v < p.lo).length}; });
+}
+function tabAnni(per) {
+  return `<div style="overflow-x:auto"><table class="yt"><thead><tr><th>Anno</th><th>Dentro la fascia</th><th>Sopra</th><th>Sotto</th></tr></thead><tbody>
+      ${per.map(r => `<tr><td>${r.y}</td><td><span class="bar"><i style="width:${r.k / r.n * 100}%"></i></span>${r.k} su ${r.n}</td><td>${r.sopra}</td><td>${r.sotto}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+// P: [{t, y, v (vero), lo, md, hi, in}] in pips; scala logaritmica, dettaglio del punto più vicino al tocco
+function bandChart(ch, P, name) {
+  if (!ch || !P.length) return;
+  const yrs = [...new Set(P.map(p => p.y))].sort();
+  const draw = () => {
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 260 : 300, L = 40, R = 10, T = 12, B = 24;
+    const t0 = P[0].t, t1 = P[P.length - 1].t, x = t => L + (t - t0) / Math.max(1, t1 - t0) * (W - L - R);
+    const vals = P.flatMap(p => [p.v, p.lo, p.hi]).filter(v => v > 0), lmin = Math.log(Math.max(5, Math.min(...vals) * .85)), lmax = Math.log(Math.max(...vals) * 1.15);
+    const y = v => T + (lmax - Math.log(v)) / (lmax - lmin) * (H - T - B);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Stima prima di ogni ${name} contro la candela vera`});
+    for (const v of [10, 25, 50, 100, 200, 400, 800, 1600]) if (Math.log(v) >= lmin && Math.log(v) <= lmax) {
+      svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")}));
+      svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v)); }
+    yrs.forEach(yy => { const xx = x(Date.UTC(yy, 0, 1)); if (xx > L + 10) { svg.append(mk("line", {x1: xx, x2: xx, y1: T, y2: H - B, stroke: css("--grid")})); }
+      const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 7, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, String(yy).slice(W < 520 ? 2 : 0))); });
+    svg.append(mk("polygon", {points: P.map(p => `${x(p.t)},${y(p.hi)}`).join(" ") + " " + P.slice().reverse().map(p => `${x(p.t)},${y(p.lo)}`).join(" "), fill: css("--accent"), opacity: .16}));
+    svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.md)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 1.6}));
+    P.forEach(p => svg.append(mk("circle", {cx: x(p.t), cy: y(p.v), r: 3.4, fill: p.in ? css("--ink") : css("--panel"), stroke: p.v > p.hi ? css("--bad") : css("--ink"), "stroke-width": 1.4})));
+    const hl = mk("circle", {r: 7, fill: "none", stroke: css("--accent"), "stroke-width": 2, opacity: 0}), tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
+    svg.append(hl);
+    const show = ev => { const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      const p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
+      hl.setAttribute("cx", x(p.t)); hl.setAttribute("cy", y(p.v)); hl.setAttribute("opacity", 1);
+      const d = new Date(p.t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "UTC"});
+      tip.innerHTML = `${d}: <b>${it0(p.v)} pips</b><br>stima ${it0(p.md)} · fascia ${it0(p.lo)}–${it0(p.hi)}<br>${p.in ? "dentro" : p.v > p.hi ? "sopra la fascia" : "sotto la fascia"}`;
+      tip.hidden = false; tip.style.left = Math.min(r.width - 90, Math.max(90, x(p.t) * r.width / W)) + "px"; tip.style.top = (y(p.v) * r.height / H) + "px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; hl.setAttribute("opacity", 0); });
+    ch.innerHTML = ""; ch.append(svg, tip);
+  };
+  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+}
+
+
+// ---------- quante volte la candela è caduta dentro la stima, più grande o più piccola
+function contaBar(P) {
+  const n = P.length, k = P.filter(p => p.in).length, su = P.filter(p => p.v > p.hi).length, giu = n - k - su, w = v => (100 * v / n).toFixed(1) + "%";
+  const d10 = v => Math.round(10 * v / n);
+  return `<div class="cbar" role="img" aria-label="Dentro ${k}, più grande ${su}, più piccola ${giu} su ${n}">
+      <i class="giu" style="width:${w(giu)}"></i><i class="in" style="width:${w(k)}"></i><i class="su" style="width:${w(su)}"></i></div>
+    <div class="cleg"><span><i class="giu"></i>più piccola <b>${d10(giu)} su 10</b></span><span><i class="in"></i>dentro <b>${d10(k)} su 10</b></span><span><i class="su"></i>più grande <b>${d10(su)} su 10</b></span></div>`;
+}
+// ---------- Retail / PPI
+const MONO = "JetBrains Mono,ui-monospace,monospace";
+const rome = (iso, o) => new Intl.DateTimeFormat("it-IT", {timeZone: "Europe/Rome", ...o}).format(new Date(iso));
+const qt = (a, p) => { const s = a.filter(x => x != null && !isNaN(x)).sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.max(0, Math.round(p * (s.length - 1))))]; };
+const utc = d => d.replace(" ", "T") + ":00Z";
+const ev = D.ev.map(e => { const k = e.m1c5 || [0, 0, 0, 0], su = Math.max(0, k[1]), giu = Math.max(0, -k[2]);
+  return {...e, iso: utc(e.d), pct: e.m1_bid * 0.1 / e.prezzo * 100, contropct: (e.m1_mov > 0 ? giu : su) * 0.1 / e.prezzo * 100}; });
+const LAST = ev[ev.length - 1], LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PX = LV ? LV.oggi.prezzo : LAST.prezzo, recent = ev.slice(-12);
+const toPips = p => p / 100 * PX * 10, r10 = v => Math.round(v / 10) * 10;
+const evs = ev.map(e => ({t: new Date(e.iso).getTime(), y: e.y, pips: e.m1_bid, px: e.prezzo, pct: e.pct, tipo: e.tipo})).filter(e => e.pips > 0);
+const BT = bandTest(evs, 12), NXT = BT.next(PX), RC = BT.since(2023);
+const contro90 = toPips(qt(recent.map(e => e.contropct), .9));
+const NEXT = D.prossime[0];
+
+// 1 · prossima release
+(() => {
+  const n = NEXT, names = n ? n.titoli.split(" + ").filter(t => !/Core/.test(t)).map(t => t.replace(" m/m", "")).join(" + ") : "";
+  document.getElementById("hero").innerHTML = `<div class="top"><span class="when">${n ? `${names} · ${rome(n.t0, {weekday: "long", day: "numeric", month: "long"})} · ${rome(n.t0, {hour: "2-digit", minute: "2-digit"})}` : "Nessuna data in calendario"}</span><span class="cd" id="cd"></span></div>
+    <div class="big">~${r10(NXT.md)} <span style="font-size:.4em">pips</span></div>
+    <p class="why">La prima candela, dal minimo al massimo. Metà delle volte ${r10(NXT.lo)}–${r10(NXT.hi)}.</p>
+    <div class="kpis">
+      <div class="kpi"><b>${Math.round(10 * RC.k / RC.n)} su 10</b><span>la stima ci prende, dal 2023 (${RC.k} su ${RC.n})</span></div>
+      <div class="kpi"><b>~${r10(contro90)} pips</b><span>il massimo che va contro, 9 volte su 10</span></div>
+    </div>`;
+  if (!n) return;
+  const tick = () => { const ms = new Date(n.t0) - Date.now(), c = document.getElementById("cd"); if (ms <= 0) { c.textContent = "uscita"; return; }
+    const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60; c.textContent = `fra ${d ? d + " g " : ""}${h} h ${d ? "" : m + " min"}`; };
+  tick(); setInterval(tick, 30000);
+})();
+
+// 2 · le ultime release contro la stima di allora
+(() => {
+  const P = BT.P.filter(p => p.y >= 2019), L12 = P.slice(-12), host = document.getElementById("prec"), strip = document.getElementById("strip");
+  const dd = t => new Date(t).toLocaleDateString("it-IT", {day: "2-digit", month: "2-digit", timeZone: "UTC"});
+  let cur = L12[L12.length - 1];
+  strip.innerHTML = L12.map((p, i) => `<button data-i="${i}" class="${p.in ? "w" : "l"}" aria-pressed="false">${dd(p.t)}<b>${it0(p.v)}</b></button>`).join("");
+  host.innerHTML = `<p class="one" id="sel"></p>${contaBar(P)}
+    <p class="one">La fascia è fatta per prenderne metà: quelle fuori non sono errori, un po' sopra e un po' sotto.</p>
+    <div class="chart" id="prChart"></div>
+    <p class="small">Dal 2019, ogni punto è una release · ● dentro · ○ fuori · tocca un punto</p>`;
+  const sel = () => { strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(L12[+b.dataset.i] === cur)));
+    const e = evs.find(x => x.t === cur.t);
+    document.getElementById("sel").innerHTML = `${dd(cur.t)} · ${e ? e.tipo.replace("+", " + ") : ""}: <b>${it0(cur.v)} pips</b> · stima ${r10(cur.lo)}–${r10(cur.hi)} → <b class="${cur.in ? "g" : "r"}">${cur.in ? "dentro" : cur.v > cur.hi ? "più grande" : "più piccola"}</b>`; };
+  strip.querySelectorAll("button").forEach(b => b.onclick = () => { cur = L12[+b.dataset.i]; sel(); });
+  sel(); strip.scrollLeft = strip.scrollWidth;
+  bandChart(host.querySelector("#prChart"), P, "release");
+})();
+
+oggi(D.liv, document.getElementById("oggi"));
+simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
+document.getElementById("simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));
+document.getElementById("foot").textContent = "Dati: tick Dukascopy, calendario ForexFactory. Ogni numero viene da una prova con le regole scritte prima (docs del progetto).";
+</script>

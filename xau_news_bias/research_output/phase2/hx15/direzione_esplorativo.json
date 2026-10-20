@@ -1,0 +1,811 @@
+{
+ "eventi": 1169,
+ "combinazioni": 882,
+ "maxt_nullo": {
+  "0.5": 3.114623360974597,
+  "0.9": 3.643843739574975,
+  "0.95": 3.8329565276600936
+ },
+ "migliori_15": [
+  {
+   "gruppo": "TUTTE",
+   "regola": "B2",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 980,
+   "giuste": 0.568,
+   "t": 4.511,
+   "p_fw": 0.004
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "B3",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 748,
+   "giuste": 0.583,
+   "t": 4.393,
+   "p_fw": 0.007
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "B5",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 54,
+   "giuste": 0.611,
+   "t": 3.399,
+   "p_fw": 0.224
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "B1",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 103,
+   "giuste": 0.573,
+   "t": 2.806,
+   "p_fw": 0.826
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "B3",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 84,
+   "giuste": 0.607,
+   "t": 2.76,
+   "p_fw": 0.867
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "B3",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 75,
+   "giuste": 0.693,
+   "t": 2.681,
+   "p_fw": 0.931
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A6",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 285,
+   "giuste": 0.554,
+   "t": 2.567,
+   "p_fw": 0.975
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "B3",
+   "verso": 1,
+   "finestra": "X15",
+   "n": 84,
+   "giuste": 0.583,
+   "t": 2.547,
+   "p_fw": 0.978
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A5",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 77,
+   "giuste": 0.623,
+   "t": 2.547,
+   "p_fw": 0.978
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "B5",
+   "verso": -1,
+   "finestra": "X60",
+   "n": 41,
+   "giuste": 0.707,
+   "t": 2.541,
+   "p_fw": 0.98
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "B3",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 72,
+   "giuste": 0.611,
+   "t": 2.509,
+   "p_fw": 0.983
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A4",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 103,
+   "giuste": 0.592,
+   "t": 2.419,
+   "p_fw": 1.0
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "B6",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 47,
+   "giuste": 0.553,
+   "t": 2.41,
+   "p_fw": 1.0
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "B5",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 53,
+   "giuste": 0.679,
+   "t": 2.386,
+   "p_fw": 1.0
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "B2",
+   "verso": 1,
+   "finestra": "X5",
+   "n": 82,
+   "giuste": 0.646,
+   "t": 2.372,
+   "p_fw": 1.0
+  }
+ ],
+ "A9_sempre_long": [
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 98,
+   "giuste": 0.388,
+   "t": -1.774
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 98,
+   "giuste": 0.429,
+   "t": -2.0
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 98,
+   "giuste": 0.429,
+   "t": 0.329
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 285,
+   "giuste": 0.435,
+   "t": -2.058
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 285,
+   "giuste": 0.463,
+   "t": -2.493
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 285,
+   "giuste": 0.477,
+   "t": -1.171
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 103,
+   "giuste": 0.495,
+   "t": 0.862
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 103,
+   "giuste": 0.485,
+   "t": 0.733
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 103,
+   "giuste": 0.544,
+   "t": 0.921
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 72,
+   "giuste": 0.458,
+   "t": -0.052
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 72,
+   "giuste": 0.528,
+   "t": 0.912
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 72,
+   "giuste": 0.528,
+   "t": 0.05
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 107,
+   "giuste": 0.514,
+   "t": 0.436
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 107,
+   "giuste": 0.523,
+   "t": 0.391
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 107,
+   "giuste": 0.505,
+   "t": 0.181
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 103,
+   "giuste": 0.466,
+   "t": -1.711
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 103,
+   "giuste": 0.437,
+   "t": -0.948
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 103,
+   "giuste": 0.505,
+   "t": 0.278
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 76,
+   "giuste": 0.579,
+   "t": 0.515
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 76,
+   "giuste": 0.579,
+   "t": 1.056
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 76,
+   "giuste": 0.553,
+   "t": 1.488
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 90,
+   "giuste": 0.433,
+   "t": -0.783
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 90,
+   "giuste": 0.411,
+   "t": -0.533
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 90,
+   "giuste": 0.4,
+   "t": -0.17
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 73,
+   "giuste": 0.521,
+   "t": -0.141
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 73,
+   "giuste": 0.397,
+   "t": -0.52
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 73,
+   "giuste": 0.452,
+   "t": -1.379
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 93,
+   "giuste": 0.495,
+   "t": 0.085
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 93,
+   "giuste": 0.581,
+   "t": 0.804
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 93,
+   "giuste": 0.57,
+   "t": 0.585
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 69,
+   "giuste": 0.551,
+   "t": 0.239
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 69,
+   "giuste": 0.493,
+   "t": -0.164
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 69,
+   "giuste": 0.507,
+   "t": -0.48
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E1",
+   "n": 1169,
+   "giuste": 0.474,
+   "t": -1.454
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E5",
+   "n": 1169,
+   "giuste": 0.48,
+   "t": -0.693
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": 1,
+   "finestra": "E15",
+   "n": 1169,
+   "giuste": 0.494,
+   "t": 0.331
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 98,
+   "giuste": 0.612,
+   "t": 1.774
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 98,
+   "giuste": 0.571,
+   "t": 2.0
+  },
+  {
+   "gruppo": "ADP",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 98,
+   "giuste": 0.571,
+   "t": -0.329
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 285,
+   "giuste": 0.565,
+   "t": 2.058
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 285,
+   "giuste": 0.537,
+   "t": 2.493
+  },
+  {
+   "gruppo": "CLAIMS",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 285,
+   "giuste": 0.523,
+   "t": 1.171
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 103,
+   "giuste": 0.505,
+   "t": -0.862
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 103,
+   "giuste": 0.515,
+   "t": -0.733
+  },
+  {
+   "gruppo": "FIDUCIA",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 103,
+   "giuste": 0.456,
+   "t": -0.921
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 72,
+   "giuste": 0.542,
+   "t": 0.052
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 72,
+   "giuste": 0.472,
+   "t": -0.912
+  },
+  {
+   "gruppo": "FOMC",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 72,
+   "giuste": 0.472,
+   "t": -0.05
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 107,
+   "giuste": 0.486,
+   "t": -0.436
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 107,
+   "giuste": 0.477,
+   "t": -0.391
+  },
+  {
+   "gruppo": "ISM_M",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 107,
+   "giuste": 0.495,
+   "t": -0.181
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 103,
+   "giuste": 0.534,
+   "t": 1.711
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 103,
+   "giuste": 0.563,
+   "t": 0.948
+  },
+  {
+   "gruppo": "ISM_S",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 103,
+   "giuste": 0.495,
+   "t": -0.278
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 76,
+   "giuste": 0.421,
+   "t": -0.515
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 76,
+   "giuste": 0.421,
+   "t": -1.056
+  },
+  {
+   "gruppo": "MICHIGAN",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 76,
+   "giuste": 0.447,
+   "t": -1.488
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 90,
+   "giuste": 0.567,
+   "t": 0.783
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 90,
+   "giuste": 0.589,
+   "t": 0.533
+  },
+  {
+   "gruppo": "PIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 90,
+   "giuste": 0.6,
+   "t": 0.17
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 73,
+   "giuste": 0.479,
+   "t": 0.141
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 73,
+   "giuste": 0.603,
+   "t": 0.52
+  },
+  {
+   "gruppo": "PPI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 73,
+   "giuste": 0.548,
+   "t": 1.379
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 93,
+   "giuste": 0.505,
+   "t": -0.085
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 93,
+   "giuste": 0.419,
+   "t": -0.804
+  },
+  {
+   "gruppo": "RETAIL",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 93,
+   "giuste": 0.43,
+   "t": -0.585
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 69,
+   "giuste": 0.449,
+   "t": -0.239
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 69,
+   "giuste": 0.507,
+   "t": 0.164
+  },
+  {
+   "gruppo": "VERBALI",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 69,
+   "giuste": 0.493,
+   "t": 0.48
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E1",
+   "n": 1169,
+   "giuste": 0.526,
+   "t": 1.454
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E5",
+   "n": 1169,
+   "giuste": 0.52,
+   "t": 0.693
+  },
+  {
+   "gruppo": "TUTTE",
+   "regola": "A9",
+   "verso": -1,
+   "finestra": "E15",
+   "n": 1169,
+   "giuste": 0.506,
+   "t": -0.331
+  }
+ ]
+}

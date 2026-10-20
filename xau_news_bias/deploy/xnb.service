@@ -1,0 +1,16 @@
+# systemd (VPS Linux senza Docker): copia in /etc/systemd/system/xnb.service,
+# adatta User e i percorsi, poi: sudo systemctl enable --now xnb
+[Unit]
+Description=XAU NEWS BIAS
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=xnb
+WorkingDirectory=/opt/xau_news_bias
+ExecStart=/opt/xau_news_bias/.venv/bin/python -m xnb.api.app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
