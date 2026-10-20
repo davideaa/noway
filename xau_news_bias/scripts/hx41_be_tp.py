@@ -87,6 +87,21 @@ if __name__ == "__main__":
     trade_ev = {(e["f"], e["d"][:10]): e for e in site["ev"]
                 if e["f"] in ("NFP", "CPI") and e["rule"] and e["mv"] != 0 and e["y"] >= 2014 and (e["f"] == "CPI" or e["id"] in st37)}
     duka = DukascopyProvider()
+    # release uscite dopo la fine del dataset (es. NFP del 2/10/2026): r1 dai tick, come recenti() di H-X32
+    extra = []
+    for (f, _), e in trade_ev.items():
+        t0 = pd.Timestamp(e["d"], tz="UTC")
+        if t0 <= ds[ds.fam == f].t0.max():
+            continue
+        tk = duka.ticks("XAUUSD", t0.to_pydatetime() - pd.Timedelta(minutes=3), t0.to_pydatetime() + pd.Timedelta(minutes=3))
+        t = tk.ts_ms.to_numpy(np.int64) - int(t0.value // 1_000_000)
+        mid = (tk.bid.to_numpy(float) + tk.ask.to_numpy(float)) / 2
+        pre, w1 = np.nonzero(t < 0)[0], (t >= 0) & (t < 60_000)
+        if len(pre) and w1.sum() >= 5:
+            m0 = float(mid[pre[-1]])
+            extra.append({"t0": t0, "fam": f, "y": t0.year, "r1": (max(mid[w1].max(), m0) - min(mid[w1].min(), m0)) / m0 * 100})
+            print("aggiunta fuori dataset:", f, t0.date())
+    ds = pd.concat([ds, pd.DataFrame(extra)], ignore_index=True) if extra else ds
     tk_cache, mx, mx5 = {}, [], []
     for r in ds.itertuples():
         key = (r.fam, str(r.t0.date()))

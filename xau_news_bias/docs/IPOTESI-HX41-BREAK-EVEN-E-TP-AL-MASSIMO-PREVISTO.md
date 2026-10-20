@@ -140,3 +140,111 @@ calibrata. In quel caso:
 - il massimo previsto della prossima NFP, nella parte in alto.
 
 Se non è calibrata, si dice e non si mette.
+
+## Risultati (dopo il commit `0af6ec1`)
+
+File: `research_output/phase2/hx16/hx41_be_tp.json`.
+- 148 NFP e 150 CPI.
+- Controlli:
+  - senza TP e senza break even, a 1 minuto, la regola coincide con U1;
+  - il massimo vero coincide con quello di `trade()`;
+  - U1 e U5 sono gli stessi di H-X40.
+
+**Correzione dichiarata.** La prima esecuzione aveva 147 NFP: mancava
+quella del 02/10/2026, che non è nel dataset delle candele. Aggiunta con
+la candela r1 calcolata dai tick, come fa H-X32 per le NFP recenti. Con
+lei o senza, la conclusione non cambia. I numeri qui sotto sono con 148.
+
+### La linea verde (massimo previsto) è calibrata
+
+Il lato giusto la raggiunge entro il primo minuto:
+
+| | Linea verde | Zona arancione (linea centrale) |
+|---|---|---|
+| NFP 2014–19 | **45,7%** | — |
+| NFP 2020–26 | **47,4%** | — |
+| NFP tutto, entro 1 minuto | 46,6% | **33,1%** |
+| NFP tutto, entro 5 minuti | 57,4% | 43,2% |
+| CPI 2014–19 / 2020–26 | 52,1% / 51,9% | — |
+
+- Il massimo vero è in mediana il **71%** della linea arancione.
+- **La zona arancione disegnata dall'ingresso è raggiunta solo una volta
+  su tre**: come target era troppo lontana. Davide aveva ragione.
+- Per la regola scritta, la linea verde va sul sito.
+- Prossima NFP: massimo previsto **0,616% del prezzo**, circa 255 pips a
+  4.142 $. La candela prevista è di circa 360 pips.
+
+### La regola D non funziona
+
+R a trade, prezzi S4, tetto −1R. Righe "D": TP alla linea verde.
+
+| | U1 (14:31) | U5 (14:35) | **D**: BE 0,5R + TP verde + 5 min | D senza BE | Solo BE, senza TP | BE + TP arancione |
+|---|---|---|---|---|---|---|
+| NFP IS 2014–19 | +0,060 | +0,092 | **−0,029** | −0,019 | +0,025 | +0,027 |
+| NFP OOS 2020–26 | +0,370 | +0,458 | **−0,048** | +0,132 | +0,251 | +0,162 |
+| NFP ultimi 3 anni | +0,748 | +0,937 | **+0,182** | +0,340 | +0,769 | +0,370 |
+| CPI 2014–26 | −0,257 | −0,270 | **−0,290** | −0,307 | −0,254 | — |
+
+Griglia completa con TP verde, valori IS / OOS:
+
+| Tempo massimo | BE 0,25R | BE 0,5R | BE 1R | Senza BE |
+|---|---|---|---|---|
+| 2 min | −0,064 / −0,047 | −0,066 / −0,032 | −0,013 / +0,092 | −0,025 / +0,100 |
+| 3 min | −0,047 / −0,048 | −0,051 / −0,038 | −0,013 / +0,083 | −0,025 / +0,110 |
+| 5 min | −0,016 / −0,056 | −0,029 / −0,048 | −0,007 / +0,094 | −0,019 / +0,132 |
+| 10 min | −0,024 / −0,070 | −0,043 / −0,064 | −0,038 / +0,067 | −0,049 / +0,111 |
+
+- **Nessuna casella batte U1** (+0,060 / +0,370), nemmeno da lontano.
+- Il migliore è "5 min, senza BE": non sta sul bordo, la griglia non si
+  estende.
+- Per la regola scritta, D **non funziona** e non batte U5.
+
+**Perdere di meno, NFP 2014–26:**
+
+| | U1 | D |
+|---|---|---|
+| Trade a −1R pieno | 49,3% | 48,0% |
+| Perdita media | 0,95 | 0,85 |
+| Trade in guadagno | 45,9% | **35,1%** |
+
+D perde un po' meno quando perde, ma vince molto meno spesso e molto meno.
+
+**Da dove viene la perdita.** Descrittivo, `scripts/hx41_be_quando.py`,
+dopo i risultati.
+
+- **Il TP alla linea verde taglia i trade grossi.** Il guadagno della
+  regola viene da poche NFP che vanno molto oltre la mediana, come il
+  2026. Chiudere alla mediana le perde.
+- **Il break even fa uscire dai trade buoni.**
+  - Scatta in 80 NFP su 148, in 70 casi entro 10 secondi dalla news.
+  - Dopo la spinta il prezzo torna indietro (la wick) e lo spread è
+    ancora largo, e in 36 NFP riporta il prezzo all'ingresso:
+    - 13 entro 10 secondi;
+    - 9 fra 10 e 60 secondi;
+    - 14 dopo il primo minuto.
+  - Chiuse alle 14:31, quelle 36 avrebbero fatto in media **+0,33R**, e 23
+    su 36 in guadagno.
+
+**Anno per anno.** Quante volte il lato giusto tocca la linea, entro 1
+minuto; R a trade.
+
+| Anno | Verde (pips, mediana) | Tocca verde | Tocca arancione | U1 | D |
+|---|---|---|---|---|---|
+| 2014 | 84 | 27% | 18% | +0,17 | +0,40 |
+| 2015 | 73 | 36% | 27% | +0,18 | +0,24 |
+| 2016 | 73 | 58% | 42% | +0,03 | −0,39 |
+| 2017 | 48 | 25% | 17% | +0,11 | −0,00 |
+| 2018 | 34 | 58% | 33% | +0,10 | +0,08 |
+| 2019 | 31 | 67% | 50% | −0,21 | −0,44 |
+| 2020 | 43 | 33% | 8% | −0,53 | −0,61 |
+| 2021 | 48 | 73% | 55% | +0,39 | −0,17 |
+| 2022 | 49 | 50% | 42% | +0,08 | −0,24 |
+| 2023 | 81 | 36% | 27% | +0,54 | +0,17 |
+| 2024 | 131 | 42% | 25% | +0,68 | +0,30 |
+| 2025 | 108 | 36% | 27% | +0,09 | −0,14 |
+| 2026 | 186 | 67% | 67% | +1,67 | +0,48 |
+
+**Decisione.**
+- Il trade resta com'è: chiusura alle 14:31, niente TP, niente break even.
+- La linea verde va sul sito come informazione, cioè dove arriva il
+  prezzo metà delle volte, **con scritto che usarla come TP fa peggio**.
