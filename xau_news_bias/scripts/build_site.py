@@ -58,6 +58,18 @@ def stop_formula():
     return out
 
 
+def verde():
+    """H-X41: massimo previsto (linea verde), solo se calibrato. Per ogni NFP in pips, per la prossima in % del prezzo."""
+    p = HX16 / "hx41_be_tp.json"
+    if not p.exists():
+        return None
+    J = load(p)
+    if not J["verde_calibrata"]:
+        return None
+    return {"per": {e["id"]: e["verde_pips"] for e in J["eventi"] if e["f"] == "NFP"}, "prossima_pct": J["prossima"]["verde_pct"],
+            "tocca": J["tocchi_nfp"]["tocca_verde_1m"]}
+
+
 def pips29(group):
     p = load(HX16 / "hx29_pips.json")
     return {"copertura": p["copertura"], "modello": {k: p["modello"][k] for k in ("beta", "gamma")},
@@ -71,7 +83,7 @@ if __name__ == "__main__":
     log = ROOT / "live" / "hx8_live.jsonl"
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
-            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "stopf": stop_formula(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
+            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "stopf": stop_formula(), "verde": verde(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")
