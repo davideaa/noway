@@ -162,6 +162,8 @@ details.more[open]{display:grid;gap:12px}
 .tvleg b{color:var(--ink);font-weight:600}
 #rpChart{position:relative}
 @media (max-width:560px){#replay .presets button{padding:6px 9px;font-size:13px}}
+.tvov{position:absolute;left:0;top:0;pointer-events:none;z-index:2;overflow:visible}
+.tvov text{font:700 11.5px var(--f-num);paint-order:stroke;stroke:var(--panel);stroke-width:3px}
 h1,h2{font-stretch:112%}
 .live{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
 .nx{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
@@ -677,7 +679,7 @@ const replayInit = () => {
       (done ? ` ${preso ? `Stop preso${spread ? " dallo spread che si apre alla news (le candele bid non lo toccano)" : ""}: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
   };
   // ---- grafico in stile TradingView (Lightweight Charts): timeframe, zoom e trascinamento, scala log, reset
-  let chart = null, cs = null, leg = null, plines = [], tvKey = "", lastBar = null;
+  let chart = null, cs = null, leg = null, ov = null, ovKey = "", plines = [], tvKey = "", lastBar = null;
   const TFL = Object.fromEntries(TFS), T0 = e => Math.floor(utcOf(e.d).getTime() / 1000);
   const conv = (X, arr, unit, anchor) => arr.map(a => ({time: anchor + a[0] * unit, open: X.r + a[1] / 100, high: X.r + a[2] / 100, low: X.r + a[3] / 100, close: X.r + a[4] / 100, v: a[5]}));
   const agg = (c, sz, off) => { const m = new Map();
@@ -715,7 +717,27 @@ const replayInit = () => {
     // solo candele, niente volumi: la scala segue le candele visibili, e quando la news spara le altre si rimpiccioliscono
     cs = chart.addCandlestickSeries({upColor: css("--up"), downColor: css("--dn"), borderUpColor: css("--up"), borderDownColor: css("--dn"), wickUpColor: css("--up"), wickDownColor: css("--dn"), priceLineVisible: false});
     leg = document.createElement("div"); leg.className = "tvleg"; el.append(leg);
+    ov = document.createElementNS(SVGNS, "svg"); ov.setAttribute("class", "tvov"); el.append(ov);
+    const loop = () => { ovDraw(); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
     chart.subscribeCrosshairMove(p => legenda(p && p.time != null ? p.seriesData.get(cs) && {...p.seriesData.get(cs), time: p.time} : null)); };
+  // riquadro arancione (range previsto) e trattino verde (ampiezza), lunghi pochi centimetri dalla candela della news
+  const ovDraw = () => { if (!chart || !info || !ov) return; const I = info, el = ov.parentNode, W = el.clientWidth, H = el.clientHeight;
+    const pw = W - chart.priceScale("right").width(), ph = H - chart.timeScale().height(), y = p => cs.priceToCoordinate(p);
+    const nb = serieTF(cur, TF).find(c => c.time <= T0(cur) && c.time + TF > T0(cur)), x0 = nb ? chart.timeScale().timeToCoordinate(nb.time) : null;
+    const L = innerWidth < 520 ? 96 : 140, parts = [];
+    if (x0 != null) {
+      if (I.es) { const a = y(I.tgt[0]), b = y(I.tgt[1]), m = y(I.tgt[2]);
+        if (a != null && b != null) { const top = Math.min(a, b), h = Math.abs(a - b);
+          parts.push(`<rect x="${x0}" y="${top}" width="${L}" height="${Math.max(h, 1)}" fill="${css("--accent")}" fill-opacity=".18" stroke="${css("--accent")}" stroke-opacity=".55"/>`);
+          if (m != null) parts.push(`<line x1="${x0}" x2="${x0 + L}" y1="${m}" y2="${m}" stroke="${css("--accent")}" stroke-width="1.3" stroke-dasharray="5 3"/>`);
+          parts.push(`<text x="${x0 + 5}" y="${top > 16 ? top - 5 : top + 13}" fill="${css("--accent")}">range ~${r50(I.es.stima)}</text>`); } }
+      if (I.gv != null) { const g = y(I.gv);
+        if (g != null) parts.push(`<line x1="${x0}" x2="${x0 + L}" y1="${g}" y2="${g}" stroke="${css("--good")}" stroke-width="2.2"/>`,
+          `<text x="${x0 + 5}" y="${g > 16 ? g - 6 : g + 14}" fill="${css("--good")}">ampiezza ${VD.k} min ~${r50(I.vp)}</text>`); } }
+    const k = parts.join("") + pw + ph;
+    if (k === ovKey) return; ovKey = k;
+    ov.setAttribute("viewBox", `0 0 ${W} ${H}`); ov.setAttribute("width", W); ov.setAttribute("height", H);
+    ov.innerHTML = `<defs><clipPath id="tvclip"><rect x="0" y="0" width="${pw}" height="${ph}"/></clipPath></defs><g clip-path="url(#tvclip)">${parts.join("")}</g>`; };
   const drawTV = () => { const I = info, e = I.e, d = I.d; if (!chart) tvInit();
     const lim = tau >= 1800 ? null : T0(e) + tau, data = visibili(e, TF, lim), key = e.id + "|" + TF, vr = tvKey === key ? chart.timeScale().getVisibleLogicalRange() : null;
     cs.setData(data.map(c => c.open == null ? {time: c.time} : {time: c.time, open: c.open, high: c.high, low: c.low, close: c.close}));
@@ -723,10 +745,8 @@ const replayInit = () => {
     const pieni = data.filter(c => c.open != null);
     lastBar = pieni[pieni.length - 1] || null;
     plines.forEach(p => cs.removePriceLine(p)); plines = [];
-    const pl = (price, color, title, style, w, lab = true) => plines.push(cs.createPriceLine({price, color, lineWidth: w, lineStyle: style, axisLabelVisible: lab, title}));
+    const pl = (price, color, title, style, w) => plines.push(cs.createPriceLine({price, color, lineWidth: w, lineStyle: style, axisLabelVisible: true, title}));
     pl(I.en, css("--entry"), e.rule, 0, 2); pl(I.sl, css("--stop"), "SL", 0, 1);
-    if (I.es) { pl(I.tgt[2], css("--accent"), `range ~${r50(I.es.stima)}`, 2, 1); pl(I.tgt[0], css("--accent"), "", 1, 1, false); pl(I.tgt[1], css("--accent"), "", 1, 1, false); }
-    if (I.gv != null) pl(I.gv, css("--good"), `ampiezza ${VD.k} min ~${r50(I.vp)}`, 0, 2);
     if (I.done) pl(I.ex, css(I.r > 0 ? "--good" : "--bad"), I.preso ? "stop −1R" : sgnR(I.r), 2, 1);
     // segni sulla candela che contiene l'entrata, la news e l'uscita
     const marks = [], add = (s, o) => { const c = pieni.filter(k => k.time <= T0(e) + s).pop(); if (!c) return; const m = marks.find(x => x.time === c.time);
@@ -735,10 +755,12 @@ const replayInit = () => {
     if (lim == null || lim > T0(e)) add(0, {position: d > 0 ? "aboveBar" : "belowBar", color: css("--accent"), shape: "circle", text: "NFP"});
     if (I.done) add(I.exT - 1, {position: d > 0 ? "aboveBar" : "belowBar", color: css(I.r > 0 ? "--good" : "--bad"), shape: "circle", text: I.preso ? "stop" : "chiude"});
     cs.setMarkers(marks.sort((a, b) => a.time - b.time));
-    chart.priceScale("right").applyOptions({mode: LOG ? 1 : 0});
+    // la scala log si cambia solo quando premi Log: zoom e spostamenti fatti a mano restano come li hai lasciati, anche col play
+    if (chart.priceScale("right").options().mode !== (LOG ? 1 : 0)) chart.priceScale("right").applyOptions({mode: LOG ? 1 : 0});
     if (tvKey !== key) { tvKey = key; fuoco(); }
     legenda(null); };
   const draw = () => { drawSVG(); if (TV) drawTV(); };
+  window.rpChart = () => chart;  // solo per le prove automatiche del sito
   if (TV) {
     $("#rpLog").onclick = () => { LOG = !LOG; $("#rpLog").setAttribute("aria-pressed", String(LOG)); draw(); };
     $("#rpReset").onclick = () => { TF = 60; LOG = false; tvKey = ""; $("#rpLog").setAttribute("aria-pressed", "false"); reset(); };
