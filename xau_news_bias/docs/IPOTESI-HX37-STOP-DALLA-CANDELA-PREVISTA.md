@@ -64,3 +64,46 @@ Una formula è **meglio** se:
 - il replay mostra lo stop della formula NFP per NFP.
 
 **Se non passa,** resta 60, e si dice perché.
+
+## Risultati (dopo il commit `89d8e05`)
+
+File: `research_output/phase2/hx16/hx37_stop_candela.json`.
+- 149 NFP, compresa quella del 2/10/2026.
+- Il migliore (k = 0,10) non sta sul bordo: la griglia non è stata
+  estesa.
+
+R a trade con perdita tagliata a −1R (fra parentesi la perdita vera):
+
+| Stop | IS 2014–19 | OOS 2020–26 | Ultimi 3 anni | Tutto | Stop presi |
+|---|---|---|---|---|---|
+| Fisso 60 | +0,03 (−0,11) | +0,46 (+0,27) | +1,04 (+0,75) | +0,25 | 33% |
+| 60/100 di Davide | +0,03 (−0,11) | +0,26 (+0,13) | +0,59 (+0,45) | +0,15 | 30% |
+| 30 + 0,05 × candela | +0,15 (−0,24) | +0,52 (+0,08) | +0,91 (+0,22) | +0,34 | 49% |
+| **30 + 0,10 × candela** | **+0,10** (−0,19) | **+0,61** (+0,26) | **+1,18** (+0,66) | **+0,37** | 45% |
+| 30 + 0,15 × candela | +0,09 (−0,14) | +0,47 (+0,21) | +0,95 (+0,58) | +0,29 | 42% |
+| 30 + 0,20 × candela | +0,05 (−0,15) | +0,38 (+0,17) | +0,81 (+0,50) | +0,23 | 40% |
+| 30 + 0,25 × candela | +0,06 (−0,12) | +0,30 (+0,09) | +0,66 (+0,40) | +0,19 | 38% |
+| 30 + 0,30 × candela | +0,04 (−0,11) | +0,26 (+0,10) | +0,60 (+0,40) | +0,16 | 36% |
+
+Stop mediano della formula k = 0,10, anno per anno:
+
+| Anno | 2014 | 2015–16 | 2017 | 2018 | 2019 | 2020–22 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Stop (pips) | 41 | 39 | 36 | 35 | 34 | 37–38 | 40 | 47 | 45 | 56 |
+
+**Verdetto per la regola scritta prima: k = 0,10 passa.** Batte sia il
+fisso 60 sia il 60/100 nell'IS e nell'OOS. Lo fanno anche i vicini
+(0,05 e 0,15): è un altopiano.
+
+**Da dire senza ammorbidire.**
+- **Vale solo col tetto −1R**, cioè quando lo stop è il punto in cui il
+  conto si azzera (full margin, deposito = rischio). Con la perdita vera
+  la formula fa peggio del fisso 60 in quasi tutti i periodi. Alle NFP il
+  prezzo salta gli stop piccoli, come aveva già visto H-X12.
+- **In full margin lo stop minimo lo decide la leva**: circa
+  10 × prezzo ÷ leva, in pips. A 4.150 $ è circa 83 pips con 1:500 e 42
+  con 1:1000. Uno stop della formula più piccolo di questo non si può
+  fare col deposito uguale al rischio.
+- Lo stop viene preso più spesso: 45% delle NFP contro 33% col 60 fisso.
+- Le NFP 2014–26 erano già state usate per gli stop (H-X12). La formula
+  vale **da confermare dal vivo**, NFP dopo NFP.
