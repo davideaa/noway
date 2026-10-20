@@ -59,8 +59,15 @@ def stop_formula():
 
 
 def verde():
-    """Linea verde: H-X42 (massimo con la wick entro k minuti, metodo scelto) se c'è, se no H-X41 (primo minuto).
+    """Linea verde: H-X43 (ampiezza entro k minuti, 1 volta su 4), se no H-X42 (massimo con la wick), se no H-X41.
     Per ogni NFP in pips; per la prossima in % del prezzo, oppure coef × ADR21 di oggi se il metodo è ADR24."""
+    p43 = HX16 / "hx43_ampiezza_k.json"  # H-X43: ampiezza dei primi k minuti superata 1 volta su 4
+    if p43.exists():
+        J = load(p43)
+        if J.get("vince"):
+            nx = J["prossima"]
+            return {"tipo": "ampiezza", "per": J["per"], "k": J["k"], "metodo": J["metodo"], "supera": J["supera"],
+                    "prossima_pct": nx["pct"], "coef": nx.get("coef")}
     p42 = HX16 / "hx42_massimo_k.json"
     if p42.exists():
         J = load(p42)

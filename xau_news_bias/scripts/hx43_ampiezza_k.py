@@ -127,10 +127,18 @@ if __name__ == "__main__":
         g = T.dropna(subset=[f"a{k}", f"q{k}_{m}"])
         sup = g[f"a{k}"] > g[f"q{k}_{m}"]
         out |= {"k": k, "metodo": m, "anni": {int(y): round(float(s.mean()), 3) for y, s in sup.groupby(g.y)}, "supera": round(float(sup.mean()), 3),
-                "per": {s.id: round(float(getattr(s, f"q{k}_{m}") * s.px / 10), 1) for s in g.itertuples()},
-                "mediana_per": {s.id: round(float(getattr(s, f"h{k}_{m}") * s.px / 10), 1) for s in g.itertuples()}}
+                "n_supera": int(len(g))}
         nx = a32.get("prossima") or {}
         mp = m if m in ("EW3", "ADR24") else min(("EW3", "ADR24"), key=lambda q: sc[(k, q)]["perdita_2023_26"])
+        # replay: la stima del vincitore dove c'è; dove manca (FORM e RIDGE prima del 2018 e fuori dal dataset) quella di mp
+        per, met = {}, {}
+        for s in T.itertuples():
+            for q in (m, mp):
+                v = getattr(s, f"q{k}_{q}")
+                if v == v:
+                    per[s.id], met[s.id] = round(float(v * s.px / 10), 1), q
+                    break
+        out |= {"per": per, "metodo_per": met, "ripiego": mp}
         base = float(ds.r1.ewm(halflife=3, min_periods=6).mean().iloc[-1]) if mp == "EW3" else \
             float((ds.r1 / ds.adr21).dropna().iloc[-NB:].median() * nx["adr21_pct"])
         rq = float((ds[f"a{k}"] / ds[mp]).dropna().iloc[-NB:].quantile(TAU))
