@@ -12,6 +12,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from hx11_site import first_minute_move  # noqa: E402
+from hx21_range import bars  # noqa: E402
 from hx32_ampiezza_nfp import stime  # noqa: E402
 from hx38_stop_contro import s4  # noqa: E402
 from hx41_be_tp import entrata, fav_fino  # noqa: E402
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     arancio = {t["id"]: t["stima"] for t in json.loads((R / "hx16" / "hx37_stop_candela.json").read_text())["trade"]}
     full = pd.read_parquet(R / "hx16" / "hx23_dataset.parquet")
     n32 = stime(full)[["t0"] + METODI]  # stime della candela di H-X32, NFP per NFP
-    ds = full[(full.fam == "NFP") & (full.r1 > 0)][["t0", "y", "r1"]].copy()
+    ds = full[(full.fam == "NFP") & (full.r1 > 0)][["t0", "y", "r1", "adr21"]].copy()
     ev = {e["d"][:10]: e for e in site["ev"] if e["f"] == "NFP" and e["rule"] and e["mv"] != 0 and e["y"] >= 2014 and e["id"] in st37}
     duka = DukascopyProvider()
     extra = []
@@ -51,10 +52,19 @@ if __name__ == "__main__":
         pre, w1 = np.nonzero(t < 0)[0], (t >= 0) & (t < 60_000)
         if len(pre) and w1.sum() >= 5:
             m0 = float(mid[pre[-1]])
-            extra.append({"t0": t0, "y": t0.year, "r1": (max(mid[w1].max(), m0) - min(mid[w1].min(), m0)) / m0 * 100})
+            # ADR21 come nel dataset (hx23): media del range dei 21 giorni prima, giorni da H1 con +2 h
+            h1 = duka.h1_range("XAUUSD", (t0 - pd.Timedelta(days=45)).date(), t0.date())
+            dD = bars(h1, "D")
+            tday = (t0 + pd.Timedelta(hours=2)).normalize().tz_localize(None)
+            extra.append({"t0": t0, "y": t0.year, "r1": (max(mid[w1].max(), m0) - min(mid[w1].min(), m0)) / m0 * 100,
+                          "adr21": float(dD[dD.index < tday].r.iloc[-21:].mean())})
     ds = pd.concat([ds, pd.DataFrame(extra)], ignore_index=True).sort_values("t0").reset_index(drop=True)
-    ds = ds.merge(n32.drop(columns="EW3"), on="t0", how="left")
-    ds["EW3"] = ds.r1.shift(1).ewm(halflife=3, min_periods=6).mean()  # come H-X32, con le NFP fuori dal dataset
+    ds = ds.merge(n32.drop(columns=["EW3", "ADR24"]), on="t0", how="left")
+    # EW3 e ADR24 come H-X32, rifatti qui per avere anche le NFP fuori dal dataset
+    ds["EW3"] = ds.r1.shift(1).ewm(halflife=3, min_periods=6).mean()
+    ds["ADR24"] = (ds.r1 / ds.adr21).shift(1).rolling(NB, min_periods=NB).median() * ds.adr21
+    cmp = ds.merge(n32[["t0", "ADR24"]], on="t0", suffixes=("", "_32")).dropna(subset=["ADR24_32"])
+    assert (abs(cmp.ADR24 - cmp.ADR24_32) < 1e-9).all()  # controllo: stesso ADR24 di H-X32
     ALL = KS + EXTRA
     mx = {k: [] for k in ALL}
     en_rule, ids = [], []
@@ -141,9 +151,11 @@ if __name__ == "__main__":
         if mp == "EW3":
             base = float(ds.r1.ewm(halflife=3, min_periods=6).mean().iloc[-1])
         else:
-            base = float((ds.r1 / full[full.fam == "NFP"].set_index("t0").adr21.reindex(ds.t0).to_numpy()).dropna().iloc[-NB:].median() * nx["adr21_pct"])
+            base = float((ds.r1 / ds.adr21).dropna().iloc[-NB:].median() * nx["adr21_pct"])
         rat = (ds[f"m{k}"] / ds[mp]).dropna().iloc[-NB:]
         out["prossima"] = {"metodo": mp, "ultima_nfp": str(ds.t0.iloc[-1].date()), "pct": round(base * float(rat.median()), 5)}
+        if mp == "ADR24":  # il sito lo ricalcola ogni ora: pct = coef × ADR21 di oggi (livelli del sito)
+            out["prossima"] |= {"coef": round(base / nx["adr21_pct"] * float(rat.median()), 5), "adr21_pct": nx["adr21_pct"]}
         if nx.get("prezzo"):
             out["prossima"]["pips"] = round(out["prossima"]["pct"] / 100 * nx["prezzo"] * 10)
         print("anni", out["anni"], "tocca", out["tocca"], "prossima", out["prossima"], "candela hx32", nx.get("stima"))

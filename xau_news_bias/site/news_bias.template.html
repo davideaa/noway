@@ -540,7 +540,7 @@ const LV = D.liv && D.liv.giorno ? D.liv.giorno : null, PRICE = LV ? LV.oggi.pre
 const RES = LIVE.filter(r => r.type === "result" && r.family === "NFP"), LK = RES.filter(r => r.hit).length;
 const OPEN = LIVE.filter(r => r.type === "prediction" && r.family === "NFP" && !RES.find(x => x.event_id === r.event_id));
 const A = D.amp, toPips = p => p / 100 * PRICE * 10, NX = A && A.prossima ? {md: toPips(A.prossima.stima_pct), lo: toPips(A.prossima.lo_pct), hi: toPips(A.prossima.hi_pct)} : null;
-const VD = D.verde, NXV = VD && NX ? toPips(VD.prossima_pct) : null;
+const VD = D.verde, NXV = VD && NX ? toPips(VD.coef && LV && LV.oggi.S_pct ? VD.coef * LV.oggi.S_pct : VD.prossima_pct) : null;
 const SF = D.stopf, STOPP = id => SF && SF.per[id] ? SF.per[id][0] : 60;
 const R60 = SF ? Object.fromEntries(Object.entries(SF.per).map(([k, v]) => [k, v[1]])) : (D.r60 || {}), r3 = NF.filter(e => e.d >= "2023-10-01" && R60[e.id] != null).map(e => R60[e.id]), m3 = r3.reduce((a, b) => a + b, 0) / (r3.length || 1);
 const EST = {}; if (A) { A.casi.forEach(c => EST[c.data] = c); A.recenti.forEach(c => { if (c.stima != null) EST[c.data] = c; }); }
@@ -555,7 +555,7 @@ const r50 = v => Math.round(v / 10) * 10;
     <p class="why">${p ? `Il contrario della NFP precedente (${romeD(utcOf(p.precedente.t0_utc), {day: "2-digit", month: "2-digit"})}: ${p.precedente.mv > 0 ? "su" : "giù"}).` : "La direzione si scrive qui prima della news."}</p>
     <div class="kpis">
       <div class="kpi"><b>${w} su 10</b><span>direzione giusta dal 2014 (${sA.k} su ${sA.n})${RES.length ? ` · dal vivo ${LK} su ${RES.length}` : ""}</span></div>
-      ${NX ? `<div class="kpi"><b>~${r50(NX.md)} pips</b><span>candela prevista · metà delle volte ${r50(NX.lo)}–${r50(NX.hi)}${NXV ? `<br><strong class="g">~${r50(NXV)} pips</strong> massimo mediano` : ""}</span></div>` : ""}
+      ${NX ? `<div class="kpi"><b>~${r50(NX.md)} pips</b><span>candela prevista · metà delle volte ${r50(NX.lo)}–${r50(NX.hi)}${NXV ? `<br><strong class="g">~${r50(NXV)} pips</strong> massimo mediano entro ${VD.k} min${VD.coef ? ", dalla volatilità di oggi" : ""}` : ""}</span></div>` : ""}
       ${r3.length ? `<div class="kpi"><b>${sgnR(m3)}</b><span>a trade in media, ultimi 3 anni (${r3.length} NFP)${SF && SF.prezzi === "S4" ? ", con lo spread del broker a 30 pips prima della news" : ""}</span></div>` : ""}
     </div>
     <div class="flow"><span>14:29 entra</span><i>→</i><span>stop ~${SF && NX ? Math.round(SF.base + SF.k * NX.md) : 60} pips</span><i>→</i><span>14:30 news</span><i>→</i><span>14:31 chiudi, niente take profit</span></div>
@@ -577,7 +577,7 @@ const replayInit = () => {
   ysel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
   host.innerHTML = `<div class="rpctl"><button class="play" id="rpPlay">▶ Avvia</button><button id="rpAll">Mostra tutto</button><span style="flex:1"></span>
       <div class="presets" role="group" aria-label="Candele"><button data-tf="60" aria-pressed="true">1 min</button><button data-tf="5" aria-pressed="false">5 s</button></div></div>
-    <div class="chart" id="rpChart"></div><p class="one" id="rpTxt"></p><p class="small" id="rpYearTxt"></p>${VD ? `<p class="small"><b class="g">Verde</b>: massimo mediano previsto (raggiunto ${Math.round(VD.tocca * 100)} volte su 100). <b style="color:var(--accent)">Arancione</b>: range previsto. Come take profit la verde fa peggio che chiudere alle 14:31.</p>` : ""}`;
+    <div class="chart" id="rpChart"></div><p class="one" id="rpTxt"></p><p class="small" id="rpYearTxt"></p>${VD ? `<p class="small"><b class="g">Verde</b>: massimo mediano previsto, wick compresa, entro ${VD.k} min${VD.coef ? ", dalla volatilità del giorno" : ""} (raggiunto ${Math.round(VD.tocca * 100)} volte su 100). <b style="color:var(--accent)">Arancione</b>: range previsto del primo minuto. Solo riferimenti, non take profit.</p>` : ""}`;
   const candele = (e, sz, upto = Infinity) => { const out = new Map();
     BINS.forEach((b, i) => { const v = e.sc.S1.c[i]; if (!v || b >= upto) return; const k = Math.floor(b / sz) * sz, o = out.get(k), q = v.map(x => e.ref + x / 100);
       if (!o) out.set(k, {t: k, o: q[0], h: q[1], l: q[2], c: q[3]}); else { o.h = Math.max(o.h, q[1]); o.l = Math.min(o.l, q[2]); o.c = q[3]; } });
@@ -628,12 +628,12 @@ const replayInit = () => {
       svg.append(mk("rect", {x: xa, y: Math.min(y(tgt[0]), y(tgt[1])), width: xb - xa, height: Math.abs(y(tgt[0]) - y(tgt[1])), fill: css("--accent"), opacity: .14}));
       svg.append(mk("line", {x1: xa, x2: xb, y1: y(tgt[2]), y2: y(tgt[2]), stroke: css("--accent"), "stroke-width": 1.4, "stroke-dasharray": "5 3"}));
       svg.append(mk("text", {x: xa - 6, y: y(tgt[2]) + 4, "text-anchor": "end", "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, `range ~${r50(es.stima)}`)); }
-    // massimo previsto (H-X41): fin dove arriva il prezzo nella direzione giusta, metà delle volte
+    // massimo previsto (H-X42): il punto più lontano nella direzione giusta entro k minuti, metà delle volte
     let gly = null;
-    if (gv != null) { const xa = x(0), xb = x(60) + (x(60) - x(0)) * 2;
+    if (gv != null) { const xa = x(0), xb = x(60 * Math.max(VD.k || 1, 3));
       let ly = y(gv) + 4; if (es && Math.abs(ly - (y(tgt[2]) + 4)) < 14) ly = y(tgt[2]) + 4 + (y(gv) > y(tgt[2]) ? 14 : -14);
       svg.append(mk("line", {x1: xa, x2: xb, y1: y(gv), y2: y(gv), stroke: css("--good"), "stroke-width": 1.8}));
-      svg.append(mk("text", {x: xa - 6, y: ly, "text-anchor": "end", "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--good"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, `max mediano ~${r50(vp)}`)); gly = ly; }
+      svg.append(mk("text", {x: xa - 6, y: ly, "text-anchor": "end", "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--good"), stroke: css("--panel"), "stroke-width": 3, "paint-order": "stroke"}, `max ${VD.k} min ~${r50(vp)}`)); gly = ly; }
     // posizione: dall'entrata fino a tau (o all'uscita)
     const xe = x(Math.min(Math.max(tau, -60), exT)), wbox = Math.max(2, xe - x(-60));
     const bx = (p1, p2, col, op) => svg.append(mk("rect", {x: x(-60), y: Math.min(y(p1), y(p2)), width: Math.max(wbox, 2), height: Math.max(1, Math.abs(y(p1) - y(p2))), fill: css(col), opacity: op}));
@@ -662,7 +662,7 @@ const replayInit = () => {
     svg.append(mk("text", {x: Lm + 2, y: 14, "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--ink2"), "font-family": "ui-monospace,Menlo,monospace"}, `XAUUSD ${m1 ? "1m" : "5s"} · ${fDate(e)} · ${fClock(e, Math.min(tau, t1), true)}`));
     ch.innerHTML = ""; ch.append(svg);
     const news = fine.filter(b => b.t >= 0 && b.t < 60), rng = news.length ? Math.round((Math.max(...news.map(b => b.h)) - Math.min(...news.map(b => b.l))) * 10) : null;
-    $("#rpTxt").innerHTML = `${fClock(e, -60)} · diceva <b class="${e.rule[0]}">${e.rule}</b>, stop ${STOPP(e.id)} pips${es ? `, candela prevista ${r50(es.lo)}–${r50(es.hi)} pips` : ""}${vp ? `, massimo mediano ~${r50(vp)} pips` : ""}.` +
+    $("#rpTxt").innerHTML = `${fClock(e, -60)} · diceva <b class="${e.rule[0]}">${e.rule}</b>, stop ${STOPP(e.id)} pips${es ? `, candela prevista ${r50(es.lo)}–${r50(es.hi)} pips` : ""}${vp ? `, massimo mediano entro ${VD.k} min ~${r50(vp)} pips` : ""}.` +
       (done ? ` ${preso ? `Stop preso${spread ? " dallo spread che si apre alla news (le candele bid non lo toccano)" : ""}: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
   };
   const play = () => { if (timer) { stop(); return; } if (tau >= 1800) tau = -60;

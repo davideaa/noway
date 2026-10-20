@@ -59,7 +59,14 @@ def stop_formula():
 
 
 def verde():
-    """H-X41: massimo previsto (linea verde), solo se calibrato. Per ogni NFP in pips, per la prossima in % del prezzo."""
+    """Linea verde: H-X42 (massimo con la wick entro k minuti, metodo scelto) se c'è, se no H-X41 (primo minuto).
+    Per ogni NFP in pips; per la prossima in % del prezzo, oppure coef × ADR21 di oggi se il metodo è ADR24."""
+    p42 = HX16 / "hx42_massimo_k.json"
+    if p42.exists():
+        J = load(p42)
+        if J.get("vince"):
+            nx = J["prossima"]
+            return {"per": J["per"], "k": J["k"], "metodo": J["metodo"], "tocca": J["tocca"], "prossima_pct": nx["pct"], "coef": nx.get("coef")}
     p = HX16 / "hx41_be_tp.json"
     if not p.exists():
         return None
@@ -67,7 +74,7 @@ def verde():
     if not J["verde_calibrata"]:
         return None
     return {"per": {e["id"]: e["verde_pips"] for e in J["eventi"] if e["f"] == "NFP"}, "prossima_pct": J["prossima"]["verde_pct"],
-            "tocca": J["tocchi_nfp"]["tocca_verde_1m"]}
+            "tocca": J["tocchi_nfp"]["tocca_verde_1m"], "k": 1}
 
 
 def pips29(group):

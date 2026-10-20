@@ -123,3 +123,71 @@ rapporti si riempiono dal 2018.
 - Se vince uno dei due, il replay mostra le sue stime, mentre in alto va
   il migliore fra EW3 e ADR24, e si dice.
 - ADR24 usa la volatilità di oggi (ADR21 dei livelli del sito).
+
+## Risultati (dopo il commit `104a32f`)
+
+File: `research_output/phase2/hx16/hx42_massimo_k.json`.
+- Controllo: con k = 1 ed EW3 la stima coincide con la verde di H-X41 in
+  148 NFP su 148.
+- NFP in comune per la gara: 101, dal 05/01/2018 al 04/09/2026.
+
+Errore 2023–26 (più basso = meglio). Fra parentesi la calibrazione
+2019–22 / 2023–26; ✗ = non calibrata.
+
+| Finestra | EW3 | ADR24 (volatilità del giorno) | FORM | RIDGE |
+|---|---|---|---|---|
+| 1 min | 0,510 | 0,418 | 0,537 | 0,508 |
+| 2 min | 0,492 | 0,348 ✗ (55% / 38%) | 0,470 | 0,440 |
+| **3 min** | 0,494 | **0,350 (53% / 40,5%)** | 0,436 | 0,449 |
+| 4 min | 0,519 | 0,380 | 0,460 | 0,441 |
+| 5 min | 0,541 | 0,388 | 0,460 | 0,454 |
+
+**Vince "3 minuti, ADR24"** e non sta sul bordo: la griglia non si estende.
+- Con la volatilità del giorno l'errore scende da circa 0,49 (EW3) a 0,35.
+- Davide aveva ragione: per il massimo conta più la volatilità del giorno
+  che la sola memoria delle ultime NFP.
+- **Da dire**: nel 2023–26 la calibrazione è 40,5%, appena dentro il
+  limite del 40%.
+
+**Sopra o sotto l'arancione.**
+- Il massimo vero entro 3 minuti, nel 2024–26, ha mediana **149 pips**.
+  Il range vero del primo minuto ha mediana 163 pips.
+- La verde sta sopra la linea arancione nel **40%** delle NFP.
+- Con EW3, anche allungando a 15 minuti, sta sopra solo il 43% delle
+  volte.
+
+Il punto più lontano nella nostra direzione, anche in 3–15 minuti, è di
+solito più corto del range intero del primo minuto, che comprende la
+wick contro.
+
+**Anno per anno**, quante volte il lato giusto raggiunge la verde entro 3
+minuti:
+
+| 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 10% | 50% | 42% | 50% | 58% | 17% | 82% | 58% | 64% | 42% | 18% | 44% |
+
+In tutto 45 volte su 100 (136 NFP dal 2015). Nel 2025 la stima era
+troppo alta.
+
+**Prossima NFP.**
+- Massimo previsto = 0,180 × ADR21 di oggi.
+- Con l'ADR21 del 20/10 (1,78%) fa circa **134 pips**.
+- La volatilità del giorno oggi è più bassa che alle ultime NFP (2,1–3,1%),
+  quindi il valore si aggiorna ogni ora con i livelli del sito.
+
+**Decisione.**
+- La linea verde del sito diventa "3 minuti, ADR24":
+  - nel replay, NFP per NFP, dal 2015;
+  - in alto, calcolata dal vivo con l'ADR21 di oggi.
+- Resta scritto che è solo un riferimento, non un take profit.
+- L'arancione resta il range previsto del primo minuto.
+
+**Aggiunta dopo i risultati (dichiarata).**
+- Per le NFP fuori dal dataset, come quella del 02/10/2026, l'ADR21 si
+  calcola dalle H1 nello stesso modo del dataset.
+- Così la linea verde c'è anche nel replay delle NFP nuove.
+- Controllo: l'ADR24 rifatto coincide con quello di H-X32 su tutte le NFP
+  del dataset.
+- La gara non cambia, perché quelle NFP non erano nel confronto. Il
+  conteggio anno per anno include il 02/10/2026 (2026: 4 su 9).
