@@ -55,6 +55,12 @@ def stop_formula():
         out["prezzi"] = "S4"
         out["per"] = {t["id"]: [t["res"]["hx37"]["stop_pips"], t["res"]["hx37"]["r"], int(t["res"]["hx37"]["st"]), int(t["giusta"]), t["contro_pips"]]
                       for t in S4["trade"] if "hx37" in t["res"]}
+        p44 = HX16 / "hx44_stop_margine.json"
+        if p44.exists():  # H-X44, scelta di Davide del 20/10/2026: la stessa formula × 1,2 di margine
+            c38 = {t["id"]: t["contro_pips"] for t in S4["trade"]}
+            out["margine"], m = 1.2, "B37x1.2"
+            out["per"] = {t["id"]: [round(t["res"][m]["stop_pips"]), t["res"][m]["r"], int(t["res"][m]["st"]), int(t["giusta"]), c38.get(t["id"])]
+                          for t in load(p44)["trade"]}
     return out
 
 

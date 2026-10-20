@@ -29,6 +29,28 @@ Poi si ripubblica `docs/replay.html` sullo stesso artifact
 Dalla NFP del 06/11/2026 il risultato contiene anche `trade_u5`: lo stesso trade
 chiuso a T0 + 5 min (H-X13), registrato in parallelo. Il giudizio resta sulla fine M1.
 
+## Stop della formula (H-X44, scelto da Davide il 20/10/2026)
+
+**Prima di ogni NFP**, dalla NFP del 06/11/2026, c'è un record `stop`. Si scrive con:
+
+```bash
+../venv-xnb/bin/python scripts/hx8_live.py stop
+```
+
+- Va lanciato **dopo** `hx32_ampiezza_nfp.py`, perché serve la candela
+  prevista aggiornata con la NFP appena uscita. Se non è aggiornata, il
+  comando non scrive niente.
+- Il record fissa la candela prevista in % del prezzo e la formula:
+  stop = margine × (30 pips + 10% della candela prevista).
+- Lo stop in pips si calcola col prezzo d'ingresso delle 14:29.
+- I margini sono due:
+  - **× 1,2** è lo stop del sito;
+  - **× 1,0** si registra in parallelo per il confronto.
+
+**Nel risultato**, `trade_formula` contiene i due trade coi prezzi S4
+(spread del broker almeno 30 pips da −20 s a +10 s). Dopo 12 NFP dal vivo si
+confrontano R a trade e NFP giuste salvate.
+
 Se i tick Dukascopy non sono ancora disponibili, `update` lo dice e non
 scrive niente: si riprova più tardi. Quando `calendar.json` finisce, va
 riempito con le date nuove dal calendario BLS (`xnb/providers/bls.py`).

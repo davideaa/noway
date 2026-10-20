@@ -2,6 +2,7 @@
 
     python scripts/hx8_live.py update   # risolve le release passate (>= 2 h fa) e scrive le bias delle prossime
     python scripts/hx8_live.py verify   # controlla la catena
+    python scripts/hx8_live.py stop     # scrive PRIMA della NFP lo stop della formula (H-X44), dopo hx32_ampiezza_nfp.py
 
 Bias = contrario della reazione della release precedente della stessa famiglia (prima M1, mid).
 Risultato: movimento della prima M1 e trade di Davide (T0-60 s, stop 60/100 pips, uscita fine M1, -1R)
@@ -22,6 +23,9 @@ LOG = ROOT / "live" / "hx8_live.jsonl"
 CAL = ROOT / "live" / "calendar.json"
 GENESIS = "0" * 64
 U5_FROM = pd.Timestamp("2026-11-01", tz="UTC")  # H-X13: uscita a 5 min dal vivo dalla NFP del 6/11/2026
+# H-X44: stop = margine × (30 pips + 10% della candela prevista), scritto prima di ogni NFP dalla NFP del 6/11/2026;
+# il sito usa × 1,2, × 1,0 si registra in parallelo per il confronto dal vivo
+STOPF = {"base_pips": 30, "k": 0.10, "margini": [1.0, 1.2]}
 
 
 def digest(rec: dict) -> str:
@@ -37,7 +41,7 @@ def read_log() -> list[dict]:
 
 def verify(recs: list[dict]) -> None:
     prev = GENESIS
-    seen_pred, seen_res = set(), set()
+    seen_pred, seen_res, seen_stop = set(), set(), set()
     for i, r in enumerate(recs):
         assert r["seq"] == i, f"seq {r['seq']} != {i}"
         assert r["prev_hash"] == prev, f"catena rotta al record {i}"
@@ -46,9 +50,15 @@ def verify(recs: list[dict]) -> None:
             assert r["event_id"] not in seen_pred, f"bias doppia per {r['event_id']}"
             assert r["created_utc"] < r["t0_utc"], f"bias di {r['event_id']} scritta dopo la release"
             seen_pred.add(r["event_id"])
-        else:
+        elif r["type"] == "stop":
+            assert r["event_id"] in seen_pred and r["event_id"] not in seen_res and r["event_id"] not in seen_stop, f"stop non valido per {r['event_id']}"
+            assert r["created_utc"] < r["t0_utc"], f"stop di {r['event_id']} scritto dopo la release"
+            seen_stop.add(r["event_id"])
+        elif r["type"] == "result":
             assert r["event_id"] in seen_pred and r["event_id"] not in seen_res, f"risultato non valido per {r['event_id']}"
             seen_res.add(r["event_id"])
+        else:
+            raise AssertionError(f"tipo sconosciuto al record {i}: {r['type']}")
         prev = r["hash"]
 
 
@@ -75,7 +85,7 @@ def last_reactions() -> dict[str, dict]:
     return out
 
 
-def resolve(ev: dict) -> dict | None:
+def resolve(ev: dict, stop_rec: dict | None = None) -> dict | None:
     from xnb.phase2 import hx5
     from xnb.providers.dukascopy import DukascopyProvider
     sys.path.insert(0, str(ROOT / "scripts"))
@@ -105,6 +115,17 @@ def resolve(ev: dict) -> dict | None:
         b, a = quotes(tk.bid.to_numpy(float), tk.ask.to_numpy(float), "S1")
         r, r_raw = trade_until(t5, b, a, d, stop, 300)
         out["trade_u5"] = {"S1": {"r": r, "r_raw": r_raw}}
+    if stop_rec:  # H-X44: lo stop della formula, scritto prima della news, coi prezzi S4 (spread del broker a 30 pips)
+        from hx38_stop_contro import s4
+        b4, a4 = s4(t, bid, ask)
+        j = int((t <= -60_000).sum() - 1)
+        px = (b4[j] + a4[j]) / 2
+        cand = stop_rec["candela_prevista_pct"] / 100 * px * 10
+        out["trade_formula"] = {}
+        for m in stop_rec["margini"]:
+            st = m * (stop_rec["base_pips"] + stop_rec["k"] * cand) / 10
+            tr = trade(t, b4, a4, d, st, "full")
+            out["trade_formula"][f"x{m}"] = {"stop_pips": round(st * 10, 1), **{k: tr[k] for k in ("en", "sl", "ex", "st", "r")}}
     return out
 
 
@@ -113,11 +134,12 @@ def update(now: datetime) -> None:
     verify(recs)
     stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     preds = {r["event_id"]: r for r in recs if r["type"] == "prediction"}
+    stops = {r["event_id"]: r for r in recs if r["type"] == "stop"}
     done = {r["event_id"] for r in recs if r["type"] == "result"}
     for eid, p in sorted(preds.items(), key=lambda x: x[1]["t0_utc"]):
         if eid in done or pd.Timestamp(p["t0_utc"]) + pd.Timedelta(hours=2) > pd.Timestamp(now):
             continue
-        out = resolve(p)
+        out = resolve(p, stops.get(eid))
         if out is None:
             print("tick non ancora disponibili per", eid)
             continue
@@ -143,9 +165,38 @@ def update(now: datetime) -> None:
     verify(recs)
 
 
+def stop(now: datetime) -> None:
+    """Per ogni NFP in attesa senza stop: scrive la candela prevista di H-X32 e la formula dello stop, prima della news.
+    La candela deve essere già aggiornata con la NFP precedente, se no non scrive niente."""
+    from xnb.config import get_settings
+
+    recs = read_log()
+    verify(recs)
+    stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    a = json.loads((get_settings().research_dir / "phase2" / "hx16" / "hx32_ampiezza_nfp.json").read_text(encoding="utf-8"))
+    ultima = max([a["ultima"]] + [c["data"] for c in a.get("recenti_fuori_dataset", [])])
+    have = {r["event_id"] for r in recs if r["type"] in ("stop", "result")}
+    for p in [r for r in recs if r["type"] == "prediction" and r["family"] == "NFP"]:
+        if p["event_id"] in have or p["t0_utc"] <= stamp or pd.Timestamp(p["t0_utc"]) < U5_FROM:
+            continue
+        if p["precedente"]["t0_utc"][:10] != ultima or not a.get("prossima"):
+            print("candela prevista non aggiornata con la NFP precedente:", p["event_id"], "ultima in H-X32", ultima)
+            continue
+        nx = a["prossima"]
+        pct = round(float(nx["stima_pct"]), 5)
+        oggi = {f"x{m}": round(m * (STOPF["base_pips"] + STOPF["k"] * pct / 100 * nx["prezzo"] * 10)) for m in STOPF["margini"]} if nx.get("prezzo") else {}
+        append(recs, {"type": "stop", "event_id": p["event_id"], "family": "NFP", "t0_utc": p["t0_utc"], "created_utc": stamp,
+                      "regola": "stop = margine × (30 pips + 10% della candela prevista); candela in pips = pct/100 × prezzo d'ingresso × 10",
+                      "candela_prevista_pct": pct, **STOPF, "stop_pips_al_prezzo_di_oggi": oggi, "prezzo_di_oggi": nx.get("prezzo")})
+        print("stop", p["event_id"], oggi)
+    verify(recs)
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "update"
-    if cmd == "verify":
+    if cmd == "stop":
+        stop(datetime.now(timezone.utc))
+    elif cmd == "verify":
         verify(read_log())
         print("catena ok,", len(read_log()), "record")
     else:

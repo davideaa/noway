@@ -31,3 +31,25 @@ def test_bias_scritta_dopo_la_release_rifiutata():
     rec["hash"] = live.digest(rec)
     with pytest.raises(AssertionError):
         live.verify([rec])
+
+
+def _rec(seq, prev, **kw):
+    rec = {"seq": seq, **kw, "prev_hash": prev}
+    rec["hash"] = live.digest(rec)
+    return rec
+
+
+def test_stop_prima_della_news_accettato_dopo_rifiutato():
+    p = _rec(0, live.GENESIS, type="prediction", event_id="NFP_X", family="NFP", t0_utc="2026-11-06T13:30:00Z",
+             created_utc="2026-10-20T10:00:00Z", bias="SHORT")
+    ok = _rec(1, p["hash"], type="stop", event_id="NFP_X", family="NFP", t0_utc="2026-11-06T13:30:00Z",
+              created_utc="2026-10-20T10:01:00Z", candela_prevista_pct=0.87)
+    live.verify([p, ok])
+    tardi = _rec(1, p["hash"], type="stop", event_id="NFP_X", family="NFP", t0_utc="2026-11-06T13:30:00Z",
+                 created_utc="2026-11-06T13:31:00Z", candela_prevista_pct=0.87)
+    with pytest.raises(AssertionError):
+        live.verify([p, tardi])
+    doppio = _rec(2, ok["hash"], type="stop", event_id="NFP_X", family="NFP", t0_utc="2026-11-06T13:30:00Z",
+                  created_utc="2026-10-21T10:00:00Z", candela_prevista_pct=0.90)
+    with pytest.raises(AssertionError):
+        live.verify([p, ok, doppio])
