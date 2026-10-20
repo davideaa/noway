@@ -151,6 +151,11 @@ details.more[open]{display:grid;gap:12px}
 .rpctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rpctl>button{font:700 14px var(--f-body);padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
 .rpctl>button.play{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.yrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px}
+.yrs button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 2px;display:grid;gap:3px;justify-items:center;cursor:pointer;font:600 11px var(--f-num);color:var(--mute)}
+.yrs button i{display:block;width:70%;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--good) var(--p),var(--line) var(--p))}
+.yrs button b{font-size:12px;color:var(--ink)}
+.yrs button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 h1,h2{font-stretch:112%}
 .live{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
 .nx{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
@@ -659,6 +664,7 @@ const replayInit = () => {
   ysel.onchange = () => { Y = +ysel.value; const L = ALL.filter(e => e.y === Y); cur = L[L.length - 1]; fillStrip(); reset(); };
   host.querySelectorAll(".presets button").forEach(b => b.onclick = () => { TF = +b.dataset.tf; draw(); });
   ysel.value = Y; fillStrip(); draw();
+  window.rpGo = id => { const e = ALL.find(x => x.id === id); if (!e) return; Y = e.y; ysel.value = Y; cur = e; fillStrip(); reset(); $("#h-ex").scrollIntoView({behavior: "smooth", block: "start"}); };
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
 };
 
@@ -887,7 +893,7 @@ let rtL; addEventListener("resize", () => { clearTimeout(rtL); rtL = setTimeout(
 
 replayInit();
 
-// lo stop nel tempo (H-X37 coi prezzi S4 di H-X38) e il calcolatore del lotto
+// lo stop nel tempo (H-X37 coi prezzi S4 di H-X38): anni cliccabili, un punto apre il replay di quella NFP
 (() => {
   const host = $("#stopbox");
   if (!SF || SF.prezzi !== "S4") { host.remove(); $("#h-stop").remove(); return; }
@@ -898,18 +904,16 @@ replayInit();
     <p class="one">Quando avevi ragione, lo stop ti ha salvato <b>${sav} volte su ${G.length}</b> (dal 2020: ${sav20} su ${G20.length}). Si allarga da solo quando la volatilità sale: ${Math.round(median(P.filter(p => p.e.y === 2019).map(p => p.stop)))} pips nel 2019, ${Math.round(median(P.filter(p => p.e.y === 2026).map(p => p.stop)))} nel 2026.</p>
     <div class="chart" id="stChart"></div>
     <p class="small">Linea: lo stop calcolato prima di ogni NFP. Punti: quanto è andato contro quando avevi ragione, spread del broker compreso · <span style="color:var(--good)">●</span> salvato · <span style="color:var(--bad)">●</span> buttato fuori · tocca un punto</p>
-    <details class="mt5"><summary>Che lotto usare</summary><div class="fields" style="margin-top:10px">
-      <label>Deposito ($)<input id="ltD" type="number" min="10" step="10" value="500" inputmode="decimal"></label>
-      <label>Leva 1:<input id="ltL" type="number" min="1" step="50" value="500" inputmode="numeric"></label>
-      <label>Stop-out del broker (%)<input id="ltS" type="number" min="0" max="100" step="5" value="20" inputmode="numeric"></label>
-      <label>Stop (pips)<input id="ltP" type="number" min="5" step="1" value="${nxt || 60}" inputmode="numeric"></label></div>
-      <p class="one" id="ltOut" style="margin-top:10px"></p></details>`;
-  const lot = () => { const D = +$("#ltD").value, L = +$("#ltL").value, so = +$("#ltS").value / 100, S = +$("#ltP").value;
-    if (!(D > 0 && L > 0 && S > 0)) return;
-    const perLot = 10 * S + so * 100 * PRICE / L, l = Math.floor(D / perLot * 100) / 100;
-    const mg = l * 100 * PRICE / L;
-    $("#ltOut").innerHTML = `Lotto <b>${dec(l, 2)}</b>: con ${it0(S)} pips contro il broker chiude il conto. Margine usato ${it0(mg)} $; la chiusura arriva quando ti restano ${it0(so * mg)} $ (${Math.round(so * 100)}% del margine). 1 pip = 10 $ a lotto, prezzo ${it0(PRICE)} $.`; };
-  ["ltD", "ltL", "ltS", "ltP"].forEach(id => $("#" + id).addEventListener("input", lot)); lot();
+    <div class="yrs" id="stYrs" role="group" aria-label="Anno"></div><p class="small" id="stYrTxt">Tocca un anno per vederlo da solo, tocca un punto per rigiocare quella NFP.</p>`;
+  let SY = null;
+  const yrs = [...new Set(P.map(p => p.e.y))];
+  $("#stYrs").innerHTML = yrs.map(yy => { const g = G.filter(p => p.e.y === yy), k = g.filter(p => !p.st).length, pc = g.length ? k / g.length : 0;
+    return `<button data-y="${yy}" aria-pressed="false"><span>${String(yy).slice(2)}</span><i style="--p:${Math.round(pc * 100)}%"></i><b>${Math.round(pc * 100)}%</b></button>`; }).join("");
+  $("#stYrs").querySelectorAll("button").forEach(b => b.onclick = () => { SY = SY === +b.dataset.y ? null : +b.dataset.y;
+    $("#stYrs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.y === SY)));
+    const g = G.filter(p => p.e.y === SY), all = P.filter(p => p.e.y === SY);
+    $("#stYrTxt").innerHTML = SY ? `${SY}: avevi ragione ${g.length} volte, lo stop ti ha salvato <b>${g.filter(p => !p.st).length}</b> · ${all.length} NFP, <b>${sgnR(all.reduce((a, p) => a + p.r, 0))}</b> in totale, stop mediano ${Math.round(median(all.map(p => p.stop)))} pips.` : "Tocca un anno per vederlo da solo, tocca un punto per rigiocare quella NFP.";
+    draw(); });
   const ch = host.querySelector("#stChart");
   const draw = () => {
     const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 220 : 260, L = 36, R = 40, T = 12, B = 22;
@@ -920,15 +924,18 @@ replayInit();
       svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v)); }
     [...new Set(P.map(p => p.e.y))].forEach(yy => { const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 6, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, W < 520 ? "'" + String(yy).slice(2) : yy)); });
     svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.stop)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round"}));
-    G.forEach(p => { const over = p.contro >= vm; svg.append(over ? mk("path", {d: `M${x(p.t) - 4},${T + 7} L${x(p.t) + 4},${T + 7} L${x(p.t)},${T}`, fill: css(p.st ? "--bad" : "--good")})
-      : mk("circle", {cx: x(p.t), cy: y(p.contro), r: 3.2, fill: css(p.st ? "--bad" : "--good"), opacity: .85})); });
+    if (SY) svg.append(mk("rect", {x: x(Date.UTC(SY, 0, 1)), y: T, width: x(Date.UTC(SY + 1, 0, 1)) - x(Date.UTC(SY, 0, 1)), height: H - T - B, fill: css("--accent"), opacity: .08}));
+    G.forEach(p => { const over = p.contro >= vm, op = SY && p.e.y !== SY ? .15 : .9; svg.append(over ? mk("path", {d: `M${x(p.t) - 4},${T + 7} L${x(p.t) + 4},${T + 7} L${x(p.t)},${T}`, fill: css(p.st ? "--bad" : "--good"), opacity: op})
+      : mk("circle", {cx: x(p.t), cy: y(p.contro), r: SY && p.e.y === SY ? 4.5 : 3.2, fill: css(p.st ? "--bad" : "--good"), opacity: op})); });
     if (nxt) { svg.append(mk("circle", {cx: W - R + 6, cy: y(nxt), r: 5, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 2}));
       svg.append(mk("text", {x: W - R + 6, y: y(nxt) - 9, "text-anchor": "middle", "font-size": 10.5, "font-weight": 700, fill: css("--accent")}, nxt)); }
     const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
     const show = ev => { const rc = svg.getBoundingClientRect(), sx = (ev.clientX - rc.left) * W / rc.width, p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
-      tip.innerHTML = `${fDate(p.e)} · stop <b>${p.stop}</b> pips<br>${p.giusta ? `direzione giusta, è andato contro ${p.contro} pips: ${p.st ? "buttato fuori" : "salvato"}` : "direzione sbagliata"} · ${sgnR(p.r)}`;
+      tip.innerHTML = `${fDate(p.e)} · stop <b>${p.stop}</b> pips<br>${p.giusta ? `direzione giusta, è andato contro ${p.contro} pips: ${p.st ? "buttato fuori" : "salvato"}` : "direzione sbagliata"} · ${sgnR(p.r)}<br>tocca per rigiocarla`;
       tip.hidden = false; tip.style.transform = "none"; const tw = tip.offsetWidth, px = x(p.t) * rc.width / W; tip.style.left = Math.max(0, Math.min(rc.width - tw, px - tw / 2)) + "px"; tip.style.top = "0px"; };
-    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+    svg.addEventListener("click", ev => { const rc = svg.getBoundingClientRect(), sx = (ev.clientX - rc.left) * W / rc.width, p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]); if (window.rpGo) window.rpGo(p.e.id); });
+    svg.style.cursor = "pointer";
     ch.innerHTML = ""; ch.append(svg, tip);
   };
   draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
