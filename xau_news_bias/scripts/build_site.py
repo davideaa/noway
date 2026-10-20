@@ -37,6 +37,19 @@ def stop60():
     return out
 
 
+def stop_formula():
+    """H-X37: stop = 30 + k x candela prevista, col k che ha passato la prova; per ogni NFP lo stop in pips e l'R (tetto -1R)."""
+    p = HX16 / "hx37_stop_candela.json"
+    if not p.exists():
+        return None
+    J = load(p)
+    ok = [n for n, v in J["passa"].items() if v]
+    if not ok:
+        return None
+    k = max(ok, key=lambda n: J["riassunto"][n]["tutto"]["R"])
+    return {"k": float(k[1:]), "base": J["base_pips"], "per": {t["id"]: [t["res"][k]["stop_pips"], t["res"][k]["r"]] for t in J["trade"]}}
+
+
 def pips29(group):
     p = load(HX16 / "hx29_pips.json")
     return {"copertura": p["copertura"], "modello": {k: p["modello"][k] for k in ("beta", "gamma")},
@@ -50,7 +63,7 @@ if __name__ == "__main__":
     log = ROOT / "live" / "hx8_live.jsonl"
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
-            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
+            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "stopf": stop_formula(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")
