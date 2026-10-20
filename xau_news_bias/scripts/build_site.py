@@ -38,7 +38,8 @@ def stop60():
 
 
 def stop_formula():
-    """H-X37: stop = 30 + k x candela prevista, col k che ha passato la prova; per ogni NFP lo stop in pips e l'R (tetto -1R)."""
+    """H-X37: stop = 30 + k x candela prevista, col k che ha passato la prova. Per ogni NFP: stop in pips, R e stop preso coi
+    prezzi S4 di H-X38 (spread del broker allargato prima della news), direzione giusta, quanto è andato contro (pips)."""
     p = HX16 / "hx37_stop_candela.json"
     if not p.exists():
         return None
@@ -47,7 +48,14 @@ def stop_formula():
     if not ok:
         return None
     k = max(ok, key=lambda n: J["riassunto"][n]["tutto"]["R"])
-    return {"k": float(k[1:]), "base": J["base_pips"], "per": {t["id"]: [t["res"][k]["stop_pips"], t["res"][k]["r"]] for t in J["trade"]}}
+    out = {"k": float(k[1:]), "base": J["base_pips"], "prezzi": "S1", "per": {t["id"]: [t["res"][k]["stop_pips"], t["res"][k]["r"]] for t in J["trade"]}}
+    p4 = HX16 / "hx38_stop_contro.json"
+    if p4.exists():
+        S4 = load(p4)
+        out["prezzi"] = "S4"
+        out["per"] = {t["id"]: [t["res"]["hx37"]["stop_pips"], t["res"]["hx37"]["r"], int(t["res"]["hx37"]["st"]), int(t["giusta"]), t["contro_pips"]]
+                      for t in S4["trade"] if "hx37" in t["res"]}
+    return out
 
 
 def pips29(group):

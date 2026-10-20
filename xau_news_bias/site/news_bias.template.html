@@ -219,6 +219,11 @@ h1,h2{font-stretch:112%}
   <div class="panel" id="replay"></div>
 </section>
 
+<section class="sec" aria-labelledby="h-stop">
+  <h2 id="h-stop">Lo stop: quanto spazio serve</h2>
+  <div class="panel" id="stopbox"></div>
+</section>
+
 <section class="sec" aria-labelledby="h-size">
   <h2 id="h-size">Quanto si muove la candela</h2>
   <div class="panel" id="prec"></div>
@@ -545,7 +550,7 @@ const r50 = v => Math.round(v / 10) * 10;
     <div class="kpis">
       <div class="kpi"><b>${w} su 10</b><span>direzione giusta dal 2014 (${sA.k} su ${sA.n})${RES.length ? ` · dal vivo ${LK} su ${RES.length}` : ""}</span></div>
       ${NX ? `<div class="kpi"><b>~${r50(NX.md)} pips</b><span>candela prevista · metà delle volte ${r50(NX.lo)}–${r50(NX.hi)}</span></div>` : ""}
-      ${r3.length ? `<div class="kpi"><b>${sgnR(m3)}</b><span>a trade in media, ultimi 3 anni (${r3.length} NFP)${SF ? ", con lo stop dalla candela" : ""}</span></div>` : ""}
+      ${r3.length ? `<div class="kpi"><b>${sgnR(m3)}</b><span>a trade in media, ultimi 3 anni (${r3.length} NFP)${SF && SF.prezzi === "S4" ? ", con lo spread del broker a 30 pips prima della news" : ""}</span></div>` : ""}
     </div>
     <div class="flow"><span>14:29 entra</span><i>→</i><span>stop ~${SF && NX ? Math.round(SF.base + SF.k * NX.md) : 60} pips</span><i>→</i><span>14:30 news</span><i>→</i><span>14:31 chiudi, niente take profit</span></div>
     ${SF ? `<p class="small">Stop = ${SF.base} pips + ${Math.round(SF.k * 100)}% della candela prevista: si allarga quando la volatilità sale. Da confermare dal vivo. Vale se depositi solo quello che rischi (la perdita resta il deposito).</p>` : ""}`;
@@ -586,7 +591,8 @@ const replayInit = () => {
     const e = cur, d = e.rule === "LONG" ? 1 : -1, tr = e.sc.S1[e.rule[0]], r = R60[e.id], st = STOPP(e.id) / 10, en = tr.en, sl = en - d * st, es = EST[e.d.slice(0, 10)];
     const fine = candele(e, 5);
     let exT = 60, ex = en + d * r * st, preso = false;
-    if (r <= -0.999) { const hb = fine.find(b => b.t >= -60 && (d > 0 ? b.l <= sl : b.h >= sl)); exT = hb ? hb.t + 5 : 60; ex = sl; preso = true; }
+    let spread = false;
+    if (r <= -0.999) { const hb = fine.find(b => b.t >= -60 && (d > 0 ? b.l <= sl : b.h >= sl)); exT = hb ? hb.t + 5 : 5; ex = sl; preso = true; spread = !hb; }
     const done = tau >= exT;
     const ch = host.querySelector("#rpChart"), W = Math.max(320, Math.min(900, ch.clientWidth || 640)), mob = W < 520;
     const m1 = TF === 60 && M1[e.id], unit = m1 ? 60 : 5, span = mob ? 20 * 60 : 30 * 60;
@@ -643,7 +649,7 @@ const replayInit = () => {
     ch.innerHTML = ""; ch.append(svg);
     const news = fine.filter(b => b.t >= 0 && b.t < 60), rng = news.length ? Math.round((Math.max(...news.map(b => b.h)) - Math.min(...news.map(b => b.l))) * 10) : null;
     $("#rpTxt").innerHTML = `${fClock(e, -60)} · diceva <b class="${e.rule[0]}">${e.rule}</b>, stop ${STOPP(e.id)} pips${es ? `, candela prevista ${r50(es.lo)}–${r50(es.hi)} pips` : ""}.` +
-      (done ? ` ${preso ? `Stop preso: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
+      (done ? ` ${preso ? `Stop preso${spread ? " dallo spread che si apre alla news (le candele bid non lo toccano)" : ""}: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
   };
   const play = () => { if (timer) { stop(); return; } if (tau >= 1800) tau = -60;
     $("#rpPlay").textContent = "❚❚ Pausa";
@@ -880,6 +886,54 @@ money();
 let rtL; addEventListener("resize", () => { clearTimeout(rtL); rtL = setTimeout(redrawOpen, 150); });
 
 replayInit();
+
+// lo stop nel tempo (H-X37 coi prezzi S4 di H-X38) e il calcolatore del lotto
+(() => {
+  const host = $("#stopbox");
+  if (!SF || SF.prezzi !== "S4") { host.remove(); $("#h-stop").remove(); return; }
+  const P = NF.filter(e => SF.per[e.id]).map(e => { const v = SF.per[e.id]; return {e, t: utcOf(e.d).getTime(), stop: v[0], r: v[1], st: !!v[2], giusta: !!v[3], contro: v[4]}; });
+  const G = P.filter(p => p.giusta), sav = G.filter(p => !p.st).length, G20 = G.filter(p => p.e.y >= 2020), sav20 = G20.filter(p => !p.st).length;
+  const nxt = NX ? Math.round(SF.base + SF.k * NX.md) : null;
+  host.innerHTML = `<p class="lead1">~${nxt} pips <span class="small">· stop della prossima NFP = ${SF.base} + ${Math.round(SF.k * 100)}% della candela prevista</span></p>
+    <p class="one">Quando avevi ragione, lo stop ti ha salvato <b>${sav} volte su ${G.length}</b> (dal 2020: ${sav20} su ${G20.length}). Si allarga da solo quando la volatilità sale: ${Math.round(median(P.filter(p => p.e.y === 2019).map(p => p.stop)))} pips nel 2019, ${Math.round(median(P.filter(p => p.e.y === 2026).map(p => p.stop)))} nel 2026.</p>
+    <div class="chart" id="stChart"></div>
+    <p class="small">Linea: lo stop calcolato prima di ogni NFP. Punti: quanto è andato contro quando avevi ragione, spread del broker compreso · <span style="color:var(--good)">●</span> salvato · <span style="color:var(--bad)">●</span> buttato fuori · tocca un punto</p>
+    <details class="mt5"><summary>Che lotto usare</summary><div class="fields" style="margin-top:10px">
+      <label>Deposito ($)<input id="ltD" type="number" min="10" step="10" value="500" inputmode="decimal"></label>
+      <label>Leva 1:<input id="ltL" type="number" min="1" step="50" value="500" inputmode="numeric"></label>
+      <label>Stop-out del broker (%)<input id="ltS" type="number" min="0" max="100" step="5" value="20" inputmode="numeric"></label>
+      <label>Stop (pips)<input id="ltP" type="number" min="5" step="1" value="${nxt || 60}" inputmode="numeric"></label></div>
+      <p class="one" id="ltOut" style="margin-top:10px"></p></details>`;
+  const lot = () => { const D = +$("#ltD").value, L = +$("#ltL").value, so = +$("#ltS").value / 100, S = +$("#ltP").value;
+    if (!(D > 0 && L > 0 && S > 0)) return;
+    const perLot = 10 * S + so * 100 * PRICE / L, l = Math.floor(D / perLot * 100) / 100;
+    const mg = l * 100 * PRICE / L;
+    $("#ltOut").innerHTML = `Lotto <b>${dec(l, 2)}</b>: con ${it0(S)} pips contro il broker chiude il conto. Margine usato ${it0(mg)} $; la chiusura arriva quando ti restano ${it0(so * mg)} $ (${Math.round(so * 100)}% del margine). 1 pip = 10 $ a lotto, prezzo ${it0(PRICE)} $.`; };
+  ["ltD", "ltL", "ltS", "ltP"].forEach(id => $("#" + id).addEventListener("input", lot)); lot();
+  const ch = host.querySelector("#stChart");
+  const draw = () => {
+    const W = Math.max(320, Math.min(900, ch.clientWidth || 640)), H = W < 520 ? 220 : 260, L = 36, R = 40, T = 12, B = 22;
+    const ta = P[0].t, tb = P[P.length - 1].t + 60 * 864e5, x = t => L + (t - ta) / (tb - ta) * (W - L - R);
+    const vm = Math.max(...P.map(p => p.stop), nxt || 0) * 2.2, y = v => T + (H - T - B) * (1 - Math.min(v, vm) / vm);
+    const svg = mk("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Stop calcolato prima di ogni NFP e quanto il prezzo è andato contro"});
+    for (const v of [25, 50, 75, 100, 150, 200]) if (v < vm) { svg.append(mk("line", {x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: css("--grid")}));
+      svg.append(mk("text", {x: L - 5, y: y(v) + 4, "text-anchor": "end", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, v)); }
+    [...new Set(P.map(p => p.e.y))].forEach(yy => { const xm = x(Date.UTC(yy, 6, 1)); if (xm > L && xm < W - R) svg.append(mk("text", {x: xm, y: H - 6, "text-anchor": "middle", "font-size": 10.5, fill: css("--mute"), "font-family": "ui-monospace,Menlo,monospace"}, W < 520 ? "'" + String(yy).slice(2) : yy)); });
+    svg.append(mk("polyline", {points: P.map(p => `${x(p.t)},${y(p.stop)}`).join(" "), fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round"}));
+    G.forEach(p => { const over = p.contro >= vm; svg.append(over ? mk("path", {d: `M${x(p.t) - 4},${T + 7} L${x(p.t) + 4},${T + 7} L${x(p.t)},${T}`, fill: css(p.st ? "--bad" : "--good")})
+      : mk("circle", {cx: x(p.t), cy: y(p.contro), r: 3.2, fill: css(p.st ? "--bad" : "--good"), opacity: .85})); });
+    if (nxt) { svg.append(mk("circle", {cx: W - R + 6, cy: y(nxt), r: 5, fill: css("--accent"), stroke: css("--panel"), "stroke-width": 2}));
+      svg.append(mk("text", {x: W - R + 6, y: y(nxt) - 9, "text-anchor": "middle", "font-size": 10.5, "font-weight": 700, fill: css("--accent")}, nxt)); }
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true;
+    const show = ev => { const rc = svg.getBoundingClientRect(), sx = (ev.clientX - rc.left) * W / rc.width, p = P.reduce((a, q) => Math.abs(x(q.t) - sx) < Math.abs(x(a.t) - sx) ? q : a, P[0]);
+      tip.innerHTML = `${fDate(p.e)} · stop <b>${p.stop}</b> pips<br>${p.giusta ? `direzione giusta, è andato contro ${p.contro} pips: ${p.st ? "buttato fuori" : "salvato"}` : "direzione sbagliata"} · ${sgnR(p.r)}`;
+      tip.hidden = false; tip.style.transform = "none"; const tw = tip.offsetWidth, px = x(p.t) * rc.width / W; tip.style.left = Math.max(0, Math.min(rc.width - tw, px - tw / 2)) + "px"; tip.style.top = "0px"; };
+    svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show); svg.addEventListener("pointerleave", () => tip.hidden = true);
+    ch.innerHTML = ""; ch.append(svg, tip);
+  };
+  draw(); let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
+})();
+
 oggi(D.liv, $("#oggi"));
 simulatore(D.pips29, "NFP", "NFP", $("#sim"), LV && LV.oggi);
 $("#simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));
