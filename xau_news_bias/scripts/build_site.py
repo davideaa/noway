@@ -97,7 +97,7 @@ if __name__ == "__main__":
     log = ROOT / "live" / "hx8_live.jsonl"
     data = {"ev": ev, "bins": site["bins"], "amp": ampiezza(),
             "live": [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()] if log.exists() else [],
-            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "stopf": stop_formula(), "verde": verde(), "m1": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_m1_contesto.json")}
+            "liv": livelli(), "pips29": pips29("NFP"), "r60": stop60(), "stopf": stop_formula(), "verde": verde(), "tf": load(ROOT / "research_output" / "phase2" / "hx11" / "nfp_contesto_tf.json")}
     tpl = (ROOT / "site" / "news_bias.template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DATA*/null", json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     (ROOT / "docs" / "replay.html").write_text(html, encoding="utf-8")

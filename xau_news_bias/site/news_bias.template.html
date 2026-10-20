@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <title>XAU News Bias</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,600;112,800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -156,6 +157,11 @@ details.more[open]{display:grid;gap:12px}
 .yrs button i{display:block;width:70%;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--good) var(--p),var(--line) var(--p))}
 .yrs button b{font-size:12px;color:var(--ink)}
 .yrs button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+.tvleg{position:absolute;left:8px;top:6px;z-index:3;pointer-events:none;font:500 11.5px var(--f-num);color:var(--ink2);background:color-mix(in srgb,var(--panel) 82%,transparent);padding:2px 6px;border-radius:5px;max-width:calc(100% - 90px)}
+.tvleg b{color:var(--ink);font-weight:600}
+#rpChart{position:relative}
+@media (max-width:560px){#replay .presets button{padding:6px 9px;font-size:13px}}
 h1,h2{font-stretch:112%}
 .live{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
 .nx{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start}
@@ -571,12 +577,16 @@ const r50 = v => Math.round(v / 10) * 10;
 const replayInit = () => {
   const ALL = NF.filter(e => R60[e.id] != null), host = $("#replay"), strip = $("#strip"), ysel = $("#rpYear");
   if (!ALL.length) return;
-  const M1 = D.m1 || {}, years = [...new Set(ALL.map(e => e.y))].sort((a, b) => b - a);
+  // candele intorno alla news (M1 ±2 h, M5 −12/+6 h, H1 −15/+3 giorni): il grafico TradingView se la libreria c'è, se no l'SVG
+  const TFD = D.tf || {}, M1 = Object.fromEntries(Object.entries(TFD).map(([k, X]) => [k, X.m1.map(a => [a[0], X.r + a[1] / 100, X.r + a[2] / 100, X.r + a[3] / 100, X.r + a[4] / 100, a[5]])]));
+  const TV = !!(window.LightweightCharts && Object.keys(TFD).length), years = [...new Set(ALL.map(e => e.y))].sort((a, b) => b - a);
+  const TFS = TV ? [[5, "5s"], [60, "1m"], [300, "5m"], [900, "15m"], [1800, "30m"], [3600, "1h"], [14400, "4h"]] : [[60, "1 min"], [5, "5 s"]];
   if (A) (A.tutti || []).forEach(c => { if (!EST[c.data]) EST[c.data] = c; });
-  let cur = ALL[ALL.length - 1], Y = cur.y, TF = 60, tau = -60, timer = null;
+  let cur = ALL[ALL.length - 1], Y = cur.y, TF = 60, tau = -60, timer = null, LOG = false, info = null;
   ysel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
   host.innerHTML = `<div class="rpctl"><button class="play" id="rpPlay">▶ Avvia</button><button id="rpAll">Mostra tutto</button><span style="flex:1"></span>
-      <div class="presets" role="group" aria-label="Candele"><button data-tf="60" aria-pressed="true">1 min</button><button data-tf="5" aria-pressed="false">5 s</button></div></div>
+      <div class="presets" role="group" aria-label="Timeframe">${TFS.map(([v, l]) => `<button data-tf="${v}" aria-pressed="${v === 60}">${l}</button>`).join("")}</div>
+      ${TV ? `<div class="presets"><button id="rpLog" aria-pressed="false">Log</button><button id="rpReset">Reset</button></div>` : ""}</div>
     <div class="chart" id="rpChart"></div><p class="one" id="rpTxt"></p><p class="small" id="rpYearTxt"></p>${VD ? `<p class="small"><b class="g">Verde</b>: ampiezza dei primi ${VD.k} minuti (massimo − minimo, wick comprese) superata 1 volta su 4 (dal 2018: ${Math.round(VD.supera * 100)} su 100). <b style="color:var(--accent)">Arancione</b>: range del primo minuto, metà delle volte dentro la zona. Solo riferimenti, non take profit.</p>` : ""}`;
   const candele = (e, sz, upto = Infinity) => { const out = new Map();
     BINS.forEach((b, i) => { const v = e.sc.S1.c[i]; if (!v || b >= upto) return; const k = Math.floor(b / sz) * sz, o = out.get(k), q = v.map(x => e.ref + x / 100);
@@ -591,9 +601,9 @@ const replayInit = () => {
     strip.scrollLeft = strip.scrollWidth; };
   const stop = () => { if (timer) { clearInterval(timer); timer = null; } $("#rpPlay").textContent = tau >= 1800 ? "↺ Rigioca" : "▶ Avvia"; };
   const reset = () => { stop(); tau = -60; draw(); };
-  const draw = () => {
+  const drawSVG = () => {
     strip.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === cur.id)));
-    host.querySelectorAll(".presets button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.tf === TF)));
+    host.querySelectorAll(".presets button[data-tf]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.tf === TF)));
     const e = cur, d = e.rule === "LONG" ? 1 : -1, tr = e.sc.S1[e.rule[0]], r = R60[e.id], st = STOPP(e.id) / 10, en = tr.en, sl = en - d * st, es = EST[e.d.slice(0, 10)];
     const fine = candele(e, 5);
     let exT = 60, ex = en + d * r * st, preso = false;
@@ -660,18 +670,93 @@ const replayInit = () => {
       svg.append(mk("text", {x: W - R + 4, y: o.y + 4, "font-size": mob ? 9 : 10, "font-weight": 700, fill: css("--panel"), "font-family": "ui-monospace,Menlo,monospace"}, mob ? o.t.replace(/,\d\d$/, "").replace("LONG ", "L ").replace("SHORT ", "S ") : o.t)); });
     // ora del replay in alto a sinistra
     svg.append(mk("text", {x: Lm + 2, y: 14, "font-size": mob ? 10.5 : 11.5, "font-weight": 700, fill: css("--ink2"), "font-family": "ui-monospace,Menlo,monospace"}, `XAUUSD ${m1 ? "1m" : "5s"} · ${fDate(e)} · ${fClock(e, Math.min(tau, t1), true)}`));
-    ch.innerHTML = ""; ch.append(svg);
+    if (!TV) { ch.innerHTML = ""; ch.append(svg); }
+    info = {e, d, en, sl, tgt, es, vp, gv, exT, ex, preso, done, r};
     const news = fine.filter(b => b.t >= 0 && b.t < 60), rng = news.length ? Math.round((Math.max(...news.map(b => b.h)) - Math.min(...news.map(b => b.l))) * 10) : null;
     $("#rpTxt").innerHTML = `${fClock(e, -60)} · diceva <b class="${e.rule[0]}">${e.rule}</b>, stop ${STOPP(e.id)} pips${es ? `, candela prevista ${r50(es.lo)}–${r50(es.hi)} pips` : ""}${vp ? `, ampiezza ${VD.k} min (1 su 4) ~${r50(vp)} pips` : ""}.` +
       (done ? ` ${preso ? `Stop preso${spread ? " dallo spread che si apre alla news (le candele bid non lo toccano)" : ""}: <b class="r">−1R</b>.` : `Chiusura alle ${fClock(e, 60)}: <b class="${r > 0 ? "g" : "r"}">${sgnR(r)}</b>.`}${rng && es ? ` Candela ${rng} pips, ${rng < es.lo ? "più piccola" : rng > es.hi ? "più grande" : "dentro la stima"}.` : ""}` : "");
   };
+  // ---- grafico in stile TradingView (Lightweight Charts): timeframe, zoom e trascinamento, scala log, reset
+  let chart = null, cs = null, vs = null, leg = null, plines = [], tvKey = "", lastBar = null, livelli = [];
+  const TFL = Object.fromEntries(TFS), T0 = e => Math.floor(utcOf(e.d).getTime() / 1000);
+  const hexA = (h, a) => { const n = parseInt(h.replace("#", ""), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+  const conv = (X, arr, unit, anchor) => arr.map(a => ({time: anchor + a[0] * unit, open: X.r + a[1] / 100, high: X.r + a[2] / 100, low: X.r + a[3] / 100, close: X.r + a[4] / 100, v: a[5]}));
+  const agg = (c, sz, off) => { const m = new Map();
+    c.forEach(k => { const key = Math.floor((k.time + off) / sz) * sz - off, o = m.get(key);
+      if (!o) m.set(key, {...k, time: key}); else { o.high = Math.max(o.high, k.high); o.low = Math.min(o.low, k.low); o.close = k.close; o.v += k.v; } });
+    return [...m.values()].sort((a, b) => a.time - b.time); };
+  const serieTF = (e, tf) => { const X = TFD[e.id], t = T0(e), th = t - t % 3600;
+    if (tf === 5) return candele(e, 5).map(c => ({time: t + c.t, open: c.o, high: c.h, low: c.l, close: c.c, v: 0}));
+    if (tf === 60) return conv(X, X.m1, 60, t);
+    if (tf < 3600) return tf === 300 ? conv(X, X.m5, 60, t) : agg(conv(X, X.m5, 60, t), tf, 0);
+    const h = conv(X, X.h1, 3600, th);
+    return tf === 3600 ? h : agg(h, tf, 7200); };  // H4 allineate a UTC+2, come il server del broker
+  // nastro fine per la candela in corso durante il play: blocchi da 5 s intorno alla news, M1 vicino, M5 lontano
+  const nastro = e => { const X = TFD[e.id], t = T0(e), b5 = serieTF(e, 5).map(c => ({...c, d: 5})), m1 = conv(X, X.m1, 60, t).map(c => ({...c, d: 60}));
+    const lo5 = b5.length ? b5[0].time : Infinity, hi5 = b5.length ? b5[b5.length - 1].time + 5 : -Infinity, lo1 = m1.length ? m1[0].time : Infinity, hi1 = m1.length ? m1[m1.length - 1].time + 60 : -Infinity;
+    return conv(X, X.m5, 60, t).map(c => ({...c, d: 300})).filter(c => c.time + 300 <= lo1 || c.time >= hi1)
+      .concat(m1.filter(c => c.time + 60 <= lo5 || c.time >= hi5), b5).sort((a, b) => a.time - b.time); };
+  // tutte le candele del timeframe; quelle dopo il momento del replay restano spazi vuoti, così l'asse del tempo non cambia
+  const visibili = (e, tf, lim) => { const all = serieTF(e, tf); if (lim == null) return all;
+    let nas = null;
+    return all.map(c => { if (c.time + tf <= lim) return c; if (c.time >= lim) return {time: c.time};
+      const p = (nas = nas || nastro(e)).filter(k => k.time >= c.time && k.time + k.d <= lim);
+      return p.length ? {time: c.time, open: p[0].open, high: Math.max(...p.map(k => k.high)), low: Math.min(...p.map(k => k.low)), close: p[p.length - 1].close, v: c.v * (lim - c.time) / tf} : {time: c.time}; }); };
+  const fmtT = (t, full) => new Date(t * 1000).toLocaleString("it-IT", {timeZone: "Europe/Rome", ...(full ? {day: "2-digit", month: "2-digit", year: "2-digit"} : {}), hour: "2-digit", minute: "2-digit", ...(TF === 5 ? {second: "2-digit"} : {})});
+  const FOC = {5: [24, 24], 60: [45, 45], 300: [72, 36], 900: [48, 24], 1800: [36, 12], 3600: [96, 24], 14400: [60, 12]};
+  const fuoco = () => { const all = serieTF(cur, TF), i = Math.max(0, all.findIndex(c => c.time + TF > T0(cur))), k = innerWidth < 520 ? .5 : 1, [b, a] = FOC[TF];
+    chart.timeScale().setVisibleLogicalRange({from: i - Math.round(b * k), to: i + Math.round(a * k)}); chart.priceScale("right").applyOptions({autoScale: true}); };
+  const legenda = c => { const x = c || lastBar; leg.innerHTML = `<b>XAUUSD ${TFL[TF]} · ${fDate(cur)}</b>${x ? ` · ${x.time ? fmtT(x.time, false) + " · " : ""}O ${it2(x.open)} H ${it2(x.high)} L ${it2(x.low)} C ${it2(x.close)}` : ""}`; };
+  const tvInit = () => { const el = host.querySelector("#rpChart"); el.innerHTML = ""; el.style.height = (innerWidth < 520 ? 380 : 460) + "px";
+    chart = LightweightCharts.createChart(el, {autoSize: true,
+      layout: {background: {type: "solid", color: css("--panel")}, textColor: css("--mute"), fontFamily: "IBM Plex Mono, ui-monospace, Menlo, monospace", fontSize: 11},
+      grid: {vertLines: {color: css("--grid")}, horzLines: {color: css("--grid")}}, rightPriceScale: {borderColor: css("--line")},
+      timeScale: {borderColor: css("--line"), timeVisible: true, rightOffset: 4, shiftVisibleRangeOnNewBar: false, tickMarkFormatter: (t, ty) => ty === 0 ? String(new Date(t * 1000).getUTCFullYear()) : ty < 3 ? new Date(t * 1000).toLocaleDateString("it-IT", {timeZone: "Europe/Rome", day: "2-digit", month: "short"}) : fmtT(t, false)},
+      crosshair: {mode: 0}, localization: {locale: "it-IT", priceFormatter: p => it2(p), timeFormatter: t => fmtT(t, true)}});
+    // la scala comprende anche entrata, stop, arancione e verde, come prima
+    cs = chart.addCandlestickSeries({upColor: css("--up"), downColor: css("--dn"), borderUpColor: css("--up"), borderDownColor: css("--dn"), wickUpColor: css("--up"), wickDownColor: css("--dn"), priceLineVisible: false,
+      autoscaleInfoProvider: orig => { const r = orig(); if (!r || !livelli.length) return r;
+        return {...r, priceRange: {minValue: Math.min(r.priceRange.minValue, ...livelli), maxValue: Math.max(r.priceRange.maxValue, ...livelli)}}; }});
+    vs = chart.addHistogramSeries({priceScaleId: "vol", priceFormat: {type: "volume"}, lastValueVisible: false, priceLineVisible: false});
+    chart.priceScale("vol").applyOptions({scaleMargins: {top: .84, bottom: 0}});
+    leg = document.createElement("div"); leg.className = "tvleg"; el.append(leg);
+    chart.subscribeCrosshairMove(p => legenda(p && p.time != null ? p.seriesData.get(cs) && {...p.seriesData.get(cs), time: p.time} : null)); };
+  const drawTV = () => { const I = info, e = I.e, d = I.d; if (!chart) tvInit();
+    const lim = tau >= 1800 ? null : T0(e) + tau, data = visibili(e, TF, lim), key = e.id + "|" + TF, vr = tvKey === key ? chart.timeScale().getVisibleLogicalRange() : null;
+    livelli = [I.en, I.sl].concat(I.es ? [I.tgt[2]] : [], I.gv != null ? [I.gv] : []);
+    cs.setData(data.map(c => c.open == null ? {time: c.time} : {time: c.time, open: c.open, high: c.high, low: c.low, close: c.close}));
+    vs.setData(TF === 5 ? [] : data.map(c => c.open == null ? {time: c.time} : {time: c.time, value: c.v, color: hexA(css(c.close >= c.open ? "--up" : "--dn"), .4)}));
+    if (vr) chart.timeScale().setVisibleLogicalRange(vr);
+    const pieni = data.filter(c => c.open != null);
+    lastBar = pieni[pieni.length - 1] || null;
+    plines.forEach(p => cs.removePriceLine(p)); plines = [];
+    const pl = (price, color, title, style, w, lab = true) => plines.push(cs.createPriceLine({price, color, lineWidth: w, lineStyle: style, axisLabelVisible: lab, title}));
+    pl(I.en, css("--entry"), e.rule, 0, 2); pl(I.sl, css("--stop"), "SL", 0, 1);
+    if (I.es) { pl(I.tgt[2], css("--accent"), `range ~${r50(I.es.stima)}`, 2, 1); pl(I.tgt[0], css("--accent"), "", 1, 1, false); pl(I.tgt[1], css("--accent"), "", 1, 1, false); }
+    if (I.gv != null) pl(I.gv, css("--good"), `ampiezza ${VD.k} min ~${r50(I.vp)}`, 0, 2);
+    if (I.done) pl(I.ex, css(I.r > 0 ? "--good" : "--bad"), I.preso ? "stop −1R" : sgnR(I.r), 2, 1);
+    // segni sulla candela che contiene l'entrata, la news e l'uscita
+    const marks = [], add = (s, o) => { const c = pieni.filter(k => k.time <= T0(e) + s).pop(); if (!c) return; const m = marks.find(x => x.time === c.time);
+      if (m) m.text += " · " + o.text; else marks.push({time: c.time, ...o}); };
+    add(-60, {position: d > 0 ? "belowBar" : "aboveBar", color: css("--entry"), shape: d > 0 ? "arrowUp" : "arrowDown", text: "entra"});
+    if (lim == null || lim > T0(e)) add(0, {position: d > 0 ? "aboveBar" : "belowBar", color: css("--accent"), shape: "circle", text: "NFP"});
+    if (I.done) add(I.exT - 1, {position: d > 0 ? "aboveBar" : "belowBar", color: css(I.r > 0 ? "--good" : "--bad"), shape: "circle", text: I.preso ? "stop" : "chiude"});
+    cs.setMarkers(marks.sort((a, b) => a.time - b.time));
+    chart.priceScale("right").applyOptions({mode: LOG ? 1 : 0});
+    if (tvKey !== key) { tvKey = key; fuoco(); }
+    legenda(null); };
+  const draw = () => { drawSVG(); if (TV) drawTV(); };
+  if (TV) {
+    $("#rpLog").onclick = () => { LOG = !LOG; $("#rpLog").setAttribute("aria-pressed", String(LOG)); draw(); };
+    $("#rpReset").onclick = () => { TF = 60; LOG = false; tvKey = ""; $("#rpLog").setAttribute("aria-pressed", "false"); draw(); };
+  }
   const play = () => { if (timer) { stop(); return; } if (tau >= 1800) tau = -60;
     $("#rpPlay").textContent = "❚❚ Pausa";
     timer = setInterval(() => { tau += tau < 120 ? 5 : 60; draw(); if (tau >= 1800) stop(); }, tau < 120 ? 110 : 110); };
   $("#rpPlay").onclick = play;
   $("#rpAll").onclick = () => { stop(); tau = 1800; draw(); stop(); };
   ysel.onchange = () => { Y = +ysel.value; const L = ALL.filter(e => e.y === Y); cur = L[L.length - 1]; fillStrip(); reset(); };
-  host.querySelectorAll(".presets button").forEach(b => b.onclick = () => { TF = +b.dataset.tf; draw(); });
+  host.querySelectorAll(".presets button[data-tf]").forEach(b => b.onclick = () => { TF = +b.dataset.tf; draw(); });
   ysel.value = Y; fillStrip(); draw();
   window.rpGo = id => { const e = ALL.find(x => x.id === id); if (!e) return; Y = e.y; ysel.value = Y; cur = e; fillStrip(); reset(); $("#h-ex").scrollIntoView({behavior: "smooth", block: "start"}); };
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(draw, 150); });
