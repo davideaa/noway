@@ -49,10 +49,10 @@ def righe(site, st37, stima, uscite, minuti):
 
 
 def stat(x):
-    w, l = x[x > 0], x[x <= 0]
+    w, p = x[x > 0], x[x <= 0]
     return {"n": int(len(x)), "r": round(float(x.mean()), 3), "somma": round(float(x.sum()), 1), "vinti": round(float((x > 0).mean()), 3),
-            "vinto_medio": round(float(w.mean()), 3) if len(w) else None, "perso_medio": round(float(-l.mean()), 3) if len(l) else None,
-            "RR": round(float(w.mean() / -l.mean()), 2) if len(w) and len(l) and l.mean() < 0 else None}
+            "vinto_medio": round(float(w.mean()), 3) if len(w) else None, "perso_medio": round(float(-p.mean()), 3) if len(p) else None,
+            "RR": round(float(w.mean() / -p.mean()), 2) if len(w) and len(p) and p.mean() < 0 else None}
 
 
 if __name__ == "__main__":
