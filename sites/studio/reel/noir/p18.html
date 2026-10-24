@@ -433,7 +433,7 @@ function sResiduo(t, a, b) { bg('30,44,26', 0.7); x.save();
 
 /* ================= CASA: pale uguali in fila (ognuna aggiunge meno), poi l'escavatore ================= */
 function sCasa(t, a, b) { bg('30,44,26'); x.save();
-  const tPa = WA('casa', ['pale', 'pali'], 1, 2.4), tUg = WT('casa', 'uguali', 1, 2.8), tAi = WT('casa', 'aiutano', 1, 3.1), tLu = WT('casa', 'lunga', 1, 4.1), tMo = WT('casa', 'modello', 1, 4.8), tCo = WT('casa', 'conta', 1, 5.2), tEs = WA('casa', ESC, 1, 5.5);
+  const tPa = WA('casa', ['pale', 'pali'], 1, 2.4), tUg = WT('casa', 'uguali', 1, 2.8), tAi = WT('casa', 'aiutano', 1, 3.1), tLu = WT('casa', 'tempo', 1, 4.1), tMo = WT('casa', 'modello', 1, 4.8), tCo = WT('casa', 'conta', 1, 5.2), tEs = WA('casa', ESC, 1, 5.5);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tPa - 0.45 });
   phrase(t, tPa - 0.15, [['Più pale aiutano,', C.ink]], 345, { size: 92 });
   phrase(t, tCo - 0.1, [['conta l’escavatore', C.lime]], 345 + 92 * 1.12, { size: 92 });
