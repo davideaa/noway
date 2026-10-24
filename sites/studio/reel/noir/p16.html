@@ -1,0 +1,394 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 16, DAY: 0, CAP: 0, NEXT: ['Salari', 'e produttività'], FONTE: 'DATI: ISTAT (non scritta nel video dal 16/10/2026)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 16 — «La disoccupazione» (lezione 1 di 5). Numeri SOLO da p16-fonti.md:
+   agosto 2026, destagionalizzato, PROVVISORIO (Istat, CS 01/10/2026): tasso di disoccupazione 6,2% (Tabella 1), disoccupati 1.591 mila;
+   15-24 anni (Tabella 4, Prospetto 5): tasso 20,3% sulle forze di lavoro; incidenza sulla popolazione 4,3%;
+   occupazione 17,0% e inattività 78,7% della popolazione 15-24 (17,0 + 4,3 + 78,7 = 100), quindi forze di lavoro = 21,3% dei giovani.
+   Definizioni (Tabella 2): disoccupato = almeno un'azione di ricerca nelle 4 settimane + disponibile entro 2 settimane; occupato = almeno un'ora pagata.
+   Divano, telefono, zaino: esempi illustrativi senza cifre. Esempio del tasso (100 nelle forze di lavoro, 10 cercano, 5 smettono:
+   10% → 5/95 = 5,3%) = «Esempi didattici» di p16-fonti.md, scritto a schermo come ESEMPIO · CIFRE INVENTATE.
+   Barre dei giovani in scala: stessa larghezza = 100% della propria base; la base «chi lavora o cerca» è il 21,3% di tutti i giovani.
+   Niente righe di fonte a schermo (Davide, 16/10/2026). Colori: occupato lime, disoccupato rosso, inattivo ambra. */
+const ORDER = ['num', 'hook', 'telefono', 'annuncio', 'inattivo', 'zaino', 'conto', 'smette', 'agosto', 'giovani', 'tutti', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12, Y3 = 345 + 2 * 92 * 1.12; /* seconda e terza riga del titolo */
+/* parola con più grafie possibili (apostrofi: «l'Istat» → «listat», «un'ora» → «unora»): prova in ordine, poi la riserva */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+const swapK = (t, t0) => [1 - oC(seg(t, t0 - 0.3, t0 - 0.05)), oC(seg(t, t0, t0 + 0.3))];
+const rnd = (i) => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+const RGB = { lime: '200,250,114', red: '255,90,78', amber: '245,165,36', ink: '241,244,238' };
+function ring(cx, cy, r0, t, t0, rgb = RGB.lime, d = 0.6, gr = 60) { const k = seg(t, t0, t0 + d); if (k <= 0 || k >= 1) return; x.save(); x.strokeStyle = `rgba(${rgb},${1 - k})`; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r0 + gr * oC(k), 0, 7); x.stroke(); x.restore(); }
+/* etichetta di vetro (mono), bordo colorato */
+function tagPill(cx, cy, label, k, col, size = 28) { if (k <= 0) return; const w = tw(label, size, 600, 'mono', 2) + 56, h = 64, s = lerp(0.8, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); glass(cx, cy, w, h, 32, clamp(k * 2));
+  x.save(); x.globalAlpha *= clamp(k * 2); x.strokeStyle = col; x.lineWidth = 3; rr(cx - w / 2, cy - h / 2, w, h, 32); x.stroke(); x.restore();
+  txt(label, cx, cy + 2, { fam: 'mono', size, weight: 600, color: col, ls: 2, alpha: clamp(k * 2) }); x.restore(); }
+function pillSwap(cx, cy, A, B, kIn, t, tS) { const [o, i] = swapK(t, tS); tagPill(cx, cy, A[0], kIn * o, A[1]); tagPill(cx, cy, B[0], i * kIn, B[1]); }
+const count = (v, d = 1) => v.toFixed(d).replace('.', ',');
+
+/* ================= IL DIVANO (hook, telefono, inattivo, casa): due sagome stilizzate ================= */
+const TU = 360, AM = 720; /* centri delle due sagome */
+function sofa(k, bounce = 0) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 1.6); x.translate(0, (1 - oC(k)) * 50);
+  const sq = 1 - 0.03 * Math.sin(Math.PI * clamp(bounce));
+  x.translate(540, 1240); x.scale(1, sq); x.translate(-540, -1240);
+  x.fillStyle = metal(150, 0, 930, 0, true); rr(150, 960, 780, 170, 44); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.25)'; x.lineWidth = 2.5; rr(150, 960, 780, 170, 44); x.stroke();
+  x.fillStyle = 'rgba(241,244,238,0.05)'; rr(540 - 2, 980, 4, 130, 2); x.fill();
+  x.fillStyle = '#1b211d'; rr(165, 1105, 750, 92, 24); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.18)'; x.lineWidth = 2; rr(165, 1105, 750, 92, 24); x.stroke();
+  for (const ax of [105, 875]) { x.fillStyle = metal(ax, 0, ax + 100, 0, true); rr(ax, 1030, 100, 175, 36); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.16)'; rr(ax, 1030, 100, 175, 36); x.stroke(); }
+  x.fillStyle = '#0d100e'; for (const lx of [175, 881]) { rr(lx, 1197, 24, 42, 6); x.fill(); }
+  x.restore();
+  x.save(); x.globalAlpha *= clamp(k * 1.6); x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 3; x.beginPath(); x.moveTo(90, 1256); x.lineTo(990, 1256); x.stroke(); x.restore(); }
+/* sagoma seduta: o.lit = schermo acceso, o.dim = attenuata, o.no = croce sul telefono */
+function person(cx, k, o = {}) { const { lit = 0, dim = 0, bob = 0 } = o; if (k <= 0) return;
+  const s = lerp(0.82, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, 1160); x.scale(s, s); x.translate(-cx, -1160 + (1 - clamp(k)) * 30 - 6 * Math.sin(Math.PI * clamp(bob)));
+  x.globalAlpha *= clamp(k * 2) * (1 - 0.4 * dim);
+  const body = '#222a25', edge = 'rgba(241,244,238,0.75)';
+  x.lineWidth = 4; x.strokeStyle = edge; x.fillStyle = body;
+  rr(cx - 54, 1150, 40, 96, 14); x.fill(); x.stroke(); rr(cx + 14, 1150, 40, 96, 14); x.fill(); x.stroke();
+  rr(cx - 64, 1098, 128, 58, 20); x.fill(); x.stroke();
+  rr(cx - 68, 988, 136, 140, [58, 58, 14, 14]); x.fill(); x.stroke();
+  x.beginPath(); x.arc(cx, 935, 42, 0, 7); x.fill(); x.stroke();
+  /* braccia verso il telefono */
+  x.lineCap = 'round'; x.strokeStyle = edge; x.lineWidth = 30; x.beginPath(); x.moveTo(cx - 52, 1018); x.lineTo(cx - 30, 1084); x.moveTo(cx + 52, 1018); x.lineTo(cx + 30, 1084); x.stroke();
+  x.strokeStyle = body; x.lineWidth = 22; x.stroke();
+  /* telefono */
+  if (lit > 0) glow(cx, 1070, 150, RGB.lime, 0.45 * lit);
+  x.fillStyle = '#07090a'; rr(cx - 24, 1032, 48, 76, 9); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.stroke();
+  if (lit > 0) { x.save(); x.globalAlpha *= lit; const g = x.createLinearGradient(0, 1038, 0, 1102); g.addColorStop(0, '#E4FFB5'); g.addColorStop(1, '#9ED64A'); x.fillStyle = g; rr(cx - 19, 1037, 38, 66, 6); x.fill(); x.restore(); }
+  x.fillStyle = body; x.strokeStyle = edge; x.lineWidth = 3; for (const hx of [-26, 26]) { x.beginPath(); x.arc(cx + hx, 1090, 13, 0, 7); x.fill(); x.stroke(); }
+  x.restore(); }
+function names(k, hot = [0, 0]) { txt('TU', TU, 1300, { fam: 'mono', size: 26, weight: 600, color: hot[0] ? C.ink : C.muted, ls: 3, alpha: k });
+  txt('IL TUO AMICO', AM, 1300, { fam: 'mono', size: 26, weight: 600, color: hot[1] ? C.ink : C.muted, ls: 3, alpha: k }); }
+/* nuvoletta del pensiero con la valigetta: «un lavoro lo vorresti» */
+function wish(k) { if (k <= 0) return; const cx = 168, cy = 925, s = lerp(0.5, 1, oB(clamp(k)));
+  x.save(); x.globalAlpha *= clamp(k * 2);
+  for (const [px, py, r] of [[296, 905, 7], [268, 914, 10]]) { x.fillStyle = 'rgba(241,244,238,0.85)'; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill(); }
+  x.translate(cx, cy); x.scale(s, s); glass(0, 0, 124, 124, 62, 1); x.strokeStyle = 'rgba(245,165,36,0.9)'; x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 61, 0, 7); x.stroke();
+  x.strokeStyle = C.amber; x.lineWidth = 5; x.lineJoin = 'round'; rr(-30, -14, 60, 40, 7); x.stroke(); rr(-11, -25, 22, 11, 4); x.stroke(); x.beginPath(); x.moveTo(-30, 0); x.lineTo(30, 0); x.stroke();
+  x.restore(); }
+
+function sHook(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.06);
+  const tDi = WT('hook', 'disoccupato', 1, 1.9), tNo = WT('hook', 'non', 1, 1.4), tTu = WT('hook', 'tu', 1, 2.5), tAm = WT('hook', 'amico', 1, 3.1),
+    tDv = WT('hook', 'divano', 1, 3.6), tSe = WT('hook', 'senza', 2, 3.9), tTt = WT('hook', 'tutti', 1, 4.6);
+  phrase(t, a + 0.02, [['Senza lavoro,', C.ink]], 345, { size: 92 });
+  phrase(t, tNo - 0.1, [['ma non disoccupato.', C.lime]], Y2, { size: 92 });
+  sofa(oC(seg(t, a, a + 0.5)), seg(t, tDv, tDv + 0.45));
+  person(TU, seg(t, tTu - 0.25, tTu + 0.3), { bob: seg(t, tDv, tDv + 0.45) });
+  person(AM, seg(t, tAm - 0.3, tAm + 0.25), { bob: seg(t, tDv + 0.05, tDv + 0.5) });
+  txt('TU', TU, 1300, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 3, alpha: oC(seg(t, tTu, tTu + 0.3)) });
+  txt('IL TUO AMICO', AM, 1300, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 3, alpha: oC(seg(t, tAm, tAm + 0.3)) });
+  tagPill(TU, 800, 'SENZA LAVORO', seg(t, tSe - 0.1, tSe + 0.3), C.ink);
+  tagPill(AM, 800, 'SENZA LAVORO', seg(t, tTt - 0.1, tTt + 0.3), C.ink);
+  void tDi; x.restore(); finish(t); }
+
+function sTelefono(t, a, b) { bg('34,44,30', 0.8); x.save();
+  const tIs = WA('telefono', ['listat', 'istat'], 1, 0.4), tSo = WT('telefono', 'solo', 1, 0.8), tDi = WT('telefono', 'disoccupato', 1, 1.4),
+    tDf = WT('telefono', 'differenza', 1, 2.1), tTe = WT('telefono', 'telefono', 1, 2.9);
+  /* alla fine la camera entra nel telefono dell'amico: la scena dopo parte da lì */
+  const kz = ioC(seg(t, b - 0.42, b)); x.translate(AM, 1070); x.scale(1 + 1.6 * kz, 1 + 1.6 * kz); x.translate(-AM, -1070);
+  phrase(t, tIs - 0.1, [['Per l’Istat solo lui', C.ink]], 345, { size: 92, out: tDf - 0.35 });
+  phrase(t, tDi - 0.1, [['è disoccupato.', C.red]], Y2, { size: 92, out: tDf - 0.35 });
+  phrase(t, tDf - 0.05, [['La differenza:', C.ink]], 345, { size: 92 });
+  phrase(t, tTe - 0.1, [['il telefono.', C.lime]], Y2, { size: 92 });
+  sofa(1); const dimTu = oC(seg(t, tSo, tSo + 0.4));
+  person(TU, 1, { dim: dimTu * 0.6 }); person(AM, 1, { lit: oC(seg(t, tTe - 0.1, tTe + 0.3)) });
+  ring(AM, 1070, 50, t, tTe + 0.05, RGB.lime, 0.7, 70); ring(AM, 1070, 50, t, tTe + 0.35, RGB.lime, 0.7, 70);
+  names(1, [0, 1]);
+  tagPill(TU, 800, 'SENZA LAVORO', 1 - 0.35 * dimTu, C.ink);
+  pillSwap(AM, 800, ['SENZA LAVORO', C.ink], ['DISOCCUPATO', C.red], 1, t, tDi + 0.1);
+  x.restore();
+  if (kz > 0) { x.fillStyle = `rgba(5,6,7,${0.85 * kz})`; x.fillRect(0, 0, W, H); }
+  finish(t); }
+
+/* ================= ANNUNCIO: il telefono da vicino e le settimane ================= */
+const WK = (i) => i < 4 ? 110 + i * 139 : 696 + (i - 4) * 139; /* bordo sinistro delle celle: 4 passate, 2 future */
+function weeks(t, o) { const { kIn, past, act, fut, lab1, lab2, now } = o; if (kIn <= 0) return; x.save(); x.globalAlpha *= kIn;
+  for (let i = 0; i < 6; i++) { const cx = WK(i), on = i < 4 ? clamp(past * 4 - i) : clamp(fut * 2 - (i - 4)), rgb = i < 4 ? RGB.red : RGB.lime;
+    x.fillStyle = 'rgba(241,244,238,0.06)'; rr(cx, 615, 125, 70, 14); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.28)'; x.lineWidth = 2; x.stroke();
+    if (on > 0) { x.save(); x.globalAlpha *= oC(on); x.fillStyle = `rgba(${rgb},0.22)`; rr(cx, 615, 125, 70, 14); x.fill(); x.strokeStyle = `rgb(${rgb})`; x.lineWidth = 3; x.stroke(); x.restore(); } }
+  /* l'azione di ricerca: un segno di spunta nella terza settimana */
+  if (act > 0) { x.save(); x.strokeStyle = C.red; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round'; const cx = WK(2) + 62, k1 = clamp(act * 2), k2 = clamp(act * 2 - 1);
+    x.beginPath(); x.moveTo(cx - 22, 650); x.lineTo(cx - 22 + 14 * k1, 650 + 14 * k1); if (k2 > 0) x.lineTo(cx - 8 + 32 * k2, 664 - 32 * k2); x.stroke(); x.restore(); }
+  txt('ULTIME 4 SETTIMANE', (WK(0) + WK(3) + 125) / 2, 584, { fam: 'mono', size: 24, weight: 600, color: C.red, ls: 2, alpha: lab1 });
+  txt('ENTRO 2 SETTIMANE', (WK(4) + WK(5) + 125) / 2, 584, { fam: 'mono', size: 22, weight: 600, color: C.lime, ls: 1, alpha: lab2 });
+  if (now > 0) { x.save(); x.globalAlpha *= now; x.fillStyle = C.ink; rr(672, 600, 4, 100, 2); x.fill(); x.restore(); txt('OGGI', 674, 730, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 2, alpha: now }); }
+  x.restore(); }
+function bigPhone(t, k, o) { const { card, sent, tTap } = o; if (k <= 0) return; const cx = lerp(AM, 540, ioC(k)), cy = lerp(1070, 1120, ioC(k)), s = lerp(0.13, 1, ioC(k));
+  x.save(); x.translate(cx, cy); x.scale(s, s);
+  glow(0, 0, 420, RGB.lime, 0.10);
+  x.fillStyle = '#0B0E0C'; rr(-190, -310, 380, 620, 54); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 4; x.stroke();
+  x.fillStyle = '#101512'; rr(-172, -292, 344, 584, 40); x.fill();
+  x.fillStyle = '#050607'; rr(-48, -280, 96, 22, 11); x.fill();
+  txt('ANNUNCI DI LAVORO', -150, -228, { fam: 'mono', size: 22, weight: 600, color: C.muted, align: 'left', ls: 1 });
+  /* l'annuncio che scorre dentro */
+  if (card > 0) { const dy = (1 - oC(card)) * 120; x.save(); x.globalAlpha *= clamp(card * 2); x.translate(0, dy);
+    x.fillStyle = 'rgba(241,244,238,0.07)'; rr(-152, -190, 304, 300, 26); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 2; x.stroke();
+    x.strokeStyle = C.lime; x.lineWidth = 5; x.lineJoin = 'round'; rr(-34, -150, 68, 46, 8); x.stroke(); rr(-13, -163, 26, 13, 4); x.stroke(); x.beginPath(); x.moveTo(-34, -132); x.lineTo(34, -132); x.stroke();
+    txt('CERCASI PERSONALE', 0, -64, { size: 26, weight: 800, color: C.ink });
+    x.fillStyle = 'rgba(241,244,238,0.22)'; for (const [yy, ww] of [[-16, 220], [16, 250], [48, 160]]) { rr(-ww / 2, yy, ww, 12, 6); x.fill(); }
+    x.restore(); }
+  /* il tasto: «RISPONDI» → «INVIATO» */
+  const kb = clamp(card * 2); if (kb > 0) { x.save(); x.globalAlpha *= kb; const press = t >= tTap ? 1 - 0.06 * Math.sin(Math.PI * clamp((t - tTap) / 0.2)) : 1; x.scale(press, press);
+    if (sent < 0.5) { x.fillStyle = C.lime; rr(-125, 150, 250, 78, 39); x.fill(); txt('RISPONDI', 0, 191, { size: 32, weight: 800, color: '#15200C' }); }
+    else { x.fillStyle = 'rgba(200,250,114,0.12)'; rr(-125, 150, 250, 78, 39); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 3; x.stroke();
+      txt('INVIATO', -16, 191, { size: 32, weight: 800, color: C.lime }); x.strokeStyle = C.lime; x.lineWidth = 6; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(68, 190); x.lineTo(80, 202); x.lineTo(102, 178); x.stroke(); }
+    x.restore(); }
+  x.restore(); }
+function sAnnuncio(t, a, b) { bg('34,44,30', 0.7); x.save();
+  const tUl = WT('annuncio', 'ultime', 1, 0.2), tSt = WT('annuncio', 'settimane', 1, 1.2), tLu = WT('annuncio', 'lui', 1, 1.5), tRi = WT('annuncio', 'risposto', 1, 2.0),
+    tAn = WT('annuncio', 'annuncio', 1, 2.7), tPo = WT('annuncio', 'potrebbe', 1, 3.8), tCo = WT('annuncio', 'cominciare', 1, 4.2), tEn = WT('annuncio', 'entro', 1, 4.6);
+  phrase(t, Math.max(a + 0.05, tUl - 0.1), [['Ha cercato lavoro', C.ink]], 345, { size: 92 });
+  phrase(t, tPo - 0.1, [['e può iniziare.', C.lime]], Y2, { size: 92 });
+  const kP = seg(t, a, a + 0.55);
+  weeks(t, { kIn: oC(seg(t, a + 0.15, a + 0.5)), past: seg(t, tUl, tSt + 0.3), act: seg(t, tRi + 0.25, tRi + 0.6), fut: seg(t, tEn - 0.1, tEn + 0.6),
+    lab1: oC(seg(t, tUl, tUl + 0.4)), lab2: oC(seg(t, tEn, tEn + 0.4)), now: oC(seg(t, tCo - 0.2, tCo + 0.2)) });
+  const tTap = tRi + 0.05;
+  bigPhone(t, kP, { card: seg(t, Math.min(tLu, tRi - 0.4) - 0.2, Math.min(tLu, tRi - 0.4) + 0.3), sent: t >= tTap + 0.18 ? 1 : 0, tTap });
+  tap(540, 1311, t, tTap);
+  ring(540, 1311, 40, t, tAn, RGB.lime, 0.6, 40); void b;
+  x.restore(); finish(t); }
+
+function sInattivo(t, a, b) { bg('44,38,22', 0.75); x.save(); zoom(t, a, b, 1.08);
+  const tTu = WT('inattivo', 'tu', 1, 0.05), tNo = WT('inattivo', 'non', 1, 0.6), tCe = WT('inattivo', 'cercato', 1, 0.9), tIn = WT('inattivo', 'inattivo', 1, 1.8),
+    tAn = WT('inattivo', 'anche', 1, 2.4), tVo = WT('inattivo', 'vorresti', 1, 3.2);
+  phrase(t, Math.max(a + 0.02, tTu - 0.05), [['Tu non hai cercato:', C.ink]], 345, { size: 92 });
+  phrase(t, tIn - 0.15, [['sei inattivo,', C.amber]], Y2, { size: 92 });
+  phrase(t, tAn - 0.1, [['anche se lo vorresti.', C.ink]], Y3, { size: 80 });
+  const kS = oC(seg(t, a, a + 0.35));
+  x.save(); x.globalAlpha *= kS; sofa(1);
+  person(TU, 1, {}); person(AM, 1, { lit: 0.8, dim: 0.5 });
+  /* il tuo telefono resta spento: nessuna ricerca */
+  cross(TU, 1070, 24, seg(t, tCe - 0.1, tCe + 0.35));
+  names(1, [1, 0]);
+  pillSwap(TU, 800, ['SENZA LAVORO', C.ink], ['INATTIVO', C.amber], 1, t, tIn);
+  tagPill(AM, 800, 'DISOCCUPATO', 0.65, C.red);
+  wish(seg(t, tVo - 0.25, tVo + 0.3));
+  x.restore(); void tNo;
+  x.restore(); finish(t); }
+
+/* ================= ZAINO: la settimana di 168 ore, ne basta una ================= */
+const ZG = { x0: 148, cw: 100, gx: 14, y0: 620, ch: 13, gy: 3, day: 3, hour: 17 };
+const zCell = (d, h) => [ZG.x0 + d * (ZG.cw + ZG.gx), ZG.y0 + h * (ZG.ch + ZG.gy)];
+function rider(cx, k, walk, t) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 2);
+  const ph = walk * 9, sw = Math.sin(ph) * 26 * clamp(walk * 3), bobY = Math.abs(Math.sin(ph)) * 5 * clamp(walk * 3), fy = 1335;
+  x.translate(cx, -bobY);
+  const edge = 'rgba(241,244,238,0.8)', body = '#222a25';
+  x.lineCap = 'round'; x.strokeStyle = edge; x.lineWidth = 26; x.beginPath(); x.moveTo(-6, 1250); x.lineTo(-6 + sw, fy - 8); x.moveTo(6, 1250); x.lineTo(6 - sw, fy - 8); x.stroke();
+  x.strokeStyle = body; x.lineWidth = 18; x.stroke();
+  /* zaino cubico delle consegne */
+  x.fillStyle = '#121714'; rr(-112, 1132, 92, 100, 12); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 4; x.stroke();
+  x.strokeStyle = 'rgba(200,250,114,0.7)'; x.lineWidth = 3; x.beginPath(); x.moveTo(-96, 1170); x.lineTo(-36, 1170); x.stroke();
+  x.fillStyle = body; x.strokeStyle = edge; x.lineWidth = 4; rr(-34, 1150, 68, 108, 24); x.fill(); x.stroke();
+  x.beginPath(); x.arc(4, 1112, 30, 0, 7); x.fill(); x.stroke();
+  x.lineWidth = 22; x.strokeStyle = edge; x.beginPath(); x.moveTo(10, 1170); x.lineTo(10 - sw * 0.7, 1236); x.stroke(); x.strokeStyle = body; x.lineWidth = 14; x.stroke();
+  x.restore(); void t; }
+function sZaino(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tBa = WT('zaino', 'basta', 1, 0.5), tOc = WT('zaino', 'occupato', 1, 1.6), tOr = WA('zaino', ['unora', 'ora'], 1, 2.0), tPa = WT('zaino', 'pagata', 1, 2.3),
+    tCo = WT('zaino', 'consegne', 1, 2.8), tZa = WT('zaino', 'zaino', 1, 3.4), tSe = WT('zaino', 'settimana', 1, 4.2);
+  phrase(t, tBa - 0.1, [['Basta pochissimo:', C.ink]], 345, { size: 92 });
+  phrase(t, tOr - 0.1, [['un’ora pagata.', C.lime]], Y2, { size: 92 });
+  const kG = seg(t, a + 0.05, a + 0.9), lit = oC(seg(t, tPa - 0.05, tPa + 0.3)), all = oC(seg(t, tSe - 0.1, tSe + 0.4));
+  ['L', 'M', 'M', 'G', 'V', 'S', 'D'].forEach((g, d) => txt(g, zCell(d, 0)[0] + ZG.cw / 2, 588, { fam: 'mono', size: 24, weight: 600, color: d === ZG.day && lit > 0.5 ? C.lime : C.muted, alpha: oC(seg(kG, d / 9, d / 9 + 0.3)) }));
+  for (let d = 0; d < 7; d++) for (let h = 0; h < 24; h++) { const k = oC(seg(kG, (d * 24 + h) / 168 * 0.7, (d * 24 + h) / 168 * 0.7 + 0.3)); if (k <= 0) continue; const [cx, cy] = zCell(d, h), on = d === ZG.day && h === ZG.hour;
+    x.fillStyle = on && lit > 0 ? `rgba(200,250,114,${lerp(0.09, 1, lit)})` : `rgba(241,244,238,${0.09 * k * (1 - 0.35 * all)})`; x.fillRect(cx, cy, ZG.cw, ZG.ch); }
+  const [lx, ly] = zCell(ZG.day, ZG.hour); if (lit > 0) { glow(lx + ZG.cw / 2, ly + 6, 140, RGB.lime, 0.4 * lit); ring(lx + ZG.cw / 2, ly + 6, 20, t, tPa, RGB.lime, 0.7, 60); }
+  /* cornice della settimana intera, sulla parola «settimana» */
+  if (all > 0) { x.save(); x.globalAlpha = all; x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; rr(ZG.x0 - 12, ZG.y0 - 12, 7 * ZG.cw + 6 * ZG.gx + 24, 24 * (ZG.ch + ZG.gy) + 21, 18); x.stroke(); x.restore(); }
+  txt('1 ORA IN TUTTA LA SETTIMANA', 540, 1052, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, alpha: all });
+  /* il rider entra e si ferma sotto il giovedì */
+  const kw = seg(t, tCo - 0.9, tCo + 0.2), rx = lerp(-140, 540, oC(kw));
+  rider(rx, oC(seg(t, tCo - 0.9, tCo - 0.6)), kw * (1 - kw * 0.0), t);
+  txt('CONSEGNE CON LO ZAINO', 300, 1395, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tZa, tZa + 0.4)) * 0 });
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.globalAlpha = oC(seg(t, tCo - 0.9, tCo - 0.5)); x.beginPath(); x.moveTo(110, 1338); x.lineTo(970, 1338); x.stroke(); x.restore();
+  tagPill(800, 1210, 'OCCUPATO', seg(t, tOc - 0.05, tOc + 0.35) * oC(seg(t, tPa, tPa + 0.3)) + 0 * tOc, C.lime, 30);
+  void tZa; x.restore(); finish(t); }
+
+/* ================= IL CONTO (conto, smette): chi lavora e chi cerca dentro la cornice, gli altri fuori ================= */
+const DOTS = []; for (let i = 0; i < 115; i++) DOTS.push({ ty: i < 90 ? 'L' : i < 100 ? 'R' : 'A', cx: 150 + rnd(i) * 780, cy: 630 + rnd(i + 500) * 400 });
+const gridP = (i) => [200 + (i % 10) * 40, 640 + Math.floor(i / 10) * 40], outP = (j) => [770 + (j % 4) * 48, 650 + Math.floor(j / 4) * 48];
+function dotsField(t, o) { const { kL, kR, kA, quit = 0, frame = 0, labF = 0, labA = 0, flash: fl = 0 } = o;
+  if (frame > 0) { glass(380, 820, 440, 450, 30, frame); x.save(); x.globalAlpha *= frame; x.strokeStyle = `rgba(200,250,114,${0.35 + 0.5 * fl})`; x.lineWidth = 3; rr(160, 595, 440, 450, 30); x.stroke(); x.restore(); }
+  txt('CHI LAVORA O CERCA', 380, 562, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 2, alpha: labF });
+  txt('NON CERCANO', 842, 562, { fam: 'mono', size: 24, weight: 600, color: C.amber, ls: 2, alpha: labA });
+  DOTS.forEach((d, i) => { const dr = 1 - Math.max(d.ty === 'L' ? kL[i] : d.ty === 'R' ? kR : kA, 0);
+    const c0 = [d.cx + Math.sin(t * 1.3 + i) * 7 * dr, d.cy + Math.cos(t * 1.1 + i * 1.7) * 7 * dr];
+    let k = d.ty === 'L' ? kL[i] : d.ty === 'R' ? kR : kA, tgt = d.ty === 'A' ? outP(i - 100) : gridP(i), rgb = d.ty === 'L' ? RGB.lime : d.ty === 'R' ? RGB.red : RGB.amber;
+    let p = [lerp(c0[0], tgt[0], ioC(clamp(k))), lerp(c0[1], tgt[1], ioC(clamp(k)))];
+    if (d.ty === 'R' && i >= 95 && quit > 0) { const q = clamp(quit * 1.4 - (i - 95) * 0.08), o2 = outP(15 + i - 95), e = ioC(q);
+      p = [lerp(tgt[0], o2[0], e), lerp(tgt[1], o2[1], e) - Math.sin(Math.PI * e) * 90]; if (q > 0.5) rgb = RGB.amber; }
+    x.fillStyle = `rgb(${rgb})`; x.beginPath(); x.arc(p[0], p[1], 13, 0, 7); x.fill(); }); }
+const kLs = (t, t0) => DOTS.map((d, i) => seg(t, t0 + i * 0.008, t0 + i * 0.008 + 0.7));
+function sConto(t, a, b) { bg(); x.save();
+  const tIn = WT('conto', 'inganna', 1, 1.6), tTa = WT('conto', 'tasso', 1, 2.3), tCt = WT('conto', 'conta', 1, 3.3), tLa = WT('conto', 'lavora', 1, 3.9), tCe = WT('conto', 'cerca', 1, 4.4);
+  phrase(t, Math.max(a + 0.02, tIn - 0.6), [['Il numero inganna.', C.amber]], 345, { size: 92, out: tCt - 0.35 });
+  phrase(t, tCt - 0.05, [['Conta chi lavora', C.ink]], 345, { size: 92 });
+  phrase(t, tCe - 0.1, [['e chi cerca.', C.red]], Y2, { size: 92 });
+  const kIn = oC(seg(t, a, a + 0.6));
+  x.save(); x.globalAlpha *= kIn;
+  dotsField(t, { kL: kLs(t, tLa - 0.15), kR: seg(t, tCe - 0.1, tCe + 0.6), kA: seg(t, tCt, tCt + 0.7), frame: oC(seg(t, tTa, tTa + 0.5)), labF: oC(seg(t, tCt, tCt + 0.4)), labA: oC(seg(t, tCt + 0.3, tCt + 0.7)) });
+  x.restore();
+  /* la frazione a parole */
+  txt('TASSO DI DISOCCUPAZIONE', 540, 1100, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tTa, tTa + 0.4)) });
+  const kN = oC(seg(t, tCe, tCe + 0.35)), kD = oC(seg(t, tLa, tLa + 0.35));
+  txt('CHI CERCA', 540, 1152, { size: 40, weight: 800, color: C.red, alpha: kN });
+  if (kD > 0) { x.save(); x.globalAlpha = kD; x.fillStyle = C.ink; x.fillRect(lerp(540, 290, kD), 1187, lerp(0, 500, kD), 4); x.restore(); }
+  const dL = 'CHI LAVORA + ', dW = tw(dL, 40) + tw('CHI CERCA', 40), dx0 = 540 - dW / 2;
+  txt(dL, dx0, 1226, { size: 40, weight: 800, color: C.lime, align: 'left', alpha: kD }); txt('CHI CERCA', dx0 + tw(dL, 40), 1226, { size: 40, weight: 800, color: C.red, align: 'left', alpha: kN });
+  mono('ESEMPIO · CIFRE INVENTATE', 540, 1430, t, a + 0.8, { size: 22 });
+  void b; x.restore(); finish(t); }
+function sSmette(t, a, b) { bg(); x.save();
+  const tSm = WT('smette', 'smette', 1, 0.6), tEs = WT('smette', 'esce', 1, 1.4), tTa = WT('smette', 'tasso', 1, 2.3), tSc = WT('smette', 'scendere', 1, 2.7), tPo = WT('smette', 'posti', 1, 3.4);
+  phrase(t, Math.max(a + 0.02, tSm - 0.2), [['Smette di cercare:', C.ink]], 345, { size: 92, out: tTa - 0.35 });
+  phrase(t, tEs - 0.1, [['esce dal conto.', C.amber]], Y2, { size: 92, out: tTa - 0.35 });
+  phrase(t, tTa - 0.05, [['Il tasso scende', C.lime]], 345, { size: 92 });
+  phrase(t, tPo - 0.15, [['senza posti in più.', C.ink]], Y2, { size: 92 });
+  const quit = seg(t, tSm, tSm + 1.0), fl = Math.sin(Math.PI * seg(t, tEs, tEs + 0.6));
+  dotsField(t, { kL: DOTS.map(() => 1), kR: 1, kA: 1, quit, frame: 1, labF: 1, labA: 1, flash: fl });
+  /* la frazione diventa numeri (esempio) */
+  const [wo, ni] = swapK(t, a + 0.35);
+  txt('TASSO DI DISOCCUPAZIONE', 540, 1100, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2 });
+  txt('CHI CERCA', 540, 1152, { size: 40, weight: 800, color: C.red, alpha: wo });
+  x.save(); x.fillStyle = C.ink; x.globalAlpha = wo; x.fillRect(290, 1187, 500, 4); x.restore();
+  const dL = 'CHI LAVORA + ', dW = tw(dL, 40) + tw('CHI CERCA', 40), dx0 = 540 - dW / 2;
+  txt(dL, dx0, 1226, { size: 40, weight: 800, color: C.lime, align: 'left', alpha: wo }); txt('CHI CERCA', dx0 + tw(dL, 40), 1226, { size: 40, weight: 800, color: C.red, align: 'left', alpha: wo });
+  if (ni > 0) { const n1 = seg(t, tSm + 0.7, tSm + 1.1) > 0.5, d1 = seg(t, tEs, tEs + 0.3) > 0.5, r1 = oC(seg(t, tSc - 0.05, tSc + 0.5));
+    const [o1, i1] = swapK(t, tSm + 0.95), [o2, i2] = swapK(t, tEs + 0.2);
+    txt('10', 330, 1150, { size: 56, weight: 800, color: C.red, alpha: ni * o1 }); txt('5', 330, 1150, { size: 56, weight: 800, color: C.red, alpha: ni * i1 });
+    x.save(); x.globalAlpha = ni; x.fillStyle = C.ink; x.fillRect(230, 1188, 200, 4); x.restore();
+    txt('100', 330, 1230, { size: 56, weight: 800, color: C.ink, alpha: ni * o2 }); txt('95', 330, 1230, { size: 56, weight: 800, color: C.ink, alpha: ni * i2 });
+    const v = lerp(10, 100 * 5 / 95, r1);
+    txt('= ' + (r1 > 0 && r1 < 1 ? count(v) : r1 >= 1 ? '5,3' : '10') + '%', 500, 1192, { size: 96, weight: 800, color: r1 > 0.5 ? C.lime : C.red, align: 'left', alpha: ni });
+    if (r1 > 0) { glow(700, 1192, 220, RGB.lime, 0.16 * r1); x.save(); x.globalAlpha = r1; x.fillStyle = C.lime; const ax = 925, ay = 1150 + 40 * r1;
+      x.fillRect(ax - 5, 1130, 10, ay - 1130); x.beginPath(); x.moveTo(ax - 22, ay); x.lineTo(ax + 22, ay); x.lineTo(ax, ay + 26); x.closePath(); x.fill(); x.restore(); }
+    void n1; void d1; }
+  tagPill(540, 1330, 'OCCUPATI: SEMPRE 90', seg(t, tPo - 0.05, tPo + 0.35), C.lime, 28);
+  txt('ESEMPIO · CIFRE INVENTATE', 540, 1430, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 3 });
+  void b; x.restore(); finish(t); }
+
+/* ================= AGOSTO: il tabellone a palette ================= */
+const DIG = '0123456789';
+function flap(cx, cy, w, h, target, t, t0, idx, rgb = RGB.ink) {
+  const fs = h * 0.7, run = 0.75, sp = 13;
+  x.fillStyle = '#0f1311'; rr(cx - w / 2, cy - h / 2, w, h, 14); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.16)'; x.lineWidth = 2; x.stroke();
+  let cur = ' ', prev = ' ', f = 1; const isD = DIG.includes(target);
+  if (t >= t0) cur = target;
+  else if (t > t0 - run && isD) { const n = Math.floor((t - (t0 - run)) * sp); cur = DIG[(idx * 3 + n * 7) % 10]; prev = n ? DIG[(idx * 3 + (n - 1) * 7) % 10] : ' '; f = ((t - (t0 - run)) * sp) % 1; }
+  if (t >= t0 && t < t0 + 1 / sp) { prev = isD ? DIG[(idx * 3 + (Math.floor(run * sp) - 1) * 7) % 10] : ' '; f = (t - t0) * sp; }
+  const col = t >= t0 ? `rgb(${rgb})` : 'rgba(241,244,238,0.85)';
+  const half = (ch, top, sy = 1) => { x.save(); x.beginPath(); x.rect(cx - w / 2, top ? cy - h / 2 : cy, w, h / 2); x.clip(); x.translate(cx, cy); x.scale(1, sy); txt(ch, 0, 4, { size: fs, weight: 800, color: col }); x.restore(); };
+  if (f >= 1) { half(cur, true); half(cur, false); }
+  else if (f < 0.5) { half(cur, true); half(prev, false); x.save(); x.beginPath(); x.rect(cx - w / 2, cy - h / 2, w, h / 2); x.clip(); x.translate(cx, cy); x.scale(1, 1 - 2 * f); x.translate(-cx, -cy); x.fillStyle = '#151a17'; x.fillRect(cx - w / 2, cy - h / 2, w, h / 2); x.restore(); half(prev, true, 1 - 2 * f); }
+  else { half(cur, true); half(prev, false); x.save(); x.beginPath(); x.rect(cx - w / 2, cy, w, h / 2); x.clip(); x.translate(cx, cy); x.scale(1, 2 * f - 1); x.translate(-cx, -cy); x.fillStyle = '#151a17'; x.fillRect(cx - w / 2, cy, w, h / 2); x.restore(); half(cur, false, 2 * f - 1); }
+  x.fillStyle = '#050607'; x.fillRect(cx - w / 2, cy - 2, w, 4);
+  for (const sx of [-1, 1]) { x.fillStyle = 'rgba(241,244,238,0.25)'; x.fillRect(cx + sx * (w / 2 - 6) - 2, cy - 7, 4, 14); } }
+function board(chars, widths, cy, h, gap, t, t0, step, rgb, k) { if (k <= 0) return; const tot = widths.reduce((q, v) => q + v, 0) + gap * (chars.length - 1); let px = 540 - tot / 2;
+  x.save(); x.globalAlpha *= k; chars.forEach((ch, i) => { flap(px + widths[i] / 2, cy, widths[i], h, ch, t, t0 + i * step, i + cy, rgb); px += widths[i] + gap; }); x.restore(); }
+function stamp(cx, cy, label, k, col) { if (k <= 0) return; const s = lerp(1.6, 1, oC(clamp(k))), w = tw(label, 28, 600, 'mono', 3) + 56;
+  x.save(); x.translate(cx, cy); x.rotate(-0.035 * clamp(k)); x.scale(s, s); x.globalAlpha *= clamp(k * 2.5);
+  x.strokeStyle = col; x.lineWidth = 4; rr(-w / 2, -34, w, 68, 10); x.stroke(); x.fillStyle = 'rgba(245,165,36,0.08)'; x.fill();
+  txt(label, 0, 2, { fam: 'mono', size: 28, weight: 600, color: col, ls: 3 }); x.restore(); }
+function sAgosto(t, a, b) { bg('44,38,22', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tAg = WT('agosto', 'agosto', 1, 0.2), tPr = WT('agosto', 'provvisorio', 1, 1.2), tTa = WT('agosto', 'tasso', 1, 2.0), tIn = WT('agosto', 'intorno', 1, 2.4), tCi = WT('agosto', 'circa', 1, 4.0), tPe = WT('agosto', 'persone', 1, 5.4);
+  phrase(t, Math.max(a + 0.02, tAg - 0.1), [['Agosto: il tasso', C.ink]], 345, { size: 92 });
+  phrase(t, tIn - 0.1, [['è intorno al 6%.', C.lime]], Y2, { size: 92 });
+  stamp(540, 590, 'DATO PROVVISORIO · AGOSTO 2026', seg(t, tPr - 0.05, tPr + 0.3), C.amber);
+  board(['6', ',', '2', '%'], [150, 70, 150, 150], 790, 210, 14, t, tIn + 0.25, 0.12, RGB.ink, oC(seg(t, a + 0.1, a + 0.5)));
+  const l1 = seg(t, tIn + 0.6, tIn + 1.0); if (l1 > 0) glow(540, 790, 380, RGB.lime, 0.10 * l1);
+  txt('TASSO DI DISOCCUPAZIONE', 540, 935, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: oC(seg(t, tTa, tTa + 0.4)) });
+  board(['1', '.', '5', '9', '1'], [118, 56, 118, 118, 118], 1095, 170, 12, t, tCi + 0.25, 0.1, RGB.ink, oC(seg(t, a + 0.3, a + 0.7)));
+  txt('MILA PERSONE CHE CERCANO LAVORO', 540, 1240, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: oC(seg(t, tPe - 0.1, tPe + 0.3)) });
+  void b; x.restore(); finish(t); }
+
+/* ================= GIOVANI 15-24: stesse persone, due basi diverse (in scala) ================= */
+const GB = { x0: 110, w: 860, yA: 620, yB: 990, h: 80, rA: 20.3, rB: 4.3, oB: 17.0 };
+const fx = (p) => GB.w * p / 100;
+function segBar(x0, y, w, h, rgb, k = 1) { if (k <= 0 || w <= 0) return; x.save(); x.globalAlpha *= k; x.fillStyle = `rgb(${rgb})`; x.fillRect(x0, y, w, h); x.restore(); }
+function frameBar(y, k) { if (k <= 0) return; x.save(); x.globalAlpha *= k; x.fillStyle = 'rgba(241,244,238,0.05)'; rr(GB.x0, y, GB.w, GB.h, 10); x.fill(); x.restore(); }
+function edgeBar(y, k) { if (k <= 0) return; x.save(); x.globalAlpha *= k; x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; rr(GB.x0, y, GB.w, GB.h, 10); x.stroke(); x.restore(); }
+function legend(k, kA) { const items = [['LAVORANO', RGB.lime, k], ['CERCANO', RGB.red, k], ['NON CERCANO', RGB.amber, kA]], gap = 56, sw = 26, sp = 14;
+  const ws = items.map(([l]) => sw + sp + tw(l, 24, 600, 'mono', 2)), tot = ws.reduce((q, v) => q + v, 0) + gap * 2; let px = 540 - tot / 2;
+  items.forEach(([l, rgb, kk], i) => { if (kk > 0) { x.save(); x.globalAlpha = kk; x.fillStyle = `rgb(${rgb})`; rr(px, 1202, sw, sw, 6); x.fill(); x.restore();
+    txt(l, px + sw + sp, 1216, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', ls: 2, alpha: kk }); } px += ws[i] + gap; }); }
+function youth(t, o) { const { kA = 1, redA = 1, labA = 0, valA = 0, lens = 0, kB = 0, amB = 0, labB = 0, valB = 0, vA = GB.rA, vB = GB.rB, legA = 0, legB = 0 } = o;
+  /* barra A: base = chi lavora o cerca (100% della barra) */
+  frameBar(GB.yA, kA); segBar(GB.x0, GB.yA, GB.w * clamp(kA), GB.h, RGB.lime, 1); segBar(GB.x0, GB.yA, fx(GB.rA) * ioC(clamp(redA)), GB.h, RGB.red, 1); edgeBar(GB.yA, kA);
+  txt('SU CHI LAVORA O CERCA', GB.x0, 584, { fam: 'mono', size: 26, weight: 600, color: C.ink, align: 'left', ls: 2, alpha: labA });
+  txt(count(vA) + '%', 970, 580, { size: 60, weight: 800, color: C.red, align: 'right', alpha: valA });
+  /* la lente: la barra A è la parte sinistra della barra B, in scala */
+  const fB = fx(GB.rB + GB.oB);
+  if (lens > 0) { const e = oC(lens), x1 = lerp(970, GB.x0 + fB, e), yb = lerp(GB.yA + GB.h + 4, GB.yB - 4, e);
+    x.save(); x.fillStyle = 'rgba(200,250,114,0.06)'; x.beginPath(); x.moveTo(GB.x0, GB.yA + GB.h + 4); x.lineTo(970, GB.yA + GB.h + 4); x.lineTo(x1, yb); x.lineTo(GB.x0, yb); x.closePath(); x.fill();
+    x.strokeStyle = 'rgba(200,250,114,0.55)'; x.lineWidth = 3; x.setLineDash([8, 8]); x.beginPath(); x.moveTo(970, GB.yA + GB.h + 4); x.lineTo(x1, yb); x.moveTo(GB.x0, GB.yA + GB.h + 4); x.lineTo(GB.x0, yb); x.stroke(); x.setLineDash([]); x.restore();
+    /* il pezzo «forze di lavoro» scende e si restringe nella barra B */
+    const w0 = GB.w, w1 = fB, ww = lerp(w0, w1, e), yy = lerp(GB.yA, GB.yB, e);
+    if (kB <= 0 || e < 1) { segBar(GB.x0, yy, ww * (GB.oB + GB.rB === 0 ? 0 : 1), GB.h, RGB.lime, 0.9 * clamp(lens * 4)); segBar(GB.x0, yy, ww * GB.rB / (GB.rB + GB.oB), GB.h, RGB.red, clamp(lens * 4)); } }
+  /* barra B: base = tutti i giovani 15-24 */
+  if (kB > 0) { frameBar(GB.yB, kB); segBar(GB.x0, GB.yB, fB, GB.h, RGB.lime); segBar(GB.x0, GB.yB, fx(GB.rB), GB.h, RGB.red);
+    segBar(GB.x0 + fB, GB.yB, (GB.w - fB) * ioC(clamp(amB)), GB.h, RGB.amber); edgeBar(GB.yB, kB); }
+  txt('SU TUTTI I GIOVANI', GB.x0, 1118, { fam: 'mono', size: 26, weight: 600, color: C.ink, align: 'left', ls: 2, alpha: labB });
+  txt(count(vB) + '%', 970, 1114, { size: 60, weight: 800, color: C.red, align: 'right', alpha: valB });
+  legend(legA, legB);
+  mono('15–24 ANNI · DATO PROVVISORIO · AGOSTO 2026', 540, 1420, t, S('giovani') + 0.6, { size: 22 }); }
+function sGiovani(t, a, b) { bg(); x.save();
+  const tTr = WT('giovani', 'tra', 1, 0.05), tAn = WT('giovani', 'anni', 1, 1.3), tCi = WT('giovani', 'circa', 1, 1.6), tSe = WT('giovani', 'sempre', 1, 2.9), tLa = WT('giovani', 'lavora', 1, 3.4), tCe = WT('giovani', 'cerca', 1, 3.8);
+  phrase(t, Math.max(a + 0.02, tTr - 0.05), [['Tra i 15 e i 24 anni', C.ink]], 345, { size: 92 });
+  phrase(t, tCi - 0.1, [['circa il 20%,', C.red]], Y2, { size: 92 });
+  const kr = seg(t, tCi, tCi + 0.8);
+  youth(t, { kA: seg(t, a + 0.1, tAn + 0.2), redA: kr, valA: oC(seg(t, tCi, tCi + 0.3)), vA: GB.rA * oC(kr), labA: oC(seg(t, tSe, tSe + 0.4)), legA: oC(seg(t, tLa, tLa + 0.4)) });
+  void tCe; void b; x.restore(); finish(t); }
+function sTutti(t, a, b) { bg(); x.save();
+  const tMe = WT('tutti', 'mentre', 1, 0.05), tTu = WT('tutti', 'tutti', 1, 0.4), tGi = WT('tutti', 'giovani', 1, 0.7), tDi = WT('tutti', 'disoccupati', 1, 1.6), tPo = WT('tutti', 'poco', 1, 2.3);
+  phrase(t, Math.max(a + 0.02, tMe - 0.05), [['Su tutti i giovani:', C.ink]], 345, { size: 92 });
+  phrase(t, tPo - 0.1, [['poco più di 4 su 100.', C.red]], Y2, { size: 92 });
+  const lens = seg(t, tTu - 0.1, tTu + 0.8), kv = seg(t, tPo, tPo + 0.6);
+  youth(t, { labA: 1, valA: 1, legA: 1, lens, kB: lens >= 1 ? 1 : 0, amB: seg(t, tGi, tGi + 0.9), legB: oC(seg(t, tGi + 0.2, tGi + 0.6)), labB: oC(seg(t, tTu + 0.4, tTu + 0.8)),
+    valB: oC(seg(t, tPo, tPo + 0.3)), vB: GB.rB * oC(kv) });
+  if (kv > 0) ring(GB.x0 + fx(GB.rB) / 2, GB.yB + GB.h / 2, 30, t, tDi + 0.2, RGB.red, 0.7, 40);
+  void b; x.restore(); finish(t); }
+
+/* ================= CASA: il divano, poi il tasso e gli occupati ================= */
+function lensGlass(cx, cy, r, k) { if (k <= 0) return; x.save(); x.globalAlpha *= k; x.fillStyle = 'rgba(200,250,114,0.10)'; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill();
+  x.strokeStyle = C.lime; x.lineWidth = 7; x.stroke(); x.lineCap = 'round'; x.lineWidth = 16; x.beginPath(); x.moveTo(cx + r * 0.72, cy + r * 0.72); x.lineTo(cx + r * 1.35, cy + r * 1.35); x.stroke(); x.restore(); }
+function bust(cx, cy, s, rgb, k) { if (k <= 0) return; x.save(); x.globalAlpha *= k; x.fillStyle = `rgba(${rgb},0.9)`; x.beginPath(); x.arc(cx, cy - 22 * s, 15 * s, 0, 7); x.fill(); x.beginPath(); x.arc(cx, cy + 22 * s, 26 * s, Math.PI, 0); x.fill(); x.restore(); }
+function sCasa(t, a, b) { bg('30,44,26'); x.save();
+  const tDi = WT('casa', 'disoccupato', 1, 1.6), tSz = WT('casa', 'senza', 1, 2.4), tQu = WT('casa', 'quando', 1, 3.3), tSc = WT('casa', 'scende', 1, 3.9), tGu = WT('casa', 'guarda', 1, 4.3), tOc = WT('casa', 'occupati', 1, 4.9);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tDi - 0.4 });
+  phrase(t, tDi - 0.1, [['Disoccupato non è', C.ink]], 345, { size: 92, out: tQu - 0.35 });
+  phrase(t, tSz - 0.1, [['senza lavoro.', C.lime]], Y2, { size: 92, out: tQu - 0.35 });
+  phrase(t, tQu - 0.05, [['Il tasso scende?', C.ink]], 345, { size: 92 });
+  phrase(t, tGu - 0.1, [['Guarda gli occupati.', C.lime]], Y2, { size: 92 });
+  /* fase 1: il divano, tutti e due senza lavoro */
+  const kS = oC(seg(t, a + 0.1, a + 0.6)) * (1 - oC(seg(t, tQu - 0.35, tQu + 0.05)));
+  if (kS > 0) { x.save(); x.globalAlpha *= kS; x.translate(0, 30 * (1 - kS));
+    sofa(1); person(TU, 1); person(AM, 1, { lit: 0.8 }); names(1, [1, 1]);
+    tagPill(TU, 800, 'INATTIVO', 1, C.amber); tagPill(AM, 800, 'DISOCCUPATO', 1, C.red);
+    const kb = oC(seg(t, tSz - 0.05, tSz + 0.4)); if (kb > 0) { x.save(); x.globalAlpha *= kb; x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; x.beginPath(); x.moveTo(230, 1336); x.lineTo(230, 1350); x.lineTo(lerp(540, 850, kb), 1350); x.moveTo(850, 1336); x.lineTo(850, 1350); x.lineTo(lerp(540, 230, kb), 1350); x.stroke(); x.restore();
+      txt('SENZA LAVORO TUTTI E DUE', 540, 1398, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: kb }); }
+    x.restore(); }
+  /* fase 2: due carte, il tasso che scende e gli occupati sotto la lente */
+  const kC = oC(seg(t, tQu - 0.05, tQu + 0.45));
+  if (kC > 0) { x.save(); x.globalAlpha *= kC; x.translate(0, 40 * (1 - kC));
+    glass(300, 930, 400, 400, 32, 1); glass(780, 930, 400, 400, 32, 1);
+    txt('TASSO', 300, 780, { fam: 'mono', size: 28, weight: 600, color: C.ink, ls: 3 }); txt('OCCUPATI', 780, 780, { fam: 'mono', size: 28, weight: 600, color: C.ink, ls: 3 });
+    const ks = seg(t, tSc - 0.1, tSc + 0.5), ay = lerp(860, 1030, ioC(ks));
+    x.fillStyle = C.amber; x.globalAlpha *= 1; x.fillRect(300 - 9, 850, 18, ay - 850); x.beginPath(); x.moveTo(300 - 40, ay); x.lineTo(300 + 40, ay); x.lineTo(300, ay + 48); x.closePath(); x.fill();
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) bust(700 + c * 80, 900 + r * 100, 1, RGB.lime, oC(seg(t, tQu + 0.2 + (r * 3 + c) * 0.05, tQu + 0.5 + (r * 3 + c) * 0.05)));
+    x.restore();
+    const kg = seg(t, tGu - 0.3, tGu + 0.5), lx = lerp(430, 790, ioC(kg)), ly = lerp(1180, 945, ioC(kg)) + Math.sin(t * 3) * 6 * seg(t, tGu + 0.5, tGu + 0.8);
+    lensGlass(lx, ly, 82, oC(seg(t, tGu - 0.3, tGu)) * kC);
+    txt('SCENDE', 300, 1200, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 3, alpha: oC(seg(t, tSc, tSc + 0.4)) * kC });
+    txt('SONO AUMENTATI?', 780, 1200, { fam: 'mono', size: 28, weight: 600, color: C.lime, ls: 3, alpha: oC(seg(t, tOc, tOc + 0.4)) * kC }); }
+  void b; x.restore(); finish(t); }
+
+serie({ hook: sHook, telefono: sTelefono, annuncio: sAnnuncio, inattivo: sInattivo, zaino: sZaino, conto: sConto, smette: sSmette,
+  agosto: sAgosto, giovani: sGiovani, tutti: sTutti, casa: sCasa }, ORDER, ['hook', 'zaino', 'conto', 'agosto', 'casa']);
+</script></body></html>
