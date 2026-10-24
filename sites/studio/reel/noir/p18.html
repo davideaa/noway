@@ -126,7 +126,7 @@ function sHook(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
   phrase(t, tPa - 0.2, [['Parti da', C.ink], ['una pala.', C.amber]], 345, { size: 92 });
   const base = 1180, sink = 380 * ioC(seg(t, tP - 0.7, tP + 0.05)), kc = 1 - seg(t, tP - 0.2, tP + 0.1);
   x.save(); x.beginPath(); x.rect(0, 0, W, base); x.clip(); x.translate(0, sink);
-  const hL = 520 * ioC(seg(t, a, Math.max(a + 1.2, tI + 0.3))), hR = 170 * oC(seg(t, a + 0.1, tRe)) + 6 * Math.sin(t * 3) * seg(t, tRe, tRe + 0.3);
+  const hL = 520 * oC(seg(t, a - 0.1, a + 2.2)), hR = 170 * oC(seg(t, a + 0.1, tRe)) + 6 * Math.sin(t * 3) * seg(t, tRe, tRe + 0.3);
   city(110, base, hL, kc, '200,250,114'); city(606, base, hR, kc, '245,165,36');
   if (hL > 40) glow(292, base - hL, 200, '200,250,114', 0.18 * kc * seg(t, tR - 0.2, tR + 0.4)); x.restore();
   x.save(); x.strokeStyle = 'rgba(190,160,110,0.6)'; x.lineWidth = 3; x.beginPath(); x.moveTo(100, base); x.lineTo(980, base); x.stroke(); x.restore();
@@ -209,7 +209,7 @@ function sModello(t, a, b) { bg(); x.save();
   x.save(); x.translate(cxx, cy); x.scale(sc, sc); x.translate(-540, -(CA.gy + 65));
   cantiere(t, { kTxt: 1 - seg(t, tEs - 0.2, tEs + 0.05), shB: 1, sp3: 1, sp4: 1, LA: 25, inc: [1, 1, 1, 1], kB: 1, LB: 40, exc: { cx: 840, k: 1, dig: 0, wheel: 0 } });
   x.restore();
-  honest('ESEMPIO INVENTATO', oC(seg(t, tIn, tIn + 0.35)), 805);
+  honest('ESEMPIO INVENTATO', oC(seg(t, tIn, tIn + 0.35)), 812);
   if (kc < 0.3) honest('ESEMPIO · CIFRE INVENTATE', 1 - kc / 0.3);
   /* il foglio si srotola sotto */
   const kr = ioC(seg(t, tMo - 0.1, tMo + 0.7)); sheet(850, 1380, oC(seg(t, tMo - 0.2, tMo)), kr);
@@ -379,7 +379,7 @@ function sTutto(t, a, b) { bg('48,40,22', 0.5); x.save();
     x.save(); x.globalAlpha *= 1 - 0.7 * lid; x.translate((bx0 + bx1) / 2, TL.y0 - 40 * lid); x.rotate(-0.07 * lid); x.fillStyle = '#9CC85A'; rr(-(bx1 - bx0) / 2, -22, bx1 - bx0, 22, 8); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 2; x.stroke(); x.restore();
     if (lid > 0.3) glow((bx0 + bx1) / 2, TL.y0, 260, '245,165,36', 0.3 * clamp((lid - 0.3) * 2)); x.restore(); }
   /* escono «di tutto»: punti di domanda */
-  const Q = [[230, 640, 0], [330, 560, 0.12], [800, 545, 0.24], [890, 650, 0.36]];
+  const Q = [[230, 640, 0], [330, 560, 0.12], [800, 545, 0.24], [905, 605, 0.36]];
   Q.forEach(([qx, qy, d]) => { const kk = seg(t, tTu - 0.2 + d, tTu + 0.25 + d); if (kk <= 0) return; const e = oB(kk), px = lerp(540, qx, oC(kk)), py = lerp(TL.y0 + 20, qy, e) + 6 * Math.sin(t * 3 + qx);
     txt('?', px, py, { size: 64, weight: 800, color: C.amber, alpha: clamp(kk * 2) }); });
   const kb = seg(t, tIs - 0.25, tIs + 0.2); book(470, 615, kb, t); lab('ISTRUZIONE', 562, 617, oC(seg(t, tIs, tIs + 0.35)), C.lime, 30, { ls: 4, align: 'left' });
