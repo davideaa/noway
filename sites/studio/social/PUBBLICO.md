@@ -5,6 +5,18 @@ partendo da `social/metriche.json` (storico scaricato da `social/metriche.py`). 
 **segnali**, non conclusioni; una conclusione richiede almeno ~10 reel confrontabili e qualche centinaio di visualizzazioni.
 Tutto dentro `LINEA-EDITORIALE.md`.
 
+## 24/10/2026 — dopo 15 reel (settimane 1–3)
+Dati: 2 follower; 15 reel. Visualizzazioni medie: settimane 1–2 circa 35 a reel, settimana 3 circa 42 (ma la 15 da sola ne ha 122 in meno di un giorno; senza la 15 la media scende a circa 22).
+Like quasi a zero, nessun commento, condivisione o salvataggio.
+
+**Esito della prova della settimana 3 (voce a 0,62 s invece di 1,24 s): non ha funzionato.** La quota vista media è scesa
+dal 12% (settimane 1–2) al 6% (settimana 3): le persone restano in media 2–9 secondi invece di 5–17. Con 5 reel e poche
+decine di visualizzazioni è un **segnale**, non una prova, e c'è un disturbo: la copertina della 11 è uscita grigia (corretta il 19/10).
+Ma la direzione è chiara: anticipare la voce non ha trattenuto di più.
+
+Produzione ferma: Davide il 17/10 ha chiesto di non preparare la settimana 4. Nessuna nuova prova finché non si riparte;
+alla ripartenza la cosa più prudente è tornare alla voce a 1,24 s (come le settimane 1–2) e decidere con Davide la prova successiva.
+
 ## 16/10/2026 — dopo 10 reel (settimane 1–2)
 Dati: 2 follower; 0–110 visualizzazioni a reel (totale circa 330); 1 like al massimo; 0 commenti, condivisioni, salvataggi.
 Tutti alle 12:00 (la 7 per un guasto alle 15:02): sull'orario **non c'è niente da dire**.
