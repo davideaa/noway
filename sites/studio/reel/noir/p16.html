@@ -93,12 +93,8 @@ function sHook(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.06);
 function sTelefono(t, a, b) { bg('34,44,30', 0.8); x.save();
   const tIs = WA('telefono', ['listat', 'istat'], 1, 0.4), tSo = WT('telefono', 'solo', 1, 0.8), tDi = WT('telefono', 'disoccupato', 1, 1.4),
     tDf = WT('telefono', 'differenza', 1, 2.1), tTe = WT('telefono', 'telefono', 1, 2.9);
-  /* alla fine la camera entra nel telefono dell'amico: la scena dopo parte da lì */
-  const kz = ioC(seg(t, b - 0.42, b)); x.translate(AM, 1070); x.scale(1 + 1.6 * kz, 1 + 1.6 * kz); x.translate(-AM, -1070);
-  phrase(t, tIs - 0.1, [['Per l’Istat solo lui', C.ink]], 345, { size: 92, out: tDf - 0.35 });
-  phrase(t, tDi - 0.1, [['è disoccupato.', C.red]], Y2, { size: 92, out: tDf - 0.35 });
-  phrase(t, tDf - 0.05, [['La differenza:', C.ink]], 345, { size: 92 });
-  phrase(t, tTe - 0.1, [['il telefono.', C.lime]], Y2, { size: 92 });
+  /* alla fine la camera entra nel telefono dell'amico (solo il divano, i titoli restano fermi): la scena dopo parte da lì */
+  const kz = ioC(seg(t, b - 0.42, b)); x.save(); if (kz > 0) { x.beginPath(); x.rect(0, 560, W, H - 560); x.clip(); } x.translate(AM, 1070); x.scale(1 + 1.6 * kz, 1 + 1.6 * kz); x.translate(-AM, -1070);
   sofa(1); const dimTu = oC(seg(t, tSo, tSo + 0.4));
   person(TU, 1, { dim: dimTu * 0.6 }); person(AM, 1, { lit: oC(seg(t, tTe - 0.1, tTe + 0.3)) });
   ring(AM, 1070, 50, t, tTe + 0.05, RGB.lime, 0.7, 70); ring(AM, 1070, 50, t, tTe + 0.35, RGB.lime, 0.7, 70);
@@ -106,8 +102,12 @@ function sTelefono(t, a, b) { bg('34,44,30', 0.8); x.save();
   tagPill(TU, 800, 'SENZA LAVORO', 1 - 0.35 * dimTu, C.ink);
   pillSwap(AM, 800, ['SENZA LAVORO', C.ink], ['DISOCCUPATO', C.red], 1, t, tDi + 0.1);
   x.restore();
-  if (kz > 0) { x.fillStyle = `rgba(5,6,7,${0.85 * kz})`; x.fillRect(0, 0, W, H); }
-  finish(t); }
+  if (kz > 0) { x.fillStyle = `rgba(5,6,7,${0.9 * kz})`; x.fillRect(0, 560, W, H - 560); }
+  phrase(t, tIs - 0.1, [['Per l’Istat solo lui', C.ink]], 345, { size: 92, out: tDf - 0.35 });
+  phrase(t, tDi - 0.1, [['è disoccupato.', C.red]], Y2, { size: 92, out: tDf - 0.35 });
+  phrase(t, tDf - 0.05, [['La differenza:', C.ink]], 345, { size: 92 });
+  phrase(t, tTe - 0.1, [['il telefono.', C.lime]], Y2, { size: 92 });
+  x.restore(); finish(t); }
 
 /* ================= ANNUNCIO: il telefono da vicino e le settimane ================= */
 const WK = (i) => i < 4 ? 110 + i * 139 : 696 + (i - 4) * 139; /* bordo sinistro delle celle: 4 passate, 2 future */
@@ -157,7 +157,7 @@ function sAnnuncio(t, a, b) { bg('34,44,30', 0.7); x.save();
   ring(540, 1311, 40, t, tAn, RGB.lime, 0.6, 40); void b;
   x.restore(); finish(t); }
 
-function sInattivo(t, a, b) { bg('44,38,22', 0.75); x.save(); zoom(t, a, b, 1.08);
+function sInattivo(t, a, b) { bg('44,38,22', 0.75); x.save(); zoom(t, a, b, 1.05);
   const tTu = WT('inattivo', 'tu', 1, 0.05), tNo = WT('inattivo', 'non', 1, 0.6), tCe = WT('inattivo', 'cercato', 1, 0.9), tIn = WT('inattivo', 'inattivo', 1, 1.8),
     tAn = WT('inattivo', 'anche', 1, 2.4), tVo = WT('inattivo', 'vorresti', 1, 3.2);
   phrase(t, Math.max(a + 0.02, tTu - 0.05), [['Tu non hai cercato:', C.ink]], 345, { size: 92 });
@@ -179,7 +179,7 @@ function sInattivo(t, a, b) { bg('44,38,22', 0.75); x.save(); zoom(t, a, b, 1.08
 const ZG = { x0: 148, cw: 100, gx: 14, y0: 620, ch: 13, gy: 3, day: 3, hour: 17 };
 const zCell = (d, h) => [ZG.x0 + d * (ZG.cw + ZG.gx), ZG.y0 + h * (ZG.ch + ZG.gy)];
 function rider(cx, k, walk, t) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 2);
-  const ph = walk * 9, sw = Math.sin(ph) * 26 * clamp(walk * 3), bobY = Math.abs(Math.sin(ph)) * 5 * clamp(walk * 3), fy = 1335;
+  const st = clamp(walk * 3) * (1 - seg(walk, 0.8, 1)), ph = walk * 9, sw = Math.sin(ph) * 26 * st, bobY = Math.abs(Math.sin(ph)) * 5 * st, fy = 1335;
   x.translate(cx, -bobY);
   const edge = 'rgba(241,244,238,0.8)', body = '#222a25';
   x.lineCap = 'round'; x.strokeStyle = edge; x.lineWidth = 26; x.beginPath(); x.moveTo(-6, 1250); x.lineTo(-6 + sw, fy - 8); x.moveTo(6, 1250); x.lineTo(6 - sw, fy - 8); x.stroke();
@@ -206,11 +206,10 @@ function sZaino(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   txt('1 ORA IN TUTTA LA SETTIMANA', 540, 1052, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, alpha: all });
   /* il rider entra e si ferma sotto il giovedì */
   const kw = seg(t, tCo - 0.9, tCo + 0.2), rx = lerp(-140, 540, oC(kw));
-  rider(rx, oC(seg(t, tCo - 0.9, tCo - 0.6)), kw * (1 - kw * 0.0), t);
-  txt('CONSEGNE CON LO ZAINO', 300, 1395, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tZa, tZa + 0.4)) * 0 });
+  rider(rx, oC(seg(t, tCo - 0.9, tCo - 0.6)), kw, t);
   x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.globalAlpha = oC(seg(t, tCo - 0.9, tCo - 0.5)); x.beginPath(); x.moveTo(110, 1338); x.lineTo(970, 1338); x.stroke(); x.restore();
-  tagPill(800, 1210, 'OCCUPATO', seg(t, tOc - 0.05, tOc + 0.35) * oC(seg(t, tPa, tPa + 0.3)) + 0 * tOc, C.lime, 30);
-  void tZa; x.restore(); finish(t); }
+  tagPill(800, 1210, 'OCCUPATO', seg(t, Math.max(tCo + 0.2, tZa - 0.1), Math.max(tCo + 0.2, tZa - 0.1) + 0.4), C.lime, 30); /* dopo che il rider si è fermato */
+  void tOc; x.restore(); finish(t); }
 
 /* ================= IL CONTO (conto, smette): chi lavora e chi cerca dentro la cornice, gli altri fuori ================= */
 const DOTS = []; for (let i = 0; i < 115; i++) DOTS.push({ ty: i < 90 ? 'L' : i < 100 ? 'R' : 'A', cx: 150 + rnd(i) * 780, cy: 630 + rnd(i + 500) * 400 });
@@ -330,7 +329,7 @@ function youth(t, o) { const { kA = 1, redA = 1, labA = 0, valA = 0, lens = 0, k
     x.strokeStyle = 'rgba(200,250,114,0.55)'; x.lineWidth = 3; x.setLineDash([8, 8]); x.beginPath(); x.moveTo(970, GB.yA + GB.h + 4); x.lineTo(x1, yb); x.moveTo(GB.x0, GB.yA + GB.h + 4); x.lineTo(GB.x0, yb); x.stroke(); x.setLineDash([]); x.restore();
     /* il pezzo «forze di lavoro» scende e si restringe nella barra B */
     const w0 = GB.w, w1 = fB, ww = lerp(w0, w1, e), yy = lerp(GB.yA, GB.yB, e);
-    if (kB <= 0 || e < 1) { segBar(GB.x0, yy, ww * (GB.oB + GB.rB === 0 ? 0 : 1), GB.h, RGB.lime, 0.9 * clamp(lens * 4)); segBar(GB.x0, yy, ww * GB.rB / (GB.rB + GB.oB), GB.h, RGB.red, clamp(lens * 4)); } }
+    if (kB <= 0 || e < 1) { segBar(GB.x0, yy, ww, GB.h, RGB.lime, 0.9 * clamp(lens * 4)); segBar(GB.x0, yy, ww * GB.rB / (GB.rB + GB.oB), GB.h, RGB.red, clamp(lens * 4)); } }
   /* barra B: base = tutti i giovani 15-24 */
   if (kB > 0) { frameBar(GB.yB, kB); segBar(GB.x0, GB.yB, fB, GB.h, RGB.lime); segBar(GB.x0, GB.yB, fx(GB.rB), GB.h, RGB.red);
     segBar(GB.x0 + fB, GB.yB, (GB.w - fB) * ioC(clamp(amB)), GB.h, RGB.amber); edgeBar(GB.yB, kB); }
@@ -350,9 +349,10 @@ function sTutti(t, a, b) { bg(); x.save();
   phrase(t, Math.max(a + 0.02, tMe - 0.05), [['Su tutti i giovani:', C.ink]], 345, { size: 92 });
   phrase(t, tPo - 0.1, [['poco più di 4 su 100.', C.red]], Y2, { size: 92 });
   const lens = seg(t, tTu - 0.1, tTu + 0.8), kv = seg(t, tPo, tPo + 0.6);
-  youth(t, { labA: 1, valA: 1, legA: 1, lens, kB: lens >= 1 ? 1 : 0, amB: seg(t, tGi, tGi + 0.9), legB: oC(seg(t, tGi + 0.2, tGi + 0.6)), labB: oC(seg(t, tTu + 0.4, tTu + 0.8)),
+  const tAm = Math.max(tGi, tTu + 0.75);
+  youth(t, { labA: 1, valA: 1, legA: 1, lens, kB: lens >= 1 ? 1 : 0, amB: seg(t, tAm, tAm + 0.9), legB: oC(seg(t, tGi + 0.2, tGi + 0.6)), labB: oC(seg(t, tTu + 0.4, tTu + 0.8)),
     valB: oC(seg(t, tPo, tPo + 0.3)), vB: GB.rB * oC(kv) });
-  if (kv > 0) ring(GB.x0 + fx(GB.rB) / 2, GB.yB + GB.h / 2, 30, t, tDi + 0.2, RGB.red, 0.7, 40);
+  ring(GB.x0 + fx(GB.rB) / 2, GB.yB + GB.h / 2, 30, t, tPo + 0.1, RGB.red, 0.7, 40); void tDi;
   void b; x.restore(); finish(t); }
 
 /* ================= CASA: il divano, poi il tasso e gli occupati ================= */
@@ -383,8 +383,8 @@ function sCasa(t, a, b) { bg('30,44,26'); x.save();
     x.fillStyle = C.amber; x.globalAlpha *= 1; x.fillRect(300 - 9, 850, 18, ay - 850); x.beginPath(); x.moveTo(300 - 40, ay); x.lineTo(300 + 40, ay); x.lineTo(300, ay + 48); x.closePath(); x.fill();
     for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) bust(700 + c * 80, 900 + r * 100, 1, RGB.lime, oC(seg(t, tQu + 0.2 + (r * 3 + c) * 0.05, tQu + 0.5 + (r * 3 + c) * 0.05)));
     x.restore();
-    const kg = seg(t, tGu - 0.3, tGu + 0.5), lx = lerp(430, 790, ioC(kg)), ly = lerp(1180, 945, ioC(kg)) + Math.sin(t * 3) * 6 * seg(t, tGu + 0.5, tGu + 0.8);
-    lensGlass(lx, ly, 82, oC(seg(t, tGu - 0.3, tGu)) * kC);
+    const kg = seg(t, tGu - 0.3, tGu + 0.5), lx = lerp(560, 780, ioC(kg)), ly = lerp(1240, 935, ioC(kg)) + Math.sin(t * 3) * 6 * seg(t, tGu + 0.5, tGu + 0.8);
+    lensGlass(lx, ly, 112, oC(seg(t, tGu - 0.3, tGu)) * kC);
     txt('SCENDE', 300, 1200, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 3, alpha: oC(seg(t, tSc, tSc + 0.4)) * kC });
     txt('SONO AUMENTATI?', 780, 1200, { fam: 'mono', size: 28, weight: 600, color: C.lime, ls: 3, alpha: oC(seg(t, tOc, tOc + 0.4)) * kC }); }
   void b; x.restore(); finish(t); }
