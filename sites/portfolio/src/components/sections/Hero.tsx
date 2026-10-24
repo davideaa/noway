@@ -1,0 +1,76 @@
+import { ArrowRight, Mail } from "lucide-react";
+import { HeroScene } from "@/components/motion/HeroScene";
+import { PauseButton } from "@/components/motion/PauseButton";
+import { BacktestTag, Reveal } from "@/components/site/ui";
+import { buttonVariants } from "@/components/ui/button";
+import { FILM_H1 } from "@/lib/site";
+
+// Cifre della fascia (COPY.md v2, 3.1; fonte data/strategie.json). La cifra "mesi di
+// risultati in tempo reale" e' [DA COMPLETARE]: non si mostra (vedi DA-COMPLETARE.md).
+const STATS = [
+  { fig: "3", label: "strategie, su tre mercati che si muovono per motivi diversi" },
+  { fig: "4.206", label: "operazioni simulate in 7,7 anni (backtest)" },
+  { fig: "93", label: "mesi misurati, mese per mese, senza togliere quelli in perdita" },
+  { fig: "6", label: "mesi su 93 in cui hanno perso tutte e tre insieme (backtest)" },
+];
+
+export function Hero() {
+  return (
+    <HeroScene>
+      <div className="max-w-[1100px]">
+        <Reveal variant="scene">
+          <p className="eyebrow chip-solid">
+            <b>01</b> &mdash; Ingresso &nbsp;·&nbsp; XAUUSD · Nasdaq · USDJPY · Backtest 2019–2026
+          </p>
+        </Reveal>
+        <Reveal variant="scene" i={1}>
+          <h1 id="titolo-hero" className="t-display mt-5">
+            {FILM_H1}
+          </h1>
+        </Reveal>
+        <Reveal i={2}>
+          <p className="hero__lead mt-6">
+            Un portafoglio di tre sistemi automatici su XAUUSD, Nasdaq e USDJPY. Qui ci sono i loro risultati, spiegati
+            in modo semplice: sono di backtest validati fuori campione e non garantiscono rendimenti futuri.
+          </p>
+        </Reveal>
+        <Reveal i={3} className="mt-8 flex flex-wrap items-center gap-3">
+          <a href="#esplora" className={buttonVariants()}>
+            Scegli una strategia
+            <ArrowRight size={16} strokeWidth={1.6} aria-hidden />
+          </a>
+          <a href="#simulatore" className={buttonVariants({ variant: "outline" })}>
+            Apri il simulatore
+          </a>
+          <a href="#contatti" className={buttonVariants({ variant: "outline" })} aria-label="Contattaci: vai ai contatti">
+            <Mail size={16} strokeWidth={1.6} aria-hidden />
+            Contattaci
+          </a>
+        </Reveal>
+        <Reveal i={4}>
+          <p className="chip-solid t-sec mt-5 max-w-[68ch] text-ink!">
+            I risultati sono simulazioni su dati storici. I risultati passati non garantiscono quelli futuri.
+          </p>
+        </Reveal>
+      </div>
+
+      <Reveal i={5} className="mt-10 space-y-3 md:mt-14">
+        <div className="flex flex-wrap items-center gap-3">
+          <BacktestTag />
+          <span className="chip-solid t-note">Periodo 2019.01–2026.09, 93 mesi (il 2026 arriva a settembre)</span>
+        </div>
+        <ul className="stats">
+          {STATS.map((s) => (
+            <li key={s.fig} className="stat">
+              <span className="fig-xl">{s.fig}</span>
+              <span className="t-sec">{s.label}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="pt-1">
+          <PauseButton />
+        </div>
+      </Reveal>
+    </HeroScene>
+  );
+}
