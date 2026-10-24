@@ -319,7 +319,7 @@ function prodChart(t, o) { const { kIt = 1, pIt = 0, sIt = 0, l1 = 0, l2 = 0, kD
   trend(PC.it, PC.itS, sIt, C.amber, '245,165,36', true); trend(PC.it, PC.itP, pIt, C.lime, '200,250,114', false);
   trend(PC.de, PC.deS, sDe, C.amber, '245,165,36', true); trend(PC.de, PC.deP, pDe, C.lime, '200,250,114', false);
   lab('QUASI FERMA', 325, 1040, l1, C.lime, 24); lab('CIRCA −3%', 325, 1160, l2, C.amber, 24);
-  lab('CIRCA +20%', PC.de[1], 752, lD, C.ink, 26, { align: 'right' });
+  lab('CIRCA +20%', PC.de[1], 728, lD, C.ink, 26, { align: 'right' });
   legend(g1, g2); mono('INDICE 2000 = 100 · PRIMO E ULTIMO ANNO', 540, 1405, t, PC.t0 || 0, { size: 22 }); }
 function sFerma(t, a, b) { bg(); x.save();
   const tPr = WT('ferma', 'produttivita', 1, 2.4), tQu = WT('ferma', 'quasi', 1, 4.0), tFe = WT('ferma', 'ferma', 1, 4.4);
