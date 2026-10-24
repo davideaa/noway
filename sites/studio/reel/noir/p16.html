@@ -68,7 +68,7 @@ function person(cx, k, o = {}) { const { lit = 0, dim = 0, bob = 0 } = o; if (k 
   x.restore(); }
 function names(k, hot = [0, 0]) { txt('TU', TU, 1300, { fam: 'mono', size: 26, weight: 600, color: hot[0] ? C.ink : C.muted, ls: 3, alpha: k });
   txt('IL TUO AMICO', AM, 1300, { fam: 'mono', size: 26, weight: 600, color: hot[1] ? C.ink : C.muted, ls: 3, alpha: k }); }
-/* nuvoletta del pensiero con la valigetta: «un lavoro lo vorresti» */
+/* nuvoletta del pensiero con la valigetta: «un lavoro lo vuoi» */
 function wish(k) { if (k <= 0) return; const cx = 168, cy = 925, s = lerp(0.5, 1, oB(clamp(k)));
   x.save(); x.globalAlpha *= clamp(k * 2);
   for (const [px, py, r] of [[296, 905, 7], [268, 914, 10]]) { x.fillStyle = 'rgba(241,244,238,0.85)'; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill(); }
@@ -159,10 +159,10 @@ function sAnnuncio(t, a, b) { bg('34,44,30', 0.7); x.save();
 
 function sInattivo(t, a, b) { bg('44,38,22', 0.75); x.save(); zoom(t, a, b, 1.05);
   const tTu = WT('inattivo', 'tu', 1, 0.05), tNo = WT('inattivo', 'non', 1, 0.6), tCe = WT('inattivo', 'cercato', 1, 0.9), tIn = WT('inattivo', 'inattivo', 1, 1.8),
-    tAn = WT('inattivo', 'anche', 1, 2.4), tVo = WT('inattivo', 'vorresti', 1, 3.2);
+    tAn = WT('inattivo', 'anche', 1, 2.4), tVo = WT('inattivo', 'vuoi', 1, 3.0);
   phrase(t, Math.max(a + 0.02, tTu - 0.05), [['Tu non hai cercato:', C.ink]], 345, { size: 92 });
   phrase(t, tIn - 0.15, [['sei inattivo,', C.amber]], Y2, { size: 92 });
-  phrase(t, tAn - 0.1, [['anche se lo vorresti.', C.ink]], Y3, { size: 80 });
+  phrase(t, tAn - 0.1, [['anche se lo vuoi.', C.ink]], Y3, { size: 80 });
   const kS = oC(seg(t, a, a + 0.35));
   x.save(); x.globalAlpha *= kS; sofa(1);
   person(TU, 1, {}); person(AM, 1, { lit: 0.8, dim: 0.5 });
