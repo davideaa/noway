@@ -51,7 +51,7 @@ function sHook(t, a, b) { bg('52,26,24', 0.55); x.save(); zoom(t, a, b, 1.05);
   x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 3; x.beginPath(); x.moveTo(110, HK.by); x.lineTo(970, HK.by); x.stroke();
   /* l'Italia */
   const kI = oC(seg(t, tMe + 0.15, tMe + 0.5)); if (kI > 0) { glow(hkX(26), HK.by - 30, 110, '255,90,78', 0.35 * kI);
-    txt('ITALIA', 962, HK.by - 8.6 * HK.ppp - 42, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'right', ls: 2, alpha: kI }); }
+    dashLine(hkX(26), HK.by - 82, hkX(26), HK.by - 8.6 * HK.ppp - 8, C.red, 3, [4, 5], kI); txt('ITALIA', 962, HK.by - 100, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'right', ls: 2, alpha: kI }); }
   /* gli altri 26 */
   const kA = oC(seg(t, tAl - 0.1, tAl + 0.35)); if (kA > 0) { x.save(); x.globalAlpha = kA; x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3;
     const x0 = HK.x0 + 4, x1 = HK.x0 + 26 * HK.sw - 4; x.beginPath(); x.moveTo(x0, 612); x.lineTo(x0, 600); x.lineTo(x1, 600); x.lineTo(x1, 612); x.stroke(); x.restore();
