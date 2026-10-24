@@ -96,8 +96,8 @@ function chart(t, o = {}) { const { kIn = 1, n = {}, lab = {}, tolti = 0 } = o; 
 }
 function sNove(t, a, b) { bg('52,26,24', 0.45); x.save();
   const tTr = WT('nove', 'tra', 1, 1.4), tTo = WT('nove', 'tolti', 1, 5.6), tSa = WT('nove', 'salito', 1, 6.7), tMe = WT('nove', 'meno', 1, 7.3);
-  phrase(t, a + 0.05, [['PIL per abitante:', C.ink]], 345, { size: 92, out: b - 0.3 });
-  phrase(t, tMe - 0.1, [['meno di +9%.', C.red]], Y2, { size: 92, out: b - 0.3 });
+  phrase(t, a + 0.05, [['PIL per abitante:', C.ink]], 345, { size: 92, out: b - 0.2 });
+  phrase(t, tMe - 0.1, [['meno di +9%.', C.red]], Y2, { size: 92, out: b - 0.2 });
   chart(t, { kIn: oC(seg(t, a, a + 0.5)), n: { it: 25 * ioC(seg(t, tTr - 0.1, tSa + 0.2)) }, lab: { it: oC(seg(t, tMe + 0.1, tMe + 0.5)) }, tolti: seg(t, tTo - 0.1, tTo + 1.4) });
   ring(GX(2025), GY(SER.it[25]), 14, t, tMe + 0.15, '255,90,78', 0.7, 34);
   x.restore(); finish(t); }

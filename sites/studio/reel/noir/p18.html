@@ -56,7 +56,7 @@ function amico(cx, gy, o = {}) { const { k = 1, dig = 0, t = 0, ph = 0, shovel =
   else { x.strokeStyle = armC; x.lineWidth = 10; x.beginPath(); x.moveTo(...Sh); x.lineTo(-16, -100); x.moveTo(...Sh); x.lineTo(28, -102); x.stroke(); }
   x.restore(); }
 /* l'escavatore, disegnato rivolto a sinistra (dir = −1 lo specchia); il braccio raggiunge il punto (tx, ty) del mondo */
-function excav(cx, gy, s, k, tx, ty, dir = 1, wheel = 0, glowK = 0) { if (k <= 0) return;
+function excav(cx, gy, s, k, tx, ty, dir = 1, wheel = 0, glowK = 0, down = false) { if (k <= 0) return;
   if (glowK > 0) glow(cx, gy - 120 * s, 260 * s, '245,165,36', 0.25 * glowK);
   x.save(); x.translate(cx, gy); x.scale(s * dir, s); x.globalAlpha *= clamp(k); x.lineCap = 'round'; x.lineJoin = 'round';
   const lx = (tx - cx) / (s * dir), ly = (ty - gy) / s, P0 = [-30, -118], l1 = 200, l2 = 168;
@@ -67,7 +67,7 @@ function excav(cx, gy, s, k, tx, ty, dir = 1, wheel = 0, glowK = 0) { if (k <= 0
   x.fillStyle = 'rgba(200,250,114,0.55)'; rr(-82, -204, 58, 52, 6); x.fill(); x.fillStyle = 'rgba(5,6,7,0.35)'; x.fillRect(40, -120, 70, 8);
   /* due segmenti con il gomito in alto */
   let dx = lx - P0[0], dy = ly - P0[1], d = Math.min(Math.hypot(dx, dy), l1 + l2 - 2); const an = Math.atan2(dy, dx), bb = Math.acos(clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1));
-  const E1 = [P0[0] + Math.cos(an + bb) * l1, P0[1] + Math.sin(an + bb) * l1], E2 = [P0[0] + Math.cos(an - bb) * l1, P0[1] + Math.sin(an - bb) * l1], E = E1[1] < E2[1] ? E1 : E2;
+  const E1 = [P0[0] + Math.cos(an + bb) * l1, P0[1] + Math.sin(an + bb) * l1], E2 = [P0[0] + Math.cos(an - bb) * l1, P0[1] + Math.sin(an - bb) * l1], E = (E1[1] < E2[1]) !== down ? E1 : E2;
   const B = [P0[0] + Math.cos(an) * d, P0[1] + Math.sin(an) * d];
   x.strokeStyle = '#8B958F'; x.lineWidth = 7; x.beginPath(); x.moveTo(10, -126); x.lineTo(lerp(P0[0], E[0], 0.55), lerp(P0[1], E[1], 0.55)); x.stroke();
   x.strokeStyle = '#E3A12F'; x.lineWidth = 26; x.beginPath(); x.moveTo(...P0); x.lineTo(...E); x.stroke();
@@ -101,7 +101,7 @@ function cantiere(t, o = {}) {
   if (rack) rack.forEach(([px, kk]) => { if (kk <= 0) return; const dy = -40 * (1 - oB(clamp(kk))); pala(px - 8, CA.gy - 200 + dy, px + 4, CA.gy + 18 + dy, clamp(kk * 3)); });
   amico(CA.ax, CA.gy, { k: kF, dig: digA, t, ph: 0, shovel: 1, armHi });
   amico(CA.bx, CA.gy, { k: kF, dig: digB, t, ph: 2.1, shovel: shB, armHi });
-  if (exc) excav(exc.cx, CA.gy, 1, exc.k, exc.cx - 205 + 18 * Math.sin(t * 4.4), CA.gy - 40 + 34 * (0.5 + 0.5 * Math.cos(t * 4.4)) * exc.dig, 1, exc.wheel, exc.glow || 0);
+  if (exc) excav(exc.cx, CA.gy, 1, exc.k, exc.cx - 225 + 18 * Math.sin(t * 4.4), CA.gy - 76 + 28 * (0.5 + 0.5 * Math.cos(t * 4.4)) * exc.dig, 1, exc.wheel, exc.glow || 0);
   /* riga delle pale */
   band(CA.yA, 1); trench(CA.yA, LA, 1, VA.map((v, i) => [v, SEGC[i]]), '241,244,238', kTxt);
   lab('CON LE PALE', CA.X0, 1005, kTxt, C.muted, 22, { align: 'left', ls: 1 }); lab('METRI DI FOSSO AL GIORNO', 950, 1005, kTxt, C.muted, 22, { align: 'right', ls: 1 });
@@ -272,7 +272,7 @@ function savingsChart(t, o) { const { kAx = 1, kx2 = 1, kP1 = 1, kP2 = 0, kB = 0
     x.fillStyle = C.lime; x.beginPath(); x.moveTo(bx, ya - 6); x.lineTo(bx - 10, ya + 12); x.lineTo(bx + 10, ya + 12); x.fill(); x.restore();
     txt('più ricco', bx + 22, (ya + yb) / 2 + 2, { size: 34, weight: 800, color: C.lime, align: 'left', alpha: kB }); }
   if (kFlat > 0) for (const L of [L1, L2]) { const xe = SH.xr - 20, ye = yL(xe, L, 0); x.save(); x.globalAlpha *= kFlat; x.fillStyle = C.red; x.beginPath(); x.moveTo(xe + 26, ye); x.lineTo(xe + 8, ye - 10); x.lineTo(xe + 8, ye + 10); x.fill(); x.restore(); }
-  if (kEx > 0) { const tx = 850, ty = yL(tx, L1, tilt) + 70; excav(700, SH.oy, 1, kEx, tx, ty, -1, wheel, 0.6 * kEx); }
+  if (kEx > 0) { const tx = 850, ty = yL(tx, L1, tilt) + 70; excav(700, SH.oy, 1, kEx, tx, ty, -1, wheel, 0.6 * kEx, true); }
 }
 function sRisp(t, a, b) { bg(); x.save();
   const tRi = WT('risparmio', 'risparmiare', 1, 0.3), tAr = WT('risparmio', 'arricchisce', 1, 1.4), tPa = WT('risparmio', 'paese', 1, 2.1), tNo = WT('risparmio', 'non', 1, 2.8), tCr = WT('risparmio', 'crescere', 1, 3.8), tSe = WT('risparmio', 'sempre', 1, 5.5);
