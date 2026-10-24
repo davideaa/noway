@@ -101,7 +101,7 @@ function cantiere(t, o = {}) {
   if (rack) rack.forEach(([px, kk]) => { if (kk <= 0) return; const dy = -40 * (1 - oB(clamp(kk))); pala(px - 8, CA.gy - 200 + dy, px + 4, CA.gy + 18 + dy, clamp(kk * 3)); });
   amico(CA.ax, CA.gy, { k: kF, dig: digA, t, ph: 0, shovel: 1, armHi });
   amico(CA.bx, CA.gy, { k: kF, dig: digB, t, ph: 2.1, shovel: shB, armHi });
-  if (exc) excav(exc.cx, CA.gy, 1, exc.k, exc.cx - 225 + 18 * Math.sin(t * 4.4), CA.gy - 76 + 28 * (0.5 + 0.5 * Math.cos(t * 4.4)) * exc.dig, 1, exc.wheel, exc.glow || 0);
+  if (exc) excav(exc.cx, CA.gy, 1, exc.k, exc.cx - 188 + 14 * Math.sin(t * 4.4), CA.gy - 76 + 28 * (0.5 + 0.5 * Math.cos(t * 4.4)) * exc.dig, 1, exc.wheel, exc.glow || 0);
   /* riga delle pale */
   band(CA.yA, 1); trench(CA.yA, LA, 1, VA.map((v, i) => [v, SEGC[i]]), '241,244,238', kTxt);
   lab('CON LE PALE', CA.X0, 1005, kTxt, C.muted, 22, { align: 'left', ls: 1 }); lab('METRI DI FOSSO AL GIORNO', 950, 1005, kTxt, C.muted, 22, { align: 'right', ls: 1 });
