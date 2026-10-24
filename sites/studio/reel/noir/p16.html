@@ -228,7 +228,7 @@ function dotsField(t, o) { const { kL, kR, kA, quit = 0, frame = 0, labF = 0, la
 const kLs = (t, t0) => DOTS.map((d, i) => seg(t, t0 + i * 0.004, t0 + i * 0.004 + 0.5)); /* 90 punti in meno di un secondo */
 function sConto(t, a, b) { bg(); x.save();
   const tNu = WT('conto', 'numero', 1, 1.2), tIn = WT('conto', 'inganna', 1, 1.6), tTa = WT('conto', 'tasso', 1, 2.3), tCt = WT('conto', 'conta', 1, 3.3), tLa = WT('conto', 'lavora', 1, 3.9), tCe = WT('conto', 'cerca', 1, 4.4);
-  phrase(t, Math.max(a + 0.02, tNu - 0.1), [['Il numero può ingannare.', C.amber]], 345, { size: 92, out: tCt - 0.35 }); void tIn;
+  phrase(t, Math.max(a + 0.02, tNu - 0.1), [['Il numero può ingannare.', C.amber]], 345, { size: 92, maxW: 880, out: tCt - 0.35 }); /* dentro x 5–90% */ void tIn;
   phrase(t, tCt - 0.05, [['Conta chi lavora', C.ink]], 345, { size: 92 });
   phrase(t, tCe - 0.1, [['e chi cerca.', C.red]], Y2, { size: 92 });
   const kIn = oC(seg(t, a, a + 0.6));
@@ -248,8 +248,8 @@ function sSmette(t, a, b) { bg(); x.save();
   const tSm = WT('smette', 'smette', 1, 0.6), tEs = WT('smette', 'esce', 1, 1.4), tTa = WT('smette', 'tasso', 1, 2.3), tSc = WT('smette', 'scendere', 1, 2.7), tPo = WT('smette', 'posti', 1, 3.4);
   phrase(t, Math.max(a + 0.02, tSm - 0.2), [['Smette di cercare:', C.ink]], 345, { size: 92, out: tTa - 0.35 });
   phrase(t, tEs - 0.1, [['esce dal conto.', C.amber]], Y2, { size: 92, out: tTa - 0.35 });
-  phrase(t, tTa - 0.05, [['Il tasso può scendere', C.lime]], 345, { size: 92 });
-  phrase(t, tPo - 0.15, [['senza posti in più.', C.ink]], Y2, { size: 92 });
+  phrase(t, tTa - 0.05, [['Il tasso può scendere', C.lime]], 345, { size: 84, maxW: 880 }); /* stessa misura per le due righe, dentro x 5–90% */
+  phrase(t, tPo - 0.15, [['senza posti in più.', C.ink]], 345 + 84 * 1.12, { size: 84 });
   const quit = seg(t, tSm, tSm + 1.0), fl = Math.sin(Math.PI * seg(t, tEs, tEs + 0.6));
   dotsField(t, { kL: DOTS.map(() => 1), kR: 1, kA: 1, quit, frame: 1, labF: 1, labA: 1, flash: fl });
   /* la frazione diventa numeri (esempio) */
