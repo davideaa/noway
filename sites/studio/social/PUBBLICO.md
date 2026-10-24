@@ -14,8 +14,8 @@ dal 12% (settimane 1–2) al 6% (settimana 3): le persone restano in media 2–9
 decine di visualizzazioni è un **segnale**, non una prova, e c'è un disturbo: la copertina della 11 è uscita grigia (corretta il 19/10).
 Ma la direzione è chiara: anticipare la voce non ha trattenuto di più.
 
-Produzione ferma: Davide il 17/10 ha chiesto di non preparare la settimana 4. Nessuna nuova prova finché non si riparte;
-alla ripartenza la cosa più prudente è tornare alla voce a 1,24 s (come le settimane 1–2) e decidere con Davide la prova successiva.
+**Decisione di Davide (24/10): i dati sono troppo pochi per basarci un cambiamento: la settimana 4 (puntate 16–20, 26–30/10) si fa
+identica alla settimana 3** (voce a 0,62 s, copertina a 0,3 s). Nessuna nuova prova; si riguarda con più reel.
 
 ## 16/10/2026 — dopo 10 reel (settimane 1–2)
 Dati: 2 follower; 0–110 visualizzazioni a reel (totale circa 330); 1 like al massimo; 0 commenti, condivisioni, salvataggi.
