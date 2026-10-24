@@ -268,7 +268,7 @@ function sImmigrazione(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
 
 /* ================= LAVORO + PRODUTTIVITÀ: il muro del lavoro (illustrazione) ================= */
 const WL = { x0: 120, cols: 5, pit: 128, bw: 122, bh: 62, gy: 6, rows: 6, by: 1300 };
-const GAPC = [1, 2, 3], GAPL = ['DONNE', 'DONNE', 'GIOVANI'];
+const GAPC = [1, 2, 3], GAPL = ['PERSONE', 'PERSONE', 'PERSONE'];
 function brick(px, py, w, h, o = {}) { const { fill = '#1A201C', stroke = 'rgba(241,244,238,0.55)', dash = false, a = 1, label = null, lcol = '#15200C' } = o; if (a <= 0) return;
   x.save(); x.globalAlpha *= a; rr(px, py, w, h, 8); x.fillStyle = fill; x.fill(); x.strokeStyle = stroke; x.lineWidth = 2.5; if (dash) x.setLineDash([7, 6]); x.stroke(); x.setLineDash([]);
   x.fillStyle = 'rgba(255,255,255,0.10)'; if (!dash) x.fillRect(px + 8, py + 5, w - 16, 3); x.restore();
@@ -285,7 +285,7 @@ function wall(t, o = {}) { const { k = 1, gapFill = [0, 0, 0], gapGhost = 1, gro
         continue; }
       if (lastCol && rem > 0) { brick(px, py, w, bh, { fill: 'rgba(255,90,78,0.10)', stroke: 'rgba(255,90,78,0.85)', dash: rem > 0.5, a: 1 - 0.75 * rem }); continue; }
       brick(px, py, w, bh); } }
-  /* i mattoni nuovi (donne, giovani) al loro posto */
+  /* i mattoni nuovi (più persone al lavoro) al loro posto */
   GAPC.forEach((c, gi) => { const f = gapFill[gi]; if (f < 1) return; const py = WL.by - WL.rows * pitY + WL.gy, px = WL.x0 + c * WL.pit;
     brick(px, py, WL.bw, bh, { fill: 'rgba(200,250,114,0.92)', stroke: C.lime, label: GAPL[gi] }); });
   x.restore(); }
@@ -296,8 +296,8 @@ function flyBrick(t, gi, t0, from) { const u = seg(t, t0 - 0.7, t0); if (u <= 0 
   brick(-WL.bw / 2, -WL.bh / 2, WL.bw, WL.bh, { fill: 'rgba(200,250,114,0.92)', stroke: C.lime, label: GAPL[gi] }); x.restore(); }
 function levelLine(k) { const y = wallTop(1) - 4; dashLine(100, y, 990, y, 'rgba(200,250,114,0.75)', 3, [12, 9], k); lab('OGGI', 990, y - 26, k, C.lime, 24, { align: 'right' }); }
 function sLavoro(t, a, b) { bg(); x.save();
-  const tDo = WT('lavoro', 'donne', 1, 0.7), tGi = WT('lavoro', 'giovani', 1, 1.4), tMa = WT('lavoro', 'massimo', 1, 4.5), tCa = WT('lavoro', 'calo', 1, 5.5);
-  phrase(t, Math.max(a + 0.02, tDo - 0.35), [['Più donne e giovani', C.lime]], 345, { size: 92 });
+  const tDo = WT('lavoro', 'persone', 1, 1.6), tGi = WT('lavoro', 'lavoro', 1, 2.2), tMa = WT('lavoro', 'massimo', 1, 4.5), tCa = WT('lavoro', 'calo', 1, 5.5);
+  phrase(t, Math.max(a + 0.02, tDo - 0.35), [['Più persone al lavoro', C.lime]], 345, { size: 84 });
   phrase(t, tMa - 0.1, [['al massimo compensano.', C.ink]], Y2, { size: 92 });
   const kW = oC(seg(t, a, a + 0.5)), t1 = tDo + 0.55, t2 = tDo + 0.85, t3 = tGi + 0.65;
   levelLine(kW);
