@@ -187,9 +187,9 @@ const OUT100 = (() => { const r = rngf(23), a = Array.from({ length: 100 }, (_, 
 const ACC = (() => { /* conto illustrativo: sale a zig-zag da 1.000 a 1.200 € */ const r = rngf(77), o = [1000]; let v = 1000; for (let i = 1; i <= 100; i++) { const up = i % 5 !== 0 ? r() < 0.55 : false; v += up ? 12 : -5; o.push(v); } const k = 200 / (o[100] - 1000); return o.map((q, i) => 1000 + (q - 1000) * k); })();
 function sCento(t, a, b) { bg('56,14,24'); x.save(); zoom(t, a, b, 1.04);
   const t0 = Math.max(a + 0.1, WA('cento', ['cento', '100'], 1, 0.5) - 0.2), tM = WT('cento', 'media', 1, 1.6) - 0.15, tV = Math.max(t0 + 2, WA('cento', ['milleduecento', '1200', '1.200'], 1, 5.0) - 0.1);
-  const p = seg(t, t0 + 0.2, tV), n = Math.min(100, p * 100), v = ACC[Math.floor(n)] + (ACC[Math.min(100, Math.floor(n) + 1)] - ACC[Math.floor(n)]) * (n % 1), fin = t >= tV - 0.05;
+  const p = seg(t, t0 + 0.2, tV), n = Math.min(100, p * 100), v = ACC[Math.floor(n)] + (ACC[Math.min(100, Math.floor(n) + 1)] - ACC[Math.floor(n)]) * (n % 1), fin = t >= tV - 0.05; const vv = Math.min(v, 1200);
   const kc = oC(seg(t, a + 0.1, a + 0.5)); lab('IL CONTO', 540, 590, C.muted, 26, { alpha: kc });
-  const pop = fin ? 1 + 0.07 * Math.sin(Math.PI * clamp((t - tV + 0.05) / 0.4)) : 1; x.save(); x.translate(540, 680); x.scale(pop, pop); if (fin) glow(0, 0, 320, '232,196,106', 0.25); txt(eur(t < t0 ? 1000 : v), 0, 0, { size: 130, weight: 800, color: C.lime, ls: -3, alpha: kc }); x.restore();
+  const pop = fin ? 1 + 0.07 * Math.sin(Math.PI * clamp((t - tV + 0.05) / 0.4)) : 1; x.save(); x.translate(540, 680); x.scale(pop, pop); if (fin) glow(0, 0, 320, '232,196,106', 0.25); txt(eur(t < t0 ? 1000 : vv), 0, 0, { size: 130, weight: 800, color: C.lime, ls: -3, alpha: kc }); x.restore();
   glass(540, 1070, 920, 560, 40, kc); lab('ILLUSTRAZIONE', 130, 820, C.muted, 22, { align: 'left', alpha: kc });
   const X0 = 130, X1 = 950, Y0 = 880, Y1 = 1300, lo = 985, hi = 1205, ym = (q) => lerp(Y1, Y0, (q - lo) / (hi - lo)), xm = (i) => lerp(X0, X1, i / 100);
   x.save(); x.globalAlpha = kc; x.strokeStyle = 'rgba(244,239,233,0.25)'; x.lineWidth = 2; x.setLineDash([4, 10]); x.beginPath(); x.moveTo(X0, ym(1000)); x.lineTo(X1, ym(1000)); x.stroke(); x.setLineDash([]); lab('1.000 €', X0 + 4, ym(1000) + 24, C.muted, 22, { align: 'left' }); x.restore();
