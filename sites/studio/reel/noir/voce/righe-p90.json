@@ -1,13 +1,15 @@
 [
- ["Il trading è forse il gioco mentale più difficile che esista: assomiglia al poker, ma la mano non finisce mai.", "hook"],
- ["Al tavolo non scegli le carte che ti arrivano, e sui mercati non scegli il prezzo.", "carte"],
- ["Scegli solo tre cose: quando giocare, quanto puntare, e quando alzarti dal tavolo.", "tre"],
- ["E anche la coppia d'assi, contro una coppia di re, perde circa due volte su dieci.", "assi"],
- ["Per questo una buona scelta può perdere, e conta il risultato su tante mani.", "tante"],
- ["Esempio inventato: vinci quattro mani su dieci, ma quando vinci prendi il doppio di quello che rischi.", "esempio"],
+ ["Il trading è come il poker: non vince chi ha la mano più bella, vince chi sa quanto puntare.", "hook"],
+ ["Fare trading vuol dire comprare qualcosa, per esempio l'oro, sperando che salga, oppure venderlo sperando che scenda.", "cose"],
+ ["Il prezzo sono le carte: arrivano dal mercato, e tu non puoi sceglierle.", "carte"],
+ ["Tu scegli solo tre cose: se entrare, quanto rischiare, e quando uscire.", "tre"],
+ ["E anche la mano migliore perde: la coppia d'assi contro una coppia di re perde circa due volte su dieci.", "assi"],
+ ["Per questo il giocatore professionista non pensa alla singola mano, ma a mille mani.", "mille"],
+ ["Esempio inventato: vinci quattro volte su dieci, ma quando vinci prendi il doppio di quello che rischi.", "esempio"],
  ["Su cento mani, in media, sei avanti di venti volte la puntata.", "cento"],
- ["Però cinque mani perse di fila capitano: con questi numeri, quasi otto volte su cento.", "fila"],
- ["Se rischi l'uno per cento del conto, dopo dieci mani perse sei sotto di circa il dieci per cento.", "uno"],
- ["Se rischi il dieci per cento, sei sotto di quasi due terzi, e il gioco per te è finito.", "dieci"],
- ["Cosa ti porti a casa? Il vantaggio lo dà la probabilità, ma al tavolo ti tiene la gestione del rischio.", "casa"]
+ ["Il professionista punta di più quando il vantaggio è chiaro, di meno quando non lo è, e mai tutto su una mano.", "punta"],
+ ["Perché cinque mani perse di fila capitano: con quei numeri, quasi otto volte su cento.", "fila"],
+ ["Se rischi l'uno per cento del conto, dopo dieci perdite sei sotto di circa il dieci per cento.", "uno"],
+ ["Se rischi il dieci per cento, sei sotto di quasi due terzi, e sei fuori dal tavolo.", "dieci"],
+ ["Cosa ti porti a casa? La probabilità ti dà il vantaggio, ma è la gestione del rischio a tenerti al tavolo.", "casa"]
 ]
