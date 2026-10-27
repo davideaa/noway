@@ -336,7 +336,7 @@ function bigSpade(t, a, cx, cy, s) { const p = oC(seg(t, a, a + 1.1)), f = oC(se
   x.restore(); }
 function sCasa(t, a, b) { bg('62,12,22'); x.save(); zoom(t, a, b, 1.04);
   const tP = WA('casa', ['perdi'], 1, 1.4) - 0.15, tG = WA('casa', ['guadagn'], 1, 3.4) - 0.15, tN = WA('casa', ['nuot'], 1, 5.6) - 0.15;
-  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
+  phrase(t, a + 0.05, [['Come al tavolo', C.ink], ['da poker.', C.red]], 345, { size: 92 });
   bigSpade(t, a + 0.3, 540, 610, 100);
   const P3 = [[tP, 'Perdi poco', 'quando sbagli', 0], [tG, 'Guadagni di più', 'quando hai ragione', 1], [tN, 'Nuoti', 'con lo squalo', 2]];
   P3.forEach(([t0, big, sub, i]) => { const k = oC(seg(t, t0, t0 + 0.5)); if (k <= 0) return; const cy = 850 + i * 190; x.save(); x.translate((1 - k) * 60, 0); glass(540, cy, 900, 160, 36, k);
