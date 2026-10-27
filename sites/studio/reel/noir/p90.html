@@ -1,0 +1,344 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: '♠', DAY: 0, CAP: 10, NEXT: ['', ''], FONTE: '' };</script>
+<script src="serie.js"></script>
+<script>
+/* REEL EXTRA p90 «Il trading è come il poker» (fuori serie). Fonti e conti: p90-fonti.md.
+   Numeri a schermo: ≈82% / ≈18% (assi contro re), 4 su 10 e doppio (ESEMPIO · CIFRE INVENTATE), +20 su 100 mani,
+   ≈ 8 su 100 (0,6^5), 1% → −9,6% (circa −10%), 10% → −65% (quasi due terzi). Le carte usano solo lettere (A K Q J).
+   Dal 27/10: niente scene num/fine/cta/end, niente firma né account: il video finisce su «casa» con il seme di picche disegnato a mano.
+   I commenti nel codice sono solo /* ... */ . */
+const ORDER = ['hook', 'carte', 'tre', 'assi', 'tante', 'esempio', 'cento', 'fila', 'uno', 'dieci', 'casa'];
+
+/* ---------- aiuti ---------- */
+const rngf = (seed) => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+const WA = (k, alts, n = 1, riserva = 0.8) => { const L = ((window.WORDS || {})[k]) || []; let c = 0;
+  for (const [p, t] of L) { const w = _nw(p); if (alts.some((q) => w.startsWith(_nw(q))) && ++c === n) return t; }
+  return S(k) + riserva; };
+const hx = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const shade = (h, k) => { const [r, g, b] = hx(h); return `rgb(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)})`; };
+const lab = (s, px, py, col = C.muted, size = 26, o = {}) => txt(s, px, py, { fam: 'mono', size, weight: 600, color: col, ls: 2, ...o });
+const T2 = 345 + 92 * 1.12; /* y della seconda riga del titolo a size 92 */
+const MINUS = '−';
+
+/* ---------- semi disegnati a mano (nessun glifo dal font) ---------- */
+const SP = {
+  S: new Path2D('M0 -1 C0.15 -0.65 0.95 -0.4 0.95 0.1 C0.95 0.55 0.4 0.7 0.12 0.35 C0.12 0.6 0.2 0.85 0.4 1 L-0.4 1 C-0.2 0.85 -0.12 0.6 -0.12 0.35 C-0.4 0.7 -0.95 0.55 -0.95 0.1 C-0.95 -0.4 -0.15 -0.65 0 -1 Z'),
+  H: new Path2D('M0 0.95 C-0.2 0.75 -1 0.2 -1 -0.35 C-1 -0.8 -0.65 -1 -0.4 -1 C-0.2 -1 -0.05 -0.9 0 -0.65 C0.05 -0.9 0.2 -1 0.4 -1 C0.65 -1 1 -0.8 1 -0.35 C1 0.2 0.2 0.75 0 0.95 Z'),
+  D: new Path2D('M0 -1 L0.68 0 L0 1 L-0.68 0 Z') };
+SP.Cc = new Path2D(); SP.Cc.moveTo(0.42, -0.5); SP.Cc.arc(0, -0.5, 0.42, 0, 7); SP.Cc.moveTo(-0.08, 0.2); SP.Cc.arc(-0.5, 0.2, 0.42, 0, 7); SP.Cc.moveTo(0.92, 0.2); SP.Cc.arc(0.5, 0.2, 0.42, 0, 7);
+SP.Cs = new Path2D('M0 -0.1 L0.3 1 L-0.3 1 Z');
+const RED = '#D0342B', BLK = '#0B0D0C';
+function suit(s, cx, cy, r, col) { x.save(); x.translate(cx, cy); x.scale(r, r); x.fillStyle = col;
+  if (s === 'C') { x.fill(SP.Cc); x.fill(SP.Cs); } else x.fill(SP[s]); x.restore(); }
+
+/* carta: flip 0 = coperta, 1 = scoperta (si gira restringendosi in larghezza) */
+function card(cx, cy, w, o = {}) { const { rot = 0, flip = 1, rank = 'A', st = 'S', alpha = 1, dim = 0, q = false } = o; if (alpha <= 0.01) return;
+  const h = w * 1.4, f = clamp(flip), sx = Math.max(0.02, Math.abs(Math.cos(Math.PI * f))), face = f > 0.5, col = st === 'H' || st === 'D' ? RED : BLK;
+  x.save(); x.globalAlpha *= alpha; x.translate(cx, cy); x.rotate(rot); x.scale(sx, 1);
+  x.fillStyle = 'rgba(0,0,0,0.42)'; rr(-w / 2 + 5, -h / 2 + 12, w, h, w * 0.1); x.fill();
+  if (face) { const g = x.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); g.addColorStop(0, '#F4F6F1'); g.addColorStop(1, '#D9DDD6'); x.fillStyle = g; rr(-w / 2, -h / 2, w, h, w * 0.1); x.fill();
+    for (const side of [0, 1]) { x.save(); if (side) x.rotate(Math.PI); txt(rank, -w * 0.27, -h * 0.34, { size: w * 0.34, weight: 800, color: col, ls: -1 }); suit(st, -w * 0.27, -h * 0.17, w * 0.1, col); x.restore(); }
+    suit(st, 0, 0, w * 0.27, col); }
+  else { x.fillStyle = '#0E1411'; rr(-w / 2, -h / 2, w, h, w * 0.1); x.fill();
+    x.save(); rr(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, w * 0.07); x.clip(); x.strokeStyle = 'rgba(200,250,114,0.2)'; x.lineWidth = 2;
+    for (let i = -14; i <= 14; i++) { x.beginPath(); x.moveTo(-w + i * 22, -h); x.lineTo(w + i * 22, h); x.stroke(); x.beginPath(); x.moveTo(w - i * 22, -h); x.lineTo(-w - i * 22, h); x.stroke(); }
+    x.restore(); x.strokeStyle = 'rgba(200,250,114,0.6)'; x.lineWidth = 3; rr(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, w * 0.07); x.stroke();
+    x.fillStyle = 'rgba(200,250,114,0.85)'; x.beginPath(); x.moveTo(0, -w * 0.2); x.lineTo(w * 0.14, 0); x.lineTo(0, w * 0.2); x.lineTo(-w * 0.14, 0); x.closePath(); x.fill();
+    if (q) txt('?', 0, 4, { size: w * 0.5, weight: 800, color: '#0E1411', alpha: 1 }); }
+  if (dim > 0) { x.fillStyle = `rgba(5,6,7,${dim})`; rr(-w / 2, -h / 2, w, h, w * 0.1); x.fill(); }
+  x.restore(); }
+function pair(cx, cy, w, hnd, o = {}) { const { rot = 0, ...rest } = o;
+  card(cx - w * 0.36, cy, w, { rank: hnd[0], st: hnd[1], rot: -0.11 + rot, ...rest }); card(cx + w * 0.36, cy + 8, w, { rank: hnd[2], st: hnd[3], rot: 0.11 + rot, ...rest }); }
+const HANDS = [['A', 'S', 'K', 'S'], ['Q', 'H', 'J', 'H'], ['K', 'D', 'Q', 'C'], ['J', 'S', 'A', 'D'], ['K', 'H', 'Q', 'S'], ['A', 'C', 'J', 'D']];
+
+/* tavolo visto dall'alto: bordo scuro con filo lime, feltro verde scuro, linea delle puntate */
+function felt(cx, cy, w, h, k = 1) { if (k <= 0) return; const r = Math.min(w, h) / 2, m = 24;
+  x.save(); x.globalAlpha *= clamp(k);
+  const g0 = x.createLinearGradient(0, cy - h / 2, 0, cy + h / 2); g0.addColorStop(0, '#2b312d'); g0.addColorStop(1, '#0f1311');
+  x.fillStyle = g0; rr(cx - w / 2, cy - h / 2, w, h, r); x.fill();
+  x.strokeStyle = 'rgba(200,250,114,0.35)'; x.lineWidth = 2.5; rr(cx - w / 2, cy - h / 2, w, h, r); x.stroke();
+  const g = x.createRadialGradient(cx, cy - h * 0.12, 20, cx, cy, w * 0.62); g.addColorStop(0, '#1b3a27'); g.addColorStop(1, '#0a160f');
+  x.fillStyle = g; rr(cx - w / 2 + m, cy - h / 2 + m, w - 2 * m, h - 2 * m, r - m); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.14)'; x.lineWidth = 3; x.setLineDash([4, 14]); x.lineCap = 'round'; rr(cx - w / 2 + 70, cy - h / 2 + 70, w - 140, h - 140, r - 70); x.stroke(); x.setLineDash([]);
+  x.restore(); }
+
+/* fiches: stack = pila vista di lato (n può avere decimali), chipTop = vista dall'alto */
+function stack(cx, by, n, o = {}) { const { rx = 100, ry = 28, th = 5, col = C.lime, alpha = 1, hl = 0, hlCol = C.red } = o; if (n <= 0.01) return;
+  x.save(); x.globalAlpha *= alpha; const NN = Math.ceil(n - 1e-6);
+  for (let i = 0; i < NN; i++) { const f = Math.min(1, n - i), yb = by - i * th, yt = yb - th * f, top = i === NN - 1, c = hl > 0 && i >= NN - hl ? hlCol : col;
+    x.fillStyle = shade(c, i % 2 ? 0.6 : 0.8); x.beginPath(); x.moveTo(cx - rx, yt); x.lineTo(cx - rx, yb); x.ellipse(cx, yb, rx, ry, 0, Math.PI, 0, true); x.lineTo(cx + rx, yt); x.closePath(); x.fill();
+    if (top) { x.fillStyle = shade(c, 1); x.beginPath(); x.ellipse(cx, yt, rx, ry, 0, 0, 7); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 2; x.stroke();
+      x.beginPath(); x.ellipse(cx, yt, rx * 0.66, ry * 0.66, 0, 0, 7); x.strokeStyle = 'rgba(5,6,7,0.5)'; x.stroke(); } }
+  x.restore(); }
+function chipTop(cx, cy, r, col, o = {}) { const { sx = 1, alpha = 1, inner = '#0F1311' } = o; if (alpha <= 0.01) return;
+  x.save(); x.globalAlpha *= alpha; x.translate(cx, cy); x.scale(Math.max(0.03, Math.abs(sx)), 1);
+  x.fillStyle = 'rgba(0,0,0,0.45)'; x.beginPath(); x.arc(0, 8, r, 0, 7); x.fill();
+  x.fillStyle = col; x.beginPath(); x.arc(0, 0, r, 0, 7); x.fill();
+  for (let i = 0; i < 8; i++) { x.save(); x.rotate(i * Math.PI / 4); x.fillStyle = 'rgba(241,244,238,0.92)'; x.fillRect(-r * 0.15, -r * 0.98, r * 0.3, r * 0.2); x.restore(); }
+  x.fillStyle = inner; x.beginPath(); x.arc(0, 0, r * 0.64, 0, 7); x.fill(); x.strokeStyle = col; x.lineWidth = Math.max(2, r * 0.045); x.stroke();
+  x.restore(); }
+
+/* ======================= 1. hook ======================= */
+const lem = (s, cx, cy, A) => { const d = 1 + Math.sin(s) ** 2; return [cx + A * Math.cos(s) / d, cy + A * Math.sin(s) * Math.cos(s) / d]; };
+function infinity(t, t0, cx, cy, A) { const kd = seg(t, t0, t0 + 1.0); if (kd <= 0) return;
+  x.save(); x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = 9; x.strokeStyle = 'rgba(200,250,114,0.38)'; x.beginPath();
+  for (let i = 0; i <= 120 * kd; i++) { const [px, py] = lem(i / 120 * 2 * Math.PI - Math.PI / 2, cx, cy, A); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+  const sr = (t - t0) * 2.4 - Math.PI / 2; x.strokeStyle = C.lime; x.lineWidth = 12; x.beginPath();
+  for (let i = 0; i <= 24; i++) { const [px, py] = lem(sr - i * 0.04, cx, cy, A); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.globalAlpha = clamp(kd * 2); x.stroke();
+  const [dx, dy] = lem(sr, cx, cy, A); glow(dx, dy, 60, '200,250,114', 0.6); x.fillStyle = C.ink; x.beginPath(); x.arc(dx, dy, 9, 0, 7); x.fill(); x.restore(); }
+function sHook(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.05);
+  const tB = WT('hook', 'mano', 1, 4.2) - 0.12, kT = oC(seg(t, 0, 0.18));
+  felt(540, 1010, 900, 700, kT);
+  /* mazzo e fiches */
+  for (let i = 0; i < 3; i++) card(850 - i * 3, 790 - i * 3, 90, { flip: 0, rot: 0.08, alpha: kT });
+  stack(815, 1250, 7, { rx: 56, ry: 17, th: 11, col: C.amber, alpha: kT }); stack(900, 1270, 4, { rx: 50, ry: 15, th: 11, col: C.lime, alpha: kT });
+  chipTop(235, 1215, 46, C.red, { alpha: kT }); chipTop(305, 1255, 46, C.lime, { alpha: kT }); chipTop(215, 1110, 40, C.ink, { alpha: kT });
+  /* carte comuni: sono coperte, poi tre si scoprono */
+  const FL = [['Q', 'H'], ['J', 'C'], ['K', 'D']];
+  for (let i = 0; i < 5; i++) { const fl = i < 3 ? ioC(seg(t, 2.2 + i * 0.14, 2.7 + i * 0.14)) : 0;
+    card(540 + (i - 2) * 128, 945 + Math.sin(t * 1.6 + i) * 3, 112, { flip: fl, rank: (FL[i] || [])[0], st: (FL[i] || [])[1], alpha: kT }); }
+  infinity(t, tB + 0.3, 540, 790, 105);
+  /* mano che non finisce: ogni 1,5 s le due carte escono e ne arrivano altre */
+  const per = 1.5, tt = t - (tB - 0.1);
+  if (tt < 0) pair(540, 1170, 140, HANDS[0], { alpha: kT });
+  else { const n = Math.floor(tt / per), u = (tt - n * per) / per, prev = HANDS[n % HANDS.length], cur = HANDS[(n + 1) % HANDS.length];
+    const ke = oC(seg(u, 0, 0.22)); if (ke < 1) pair(540 - 360 * ke, 1170 + 80 * ke, 140, prev, { alpha: 1 - ke, rot: -0.5 * ke });
+    const ka = oC(seg(u, 0.2, 0.5)), kf = ioC(seg(u, 0.5, 0.72));
+    if (ka > 0) pair(lerp(850, 540, ka), lerp(790, 1170, ka) - Math.sin(Math.PI * ka) * 60, lerp(70, 140, ka), cur, { flip: kf, alpha: clamp(ka * 3) }); }
+  phrase(t, -0.12, [['Il trading è', C.ink], ['come il poker.', C.lime]], 345, { size: 92, st: 0.04, out: tB - 0.05 });
+  phrase(t, tB, [['Ma la mano', C.ink], ['non finisce mai.', C.red]], 345, { size: 92, st: 0.2 });
+  x.restore(); finish(t); }
+
+/* ======================= 2. carte ======================= */
+const PRICE = (() => { const r = rngf(5); let p = 0; const a = [0]; for (let i = 1; i < 90; i++) { p += (r() - 0.5) * 2 + (r() < 0.08 ? (r() - 0.5) * 5 : 0); a.push(p); }
+  const mn = Math.min(...a), mx = Math.max(...a); return a.map((v) => (v - mn) / (mx - mn)); })();
+function sCarte(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
+  const tM = WT('carte', 'mercati', 1, 3.2) - 0.15, t0 = WA('carte', ['carte'], 1, 1.4) - 0.7, kx = oC(seg(t, tM - 0.15, tM + 0.3));
+  /* fase 1: carte coperte dal mazzo */
+  if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; felt(540, 1000, 900, 620, oC(seg(t, a, a + 0.4)));
+    for (let i = 0; i < 3; i++) card(830 - i * 3, 780 - i * 3, 100, { flip: 0, rot: 0.1 });
+    for (let i = 0; i < 5; i++) { const e = oC(seg(t, t0 + i * 0.3, t0 + i * 0.3 + 0.55)), tx = 540 + (i - 2) * 150, ty = 1060; if (e <= 0) continue;
+      const px = lerp(830, tx, e), py = lerp(780, ty, e) - Math.sin(Math.PI * e) * 90, q = oC(seg(t, t0 + i * 0.3 + 0.55, t0 + i * 0.3 + 0.9));
+      card(px, py, lerp(100, 124, e), { flip: 0, rot: lerp(0.5, (i - 2) * 0.05, e), q: false });
+      txt('?', px, py + 4, { size: 70, weight: 800, color: C.lime, alpha: q }); }
+    x.restore(); }
+  /* fase 2: il prezzo non lo scegli */
+  const kp = oC(seg(t, tM + 0.05, tM + 0.5)); if (kp > 0) { glass(540, 1010, 880, 640, 40, kp);
+    lab('IL PREZZO', 150, 735, C.muted, 26, { align: 'left', alpha: kp });
+    const X0 = 140, X1 = 940, Y0 = 810, Y1 = 1260; x.save(); x.globalAlpha = kp; x.strokeStyle = 'rgba(241,244,238,0.1)'; x.lineWidth = 2;
+    for (let i = 0; i < 4; i++) { x.beginPath(); x.moveTo(X0, Y0 + i * (Y1 - Y0) / 3); x.lineTo(X1, Y0 + i * (Y1 - Y0) / 3); x.stroke(); }
+    const pr = seg(t, tM + 0.3, tM + 3.2) * 89, pt = (q) => { const i = Math.min(88, Math.floor(q)), f = q - i; return [lerp(X0, X1, q / 89), lerp(Y1, Y0, lerp(PRICE[i], PRICE[i + 1], f))]; };
+    x.strokeStyle = C.ink; x.lineWidth = 6; x.lineJoin = 'round'; x.beginPath(); for (let i = 0; i <= pr; i += 0.5) { const [px, py] = pt(i); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+    const [ex, ey] = pt(pr); glow(ex, ey, 60, '200,250,114', 0.5); x.fillStyle = C.lime; x.beginPath(); x.arc(ex, ey, 11, 0, 7); x.fill(); x.restore();
+    const tt0 = tM + 1.7, [tx, ty] = pt(Math.min(89, (tt0 - tM - 0.3) / 2.9 * 89)); tap(tx, ty, t, tt0);
+    cross(900, 735, 22, seg(t, tt0 + 0.3, tt0 + 0.8)); }
+  phrase(t, a + 0.05, [['Le carte', C.ink], ['non le scegli.', C.lime]], 345, { size: 92, out: tM - 0.1 });
+  phrase(t, tM, [['Il prezzo', C.ink], ['non lo scegli.', C.red]], 345, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 3. tre ======================= */
+function sTre(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const T = [WA('tre', ['quando'], 1, 1.8) - 0.3, WA('tre', ['quanto'], 1, 3.4) - 0.3, WA('tre', ['alz'], 1, 5.2) - 0.3];
+  felt(540, 940, 940, 620, oC(seg(t, a, a + 0.4)));
+  const CH = [[215, C.lime, 'QUANDO', 'giocare'], [540, C.amber, 'QUANTO', 'puntare'], [865, C.red, 'ALZATI', 'dal tavolo']];
+  CH.forEach(([cx, col, nm, sub], i) => { const cy = 900, e = seg(t, T[i], T[i] + 0.7), hot = t >= T[i] && (i === 2 || t < T[i + 1]);
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.22)'; x.lineWidth = 3; x.setLineDash([3, 12]); x.lineCap = 'round'; x.beginPath(); x.arc(cx, cy, 148, 0, 7); x.stroke(); x.restore();
+    if (e <= 0) return; const sc = clamp(oB(oC(e), 2.2), 0, 1.15), yy = cy - (1 - oC(e)) * 80, spin = Math.cos(Math.PI * 3 * (1 - oC(e)));
+    if (hot) glow(cx, cy, 230, hx2(col), 0.28);
+    x.save(); x.translate(cx, yy); x.scale(sc, sc); chipTop(0, 0, 125, col, { sx: spin });
+    if (e > 0.6) { x.globalAlpha = clamp((e - 0.6) * 3); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 9; x.lineCap = 'round'; x.lineJoin = 'round';
+      if (i === 0) { x.beginPath(); x.arc(0, 0, 50, 0, 7); x.stroke(); const ang = t * 2.2; x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.sin(ang) * 36, -Math.cos(ang) * 36); x.stroke(); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.sin(ang / 12) * 24, -Math.cos(ang / 12) * 24); x.stroke(); }
+      if (i === 1) { x.globalAlpha = 1; stack(0, 38, 1 + 3 * oC(seg(t, T[1] + 0.5, T[1] + 1.6)), { rx: 44, ry: 13, th: 14, col, alpha: clamp((e - 0.6) * 3) }); }
+      if (i === 2) { x.beginPath(); x.moveTo(0, 38); x.lineTo(0, -42); x.moveTo(-30, -12); x.lineTo(0, -42); x.lineTo(30, -12); x.stroke(); x.beginPath(); x.moveTo(-44, 52); x.lineTo(44, 52); x.stroke(); } }
+    x.restore();
+    txt(nm, cx, 1085, { fam: 'mono', size: 32, weight: 600, color: hot ? col : C.ink, ls: 3, alpha: oC(e) });
+    txt(sub, cx, 1135, { fam: 'mono', size: 26, weight: 500, color: C.muted, ls: 1, alpha: oC(e) }); });
+  phrase(t, a + 0.05, [['Scegli solo', C.ink], ['tre cose.', C.lime]], 345, { size: 92 });
+  x.restore(); finish(t); }
+const hx2 = (h) => hx(h).join(',');
+
+/* ======================= 4. assi ======================= */
+function sAssi(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tA = WT('assi', 'coppia', 1, 1.0) - 0.2, tK = WT('assi', 'coppia', 2, 2.6) - 0.15, tL = WT('assi', 'perde', 1, 4.4) - 0.1, tD = WA('assi', ['due', '2'], 1, 5.0) - 0.1;
+  const ka = oB(seg(t, tA, tA + 0.5)), kk = oB(seg(t, tK, tK + 0.5)), lose = oC(seg(t, tL, tL + 0.5));
+  /* assi (a sinistra) e re (a destra) */
+  if (ka > 0) { x.save(); x.translate(270, 790); x.scale(clamp(ka, 0, 1.15), clamp(ka, 0, 1.15)); glow(0, 0, 230, '200,250,114', 0.2 * (1 - lose));
+    pair(0, 0, 150, [['A', 'S', 'A', 'H']][0], { dim: lose * 0.5 }); x.restore();
+    cross(270, 790, 62, seg(t, tL + 0.1, tL + 0.6)); }
+  if (kk > 0) { x.save(); x.translate(810, 790); x.scale(clamp(kk, 0, 1.15), clamp(kk, 0, 1.15)); glow(0, 0, 230, '245,165,36', 0.18);
+    pair(0, 0, 150, ['K', 'C', 'K', 'D']); x.restore(); }
+  txt('CONTRO', 540, 790, { fam: 'mono', size: 28, weight: 600, color: C.muted, ls: 3, alpha: oC(seg(t, tK - 0.1, tK + 0.3)) });
+  /* barra 82 / 18 */
+  const kb = oC(seg(t, tK + 0.8, tK + 1.6)), BX = 110, BW = 860, BY = 1010, w1 = BW * 0.82 * kb;
+  if (kb > 0) { x.save(); rr(BX, BY - 40, BW, 80, 20); x.clip(); x.fillStyle = 'rgba(255,255,255,0.06)'; x.fillRect(BX, BY - 40, BW, 80);
+    x.fillStyle = C.lime; x.fillRect(BX, BY - 40, w1, 80); x.fillStyle = C.red; x.fillRect(BX + BW * 0.82, BY - 40, BW * 0.18 * oC(seg(t, tK + 1.3, tK + 1.8)), 80); x.restore();
+    txt('≈ 82%', BX + BW * 0.41, BY, { size: 48, weight: 800, color: '#15200C', alpha: kb > 0.9 ? 1 : 0 });
+    const k18 = oC(seg(t, tK + 1.5, tK + 1.9)); txt('≈ 18%', BX + BW * 0.91, BY, { size: 36, weight: 800, color: '#2A0B08', alpha: k18 });
+    lab('gli assi vincono', BX + BW * 0.41, BY + 70, C.lime, 24, { alpha: kb }); lab('perdono', BX + BW * 0.91 - 6, BY + 70, C.red, 24, { alpha: oC(seg(t, tK + 1.5, tK + 1.9)) }); }
+  /* dieci mani: due perse */
+  const kd = (i) => oC(seg(t, tD + i * 0.05, tD + i * 0.05 + 0.3));
+  for (let i = 0; i < 10; i++) { const cx = 540 + (i - 4.5) * 72, cy = 1190, k = kd(i); if (k <= 0) continue; const red = i < 2 && t > tD + 0.9;
+    chipTop(cx, cy, 26 * clamp(oB(k), 0, 1.2), red ? C.red : C.lime, { inner: red ? '#2A0B08' : '#0F1311' }); }
+  const kc = oC(seg(t, tD + 0.9, tD + 1.4)); txt('circa 2 volte su 10', 540, 1320, { size: 64, weight: 800, color: C.red, alpha: kc, blur: (1 - kc) * 10, ls: -1 });
+  phrase(t, tA, [['Coppia d’assi', C.ink]], 345, { size: 88 }); phrase(t, tK, [['contro coppia di re', C.lime]], T2, { size: 88 });
+  x.restore(); finish(t); }
+
+/* ======================= 5. tante ======================= */
+const HAND_SEQ = 'LWLLWLLLWLWWLLWLLWLWLLWWLLWLWLLWLLWW'.split('').map((c) => (c === 'W' ? 1 : 0));
+const CUM = (() => { let s = 0; const o = [0]; for (const w of HAND_SEQ) { s += w ? 2 : -1; o.push(s); } return o; })();
+function sTante(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tP = WT('tante', 'perdere', 1, 3.0) - 0.2, tC = WT('tante', 'conta', 1, 3.9) - 0.1, tT = WT('tante', 'tante', 1, 5.4) - 0.2;
+  const sw = ioC(seg(t, tT - 0.1, tT + 0.7)), N = HAND_SEQ.length;
+  /* fase 1: una buona mano che perde */
+  if (sw < 1) { x.save(); x.globalAlpha = 1 - sw; const lose = oC(seg(t, tP, tP + 0.5)), e = oB(seg(t, a + 0.2, a + 0.8));
+    glow(540, 930, 330, '200,250,114', 0.22 * (1 - lose)); x.translate(540, 930 - sw * 200); x.scale(clamp(e, 0, 1.1), clamp(e, 0, 1.1)); pair(0, 0, 220, HANDS[0], { dim: lose * 0.45 }); x.restore();
+    cross(540, 930, 90, seg(t, tP + 0.1, tP + 0.7) * (1 - sw)); }
+  /* fase 2: tante mani che scorrono e la linea che sale a zig-zag */
+  if (sw > 0) { x.save(); x.globalAlpha = sw; const pr = seg(t, tT + 0.2, Math.max(tT + 3, b - 0.6)) * N;
+    for (let j = 0; j < N; j++) { const px = 540 + (j + 0.5 - pr) * 120, py = 650; if (px < 30 || px > 1050) continue; const near = Math.abs(px - 540) < 60, win = HAND_SEQ[j];
+      pair(px, py, 54, HANDS[j % HANDS.length], { flip: 1, alpha: 0.9 * (1 - clamp((Math.abs(px - 540) - 380) / 150)) });
+      x.fillStyle = win ? C.lime : C.red; x.beginPath(); x.arc(px, py + 66, near ? 12 : 8, 0, 7); x.fill(); }
+    x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; x.beginPath(); x.moveTo(540, 575); x.lineTo(540, 560); x.stroke();
+    glass(540, 1050, 900, 560, 40, 1); lab('ILLUSTRAZIONE', 130, 800, C.muted, 24, { align: 'left' });
+    const X0 = 130, X1 = 950, Y0 = 880, Y1 = 1290, lo = Math.min(...CUM), hi = Math.max(...CUM), ym = (v) => lerp(Y1, Y0, (v - lo) / (hi - lo)), xm = (j) => lerp(X0, X1, j / N);
+    x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 2; x.setLineDash([4, 10]); x.beginPath(); x.moveTo(X0, ym(0)); x.lineTo(X1, ym(0)); x.stroke(); x.setLineDash([]);
+    x.strokeStyle = C.lime; x.lineWidth = 7; x.lineJoin = 'round'; x.beginPath(); x.moveTo(xm(0), ym(0));
+    for (let j = 1; j <= Math.floor(pr); j++) x.lineTo(xm(j), ym(CUM[j]));
+    const jf = Math.floor(pr), fr = pr - jf, vy = jf < N ? lerp(CUM[jf], CUM[jf + 1], fr) : CUM[N], vx = xm(Math.min(N, pr)); x.lineTo(vx, ym(vy)); x.stroke();
+    glow(vx, ym(vy), 60, '200,250,114', 0.5); x.fillStyle = C.ink; x.beginPath(); x.arc(vx, ym(vy), 10, 0, 7); x.fill(); x.restore(); }
+  phrase(t, a + 0.05, [['Una buona scelta', C.ink], ['può perdere.', C.red]], 345, { size: 92, out: tC - 0.05 });
+  phrase(t, tC, [['Conta il risultato', C.ink], ['su tante mani.', C.lime]], 345, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 6. esempio ======================= */
+function sEsempio(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tV = WT('esempio', 'vinci', 1, 1.9) - 0.2, tQ = WA('esempio', ['quattro', '4'], 1, 2.2) - 0.1, tDi = WA('esempio', ['dieci', '10'], 1, 3.3) - 0.15;
+  const tQd = WT('esempio', 'quando', 1, 4.6) - 0.1, tDo = WT('esempio', 'doppio', 1, 5.6) - 0.15, tRi = WT('esempio', 'rischi', 1, 6.8) - 0.1;
+  lab('ESEMPIO · CIFRE INVENTATE', 540, 295, C.amber, 26, { alpha: oC(seg(t, a, a + 0.4)) });
+  /* dieci mani: quattro vinte, sei perse */
+  for (let i = 0; i < 10; i++) { const cx = 540 + ((i % 5) - 2) * 170, cy = 655 + Math.floor(i / 5) * 130, k = oB(seg(t, tV + i * 0.04, tV + i * 0.04 + 0.35));
+    const win = i < 4, kw = oC(seg(t, tQ + i * 0.2, tQ + i * 0.2 + 0.3)), kl = oC(seg(t, tDi + (i - 4) * 0.07, tDi + (i - 4) * 0.07 + 0.3));
+    if (k <= 0) continue; const s = clamp(k, 0, 1.15);
+    const col = win && kw > 0.5 ? C.lime : !win && kl > 0.5 ? C.red : '#59615C', inner = win && kw > 0.5 ? '#16240A' : !win && kl > 0.5 ? '#2A0B08' : '#0F1311';
+    if (win && kw > 0.3 && kw < 1) glow(cx, cy, 90, '200,250,114', 0.4 * (1 - kw));
+    chipTop(cx, cy, 50 * s, col, { inner });
+    if (win && kw > 0.5) { x.save(); x.strokeStyle = C.lime; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round'; x.globalAlpha = kw; x.beginPath(); x.moveTo(cx - 17, cy); x.lineTo(cx - 5, cy + 13); x.lineTo(cx + 19, cy - 14); x.stroke(); x.restore(); }
+    if (!win && kl > 0.5) { x.save(); x.strokeStyle = C.red; x.lineWidth = 7; x.lineCap = 'round'; x.globalAlpha = kl; x.beginPath(); x.moveTo(cx - 15, cy - 15); x.lineTo(cx + 15, cy + 15); x.moveTo(cx + 15, cy - 15); x.lineTo(cx - 15, cy + 15); x.stroke(); x.restore(); } }
+  /* vinci: prendi il doppio di quello che rischi */
+  const kp = oC(seg(t, tQd - 0.1, tQd + 0.4)); if (kp > 0) { glass(540, 1180, 900, 380, 40, kp);
+    const hl = t >= tRi; lab('RISCHI', 250, 1330, hl ? C.lime : C.muted, 26, { alpha: kp }); lab('PRENDI', 640, 1330, t >= tDo ? C.lime : C.muted, 26, { alpha: kp });
+    const k1 = oB(seg(t, tQd + 0.1, tQd + 0.6)); stack(250, 1270 - (1 - clamp(k1, 0, 1.2)) * -0, clamp(k1, 0, 1), { rx: 80, ry: 24, th: 26, col: C.amber, alpha: 1 });
+    if (k1 > 0) { x.save(); x.globalAlpha = oC(seg(t, tDo - 0.1, tDo + 0.2)); const ka2 = seg(t, tDo, tDo + 0.35); x.strokeStyle = C.lime; x.lineWidth = 8; x.lineCap = 'round'; x.lineJoin = 'round';
+      x.beginPath(); x.moveTo(375, 1180); x.lineTo(375 + 90 * ka2, 1180); x.stroke(); if (ka2 > 0.9) { x.beginPath(); x.moveTo(445, 1160); x.lineTo(468, 1180); x.lineTo(445, 1200); x.stroke(); } x.restore(); }
+    const n2 = clamp(oB(seg(t, tDo + 0.1, tDo + 0.6)), 0, 1) + clamp(oB(seg(t, tDo + 0.45, tDo + 0.95)), 0, 1); stack(640, 1270, n2, { rx: 80, ry: 24, th: 26, col: C.lime });
+    const kx = oB(seg(t, tDo + 0.5, tDo + 1.0)); if (kx > 0) { x.save(); x.translate(850, 1160); x.scale(clamp(kx, 0, 1.2), clamp(kx, 0, 1.2)); glow(0, 0, 160, '200,250,114', 0.25); txt('×2', 0, 0, { size: 140, weight: 800, color: C.lime }); x.restore(); } }
+  phrase(t, a + 0.05, [['Un esempio', C.ink], ['inventato.', C.amber]], 345, { size: 92, out: tQ - 0.1 });
+  phrase(t, tQ, [['Vinci 4 mani', C.ink]], 345, { size: 92 }); phrase(t, tDi, [['su 10.', C.lime]], T2, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 7. cento ======================= */
+const OUT100 = (() => { const r = rngf(23), a = Array.from({ length: 100 }, (_, i) => (i < 40 ? 1 : 0)); for (let i = 99; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; })();
+const CUM100 = (() => { let s = 0; return [0, ...OUT100.map((w) => (s += w ? 2 : -1))]; })();
+function sCento(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const t0 = Math.max(a + 0.1, WA('cento', ['cento', '100'], 1, 0.5) - 0.2), tM = WT('cento', 'media', 1, 1.6) - 0.15, tV = WA('cento', ['venti', '20'], 1, 3.6);
+  const n = Math.round(100 * seg(t, t0 + 0.2, tV - 0.05)), v = CUM100[n], fin = t >= tV - 0.05;
+  for (let i = 0; i < 100; i++) { const cx = 540 + ((i % 10) - 4.5) * 76, cy = 930 + Math.floor(i / 10) * 49, shown = i < n, ks = shown ? oB(clamp((n - i) / 6)) : 0;
+    const k0 = oC(seg(t, a + 0.05 + (i % 10) * 0.02, a + 0.4 + (i % 10) * 0.02));
+    x.save(); x.globalAlpha = k0; x.strokeStyle = 'rgba(241,244,238,0.16)'; x.lineWidth = 2; rr(cx - 18, cy - 18, 36, 36, 9); x.stroke(); x.restore();
+    if (shown) { const s = clamp(ks, 0, 1.15); x.save(); x.translate(cx, cy); x.scale(s, s); x.fillStyle = OUT100[i] ? C.lime : 'rgba(255,90,78,0.5)'; rr(-18, -18, 36, 36, 9); x.fill();
+      if (!OUT100[i]) { x.strokeStyle = C.red; x.lineWidth = 3; rr(-18, -18, 36, 36, 9); x.stroke(); } x.restore(); } }
+  const col = v < 0 ? C.red : C.lime, pop = fin ? 1 + 0.08 * Math.sin(Math.PI * clamp((t - tV + 0.05) / 0.4)) : 1;
+  x.save(); x.translate(540, 700); x.scale(pop, pop); if (fin) glow(0, 0, 360, '200,250,114', 0.25); txt((v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v), 0, 0, { size: 210, weight: 800, color: col, ls: -6, alpha: oC(seg(t, t0, t0 + 0.3)) }); x.restore();
+  lab('VOLTE LA PUNTATA', 540, 828, C.muted, 26, { alpha: oC(seg(t, t0, t0 + 0.4)) });
+  phrase(t, Math.max(a + 0.05, t0 - 0.05), [['Su 100 mani,', C.ink]], 345, { size: 92 }); phrase(t, tM, [['in media', C.lime]], T2, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 8. fila ======================= */
+const DOTS8 = (() => { const r = rngf(41), s = new Set(); while (s.size < 8) s.add(Math.floor(r() * 100)); return [...s]; })();
+function sFila(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tC = WA('fila', ['cinque', '5'], 1, 0.9) - 0.1, tO = WA('fila', ['otto', '8'], 1, 4.6) - 0.1, tCe = Math.max(tO + 0.5, WA('fila', ['cento', '100'], 1, 5.9) - 0.15);
+  felt(540, 800, 960, 400, oC(seg(t, a, a + 0.4)));
+  const kl = oC(seg(t, tC + 0.1, tC + 1.5)); x.save(); x.strokeStyle = 'rgba(255,90,78,0.55)'; x.lineWidth = 6; x.setLineDash([2, 14]); x.lineCap = 'round'; x.beginPath(); x.moveTo(180, 800); x.lineTo(180 + 720 * kl, 800); x.stroke(); x.restore();
+  const F5 = [['J', 'C'], ['Q', 'D'], ['K', 'S'], ['J', 'H'], ['Q', 'C']];
+  F5.forEach(([r, s], i) => { const t0 = tC + i * 0.27, e = oC(seg(t, t0, t0 + 0.45)); if (e <= 0) return; const cx = 180 + i * 180;
+    card(lerp(1100, cx, e), 800, 140, { rank: r, st: s, flip: 1, dim: 0.28 * seg(t, t0 + 0.4, t0 + 0.7), rot: (1 - e) * 0.3, alpha: clamp(e * 3) });
+    cross(cx, 800, 46, seg(t, t0 + 0.4, t0 + 0.9)); });
+  /* ≈ 8 su 100 */
+  const ko = oC(seg(t, tO, tO + 0.4)), kc = oC(seg(t, tCe, tCe + 0.35)); let sz = 100; const ts = '≈ 8 su 100'; while (tw(ts, sz) > 590) sz -= 4;
+  const w8 = tw('≈ 8 ', sz); txt('≈ 8', 70, 1235, { size: sz, weight: 800, color: C.red, align: 'left', alpha: ko, blur: (1 - ko) * 10, ls: -2 }); txt('su 100', 70 + w8, 1235, { size: sz, weight: 800, color: C.ink, align: 'left', alpha: kc, blur: (1 - kc) * 10, ls: -2 });
+  for (let i = 0; i < 100; i++) { const cx = 700 + (i % 10) * 28, cy = 1100 + Math.floor(i / 10) * 28, k0 = oC(seg(t, tCe - 0.2 + (i % 10) * 0.01, tCe + 0.25)), idx = DOTS8.indexOf(i);
+    x.fillStyle = 'rgba(241,244,238,0.22)'; x.globalAlpha = k0; x.beginPath(); x.arc(cx, cy, 8, 0, 7); x.fill(); x.globalAlpha = 1;
+    if (idx >= 0) { const k = oB(seg(t, tCe + 0.3 + idx * 0.12, tCe + 0.3 + idx * 0.12 + 0.3)); if (k > 0) { glow(cx, cy, 30, '255,90,78', 0.5 * clamp(k)); x.fillStyle = C.red; x.beginPath(); x.arc(cx, cy, 10 * clamp(k, 0, 1.3), 0, 7); x.fill(); } } }
+  phrase(t, tC - 0.1, [['Cinque perse', C.red], ['di fila.', C.ink]], 345, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 9-10. uno / dieci: pile di fiches che si consumano ======================= */
+const STK = { base: 1230, th: 4.4, rx: 100, ry: 28 };
+function remain(t, t0, span, r, steps = 10) { let rem = 100; for (let i = 0; i < steps; i++) { const ti = t0 + i * span / steps, p = oC(seg(t, ti, ti + Math.min(0.3, span / steps))); rem = lerp(rem, rem * (1 - r), p); } return rem; }
+function sUno(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tR = WT('uno', 'rischi', 1, 0.5) + 0.25, tD = WT('uno', 'dopo', 1, 2.6), tS = Math.max(tD + 1.2, WT('uno', 'sotto', 1, 4.8) - 0.1), tC = WT('uno', 'dieci', 2, 6.3) - 0.1;
+  const span = tS - tD, rem = remain(t, tD, span, 0.01), ks = oB(seg(t, a + 0.1, a + 0.7));
+  const SX = 330; glow(SX, 1000, 280, '200,250,114', 0.12);
+  stack(SX, STK.base, 100 * clamp(ks, 0, 1) - (100 - rem) * clamp(ks, 0, 1), { rx: STK.rx, ry: STK.ry, th: STK.th, col: C.lime, hl: rem > 99.9 && t > tR ? 1 : 0, hlCol: C.red });
+  lab('IL CONTO', SX, 1310, C.muted, 26, { alpha: oC(seg(t, a + 0.3, a + 0.7)) });
+  const kt = oC(seg(t, tR, tR + 0.4)), topY = STK.base - rem * STK.th - 6; if (kt > 0 && rem > 80) { x.save(); x.globalAlpha = kt; x.strokeStyle = C.red; x.lineWidth = 4; x.beginPath(); x.moveTo(SX + 112, topY + 6); x.lineTo(SX + 150, topY - 22); x.stroke(); x.restore(); txt('1%', SX + 200, topY - 28, { size: 56, weight: 800, color: C.red, alpha: kt }); }
+  /* dieci mani perse */
+  lab('MANI PERSE', 790, 830, C.muted, 26, { alpha: oC(seg(t, tD - 0.5, tD)) });
+  for (let i = 0; i < 10; i++) { const cx = 640 + (i % 5) * 76, cy = 900 + Math.floor(i / 5) * 84, ti = tD + i * span / 10, k = oB(seg(t, ti, ti + 0.3)), kb = oC(seg(t, tD - 0.4, tD));
+    x.save(); x.globalAlpha = kb; x.strokeStyle = 'rgba(241,244,238,0.22)'; x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, 30, 0, 7); x.stroke(); x.restore();
+    if (k > 0) { chipTop(cx, cy, 30 * clamp(k, 0, 1.15), C.red, { inner: '#2A0B08' });
+      const f = seg(t, ti - 0.05, ti + 0.3); if (f > 0 && f < 1) { const sy = STK.base - lerp(100 * Math.pow(0.99, i), rem, 1) * STK.th; const px = lerp(SX, cx, oC(f)), py = lerp(sy, cy, oC(f)) - Math.sin(Math.PI * f) * 80; chipTop(px, py, 22, C.lime, {}); } } }
+  const nL = Math.min(10, Math.max(0, Math.floor((t - tD) / (span / 10) + 0.3))), pc = 100 - rem;
+  if (nL > 0) txt(MINUS + (Math.round(pc * 10) / 10).toFixed(1).replace('.', ',') + '%', 790, 1110, { size: 112, weight: 800, color: C.red, ls: -3 });
+  const kc = oC(seg(t, tC, tC + 0.4)); txt('circa ' + MINUS + '10%', 790, 1215, { size: 54, weight: 800, color: C.ink, alpha: kc, blur: (1 - kc) * 8 }); lab('DEL CONTO', 790, 1275, C.muted, 24, { alpha: kc });
+  phrase(t, a + 0.05, [['Rischi', C.ink]], 345, { size: 92 }); phrase(t, tR, [['l’1% del conto', C.lime]], T2, { size: 92 });
+  x.restore(); finish(t); }
+
+function sDieci(t, a, b) { bg('50,24,22', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tDi = WA('dieci', ['dieci', '10'], 1, 0.9) - 0.15, tS = WT('dieci', 'cento', 1, 1.9) - 0.2, tE = Math.max(tS + 1.6, WT('dieci', 'terzi', 1, 3.4) - 0.1), tF = WT('dieci', 'finito', 1, 4.6) - 0.3;
+  const rem = remain(t, tS, tE - tS, 0.1), k = oB(seg(t, a + 0.1, a + 0.7)), SL = 330, SR = 750;
+  /* a sinistra la pila dell'1%, che ha perso poco; a destra quella del 10% */
+  const remL = 100 * Math.pow(0.99, 10);
+  stack(SL, STK.base, remL * clamp(k, 0, 1), { rx: STK.rx, ry: STK.ry, th: STK.th, col: C.lime, alpha: 0.55 });
+  const shake = t > tE - 0.2 ? Math.sin(t * 60) * 3 * (1 - seg(t, tE - 0.2, tE + 0.5)) : 0;
+  glow(SR, 1000, 280, '255,90,78', 0.14 * (1 - rem / 100));
+  stack(SR + shake, STK.base, rem * clamp(k, 0, 1), { rx: STK.rx, ry: STK.ry, th: STK.th, col: C.amber, hl: 0 });
+  lab('RISCHIO 1%', SL, 725, C.lime, 26, { alpha: 0.9 * oC(seg(t, a + 0.3, a + 0.7)) }); lab('RISCHIO 10%', SR, 725, C.amber, 26, { alpha: oC(seg(t, tDi, tDi + 0.4)) });
+  const kl = oC(seg(t, a + 0.6, a + 1.0)); txt(MINUS + '9,6%', SL, 1330, { size: 76, weight: 800, color: C.muted, alpha: kl }); txt('circa ' + MINUS + '10%', SL, 1395, { fam: 'mono', size: 28, weight: 600, color: C.muted, ls: 1, alpha: kl });
+  const lost = 100 - rem, kr = oC(seg(t, tS, tS + 0.3)); if (kr > 0) txt(MINUS + Math.round(lost) + '%', SR, 1330, { size: 96, weight: 800, color: C.red, alpha: kr, ls: -2 });
+  const kq = oC(seg(t, tE - 0.1, tE + 0.4)); txt('quasi due terzi', SR, 1395, { size: 38, weight: 800, color: C.ink, alpha: kq, blur: (1 - kq) * 8 });
+  phrase(t, a + 0.05, [['Rischi', C.ink]], 345, { size: 92, out: tF - 0.05 }); phrase(t, tDi, [['il 10%', C.amber]], T2, { size: 92, out: tF - 0.05 });
+  phrase(t, tF, [['Il gioco per te', C.ink], ['è finito.', C.red]], 345, { size: 92 });
+  x.restore(); finish(t); }
+
+/* ======================= 11. casa: chiusura con la picca ======================= */
+function bigSpade(t, a, cx, cy, s) { const p = oC(seg(t, a, a + 1.1)), f = oC(seg(t, a + 0.8, a + 1.6)), br = 0.5 + 0.5 * Math.sin(t * 2.2);
+  glow(cx, cy, 380, '200,250,114', (0.16 + 0.1 * br) * clamp(p * 2)); glow(cx, cy, 190, '200,250,114', (0.22 + 0.12 * br) * f);
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.lineJoin = 'round'; x.lineCap = 'round';
+  x.globalAlpha = f * 0.95; const g = x.createLinearGradient(0, -1, 0, 1); g.addColorStop(0, '#E4FFB0'); g.addColorStop(1, '#8DC93A'); x.fillStyle = g; x.fill(SP.S);
+  x.globalAlpha = 1; x.strokeStyle = C.lime; x.lineWidth = 7 / s; x.setLineDash([8.2, 8.2]); x.lineDashOffset = 8.2 * (1 - p); if (p > 0) x.stroke(SP.S); x.setLineDash([]);
+  x.restore(); }
+function die(cx, cy, s, rot, k) { if (k <= 0) return; x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(s * k, s * k);
+  x.fillStyle = 'rgba(0,0,0,0.4)'; rr(-52, -44, 110, 110, 22); x.fill(); x.fillStyle = '#E9ECE6'; rr(-55, -55, 110, 110, 22); x.fill(); x.fillStyle = BLK;
+  for (const [px, py] of [[-27, -27], [27, -27], [0, 0], [-27, 27], [27, 27]]) { x.beginPath(); x.arc(px, py, 9, 0, 7); x.fill(); } x.restore(); }
+function sCasa(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tVa = WT('casa', 'vantaggio', 1, 1.7) - 0.15, tTa = WT('casa', 'tavolo', 1, 4.3) - 0.15;
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
+  bigSpade(t, a + 0.3, 540, 650, 112);
+  const kA = oC(seg(t, tVa, tVa + 0.5)), kB = oC(seg(t, tTa, tTa + 0.5));
+  if (kA > 0) { x.save(); x.translate((1 - kA) * 60, 0); glass(540, 945, 900, 230, 36, kA); die(160, 945, 1, -0.2 + 0.2 * oC(seg(t, tVa, tVa + 0.8)), clamp(oB(seg(t, tVa + 0.1, tVa + 0.6)), 0, 1.1));
+    lab('IL VANTAGGIO', 270, 885, C.lime, 26, { align: 'left', alpha: kA }); txt('la probabilità', 270, 960, { size: 72, weight: 800, align: 'left', alpha: kA }); x.restore(); }
+  if (kB > 0) { x.save(); x.translate((1 - kB) * 60, 0); glass(540, 1225, 900, 270, 36, kB); stack(160, 1260, 1 + 4 * oC(seg(t, tTa + 0.2, tTa + 1.2)), { rx: 58, ry: 17, th: 14, col: C.amber, alpha: kB });
+    lab('AL TAVOLO TI TIENE', 270, 1150, C.amber, 26, { align: 'left', alpha: kB }); txt('la gestione', 270, 1222, { size: 68, weight: 800, align: 'left', alpha: kB }); txt('del rischio', 270, 1294, { size: 68, weight: 800, align: 'left', alpha: kB }); x.restore(); }
+  lab('CONTENUTO EDUCATIVO · NON È CONSULENZA FINANZIARIA', 540, 1420, '#8B958F', 22, { ls: 1.5, alpha: oC(seg(t, a + 1.0, a + 1.5)) });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, carte: sCarte, tre: sTre, assi: sAssi, tante: sTante, esempio: sEsempio, cento: sCento, fila: sFila, uno: sUno, dieci: sDieci, casa: sCasa }, ORDER, ['assi', 'cento', 'dieci', 'casa']);
+</script></body></html>
