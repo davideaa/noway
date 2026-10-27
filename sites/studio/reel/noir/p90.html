@@ -216,13 +216,13 @@ function sFila(t, a, b) { bg('56,14,24'); x.save(); zoom(t, a, b, 1.04);
 /* ======================= 7. zero: puntate da 10 € contro puntate da 100 € ======================= */
 function sZero(t, a, b) { bg('70,12,20', 0.6); x.save(); zoom(t, a, b, 1.04);
   const tD = WA('zero', ['dieci', '10'], 1, 0.8) - 0.1, tRe = WT('zero', 'resti', 1, 2.6) - 0.15, tC = WA('zero', ['cento', '100'], 1, 3.4) - 0.1, tZ = WT('zero', 'zero', 1, 5.4) - 0.15, k = oB(seg(t, a + 0.1, a + 0.7));
-  const SL = 300, SR = 780, base = 1230, th = 4.4;
+  const SL = 300, SR = 780, base = 1230, th = 4.4, perL = clamp((tC - 0.5 - tD - 0.2) / 10, 0.06, 0.17), perR = clamp((tZ - tC - 0.35) / 10, 0.06, 0.16);
   const lost = (t0, per, i) => oC(seg(t, t0 + i * per, t0 + i * per + 0.22));
-  let nl = 0, nr = 0; for (let i = 0; i < 10; i++) { nl += lost(tD + 0.2, 0.17, i); nr += lost(tC + 0.1, 0.15, i); }
+  let nl = 0, nr = 0; for (let i = 0; i < 10; i++) { nl += lost(tD + 0.2, perL, i); nr += lost(tC + 0.1, perR, i); }
   const L = 100 - nl, R = 100 - 10 * nr;
   stack(SL, base, L * clamp(k, 0, 1), { rx: 90, ry: 26, th, col: C.lime }); stack(SR, base, R * clamp(k, 0, 1), { rx: 90, ry: 26, th, col: C.red });
-  for (let i = 0; i < 10; i++) { const pl = seg(t, tD + 0.2 + i * 0.17, tD + 0.2 + i * 0.17 + 0.5); if (pl > 0 && pl < 1) stack(SL + 20 * pl, base - (100 - i) * th - 60 * pl, 1, { rx: 90, ry: 26, th, col: C.lime, alpha: 1 - pl });
-    const pr = seg(t, tC + 0.1 + i * 0.15, tC + 0.1 + i * 0.15 + 0.5); if (pr > 0 && pr < 1) stack(SR + 20 * pr, base - (100 - 10 * i) * th - 60 * pr, 10, { rx: 90, ry: 26, th, col: C.red, alpha: 1 - pr }); }
+  for (let i = 0; i < 10; i++) { const pl = seg(t, tD + 0.2 + i * perL, tD + 0.2 + i * perL + 0.5); if (pl > 0 && pl < 1) stack(SL + 20 * pl, base - (100 - i) * th - 60 * pl, 1, { rx: 90, ry: 26, th, col: C.lime, alpha: 1 - pl });
+    const pr = seg(t, tC + 0.1 + i * perR, tC + 0.1 + i * perR + 0.5); if (pr > 0 && pr < 1) stack(SR + 20 * pr, base - (100 - 10 * i) * th - 60 * pr, 10, { rx: 90, ry: 26, th, col: C.red, alpha: 1 - pr }); }
   lab('PUNTATE DA 10 €', SL, 730, C.lime, 26, { alpha: oC(seg(t, tD, tD + 0.4)) }); lab('PUNTATE DA 100 €', SR, 730, C.red, 26, { alpha: oC(seg(t, tC, tC + 0.4)) });
   const kL = oC(seg(t, tD + 0.2, tD + 0.6)), kR = oC(seg(t, tC + 0.1, tC + 0.5));
   txt(eur(L * 10), SL, 1320, { size: 76, weight: 800, color: C.lime, alpha: kL }); lab('resti al tavolo', SL, 1385, C.ink, 26, { alpha: oC(seg(t, tRe, tRe + 0.4)) });
@@ -266,28 +266,35 @@ function sSqualo(t, a, b) { bg('56,14,24'); x.save(); zoom(t, a, b, 1.04);
   x.restore(); finish(t); }
 
 /* ======================= 10. remora: il momento forte, squalo e rèmora lungo il trend ======================= */
-const RB = [[20, 1390], [360, 1360], [620, 940], [1010, 830]];
+const RB = [[0, 1760], [900, 1700], [1500, 960], [2900, 600]];
 const bez = (u) => { const q = 1 - u; return [q * q * q * RB[0][0] + 3 * q * q * u * RB[1][0] + 3 * q * u * u * RB[2][0] + u * u * u * RB[3][0], q * q * q * RB[0][1] + 3 * q * q * u * RB[1][1] + 3 * q * u * u * RB[2][1] + u * u * u * RB[3][1]]; };
-function sharkPose(t, a, b) { const u = lerp(0.08, 0.8, ioC(seg(t, a + 0.1, b - 0.3))) , p = bez(u), p2 = bez(Math.min(1, u + 0.01)), ang = Math.atan2(p2[1] - p[1], p2[0] - p[0]) * 0.8; return { x: p[0], y: p[1] + 10 * Math.sin(t * 2.6), ang, u }; }
-function sRemora(t, a, b) { bg('56,14,24'); x.save(); zoom(t, a, b, 1.03);
-  const tAt = WT('remora', 'attacca', 1, 3.2) - 0.1, tVa = WT('remora', 'va', 1, 5.4) - 0.1, ss = 0.9, RS = 0.9, sp = sharkPose(t, a, b);
-  /* bolle e acqua che scorrono verso sinistra */
-  for (let i = 0; i < 16; i++) { const yy = 620 + (i * 137) % 820, spd = 120 + (i % 4) * 70, px = (((i * 173 - t * spd) % 1200) + 1200) % 1200 - 60; x.save(); x.strokeStyle = 'rgba(244,239,233,0.16)'; x.lineWidth = 2; x.beginPath(); x.arc(px, yy + Math.sin(t * 2 + i) * 8, 4 + (i % 3) * 3, 0, 7); x.stroke(); x.restore(); }
+/* posizione dello squalo nel «mondo»; la camera lo segue con un piccolo ritardo, quindi sullo schermo resta quasi al centro */
+function sharkPose(t, a, b) { const u = lerp(0.06, 0.8, seg(t, a, b - 0.2)), p = bez(u), p2 = bez(Math.min(1, u + 0.01)), ang = Math.atan2(p2[1] - p[1], p2[0] - p[0]) * 0.7; return { x: p[0], y: p[1] + 14 * Math.sin(t * 2.4), ang, u }; }
+function sRemora(t, a, b) { bg('56,14,24'); x.save();
+  const tAt = WT('remora', 'attacca', 1, 3.2) - 0.1, tVa = WT('remora', 'va', 1, 5.4) - 0.1, ss = 1.55, RS = 1.35, sp = sharkPose(t, a, b), cm = sharkPose(t - 0.35, a, b), ent = 1 - oC(seg(t, a, a + 1.1));
+  const pz = 1 + 0.03 * Math.sin(Math.PI * clamp((t - tAt - 0.2) / 0.9)); x.translate(540, 960); x.scale(pz, pz); x.translate(-540, -960);
+  const camX = cm.x - 540, camY = cm.y - 960;
+  /* bolle e acqua che scorrono (parallasse) */
+  for (let i = 0; i < 22; i++) { const par = 0.35 + (i % 4) * 0.22, yy = 600 + (i * 137) % 860, px = (((i * 173 - camX * par) % 1300) + 1300) % 1300 - 110; x.save(); x.strokeStyle = 'rgba(244,239,233,' + (0.1 + 0.08 * (i % 3)) + ')'; x.lineWidth = 2; x.beginPath(); x.arc(px, yy - camY * par * 0.3 + Math.sin(t * 2 + i) * 8, 4 + (i % 3) * 3 * par, 0, 7); x.stroke(); x.restore(); }
+  x.save(); x.translate(-camX, -camY);
   /* il trend: la scia dorata che lo squalo disegna */
-  x.save(); x.strokeStyle = 'rgba(244,239,233,0.14)'; x.lineWidth = 5; x.setLineDash([2, 16]); x.lineCap = 'round'; x.beginPath(); x.moveTo(...RB[0]); x.bezierCurveTo(...RB[1], ...RB[2], ...RB[3]); x.stroke(); x.setLineDash([]); x.restore();
-  x.save(); x.strokeStyle = C.lime; x.lineWidth = 10; x.lineCap = 'round'; x.lineJoin = 'round'; x.shadowColor = 'rgba(232,196,106,0.7)'; x.shadowBlur = 22; x.beginPath(); for (let i = 0; i <= 60; i++) { const u = Math.min(sp.u, 0.1 + (0.8) * i / 60 * 1.25); const q = bez(Math.min(u, i / 60)); if (i / 60 > sp.u) break; i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); } x.stroke(); x.restore();
-  lab('TREND', 540, 1440, C.lime, 28, { alpha: oC(seg(t, a + 0.4, a + 0.9)) });
-  glow(sp.x, sp.y, 300, '255,68,88', 0.12);
-  shark(sp.x, sp.y, ss, sp.ang, t * 4.5);
-  /* rèmora: arriva da sinistra, si avvicina, poi si attacca sotto la pancia e viaggia con lui */
-  const rpos = (tt) => { const q = sharkPose(tt, a, b), ent = 1 - oC(seg(tt, a, a + 1.6)), free = [q.x - 210 + 50 * Math.sin(tt * 1.9) - 480 * ent, q.y + 150 + 28 * Math.sin(tt * 2.7) + 260 * ent];
-    const e = oC(seg(tt, tAt - 0.3, tAt + 0.5)), ca = Math.cos(q.ang), sa = Math.sin(q.ang), lx = 38 * ss, ly = 56 * ss + 24 * RS, bel = [q.x + ca * lx - sa * ly, q.y + sa * lx + ca * ly];
+  x.strokeStyle = 'rgba(244,239,233,0.14)'; x.lineWidth = 5; x.setLineDash([2, 16]); x.lineCap = 'round'; x.beginPath(); x.moveTo(...RB[0]); x.bezierCurveTo(...RB[1], ...RB[2], ...RB[3]); x.stroke(); x.setLineDash([]);
+  x.strokeStyle = C.lime; x.lineWidth = 12; x.lineJoin = 'round'; x.shadowColor = 'rgba(232,196,106,0.75)'; x.shadowBlur = 26; x.beginPath(); for (let i = 0; i <= 90; i++) { const uu = sp.u * i / 90, q = bez(uu); i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); } x.stroke(); x.shadowBlur = 0;
+  x.restore();
+  /* squalo (sullo schermo vicino al centro) */
+  const shx = sp.x - camX - 700 * ent, shy = sp.y - camY;
+  glow(shx, shy, 520, '255,68,88', 0.12); shark(shx, shy, ss, sp.ang, t * 4.5);
+  /* rèmora: arriva da sinistra in basso, poi si attacca sotto la pancia e viaggia con lui */
+  const rpos = (tt) => { const q = sharkPose(tt, a, b), qc = sharkPose(tt - 0.35, a, b), en = 1 - oC(seg(tt, a, a + 1.1)), sx = q.x - (qc.x - 540) - 700 * en, sy = q.y - (qc.y - 960);
+    const ent2 = 1 - oC(seg(tt, a + 0.3, a + 2.0)), free = [sx - 330 + 70 * Math.sin(tt * 1.9) - 520 * ent2, sy + 300 + 30 * Math.sin(tt * 2.7) + 240 * ent2];
+    const e = oC(seg(tt, tAt - 0.2, tAt + 0.7)), ca = Math.cos(q.ang), sa = Math.sin(q.ang), lx = 38 * ss, ly = 56 * ss + 25 * RS, bel = [sx + ca * lx - sa * ly, sy + sa * lx + ca * ly];
     return [lerp(free[0], bel[0], e), lerp(free[1], bel[1], e), e, q.ang]; };
   const [rx, ry, e, qa] = rpos(t), [rx2, ry2] = rpos(t + 0.03), va = Math.atan2(ry2 - ry, rx2 - rx), ra = lerp(va, qa, e);
   remora(rx, ry, RS, ra, t * 9);
-  const kc = seg(t, tAt + 0.35, tAt + 0.95); if (kc > 0 && kc < 1) { x.save(); x.strokeStyle = C.lime; x.lineWidth = 4; x.globalAlpha = 1 - kc; x.beginPath(); x.arc(rx, ry - 20 * RS, 14 + 80 * oC(kc), 0, 7); x.stroke(); x.restore(); }
-  const kS = oC(seg(t, a + 0.6, a + 1.1)), kR = oC(seg(t, tAt - 0.2, tAt + 0.3));
-  lab('SQUALO', sp.x, sp.y - 150 * ss, C.ink, 28, { alpha: kS }); lab('RÈMORA', rx, ry + 60 * RS + 12, C.lime, 28, { alpha: kR });
+  const kc = seg(t, tAt + 0.5, tAt + 1.2); if (kc > 0 && kc < 1) { x.save(); x.strokeStyle = C.lime; x.lineWidth = 5; x.globalAlpha = 1 - kc; x.beginPath(); x.arc(rx, ry - 28 * RS, 20 + 110 * oC(kc), 0, 7); x.stroke(); x.restore(); }
+  const kS = oC(seg(t, a + 0.8, a + 1.3)), kR = oC(seg(t, tAt - 0.3, tAt + 0.2));
+  lab('SQUALO', shx + 20, shy - 238, C.ink, 30, { alpha: kS }); lab('RÈMORA', rx, ry + 90, C.lime, 30, { alpha: kR });
+  lab('TREND', 540, 1440, C.lime, 28, { alpha: oC(seg(t, a + 0.4, a + 0.9)) });
   phrase(t, a + 0.05, [['Il trader furbo', C.ink], ['fa come la rèmora.', C.red]], 345, { size: 90, out: tAt - 0.15 });
   phrase(t, tAt - 0.1, [['Si attacca', C.red], ['allo squalo.', C.ink]], 345, { size: 92, out: tVa - 0.05 }); phrase(t, tVa, [['E va dove', C.ink], ['va lui.', C.red]], 345, { size: 92 });
   x.restore(); finish(t); }
