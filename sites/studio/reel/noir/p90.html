@@ -335,10 +335,10 @@ function bigSpade(t, a, cx, cy, s) { const p = oC(seg(t, a, a + 1.1)), f = oC(se
   x.globalAlpha = 1; x.strokeStyle = C.red; x.lineWidth = 7 / s; x.setLineDash([8.2, 8.2]); x.lineDashOffset = 8.2 * (1 - p); if (p > 0) x.stroke(SP.S); x.setLineDash([]);
   x.restore(); }
 function sCasa(t, a, b) { bg('62,12,22'); x.save(); zoom(t, a, b, 1.04);
-  const tP = WA('casa', ['perdi'], 1, 1.4) - 0.15, tG = WA('casa', ['guadagn'], 1, 3.4) - 0.15, tN = WA('casa', ['nuota'], 1, 5.6) - 0.15;
+  const tP = WA('casa', ['perdi'], 1, 1.4) - 0.15, tG = WA('casa', ['guadagn'], 1, 3.4) - 0.15, tN = WA('casa', ['nuot'], 1, 5.6) - 0.15;
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
   bigSpade(t, a + 0.3, 540, 610, 100);
-  const P3 = [[tP, 'Perdi poco', 'quando sbagli', 0], [tG, 'Guadagni di più', 'quando hai ragione', 1], [tN, 'Nuota', 'con lo squalo', 2]];
+  const P3 = [[tP, 'Perdi poco', 'quando sbagli', 0], [tG, 'Guadagni di più', 'quando hai ragione', 1], [tN, 'Nuoti', 'con lo squalo', 2]];
   P3.forEach(([t0, big, sub, i]) => { const k = oC(seg(t, t0, t0 + 0.5)); if (k <= 0) return; const cy = 850 + i * 190; x.save(); x.translate((1 - k) * 60, 0); glass(540, cy, 900, 160, 36, k);
     if (i === 0) stack(170, cy + 30, 2, { rx: 42, ry: 13, th: 13, col: C.red, alpha: k }); if (i === 1) arrowUD(170, cy, 1.6, true, C.lime, 10); if (i === 2) shark(170, cy, 0.2, 0, t * 4, k);
     txt(big, 290, cy - 24, { size: 60, weight: 800, align: 'left', alpha: k }); lab(sub, 290, cy + 40, i === 0 ? C.red : C.lime, 28, { align: 'left', alpha: k }); x.restore(); });
