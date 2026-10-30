@@ -87,8 +87,8 @@ function bust(cx, cy, s, col, k) { if (k <= 0) return; x.save(); x.translate(cx,
 
 /* ================= CARTA: la banconota diventa un foglio, poi compra la roba ================= */
 function sCarta(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
-  const tC1 = WT('carta', 'cinquanta', 1, 1.0), tPz = WT('carta', 'pezzo', 1, 2.4), tPo = WT('carta', 'pochissimo', 1, 3.9), tEp = WT('carta', 'eppure', 1, 4.5),
-    tCo = WT('carta', 'compri', 1, 5.5), tC2 = WT('carta', 'cinquanta', 2, 5.9);
+  const tC1 = WA('carta', ['cinquanta', '50'], 1, 1.0), tPz = WT('carta', 'pezzo', 1, 2.4), tPo = WT('carta', 'pochissimo', 1, 3.9), tEp = WT('carta', 'eppure', 1, 4.5),
+    tCo = WT('carta', 'compri', 1, 5.5), tC2 = WA('carta', ['cinquanta', '50'], 2, 5.9);
   phrase(t, a + 0.03, [['Una banconota', C.ink]], 345, { size: 92, out: tPz - 0.35 });
   phrase(t, tC1 - 0.1, [['da 50 €', C.lime]], Y2, { size: 92, out: tPz - 0.35 });
   phrase(t, tPz - 0.1, [['Un pezzo di carta', C.ink]], 345, { size: 92, out: tEp - 0.35 });
@@ -200,7 +200,7 @@ function sM1(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
 
 /* ================= CONTI: la provetta si spezza in contante e conti correnti ================= */
 function sConti(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
-  const tCn = WT('conti', 'contante', 1, 0.2), tMl = WA('conti', ['milleseicento', '1600', '16'], 1, 2.1), tRe = WT('conti', 'resto', 1, 3.4), tNv = WA('conti', ['novemila', '9700', '97'], 1, 4.2), tCc = WT('conti', 'conti', 1, 5.2);
+  const tCn = WT('conti', 'contante', 1, 0.2), tMl = WA('conti', ['milleseicento', '1600', '16', '1'], 1, 2.1), tRe = WT('conti', 'resto', 1, 3.4), tNv = WA('conti', ['novemila', '9700', '97', '9'], 1, 4.2), tCc = WT('conti', 'conti', 1, 5.2);
   phrase(t, a + 0.03, [['Di cui contante,', C.ink]], 345, { size: 92 });
   phrase(t, tRe - 0.1, [['il resto sul conto.', C.lime]], Y2, { size: 92 });
   const { cx, cy, w, h } = TUBE, x0 = cx - w / 2, FR = 1618.447 / 11333.724, sw = FR * w, sp = ioC(seg(t, tCn - 0.1, tCn + 0.5)), gap = 16 * sp;
@@ -215,7 +215,7 @@ function sConti(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
 
 /* ================= SEI: una moneta contro sei, che diventano righe di registro ================= */
 function sSei(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
-  const tEu = WT('sei', 'euro', 1, 1.2), tCn = WT('sei', 'contante', 1, 1.7), tSe = WT('sei', 'sei', 1, 3.4), tSa = WT('sei', 'saldo', 1, 4.8), tNu = WT('sei', 'numero', 1, 6.5), tRg = WT('sei', 'registro', 1, 7.2);
+  const tEu = WT('sei', 'euro', 1, 1.2), tCn = WT('sei', 'contante', 1, 1.7), tSe = WA('sei', ['sei', '6'], 1, 3.4), tSa = WT('sei', 'saldo', 1, 4.8), tNu = WT('sei', 'numero', 1, 6.5), tRg = WT('sei', 'registro', 1, 7.2);
   phrase(t, tEu - 0.1, [['1 € di contante,', C.ink]], 345, { size: 92, out: tNu - 0.3 });
   phrase(t, tSe - 0.1, [['6 € sul conto.', C.lime]], Y2, { size: 92, out: tNu - 0.3 });
   phrase(t, tNu - 0.05, [['Un numero', C.ink]], 345, { size: 92 });
@@ -233,7 +233,7 @@ function sSei(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
 
 /* ================= CASA: fiducia, poi dieci caselle da 8,6 su conto ================= */
 function sCasa(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
-  const tBn = WT('casa', 'banconota', 1, 2.4), tFi = WT('casa', 'fidano', 1, 4.1), tPi = WT('casa', 'piu', 1, 5.2), tOt = WT('casa', 'otto', 1, 5.9), tDi = WT('casa', 'dieci', 1, 6.9), tNu = WT('casa', 'numeri', 1, 7.6);
+  const tBn = WT('casa', 'banconota', 1, 2.4), tFi = WT('casa', 'fidano', 1, 4.1), tPi = WT('casa', 'piu', 1, 5.2), tOt = WA('casa', ['otto', '8'], 1, 5.9), tDi = WA('casa', ['dieci', '10'], 1, 6.9), tNu = WT('casa', 'numeri', 1, 7.6);
   phrase(t, a + 0.03, [['Ti porti a casa:', C.ink]], 345, { size: 92, out: tPi - 0.4 });
   phrase(t, tFi - 0.15, [['conta la fiducia.', C.lime]], Y2, { size: 92, out: tPi - 0.4 });
   phrase(t, tOt - 0.15, [['Più di 8 € su 10', C.ink]], 345, { size: 92 });
