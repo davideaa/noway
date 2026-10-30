@@ -436,13 +436,13 @@
   "n": 25,
   "titolo": "Silicon Valley Bank 2023",
   "caso_reale": true,
-  "gancio": "La sedicesima banca americana è saltata in 48 ore. Come?",
+  "gancio": "Una grande banca americana è saltata in meno di due giorni. Come?",
   "spiega": [
    "SVB aveva molti depositi di startup, in gran parte sopra la soglia garantita di 250.000 dollari.",
-   "Aveva investito in titoli di Stato a lungo termine, che hanno perso valore quando i tassi sono saliti.",
+   "Aveva investito molto in titoli a lungo termine, che hanno perso valore quando i tassi sono saliti.",
    "La notizia delle perdite ha scatenato una corsa digitale: miliardi chiesti indietro in un giorno."
   ],
-  "esempio": "Il 9 marzo 2023 i clienti chiedono di ritirare circa 42 miliardi di dollari; il 10 marzo la banca viene chiusa. Fonte: rapporto Fed aprile 2023.",
+  "esempio": "Il 9 marzo 2023 escono dalla banca oltre 40 miliardi di dollari; il 10 marzo la banca viene chiusa. Fonte: rapporto Fed aprile 2023.",
   "ti_serve": "Vedere dal vivo riserva frazionaria, corsa agli sportelli e limiti della garanzia.",
   "visual": "Grattacielo di vetro che si svuota mentre frecce luminose escono dagli smartphone.",
   "collega": [
