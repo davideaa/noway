@@ -385,7 +385,7 @@
   "n": 22,
   "titolo": "Chi crea i soldi: le banche",
   "caso_reale": false,
-  "gancio": "Quando la banca ti presta soldi, li crea dal nulla. Davvero.",
+  "gancio": "Quando la banca ti fa un prestito, i soldi nuovi nascono in quel momento. E spariscono quando lo restituisci.",
   "spiega": [
    "Quando una banca concede un prestito, accredita un nuovo deposito sul conto del cliente: nasce denaro.",
    "Quando il prestito viene rimborsato, quel denaro sparisce.",
