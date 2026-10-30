@@ -78,7 +78,7 @@ function ledgers(t, o) {
 const exLabel = (k) => txt('ESEMPIO · CIFRE INVENTATE', 540, 575, { fam: 'mono', size: 26, weight: 600, color: C.amber, ls: 3, alpha: k });
 
 function sScrive(t, a, b) { bg('30,44,26'); x.save();
-  const tD1 = WI('scrive', ['diecimila', '10000', 'dieci'], 1, 3), tDeb = WI('scrive', ['debit'], 1, 14), tCr = WI('scrive', ['credit'], 1, 18), tMo = WI('scrive', ['moment'], 1, 22), tD2 = WI('scrive', ['diecimila', '10000', 'dieci'], 2, 24);
+  const tD1 = WI('scrive', ['diecimila', '10000', 'dieci', '10'], 1, 3), tDeb = WI('scrive', ['debit'], 1, 14), tCr = WI('scrive', ['credit'], 1, 18), tMo = WI('scrive', ['moment'], 1, 22), tD2 = WI('scrive', ['diecimila', '10000', 'dieci', '10'], 2, 24);
   phrase(t, a + 0.05, [['Chiedi un prestito', C.ink]], 345, { size: 92 });
   phrase(t, tD1 - 0.15, [['10.000 € per l’auto', C.lime]], Y2, { size: 92 });
   exLabel(oC(seg(t, a + 0.2, a + 0.6)));
