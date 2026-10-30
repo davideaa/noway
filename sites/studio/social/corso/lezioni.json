@@ -368,10 +368,10 @@
   "n": 21,
   "titolo": "Cos'è il denaro",
   "caso_reale": false,
-  "gancio": "Una banconota da 50 € costa pochi centesimi da stampare. Perché vale 50?",
+  "gancio": "Una banconota da 50 € è solo carta. Perché vale 50?",
   "spiega": [
    "Il denaro ha tre funzioni: mezzo di scambio, unità di misura dei prezzi, riserva di valore.",
-   "L'euro non è convertibile in oro: vale perché tutti lo accettano e lo Stato lo impone per pagare le tasse.",
+   "L'euro non è convertibile in oro: vale perché la legge lo rende moneta a corso legale e tutti si fidano che il suo valore resti stabile.",
    "Gran parte del denaro non è contante ma depositi bancari: numeri su un conto."
   ],
   "esempio": "Le banconote e monete in euro circolano dal 1° gennaio 2002. Confrontare contante e depositi nell'aggregato M1 sui dati BCE.",
