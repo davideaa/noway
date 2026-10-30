@@ -152,7 +152,7 @@ function sEsempio(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
   txt('ESEMPIO · CIFRE INVENTATE', 540, 456, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 3, alpha: ke });
   txt('1.000 clienti', 290, 548, { size: 46, weight: 800, alpha: oC(seg(t, tMi - 0.1, tMi + 0.3)), blur: (1 - oC(seg(t, tMi - 0.1, tMi + 0.3))) * 10 });
   txt('1.000 € a testa', 770, 548, { size: 46, weight: 800, color: C.muted, alpha: oC(seg(t, tMi2 - 0.1, tMi2 + 0.3)) });
-  const n1 = 100 * ioC(seg(t, tCen - 0.15, tCen + 0.7)), n2 = 900 * ioC(seg(t, tTut - 0.1, tTut + 1.05)), n = Math.round(n1 + n2), CASH = 120, kg = oC(seg(t, tMi, tMi + 0.9));
+  const n1 = 100 * ioC(seg(t, tCen - 0.15, tCen + 0.7)), n2 = 900 * ioC(seg(t, tTut - 0.1, tTut + 0.65)), n = Math.round(n1 + n2), CASH = 120, kg = oC(seg(t, tMi, tMi + 0.9));
   for (let i = 0; i < 1000; i++) { const col = i % 50, row = Math.floor(i / 50), ki = clamp(kg * 1.6 - row * 0.03 - col * 0.004), px = 108 + col * 17.6, py = 640 + row * 17;
     if (ki <= 0) continue; const req = i < n; x.fillStyle = req ? (i < CASH ? C.lime : C.red) : 'rgba(241,244,238,0.34)'; x.globalAlpha = ki; x.beginPath(); x.arc(px, py, req ? 6 : 5, 0, 7); x.fill(); }
   x.globalAlpha = 1;
