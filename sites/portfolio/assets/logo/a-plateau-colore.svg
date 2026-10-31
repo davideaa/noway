@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-labelledby="t d">
+  <title id="t">Marchio Plateau, a colori</title>
+  <desc id="d">Una linea lime che sale e diventa piatta, sopra una base grigia sottile.</desc>
+  <path d="M5 29 H27" fill="none" stroke="var(--mut, #939fa9)" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M5 25 L14.5 8 H27" fill="none" stroke="var(--acc, #c8fa72)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

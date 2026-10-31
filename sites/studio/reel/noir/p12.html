@@ -1,0 +1,329 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 12, DAY: 1, CAP: 0, NEXT: ['Domanda e offerta', 'aggregata'] }; /* dal 16/10/2026 niente riga delle fonti nel video (Davide): P.FONTE non serve più */</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 12 — «La recessione». Numeri SOLO da p12-fonti.md:
+   Italia 2018, III e IV trimestre, Pil sul trimestre precedente: −0,1 e −0,1 nei dati di allora (il −0,1 del III: Istat, conti trimestrali III trim. 2018 del 30/11/2018, verificato in p12-fonti.md) (Istat 13/03/2019: «secondo trimestre
+   consecutivo», il III solo implicito → a schermo nessuna data del comunicato), oggi +0,1 e +0,4 (Eurostat namq_10_gdp, 15/10/2026).
+   Le barre dei due pannelli sono nella STESSA scala: 75 px per 0,1 punti (−0,1 = 75 px giù, +0,4 = 300 px su).
+   Area euro (EA20): IV trim. 2022 −0,1, I trim. 2023 −0,2 (Eurostat); comitato CEPR 30/06/2023: «premature». Scala 240 px per punto,
+   con le righe a ±1% per far vedere quanto sono piccoli. Il comitato europeo data SOLO l'area euro (mai l'Italia).
+   Stati Uniti: comitato NBER (a schermo solo «istituto di ricerca», senza sigla); indicatori: occupazione, redditi, consumi (+ Pil).
+   2001: recessione senza due trimestri di calo di fila (NBER FAQ). 2020: picco febbraio, minimo aprile, 2 mesi (marzo e aprile),
+   «la più breve registrata dal comitato americano» (mai «di sempre»); la linea dei mesi è uno SCHEMA senza scala (nessun numero).
+   Criteri NBER: profondità, diffusione, durata (FAQ, «somewhat interchangeable»): barre qualitative, senza numeri.
+   Disoccupazione Italia, media annua 15–74 (Eurostat une_rt_a, 10/09/2026): 2011 8,5 · 2012 10,9 · 2013 12,4 · 2014 12,9 · 2015 12,0;
+   barre da zero in scala (42 px per punto). Minimo del Pil trimestrale: I trim. 2013. Niente «recessione tecnica», niente tassi USA annualizzati.
+   CAP 0 = capitolo 1. DAY 1 = martedì, lezione 2 di 5. */
+const ORDER = ['num', 'hook', 'allora', 'rivisti', 'comitato', 'europa', 'bastano', 'duemilauno', 'breve', 'profonda', 'disoccupazione', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+const it = (v) => (v < -0.001 ? '−' : v > 0.001 ? '+' : '') + Math.abs(v).toFixed(1).replace('.', ',');
+const c1 = (v) => v.toFixed(1).replace('.', ',');
+/* zoom lento centrato sul titolo: il titolo resta fermo, il resto si assesta */
+const zm = (t, a, b, z0 = 1.03) => { const z = lerp(z0, 1, oC(seg(t, a, b))); x.translate(540, 345); x.scale(z, z); x.translate(-540, -345); };
+
+/* ================= oggetti ================= */
+/* timbro che cade e si stampa */
+function stamp(cx, cy, label, col, rgb, k, rot = -0.1, size = 46) { if (k <= 0) return; const s = lerp(1.7, 1, oC(clamp(k))), w = tw(label, size, 800, 'Manrope', 4) + 56;
+  x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(s, s); x.globalAlpha *= clamp(k * 2.5);
+  if (k > 0.35) glow(0, 0, w * 0.7, rgb, 0.18 * (1 - seg(k, 0.6, 1) * 0.5));
+  x.fillStyle = 'rgba(5,6,7,0.78)'; rr(-w / 2, -size * 0.9, w, size * 1.8, 14); x.fill(); x.strokeStyle = col; x.lineWidth = 6; x.stroke();
+  txt(label, 0, 2, { size, weight: 800, color: col, ls: 4 }); x.restore(); }
+/* comitato: cinque teste a semicerchio (entrano una alla volta da t0) */
+function heads(cx, cy, s, col, k, t, t0) { const n = 5;
+  for (let i = 0; i < n; i++) { const u = i / (n - 1), px = cx + (u - 0.5) * 300 * s, py = cy - Math.sin(u * Math.PI) * 30 * s;
+    const ki = t0 === undefined ? 1 : oB(seg(t, t0 + i * 0.08, t0 + 0.4 + i * 0.08)); if (ki <= 0) continue;
+    x.save(); x.globalAlpha *= clamp(k); x.translate(px, py); x.scale(s * clamp(ki, 0, 1.2), s * clamp(ki, 0, 1.2));
+    x.fillStyle = col; x.beginPath(); x.arc(0, -34, 20, 0, 7); x.fill(); x.beginPath(); x.arc(0, 26, 34, Math.PI, 0); x.closePath(); x.fill(); x.restore(); } }
+/* giornale: carta chiara, testo scuro (contrasto alto) */
+function paper(cx, cy, w, h, k, head, hcol = '#b8322a', rot = -0.02, extra = null) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.rotate(rot);
+  x.fillStyle = '#E4E7E1'; x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 40; rr(-w / 2, -h / 2, w, h, 14); x.fill(); x.shadowBlur = 0;
+  x.fillStyle = '#0b0d0c'; x.fillRect(-w / 2 + 30, -h / 2 + 30, w - 60, 16); x.fillStyle = 'rgba(11,13,12,0.4)'; x.fillRect(-w / 2 + 30, -h / 2 + 58, w - 60, 3);
+  let hs = 66; while (hs > 30 && tw('RECESSIONE', hs) > w - 110) hs -= 2;
+  if (head) txt(head, -tw('RECESSIONE', hs) / 2, -h / 2 + 122, { size: hs, weight: 800, color: hcol, align: 'left' }); /* da sinistra: il titolo che si scrive non si sposta */
+  if (extra) extra(tw('RECESSIONE', hs), -h / 2 + 122, hs);
+  const cw = (w - 84) / 2; x.fillStyle = 'rgba(11,13,12,0.18)';
+  for (let c = 0; c < 2; c++) for (let yy = -h / 2 + 190; yy < h / 2 - 30; yy += 30) x.fillRect(-w / 2 + 30 + c * (cw + 24), yy, cw * (((yy * 7 + c * 13) % 5) === 0 ? 0.6 : 1), 10);
+  x.restore(); }
+function downArrow(cx, cy, s, col, k) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy - (1 - oC(k)) * 30); x.strokeStyle = col; x.lineWidth = 9 * s; x.lineCap = 'round'; x.lineJoin = 'round';
+  x.beginPath(); x.moveTo(0, -40 * s); x.lineTo(0, 40 * s); x.moveTo(-26 * s, 14 * s); x.lineTo(0, 40 * s); x.lineTo(26 * s, 14 * s); x.stroke(); x.restore(); }
+function chevron(cx, cy, s, col, k) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.strokeStyle = col; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round';
+  x.beginPath(); x.moveTo(cx - 10 * s, cy - 20 * s); x.lineTo(cx + 10 * s, cy); x.lineTo(cx - 10 * s, cy + 20 * s); x.stroke(); x.restore(); }
+
+/* ================= HOOK: il timbro «RECESSIONE» del 2019 cancellato dalla revisione ================= */
+const SPK = Array.from({ length: 70 }, (_, i) => { const r = (n) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1; return [r(1), r(2), r(3), r(4)]; });
+function sHook(t, a, b) { bg('50,24,22', 0.7); x.save(); zm(t, a, b);
+  const tN = WT('hook', 'nel', 1, 0.0), tR = WA('hook', ['sembrava', 'recess'], 1, 1.0) + 0.1, tO = WT('hook', 'oggi', 1, 2.4), tV = WT('hook', 'rivisti', 1, 3.4), tS = WT('hook', 'sparita', 1, 4.8);
+  phrase(t, a + 0.05, [['La recessione', C.ink]], 345, { size: 92 });
+  phrase(t, tS - 0.1, [['che è sparita.', C.lime]], Y2, { size: 92 });
+  const CX = 540, CY = 930, CW = 680, CH = 560, top = CY - CH / 2;
+  const kc = oB(seg(t, tN - 0.1, tN + 0.45)); if (kc <= 0) { x.restore(); finish(t); return; }
+  x.save(); x.translate(CX, CY); x.scale(lerp(0.9, 1, clamp(kc)), lerp(0.9, 1, clamp(kc))); x.translate(-CX, -CY);
+  glass(CX, CY, CW, CH, 30, clamp(kc));
+  txt('ITALIA · FINE 2018', CX, top + 52, { fam: 'mono', size: 30, weight: 600, color: C.ink, ls: 4, alpha: clamp(kc) });
+  x.save(); x.globalAlpha = clamp(kc); x.fillStyle = 'rgba(241,244,238,0.16)'; [0.82, 0.64, 0.74].forEach((f, i) => { rr(CX - CW / 2 + 60, top + 108 + i * 34, (CW - 120) * f, 12, 6); x.fill(); }); x.restore();
+  /* scansione «dati rivisti»: dall'alto al basso tra «oggi» e «rivisti» */
+  const SY = CY + 50, ks = ioC(seg(t, tO, tV + 0.5)), scanY = lerp(top + 120, top + CH - 92, ks), scanOn = ks > 0 && ks < 1 ? 1 : 0;
+  const kSt = seg(t, tR - 0.05, tR + 0.3);
+  /* il timbro: rimane solo sotto la linea di scansione */
+  if (kSt > 0) { x.save(); if (ks > 0) { x.beginPath(); x.rect(0, scanY, W, H); x.clip(); } stamp(CX, SY, 'RECESSIONE', C.red, '255,90,78', kSt, -0.08, 66); x.restore(); }
+  /* frammenti rossi che volano via dove passa la scansione */
+  if (ks > 0) SPK.forEach(([r1, r2, r3, r4]) => { const py0 = SY - 70 + r2 * 140, tc = lerp(tO, tV + 0.5, ioC(clamp((py0 - top - 120) / (CH - 212)))), k = seg(t, tc, tc + 1.1 + r3 * 0.6); if (k <= 0 || k >= 1) return;
+    const px = CX - 260 + r1 * 520 + (r4 - 0.5) * 160 * oC(k), py = py0 - 180 * oC(k) * (0.5 + r3); x.fillStyle = `rgba(255,90,78,${0.9 * (1 - k)})`; x.fillRect(px, py, 6 + r4 * 8, 6 + r4 * 8); });
+  /* il segno del timbro sparito: contorno tratteggiato */
+  const kg = oC(seg(t, tV + 0.6, tS + 0.2)); if (kg > 0) { x.save(); x.globalAlpha = 0.6 * kg; x.translate(CX, SY); x.rotate(-0.08); const w = tw('RECESSIONE', 66, 800, 'Manrope', 4) + 56;
+    x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; x.setLineDash([10, 10]); rr(-w / 2, -66 * 0.9, w, 66 * 1.8, 14); x.stroke(); x.restore(); }
+  if (scanOn) { x.save(); glow(CX, scanY, 260, '200,250,114', 0.16); x.fillStyle = C.lime; x.fillRect(CX - CW / 2 + 16, scanY - 2, CW - 32, 4);
+    const lw = tw('DATI RIVISTI', 24, 600, 'mono', 3) + 28; x.fillStyle = 'rgba(5,6,7,0.9)'; rr(CX + CW / 2 - 24 - lw, scanY - 46, lw, 36, 18); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 2; x.stroke();
+    txt('DATI RIVISTI', CX + CW / 2 - 24 - lw / 2, scanY - 28, { fam: 'mono', size: 24, weight: 600, color: C.lime, ls: 3 }); x.restore(); }
+  txt('NEI DATI DI OGGI', CX, top + CH - 50, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 3, alpha: oC(seg(t, tV + 0.6, tV + 1.0)) });
+  x.restore(); x.restore(); finish(t); }
+
+/* ================= ALLORA + RIVISTI: due pannelli nella stessa scala, prima e dopo ================= */
+const IZ = 1000, IU = 75, PL = 292, PR = 788; /* zero, px per 0,1 punti, centri dei pannelli */
+function itPanel(cx, k, head, col) { if (k <= 0) return; glass(cx, 915, 445, 710, 28, k);
+  txt(head, cx, 600, { fam: 'mono', size: 24, weight: 600, color: col, ls: 2, alpha: k });
+  x.save(); x.globalAlpha *= k; x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; x.beginPath(); x.moveTo(cx - 200, IZ); x.lineTo(cx + 200, IZ); x.stroke(); x.restore();
+  txt('III TRIM.', cx - 90, 1185, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 1, alpha: k });
+  txt('IV TRIM.', cx + 90, 1185, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 1, alpha: k });
+  txt('2018', cx, 1228, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 3, alpha: k }); }
+/* barra trimestrale: v in punti percentuali; kk = crescita (il numero conta insieme alla barra) */
+function qbar(cx, v, kk, col, rgb) { if (kk <= 0) return; const h = (v / 0.1) * IU * oC(kk), y0 = Math.min(IZ, IZ - h);
+  x.save(); x.globalAlpha *= clamp(kk * 3); x.fillStyle = `rgba(${rgb},0.85)`; rr(cx - 55, y0, 110, Math.abs(h), v < 0 ? [0, 0, 12, 12] : [12, 12, 0, 0]); x.fill(); x.restore();
+  const shown = Math.round(v * oC(kk) * 10) / 10, ly = v < 0 ? IZ + Math.abs(h) + 40 : IZ - Math.abs(h) - 40;
+  txt(it(shown) + '%', cx, ly, { size: 44, weight: 800, color: col, alpha: clamp(kk * 3) }); }
+/* tessera della regola pratica: «LA REGOLA DEI 2 TRIMESTRI» (due frecce giù, simboliche) = «RECESSIONE?» */
+function ruleCard(cx, k, kE, kR) { if (k <= 0) return; const s = lerp(0.9, 1, oB(clamp(k))); x.save(); x.translate(cx, 905); x.scale(s, s); x.translate(-cx, -905);
+  glass(cx, 905, 400, 580, 28, clamp(k)); txt('LA REGOLA DEI', cx, 668, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 2, alpha: clamp(k) });
+  txt('2 TRIMESTRI', cx, 708, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 2, alpha: clamp(k) });
+  downArrow(cx - 60, 812, 0.9, C.red, clamp(k * 1.5)); downArrow(cx + 60, 812, 0.9, C.red, clamp(k * 1.5 - 0.3));
+  txt('IN CALO', cx, 888, { fam: 'mono', size: 26, weight: 600, color: C.red, ls: 3, alpha: clamp(k) });
+  if (kE > 0) { x.save(); x.translate(cx, 948); x.scale(clamp(oB(kE), 0, 1.2), clamp(oB(kE), 0, 1.2)); txt('=', 0, 0, { size: 76, weight: 800, color: C.ink }); x.restore(); }
+  let rs = 56; while (rs > 30 && tw('RECESSIONE?', rs) > 350) rs -= 2;
+  if (kR > 0) txt('RECESSIONE?', cx, 1020 + (1 - oC(kR)) * 30, { size: rs, weight: 800, color: C.red, alpha: oC(kR), blur: (1 - oC(kR)) * 10 });
+  x.restore(); }
+function sAllora(t, a, b) { bg(); x.save();
+  const tT = WT('allora', 'trimestri', 1, 2.1), tP = WT('allora', 'prodotto', 1, 4.1), tG = WT('allora', 'regola', 1, 5.9), tC = WT('allora', 'citata', 1, 6.6), tR = WT('allora', 'recess', 1, 7.2);
+  phrase(t, a + 0.05, [['Nei dati di allora:', C.ink]], 345, { size: 92 });
+  phrase(t, tT - 0.4, [['due cali di fila.', C.red]], Y2, { size: 92 }); /* «due» sulla parola */
+  const kp = oC(seg(t, a + 0.15, a + 0.6)); itPanel(PL, kp, 'NEI DATI DI ALLORA', C.ink);
+  qbar(PL - 90, -0.1, seg(t, tT - 0.3, tT + 0.3), C.red, '255,90,78'); qbar(PL + 90, -0.1, seg(t, tT + 0.1, tT + 0.7), C.red, '255,90,78');
+  mono('PIL ITALIA · VARIAZIONE SUL TRIMESTRE PRECEDENTE', 540, 1320, t, tP - 0.1, { size: 22, color: C.muted, ls: 2 });
+  /* la regola molto citata: entra su «regola», «=» su «citata», «RECESSIONE?» su «recessione» */
+  const kg = oC(seg(t, tG - 0.3, tG + 0.3)); if (kg > 0) { x.save(); x.translate(0, -(1 - kg) * 90); ruleCard(PR, kg, seg(t, tC - 0.1, tC + 0.3), seg(t, tR - 0.1, tR + 0.35)); x.restore(); }
+  if (tR > tG) glow(PR, 1020, 200, '255,90,78', 0.12 * oC(seg(t, tR - 0.1, tR + 0.4)));
+  x.restore(); finish(t); }
+function sRivisti(t, a, b) { bg(); x.save();
+  const tU = WT('rivisti', 'ufficiale', 1, 2.4), tRf = WT('rivisti', 'rifatti', 1, 3.1), tDi = WT('rivisti', 'diventati', 1, 5.5), tCr = WT('rivisti', 'crescite', 1, 6.2); /* non «cali»: la voce lo dice «cadi» */
+  phrase(t, a + 0.05, [['Una regola pratica,', C.amber]], 345, { size: 92, out: tRf - 0.45 });
+  phrase(t, tU - 0.35, [['non ufficiale.', C.ink]], Y2, { size: 92, out: tRf - 0.45 });
+  phrase(t, tRf - 0.1, [['Rifatti i conti:', C.ink]], 345, { size: 92 });
+  phrase(t, tDi - 0.1, [['piccole crescite.', C.lime]], Y2, { size: 92 });
+  itPanel(PL, 1, 'NEI DATI DI ALLORA', C.ink); qbar(PL - 90, -0.1, 1, C.red, '255,90,78'); qbar(PL + 90, -0.1, 1, C.red, '255,90,78');
+  mono('PIL ITALIA · VARIAZIONE SUL TRIMESTRE PRECEDENTE', 540, 1320, t, -9, { size: 22, color: C.muted, ls: 2 });
+  /* la regola riceve il timbro «NON UFFICIALE», poi esce a destra */
+  const kx = ioC(seg(t, tRf - 0.25, tRf + 0.15)); /* la tessera è uscita del tutto prima che entri il pannello: mai sovrapposti */
+  if (kx < 1) { x.save(); x.globalAlpha = 1 - kx; x.translate(320 * kx, 0); ruleCard(PR, 1, 1, 1);
+    stamp(PR, 1128, 'NON UFFICIALE', C.amber, '245,165,36', seg(t, tU - 0.05, tU + 0.3), -0.08, 30); x.restore(); }
+  /* pannello «dati rivisti»: stessi trimestri, stessa scala */
+  const kp = oC(seg(t, tRf + 0.2, tRf + 0.65)); itPanel(PR, kp, 'NEI DATI RIVISTI', C.lime);
+  if (kp > 0) { x.save(); x.globalAlpha = 0.55 * kp; x.strokeStyle = C.red; x.lineWidth = 2; x.setLineDash([6, 6]); [PR - 90, PR + 90].forEach((cx) => { rr(cx - 55, IZ, 110, IU, [0, 0, 12, 12]); x.stroke(); }); x.restore(); }
+  chevron(540, 915, 1, C.lime, kp);
+  qbar(PR - 90, 0.1, seg(t, tDi - 0.3, tDi + 0.4), C.lime, '200,250,114'); qbar(PR + 90, 0.4, seg(t, tDi + 0.1, tCr + 0.5), C.lime, '200,250,114');
+  x.restore(); finish(t); }
+
+/* ================= COMITATO: negli Stati Uniti un comitato guarda più indicatori ================= */
+function icoPil(cx, cy, col) { x.save(); x.fillStyle = col; [[-34, 26], [-6, 44], [22, 62]].forEach(([dx, h]) => x.fillRect(cx + dx, cy + 30 - h, 20, h)); x.fillRect(cx - 44, cy + 32, 96, 4); x.restore(); }
+function icoWork(cx, cy, col) { x.save(); x.fillStyle = col; x.strokeStyle = col; x.lineWidth = 5; x.beginPath(); x.arc(cx - 10, cy - 18, 15, 0, 7); x.fill();
+  x.beginPath(); x.arc(cx - 10, cy + 34, 30, Math.PI, 0); x.closePath(); x.fill(); x.lineJoin = 'round'; rr(cx + 14, cy + 6, 36, 28, 5); x.fillStyle = '#0d110f'; x.fill(); x.stroke(); x.beginPath(); x.moveTo(cx + 24, cy + 6); x.lineTo(cx + 24, cy - 2); x.lineTo(cx + 40, cy - 2); x.lineTo(cx + 40, cy + 6); x.stroke(); x.restore(); }
+function icoMoney(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; rr(cx - 46, cy - 26, 92, 54, 8); x.stroke(); x.beginPath(); x.arc(cx, cy + 1, 13, 0, 7); x.stroke();
+  x.fillStyle = col; x.fillRect(cx - 36, cy - 4, 8, 8); x.fillRect(cx + 28, cy - 4, 8, 8); x.restore(); }
+function icoCart(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 48, cy - 30); x.lineTo(cx - 34, cy - 30); x.lineTo(cx - 22, cy + 14); x.lineTo(cx + 34, cy + 14); x.lineTo(cx + 44, cy - 18); x.lineTo(cx - 28, cy - 18); x.stroke();
+  x.fillStyle = col; x.beginPath(); x.arc(cx - 14, cy + 30, 7, 0, 7); x.fill(); x.beginPath(); x.arc(cx + 28, cy + 30, 7, 0, 7); x.fill(); x.restore(); }
+const TL = [['PIL', 'guarda', icoPil, 5.5], ['OCCUPAZIONE', 'occupazione', icoWork, 6.2], ['REDDITI', 'redditi', icoMoney, 6.6], ['CONSUMI', 'consumi', icoCart, 7.2]];
+function sComitato(t, a, b) { bg(); x.save(); zm(t, a, b);
+  const tC = WT('comitato', 'comitato', 1, 3.1), tI = WT('comitato', 'istituto', 1, 4.1);
+  phrase(t, a + 0.05, [['Negli Stati Uniti', C.ink]], 345, { size: 92 });
+  phrase(t, tC - 0.1, [['le data un comitato.', C.lime]], Y2, { size: 92 });
+  const kp = oC(seg(t, tC - 0.35, tC + 0.15)); glass(540, 745, 720, 310, 30, kp);
+  if (kp > 0) { heads(540, 760, 1, C.ink, kp, t, tC - 0.1);
+    x.save(); x.globalAlpha = kp; x.fillStyle = metal(280, 0, 800, 0, true); x.beginPath(); x.ellipse(540, 800, 280, 44, 0, 0, 7); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.6)'; x.lineWidth = 3; x.stroke(); x.restore(); }
+  mono('UN ISTITUTO DI RICERCA', 540, 870, t, tI - 0.1, { size: 24, color: C.lime });
+  TL.forEach(([lab, w, ico, r], i) => { const cx = 177.5 + i * 235, cy = 1180, tw0 = WT('comitato', w, 1, r), k = oB(seg(t, tw0 - 0.25, tw0 + 0.3)); if (k <= 0) return;
+    const hot = i > 0 ? seg(t, tw0, tw0 + 0.2) : 0, col = i === 0 ? C.ink : C.lime;
+    /* filo verso il tavolo, con un punto che sale */
+    const q = { p0: [cx, 1072], c: [cx, 960], p1: [lerp(cx, 540, 0.75), 896] };
+    x.save(); x.globalAlpha = clamp(k); x.strokeStyle = i === 0 ? 'rgba(241,244,238,0.45)' : 'rgba(200,250,114,0.6)'; x.lineWidth = 3; x.setLineDash([2, 10]); x.lineCap = 'round';
+    x.beginPath(); x.moveTo(...q.p0); x.quadraticCurveTo(...q.c, ...q.p1); x.stroke(); x.setLineDash([]);
+    const u = ((t - tw0) * 0.7) % 1; if (u > 0) { const [px, py] = qp(q, u); x.fillStyle = col; x.beginPath(); x.arc(px, py, 7, 0, 7); x.fill(); } x.restore();
+    const s = clamp(k, 0, 1.12); x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); if (hot > 0) glow(cx, cy, 200, '200,250,114', 0.2 * hot);
+    glass(cx, cy, 215, 210, 26, clamp(k)); ico(cx, cy - 28, col);
+    txt(lab, cx, cy + 66, { fam: 'mono', size: 22, weight: 600, color: col, ls: 1, alpha: clamp(k) }); x.restore(); });
+  x.restore(); finish(t); }
+
+/* ================= EUROPA + BASTANO: area euro, due cali piccolissimi in scala ================= */
+const EZ = 1000, EU = 240; /* zero e px per punto percentuale */
+function euroChart(t, kp, k1, k2, kB) {
+  if (kp <= 0) return; glass(540, 990, 900, 620, 30, kp);
+  txt('AREA EURO · PIL SUL TRIMESTRE PRECEDENTE', 540, 715, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 2, alpha: kp });
+  x.save(); x.globalAlpha = kp; x.lineWidth = 2;
+  [[1, '+1%'], [0, '0'], [-1, '−1%']].forEach(([v, l]) => { const y = EZ - v * EU; x.strokeStyle = v === 0 ? 'rgba(241,244,238,0.6)' : 'rgba(241,244,238,0.2)'; x.lineWidth = v === 0 ? 3 : 2;
+    if (v !== 0) x.setLineDash([6, 8]); x.beginPath(); x.moveTo(190, y); x.lineTo(950, y); x.stroke(); x.setLineDash([]);
+    txt(l, 140, y, { fam: 'mono', size: 24, weight: 600, color: C.muted }); });
+  x.strokeStyle = 'rgba(241,244,238,0.3)'; x.setLineDash([4, 8]); x.beginPath(); x.moveTo(565, 925); x.lineTo(565, 1180); x.stroke(); x.setLineDash([]); x.restore();
+  txt('IV TRIM. 2022', 430, EZ - 40, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 1, alpha: kp });
+  txt('I TRIM. 2023', 700, EZ - 40, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 1, alpha: kp });
+  [[430, -0.1, k1], [700, -0.2, k2]].forEach(([cx, v, k]) => { if (k <= 0) return; const h = -v * EU * oC(k);
+    x.save(); x.globalAlpha = clamp(k * 3); x.fillStyle = 'rgba(255,90,78,0.9)'; rr(cx - 75, EZ, 150, Math.max(2, h), [0, 0, 8, 8]); x.fill(); x.restore();
+    txt(it(v) + '%', cx, EZ + h + 38, { size: 44, weight: 800, color: C.red, alpha: oC(seg(k, 0.5, 1)) }); });
+  if (kB > 0) { x.save(); x.globalAlpha = kB; x.strokeStyle = C.amber; x.lineWidth = 4; x.lineCap = 'round'; x.beginPath(); x.moveTo(853, EZ); x.lineTo(870, EZ); x.lineTo(870, EZ + 0.2 * EU); x.lineTo(853, EZ + 0.2 * EU); x.stroke(); x.restore();
+    txt('DI POCHISSIMO', 850, EZ + 150, { fam: 'mono', size: 24, weight: 600, color: C.amber, ls: 1, alpha: kB }); } }
+function euroPill(k) { if (k <= 0) return; const s = lerp(0.85, 1, oB(clamp(k))); x.save(); x.translate(540, 600); x.scale(s, s); x.translate(-540, -600);
+  glass(540, 600, 640, 92, 46, clamp(k * 2)); heads(305, 612, 0.36, C.lime, clamp(k * 2));
+  txt('UN COMITATO SIMILE', 600, 602, { fam: 'mono', size: 28, weight: 600, color: C.lime, ls: 2, alpha: clamp(k * 2) }); x.restore(); }
+function sEuropa(t, a, b) { bg('52,40,20', 0.55); x.save();
+  const tC = WT('europa', 'comitato', 1, 1.4), tCav = WT('europa', 'cavallo', 1, 2.4), tT = WT('europa', 'trimestri', 1, 4.5), tCa = WT('europa', 'calo', 1, 5.2), tP = WT('europa', 'pochissimo', 1, 6.9);
+  phrase(t, a + 0.05, [['In Europa:', C.ink]], 345, { size: 92 });
+  phrase(t, tT - 0.4, [['due cali lievi.', C.red]], Y2, { size: 92 }); /* «due» sulla parola */
+  euroPill(seg(t, tC - 0.2, tC + 0.3));
+  euroChart(t, oC(seg(t, tCav - 0.2, tCav + 0.3)), seg(t, tT - 0.1, tT + 0.5), seg(t, tCa - 0.1, tCa + 0.5), oC(seg(t, tP - 0.25, tP + 0.2)));
+  x.restore(); finish(t); }
+function sBastano(t, a, b) { bg('52,40,20', 0.55); x.save();
+  const tPr = WT('bastano', 'prematuro', 1, 2.8), tT = WT('bastano', 'trimestri', 1, 3.4), tB = WT('bastano', 'bastano', 1, 4.1);
+  phrase(t, a + 0.05, [['Recessione?', C.ink]], 345, { size: 92 });
+  phrase(t, tPr - 0.1, [['«Prematuro».', C.amber]], Y2, { size: 92 });
+  euroPill(1); euroChart(t, 1, 1, 1, 1);
+  stamp(565, 855, 'PREMATURO', C.amber, '245,165,36', seg(t, tPr - 0.05, tPr + 0.3), -0.08, 50);
+  const kq = oC(seg(t, tT - 0.45, tB + 0.1)); if (kq > 0) { glassPill(540, 1385, 'due trimestri non bastano', kq, C.ink, 38); }
+  x.restore(); finish(t); }
+
+/* ================= 2001: recessione senza due cali di fila ================= */
+function calendar(cx, cy, k, year) { const w = 520, h = 440, top = cy - h / 2; x.save(); x.globalAlpha *= clamp(k);
+  glass(cx, cy, w, h, 26, 1); x.fillStyle = 'rgba(200,250,114,0.12)'; rr(cx - w / 2, top, w, 74, [26, 26, 0, 0]); x.fill();
+  [-130, 130].forEach((dx) => { x.fillStyle = metal(cx + dx - 10, 0, cx + dx + 10, 0); rr(cx + dx - 10, top - 26, 20, 50, 10); x.fill(); });
+  txt('STATI UNITI', cx, top + 39, { fam: 'mono', size: 28, weight: 600, color: C.lime, ls: 4 });
+  txt(year, cx, top + 182, { size: 150, weight: 800, color: C.ink, ls: -4 }); x.restore(); }
+function sDuemilauno(t, a, b) { bg(); x.save(); zm(t, a, b);
+  const tN = WT('duemilauno', 'nel', 1, 1.7), tR = WT('duemilauno', 'recess', 1, 4.5), tS = WT('duemilauno', 'senza', 1, 4.8);
+  phrase(t, a + 0.05, [['Nemmeno necessari:', C.ink]], 345, { size: 92 });
+  phrase(t, tN - 0.05, [['Stati Uniti, 2001.', C.amber]], Y2, { size: 92 }); /* l'anno sulla parola */
+  const kc = oB(seg(t, tN - 0.05, tN + 0.5)); if (kc > 0) { x.save(); x.translate(0, -(1 - clamp(kc)) * 60); calendar(540, 840, clamp(kc), '2001'); x.restore(); }
+  stamp(540, 980, 'RECESSIONE', C.red, '255,90,78', seg(t, tR - 0.05, tR + 0.3), -0.07, 50);
+  /* la regola pratica: casella che resta vuota, poi ✗ */
+  const kr = oC(seg(t, a + 0.3, a + 0.8));
+  mono('LA REGOLA PRATICA', 540, 1158, t, a + 0.3, { size: 24, color: C.muted });
+  if (kr > 0) { glass(540, 1255, 640, 124, 30, kr); x.save(); x.globalAlpha = kr; x.strokeStyle = C.ink; x.lineWidth = 4; rr(262, 1227, 56, 56, 10); x.stroke(); x.restore();
+    txt('due cali di fila', 346, 1257, { size: 46, weight: 800, color: C.ink, align: 'left', alpha: kr });
+    cross(290, 1255, 18, seg(t, tS - 0.05, tS + 0.35)); }
+  x.restore(); finish(t); }
+
+/* ================= BREVE: 2020, picco a febbraio, minimo ad aprile, due mesi ================= */
+const MESI = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU'], MX = (i) => 185 + i * 142;
+const LINE = [[0, 770], [1, 770], [2, 900], [3, 1012], [4, 945], [5, 900]];
+function sBreve(t, a, b) { bg('50,24,22', 0.55); x.save(); zm(t, a, b);
+  const tRg = WT('breve', 'registrata', 1, 1.0), tD = WT('breve', 'del', 1, 3.1), tP = WT('breve', 'picco', 1, 3.8), tF = WT('breve', 'febbraio', 1, 4.5),
+    tM = WT('breve', 'minimo', 1, 4.8), tA = WT('breve', 'aprile', 1, 5.5), tMe = WT('breve', 'mesi', 1, 6.2);
+  phrase(t, a + 0.05, [['La più breve', C.ink]], 345, { size: 92 });
+  phrase(t, tMe - 0.35, [['due mesi.', C.red]], Y2, { size: 92 }); /* «due» sulla parola */
+  mono('REGISTRATA DAL COMITATO AMERICANO', 540, 565, t, tRg - 0.05, { size: 24, color: C.ink });
+  mono('STATI UNITI · 2020', 540, 640, t, tD + 0.15, { size: 28, color: C.lime, ls: 4 });
+  /* mesi */
+  MESI.forEach((m, i) => { const cx = MX(i), k = oC(seg(t, tD + 0.1 + i * 0.06, tD + 0.5 + i * 0.06)); if (k <= 0) return;
+    const rec = (i === 2 || i === 3) ? oC(seg(t, tMe - 0.1, tMe + 0.3)) : 0, pk = i === 1 ? oC(seg(t, tF - 0.1, tF + 0.3)) : 0, tr = i === 3 ? oC(seg(t, tA - 0.1, tA + 0.3)) : 0;
+    glass(cx, 1150, 126, 106, 18, k); x.save(); x.globalAlpha = k;
+    if (rec > 0) { x.fillStyle = `rgba(255,90,78,${0.28 * rec})`; rr(cx - 63, 1097, 126, 106, 18); x.fill(); }
+    const bc = pk > 0 ? `rgba(200,250,114,${pk})` : (tr > 0 || rec > 0) ? `rgba(255,90,78,${Math.max(tr, rec)})` : null;
+    if (bc) { x.strokeStyle = bc; x.lineWidth = 4; rr(cx - 63, 1097, 126, 106, 18); x.stroke(); } x.restore();
+    txt(m, cx, 1150, { fam: 'mono', size: 30, weight: 600, color: pk > 0.5 ? C.lime : (rec > 0.5 || tr > 0.5) ? C.red : C.ink, ls: 2, alpha: k }); });
+  /* linea dell'attività (schema): fino a febbraio, poi giù fino ad aprile, poi risale */
+  const pts = LINE.map(([i, y]) => [MX(i), y]), u = 1 * oC(seg(t, tD + 0.3, tP)) + 2 * ioC(seg(t, tM - 0.3, tA + 0.1)) + 2 * ioC(seg(t, tA + 0.2, tMe + 0.4));
+  if (u > 0) { x.save(); x.lineWidth = 6; x.lineCap = 'round'; x.lineJoin = 'round';
+    for (let s = 0; s < 5; s++) { const f = clamp(u - s); if (f <= 0) break; const [x0, y0] = pts[s], [x1, y1] = pts[s + 1];
+      x.strokeStyle = s === 0 ? C.ink : s < 3 ? C.red : 'rgba(241,244,238,0.6)'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(lerp(x0, x1, f), lerp(y0, y1, f)); x.stroke(); }
+    x.restore(); }
+  const kp = oB(seg(t, tP - 0.1, tP + 0.35)); if (kp > 0) { glow(MX(1), 770, 90, '200,250,114', 0.4 * clamp(kp)); x.fillStyle = C.lime; x.beginPath(); x.arc(MX(1), 770, 12 * clamp(kp, 0, 1.2), 0, 7); x.fill();
+    txt('PICCO', MX(1), 722, { fam: 'mono', size: 28, weight: 600, color: C.lime, ls: 3, alpha: clamp(kp) }); }
+  const km = oB(seg(t, tM + 0.1, tM + 0.5)); if (km > 0) { glow(MX(3), 1012, 90, '255,90,78', 0.4 * clamp(km)); x.fillStyle = C.red; x.beginPath(); x.arc(MX(3), 1012, 12 * clamp(km, 0, 1.2), 0, 7); x.fill();
+    txt('MINIMO', MX(3) - 112, 1040, { fam: 'mono', size: 28, weight: 600, color: C.red, ls: 3, alpha: clamp(km) }); }
+  /* graffa sotto marzo e aprile */
+  const kb = oC(seg(t, tMe - 0.1, tMe + 0.35)); if (kb > 0) { x.save(); x.globalAlpha = kb; x.strokeStyle = C.red; x.lineWidth = 4; x.lineCap = 'round';
+    x.beginPath(); x.moveTo(MX(2) - 60, 1222); x.lineTo(MX(2) - 60, 1236); x.lineTo(MX(3) + 60, 1236); x.lineTo(MX(3) + 60, 1222); x.moveTo(540, 1236); x.lineTo(540, 1250); x.stroke(); x.restore();
+    txt('2 MESI: MARZO E APRILE', 540, 1286, { fam: 'mono', size: 28, weight: 600, color: C.red, ls: 2, alpha: kb }); }
+  txt('SCHEMA, SENZA SCALA', 540, 1372, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, tP, tP + 0.4)) });
+  x.restore(); finish(t); }
+
+/* ================= PROFONDA: durata corta, ma profondità e diffusione al massimo ================= */
+const MT = [['DURATA', 0.13, C.amber, '245,165,36'], ['PROFONDITÀ', 1, C.red, '255,90,78'], ['DIFFUSIONE', 1, C.red, '255,90,78']];
+function sProfonda(t, a, b) { bg('50,24,22', 0.6); x.save(); zm(t, a, b);
+  const tL = WT('profonda', 'lavoro', 1, 1.4), tPr = WT('profonda', 'produzione', 1, 2.1), tG = WT('profonda', 'grande', 1, 3.1), tD = WT('profonda', 'diffuso', 1, 3.8), tR = WT('profonda', 'recess', 1, 5.5);
+  phrase(t, a + 0.05, [['Breve, ma', C.ink]], 345, { size: 92 });
+  phrase(t, tG - 0.1, [['grande e diffusa.', C.red]], Y2, { size: 92 });
+  [['LAVORO', 330, tL], ['PRODUZIONE', 750, tPr]].forEach(([lab, cx, t0]) => { const k = oB(seg(t, t0 - 0.25, t0 + 0.3)); if (k <= 0) return; const s = clamp(k, 0, 1.12);
+    x.save(); x.translate(cx, 612); x.scale(s, s); x.translate(-cx, -612); glass(cx, 612, 360, 104, 52, clamp(k));
+    downArrow(cx - 125, 612, 0.62, C.red, seg(t, t0, t0 + 0.4)); txt(lab, cx + 25, 614, { fam: 'mono', size: 30, weight: 600, color: C.ink, ls: 2, alpha: clamp(k) }); x.restore(); });
+  MT.forEach(([lab, v, col, rgb], i) => { const y = 790 + i * 150, t0 = [a + 0.2, tG, tD][i], k = oC(seg(t, a + 0.2 + i * 0.1, a + 0.6 + i * 0.1)); if (k <= 0) return;
+    const f = v * ioC(seg(t, t0, t0 + 0.7)), on = seg(t, t0, t0 + 0.3);
+    txt(lab, 110, y, { fam: 'mono', size: 28, weight: 600, color: on > 0.5 ? col : C.ink, ls: 2, align: 'left', alpha: k });
+    x.save(); x.globalAlpha = k; x.fillStyle = 'rgba(241,244,238,0.1)'; rr(470, y - 18, 490, 36, 18); x.fill();
+    if (f > 0) { if (i > 0) glow(470 + 490 * f, y, 90, rgb, 0.35 * on); x.fillStyle = col; rr(470, y - 18, Math.max(36, 490 * f), 36, 18); x.fill(); } x.restore(); });
+  stamp(540, 1270, 'RECESSIONE', C.red, '255,90,78', seg(t, tR - 0.05, tR + 0.3), -0.06, 58);
+  x.restore(); finish(t); }
+
+/* ================= DISOCCUPAZIONE: Italia 2011–2015, barre in scala da zero ================= */
+const UN = [['2011', 8.5], ['2012', 10.9], ['2013', 12.4], ['2014', 12.9], ['2015', 12.0]], UZ = 1230, UP = 42;
+function sDisoccupazione(t, a, b) { bg(); x.save(); zm(t, a, b);
+  const tI = WT('disoccupazione', 'italia', 1, 1.7), tDi = WT('disoccupazione', 'disoccupazione', 1, 2.4), tCi = WT('disoccupazione', 'circa', 1, 3.4),
+    tN = WT('disoccupazione', 'nel', 1, 5.2), tDo = WT('disoccupazione', 'dopo', 1, 5.9), tM = WT('disoccupazione', 'minimo', 1, 6.6);
+  phrase(t, a + 0.05, [['Gli effetti durano:', C.ink]], 345, { size: 92 });
+  phrase(t, tCi - 0.1, [['circa il 13%.', C.red]], Y2, { size: 92 }); /* il numero sulla parola */
+  mono('ITALIA · DISOCCUPAZIONE, MEDIA ANNUA', 540, 568, t, tI - 0.1, { size: 22, color: C.muted, ls: 2 });
+  const kz = oC(seg(t, tI - 0.1, tI + 0.4)); x.save(); x.globalAlpha = kz; x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.beginPath(); x.moveTo(100, UZ); x.lineTo(980, UZ); x.stroke(); x.restore();
+  UN.forEach(([y, v], i) => { const cx = 180 + i * 180, hi = i === 3, t0 = i < 3 ? tDi - 0.1 + i * 0.25 : i === 3 ? tCi : tN + 0.5, k = seg(t, t0, t0 + (hi ? 1.2 : 0.6)); if (k <= 0) return;
+    const h = v * UP * oC(k), col = hi ? C.red : C.ink, rgb = hi ? '255,90,78' : '241,244,238';
+    if (hi) glow(cx, UZ - h / 2, 220, '255,90,78', 0.18 * oC(k));
+    x.save(); x.globalAlpha = clamp(k * 3); const g = x.createLinearGradient(0, UZ - h, 0, UZ); g.addColorStop(0, `rgba(${rgb},${hi ? 0.95 : 0.55})`); g.addColorStop(1, `rgba(${rgb},${hi ? 0.45 : 0.18})`);
+    x.fillStyle = g; rr(cx - 65, UZ - h, 130, h, [12, 12, 0, 0]); x.fill(); x.restore();
+    txt(c1(Math.round(v * oC(k) * 10) / 10) + (hi ? '%' : ''), cx, UZ - h - (hi ? 40 : 34), { size: hi ? 50 : 36, weight: 800, color: col, alpha: clamp(k * 3) });
+    const ky = hi ? oC(seg(t, tN, tN + 0.3)) : 0;
+    txt(y, cx, UZ + 40, { fam: 'mono', size: 28, weight: 600, color: ky > 0.5 ? C.red : C.muted, ls: 2, alpha: clamp(k * 3) }); });
+  /* minimo del Pil (2013) e freccia verso il 2014 */
+  const km = oC(seg(t, tDo - 0.1, tDo + 0.3)); if (km > 0) { x.save(); x.globalAlpha = km; x.fillStyle = C.lime; x.beginPath(); x.moveTo(540, 1296); x.lineTo(556, 1320); x.lineTo(524, 1320); x.closePath(); x.fill(); x.restore();
+    txt('MINIMO DEL PIL', 540, 1356, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, alpha: km }); }
+  const ka = oC(seg(t, tM, tM + 0.5)); if (ka > 0) { const ex = tw('MINIMO DEL PIL', 26, 600, 'mono', 2) / 2 + 540 + 16; x.save(); x.globalAlpha = ka; x.strokeStyle = C.amber; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(ex, 1356); x.lineTo(720, 1356); x.lineTo(720, lerp(1356, 1300, ka)); x.stroke();
+    x.beginPath(); x.moveTo(708, 1314); x.lineTo(720, 1300); x.lineTo(732, 1314); x.stroke(); x.restore(); }
+  x.restore(); finish(t); }
+
+/* ================= CASA: davanti a un titolo, chi l'ha detto e su che dati ================= */
+function chips(cx, top, head, A, B, k, t, tA, tB) { /* tocca entrambe le opzioni: nessuna è «la risposta giusta» */ if (k <= 0) return; glass(cx, top + 130, 420, 260, 28, k);
+  txt(head, cx, top + 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 3, alpha: k });
+  [A, B].forEach((lab, i) => { const y = top + 108 + i * 80, on = seg(t, [tA, tB][i], [tA, tB][i] + 0.15), w = 340;
+    x.save(); x.globalAlpha = k; x.fillStyle = on > 0.5 ? 'rgba(200,250,114,0.14)' : 'rgba(241,244,238,0.06)'; rr(cx - w / 2, y - 30, w, 60, 30); x.fill();
+    x.strokeStyle = on > 0.5 ? C.lime : 'rgba(241,244,238,0.3)'; x.lineWidth = 2; x.stroke(); x.restore();
+    txt(lab, cx, y + 1, { fam: 'mono', size: 26, weight: 600, color: on > 0.5 ? C.lime : C.ink, ls: 1, alpha: k }); });
+  tap(cx + 178, top + 108, t, tA); tap(cx + 178, top + 188, t, tB); }
+function sCasa(t, a, b) { bg('30,44,26'); x.save();
+  const tT = WT('casa', 'titolo', 1, 3.1), tR = WT('casa', 'recess', 1, 3.8), tCh = WA('casa', ['chiederti', 'chieder'], 1, 4.5), tC2 = WT('casa', 'chi', 2, 4.8), tD = WT('casa', 'detto', 1, 5.5), tDa = WT('casa', 'dati', 1, 6.9);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 330, { size: 70, out: tC2 - 0.4 });
+  phrase(t, tC2 - 0.1, [['Chi l’ha detto?', C.ink]], 345, { size: 92 });
+  phrase(t, tDa - 0.35, [['Su che dati?', C.lime]], Y2, { size: 92 });
+  const kp = oC(seg(t, tT - 0.35, tT + 0.25)); if (kp > 0) { x.save(); x.translate(0, (1 - kp) * 60);
+    paper(540, 830, 620, 400, kp, typed('RECESSIONE', t, tR - 0.2, 26), '#b8322a', -0.025, (hw, hy, hs) => {
+      const q = seg(t, tCh - 0.1, tCh + 0.3), sx = Math.abs(Math.cos(q * Math.PI)), ex = hw / 2 + 24, ka = seg(t, tR + 0.2, tR + 0.4); if (ka <= 0) return;
+      x.save(); x.translate(ex, hy); x.scale(Math.max(0.05, sx), 1); txt(q < 0.5 ? '!' : '?', 0, 0, { size: hs, weight: 800, color: q < 0.5 ? '#b8322a' : '#8a5a00', alpha: ka }); x.restore(); });
+    x.restore(); }
+  chips(300, 1110, 'CHI', 'COMITATO', 'REGOLA PRATICA', oC(seg(t, tC2 - 0.2, tC2 + 0.3)), t, tD - 0.15, tD + 0.45);
+  chips(780, 1110, 'QUALI DATI', 'DI ALLORA', 'RIVISTI', oC(seg(t, tDa - 0.6, tDa - 0.1)), t, tDa + 0.05, tDa + 0.65);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, allora: sAllora, rivisti: sRivisti, comitato: sComitato, europa: sEuropa, bastano: sBastano, duemilauno: sDuemilauno,
+  breve: sBreve, profonda: sProfonda, disoccupazione: sDisoccupazione, casa: sCasa }, ORDER, ['hook', 'comitato', 'duemilauno', 'disoccupazione', 'casa']);
+</script></body></html>
