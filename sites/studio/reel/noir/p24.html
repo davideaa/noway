@@ -1,0 +1,230 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 24, DAY: 3, CAP: 1, NEXT: ['Silicon Valley', 'Bank'], FONTE: 'DATI: FITD · DIRETTIVA 2014/49/UE · BANCA D’ITALIA (non scritta nel video dal 16/10/2026)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 24 — «La garanzia dei depositi» (giovedì 5/11/2026, lezione 4 di 5, capitolo 2). Numeri SOLO da p24-fonti.md:
+   100.000 € per depositante e per banca (FITD, direttiva art. 6 e 7) · interessi compresi nel cumulo (Banca d'Italia) · rimborso entro 7 giorni lavorativi (FITD, art. 8) ·
+   nessuna richiesta (art. 8 par. 6) · differimenti possibili. L'esempio dei 130.000 € e' CIFRE INVENTATE (etichetta ambra); del resto non si dice quanto si recupera.
+   Niente numeri sul fondo (6,2 mld, 123 banche): la voce non li dice. Niente riga delle fonti nel video. */
+const ORDER = ['num', 'hook', 'tetto', 'esempio', 'resto', 'fondo', 'tempi', 'richiesta', 'coperto', 'scopo', 'casa', 'fine', 'cta', 'end'];
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (forma in lettere E in cifre:
+   Whisper scrive «100.000», «130», «7»). Senza voce (anteprima) usa la frazione f della scena. Ogni aggancio e' registrato in window.ANCH per il controllo sui cues veri. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+function polyline(pts, k, col, lw) { if (k <= 0) return; x.save(); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round'; x.lineJoin = 'round';
+  const Ls = []; let tot = 0; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); Ls.push(d); tot += d; }
+  let rem = tot * clamp(k); x.beginPath(); x.moveTo(...pts[0]);
+  for (let i = 1; i < pts.length && rem > 0; i++) { const f = Math.min(1, rem / Ls[i - 1]); x.lineTo(pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f); rem -= Ls[i - 1]; }
+  x.stroke(); x.restore(); }
+function bankIcon(cx, cy, s, col, lw = 7) { x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round'; x.lineJoin = 'round';
+  x.beginPath(); x.moveTo(-60, -14); x.lineTo(0, -58); x.lineTo(60, -14); x.closePath(); x.stroke();
+  for (const dx of [-38, 0, 38]) { x.beginPath(); x.moveTo(dx, -2); x.lineTo(dx, 38); x.stroke(); }
+  x.beginPath(); x.moveTo(-64, 56); x.lineTo(64, 56); x.stroke(); x.restore(); }
+function personIcon(cx, cy, s, col, lw = 7) { x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round';
+  x.beginPath(); x.arc(0, -26, 20, 0, 7); x.stroke(); x.beginPath(); x.arc(0, 54, 48, Math.PI * 1.12, Math.PI * 1.88); x.stroke(); x.restore(); }
+function personFill(cx, cy, s, col) { x.fillStyle = col; x.beginPath(); x.arc(cx, cy - 22 * s, 15 * s, 0, 7); x.fill(); x.beginPath(); x.arc(cx, cy + 34 * s, 32 * s, Math.PI, 0); x.closePath(); x.fill(); }
+function tick(cx, cy, r, k, col = C.lime, lw = 12) { if (k <= 0) return; const a = oC(clamp(k * 2)), b = oC(clamp(k * 2 - 1));
+  const p0 = [cx - r * 0.9, cy], p1 = [cx - r * 0.35, cy + r * 0.55], p2 = [cx + r * 0.95, cy - r * 0.6];
+  x.save(); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(...p0);
+  x.lineTo(p0[0] + (p1[0] - p0[0]) * a, p0[1] + (p1[1] - p0[1]) * a); if (b > 0) x.lineTo(p1[0] + (p2[0] - p1[0]) * b, p1[1] + (p2[1] - p1[1]) * b); x.stroke(); x.restore(); }
+function shieldPath(cx, cy, w, h) { x.beginPath(); x.moveTo(cx, cy - h / 2);
+  x.bezierCurveTo(cx + w * 0.2, cy - h * 0.42, cx + w * 0.42, cy - h * 0.46, cx + w / 2, cy - h * 0.40); x.lineTo(cx + w / 2, cy + h * 0.02);
+  x.bezierCurveTo(cx + w / 2, cy + h * 0.30, cx + w * 0.22, cy + h * 0.44, cx, cy + h / 2);
+  x.bezierCurveTo(cx - w * 0.22, cy + h * 0.44, cx - w / 2, cy + h * 0.30, cx - w / 2, cy + h * 0.02); x.lineTo(cx - w / 2, cy - h * 0.40);
+  x.bezierCurveTo(cx - w * 0.42, cy - h * 0.46, cx - w * 0.2, cy - h * 0.42, cx, cy - h / 2); x.closePath(); }
+
+/* ================= HOOK: «100.000 €» enorme subito, poi persona + banca che crolla ================= */
+function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
+  const tRim = WA('hook', ['rimborsa', 'rimbor'], 1, 0.28), tPer = WA('hook', ['persona'], 1, 0.5), tBan = WA('hook', ['banca'], 1, 0.67), tFal = WA('hook', ['fallisce', 'fallire', 'falli'], 1, 0.9);
+  const SZ = Math.min(210, Math.floor(190 * 900 / tw('100.000 €', 190, 800))), k = oC(seg(t, a, a + 0.32)), pun = lerp(1.22, 1, k);
+  glow(540, 500, 560, '200,250,114', 0.22 * k * (0.85 + 0.15 * Math.sin(t * 3)));
+  x.save(); x.translate(540, 500); x.scale(pun, pun); txt('100.000 €', 0, 0, { size: SZ, weight: 800, color: C.lime, alpha: k, blur: (1 - k) * 14, ls: -4 }); x.restore();
+  const ku = oC(seg(t, a + 0.2, a + 0.8)); x.save(); x.strokeStyle = C.lime; x.lineWidth = 5; x.lineCap = 'round'; x.globalAlpha = ku; x.beginPath(); x.moveTo(540 - 360 * ku, 612); x.lineTo(540 + 360 * ku, 612); x.stroke(); x.restore();
+  phrase(t, tRim - 0.1, [['ti rimborsa un fondo', C.ink]], 712, { size: 68 });
+  const kp = oB(seg(t, tPer - 0.1, tPer + 0.45)), kb = oB(seg(t, tBan - 0.1, tBan + 0.45)), fall = oC(seg(t, tFal, tFal + 0.5)), CYc = 980;
+  pop(300, CYc, kp, () => { glass(300, CYc, 200, 200, 100, 1); personIcon(300, CYc, 1, C.ink); });
+  lab(t, 'PER PERSONA', 300, CYc + 150, tPer, { color: C.ink, size: 28 });
+  pop(780, CYc, kb, () => { glass(780, CYc, 200, 200, 100, 1); if (fall > 0) glow(780, CYc, 160, '255,90,78', 0.3 * fall); bankIcon(780, CYc, 1, fall > 0.3 ? C.red : C.ink); });
+  polyline([[792, CYc - 54], [770, CYc - 20], [798, CYc + 4], [768, CYc + 32], [786, CYc + 56]], fall, C.red, 6);
+  lab(t, 'PER BANCA', 780, CYc + 150, tBan, { color: C.ink, size: 28 });
+  const kf = seg(t, tFal - 0.1, tFal + 0.45); if (kf > 0) glassPill(540, 1330, 'SE LA BANCA FALLISCE', kf, C.red, 38);
+  x.restore(); finish(t); }
+
+/* ================= TETTO: conto + libretto + interessi si impilano sotto UN solo soffitto ================= */
+function block(t, t0, yTop, h, fillRgb, label, o = {}) { const k = oC(seg(t, t0, t0 + 0.5)); if (k <= 0) return; const y = yTop - 560 * (1 - k);
+  x.save(); x.globalAlpha = clamp(k * 1.6); const g = x.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, `rgba(${fillRgb},0.42)`); g.addColorStop(1, `rgba(${fillRgb},0.22)`);
+  x.fillStyle = g; rr(256, y + 3, 368, h - 6, 16); x.fill(); x.strokeStyle = `rgba(${fillRgb},0.9)`; x.lineWidth = 3; rr(256, y + 3, 368, h - 6, 16); x.stroke();
+  txt(label, 440, y + h / 2 + 1, { size: o.size || 42, weight: 800, fam: o.fam || 'Manrope', color: o.col || C.ink, ls: o.ls || 0 }); x.restore(); }
+function sTetto(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tTe = WA('tetto', ['tetto'], 1, 0.07), tCo = WA('tetto', ['conto'], 2, 0.64), tLi = WA('tetto', ['libretto'], 1, 0.75), tSo = WA('tetto', ['sommano', 'somma'], 1, 0.89), tIn = WA('tetto', ['interess'], 1, 0.93);
+  phrase(t, a + 0.05, [['Un solo tetto', C.ink], ['per banca', C.lime]], 345, { size: 92 });
+  const kt = oC(seg(t, a + 0.3, a + 0.8)); glass(440, 1050, 400, 700, 30, kt);
+  const kl = oC(seg(t, tTe, tTe + 0.6)); if (kl > 0) { x.save(); x.globalAlpha = kl; x.strokeStyle = C.lime; x.lineWidth = 4; x.setLineDash([14, 10]); x.beginPath(); x.moveTo(150, 730); x.lineTo(150 + 780 * kl, 730); x.stroke(); x.restore(); }
+  lab(t, 'TETTO · 100.000 €', 540, 686, tTe + 0.1, { color: C.lime, size: 28, ls: 3 });
+  block(t, tCo - 0.2, 1060, 330, '200,250,114', 'CONTO'); block(t, tLi - 0.2, 810, 250, '200,250,114', 'LIBRETTO');
+  block(t, tIn - 0.2, 742, 68, '245,165,36', 'INTERESSI', { size: 26, fam: 'mono', ls: 3 });
+  const ks = oC(seg(t, tSo - 0.1, tSo + 0.6)); polyline([[662, 745], [686, 745], [686, 1385], [662, 1385]], ks, C.lime, 5); polyline([[686, 1065], [710, 1065]], ks, C.lime, 5);
+  txt('SI', 830, 1020, { fam: 'mono', size: 34, weight: 600, color: C.lime, ls: 3, alpha: ks }); txt('SOMMANO', 830, 1066, { fam: 'mono', size: 34, weight: 600, color: C.lime, ls: 3, alpha: ks });
+  x.restore(); finish(t); }
+
+/* ================= ESEMPIO: torre di 13 monete, le prime 10 coperte dallo scudo del fondo ================= */
+function sEsempio(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tCen = WA('esempio', ['centotrenta', '130'], 1, 0.043), tLiq = WA('esempio', ['liquidazione'], 1, 0.39), tRim = WA('esempio', ['rimborsa', 'rimbor'], 1, 0.65),
+    tHun = WA('esempio', ['centomila', '100'], 1, 0.7), tRes = WA('esempio', ['resto'], 1, 0.87), tPag = WA('esempio', ['paga'], 1, 0.96);
+  phrase(t, a + 0.05, [['Banca in liquidazione', C.ink]], 345, { size: 80 });
+  phrase(t, tCen - 0.1, [['130.000 €', C.ink]], 478, { size: 120 });
+  const ke = oC(seg(t, a + 0.1, a + 0.5)), lw = tw('ESEMPIO · CIFRE INVENTATE', 28, 600, 'mono', 3) + 70;
+  x.save(); x.globalAlpha = ke; x.strokeStyle = C.amber; x.lineWidth = 3; rr(540 - lw / 2, 590, lw, 62, 31); x.stroke(); x.fillStyle = 'rgba(245,165,36,0.08)'; x.fill(); x.restore();
+  txt('ESEMPIO · CIFRE INVENTATE', 540, 622, { fam: 'mono', size: 28, weight: 600, color: C.amber, ls: 3, alpha: ke });
+  const CX = 290, BOT = 1340, SP = 44, kLime = oC(seg(t, tHun - 0.1, tHun + 0.5)), kAmb = oC(seg(t, tRes - 0.1, tRes + 0.4));
+  glow(CX, 1140, 280, '200,250,114', 0.20 * kLime);
+  for (let i = 0; i < 13; i++) { const t0 = tCen + 0.05 + i * 0.055, k = oC(seg(t, t0, t0 + 0.4)); if (k <= 0) continue; const cy = BOT - i * SP - (1 - k) * 340;
+    const up = i >= 10, m = up ? kAmb : kLime, base = [241, 244, 238], to = up ? [245, 165, 36] : [200, 250, 114];
+    const rim = base.map((v, j) => Math.round(lerp(v, to[j], m))).join(','); coin(CX, cy, 125, clamp(k * 1.5), rim, '€');
+    x.save(); x.globalAlpha = clamp(k * 1.5) * 0.22 * m; x.fillStyle = `rgb(${rim})`; x.beginPath(); x.ellipse(CX, cy, 124, 40, 0, 0, 7); x.fill(); x.restore(); }
+  polyline([[452, 1378], [474, 1378], [474, 925], [452, 925]], kLime, C.lime, 6);
+  polyline([[452, 915], [474, 915], [474, 780], [452, 780]], kAmb, C.amber, 6);
+  txt('100.000 €', 500, 1150, { size: 70, weight: 800, color: C.lime, align: 'left', alpha: kLime, ls: -2, blur: (1 - kLime) * 8 });
+  txt('RIMBORSATI DAL FONDO', 500, 1204, { fam: 'mono', size: 24, weight: 600, color: C.lime, align: 'left', ls: 1, alpha: kLime });
+  txt('IL RESTO', 500, 822, { size: 56, weight: 800, color: C.amber, align: 'left', alpha: kAmb, ls: -1, blur: (1 - kAmb) * 8 });
+  txt('NON PAGA IL FONDO', 500, 872, { fam: 'mono', size: 24, weight: 600, color: C.amber, align: 'left', ls: 1, alpha: oC(seg(t, tPag - 0.1, tPag + 0.3)) });
+  x.restore(); finish(t); }
+
+/* ================= RESTO: un indicatore a lancetta che non si ferma (dipende dalla liquidazione) ================= */
+function sResto(t, a, b) { bg('50,38,16', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tQua = WA('resto', ['quanto'], 1, 0.0), tDip = WA('resto', ['dipende'], 1, 0.33), tLiq = WA('resto', ['liquidazione'], 1, 0.88);
+  phrase(t, a + 0.05, [['Sul resto,', C.ink], ['dipende.', C.amber]], 345, { size: 92 });
+  const cx = 540, cy = 1060, R = 340, ka = oC(seg(t, a + 0.3, a + 1.0));
+  x.save(); x.globalAlpha = ka; x.lineCap = 'butt'; x.strokeStyle = 'rgba(255,255,255,0.06)'; x.lineWidth = 70; x.beginPath(); x.arc(cx, cy, R, Math.PI, Math.PI + Math.PI * ka); x.stroke();
+  const g = x.createLinearGradient(cx - R, 0, cx + R, 0); g.addColorStop(0, C.red); g.addColorStop(0.5, C.amber); g.addColorStop(1, C.lime);
+  x.strokeStyle = g; x.lineWidth = 44; x.beginPath(); x.arc(cx, cy, R, Math.PI, Math.PI + Math.PI * ka); x.stroke(); x.restore();
+  lab(t, 'DI MENO', cx - R, cy + 60, a + 0.9, { color: C.ink, size: 26 }); lab(t, 'DI PIÙ', cx + R, cy + 60, a + 0.9, { color: C.ink, size: 26 });
+  const amp = oC(seg(t, tDip - 0.15, tDip + 0.6)), v = clamp(0.06 + amp * (0.42 + 0.30 * Math.sin(t * 2.1) + 0.16 * Math.sin(t * 5.3 + 1)), 0, 1), th = Math.PI + Math.PI * v;
+  if (ka > 0.5) { const tx = cx + Math.cos(th) * (R - 8), ty = cy + Math.sin(th) * (R - 8); glow(tx, ty, 90, '255,255,255', 0.25 * amp);
+    x.save(); x.strokeStyle = C.ink; x.lineWidth = 12; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(th) * (R - 60), cy + Math.sin(th) * (R - 60)); x.stroke();
+    x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 26, 0, 7); x.fill(); x.fillStyle = C.bg; x.beginPath(); x.arc(cx, cy, 10, 0, 7); x.fill(); x.restore(); }
+  const kq = oB(seg(t, tDip, tDip + 0.5)); if (kq > 0) { x.save(); x.translate(540, 1230); x.scale(clamp(kq, 0, 1.15), clamp(kq, 0, 1.15)); glow(0, 0, 200, '245,165,36', 0.2); txt('?', 0, 0, { size: 210, weight: 800, color: C.amber }); x.restore(); }
+  const kp = seg(t, tLiq - 0.1, tLiq + 0.45); if (kp > 0) glassPill(540, 1400, 'LIQUIDAZIONE', kp, C.ink, 40);
+  x.restore(); finish(t); }
+
+/* ================= FONDO: otto banche versano monete in un fondo comune ================= */
+function sFondo(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tFo = WA('fondo', ['fondo'], 1, 0.2), tBa = WA('fondo', ['banche'], 1, 0.4), tIt = WA('fondo', ['italia', 'litalia'], 1, 0.55), tFo2 = WA('fondo', ['fondo'], 2, 0.7);
+  phrase(t, a + 0.05, [['Un fondo,', C.ink], ['dalle banche stesse', C.lime]], 345, { size: 92 });
+  const cx = 540, CY = 950, Rx = 360, Ry = 290, kc = oB(seg(t, tFo - 0.1, tFo + 0.5)), prog = oC(seg(t, tBa, tIt));
+  const B = []; for (let i = 0; i < 8; i++) { const an = -Math.PI / 2 + i * Math.PI / 4; B.push([cx + Rx * Math.cos(an), CY + Ry * Math.sin(an), tBa + i * 0.09]); }
+  B.forEach(([bx, by, t0], i) => { if (t < t0 + 0.4) return; for (let j = 0; j < 2; j++) { const u = ((t - t0 - 0.4) * 0.55 + j / 2 + i * 0.11) % 1, e = u * u * (3 - 2 * u), px = lerp(bx, cx, e), py = lerp(by, CY, e);
+    if (u > 0.9) continue; glow(px, py, 30, '200,250,114', 0.4); x.fillStyle = C.lime; x.beginPath(); x.arc(px, py, 9, 0, 7); x.fill(); } });
+  B.forEach(([bx, by, t0]) => { const k = oB(seg(t, t0, t0 + 0.4)); pop(bx, by, k, () => { glass(bx, by, 108, 108, 54, 1); bankIcon(bx, by, 0.5, C.ink, 8); }); });
+  pop(cx, CY, kc, () => { glow(cx, CY, 260, '200,250,114', 0.2 * prog + 0.06); glass(cx, CY, 300, 300, 150, 1);
+    x.save(); x.strokeStyle = C.lime; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.arc(cx, CY, 160, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * prog); x.stroke(); x.restore();
+    txt('FONDO', cx, CY, { size: 56, weight: 800, color: C.lime, ls: -1 }); });
+  phrase(t, tFo2 - 0.1, [['Fondo interbancario', C.lime], ['di tutela dei depositi', C.ink]], 1372, { size: 50 });
+  x.restore(); finish(t); }
+
+/* ================= TEMPI: liquidazione sì, problema qualunque no; poi sette caselle di giorni lavorativi ================= */
+function sTempi(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tLiq = WA('tempi', ['liquidazione'], 1, 0.39), tPro = WA('tempi', ['problema'], 1, 0.56), tSet = WA('tempi', ['sette', '7'], 1, 0.78), tGio = WA('tempi', ['giorni'], 1, 0.83), tDif = WA('tempi', ['differim', 'differ'], 1, 0.96);
+  phrase(t, a + 0.05, [['Quando scatta', C.ink], ['il rimborso', C.lime]], 345, { size: 92 });
+  const k1 = seg(t, tLiq - 0.1, tLiq + 0.45); if (k1 > 0) { const w = glassPill(500, 650, 'LIQUIDAZIONE', k1, C.ink, 42); tick(500 + w / 2 + 62, 650, 30, seg(t, tLiq + 0.2, tLiq + 0.7), C.lime, 11); }
+  const k2 = seg(t, tPro - 0.1, tPro + 0.45); if (k2 > 0) { const w = glassPill(500, 780, 'UN PROBLEMA QUALUNQUE', k2, C.muted, 38); cross(500 + w / 2 + 56, 780, 26, seg(t, tPro + 0.3, tPro + 0.8)); }
+  lab(t, 'GIORNI LAVORATIVI', 540, 960, tGio - 0.1, { color: C.ink, size: 28, ls: 3 });
+  for (let i = 0; i < 7; i++) { const cxx = 106 + 56 + i * 126, ki = oB(seg(t, a + 0.5 + i * 0.05, a + 0.9 + i * 0.05)), on = oC(seg(t, tSet + i * 0.14, tSet + i * 0.14 + 0.3)), last = i === 6;
+    if (ki <= 0) continue; pop(cxx, 1100, ki, () => { if (on > 0) glow(cxx, 1100, 110, '200,250,114', 0.3 * on); glass(cxx, 1100, 112, 150, 26, 1);
+      if (on > 0) { x.save(); x.globalAlpha = on; x.fillStyle = 'rgba(200,250,114,0.28)'; rr(cxx - 56, 1025, 112, 150, 26); x.fill(); x.strokeStyle = C.lime; x.lineWidth = last ? 5 : 3; rr(cxx - 56, 1025, 112, 150, 26); x.stroke(); x.restore(); }
+      txt(String(i + 1), cxx, 1102, { size: 66, weight: 800, color: on > 0.4 ? C.lime : 'rgba(241,244,238,0.45)' }); }); }
+  const kd = seg(t, tDif - 0.1, tDif + 0.45); if (kd > 0) glassPill(540, 1330, 'SALVO DIFFERIMENTI', kd, C.amber, 40);
+  x.restore(); finish(t); }
+
+/* ================= RICHIESTA: il modulo viene barrato e se ne va; il fondo paga direttamente ================= */
+function sRichiesta(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tNes = WA('richiesta', ['nessuna'], 1, 0.4), tRic = WA('richiesta', ['richiesta'], 1, 0.5), tFon = WA('richiesta', ['fondo'], 1, 0.7), tPro = WA('richiesta', ['procede'], 1, 0.8);
+  phrase(t, a + 0.05, [['Nessuna richiesta', C.ink]], 345, { size: 92 });
+  phrase(t, tFon - 0.05, [['Il fondo procede', C.lime]], 345 + 92 * 1.12, { size: 92 });
+  const kp = oB(seg(t, a + 0.3, a + 0.85)), fly = ioC(seg(t, tPro - 0.1, tPro + 0.7)), kx = seg(t, tNes, tRic + 0.3);
+  if (kp > 0 && fly < 1) { x.save(); x.translate(540 - 200 * fly, 810 - 360 * fly); x.rotate(-0.5 * fly); const s = clamp(kp, 0, 1.1) * (1 - 0.5 * fly); x.scale(s, s); x.globalAlpha *= 1 - fly;
+    x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 30; x.fillStyle = '#E9ECE6'; rr(-150, -190, 300, 380, 18); x.fill(); x.shadowBlur = 0;
+    txt('MODULO DI RICHIESTA', 0, -140, { fam: 'mono', size: 22, weight: 600, color: '#0B0D0C', ls: 1 });
+    x.fillStyle = '#9AA29C'; for (let i = 0; i < 5; i++) rr(-110, -90 + i * 52, i % 2 ? 190 : 220, 16, 8), x.fill();
+    x.strokeStyle = '#0B0D0C'; x.lineWidth = 3; rr(-110, 150 - 10, 110, 0.1, 1); x.beginPath(); x.moveTo(-110, 150); x.lineTo(-10, 150); x.stroke();
+    cross(0, 0, 120, kx * (1 - fly)); x.restore(); }
+  const up = ioC(seg(t, tPro + 0.1, tPro + 0.9)), ry = lerp(1250, 930, up), kf = oB(seg(t, a + 0.5, a + 1.0));
+  if (kf > 0) { const xs = 270, xe = 810, q = oC(seg(t, tPro, tPro + 0.5));
+    pop(xs, ry, kf, () => { glass(xs, ry, 210, 210, 105, 1); bankIcon(xs, ry, 0.9, C.ink, 7); }); pop(xe, ry, kf, () => { glass(xe, ry, 210, 210, 105, 1); personIcon(xe, ry, 1, C.ink); });
+    lab(t, 'FONDO', xs, ry + 150, a + 0.7, { color: C.ink, size: 28 }); lab(t, 'TU', xe, ry + 150, a + 0.7, { color: C.ink, size: 28 });
+    if (q > 0) { x.save(); x.globalAlpha = q; x.strokeStyle = C.lime; x.lineWidth = 4; x.setLineDash([2, 12]); x.lineCap = 'round'; x.beginPath(); x.moveTo(xs + 125, ry); x.lineTo(xe - 125, ry); x.stroke(); x.setLineDash([]);
+      for (let j = 0; j < 4; j++) { const u = ((t - tPro) * 0.7 + j / 4) % 1, px = lerp(xs + 130, xe - 130, u); glow(px, ry, 34, '200,250,114', 0.4); x.fillStyle = C.lime; x.beginPath(); x.arc(px, ry, 10, 0, 7); x.fill(); }
+      x.fillStyle = C.lime; x.beginPath(); x.moveTo(xe - 118, ry); x.lineTo(xe - 144, ry - 16); x.lineTo(xe - 144, ry + 16); x.closePath(); x.fill(); x.restore(); } }
+  x.restore(); finish(t); }
+
+/* ================= COPERTO: due elenchi, spuntati e barrati ================= */
+function row(t, t0, y, label, ok) { const k = oC(seg(t, t0 - 0.1, t0 + 0.4)); if (k <= 0) return; x.save(); x.translate(-70 * (1 - k), 0); x.globalAlpha *= k; glass(540, y, 700, 80, 28, 1);
+  txt(label, 228, y + 1, { size: 38, weight: 800, align: 'left', color: ok ? C.ink : 'rgba(241,244,238,0.85)' });
+  const km = seg(t, t0 + 0.2, t0 + 0.7); if (ok) tick(852, y + 2, 20, km, C.lime, 8); else cross(852, y, 17, km); x.restore(); }
+function sCoperto(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tCon = WA('coperto', ['conti'], 1, 0.11), tLib = WA('coperto', ['libretti'], 1, 0.22), tAss = WA('coperto', ['assegni'], 1, 0.33), tAzi = WA('coperto', ['azioni'], 1, 0.44),
+    tObb = WA('coperto', ['obbligazioni'], 1, 0.5), tFon = WA('coperto', ['fondi'], 1, 0.61), tStr = WA('coperto', ['strumenti'], 1, 0.78), tDep = WA('coperto', ['depositi'], 1, 0.94);
+  phrase(t, a + 0.05, [['Coperti: i depositi', C.ink]], 345, { size: 88 });
+  lab(t, 'DEPOSITI', 190, 620, a + 0.4, { color: C.lime, align: 'left', size: 28, ls: 3 });
+  row(t, tCon, 700, 'conti correnti', true); row(t, tLib, 790, 'libretti', true); row(t, tAss, 880, 'assegni circolari', true);
+  lab(t, 'STRUMENTI FINANZIARI', 190, 1000, tAzi - 0.2, { color: C.red, align: 'left', size: 28, ls: 3 });
+  row(t, tAzi, 1080, 'azioni', false); row(t, tObb, 1170, 'obbligazioni', false); row(t, tFon, 1260, 'fondi d’investimento', false);
+  const kd = seg(t, tDep - 0.1, tDep + 0.45); if (kd > 0) glassPill(540, 1390, 'NON SONO DEPOSITI', kd, C.red, 38);
+  x.restore(); finish(t); }
+
+/* ================= SCOPO: la folla corre verso la banca; lo scudo la ferma e la calma ================= */
+function sScopo(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tRas = WA('scopo', ['rassicur'], 1, 0.18), tPro = WA('scopo', ['protetto'], 1, 0.41), tSpo = WA('scopo', ['sportello'], 1, 0.73), tCor = WA('scopo', ['corsa'], 1, 0.86);
+  phrase(t, a + 0.05, [['Serve a', C.ink]], 345, { size: 92 });
+  phrase(t, tRas - 0.05, [['rassicurarti.', C.lime]], 345 + 92 * 1.12, { size: 92 });
+  const calm = oC(seg(t, tPro, tPro + 0.7)), rush = ioC(seg(t, a + 0.4, tPro)), CY = 1020;
+  const kb = oB(seg(t, a + 0.3, a + 0.8)); pop(850, CY, kb, () => { glass(850, CY, 230, 260, 36, 1); bankIcon(850, CY, 1.0, C.ink, 7); });
+  for (let i = 0; i < 6; i++) { const bx = 130 + i * 80, off = 110 * rush * (1 - calm), px = bx + off, bob = Math.sin(t * 13 + i * 1.3) * 8 * (1 - calm) * (rush > 0.02 ? 1 : 0);
+    const col = calm > 0.5 ? C.lime : 'rgba(241,244,238,0.85)', ki = oC(seg(t, a + 0.2 + i * 0.05, a + 0.5 + i * 0.05));
+    if ((1 - calm) * rush > 0.05) { x.save(); x.globalAlpha = (1 - calm) * rush * 0.5; x.strokeStyle = C.muted; x.lineWidth = 4; x.lineCap = 'round'; for (let j = 0; j < 2; j++) { x.beginPath(); x.moveTo(px - 36 - j * 6, CY - 14 + j * 30 + bob); x.lineTo(px - 62 - j * 6, CY - 14 + j * 30 + bob); x.stroke(); } x.restore(); }
+    x.save(); x.globalAlpha *= ki; personFill(px, CY + bob, 1.1, col); x.restore(); }
+  const ks = oB(seg(t, tPro - 0.1, tPro + 0.5)); pop(330, 790, ks, () => { glow(330, 790, 190, '200,250,114', 0.25); shieldPath(330, 790, 190, 220); x.fillStyle = 'rgba(200,250,114,0.14)'; x.fill(); x.strokeStyle = C.lime; x.lineWidth = 7; x.lineJoin = 'round'; x.stroke(); });
+  tick(330, 796, 44, seg(t, tPro + 0.25, tPro + 0.75), C.lime, 14);
+  lab(t, 'NIENTE CORSA ALLO SPORTELLO', 540, 1190, tSpo - 0.1, { color: C.lime, size: 28, ls: 2 });
+  const kc = seg(t, tCor - 0.1, tCor + 0.45); if (kc > 0) glassPill(540, 1330, 'COME NELLA CORSA DI IERI', kc, C.amber, 36);
+  x.restore(); finish(t); }
+
+/* ================= CASA: lo scontrino da portarsi a casa ================= */
+function sCasa(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tTet = WA('casa', ['tetto'], 1, 0.29), tHun = WA('casa', ['centomila', '100'], 1, 0.375), tPer = WA('casa', ['persona'], 1, 0.5), tBan = WA('casa', ['banca'], 1, 0.625),
+    tDep = WA('casa', ['depositi'], 1, 0.79), tAzi = WA('casa', ['azioni'], 1, 0.875);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
+  const Y0 = 560, PX = 250, PW = 580, ks = oC(seg(t, a + 0.3, a + 0.8));
+  /* la carta esce dalla fessura: altezza guidata dalle parole */
+  const STEP = [[tTet, 130], [tHun, 250], [tPer, 340], [tBan, 410], [tDep, 560], [tAzi, 660]]; let bot = 0;
+  for (const [tj, need] of STEP) bot = lerp(bot, need, oC(seg(t, tj - 0.3, tj + 0.2)));
+  if (bot > 2) { x.save(); x.translate(0, 0); const sw = Math.sin(t * 1.7) * 0.004; x.translate(540, Y0); x.rotate(sw); x.translate(-540, -Y0);
+    x.beginPath(); x.moveTo(PX, Y0); x.lineTo(PX + PW, Y0); const yb = Y0 + bot; x.lineTo(PX + PW, yb);
+    for (let i = 0; i <= 14; i++) x.lineTo(PX + PW - i * (PW / 14), yb + (i % 2 ? 12 : 0)); x.closePath();
+    x.shadowColor = 'rgba(0,0,0,0.55)'; x.shadowBlur = 36; x.shadowOffsetY = 12; x.fillStyle = '#E9ECE6'; x.fill(); x.shadowBlur = 0; x.shadowOffsetY = 0; x.clip();
+    const ln = (yy, fn) => { const ka = oC(seg(bot, yy - 10, yy + 40)); if (ka > 0) { x.save(); x.globalAlpha *= ka; fn(); x.restore(); } };
+    ln(60, () => txt('TETTO', 540, Y0 + 62, { fam: 'mono', size: 28, weight: 600, color: '#3A413D', ls: 6 }));
+    ln(175, () => txt('100.000 €', 540, Y0 + 170, { size: 92, weight: 800, color: '#0B0D0C', ls: -2 }));
+    ln(275, () => txt('per persona', 540, Y0 + 270, { size: 46, weight: 800, color: '#0B0D0C' }));
+    ln(345, () => txt('per banca', 540, Y0 + 338, { size: 46, weight: 800, color: '#0B0D0C' }));
+    ln(430, () => { x.strokeStyle = '#6F7771'; x.lineWidth = 3; x.setLineDash([12, 10]); x.beginPath(); x.moveTo(PX + 40, Y0 + 400); x.lineTo(PX + PW - 40, Y0 + 400); x.stroke(); x.setLineDash([]); });
+    ln(500, () => { tick(PX + 70, Y0 + 480, 24, 1, '#2E6A00', 10); txt('DEPOSITI', PX + 130, Y0 + 482, { size: 52, weight: 800, color: '#2E6A00', align: 'left' }); });
+    ln(600, () => { cross(PX + 70, Y0 + 585, 20, 1); txt('AZIONI E FONDI', PX + 112, Y0 + 588, { size: 46, weight: 800, color: '#B3261E', align: 'left' }); });
+    x.restore(); }
+  glass(540, Y0 - 12, 700, 44, 22, ks);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, tetto: sTetto, esempio: sEsempio, resto: sResto, fondo: sFondo, tempi: sTempi, richiesta: sRichiesta, coperto: sCoperto, scopo: sScopo, casa: sCasa }, ORDER, ['hook', 'esempio', 'coperto']);
+</script></body></html>
