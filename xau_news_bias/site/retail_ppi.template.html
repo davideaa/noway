@@ -86,6 +86,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .can div{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;font-size:14px;color:var(--ink2)}
 .can i{font-style:normal;font-weight:700}
 footer{color:var(--mute);font-size:12.5px;max-width:72ch}
+.dlbar{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:6px 12px}
+.dlbar[hidden]{display:none}
+.dlbtn{font:600 13.5px var(--f-body);padding:6px 14px;border-radius:999px;border:1px solid var(--accent);background:var(--panel);color:var(--accent);cursor:pointer}
+.dlbtn:hover{background:var(--accent);color:var(--panel)}
 .yt{border-collapse:collapse;width:100%;font-size:14px;min-width:320px}
 .yt th,.yt td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 .yt th{font:600 11.5px var(--f-num);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
@@ -172,6 +176,7 @@ details.more[open]{display:grid;gap:12px}
 .cap{font:600 12.5px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
 </style>
 <div class="wrap">
+<div class="dlbar" id="dlbar" hidden><span class="small" id="dlmsg"></span><button type="button" class="dlbtn" id="scarica">⬇ Scarica il file .html</button></div>
 <section class="hero" id="hero" aria-label="Prossima release"></section>
 
 <section class="sec" aria-labelledby="h-ex">
@@ -190,7 +195,9 @@ details.more[open]{display:grid;gap:12px}
 
 <footer id="foot"></footer>
 </div>
-<script>
+<script id="pagina">
+// copia della pagina come file .html, per tenerla in una cartella: presa adesso, prima di disegnare
+const SORGENTE = document.documentElement.outerHTML;
 const D = __DATA__;
 // ---------- comuni ai due siti
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -515,4 +522,19 @@ oggi(D.liv, document.getElementById("oggi"));
 simulatore(D.pips29, "RETAIL_PPI", "release Retail/PPI", document.getElementById("sim"), LV && LV.oggi);
 document.getElementById("simbox").addEventListener("toggle", () => dispatchEvent(new Event("resize")));
 document.getElementById("foot").textContent = "Dati: tick Dukascopy, calendario ForexFactory. Ogni numero viene da una prova con le regole scritte prima (docs del progetto).";
+(async () => {  // il tasto Scarica compare solo dove chi guarda può salvare file (claude.ai), non nella copia salvata
+  const dl = window.claude ? await window.claude.use("downloads") : null;
+  if (!dl) return;
+  const msg = document.getElementById("dlmsg");
+  document.getElementById("dlbar").hidden = false;
+  document.getElementById("scarica").onclick = async () => {
+    const doc = new DOMParser().parseFromString(SORGENTE, "text/html");
+    doc.querySelectorAll("script").forEach(s => { if (s.id !== "pagina" && !s.src.includes("lightweight-charts")) s.remove(); });  // via gli script del visualizzatore
+    msg.textContent = "";
+    try {
+      await dl.save({filename: "XAU-News-Bias-Retail-PPI.html", data: new Blob(["<!doctype html>\n" + doc.documentElement.outerHTML])});
+      msg.textContent = "Fatto: mettilo nella cartella al posto di quello vecchio.";
+    } catch (e) { if (!e || e.code !== "declined") msg.textContent = "Da qui non si può scaricare: apri il link nel browser."; }
+  };
+})();
 </script>
