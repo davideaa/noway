@@ -4,8 +4,8 @@ const { chromium } = require('../node_modules/playwright-core'); const fs = requ
 (async () => {
   const dir = process.argv[2] || 'out'; fs.mkdirSync(dir, { recursive: true });
   const cpi = JSON.parse(fs.readFileSync(path.join(__dirname, 'cpi.json'), 'utf8'));
-  const exe = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-  const b = await chromium.launch({ executablePath: fs.existsSync(exe) ? exe : undefined, args: ['--no-sandbox', '--allow-file-access-from-files'] });
+  const exe = [process.env.CHROME, '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', ...(fs.existsSync('/opt/pw-browsers') ? fs.readdirSync('/opt/pw-browsers').filter((d) => /^chromium-\d+$/.test(d)).map((d) => `/opt/pw-browsers/${d}/chrome-linux64/chrome`) : [])].find((p) => p && fs.existsSync(p));
+  const b = await chromium.launch({ executablePath: exe, args: ['--no-sandbox', '--allow-file-access-from-files'] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } }); p.on('pageerror', (e) => console.log('ERR', e.message));
   await p.goto('file://' + path.join(__dirname, process.env.COMP || 'comp.html'));
   await p.evaluate((c) => { window.CPI = c; }, cpi);
