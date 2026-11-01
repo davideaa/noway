@@ -47,7 +47,7 @@ function shieldPath(cx, cy, w, h) { x.beginPath(); x.moveTo(cx, cy - h / 2);
 
 /* ================= HOOK: «100.000 €» enorme subito, poi persona + banca che crolla ================= */
 function sHook(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
-  const tRim = WA('hook', ['rimborsa', 'rimbor'], 1, 0.28), tPer = WA('hook', ['persona'], 1, 0.5), tBan = WA('hook', ['banca'], 1, 0.67), tFal = WA('hook', ['fallisce', 'fallire', 'falli'], 1, 0.9);
+  const tRim = WA('hook', ['rimborsa', 'rimbor'], 1, 0.28), tPer = WA('hook', ['person'], 1, 0.5), tBan = WA('hook', ['banca'], 1, 0.67), tFal = WA('hook', ['fallisce', 'fallire', 'falli'], 1, 0.9);
   const SZ = Math.min(210, Math.floor(190 * 900 / tw('100.000 €', 190, 800))), k = oC(seg(t, a, a + 0.32)), pun = lerp(1.22, 1, k);
   glow(540, 500, 560, '200,250,114', 0.22 * k * (0.85 + 0.15 * Math.sin(t * 3)));
   x.save(); x.translate(540, 500); x.scale(pun, pun); txt('100.000 €', 0, 0, { size: SZ, weight: 800, color: C.lime, alpha: k, blur: (1 - k) * 14, ls: -4 }); x.restore();
@@ -203,7 +203,7 @@ function sScopo(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
 
 /* ================= CASA: lo scontrino da portarsi a casa ================= */
 function sCasa(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
-  const tTet = WA('casa', ['tetto'], 1, 0.29), tHun = WA('casa', ['centomila', '100'], 1, 0.375), tPer = WA('casa', ['persona'], 1, 0.5), tBan = WA('casa', ['banca'], 1, 0.625),
+  const tTet = WA('casa', ['tetto'], 1, 0.29), tHun = WA('casa', ['centomila', '100'], 1, 0.375), tPer = WA('casa', ['person'], 1, 0.5), tBan = WA('casa', ['banca'], 1, 0.625),
     tDep = WA('casa', ['depositi'], 1, 0.79), tAzi = WA('casa', ['azioni'], 1, 0.875);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
   const Y0 = 560, PX = 250, PW = 580, ks = oC(seg(t, a + 0.3, a + 0.8));
