@@ -198,6 +198,10 @@ h1,h2{font-stretch:112%}
 #ylist details.yr>summary{grid-template-columns:52px 1fr auto}
 #ylist details.yr>.body{padding:0 8px 10px;gap:6px}
 #ylist details.nf{background:var(--bg)}
+#ylist summary.cela{cursor:default}
+.svela{grid-column:3/-1;justify-self:end;font:600 13.5px var(--f-body);padding:5px 16px;border-radius:999px;border:1px solid var(--accent);background:var(--panel);color:var(--accent);cursor:pointer}
+.svela:hover{background:var(--accent);color:var(--panel)}
+.svela.tutte{grid-column:auto;justify-self:start;margin-top:2px}
 .body{padding:0 12px 14px;display:grid;gap:12px}
 .rp{display:inline-block;min-width:66px;text-align:right;padding:1px 8px;border-radius:6px;font-family:var(--f-num);font-size:14px}
 .rp.w{background:var(--good-bg);color:var(--good)} .rp.l{background:var(--bad-bg);color:var(--bad)} .rp.n{background:var(--none-bg);color:var(--mute)}
@@ -250,7 +254,7 @@ h1,h2{font-stretch:112%}
 <section class="sec" aria-labelledby="h-years">
   <h2 id="h-years">Tutte le NFP</h2>
   <div class="bar"><label class="small" for="budget">Budget all'anno</label><input id="budget" type="number" min="100" step="100" value="3000" inputmode="numeric"></div>
-  <p class="small">Rischi cassa ÷ NFP rimaste nell'anno. Stop del registro: 60 pips fino al 2023, 100 dal 2024. Tocca un anno, poi una NFP.</p>
+  <p class="small">Rischi cassa ÷ NFP rimaste nell'anno. Stop del registro: 60 pips fino al 2023, 100 dal 2024. Tocca un anno: vedi solo cosa diceva il segnale. Premi <b>Svela</b> per vedere com'è andata. Quando riapri la pagina si nasconde tutto di nuovo.</p>
   <div class="tiles" id="mtiles"></div>
   <div class="list" id="ylist"></div>
 </section>
@@ -817,10 +821,18 @@ function rangeOf(e){  // candela della news sul bid vero, dal minimo al massimo,
   const vs = e.sc.S1.c.filter((v,j) => v && BINS[j]>=0 && BINS[j]<60);
   return Math.round((Math.max(...vs.map(v=>v[1])) - Math.min(...vs.map(v=>v[2])))/10);
 }
-function nfRow(e, o){  // una NFP dentro il suo anno: riga compatta che si apre sul grafico
+const SVELATE = new Set();  // NFP già svelate: solo in memoria, quando si riapre la pagina si nascondono di nuovo
+function nfRow(e, o, dopo){  // una NFP dentro il suo anno: prima solo la previsione, con Svela il risultato e il grafico
   const d = document.createElement("details"); d.className = "nf"; d.dataset.id = e.id;
   const b = e.rule, h = hitB(e, "rule"), tr = e.sc[st.s][b[0]];
-  d.innerHTML = `<summary><span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span><span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips<small>candela ${rangeOf(e)}</small></span><span class="rp ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`;
+  const head = `<span class="dt">${fDate(e, true)}${e.live?" ●":""}</span><span class="tg ${b[0]}">${b}</span>`;
+  const tutto = () => { d.innerHTML = `<summary>${head}<span class="${h?"ok":"ko"}">${h?"✓":"✗"}</span><span class="mv">${e.mv>0?"↑":"↓"} ${Math.abs(pips(e.mv))} pips<small>candela ${rangeOf(e)}</small></span><span class="rp ${cls(tr.r)}">${fR(tr.r)}</span></summary><div class="body"></div>`; };
+  if(SVELATE.has(e.id)) tutto();
+  else {
+    d.innerHTML = `<summary class="cela">${head}<button type="button" class="svela" aria-label="Svela la NFP del ${fDate(e)}">Svela</button></summary><div class="body"></div>`;
+    d.querySelector("summary").addEventListener("click", ev => ev.preventDefault());  // chiusa finché non la sveli
+    d.querySelector(".svela").addEventListener("click", ev => { ev.preventDefault(); SVELATE.add(e.id); tutto(); d.querySelector("summary").focus(); if(dopo) dopo(); });
+  }
   d.addEventListener("toggle", () => { if(d.open) openRow(d, e, o); });
   return d;
 }
@@ -984,11 +996,24 @@ function money(){
   for(const x of res.slice().reverse()){
     const d = document.createElement("details"); d.className = "yr"; d.dataset.y = x.y;
     const k = x.rows.filter(o => hitB(o.e, "rule")).length, sR = x.rows.reduce((a,o) => a + o.r, 0);
-    d.innerHTML = `<summary><span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · ${k} indovinate<small>${fR1(sR)} · fine anno ${fMoney(x.fine)}</small></span><span class="rp ${cls(x.prof)}">${x.prof>=0?"+":"−"}${fMoney(Math.abs(x.prof))}</span></summary><div class="body"></div>`;
+    d.innerHTML = `<summary></summary><div class="body"></div>`;
+    const testa = () => {  // il risultato dell'anno si vede solo quando le sue NFP sono svelate tutte
+      const sv = x.rows.filter(o => SVELATE.has(o.e.id)), ks = sv.filter(o => hitB(o.e, "rule")).length;
+      d.querySelector("summary").innerHTML = sv.length === x.rows.length
+        ? `<span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · ${k} indovinate<small>${fR1(sR)} · fine anno ${fMoney(x.fine)}</small></span><span class="rp ${cls(x.prof)}">${x.prof>=0?"+":"−"}${fMoney(Math.abs(x.prof))}</span>`
+        : `<span class="dt">${x.y}</span><span class="mv">${x.rows.length} NFP · ${sv.length} ${sv.length === 1 ? "svelata" : "svelate"}${sv.length ? `, ${ks} ${ks === 1 ? "indovinata" : "indovinate"}` : ""}<small>il risultato dell'anno appare quando le sveli tutte</small></span><span class="rp n">?</span>`;
+      const tt = d.querySelector(".svela.tutte"); if(tt && sv.length === x.rows.length) tt.remove();
+    };
+    testa();
     d.addEventListener("toggle", () => {
       const body = d.querySelector(".body");
       if(!d.open || body.childElementCount) return;
-      for(const o of x.rows){ const n = nfRow(o.e, o); body.appendChild(n); if(openN.includes(o.e.id)) n.open = true; }
+      for(const o of x.rows){ const n = nfRow(o.e, o, testa); body.appendChild(n); if(openN.includes(o.e.id) && SVELATE.has(o.e.id)) n.open = true; }
+      if(x.rows.some(o => !SVELATE.has(o.e.id))){
+        const all = document.createElement("button"); all.type = "button"; all.className = "svela tutte"; all.textContent = `Svela tutte le NFP del ${x.y}`;
+        all.onclick = () => body.querySelectorAll("summary.cela .svela").forEach(bt => bt.click());
+        body.appendChild(all);
+      }
     });
     box.appendChild(d);
     if(openY.length ? openY.includes(String(x.y)) : x === res[res.length-1]) d.open = true;
