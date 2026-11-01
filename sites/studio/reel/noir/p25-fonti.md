@@ -113,3 +113,10 @@ Nessun esempio numerico inventato è necessario: il caso è reale e tutti i nume
 - Attese vs fatti: i 100 miliardi del 10 marzo sono previsione della banca, riportata dalla Fed.
 - Superlativi (p19): «16ª banca», «seconda per dimensione» solo con "secondo la CRS / reportedly".
 - Perimetri (p5, p19): banca contro holding, bilancio consolidato contro call report; dichiarati sopra.
+
+## Revisione del controllo (1/11)
+
+- **«Tutti insieme» tolto** (riga 7 e schermo): il 9 marzo sono usciti oltre 40 mld su ~175 mld di depositi, circa un quarto. La Fed parla di ritiri «in a coordinated manner with unprecedented speed»: a voce e a schermo ora «in massa».
+- **«Una banca regge finché ci si fida»** (riga 10) non è un dato: è la morale della lezione 23 (riserva frazionaria, p23-fonti.md). La banca tiene in cassa solo una parte dei depositi, quindi regge finché i clienti non chiedono indietro i soldi in massa. Il caso SVB è l'esempio di quella lezione.
+- **«circa 9 depositi su 10»** anche a schermo, non solo a voce (94 % Fed, gruppo; 87,5–95,6 % dai calcoli nostri sul 10-K).
+- **Etichetta «altro 10%» tolta** dalla scena dei titoli: era il resto aritmetico, non un dato delle fonti.
