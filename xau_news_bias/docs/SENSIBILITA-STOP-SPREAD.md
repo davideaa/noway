@@ -71,7 +71,7 @@ File: `research_output/phase2/hx16/sens_stop_spread.json` e `.csv` (una riga per
 | A — calcolo del sito (−60 s, 30 pips) | +29 | +62 | 85% | — |
 | B — −30 s, 30 pips | +16 | +35 | 81% | 6 |
 | C — −30 s, 40 pips | +15 | +35 | 77% | 9 |
-| D — −30 s, 40 pips fino a +30 s | +13 | +35 | 74% | 11 |
+| D — −30 s, 40 pips fino a +30 s | +14 | +35 | 74% | 11 |
 | E — 40 pips tutti dal lato dello stop | +1 | +29 | 49% | 43 |
 
 **In R, 2020–26** (t contro A):
