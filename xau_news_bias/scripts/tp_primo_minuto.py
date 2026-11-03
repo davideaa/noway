@@ -70,7 +70,7 @@ if __name__ == "__main__":
     df.to_csv(R / "hx16" / "tp_primo_minuto.csv", index=False)
     last3 = df.d >= "2023-10-01"
     g = df[df.giusta]
-    out = {"n": len(df), "a_favore_nelle_giuste": {p: {"n": int(m.sum()), "mediana": round(float(g.loc[m[df.giusta], "mfe"].median())),
+    out = {"n": len(df), "a_favore_nelle_giuste": {p: {"n": int((m & df.giusta).sum()), "mediana": round(float(g.loc[m[df.giusta], "mfe"].median())),
                                                          "1_su_4": round(float(g.loc[m[df.giusta], "mfe"].quantile(.75))),
                                                          "1_su_10": round(float(g.loc[m[df.giusta], "mfe"].quantile(.9))),
                                                          "max": round(float(g.loc[m[df.giusta], "mfe"].max()))}
