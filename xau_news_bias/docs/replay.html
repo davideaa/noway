@@ -575,7 +575,7 @@ const r50 = v => Math.round(v / 10) * 10;
     <div class="kpis">
       <div class="kpi"><b>${w} su 10</b><span>direzione giusta dal 2014 (${sA.k} su ${sA.n})${RES.length ? ` · dal vivo ${LK} su ${RES.length}` : ""}</span></div>
       ${NX ? `<div class="kpi"><b>~${r50(NX.md)} pips</b><span>candela prevista · metà delle volte ${r50(NX.lo)}–${r50(NX.hi)}${NXV ? `<br><strong class="g">~${r50(NXV)} pips</strong> ampiezza dei primi ${VD.k} min, superata 1 volta su 4` : ""}</span></div>` : ""}
-      ${r3.length ? `<div class="kpi"><b>${sgnR(m3)}</b><span>a trade in media, ultimi 3 anni (${r3.length} NFP)${SF && SF.prezzi === "S4" ? ", con lo spread del broker a 30 pips prima della news${SF.ingresso ? `, entrando alle ${SF.ingresso}` : ""}" : ""}</span></div>` : ""}
+      ${r3.length ? `<div class="kpi"><b>${sgnR(m3)}</b><span>a trade in media, ultimi 3 anni (${r3.length} NFP)${SF && SF.prezzi === "S4" ? `, con lo spread del broker a 30 pips prima della news${SF.ingresso ? `, entrando alle ${SF.ingresso}` : ""}` : ""}</span></div>` : ""}
     </div>
     <div class="flow"><span>${SF && SF.ingresso ? SF.ingresso : "14:29"} entra</span><i>→</i><span>stop ~${SF && NX ? STOPF(NX.md) : 60} pips</span><i>→</i><span>14:30 news</span><i>→</i><span>14:31 chiudi, niente take profit</span></div>
     ${SF ? `<p class="small">Stop = ${FORMULA}: si allarga quando la volatilità sale${SM !== 1 ? ", col 20% di margine" : ""}${SF.piu ? ` e ${SF.piu} pips in più per lo spread dei secondi prima della news` : ""}. Da confermare dal vivo. Vale se depositi solo quello che rischi (la perdita resta il deposito).</p>` : ""}`;
