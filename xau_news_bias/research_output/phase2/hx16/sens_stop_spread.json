@@ -1,0 +1,175 @@
+{
+ "n": 148,
+ "controllo_A_uguale_a_hx44": 143,
+ "varianti": {
+  "A": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.006,
+    "salvate": 0.791
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.452,
+    "salvate": 0.851
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.952,
+    "salvate": 0.818
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.236,
+    "salvate": 0.822
+   },
+   "cambiano_esito_rispetto_ad_A": 0,
+   "t_contro_A_2020_26": null
+  },
+  "B": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.003,
+    "salvate": 0.791
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.261,
+    "salvate": 0.809
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.545,
+    "salvate": 0.727
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.136,
+    "salvate": 0.8
+   },
+   "cambiano_esito_rispetto_ad_A": 6,
+   "t_contro_A_2020_26": -1.4
+  },
+  "C": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.017,
+    "salvate": 0.767
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.224,
+    "salvate": 0.766
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.545,
+    "salvate": 0.727
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.11,
+    "salvate": 0.767
+   },
+   "cambiano_esito_rispetto_ad_A": 9,
+   "t_contro_A_2020_26": -1.65
+  },
+  "D": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.027,
+    "salvate": 0.767
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.205,
+    "salvate": 0.745
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.545,
+    "salvate": 0.727
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.095,
+    "salvate": 0.756
+   },
+   "cambiano_esito_rispetto_ad_A": 11,
+   "t_contro_A_2020_26": -1.78
+  },
+  "E": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.555,
+    "salvate": 0.302
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": -0.086,
+    "salvate": 0.489
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.442,
+    "salvate": 0.636
+   },
+   "tutto": {
+    "n": 148,
+    "R": -0.308,
+    "salvate": 0.4
+   },
+   "cambiano_esito_rispetto_ad_A": 43,
+   "t_contro_A_2020_26": -3.47
+  },
+  "B+10": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.054,
+    "salvate": 0.814
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.338,
+    "salvate": 0.894
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.797,
+    "salvate": 0.909
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.152,
+    "salvate": 0.856
+   },
+   "cambiano_esito_rispetto_ad_A": 6,
+   "t_contro_A_2020_26": -3.15
+  },
+  "C+10": {
+   "IS 2014-19": {
+    "n": 70,
+    "R": -0.064,
+    "salvate": 0.814
+   },
+   "OOS 2020-26": {
+    "n": 78,
+    "R": 0.302,
+    "salvate": 0.872
+   },
+   "ultimi 3 anni": {
+    "n": 35,
+    "R": 0.732,
+    "salvate": 0.864
+   },
+   "tutto": {
+    "n": 148,
+    "R": 0.129,
+    "salvate": 0.844
+   },
+   "cambiano_esito_rispetto_ad_A": 5,
+   "t_contro_A_2020_26": -3.07
+  }
+ },
+ "aggiungere_10_pips": true
+}

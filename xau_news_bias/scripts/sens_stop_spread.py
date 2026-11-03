@@ -18,7 +18,9 @@ from xnb.providers.dukascopy import DukascopyProvider  # noqa: E402
 # nome: (spread minimo in $, da ms, a ms, tutto dal lato dello stop, ingresso ms)
 VAR = {"A": (3.0, -20_000, 10_000, False, -60_000), "B": (3.0, -20_000, 10_000, False, -30_000),
        "C": (4.0, -20_000, 10_000, False, -30_000), "D": (4.0, -20_000, 30_000, False, -30_000),
-       "E": (4.0, -20_000, 10_000, True, -30_000)}
+       "E": (4.0, -20_000, 10_000, True, -30_000),
+       # aggiunte dopo aver visto A-E (non decidono): la proposta della regola, stop + 10 pips
+       "B+10": (3.0, -20_000, 10_000, False, -30_000, 1.0), "C+10": (4.0, -20_000, 10_000, False, -30_000, 1.0)}
 
 
 def prezzi(t, bid, ask, d, minsp, da, a, lato):
@@ -62,12 +64,13 @@ if __name__ == "__main__":
         d = 1 if e["rule"] == "LONG" else -1
         stop = h44[e["id"]]["res"]["B37x1.2"]["stop_pips"] / 10
         row = {"id": e["id"], "d": str(e["t0"]), "y": e["y"], "giusta": h44[e["id"]]["giusta"], "rif": h44[e["id"]]["res"]["B37x1.2"]["r"]}
-        for n, (ms, da, a, lato, ing) in VAR.items():
+        for n, (ms, da, a, lato, ing, *piu) in VAR.items():
             b, q = prezzi(t, bid, ask, d, ms, da, a, lato)
-            row[n], row[n + "_st"] = trade(t, b, q, d, stop, ing)
+            row[n], row[n + "_st"] = trade(t, b, q, d, stop + (piu[0] if piu else 0.0), ing)
         rows.append(row)
         print(e["id"], flush=True)
     df = pd.DataFrame(rows)
+    df.to_csv(R / "hx16" / "sens_stop_spread.csv", index=False)
     last3 = df.d >= "2023-10-01"
     out = {"n": len(df), "controllo_A_uguale_a_hx44": int((df.A.round(3) - df.rif).abs().lt(0.002).sum()), "varianti": {}}
     for n in VAR:
@@ -77,6 +80,8 @@ if __name__ == "__main__":
             g = s & df.giusta
             v[p] = {"n": int(s.sum()), "R": round(float(df.loc[s, n].mean()), 3), "salvate": round(float(1 - df.loc[g, n + "_st"].mean()), 3)}
         v["cambiano_esito_rispetto_ad_A"] = int((df[n + "_st"] != df["A_st"]).sum())
+        dd = (df[n] - df.A)[df.y >= 2020]
+        v["t_contro_A_2020_26"] = round(float(dd.mean() / (dd.std(ddof=1) / np.sqrt(len(dd)))), 2) if dd.std(ddof=1) > 0 else None
         out["varianti"][n] = v
     a, c = out["varianti"]["A"]["OOS 2020-26"], out["varianti"]["C"]["OOS 2020-26"]
     out["aggiungere_10_pips"] = bool(a["R"] - c["R"] > 0.05 or a["salvate"] - c["salvate"] > 0.05)
