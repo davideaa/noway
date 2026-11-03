@@ -162,3 +162,29 @@ File: `research_output/phase2/hx16/descr_nfp_minuto.json` (gruppi, verso, previs
 - 15 minuti 40 / 75 $ (dal 2026);
 - prima ora 50 / 80 $ (livello di volatilità e 2026 d'accordo);
 - giorno 90 / 135 $ (livello di volatilità e 2026 d'accordo).
+
+## Domanda di Davide dopo i risultati: vale negli ultimi anni, in pip?
+
+Non scritto prima: è descrittivo.
+
+**Spearman fra l'escursione media giornaliera dei 5 giorni prima e il 1° minuto (massimo − minimo, con le wick):**
+
+| Periodo | In % | In pip |
+|---|---|---|
+| Dal 2015 | 0,19 | 0,56 |
+| Ultimi 3 anni | 0,21 | 0,49 |
+| 2025–26 | 0,48 (p 0,03) | 0,69 |
+
+- Il valore in pip è più alto anche perché il prezzo è salito da 1.200 a 5.000 $.
+- L'**aumento** rispetto alle 4 settimane prima conta poco anche negli ultimi anni: Spearman da −0,01 a 0,27, mai significativo.
+
+**Ultimi 3 anni, 1° minuto in pip (mediana) secondo i giorni della settimana prima:**
+
+| Giorni della settimana prima | NFP | 1° minuto, mediana |
+|---|---|---|
+| Sotto 500 pip | 18 | 124 pip |
+| 500–700 pip | 4 | 163 pip |
+| Oltre 700 pip | 11 | 215 pip (massimo 822) |
+
+- La settimana di adesso fa circa 910 pip al giorno.
+- Le 11 NFP del 2025–26 con la settimana prima oltre 700 pip hanno una mediana di 397 pip al 1° minuto.
