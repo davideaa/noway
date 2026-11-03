@@ -188,3 +188,13 @@ Non scritto prima: è descrittivo.
 
 - La settimana di adesso fa circa 910 pip al giorno.
 - Le 11 NFP del 2025–26 con la settimana prima oltre 700 pip hanno una mediana di 397 pip al 1° minuto.
+
+**Seconda domanda: con la settimana di adesso (~910 pip al giorno) la prima candela può fare 500–600 pip?**
+
+- **Rispetto al 2026 la settimana non è più mossa del solito.** Le settimane prima delle NFP del 2026 avevano una mediana di 1.126 pip al giorno.
+- **Stima dalla volatilità.** Regressione in log, pip della prima candela contro pip al giorno dei 5 giorni prima, al livello di adesso:
+  - fatta sul 2025–26: mediana 228 pip, 1 su 10 432;
+  - fatta sugli ultimi 3 anni: mediana 253 pip, 1 su 10 426.
+- **Questa stima, rifatta in avanti, sbaglia per difetto.** Sulle NFP più recenti la candela vera supera la mediana stimata l'83% delle volte (12 NFP del 2025–26) e il 58% (26 negli ultimi 3 anni).
+- **Le ultime 4 NFP hanno fatto 555, 460, 822 e 407 pip** con settimane fra 860 e 1.300 pip al giorno. Sono grandi più di quanto la sola volatilità spieghi.
+- **Conclusione.** La mediana resta ~350–400 pip. 500–600 pip è un caso da circa 1 volta su 3: nel 2026, riportato a 3.930 $, il primo minuto ha superato i 50 $ 3 volte su 9.
