@@ -59,3 +59,12 @@ riempito con le date nuove dal calendario BLS (`xnb/providers/bls.py`).
 
 Solo le NFP (criterio di H-X8): dopo 24 NFP almeno 15 indovinate e somma R
 positiva; stop anticipato se dopo 12 ne ha indovinate 4 o meno.
+
+### Variante di Davide nel risultato (dal 03/11/2026)
+
+Oltre a `trade_formula.x1.0` e `x1.2`, il risultato riporta `trade_formula.davide`:
+- stop × 1,2 + 10 pips;
+- ingresso 30 s prima della news;
+- spread 30 pips solo da 20 s prima fino alla news.
+
+Si calcola dallo stesso record `stop` scritto prima della news. Vedi `docs/SENSIBILITA-STOP-SPREAD.md`.

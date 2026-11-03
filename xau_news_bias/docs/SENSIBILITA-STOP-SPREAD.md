@@ -108,3 +108,32 @@ File: `research_output/phase2/hx16/sens_stop_spread.json` e `.csv` (una riga per
 - Salva il 04/09/2026: +7,9 R invece di −1.
 
 **Il dato che manca** è come si apre davvero lo spread del broker. E dice che, se si apre tutto dal lato dello stop, lo stop da 79 salva solo metà delle NFP giuste. Si misura con `mt5/XNB_TickExport.mq5` e `mt5/xnb_events.csv` (43 NFP dal 2023).
+
+## Il caso vero di Davide e la scelta (03/11/2026)
+
+**Cosa ha detto Davide:**
+- lo spread si apre solo **prima** della news, da circa 20 s a 1 s prima, ed è di solito **30 pips**;
+- dopo la partenza non conta;
+- leva 1:500 e stop out al 20%. Con 1.000 € e 1 lotto lo stop out arriva intorno ai 100 pips, dopo lo stop.
+
+**Variante B0**, aggiunta dopo: spread 30 pips da −20 s a 0, ingresso −30 s.
+
+| Variante | Pips a NFP 2020–26 | Ultimi 3 anni | Salvate 2020–26 |
+|---|---|---|---|
+| B0, stop del sito | +16 | +35 | 81% |
+| **B0 + 10 pips** | **+27** | **+60** | **92%** |
+| A, come calcolava il sito prima | +29 | +62 | 85% |
+
+**Decisione di Davide ("Vai"): stop + 10 pips.**
+
+**Sul sito** (`build_site.py`, `stop_formula`):
+- stop = 1,2 × (30 + 10% della candela prevista) + 10 pips;
+- risultati NFP per NFP con la variante B0 + 10;
+- ingresso indicato alle 14:29:30.
+
+**Registro dal vivo** (`hx8_live.py`):
+- il risultato aggiunge `trade_formula.davide`, calcolato dallo stesso record stop scritto prima della news;
+- il record stop della NFP del 06/11 era già scritto il 20/10 e non si tocca;
+- la variante è definita in codice il 03/11, prima della NFP.
+
+**Limite.** I pallini "quanto è andato contro" nel grafico dello stop restano misurati dall'ingresso a −60 s, come in H-X38.

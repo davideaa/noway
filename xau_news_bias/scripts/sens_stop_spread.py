@@ -20,7 +20,9 @@ VAR = {"A": (3.0, -20_000, 10_000, False, -60_000), "B": (3.0, -20_000, 10_000, 
        "C": (4.0, -20_000, 10_000, False, -30_000), "D": (4.0, -20_000, 30_000, False, -30_000),
        "E": (4.0, -20_000, 10_000, True, -30_000),
        # aggiunte dopo aver visto A-E (non decidono): la proposta della regola, stop + 10 pips
-       "B+10": (3.0, -20_000, 10_000, False, -30_000, 1.0), "C+10": (4.0, -20_000, 10_000, False, -30_000, 1.0)}
+       "B+10": (3.0, -20_000, 10_000, False, -30_000, 1.0), "C+10": (4.0, -20_000, 10_000, False, -30_000, 1.0),
+       # il caso descritto da Davide il 03/11: spread 30 pips solo prima della news (da -20 s a 0), ingresso -30 s
+       "B0": (3.0, -20_000, 0, False, -30_000), "B0+10": (3.0, -20_000, 0, False, -30_000, 1.0)}
 
 
 def prezzi(t, bid, ask, d, minsp, da, a, lato):

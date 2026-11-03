@@ -26,6 +26,8 @@ U5_FROM = pd.Timestamp("2026-11-01", tz="UTC")  # H-X13: uscita a 5 min dal vivo
 # H-X44: stop = margine × (30 pips + 10% della candela prevista), scritto prima di ogni NFP dalla NFP del 6/11/2026;
 # il sito usa × 1,2, × 1,0 si registra in parallelo per il confronto dal vivo
 STOPF = {"base_pips": 30, "k": 0.10, "margini": [1.0, 1.2]}
+# scelto da Davide il 03/11/2026, prima della NFP del 06/11: stop x1,2 + 10 pips, ingresso 30 s prima, spread 30 pips solo prima della news
+DAVIDE = {"margine": 1.2, "piu_pips": 10, "ingresso_ms": -30_000, "spread_pips": 30, "spread_da_ms": -20_000, "spread_a_ms": 0}
 
 
 def digest(rec: dict) -> str:
@@ -126,6 +128,13 @@ def resolve(ev: dict, stop_rec: dict | None = None) -> dict | None:
             st = m * (stop_rec["base_pips"] + stop_rec["k"] * cand) / 10
             tr = trade(t, b4, a4, d, st, "full")
             out["trade_formula"][f"x{m}"] = {"stop_pips": round(st * 10, 1), **{k: tr[k] for k in ("en", "sl", "ex", "st", "r")}}
+        from sens_stop_spread import prezzi
+        from sens_stop_spread import trade as trade_ingresso
+        D = DAVIDE
+        st = (D["margine"] * (stop_rec["base_pips"] + stop_rec["k"] * cand) + D["piu_pips"]) / 10
+        bd, ad = prezzi(t, bid, ask, d, D["spread_pips"] / 10, D["spread_da_ms"], D["spread_a_ms"], False)
+        r_d, st_d = trade_ingresso(t, bd, ad, d, st, D["ingresso_ms"])
+        out["trade_formula"]["davide"] = {"stop_pips": round(st * 10, 1), "r": round(float(r_d), 3), "st": bool(st_d), **DAVIDE}
     return out
 
 

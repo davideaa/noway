@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parent.parent
 HX16 = ROOT / "research_output" / "phase2" / "hx16"
 
@@ -61,6 +63,12 @@ def stop_formula():
             out["margine"], m = 1.2, "B37x1.2"
             out["per"] = {t["id"]: [round(t["res"][m]["stop_pips"]), t["res"][m]["r"], int(t["res"][m]["st"]), int(t["giusta"]), c38.get(t["id"])]
                           for t in load(p44)["trade"]}
+            ps = HX16 / "sens_stop_spread.csv"
+            if ps.exists():  # scelta di Davide del 03/11/2026: +10 pips, ingresso 14:29:30, spread 30 pips solo prima della news
+                sv = pd.read_csv(ps).set_index("id")
+                out["piu"], out["ingresso"] = 10, "14:29:30"
+                out["per"] = {i: [v[0] + 10, round(float(sv.loc[i, "B0+10"]), 3), int(sv.loc[i, "B0+10_st"]), v[3], v[4]]
+                              for i, v in out["per"].items() if i in sv.index}
     return out
 
 
