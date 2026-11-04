@@ -106,6 +106,7 @@ Puntata 2 (prima con questo metodo): vedi `SOCIAL.md` → registro tempi. Stima:
   (~10 min + scaricamento modelli; il primo caricamento da disco freddo può richiedere 10 minuti).
 - Render: `npm install` in `sites/studio/reel/` (playwright-core), Chromium è già nella macchina.
 - La base `run.wav` («Run!» di Vellyy) **non è nel repository**: va chiesta a Davide se manca.
+  Se Davide non può rimandarla in tempo: `python3 sites/studio/reel/noir/voce/ricostruisci_base.py` la ricostruisce dai reel pubblicati (4/11: identica alla pubblicata a >31 dB).
 
 ## Errori già fatti (da non ripetere)
 - Controllo della voce troppo debole (solo «ci sono le parole»): non vedeva parole biascicate né finali troncati.
@@ -186,6 +187,7 @@ CUES=/tmp/cues-finti.json COMP=pN.html LIST="<numeri stampati>" node render.cjs 
 | 30/10 | 20 | Venerdì 30 nessuna puntata: la 20 era in pausa dal 24/10 e alla frase di Davide «da domani riprendi progetti social» (27/10) non l'ho rimessa in programma. Davide: «dovevi in automatico sempre» | la cadenza lun–ven non si interrompe mai da sola: una puntata in pausa si rimette in programma appena Davide dice di riprendere, e ogni giovedì si controlla che la settimana dopo abbia 5 puntate pronte |
 | 30/10 | 21, 22 | Whisper scrive i numeri in cifre («50», «10 .000», «1 .600», «6»): gli agganci WT sulla parola in lettere («cinquanta», «diecimila», «sei») non scattano e le scritte escono in ritardo o mai (la 21 perdeva il contatore 85,7%) | nelle scene ogni aggancio su un numero va scritto WA con la forma in lettere E quella in cifre (anche la sola prima parte: «10» per «10 .000», «1» per «1 .600»); il regista lo controlla sui cues veri prima del render |
 | 31/10 | 24, 25 | Prova della settimana 5 (analisi del sabato, PUBBLICO.md 31/10): «il numero in apertura» | la prima frase del copione di 24 e 25 si apre con un dato verificato che riguarda chi guarda (24: soglia di centomila euro; 25: oltre quaranta miliardi in un giorno), prima di domande e concetti; il resto uguale. 21–23 (ganci senza cifra) fanno da confronto; si legge sabato 7/11 |
+| 04/11 | 24, 25 | Il reset della macchina del 1/11 ha cancellato `run.wav`; chiesta a Davide, non arrivata: mercoledì il calendario non aveva nessuna puntata per giovedì | la base si ricostruisce dai reel pubblicati con `voce/ricostruisci_base.py` (copertura 100 %, >31 dB); un mix bloccato si sblocca entro il giorno prima dell'uscita, senza aspettare |
 | 24/10 | 19 | «bebi bum» (scritto come si pronuncia) segnalato perché Whisper scrive «baby boom» | aggiunta la sostituzione in `verifica_finale.py` e `rigenera2.py`, come per «dov'eri» |
 | 24/10 | 17 | Con il disco pieno uno dei 4 processi di render ha scritto fotogrammi JPEG completi ma VUOTI (solo sfondo, uno ogni 4): sfarfallio trovato da reel-controllo, non dal conteggio né dalla dimensione dei file (la grana di fondo fa variare le dimensioni) | dopo ogni render controllare la luminanza media fotogramma per fotogramma sul video (`signalstats` YAVG): nessun fotogramma deve stare 3 punti sotto entrambi i vicini; i fotogrammi sospetti si rifanno con `LIST=` |
 
