@@ -172,17 +172,17 @@ function sCompra(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
 
 /* ================= LIMITE: una media non e' te; il tuo segnalino scivola via dalla media ================= */
 function sLimite(t, a, b) { bg('50,38,16', 0.5); x.save(); zoom(t, a, b, 1.04);
-  const tAtt = WA('limite', ['attenzione'], 1, 0.0), tDep = WA('limite', ['deposito'], 1, 0.3), tPan = WA('limite', ['paniere'], 1, 0.5), tTua = WA('limite', ['tua'], 1, 0.68), tPer = WA('limite', ['personale'], 1, 0.78), tDiv = WA('limite', ['diversa'], 1, 0.94);
-  phrase(t, a + 0.05, [['Attenzione:', C.amber], ['vale in media', C.ink]], 345, { size: 92 });
+  const tAtt = WA('limite', ['attenzione'], 1, 0.0), tDep = WA('limite', ['deposito'], 1, 0.3), tPan = WA('limite', ['paniere'], 1, 0.5), tTua = WA('limite', ['tua'], 1, 0.68), tPer = WA('limite', ['personale'], 1, 0.78), tDiv = WA('limite', ['alta'], 1, 0.9);
+  phrase(t, a + 0.05, [['Il −4,5%', C.amber], ['vale in media', C.ink]], 345, { size: 92 });
   const k1 = seg(t, tDep - 0.15, tDep + 0.4); if (k1 > 0) glassPill(540, 700, 'DEPOSITO MEDIO', k1, C.ink, 38);
   const k2 = seg(t, tPan - 0.15, tPan + 0.4); if (k2 > 0) glassPill(540, 820, 'PANIERE MEDIO', k2, C.ink, 38);
   const TY = 1090, ka = oC(seg(t, a + 0.4, a + 1.1)), XA = 140, XB = 940;
-  if (ka > 0) { x.save(); x.globalAlpha = ka; const g = x.createLinearGradient(XA, 0, XB, 0); g.addColorStop(0, C.lime); g.addColorStop(0.5, C.amber); g.addColorStop(1, C.red);
+  if (ka > 0) { x.save(); x.globalAlpha = ka; const g = x.createLinearGradient(XA, 0, XB, 0); g.addColorStop(0, 'rgba(139,149,143,0.35)'); g.addColorStop(0.5, 'rgba(139,149,143,0.75)'); g.addColorStop(1, 'rgba(139,149,143,0.35)');
     x.fillStyle = g; rr(XA, TY - 18, (XB - XA) * ka, 36, 18); x.fill(); x.restore(); }
   const km = oB(seg(t, tDep + 0.2, tDep + 0.7)); if (km > 0) { pop(540, TY - 60, km, () => { x.fillStyle = C.ink; x.beginPath(); x.moveTo(540, TY - 22); x.lineTo(516, TY - 62); x.lineTo(564, TY - 62); x.closePath(); x.fill(); }); lab(t, 'MEDIA', 540, TY - 100, tDep + 0.3, { color: C.ink, size: 28, ls: 4 }); }
-  const kt = oB(seg(t, tTua - 0.1, tTua + 0.4)), mv = ioC(seg(t, tPer - 0.15, tPer + 0.9)), tx = lerp(540, 830, mv) + Math.sin(t * 2.2) * 5 * mv;
+  const kt = oB(seg(t, tTua - 0.1, tTua + 0.4)), mv = ioC(seg(t, tPer - 0.15, tPer + 0.9)), tx = 540 + Math.sin((t - tPer) * 2.6) * 270 * mv;
   if (kt > 0) { pop(tx, TY + 60, kt, () => { glow(tx, TY + 60, 80, '200,250,114', 0.3); x.fillStyle = C.lime; x.beginPath(); x.moveTo(tx, TY + 22); x.lineTo(tx - 24, TY + 62); x.lineTo(tx + 24, TY + 62); x.closePath(); x.fill(); }); lab(t, 'TU', tx, TY + 104, tTua, { color: C.lime, size: 28, ls: 4 }); }
-  const kd = seg(t, tDiv - 0.15, tDiv + 0.45); if (kd > 0) glassPill(540, 1330, 'PUÒ ESSERE DIVERSA', kd, C.amber, 38);
+  const kd = seg(t, tDiv - 0.15, tDiv + 0.45); if (kd > 0) glassPill(540, 1330, 'PIÙ ALTA O PIÙ BASSA', kd, C.amber, 38);
   x.restore(); finish(t); }
 
 /* ================= CASA: il portafoglio si riempie, il carrello si svuota ================= */
