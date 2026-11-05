@@ -88,3 +88,10 @@ Ipotesi: 30 pagamenti P1, P1·1,05, …, P1·1,05^29, pagati ai tempi 0, 1, …,
 6. **Rango del jackpot (ottavo)**: solo testate, non usare.
 7. **Stabilità del 5 %**: letto sulle FAQ il 5/11/2026; non verificata una versione datata del regolamento ufficiale MUSL (testo di regole non letto).
 8. Win for Life: nessun dato usato. Per un eventuale richiamo italiano servirebbe il decreto ADM, non trovato (ADM e Sisal differiscono su importo mensile).
+
+## Teoria della settimana (aggiunta dopo il controllo del 5/11)
+
+| Detto nel reel | Natura | Riferimento |
+|---|---|---|
+| «Un dollaro tra vent'anni vale meno di uno oggi, perché oggi potresti farlo fruttare: il valore attuale è lo stesso calcolo, al contrario» | **Teoria della lezione, non un dato.** È la definizione di valore attuale (attualizzazione): una somma futura F vale oggi F/(1+r)^n, perché la somma di oggi, investita al tasso r, diventa F in n anni. È la formula inversa dell'interesse composto. | Scheda 28 «Il valore attuale» in `social/corso/lezioni.json` e `p28-fonti.md` (formula, verifica inversa 862,61 € → 1.000,00 €); scheda 26 (il tasso come prezzo del tempo) |
+| Titolo a schermo «Il tempo ha un prezzo» | Sintesi della stessa teoria (scheda 26). | Come sopra |
