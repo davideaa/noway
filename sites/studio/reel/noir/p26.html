@@ -29,7 +29,7 @@ function personFill(cx, cy, s, col) { x.fillStyle = col; x.beginPath(); x.arc(cx
 
 /* ================= HOOK: l'anno è un quadrante di 12 mesi da ottobre a ottobre; il giro si chiude sul numero ================= */
 function sHook(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.05);
-  const tOt = WA('hook', ['ottobre'], 1, 0.2), tN = WA('hook', ['3,2', 'tre'], 1, 0.62), tLo = WA('hook', ['lordo'], 1, 0.9);
+  const tOt = WA('hook', ['ottobre'], 1, 0.2), tN = WA('hook', ['3,2', '3', 'tre'], 1, 0.62), tLo = WA('hook', ['lordo'], 1, 0.9);
   phrase(t, a + 0.05, [['Lo Stato offriva', C.ink]], 345, { size: 92 });
   phrase(t, tN - 0.1, [['circa il 3,2%', C.lime]], Y2, { size: 92 });
   const cx = 540, cy = 930, R = 300, MESI = ['O', 'N', 'D', 'G', 'F', 'M', 'A', 'M', 'G', 'L', 'A', 'S'];
@@ -167,7 +167,7 @@ function sAlti(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
 
 /* ================= BCE: tubo dalla BCE alle banche con il suo 2,50%; il tubo verso il tuo conto è spezzato ================= */
 function sBce(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
-  const t16 = WA('bce', ['sedici', '16'], 1, 0.14), tNu = WA('bce', ['2,5', '25', 'due'], 1, 0.3), tBa = WA('bce', ['banche'], 1, 0.46), tDe = WA('bce', ['depositi'], 1, 0.56), tNo = WA('bce', ['non'], 1, 0.7), tTuo = WA('bce', ['tuo'], 1, 0.84);
+  const t16 = WA('bce', ['sedici', '16'], 1, 0.14), tNu = WA('bce', ['2,5', '2', 'due'], 1, 0.3), tBa = WA('bce', ['banche'], 1, 0.46), tDe = WA('bce', ['depositi'], 1, 0.56), tNo = WA('bce', ['non'], 1, 0.7), tTuo = WA('bce', ['tuo'], 1, 0.84);
   phrase(t, a + 0.05, [['Anche la BCE ha il suo', C.ink]], 345, { size: 92 });
   phrase(t, t16 - 0.1, [['dal 16 settembre', C.lime]], Y2, { size: 92 });
   const node = (cy, label, k, col) => { if (k <= 0) return; x.save(); x.globalAlpha = clamp(k); const s = lerp(0.85, 1, oB(clamp(k))); x.translate(540, cy); x.scale(s, s); x.translate(-540, -cy); glass(540, cy, 360, 120, 30, 1); txt(label, 540, cy + 3, { size: label.length > 8 ? 38 : 46, weight: 800, color: col, ls: 1 }); x.restore(); };
