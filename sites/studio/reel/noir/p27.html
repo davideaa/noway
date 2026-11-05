@@ -78,13 +78,12 @@ function stairPts(f, p, X, Yp) { const pts = [[X(0), Yp(f(0))]], full = Math.flo
 function linePts(f, p, X, Yp) { const pts = []; for (let n = 0; n < p; n += 0.25) pts.push([X(n), Yp(f(n))]); pts.push([X(p), Yp(f(p))]); return pts; }
 function strokePts(pts, col, w, a, gl) { if (pts.length < 2 || a <= 0.01) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineJoin = 'round'; x.lineCap = 'round'; if (gl) { x.shadowColor = gl; x.shadowBlur = 20; }
   x.beginPath(); pts.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); x.stroke(); x.restore(); }
-function chart(t, o) { const { N, Y, yb, yt = 640, x0 = 130, x1 = 930, pS = 0, pC = 0, aS = 1, aC = 1, ln = 0, tk = 1, capLab = 1 } = o;
-  const X = (n) => x0 + (x1 - x0) * n / N, Yp = (v) => yb - (yb - yt) * v / Y;
+function chart(t, o) { const { N, Y, yb, yt = 620, x0 = 130, x1 = 930, pS = 0, pC = 0, aS = 1, aC = 1, ln = 0, tk = 1, capLab = 1 } = o;
+  const X = (n) => x0 + (x1 - x0) * n / N, Yp = (v) => yb - (yb - yt) * (v - 1000) / (Y - 1000);
   x.save(); x.strokeStyle = 'rgba(241,244,238,0.28)'; x.lineWidth = 3; x.beginPath(); x.moveTo(x0 - 10, yb); x.lineTo(x1 + 10, yb); x.stroke(); x.restore();
   const tickA = tk * (1 - ln), tickB = tk * ln;
   [[0, 5, 10], [0, 10, 20, 30]].forEach((set, si) => { const al = si ? tickB : tickA; if (al <= 0.01) return; set.forEach((n) => txt(n === set[set.length - 1] ? n + ' ANNI' : String(n), n === set[set.length - 1] ? X(n) - 10 : X(n), yb + 38, { fam: 'mono', size: 24, weight: 600, color: C.muted, alpha: al })); });
-  dashLine(x0, Yp(1000), x1, Yp(1000), 'rgba(241,244,238,0.4)', 2.5, [8, 10], 1);
-  if (capLab > 0) txt('CAPITALE 1.000 €', x0 + 6, Yp(1000) + 26, { fam: 'mono', size: 22, weight: 600, color: C.muted, align: 'left', ls: 1, alpha: capLab });
+  if (capLab > 0) txt('LA BASE È IL CAPITALE: 1.000 €', 540, yb + 82, { fam: 'mono', size: 22, weight: 600, color: C.muted, ls: 1, alpha: capLab });
   [[1 - ln, stairPts], [ln, linePts]].forEach(([al, fn]) => { if (al <= 0.01) return;
     if (pC > 0.01 && aC > 0) { const cs = fn(compF, pC, X, Yp), ss = fn(simpleF, pC, X, Yp);
       x.save(); x.globalAlpha *= al * 0.2 * aC; x.fillStyle = C.amber; x.beginPath(); cs.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); for (let i = ss.length - 1; i >= 0; i--) x.lineTo(ss[i][0], ss[i][1]); x.closePath(); x.fill(); x.restore(); }
@@ -93,7 +92,7 @@ function chart(t, o) { const { N, Y, yb, yt = 640, x0 = 130, x1 = 930, pS = 0, p
   if (pS > 0.01) { x.save(); x.globalAlpha *= aS; x.fillStyle = C.lime; x.beginPath(); x.arc(X(pS), Yp(simpleF(pS)), 11, 0, 7); x.fill(); x.restore(); }
   if (pC > 0.01) { x.save(); x.globalAlpha *= aC; x.fillStyle = C.amber; x.beginPath(); x.arc(X(pC), Yp(compF(pC)), 12, 0, 7); x.fill(); x.restore(); }
   return { X, Yp }; }
-const CH10 = { N: 10, Y: 1700, yb: 1230 };
+const CH10 = { N: 10, Y: 1700, yb: 1200 };
 
 /* ================= SEMPLICE: una scala a gradini tutti uguali (+50 l'anno) ================= */
 function sSemplice(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
@@ -103,7 +102,7 @@ function sSemplice(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   const p = ioC(seg(t, t50 - 0.1, Math.max(t10 + 0.4, t50 + 1.5))) * 10, kc = oC(seg(t, tMi, tMi + 0.5));
   const { X, Yp } = chart(t, { ...CH10, pS: p, aS: 1, capLab: kc, tk: kc });
   const kl = oC(seg(t, t15 - 0.05, t15 + 0.35)); txt(eur(1500) + ' €', 969, Yp(1500) - 46, { size: 56, weight: 800, color: C.lime, align: 'right', alpha: kl, ls: -1, blur: (1 - kl) * 8 });
-  const kp = seg(t, t50 - 0.15, t50 + 0.45); if (kp > 0) glassPill(540, 1345, '+50 € ogni anno', kp, C.lime, 46);
+  const kp = seg(t, t50 - 0.15, t50 + 0.45); if (kp > 0) glassPill(540, 1365, '+50 € ogni anno', kp, C.lime, 46);
   tag(t, a);
   x.restore(); finish(t); }
 
@@ -114,10 +113,10 @@ function sComposto(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
   phrase(t, tPr - 0.1, [['fanno interessi.', C.amber]], Y2, { size: 92 });
   const pC = ioC(seg(t, tAg - 0.2, Math.max(t10 + 0.3, tAg + 2))) * 10;
   const { X, Yp } = chart(t, { ...CH10, pS: 10, aS: 0.5, pC, aC: 1 });
-  const k1 = oC(seg(t, t10 + 0.1, t10 + 0.4)); txt(eur(1500) + ' €', 969, Yp(1500) + 44, { size: 38, weight: 800, color: C.ink, align: 'right', alpha: 0.8 * k1 });
+  const k1 = oC(seg(t, t10 + 0.1, t10 + 0.4)); txt(eur(1500) + ' €', 969, Yp(1500) + 64, { size: 38, weight: 800, color: C.ink, align: 'right', alpha: 0.8 * k1 });
   const k2 = oC(seg(t, t1629 - 0.05, t1629 + 0.35)); txt(eur(1628.89, 2) + ' €', 969, Yp(1628.89) - 50, { size: 56, weight: 800, color: C.amber, align: 'right', alpha: k2, ls: -1, blur: (1 - k2) * 8 });
-  lab(t, 'OGNI GRADINO PIÙ ALTO', 700, 1100, tVo, { color: C.amber, size: 24 });
-  const kp = seg(t, t129 - 0.15, t129 + 0.45); if (kp > 0) glassPill(540, 1345, 'circa +129 € in più', kp, C.amber, 46);
+  lab(t, 'OGNI GRADINO PIÙ ALTO', 600, 1000, tVo, { color: C.amber, size: 24 });
+  const kp = seg(t, t129 - 0.15, t129 + 0.45); if (kp > 0) glassPill(540, 1365, 'circa +129 € in più', kp, C.amber, 46);
   tag(t, a);
   x.restore(); finish(t); }
 
@@ -127,7 +126,7 @@ function sTrenta(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
     tTp = WA('trenta', ['triplica'], 1, 0.72), tDi = WA('trenta', ['differenza'], 1, 0.78), t14 = WA('trenta', ['=14', 'quattordici'], 1, 0.9);
   phrase(t, tTr - 0.15, [['Dopo 30 anni', C.ink]], 345, { size: 92 });
   phrase(t, tDi - 0.2, [['la differenza cresce.', C.amber]], Y2, { size: 92 });
-  const e = ioC(seg(t, a + 0.1, a + 1.1)), N = lerp(10, 30, e), Y = lerp(1700, 4400, e), yb = lerp(1230, 1130, e);
+  const e = ioC(seg(t, a + 0.1, a + 1.1)), N = lerp(10, 30, e), Y = lerp(1700, 4400, e), yb = lerp(1200, 1130, e);
   const pS = 10 + 20 * ioC(seg(t, Math.max(tSe - 0.1, a + 0.5), Math.max(t25 + 0.35, tSe + 1.2))), pC = 10 + 20 * ioC(seg(t, Math.max(tCo - 0.1, a + 0.5), Math.max(t43 + 0.35, tCo + 1.2)));
   const { X, Yp } = chart(t, { N, Y, yb, pS, pC, ln: e, capLab: 1 - e });
   const k1 = oC(seg(t, t25 - 0.05, t25 + 0.35)), k2 = oC(seg(t, t43 - 0.05, t43 + 0.35));

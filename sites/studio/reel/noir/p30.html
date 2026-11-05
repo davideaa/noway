@@ -137,7 +137,7 @@ function sAttuale(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
   const mv = ioC(seg(t, tVen - 0.15, tVen + 0.9)); if (mv > 0) { const px = lerp(LX, RX, mv), rad = lerp(110, 56, mv), al = lerp(1, 0.55, seg(t, tMen - 0.2, tMen + 0.5));
     dash(LX + 120, CY, px - rad - 6, CY, C.muted, 3, [3, 12], 1);
     x.save(); x.globalAlpha *= al; glass(px, CY, rad * 2, rad * 2, rad, 1); txt('1 $', px, CY + 2, { size: lerp(84, 40, mv), weight: 800, color: mv > 0.98 ? C.muted : C.gold }); x.restore(); }
-  lab(t, 'TRA 20 ANNI', RX, CY + 100, tVen + 0.6, { color: C.ink, size: 26, ls: 2 });
+  lab(t, 'TRA 20 ANNI', RX, 1240, tVen + 0.6, { color: C.ink, size: 26, ls: 2 }); dash(RX, CY + 66, RX, 1212, C.muted, 3, [3, 10], oC(seg(t, tVen + 0.6, tVen + 1.0)));
   const ka = seg(t, tInt, tInt + 0.8), p0 = [300, 945], c1 = [540, 735], p1 = [818, 968];
   qcurve(p0, c1, p1, ka, C.gold); lab(t, 'INTERESSE COMPOSTO', 540, 805, tInt + 0.35, { color: C.gold, size: 28, ls: 2 });
   const kb = seg(t, tAtt - 0.1, tAtt + 0.8), q0 = [818, 1072], c2 = [540, 1305], q1 = [300, 1095];
@@ -155,7 +155,7 @@ function sSconto(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
   const kp2 = seg(t, tTre - 0.1, tTre + 0.45); if (kp2 > 0) glassPill(330, 770, 'A 30 ANNI', kp2, C.ink, 36);
   const kr = seg(t, tCin - 0.1, tCin + 0.45); if (kr > 0) glassPill(770, 770, 'CIRCA 5,2%', kr, C.lime, 36);
   const sw0 = tSco + 0.1, ks = seg(t, sw0, sw0 + 2.0), kin = oC(seg(t, a + 0.1, a + 0.7));
-  for (let i = 0; i < 30; i++) { const full = DS * pay(i) * kin, ui = ioC(seg(ks * 34 - 2, i, i + 6)), hp = lerp(full, DS * pv(i, R_T) * kin, ui);
+  for (let i = 0; i < 30; i++) { const full = DS * pay(i) * kin, ui = ioC(seg(ks * 41 - 2, i, i + 6)), hp = lerp(full, DS * pv(i, R_T) * kin, ui);
     bar(i, DB, full, goldAt(i, lerp(1, 0.18, ui)));
     if (ui > 0) { bar(i, DB, hp, `rgba(${LIME},${ui})`); } }
   lab(t, 'OGGI', 108, DB + 38, a + 0.5, { color: C.ink, size: 24, align: 'left' }); lab(t, 'ULTIMA RATA', 972, DB + 38, a + 0.5, { color: C.ink, size: 24, align: 'right' });
@@ -166,17 +166,17 @@ function sVicino(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
   const tSom = WA('vicino', ['somma'], 1, 0.15), tQua = WA('vicino', ['quattrocento', '450'], 1, 0.35), tMen = WA('vicino', ['meno'], 1, 0.53), tUno = WA('vicino', ['uno', '1'], 1, 0.65), tCon = WA('vicino', ['contante'], 1, 0.9);
   phrase(t, a + 0.05, [['Quasi', C.ink], ['identico', C.lime]], 345, { size: 92 });
   const m = ioC(seg(t, a + 0.15, a + 1.0));
-  for (let i = 0; i < 30; i++) { const x0 = lerp(bxk(i), BX + i * 28.8, m), w = lerp(BW, 27.4, m), by = lerp(DB, 850, m), h = lerp(DS * pv(i, R_T), 90, m);
+  for (let i = 0; i < 30; i++) { const x0 = lerp(bxk(i), BX + i * 28.8, m), w = lerp(BW, 27.4, m), by = lerp(DB, 880, m), h = lerp(DS * pv(i, R_T), 90, m);
     bar(i, by, h, `rgb(${LIME})`, { x0, w, r: lerp(4, 3, m) }); }
-  const kq = oC(seg(t, tQua - 0.1, tQua + 0.35)); if (kq > 0) { txt('circa 450 mln $', 540, 665, { size: 62, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -1 });
-    const w = tw('CALCOLO NOSTRO', 24, 600, 'mono', 3) + 50, ke = oC(seg(t, tQua + 0.1, tQua + 0.5)); x.save(); x.globalAlpha = ke; x.strokeStyle = C.amber; x.lineWidth = 3; rr(540 - w / 2, 705, w, 50, 25); x.stroke(); x.restore();
-    txt('CALCOLO NOSTRO', 540, 731, { fam: 'mono', size: 24, weight: 600, color: C.amber, ls: 3, alpha: ke }); }
+  const kq = oC(seg(t, tQua - 0.1, tQua + 0.35)); if (kq > 0) { txt('circa 450 mln $', 540, 650, { size: 62, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -1 });
+    const w = tw('CALCOLO NOSTRO', 24, 600, 'mono', 3) + 50, ke = oC(seg(t, tQua + 0.1, tQua + 0.5)); x.save(); x.globalAlpha = ke; x.strokeStyle = C.amber; x.lineWidth = 3; rr(540 - w / 2, 700, w, 50, 25); x.stroke(); x.restore();
+    txt('CALCOLO NOSTRO', 540, 726, { fam: 'mono', size: 24, weight: 600, color: C.amber, ls: 3, alpha: ke }); }
   const kb = oC(seg(t, tCon - 0.15, tCon + 0.7)); if (kb > 0) { const wB = 865 * kb; glow(540, 1110, 460, '255,255,255', 0.06 * kb);
-    x.save(); x.fillStyle = 'rgba(241,244,238,0.20)'; rr(108, 1065, wB, 90, 8); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; rr(108, 1065, wB, 90, 8); x.stroke(); x.restore();
-    txt('450,5 mln $', 540, 985, { size: 62, weight: 800, color: C.ink, alpha: oC(seg(t, tCon - 0.1, tCon + 0.35)), ls: -1 });
-    lab(t, 'CONTANTE UFFICIALE', 540, 1195, tCon + 0.1, { color: C.ink, size: 26, ls: 3 }); }
-  dash(972, 815, 972, 1160, C.ink, 3, [6, 8], oC(seg(t, tCon, tCon + 0.5)));
-  const ku = seg(t, tUno - 0.1, tUno + 0.45); if (ku > 0) glassPill(540, 1340, 'SCARTO: MENO DI 1%', ku, C.lime, 40);
+    x.save(); x.fillStyle = 'rgba(241,244,238,0.20)'; rr(108, 1090, wB, 90, 8); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; rr(108, 1090, wB, 90, 8); x.stroke(); x.restore();
+    txt('450,5 mln $', 540, 1015, { size: 62, weight: 800, color: C.ink, alpha: oC(seg(t, tCon - 0.1, tCon + 0.35)), ls: -1 });
+    lab(t, 'CONTANTE UFFICIALE', 540, 1225, tCon + 0.1, { color: C.ink, size: 26, ls: 3 }); }
+  dash(972, 845, 972, 1185, C.ink, 3, [6, 8], oC(seg(t, tCon, tCon + 0.5)));
+  const ku = seg(t, tUno - 0.1, tUno + 0.45); if (ku > 0) glassPill(540, 1350, 'SCARTO: MENO DI 1%', ku, C.lime, 40);
   x.restore(); finish(t); }
 
 /* ================= TASSO: un cursore del tasso; le 30 rate si accorciano (le lontane di piu') e il valore totale scende ================= */
