@@ -172,7 +172,7 @@ function sAsta(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
 
 /* ================= REGOLA: due cursori; la moneta cala quando sale il tasso e quando il pagamento si allontana ================= */
 function sRegola(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
-  const tTas = WA('regola', ['tasso'], 1, 0.12), tMe1 = WA('regola', ['meno'], 1, 0.28), tPag = WA('regola', ['pagamento'], 1, 0.55), tLon = WA('regola', ['lontano'], 1, 0.68), tMe2 = WA('regola', ['meno'], 2, 0.8);
+  const tTas = WA('regola', ['tasso'], 1, 0.12), tMe1 = WA('regola', ['meno'], 1, 0.28), tPag = WA('regola', ['pagamento'], 1, 0.55), tLon = WA('regola', ['lontano'], 1, 0.68), tMe2 = WA('regola', ['rimpicciol'], 1, 0.8);
   phrase(t, a + 0.05, [['Più tasso,', C.ink], ['meno oggi', C.lime]], 345, { size: 92, out: tPag - 0.45 });
   phrase(t, tPag - 0.05, [['Più lontano,', C.ink], ['meno oggi', C.lime]], 345, { size: 92 });
   exLabel(t, a + 0.1, 600);
