@@ -78,3 +78,12 @@ Storico utile (stessa pagina BCE): deposit facility 4,00 % dal 20/9/2023, 3,00 %
 5. **Il 3,175 % è semplice a 360 giorni**: sul prezzo 96,881 il guadagno a 365 giorni è ~3,22 %. Per il reel «circa 3,2 %» va bene in entrambi i casi.
 6. **Fonte del 10/9/2026** (decisione di rialzo): URL dai risultati di ricerca, il testo completo non è stato aperto; il fatto è comunque confermato dalla tabella BCE dei tassi chiave (16/9/2026) e dal comunicato del 29/10.
 7. **Giorno del rilascio e coerenza serie**: p24 cita FITD (puntata 5/11); questa puntata è lezione 1 di 5 della settimana 6. Nessun legame di dati con p24/p25.
+
+## Teoria della lezione (aggiunta dopo il controllo del 5/11)
+
+Queste frasi non sono dati: sono la teoria della lezione, cioè la scheda 26 di `social/corso/lezioni.json`. Nel reel sono dette come tali.
+
+- **«Cento euro oggi e cento tra un anno non sono la stessa cosa: chi aspetta, di solito, chiede qualcosa in più».** È la definizione stessa di tasso d'interesse come prezzo del tempo (scheda 26, «spiega»). È detta con «di solito».
+- **«Secondo la teoria economica, il di più compensa tre cose».** Sono le tre componenti classiche del tasso nominale nei manuali di economia: la preferenza per il consumo presente (tasso reale), il premio per il rischio di insolvenza e l'inflazione attesa. Il reel le attribuisce alla «teoria economica», non a un ente.
+- **«Più a lungo aspetti, più paghi»,** detto dell'esempio dei 1.000 € al 4%. È aritmetica dell'esempio inventato: con lo stesso tasso, a più anni corrispondono più interessi.
+- **«Tassi alti frenano chi prende a prestito, per esempio chi chiede un mutuo».** È un meccanismo di scuola: i tassi alti rendono il credito più caro. Il TAEG medio dei nuovi mutui (3,99% ad agosto 2026) è nelle fonti, ma non viene citato.
