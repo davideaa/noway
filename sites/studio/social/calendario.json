@@ -396,6 +396,18 @@
   "caption": "Lo stesso tasso, due risultati diversi. E la differenza cresce con il tempo. 📈\nPuntata 27 di «Dalla teoria alla realtà»: interesse semplice e composto.\n\n• Nel 2020 la Banca d'Italia ha chiesto: 100 € al 2% per 5 anni, quanto avrai? Solo circa uno su quattro ha risposto giusto (contando anche una domanda più facile)\n• 1.000 € al 5% per 10 anni: 1.500 € con l'interesse semplice, 1.628,89 € con il composto (cifre di esempio, senza tasse)\n• Dopo 30 anni: 2.500 € contro oltre 4.300 €. Il tempo triplica, la differenza diventa circa 14 volte più grande\n• Regola del 72: al 5% il capitale raddoppia in circa 14 anni. È un'approssimazione, e nessuno garantisce il 5% per 30 anni\n\nFonti: Banca d'Italia, Questioni di economia e finanza n. 588 (dicembre 2020); calcoli nostri.\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #interessecomposto #risparmio #educazionefinanziaria #matematicafinanziaria #università"
  },
  {
+  "puntata": 28,
+  "titolo": "Il valore attuale",
+  "data": "2026-11-11",
+  "ora": "12:00",
+  "stato": "programmato",
+  "file": "sites/studio/social/pubblicati/2026-11-11-p28.mp4",
+  "thumb_offset": 300,
+  "durata_s": 70.1,
+  "fonti": "sites/studio/reel/noir/p28-fonti.md",
+  "caption": "Quanto valgono oggi 1.000 € che riceverai tra cinque anni? Meno di mille, e il tasso decide quanto. ⏪\nPuntata 28 di «Dalla teoria alla realtà»: il valore attuale.\n\n• Il 29 ottobre lo Stato ha venduto un BTP a 5 anni con un rendimento lordo del 4,02% l'anno: lo usiamo come tasso di riferimento, non come prezzo di un titolo\n• Il valore attuale è l'interesse composto al contrario: una somma futura si divide per (1 + tasso) elevato agli anni\n• 1.000 € tra cinque anni valgono oggi circa 862 € al 3% e circa 821 € al 4,02% (cifre illustrative)\n• Più alto è il tasso, e più il pagamento è lontano, meno vale oggi. Non esiste un tasso giusto per tutti: dipende anche dal rischio\n\nFonti: MEF, Dipartimento del Tesoro, risultati dell'asta BTP 5 anni del 29/10/2026; calcoli nostri.\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #valoreattuale #btp #tassi #educazionefinanziaria #matematicafinanziaria #università"
+ },
+ {
   "puntata": 29,
   "titolo": "Tassi nominali e reali",
   "data": "2026-11-12",
