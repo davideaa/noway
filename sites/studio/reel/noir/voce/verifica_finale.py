@@ -14,9 +14,10 @@ def norm(s):
     s = s.replace("dov eri", "doveri").replace("dove eri", "doveri")   # «dov'eri»: Whisper lo scrive attaccato o per esteso
     s = s.replace("baby boom", "bebi bum").replace("babyboom", "bebi bum")   # copione scritto come si pronuncia
     s = s.replace("silicon valley bank", "silicon valli benk")   # nome scritto come si pronuncia (puntata 23)
+    s = s.replace("fischer", "fisher")   # puntata 29
     s = s.replace("power ball", "pauerbol").replace("powerball", "pauerbol").replace("power bol", "pauerbol")   # puntata 30
     s = re.sub(r"\bsol(u|ow)\b", "sòlou", s)   # Solow: il copione scrive «Sòlou», Whisper «Solu» o «Solow»
-    s = re.sub(r"\bd (?=[aeiou])", "di ", s)   # «d'interesse» = «di interesse»: Whisper scrive l'uno o l'altro
+    s = re.sub(r"\bd\s+(?=[aeiou])", "di ", s)   # «d'interesse» = «di interesse»: Whisper scrive l'uno o l'altro
     s = re.sub(r"\bw\b", " doppia vu ", s); s = re.sub(r"\bv\b", " vu ", s)   # Whisper scrive «W» e «V» per «doppia vu» e «vu»                      # «quattro e mezzo» = «4,5»
     s = re.sub(NUM, " ", re.sub(r"\d[\d.,]*", " ", s))
     import unicodedata
