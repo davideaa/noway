@@ -135,12 +135,12 @@ function sTrenta(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
   [['TEMPO', '×3', 285, tTp, C.lime], ['DIFFERENZA', '×14', 795, t14, C.amber]].forEach(([l, v, cx, tt, col]) => { const k = seg(t, tt - 0.2, tt + 0.4); if (k <= 0) return;
     x.save(); x.globalAlpha = clamp(k * 2); const s = lerp(0.85, 1, oB(clamp(k))); x.translate(cx, 1320); x.scale(s, s); x.translate(-cx, -1320); glass(cx, 1320, 420, 190, 36, 1);
     txt(l, cx, 1268, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 3 }); txt(v, cx, 1346, { size: 110, weight: 800, color: col, ls: -2 }); x.restore(); });
-  tag(t, a + 0.5);
+  tag(t, a + 0.5, 1448);
   x.restore(); finish(t); }
 
 /* ================= SETTANTADUE: 72 : 5, e un quadrante a 14 tacche che si accende fino al raddoppio ================= */
 function sSettantadue(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
-  const tRe = WA('settantadue', ['regola'], 1, 0.1), t72 = WA('settantadue', ['=72', 'settantadue'], 1, 0.2), tTa = WA('settantadue', ['tasso'], 1, 0.3), t5 = WA('settantadue', ['=5', 'cinque'], 1, 0.46), t14 = WA('settantadue', ['=14', 'quattordici'], 1, 0.68), tAp = WA('settantadue', ['approssim'], 1, 0.88);
+  const tRe = WA('settantadue', ['regola'], 1, 0.1), t72 = WA('settantadue', ['=72', 'settantadue'], 1, 0.2), tTa = WA('settantadue', ['tasso'], 1, 0.3), t5 = WA('settantadue', ['=5', 'cinque'], 1, 0.46), t14 = WA('settantadue', ['=14', 'quattordici'], 1, 0.68), tAp = WA('settantadue', ['approssim', 'unapprossim'], 1, 0.88);
   phrase(t, a + 0.05, [['Quando raddoppi?', C.ink]], 345, { size: 92 });
   const fs = 150, ey = 630, parts = ['72', ' ÷ ', '5', ' ≈ ', '14'], ws = parts.map((s) => tw(s, fs, 800, 'Manrope', -3)), tot = ws.reduce((q, v) => q + v, 0);
   let cx = 540 - tot / 2; const cs = [];
