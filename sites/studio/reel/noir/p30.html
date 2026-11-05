@@ -1,0 +1,233 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 30, DAY: 4, CAP: 1, NEXT: ['Come la banca decide', 'se prestarti'], QUANDO: 'LUNEDÌ', FONTE: 'DATI: POWERBALL/MUSL · US TREASURY · CALCOLI NOSTRI (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 30 — «Il jackpot a rate» (Powerball, 12/08/2026). Venerdì 13/11/2026, lezione 5 di 5, capitolo 2. Numeri SOLO da p30-fonti.md:
+   1,04 mld $ (jackpot annunciato) · 450,5 mln $ in contanti · circa 43 centesimi per dollaro (43,3 %) · 30 pagamenti in 29 anni, +5 % ogni anno ·
+   prima rata circa 15,6 mln $ (calcolo nostro: 15,65), ultima oltre 60 (64,4) · oltre metà negli ultimi 10 anni (522,4 su 1.040) · Treasury 30 anni 5,24 % → «circa 5,2 %» ·
+   valore attuale circa 450 mln $ (CALCOLO NOSTRO; 454,4 col 5,24 %) · a tasso 0 → 1,04 mld $, al 3 % → 629,3 → «circa 630 mln $».
+   Le altezze delle barre sono calcolate con la stessa formula delle fonti (P1·1,05^k; sconto a 5,24 %), non a mano. Niente riga di fonte nel video.
+   Palette: oro (annunciato / a rate) + lime (valore vero, oggi) + rosso/ambra solo per le etichette di onestà. */
+C.gold = '#F2C14E'; const GOLD = '242,193,78', LIME = '200,250,114';
+const ORDER = ['num', 'hook', 'meta', 'rate', 'crescita', 'attuale', 'sconto', 'vicino', 'tasso', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola che inizia con UNA delle alternative (lettere E cifre: Whisper scrive «30», «450», «5,2»).
+   Senza voce (anteprima) usa la frazione f della scena. Ogni aggancio e' registrato in window.ANCH per il controllo sui cues veri. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function arrowHead(px, py, ang, s, col) { x.save(); x.fillStyle = col; x.translate(px, py); x.rotate(ang); x.beginPath(); x.moveTo(s, 0); x.lineTo(-s * 0.7, -s * 0.8); x.lineTo(-s * 0.7, s * 0.8); x.closePath(); x.fill(); x.restore(); }
+const qpt = (p0, c, p1, u) => [(1 - u) * (1 - u) * p0[0] + 2 * (1 - u) * u * c[0] + u * u * p1[0], (1 - u) * (1 - u) * p0[1] + 2 * (1 - u) * u * c[1] + u * u * p1[1]];
+function qcurve(p0, c, p1, k, col, lw = 6) { if (k <= 0) return; x.save(); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round'; x.setLineDash([2, 14]); x.beginPath(); x.moveTo(...p0);
+  const n = 40; for (let i = 1; i <= n * clamp(k); i++) x.lineTo(...qpt(p0, c, p1, i / n)); x.stroke(); x.restore();
+  if (k >= 0.98) { const e = qpt(p0, c, p1, 1), e2 = qpt(p0, c, p1, 0.94); arrowHead(e[0], e[1], Math.atan2(e[1] - e2[1], e[0] - e2[0]), 20, col); } }
+
+/* ---- la rendita: 30 pagamenti P1·1,05^k (stessa formula di p30-fonti.md, sez. C) ---- */
+const P1 = 1040 / ((Math.pow(1.05, 30) - 1) / 0.05);
+const pay = (k) => P1 * Math.pow(1.05, k);
+const pv = (k, r) => pay(k) / Math.pow(1 + r, k);
+const pvTot = (r) => { let s = 0; for (let k = 0; k < 30; k++) s += pv(k, r); return s; };
+const BX = 108, BS = 29, BW = 23, bxk = (i) => BX + i * BS + 3;
+const mixc = (a, b, k) => a.map((v, j) => Math.round(lerp(v, b[j], k)));
+const goldAt = (i, al = 1) => `rgba(${mixc([200, 150, 46], [255, 216, 112], i / 29).join(',')},${al})`;
+function bar(i, base, h, col, o = {}) { if (h <= 0.5) return; const { x0 = bxk(i), w = BW, r = 4, rot = 0 } = o;
+  x.save(); if (rot) { x.translate(x0 + w / 2, base - h / 2); x.rotate(rot); x.translate(-(x0 + w / 2), -(base - h / 2)); }
+  x.fillStyle = col; rr(x0, base - h, w, h, r); x.fill(); x.restore(); }
+
+/* ================= HOOK: «1,04 mld $» gira come un contatore; sotto, la cifra in contanti con una pila di monete ================= */
+function sHook(t, a, b) { bg('56,46,18', 0.7); x.save(); zoom(t, a, b, 1.06);
+  const tPow = WA('hook', ['power', 'pauer', 'pau', 'pow'], 1, 0.4), tDod = WA('hook', ['dodici', '12'], 1, 0.46), tJac = WA('hook', ['jackpot', 'jack'], 1, 0.35),
+    tCon = WA('hook', ['contanti', 'contante'], 1, 0.7), tQua = WA('hook', ['quattrocento', '450'], 1, 0.78);
+  const kn = oC(seg(t, a + 0.05, a + 1.15)), v = 1.04 * kn, txtV = (kn >= 0.995 ? '1,04' : v.toFixed(2).replace('.', ',')) + ' mld $';
+  const SZ = Math.min(190, Math.floor(190 * 880 / tw('1,04 mld $', 190, 800))), ka = oC(seg(t, a, a + 0.3));
+  glow(540, 560, 560, GOLD, 0.2 * ka * (0.85 + 0.15 * Math.sin(t * 3)));
+  txt(txtV, 540, 560, { size: SZ, weight: 800, color: C.gold, alpha: ka, blur: (1 - ka) * 12, ls: -3 });
+  lab(t, 'POWERBALL', 540, 345, tPow - 0.1, { size: 36, color: C.gold, ls: 9 });
+  lab(t, '12 AGOSTO 2026', 540, 400, tDod - 0.1, { size: 28, color: C.ink, ls: 4 });
+  const kj = seg(t, tJac - 0.1, tJac + 0.45); if (kj > 0) glassPill(540, 700, 'JACKPOT ANNUNCIATO', kj, C.gold, 34);
+  const kar = oC(seg(t, tCon - 0.3, tCon + 0.2)); dash(540, 775, 540, 760 + 80 * kar, C.muted, 4, [4, 12], kar); if (kar > 0.9) arrowHead(540, 858, Math.PI / 2, 16, C.muted);
+  const kc = seg(t, tCon - 0.1, tCon + 0.45); if (kc > 0) glassPill(540, 950, 'IN CONTANTI', kc, C.lime, 38);
+  const kq = oC(seg(t, tQua - 0.1, tQua + 0.35)), SZ2 = Math.min(150, Math.floor(150 * 860 / tw('450,5 mln $', 150, 800)));
+  if (kq > 0) { glow(540, 1090, 420, LIME, 0.2 * kq); txt('450,5 mln $', 540, 1090, { size: SZ2, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 12, ls: -2 }); }
+  for (let i = 0; i < 4; i++) { const k = oB(seg(t, tQua + 0.1 + i * 0.09, tQua + 0.5 + i * 0.09)); if (k > 0) coin(540, 1370 - i * 32 - (1 - clamp(k, 0, 1)) * 140, 110, clamp(k * 1.4), LIME, '$'); }
+  x.restore(); finish(t); }
+
+/* ================= META: 100 centesimi in una griglia, 43 si accendono sotto la linea della metà ================= */
+function sMeta(t, a, b) { bg('52,44,20', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tMet = WA('meta', ['met'], 1, 0.28), tQua = WA('meta', ['quarantatre', 'quaranta', '43'], 1, 0.5), tDol = WA('meta', ['dollaro', 'dollar'], 1, 0.8);
+  phrase(t, a + 0.05, [['Meno della', C.ink], ['metà', C.gold]], 345, { size: 92 });
+  const GX = 261, GY = 650, SP = 62, kg = (i) => oC(seg(t, a + 0.15 + i * 0.006, a + 0.45 + i * 0.006));
+  for (let i = 0; i < 100; i++) { const c = i % 10, r = Math.floor(i / 10), k = kg(i); if (k <= 0) continue; const cx = GX + c * SP, cy = GY + r * SP;
+    const kl = i < 43 ? oC(seg(t, tQua - 0.15 + i * 0.016, tQua + 0.2 + i * 0.016)) : 0;
+    x.save(); x.globalAlpha *= k; if (kl > 0) glow(cx, cy, 34, LIME, 0.32 * kl);
+    x.fillStyle = kl > 0.5 ? C.lime : `rgba(${GOLD},0.34)`; x.beginPath(); x.arc(cx, cy, 22 * lerp(1, 1.08, kl), 0, 7); x.fill();
+    x.strokeStyle = kl > 0.5 ? C.lime : `rgba(${GOLD},0.75)`; x.lineWidth = 2.5; x.stroke(); x.restore(); }
+  const ym = GY + 4.5 * SP, km = oC(seg(t, tMet - 0.1, tMet + 0.4)); dash(190, ym, 190 + 650 * km, ym, C.ink, 4, [12, 9], km);
+  lab(t, 'METÀ', 858, ym, tMet + 0.1, { color: C.ink, size: 26, align: 'left' });
+  const k43 = oB(seg(t, tQua, tQua + 0.5)); if (k43 > 0) { x.save(); x.translate(540, 1345); x.scale(clamp(k43, 0, 1.15), clamp(k43, 0, 1.15)); glow(0, 0, 260, LIME, 0.2); txt('43 ¢', 0, 0, { size: 150, weight: 800, color: C.lime, ls: -3 }); x.restore(); }
+  lab(t, 'PER OGNI DOLLARO ANNUNCIATO', 540, 1432, tDol - 0.1, { color: C.ink, size: 26, ls: 2 });
+  x.restore(); finish(t); }
+
+/* ================= RATE: il biglietto si strappa in 30 tagliandi che cadono e diventano barre crescenti ================= */
+const RB = 1180, RS = 4.0;       /* base e scala delle barre in questa scena */
+function ticketGrad() { const g = x.createLinearGradient(0, 600, 0, 820); g.addColorStop(0, '#FFE08A'); g.addColorStop(0.5, '#F2C14E'); g.addColorStop(1, '#C9962E'); return g; }
+function sRate(t, a, b) { bg('56,46,18', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tTre = WA('rate', ['trenta', '30'], 1, 0.28), tVen = WA('rate', ['ventinove', '29'], 1, 0.4), tSub = WA('rate', ['subito'], 1, 0.58), tCin = WA('rate', ['cinque', '5'], 1, 0.8);
+  phrase(t, a + 0.05, [['Non arriva', C.ink], ['tutto insieme', C.gold]], 345, { size: 92 });
+  const kt = oB(seg(t, a + 0.2, a + 0.75)), T0 = tTre - 0.1, fade = 1 - oC(seg(t, T0 - 0.05, T0 + 0.3));
+  for (let i = 0; i < 30; i++) { const ti = T0 + i * 0.03, u = ioC(seg(t, ti, ti + 0.55)), hb = RS * pay(i), bx = bxk(i);
+    const sx = BX + i * BS, sw = 29;
+    if (u <= 0) { if (kt <= 0) continue; x.save(); x.globalAlpha *= clamp(kt); const ty = 710 + (1 - clamp(kt, 0, 1)) * 60; x.translate(0, ty - 710);
+      x.fillStyle = ticketGrad(); x.translate(0, 0); rr(sx, 600 - 0, sw + 0.8, 220, i === 0 ? 20 : i === 29 ? 20 : 1); x.fill();
+      x.restore(); continue; }
+    const fy = lerp(600, RB - hb, u), fh = lerp(220, hb, u), fx = lerp(sx, bx, u) + Math.sin(i * 2.3) * 8 * Math.sin(Math.PI * u), rot = Math.sin(i * 1.7) * 0.18 * Math.sin(Math.PI * u);
+    const w = lerp(sw, BW, u); const col = u < 0.4 ? `rgb(${mixc([242, 193, 78], mixc([200, 150, 46], [255, 216, 112], i / 29), 1)})` : goldAt(i);
+    const hot = i === 0 ? oC(seg(t, tSub - 0.1, tSub + 0.3)) : 0;
+    x.save(); x.fillStyle = u < 0.5 ? ticketGrad() : goldAt(i); if (u > 0.05) { x.translate(fx + w / 2, fy + fh / 2); x.rotate(rot); x.translate(-(fx + w / 2), -(fy + fh / 2)); }
+    rr(fx, fy, w, fh, lerp(1, 4, u)); x.fill(); x.restore();
+    if (hot > 0) { glow(bx + BW / 2, RB - hb, 70, LIME, 0.5 * hot); bar(i, RB, hb, `rgba(${LIME},${hot})`); } }
+  /* il biglietto: perforazioni e scritta, finche' non si strappa */
+  if (kt > 0 && fade > 0) { x.save(); x.globalAlpha *= fade * clamp(kt); const dy = (1 - clamp(kt, 0, 1)) * 60;
+    for (let i = 1; i < 30; i++) dash(BX + i * BS, 612 + dy, BX + i * BS, 808 + dy, 'rgba(60,40,0,0.45)', 2, [6, 6]);
+    txt('POWERBALL', 540, 690 + dy, { size: 70, weight: 800, color: '#3A2A00', ls: 8 }); txt('1,04 mld $', 540, 760 + dy, { fam: 'mono', size: 40, weight: 600, color: '#3A2A00', ls: 2 }); x.restore(); }
+  const k1 = seg(t, tTre + 0.4, tTre + 0.85); if (k1 > 0) glassPill(290, 1290, '30 PAGAMENTI', k1, C.gold, 38);
+  const k2 = seg(t, tVen - 0.05, tVen + 0.4); if (k2 > 0) glassPill(790, 1290, 'IN 29 ANNI', k2, C.gold, 38);
+  lab(t, 'SUBITO', 108, 1214, tSub - 0.05, { color: C.lime, align: 'left', size: 24, ls: 3 });
+  const k3 = seg(t, tCin - 0.1, tCin + 0.4); if (k3 > 0) glassPill(540, 1405, '+5% OGNI ANNO', k3, C.lime, 40);
+  x.restore(); finish(t); }
+
+/* ================= CRESCITA: le stesse barre salgono; prima e ultima rata; le ultime dieci pesano piu' di meta' ================= */
+function sCrescita(t, a, b) { bg('56,46,18', 0.6); x.save(); zoom(t, a, b, 1.03);
+  const tQui = WA('crescita', ['quindici', '15'], 1, 0.28), tSes = WA('crescita', ['sessanta', '60'], 1, 0.56), tMet = WA('crescita', ['met'], 1, 0.68), tDie = WA('crescita', ['dieci', '10'], 1, 0.92);
+  phrase(t, a + 0.05, [['La rata', C.ink], ['cresce', C.gold]], 345, { size: 92 });
+  const g = oC(seg(t, a, a + 0.9)), S2 = lerp(RS, 7.45, g), BASE = lerp(RB, 1235, g), hl = oC(seg(t, tMet - 0.1, tMet + 0.5));
+  for (let i = 0; i < 30; i++) { const h = S2 * pay(i), last10 = i >= 20, al = last10 ? lerp(1, 1, hl) : lerp(1, 0.32, hl);
+    if (last10 && hl > 0) glow(bxk(i) + BW / 2, BASE - h / 2, 70, GOLD, 0.16 * hl);
+    bar(i, BASE, h, goldAt(i, al)); }
+  const kf = oC(seg(t, tQui - 0.1, tQui + 0.4)); if (kf > 0) { const h0 = S2 * pay(0); dash(120, BASE - h0 - 6, 120, 1000, C.lime, 3, [4, 8], kf);
+    txt('15,6 mln $', BX, 960, { size: 46, weight: 800, color: C.lime, align: 'left', alpha: kf, blur: (1 - kf) * 8, ls: -1 }); }
+  const kl = oC(seg(t, tSes - 0.1, tSes + 0.4)); if (kl > 0) { const h9 = S2 * pay(29); dash(960, BASE - h9 - 8, 960, 735, C.gold, 3, [4, 8], kl);
+    txt('oltre 60 mln $', 972, 700, { size: 46, weight: 800, color: C.gold, align: 'right', alpha: kl, blur: (1 - kl) * 8, ls: -1 }); }
+  const kb = oC(seg(t, tMet, tMet + 0.5)); if (kb > 0) { const xa = BX + 20 * BS + 2, xb = BX + 30 * BS - 4, yb = BASE + 28; x.save(); x.globalAlpha = kb; x.strokeStyle = C.gold; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(xa, yb - 12); x.lineTo(xa, yb); x.lineTo(xb, yb); x.lineTo(xb, yb - 12); x.stroke(); x.restore(); }
+  lab(t, 'ULTIMI 10 ANNI', 840, BASE + 74, tDie - 0.1, { color: C.gold, size: 26, ls: 2 });
+  const kp = seg(t, tMet - 0.05, tMet + 0.45); if (kp > 0) glassPill(540, 1405, 'OLTRE METÀ DELLA SOMMA', kp, C.gold, 38);
+  x.restore(); finish(t); }
+
+/* ================= ATTUALE: un dollaro viaggia nel tempo; arco d'andata (interesse), arco di ritorno (valore attuale) ================= */
+function sAttuale(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tInt = WA('attuale', ['interesse', 'linteresse', 'interess'], 1, 0.04), tDol = WA('attuale', ['dollaro'], 1, 0.19), tVen = WA('attuale', ['vent', '20'], 1, 0.26), tMen = WA('attuale', ['meno'], 1, 0.34),
+    tFru = WA('attuale', ['fruttare', 'frutt'], 1, 0.65), tAtt = WA('attuale', ['attuale'], 1, 0.75), tCon = WA('attuale', ['contrario'], 1, 0.96);
+  phrase(t, a + 0.05, [['Il tempo', C.ink], ['ha un prezzo', C.gold]], 345, { size: 92 });
+  const LX = 220, RX = 860, CY = 1020;
+  const kl = oB(seg(t, tDol - 0.1, tDol + 0.5)); pop(LX, CY, kl, () => { glow(LX, CY, 200, GOLD, 0.25); glass(LX, CY, 220, 220, 110, 1); txt('1 $', LX, CY + 2, { size: 84, weight: 800, color: C.gold }); });
+  lab(t, 'OGGI', LX, CY + 150, tDol + 0.15, { color: C.ink, size: 28, ls: 3 });
+  const mv = ioC(seg(t, tVen - 0.15, tVen + 0.9)); if (mv > 0) { const px = lerp(LX, RX, mv), rad = lerp(110, 56, mv), al = lerp(1, 0.55, seg(t, tMen - 0.2, tMen + 0.5));
+    dash(LX + 120, CY, px - rad - 6, CY, C.muted, 3, [3, 12], 1);
+    x.save(); x.globalAlpha *= al; glass(px, CY, rad * 2, rad * 2, rad, 1); txt('1 $', px, CY + 2, { size: lerp(84, 40, mv), weight: 800, color: mv > 0.98 ? C.muted : C.gold }); x.restore(); }
+  lab(t, 'TRA 20 ANNI', RX, CY + 100, tVen + 0.6, { color: C.ink, size: 26, ls: 2 });
+  const ka = seg(t, tInt, tInt + 0.8), p0 = [300, 945], c1 = [540, 735], p1 = [818, 968];
+  qcurve(p0, c1, p1, ka, C.gold); lab(t, 'INTERESSE COMPOSTO', 540, 805, tInt + 0.35, { color: C.gold, size: 28, ls: 2 });
+  const kb = seg(t, tAtt - 0.1, tAtt + 0.8), q0 = [818, 1072], c2 = [540, 1305], q1 = [300, 1095];
+  qcurve(q0, c2, q1, kb, C.lime); lab(t, 'VALORE ATTUALE', 540, 1290, tAtt + 0.3, { color: C.lime, size: 28, ls: 2 });
+  const kc = seg(t, tCon - 0.1, tCon + 0.45); if (kc > 0) glassPill(540, 1405, 'LO STESSO CALCOLO, AL CONTRARIO', kc, C.ink, 32);
+  x.restore(); finish(t); }
+
+/* ================= SCONTO: ogni barra viene scontata al tasso; le 30 barre si accorciano verso oggi e diventano quasi uguali ================= */
+const DB = 1330, DS = 5.0, R_T = 0.0524;
+function sSconto(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tSco = WA('sconto', ['scontala', 'sconta'], 1, 0.24), tTit = WA('sconto', ['titoli'], 1, 0.38), tTre = WA('sconto', ['trent', '30'], 1, 0.58), tCin = WA('sconto', ['cinque', '5'], 1, 0.78);
+  phrase(t, a + 0.05, [['Ogni rata,', C.ink]], 345, { size: 92 });
+  phrase(t, Math.min(tSco, tCin - 0.4) - 0.05, [['scontata', C.lime]], 345 + 92 * 1.12, { size: 92 });
+  const kp = seg(t, tTit - 0.1, tTit + 0.45); if (kp > 0) glassPill(540, 650, 'TITOLI DI STATO USA', kp, C.ink, 36);
+  const kp2 = seg(t, tTre - 0.1, tTre + 0.45); if (kp2 > 0) glassPill(330, 770, 'A 30 ANNI', kp2, C.ink, 36);
+  const kr = seg(t, tCin - 0.1, tCin + 0.45); if (kr > 0) glassPill(770, 770, 'CIRCA 5,2%', kr, C.lime, 36);
+  const sw0 = tSco + 0.1, ks = seg(t, sw0, sw0 + 2.0), kin = oC(seg(t, a + 0.1, a + 0.7));
+  for (let i = 0; i < 30; i++) { const full = DS * pay(i) * kin, ui = ioC(seg(ks * 34 - 2, i, i + 6)), hp = lerp(full, DS * pv(i, R_T) * kin, ui);
+    bar(i, DB, full, goldAt(i, lerp(1, 0.18, ui)));
+    if (ui > 0) { bar(i, DB, hp, `rgba(${LIME},${ui})`); } }
+  lab(t, 'OGGI', 108, DB + 38, a + 0.5, { color: C.ink, size: 24, align: 'left' }); lab(t, 'ULTIMA RATA', 972, DB + 38, a + 0.5, { color: C.ink, size: 24, align: 'right' });
+  x.restore(); finish(t); }
+
+/* ================= VICINO: le barre scontate diventano i 30 tratti di una striscia, accanto al contante ufficiale ================= */
+function sVicino(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tSom = WA('vicino', ['somma'], 1, 0.15), tQua = WA('vicino', ['quattrocento', '450'], 1, 0.35), tMen = WA('vicino', ['meno'], 1, 0.53), tUno = WA('vicino', ['uno', '1'], 1, 0.65), tCon = WA('vicino', ['contante'], 1, 0.9);
+  phrase(t, a + 0.05, [['Quasi', C.ink], ['identico', C.lime]], 345, { size: 92 });
+  const m = ioC(seg(t, a + 0.15, a + 1.0));
+  for (let i = 0; i < 30; i++) { const x0 = lerp(bxk(i), BX + i * 28.8, m), w = lerp(BW, 27.4, m), by = lerp(DB, 850, m), h = lerp(DS * pv(i, R_T), 90, m);
+    bar(i, by, h, `rgb(${LIME})`, { x0, w, r: lerp(4, 3, m) }); }
+  const kq = oC(seg(t, tQua - 0.1, tQua + 0.35)); if (kq > 0) { txt('circa 450 mln $', 540, 665, { size: 62, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -1 });
+    const w = tw('CALCOLO NOSTRO', 24, 600, 'mono', 3) + 50, ke = oC(seg(t, tQua + 0.1, tQua + 0.5)); x.save(); x.globalAlpha = ke; x.strokeStyle = C.amber; x.lineWidth = 3; rr(540 - w / 2, 705, w, 50, 25); x.stroke(); x.restore();
+    txt('CALCOLO NOSTRO', 540, 731, { fam: 'mono', size: 24, weight: 600, color: C.amber, ls: 3, alpha: ke }); }
+  const kb = oC(seg(t, tCon - 0.15, tCon + 0.7)); if (kb > 0) { const wB = 865 * kb; glow(540, 1110, 460, '255,255,255', 0.06 * kb);
+    x.save(); x.fillStyle = 'rgba(241,244,238,0.20)'; rr(108, 1065, wB, 90, 8); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; rr(108, 1065, wB, 90, 8); x.stroke(); x.restore();
+    txt('450,5 mln $', 540, 985, { size: 62, weight: 800, color: C.ink, alpha: oC(seg(t, tCon - 0.1, tCon + 0.35)), ls: -1 });
+    lab(t, 'CONTANTE UFFICIALE', 540, 1195, tCon + 0.1, { color: C.ink, size: 26, ls: 3 }); }
+  dash(972, 815, 972, 1160, C.ink, 3, [6, 8], oC(seg(t, tCon, tCon + 0.5)));
+  const ku = seg(t, tUno - 0.1, tUno + 0.45); if (ku > 0) glassPill(540, 1340, 'SCARTO: MENO DI 1%', ku, C.lime, 40);
+  x.restore(); finish(t); }
+
+/* ================= TASSO: un cursore del tasso; le 30 rate si accorciano (le lontane di piu') e il valore totale scende ================= */
+function sTasso(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tAlt = WA('tasso', ['alto'], 1, 0.04), tLon = WA('tasso', ['lontana'], 1, 0.38), tZer = WA('tasso', ['zero', '0'], 1, 0.52), tMil = WA('tasso', ['miliardo', 'miliard', '1'], 1, 0.68),
+    tTre = WA('tasso', ['tre', '3'], 1, 0.76), tSei = WA('tasso', ['seicentotrenta', 'seicento', '630'], 1, 0.92);
+  phrase(t, a + 0.05, [['Più sale il tasso,', C.ink], ['meno vale la rata', C.gold]], 345, { size: 84 });
+  const R = (() => { const up = ioC(seg(t, tAlt, tLon + 0.1)), back = ioC(seg(t, tZer - 0.45, tZer - 0.05)), thr = ioC(seg(t, tTre - 0.2, tTre + 0.5));
+    return 0.06 * up * (1 - back) + 0.03 * thr; })();
+  const TX0 = 150, TX1 = 930, TY = 735, kx = TX0 + (TX1 - TX0) * R / 0.06, ktr = oC(seg(t, a + 0.2, a + 0.7));
+  x.save(); x.globalAlpha *= ktr; x.lineCap = 'round'; x.strokeStyle = 'rgba(241,244,238,0.22)'; x.lineWidth = 10; x.beginPath(); x.moveTo(TX0, TY); x.lineTo(TX1, TY); x.stroke();
+  x.strokeStyle = C.gold; x.lineWidth = 10; x.beginPath(); x.moveTo(TX0, TY); x.lineTo(kx, TY); x.stroke();
+  glow(kx, TY, 80, GOLD, 0.35); glass(kx, TY, 66, 66, 33, 1); x.fillStyle = C.gold; x.beginPath(); x.arc(kx, TY, 12, 0, 7); x.fill(); x.restore();
+  txt('TASSO', kx, TY - 62, { fam: 'mono', size: 26, weight: 600, color: C.gold, ls: 3, alpha: ktr });
+  lab(t, '0%', TX0, TY + 55, tZer, { color: C.ink, size: 26 }); lab(t, '3%', TX0 + (TX1 - TX0) / 2, TY + 55, tTre, { color: C.ink, size: 26 });
+  /* la barra del valore: oro = il miliardo annunciato, lime = quanto vale davvero oggi */
+  const fr = pvTot(R) / 1040, BY = 920, BWID = 780;
+  x.save(); x.globalAlpha *= ktr; x.strokeStyle = C.gold; x.lineWidth = 3; rr(150, BY, BWID, 80, 14); x.stroke(); x.fillStyle = `rgba(${GOLD},0.10)`; rr(150, BY, BWID, 80, 14); x.fill();
+  if (fr > 0.01) { x.fillStyle = `rgba(${LIME},0.9)`; rr(150, BY, BWID * fr, 80, 14); x.fill(); } x.restore();
+  const k1 = oC(seg(t, tMil - 0.1, tMil + 0.4)), k2 = oC(seg(t, tSei - 0.1, tSei + 0.4));
+  txt('1,04 mld $', 540, 1075, { size: 92, weight: 800, color: C.gold, alpha: k1 * (1 - k2), blur: (1 - k1) * 10 + k2 * 8, ls: -2 });
+  txt('circa 630 mln $', 540, 1075, { size: 92, weight: 800, color: C.lime, alpha: k2, blur: (1 - k2) * 10, ls: -2 });
+  lab(t, 'LE 30 RATE, SCONTATE', 540, 1180, a + 0.6, { color: C.muted, size: 24, ls: 3 });
+  const BB = 1420, SC = 1.9;
+  for (let i = 0; i < 30; i++) bar(i, BB, SC * pv(i, R) * ktr, goldAt(i, 0.95));
+  x.restore(); finish(t); }
+
+/* ================= CASA: la bilancia, rate contro subito; scontando le rate i piatti si pareggiano ================= */
+function sCasa(t, a, b) { bg('56,46,18', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tCon = WA('casa', ['confrontare', 'confront'], 1, 0.3), tRat = WA('casa', ['rate'], 1, 0.45), tSub = WA('casa', ['subito'], 1, 0.58), tSco = WA('casa', ['scontare', 'sconta'], 1, 0.65),
+    tTas = WA('casa', ['tasso'], 1, 0.8), tPes = WA('casa', ['pesa'], 1, 0.9);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
+  const PX = 540, PY = 700, HL = 300, STR = 150;
+  const kR = oC(seg(t, tRat - 0.2, tRat + 0.4)), kL = oC(seg(t, tSub - 0.2, tSub + 0.4)), dsc = ioC(seg(t, tSco, tSco + 1.3));
+  const wR = lerp(1.0, 0.44, dsc) * kR, wL = 0.43 * kL, damp = Math.exp(-3 * Math.max(0, t - (tSco + 1.3))) * Math.sin((t - tSco - 1.3) * 7);
+  const th = clamp((wR - wL) * 0.38, -0.3, 0.3) + (t > tSco + 1.3 ? 0.03 * damp : 0);
+  const kb = oB(seg(t, a + 0.2, a + 0.8));
+  pop(PX, 1000, kb, () => { x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 14; x.lineCap = 'round'; x.beginPath(); x.moveTo(PX, PY); x.lineTo(PX, 1230); x.stroke(); x.beginPath(); x.moveTo(PX - 110, 1236); x.lineTo(PX + 110, 1236); x.stroke(); });
+  const ex = Math.cos(th) * HL, ey = Math.sin(th) * HL, Lx = PX - ex, Ly = PY - ey, Rx = PX + ex, Ry = PY + ey;
+  pop(PX, PY, kb, () => { x.strokeStyle = C.ink; x.lineWidth = 14; x.lineCap = 'round'; x.beginPath(); x.moveTo(Lx, Ly); x.lineTo(Rx, Ry); x.stroke(); glass(PX, PY, 54, 54, 27, 1); x.fillStyle = C.gold; x.beginPath(); x.arc(PX, PY, 10, 0, 7); x.fill(); });
+  function pan(cx, cy, fn, col) { x.save(); x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 3; x.beginPath(); x.moveTo(cx, cy - STR); x.lineTo(cx - 105, cy); x.moveTo(cx, cy - STR); x.lineTo(cx + 105, cy); x.stroke();
+    x.fillStyle = 'rgba(241,244,238,0.12)'; rr(cx - 120, cy, 240, 26, 13); x.fill(); x.strokeStyle = col; x.lineWidth = 4; rr(cx - 120, cy, 240, 26, 13); x.stroke(); fn(cx, cy); x.restore(); }
+  const cyL = Ly + STR, cyR = Ry + STR;
+  if (kb > 0) {
+    pan(Lx, cyL, (cx, cy) => { for (let i = 0; i < 4; i++) { const k = oB(seg(t, tSub - 0.1 + i * 0.07, tSub + 0.3 + i * 0.07)); if (k > 0) coin(cx, cy - 10 - i * 26 - (1 - clamp(k, 0, 1)) * 100, 80, clamp(k * 1.4), LIME, '$'); } }, C.lime);
+    pan(Rx, cyR, (cx, cy) => { for (let i = 0; i < 30; i++) { const r = Math.floor(i / 10), c = i % 10, k = oB(seg(t, tRat - 0.1 + i * 0.012, tRat + 0.3 + i * 0.012)); if (k <= 0) continue;
+      const hh = lerp(30, 12, dsc), cxx = cx - 99 + c * 22, byy = cy - 4 - r * (hh + 4) - (1 - clamp(k, 0, 1)) * 90;
+      x.fillStyle = dsc > 0.5 ? C.lime : goldAt(i); rr(cxx, byy - hh, 18, hh, 3); x.fill(); } }, dsc > 0.5 ? C.lime : C.gold); }
+  lab(t, 'SUBITO', Lx, cyL + 70, tSub, { color: C.lime, size: 28, ls: 3 }); lab(t, 'A RATE', Rx, cyR + 70, tRat, { color: C.gold, size: 28, ls: 3 });
+  phrase(t, tTas - 0.1, [['Il tasso decide', C.lime], ['quanto pesa il futuro', C.ink]], 1320, { size: 56 });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, meta: sMeta, rate: sRate, crescita: sCrescita, attuale: sAttuale, sconto: sSconto, vicino: sVicino, tasso: sTasso, casa: sCasa }, ORDER, ['hook', 'sconto', 'casa']);
+</script></body></html>

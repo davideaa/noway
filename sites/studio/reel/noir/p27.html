@@ -1,0 +1,212 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 27, DAY: 1, CAP: 1, NEXT: ['Il valore', 'attuale'], FONTE: 'DATI: BANCA D’ITALIA (QEF 588, dic. 2020) · CALCOLI NOSTRI (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 27 — «Interesse semplice e composto» (martedi 10/11/2026, lezione 2 di 5, capitolo 2). Numeri SOLO da p27-fonti.md:
+   apertura: indagine Banca d'Italia 2020 (QEF 588), 100 euro al 2% per 5 anni, solo circa 1 su 4 (indice FK4 0,23); risposta giusta poco piu di 110 (110,41; la domanda facile: 100 al 2% per 1 anno = 102);
+   esempio INVENTATO (etichetta ambra a schermo): 1.000 euro al 5%, semplice +50 l'anno -> 1.500 a 10 anni, composto 1.628,89 (circa +129 = 128,89), a 30 anni semplice 2.500 e composto 4.321,94 (a schermo «oltre 4.300»),
+   tempo x3 e differenza x14 (14,1); regola del 72: 72/5 = circa 14 anni (esatto 14,21; e' un'approssimazione). Niente riga delle fonti nel video, niente Einstein, niente «il 23% non sa».
+   Immagine nuova del composto: i gradini di una scala (ogni anno il gradino e' piu alto del precedente) che si staccano dalla scala a gradini uguali del semplice; poi i due grafici si allargano a 30 anni.
+   Aggancio ai numeri con WA: unione di TUTTE le forme (lettere e cifre) ordinate per tempo, si prende la n-esima; '=5' = parola uguale a «5» (senza prendere «50»). */
+const ORDER = ['num', 'hook', 'domanda', 'semplice', 'composto', 'trenta', 'settantadue', 'limite', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  const m = L.filter(([p]) => ws.some((w) => (w[0] === '=' ? _nw(p) === _nw(w.slice(1)) : _nw(p).startsWith(_nw(w))))).sort((u, v) => u[1] - v[1]);
+  if (m.length >= n) return m[n - 1][1];
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+const tag = (t, a, y = 1440) => lab(t, 'ESEMPIO · CIFRE INVENTATE', 540, y, a + 0.3, { size: 24, color: C.amber });
+/* una parola/cifra che entra sfocata dal basso, come phrase ma su un solo pezzo di testo */
+const tok = (t, t0, s, px, py, o = {}) => { const k = oC(seg(t, t0, t0 + 0.35)); txt(s, px, py + (1 - k) * 40, { size: 120, weight: 800, ls: -2, ...o, alpha: k * (o.alpha ?? 1), blur: (1 - k) * 14 }); };
+function dashLine(x0, y0, x1, y1, col, w = 3, dash = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(dash); x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function ring(cx, cy, r0, t, t0, rgb = '200,250,114', d = 0.6, gr = 60) { const k = seg(t, t0, t0 + d); if (k <= 0 || k >= 1) return; x.save(); x.strokeStyle = `rgba(${rgb},${1 - k})`; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r0 + gr * oC(k), 0, 7); x.stroke(); x.restore(); }
+const eur = (v, d = 0) => { const [i, f] = Math.abs(v).toFixed(d).split('.'); return (v < 0 ? '−' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (f ? ',' + f : ''); };
+function person(cx, cy, s, lit, k) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const e = lerp(0.8, 1, oB(clamp(k))); x.translate(cx, cy); x.scale(e, e); x.translate(-cx, -cy);
+  if (lit) glow(cx, cy + s * 0.2, s * 1.3, '200,250,114', 0.3 * lit);
+  x.strokeStyle = lit > 0.5 ? C.lime : 'rgba(241,244,238,0.45)'; x.fillStyle = lit > 0.5 ? 'rgba(200,250,114,0.92)' : 'rgba(241,244,238,0.1)'; x.lineWidth = 7; x.lineCap = 'round';
+  x.beginPath(); x.arc(cx, cy - s * 0.42, s * 0.26, 0, 7); x.fill(); x.stroke();
+  x.beginPath(); x.arc(cx, cy + s * 0.66, s * 0.55, Math.PI * 1.12, Math.PI * 1.88); x.stroke(); x.restore(); }
+
+/* ================= HOOK: la domanda in tre pezzi (capitale, tasso, durata), poi quattro persone e una sola si accende ================= */
+function sHook(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const t20 = WA('hook', ['2020', 'duemilaventi', 'duemila'], 1, 0.03), tCap = WA('hook', ['100', 'cento'], 1, 0.2), tTas = WA('hook', ['2', 'due'], 2, 0.28), tDur = WA('hook', ['=5', 'cinque'], 1, 0.38),
+    tQu = WA('hook', ['quanto'], 1, 0.5), tSo = WA('hook', ['solo'], 1, 0.62), tUno = WA('hook', ['=1', 'uno'], 1, 0.7), tQ4 = WA('hook', ['=4', 'quattro'], 1, 0.78), tGi = WA('hook', ['giusto'], 1, 0.9);
+  const kt = oC(seg(t, Math.max(a + 0.02, t20 - 0.15), t20 + 0.25)); txt('NEL 2020', 540, 330, { fam: 'mono', size: 34, weight: 700, color: C.lime, ls: 6, alpha: kt, blur: (1 - kt) * 8 });
+  [['CAPITALE', '100 €', 210, tCap], ['TASSO', '2 %', 540, tTas], ['DURATA', '5 anni', 870, tDur]].forEach(([l, v, cx, tt]) => { const k = seg(t, tt - 0.2, tt + 0.4); if (k <= 0) return;
+    x.save(); x.globalAlpha = clamp(k * 2); const s = lerp(0.85, 1, oB(clamp(k))); x.translate(cx, 560); x.scale(s, s); x.translate(-cx, -560);
+    glass(cx, 560, 290, 140, 34, 1); txt(v, cx, 562, { size: 76, weight: 800, color: cx === 540 ? C.amber : C.ink, ls: -1 }); x.restore(); lab(t, l, cx, 465, tt - 0.1, { size: 24 }); });
+  phrase(t, tQu - 0.15, [['quanto avrai?', C.amber]], 790, { size: 112 });
+  [240, 440, 640, 840].forEach((cx, i) => { const k = oC(seg(t, tSo - 0.1 + i * 0.08, tSo + 0.35 + i * 0.08)), lit = i === 0 ? oC(seg(t, tUno - 0.05, tUno + 0.25)) : 0; person(cx, 1040, 150, lit, k); });
+  phrase(t, tQ4 - 0.44, [['circa 1 su 4', C.lime]], 1270, { size: 124 });
+  lab(t, 'HA RISPOSTO GIUSTO', 540, 1385, tGi - 0.1, { color: C.ink, size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= DOMANDA: una riga degli anni; il pallino si ferma a 1 (la domanda facile) e poi corre fino a 5 ================= */
+function lerpCol(k) { const c0 = [241, 244, 238], c1 = [200, 250, 114]; return `rgb(${c0.map((v, i) => Math.round(lerp(v, c1[i], k))).join(',')})`; }
+function sDomanda(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tFa = WA('domanda', ['facile'], 1, 0.3), tAn = WA('domanda', ['anno'], 1, 0.42), t5 = WA('domanda', ['=5', 'cinque'], 1, 0.62), tPo = WA('domanda', ['poco'], 1, 0.75), t110 = WA('domanda', ['110', 'centodieci', 'centoundici'], 1, 0.86);
+  phrase(t, a + 0.05, [['Prima la facile,', C.ink]], 345, { size: 92 });
+  phrase(t, t5 - 0.1, [['poi 5 anni.', C.lime]], Y2, { size: 92 });
+  const x0 = 150, x1 = 930, Xp = (n) => x0 + (x1 - x0) * n / 5, ty = 1010;
+  const p1 = ioC(seg(t, tFa - 0.2, tAn + 0.15)), p2 = ioC(seg(t, t5 - 0.25, t110 + 0.2)), yr = p1 + p2 * 4;
+  const val = Math.round(100 * Math.pow(1.02, yr)), done = oC(seg(t, t110 + 0.1, t110 + 0.5));
+  txt(eur(val) + ' €', 540, 740, { size: 180, weight: 800, color: lerpCol(done), ls: -4 });
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, ty); x.lineTo(x1, ty); x.stroke();
+  x.strokeStyle = C.lime; x.lineWidth = 8; x.beginPath(); x.moveTo(x0, ty); x.lineTo(Xp(yr), ty); x.stroke(); x.restore();
+  for (let i = 0; i <= 5; i++) { x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 4; x.beginPath(); x.moveTo(Xp(i), ty - 14); x.lineTo(Xp(i), ty + 14); x.stroke(); txt(String(i), Xp(i), ty + 58, { fam: 'mono', size: 28, weight: 600, color: yr >= i - 0.01 ? C.lime : C.muted }); }
+  glow(Xp(yr), ty, 90, '200,250,114', 0.4); x.fillStyle = C.lime; x.beginPath(); x.arc(Xp(yr), ty, 24, 0, 7); x.fill();
+  ring(Xp(1), ty, 24, t, tAn + 0.1); ring(Xp(5), ty, 24, t, t110 + 0.2);
+  lab(t, 'DOMANDA FACILE', Xp(1) + 40, 1130, tAn, { color: C.lime, size: 24 }); lab(t, 'RISPOSTA GIUSTA', 969, 1180, t110 - 0.2, { color: C.lime, size: 24, align: 'right' });
+  const kp = seg(t, tPo - 0.15, tPo + 0.45); if (kp > 0) glassPill(540, 1310, 'poco più di 110 €', kp, C.amber, 48);
+  x.restore(); finish(t); }
+
+/* ================= grafico condiviso: scala a gradini uguali (semplice) e scala a gradini sempre piu alti (composto); a 30 anni diventano linee ================= */
+const simpleF = (n) => 1000 + 50 * n, compF = (n) => 1000 * Math.pow(1.05, n);
+function stairPts(f, p, X, Yp) { const pts = [[X(0), Yp(f(0))]], full = Math.floor(p);
+  for (let i = 0; i < full; i++) pts.push([X(i + 1), Yp(f(i))], [X(i + 1), Yp(f(i + 1))]);
+  const u = p - full; if (u > 0.001) { const h = Math.min(1, u * 2), r = clamp(u * 2 - 1); pts.push([X(full + h), Yp(f(full))]); if (r > 0) pts.push([X(full + 1), Yp(lerp(f(full), f(full + 1), r))]); }
+  return pts; }
+function linePts(f, p, X, Yp) { const pts = []; for (let n = 0; n < p; n += 0.25) pts.push([X(n), Yp(f(n))]); pts.push([X(p), Yp(f(p))]); return pts; }
+function strokePts(pts, col, w, a, gl) { if (pts.length < 2 || a <= 0.01) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineJoin = 'round'; x.lineCap = 'round'; if (gl) { x.shadowColor = gl; x.shadowBlur = 20; }
+  x.beginPath(); pts.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); x.stroke(); x.restore(); }
+function chart(t, o) { const { N, Y, yb, yt = 640, x0 = 130, x1 = 930, pS = 0, pC = 0, aS = 1, aC = 1, ln = 0, tk = 1, capLab = 1 } = o;
+  const X = (n) => x0 + (x1 - x0) * n / N, Yp = (v) => yb - (yb - yt) * v / Y;
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.28)'; x.lineWidth = 3; x.beginPath(); x.moveTo(x0 - 10, yb); x.lineTo(x1 + 10, yb); x.stroke(); x.restore();
+  const tickA = tk * (1 - ln), tickB = tk * ln;
+  [[0, 5, 10], [0, 10, 20, 30]].forEach((set, si) => { const al = si ? tickB : tickA; if (al <= 0.01) return; set.forEach((n) => txt(n === set[set.length - 1] ? n + ' ANNI' : String(n), n === set[set.length - 1] ? X(n) - 10 : X(n), yb + 38, { fam: 'mono', size: 24, weight: 600, color: C.muted, alpha: al })); });
+  dashLine(x0, Yp(1000), x1, Yp(1000), 'rgba(241,244,238,0.4)', 2.5, [8, 10], 1);
+  if (capLab > 0) txt('CAPITALE 1.000 €', x0 + 6, Yp(1000) + 26, { fam: 'mono', size: 22, weight: 600, color: C.muted, align: 'left', ls: 1, alpha: capLab });
+  [[1 - ln, stairPts], [ln, linePts]].forEach(([al, fn]) => { if (al <= 0.01) return;
+    if (pC > 0.01 && aC > 0) { const cs = fn(compF, pC, X, Yp), ss = fn(simpleF, pC, X, Yp);
+      x.save(); x.globalAlpha *= al * 0.2 * aC; x.fillStyle = C.amber; x.beginPath(); cs.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); for (let i = ss.length - 1; i >= 0; i--) x.lineTo(ss[i][0], ss[i][1]); x.closePath(); x.fill(); x.restore(); }
+    if (pS > 0.01) strokePts(fn(simpleF, pS, X, Yp), C.lime, 7, al * aS, 'rgba(200,250,114,0.5)');
+    if (pC > 0.01) strokePts(fn(compF, pC, X, Yp), C.amber, 8, al * aC, 'rgba(245,165,36,0.6)'); });
+  if (pS > 0.01) { x.save(); x.globalAlpha *= aS; x.fillStyle = C.lime; x.beginPath(); x.arc(X(pS), Yp(simpleF(pS)), 11, 0, 7); x.fill(); x.restore(); }
+  if (pC > 0.01) { x.save(); x.globalAlpha *= aC; x.fillStyle = C.amber; x.beginPath(); x.arc(X(pC), Yp(compF(pC)), 12, 0, 7); x.fill(); x.restore(); }
+  return { X, Yp }; }
+const CH10 = { N: 10, Y: 1700, yb: 1230 };
+
+/* ================= SEMPLICE: una scala a gradini tutti uguali (+50 l'anno) ================= */
+function sSemplice(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tMi = WA('semplice', ['1000', 'mille'], 1, 0.05), t5 = WA('semplice', ['=5', 'cinque'], 1, 0.15), t50 = WA('semplice', ['=50', 'cinquanta'], 1, 0.5), t10 = WA('semplice', ['=10', 'dieci'], 1, 0.78), t15 = WA('semplice', ['1500', 'millecinquecento'], 1, 0.88);
+  phrase(t, tMi - 0.1, [['1.000 €', C.ink]], 345, { size: 92 });
+  phrase(t, t5 - 0.1, [['al 5% l’anno', C.lime]], Y2, { size: 92 });
+  const p = ioC(seg(t, t50 - 0.1, Math.max(t10 + 0.4, t50 + 1.5))) * 10, kc = oC(seg(t, tMi, tMi + 0.5));
+  const { X, Yp } = chart(t, { ...CH10, pS: p, aS: 1, capLab: kc, tk: kc });
+  const kl = oC(seg(t, t15 - 0.05, t15 + 0.35)); txt(eur(1500) + ' €', 969, Yp(1500) - 46, { size: 56, weight: 800, color: C.lime, align: 'right', alpha: kl, ls: -1, blur: (1 - kl) * 8 });
+  const kp = seg(t, t50 - 0.15, t50 + 0.45); if (kp > 0) glassPill(540, 1345, '+50 € ogni anno', kp, C.lime, 46);
+  tag(t, a);
+  x.restore(); finish(t); }
+
+/* ================= COMPOSTO: i gradini si staccano dalla scala del semplice, ognuno piu alto del precedente ================= */
+function sComposto(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tAg = WA('composto', ['aggiungono'], 1, 0.12), tPr = WA('composto', ['producono'], 1, 0.28), tVo = WA('composto', ['volta'], 1, 0.4), t10 = WA('composto', ['=10', 'dieci'], 1, 0.58), t1629 = WA('composto', ['1629', '1628', 'milleseicento'], 1, 0.7), t129 = WA('composto', ['=129', 'centoventinove'], 1, 0.88);
+  phrase(t, a + 0.05, [['Gli interessi', C.ink]], 345, { size: 92 });
+  phrase(t, tPr - 0.1, [['fanno interessi.', C.amber]], Y2, { size: 92 });
+  const pC = ioC(seg(t, tAg - 0.2, Math.max(t10 + 0.3, tAg + 2))) * 10;
+  const { X, Yp } = chart(t, { ...CH10, pS: 10, aS: 0.5, pC, aC: 1 });
+  const k1 = oC(seg(t, t10 + 0.1, t10 + 0.4)); txt(eur(1500) + ' €', 969, Yp(1500) + 44, { size: 38, weight: 800, color: C.ink, align: 'right', alpha: 0.8 * k1 });
+  const k2 = oC(seg(t, t1629 - 0.05, t1629 + 0.35)); txt(eur(1628.89, 2) + ' €', 969, Yp(1628.89) - 50, { size: 56, weight: 800, color: C.amber, align: 'right', alpha: k2, ls: -1, blur: (1 - k2) * 8 });
+  lab(t, 'OGNI GRADINO PIÙ ALTO', 700, 1100, tVo, { color: C.amber, size: 24 });
+  const kp = seg(t, t129 - 0.15, t129 + 0.45); if (kp > 0) glassPill(540, 1345, 'circa +129 € in più', kp, C.amber, 46);
+  tag(t, a);
+  x.restore(); finish(t); }
+
+/* ================= TRENTA: il grafico si allarga a 30 anni, le scale diventano linee; il tempo x3, la differenza x14 ================= */
+function sTrenta(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tTr = WA('trenta', ['=30', 'trent'], 1, 0.04), tSe = WA('trenta', ['semplice'], 1, 0.12), t25 = WA('trenta', ['2500', 'duemilacinquecento'], 1, 0.3), tCo = WA('trenta', ['composto'], 1, 0.4), t43 = WA('trenta', ['4300', 'quattromilatrecento', '4321'], 1, 0.58),
+    tTp = WA('trenta', ['triplica'], 1, 0.72), tDi = WA('trenta', ['differenza'], 1, 0.78), t14 = WA('trenta', ['=14', 'quattordici'], 1, 0.9);
+  phrase(t, tTr - 0.15, [['Dopo 30 anni', C.ink]], 345, { size: 92 });
+  phrase(t, tDi - 0.2, [['la differenza cresce.', C.amber]], Y2, { size: 92 });
+  const e = ioC(seg(t, a + 0.1, a + 1.1)), N = lerp(10, 30, e), Y = lerp(1700, 4400, e), yb = lerp(1230, 1130, e);
+  const pS = 10 + 20 * ioC(seg(t, Math.max(tSe - 0.1, a + 0.5), Math.max(t25 + 0.35, tSe + 1.2))), pC = 10 + 20 * ioC(seg(t, Math.max(tCo - 0.1, a + 0.5), Math.max(t43 + 0.35, tCo + 1.2)));
+  const { X, Yp } = chart(t, { N, Y, yb, pS, pC, ln: e, capLab: 1 - e });
+  const k1 = oC(seg(t, t25 - 0.05, t25 + 0.35)), k2 = oC(seg(t, t43 - 0.05, t43 + 0.35));
+  txt(eur(2500) + ' €', 969, Yp(2500) + 52, { size: 48, weight: 800, color: C.lime, align: 'right', alpha: k1, ls: -1, blur: (1 - k1) * 8 });
+  txt('oltre ' + eur(4300) + ' €', 969, Yp(4321.94) - 52, { size: 52, weight: 800, color: C.amber, align: 'right', alpha: k2, ls: -1, blur: (1 - k2) * 8 });
+  [['TEMPO', '×3', 290, tTp, C.lime], ['DIFFERENZA', '×14', 790, t14, C.amber]].forEach(([l, v, cx, tt, col]) => { const k = seg(t, tt - 0.2, tt + 0.4); if (k <= 0) return;
+    x.save(); x.globalAlpha = clamp(k * 2); const s = lerp(0.85, 1, oB(clamp(k))); x.translate(cx, 1320); x.scale(s, s); x.translate(-cx, -1320); glass(cx, 1320, 440, 190, 36, 1);
+    txt(l, cx, 1268, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 3 }); txt(v, cx, 1346, { size: 110, weight: 800, color: col, ls: -2 }); x.restore(); });
+  tag(t, a + 0.5);
+  x.restore(); finish(t); }
+
+/* ================= SETTANTADUE: 72 : 5, e un quadrante a 14 tacche che si accende fino al raddoppio ================= */
+function sSettantadue(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
+  const tRe = WA('settantadue', ['regola'], 1, 0.1), t72 = WA('settantadue', ['=72', 'settantadue'], 1, 0.2), tTa = WA('settantadue', ['tasso'], 1, 0.3), t5 = WA('settantadue', ['=5', 'cinque'], 1, 0.46), t14 = WA('settantadue', ['=14', 'quattordici'], 1, 0.68), tAp = WA('settantadue', ['approssim'], 1, 0.88);
+  phrase(t, a + 0.05, [['Quando raddoppi?', C.ink]], 345, { size: 92 });
+  const fs = 150, ey = 630, parts = ['72', ' ÷ ', '5', ' ≈ ', '14'], ws = parts.map((s) => tw(s, fs, 800, 'Manrope', -3)), tot = ws.reduce((q, v) => q + v, 0);
+  let cx = 540 - tot / 2; const cs = [];
+  parts.forEach((s, i) => { cs.push(cx + ws[i] / 2); cx += ws[i]; });
+  tok(t, t72 - 0.1, '72', cs[0], ey, { size: fs, color: C.ink, ls: -3 }); tok(t, tTa - 0.1, '÷', cs[1], ey, { size: fs, color: C.muted, ls: -3 });
+  tok(t, t5 - 0.1, '5', cs[2], ey, { size: fs, color: C.lime, ls: -3 }); tok(t, t14 - 0.15, '≈', cs[3], ey, { size: fs, color: C.muted, ls: -3 }); tok(t, t14 - 0.1, '14', cs[4], ey, { size: fs, color: C.amber, ls: -3 });
+  lab(t, 'TASSO', cs[2], ey + 105, t5, { size: 24, color: C.lime }); lab(t, 'ANNI', cs[4], ey + 105, t14, { size: 24, color: C.amber });
+  const CX = 540, CY = 1050, R = 180, W = 46, t0 = Math.min(t5, t14 - 0.4), d = Math.max(0.045, (t14 + 0.25 - t0 - 0.2) / 14), kd = oC(seg(t, t0 - 0.5, t0 - 0.1));
+  let filled = 0;
+  for (let i = 0; i < 14; i++) { const a0 = -Math.PI / 2 + i * Math.PI * 2 / 14 + 0.035, a1 = a0 + Math.PI * 2 / 14 - 0.07, k = oC(seg(t, t0 + i * d, t0 + i * d + 0.2)); filled += k;
+    x.save(); x.globalAlpha = Math.max(kd, 0.0001); x.lineWidth = W; x.lineCap = 'butt'; x.strokeStyle = 'rgba(241,244,238,0.1)'; x.beginPath(); x.arc(CX, CY, R, a0, a1); x.stroke();
+    if (k > 0) { x.globalAlpha = k; x.strokeStyle = i === 13 ? C.amber : C.lime; x.beginPath(); x.arc(CX, CY, R, a0, a1); x.stroke(); } x.restore(); }
+  const kx = oB(seg(t, t0 + 13 * d + 0.1, t0 + 13 * d + 0.55)), cnt = Math.round(filled);
+  if (kd > 0 && kx < 0.99) txt(String(cnt), CX, CY - 4, { size: 130, weight: 800, color: C.muted, alpha: kd * (1 - clamp(kx * 3)) });
+  if (kx > 0) { x.save(); x.translate(CX, CY - 10); x.scale(clamp(kx, 0, 1.15), clamp(kx, 0, 1.15)); glow(0, 0, 160, '200,250,114', 0.25); txt('×2', 0, 0, { size: 150, weight: 800, color: C.lime, ls: -3 }); x.restore(); lab(t, 'IL CAPITALE', CX, CY + 92, t0 + 13 * d + 0.3, { size: 24, color: C.ink }); }
+  tag(t, a, 1330);
+  const kp = seg(t, tAp - 0.15, tAp + 0.45); if (kp > 0) glassPill(540, 1410, 'è un’approssimazione', kp, C.amber, 40);
+  x.restore(); finish(t); }
+
+/* ================= LIMITE: tre cose che mancano nell'esempio, poi la curva si specchia: vale anche per i debiti ================= */
+function sLimite(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tCi = WA('limite', ['cifre'], 1, 0.03), tIn = WA('limite', ['inflazione'], 1, 0.14), tSp = WA('limite', ['spese'], 1, 0.26), tGa = WA('limite', ['garantisce'], 1, 0.4), t5 = WA('limite', ['=5', 'cinque'], 1, 0.48), t30 = WA('limite', ['=30', 'trent'], 1, 0.58),
+    tSt = WA('limite', ['stesso'], 1, 0.7), tDe = WA('limite', ['debiti'], 1, 0.86);
+  const kOut = oC(seg(t, tSt - 0.55, tSt - 0.15));
+  x.save(); x.globalAlpha *= 1 - kOut; x.translate(0, 70 * kOut);
+  phrase(t, Math.max(a + 0.02, tCi - 0.1), [['Solo cifre', C.ink], ['di esempio.', C.amber]], 345, { size: 92 });
+  [['senza inflazione', tIn, 650], ['senza spese', tSp, 770]].forEach(([s, tt, py]) => { const k = seg(t, tt - 0.2, tt + 0.4); if (k > 0) glassPill(540, py, s, k, C.ink, 46); });
+  const kg = seg(t, tGa - 0.2, tGa + 0.4); if (kg > 0) glassPill(540, 920, 'nessuna garanzia', kg, C.amber, 46);
+  const w1 = tw('5%', 120, 800, 'Manrope', -2), w2 = tw('per 30 anni', 120, 800, 'Manrope', -2), gp = 36, x1 = 540 - (w1 + gp + w2) / 2;
+  tok(t, t5 - 0.1, '5%', x1 + w1 / 2, 1110, { color: C.lime }); tok(t, t30 - 0.1, 'per 30 anni', x1 + w1 + gp + w2 / 2, 1110, { color: C.ink });
+  x.restore();
+  /* gruppo B: la stessa curva, sopra l'asse risparmi e sotto debiti */
+  phrase(t, tSt - 0.1, [['Stesso meccanismo,', C.ink]], 345, { size: 92 });
+  phrase(t, tSt + 0.5, [['anche per i debiti.', C.red]], Y2, { size: 92 });
+  const ax = 1010, x0 = 130, x1b = 930, SC = 100, Xn = (n) => x0 + (x1b - x0) * n / 30, f = (n) => SC * (Math.pow(1.05, n) - 1);
+  const pU = ioC(seg(t, tSt - 0.1, tSt + 1.3)) * 30, pD = ioC(seg(t, tDe - 0.1, tDe + 1.0)) * 30;
+  if (pU > 0) { x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(x0 - 10, ax); x.lineTo(x1b + 10, ax); x.stroke(); x.restore(); }
+  const mk = (sg, p) => { const pts = []; for (let n = 0; n < p; n += 0.25) pts.push([Xn(n), ax - sg * f(n)]); pts.push([Xn(p), ax - sg * f(p)]); return pts; };
+  if (pU > 0.01) { strokePts(mk(1, pU), C.lime, 8, 0.9, 'rgba(200,250,114,0.5)'); }
+  if (pD > 0.01) { strokePts(mk(-1, pD), C.red, 8, 1, 'rgba(255,90,78,0.55)'); }
+  lab(t, 'RISPARMI', 969, ax - f(30) - 40, tSt + 1.2, { color: C.lime, size: 28, align: 'right' }); lab(t, 'DEBITI', 969, ax + f(30) + 46, tDe + 0.9, { color: C.red, size: 28, align: 'right' });
+  tag(t, a);
+  x.restore(); finish(t); }
+
+/* ================= CASA: due corsie a passi: uguali per il semplice, sempre piu lunghi per il composto ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
+  const tSe = WA('casa', ['semplice'], 1, 0.22), tCo = WA('casa', ['composto'], 1, 0.46), tDi = WA('casa', ['differenza'], 1, 0.74);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tSe - 0.55 });
+  phrase(t, tSe - 0.25, [['Semplice: passo fisso', C.lime]], 345, { size: 80 });
+  phrase(t, tCo - 0.25, [['Composto: sempre più lungo', C.amber]], 345 + 80 * 1.12, { size: 80 });
+  const x0 = 130, dt = 0.05, SC = 0.25, y1 = 790, y2 = 940, hh = 70;
+  lab(t, 'SEMPLICE', x0, y1 - 62, tSe, { color: C.lime, size: 26, align: 'left' }); lab(t, 'COMPOSTO', x0, y2 - 62, tCo, { color: C.amber, size: 26, align: 'left' });
+  let xs = x0, xc = x0;
+  for (let i = 0; i < 30; i++) { const ws = 50 * SC, wc = 50 * Math.pow(1.05, i) * SC;
+    const k1 = oC(seg(t, tSe + i * dt, tSe + i * dt + 0.22)), k2 = oC(seg(t, tCo + i * dt, tCo + i * dt + 0.22));
+    if (k1 > 0) { x.save(); x.globalAlpha = k1; x.fillStyle = i % 2 ? 'rgba(200,250,114,0.95)' : 'rgba(200,250,114,0.6)'; rr(xs, y1 - hh / 2, ws - 1.5, hh, 3); x.fill(); x.restore(); }
+    if (k2 > 0) { x.save(); x.globalAlpha = k2; x.fillStyle = i % 2 ? 'rgba(245,165,36,0.95)' : 'rgba(245,165,36,0.6)'; rr(xc, y2 - hh / 2, wc - 1.5, hh, 3); x.fill(); x.restore(); }
+    xs += ws; xc += wc; }
+  const xe1 = x0 + 30 * 50 * SC, kb = oC(seg(t, tDi - 0.1, tDi + 0.5));
+  if (kb > 0) { dashLine(xe1, y1 + hh / 2 + 6, xe1, y2 - hh / 2 - 6, C.ink, 3, [6, 8], kb); dashLine(xe1, y2 + hh / 2 + 6, xe1, 1050, C.ink, 3, [6, 8], kb);
+    const be = lerp(xe1, xc, oC(seg(t, tDi, tDi + 0.7))); x.save(); x.globalAlpha = kb; x.strokeStyle = C.amber; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(xe1, 1050); x.lineTo(be, 1050); x.moveTo(be, 1034); x.lineTo(be, 1066); x.moveTo(xe1, 1034); x.lineTo(xe1, 1066); x.stroke(); x.restore();
+    lab(t, 'LA DIFFERENZA SI ALLARGA', (xe1 + xc) / 2 + 40, 1112, tDi + 0.2, { color: C.amber, size: 24 }); }
+  tag(t, a, 1210);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, domanda: sDomanda, semplice: sSemplice, composto: sComposto, trenta: sTrenta, settantadue: sSettantadue, limite: sLimite, casa: sCasa },
+  ORDER, ['composto', 'trenta']);
+</script></body></html>
