@@ -588,7 +588,8 @@ const r50 = v => Math.round(v / 10) * 10;
 
 // 2 · le ultime NFP rigiocate, con le indicazioni di allora (direzione, stop 60, candela prevista); parte in fondo, dopo le funzioni della lista
 const replayInit = () => {
-  const ALL = NF.filter(e => R60[e.id] != null), host = $("#replay"), strip = $("#strip"), ysel = $("#rpYear");
+  // una NFP appena uscita entra nel replay solo quando ci sono le sue candele M1 (Dukascopy le pubblica il giorno dopo)
+  const ALL = NF.filter(e => R60[e.id] != null && (!D.tf || !Object.keys(D.tf).length || D.tf[e.id])), host = $("#replay"), strip = $("#strip"), ysel = $("#rpYear");
   if (!ALL.length) return;
   // candele intorno alla news (M1 ±2 h, M5 −12/+6 h, H1 −15/+3 giorni): il grafico TradingView se la libreria c'è, se no l'SVG
   const TFD = D.tf || {}, M1 = Object.fromEntries(Object.entries(TFD).map(([k, X]) => [k, X.m1.map(a => [a[0], X.r + a[1] / 100, X.r + a[2] / 100, X.r + a[3] / 100, X.r + a[4] / 100, a[5]])]));

@@ -1,6 +1,6 @@
 {
- "n": 148,
- "controllo_A_uguale_a_hx44": 143,
+ "n": 149,
+ "controllo_A_uguale_a_hx44": 144,
  "varianti": {
   "A": {
    "IS 2014-19": {
@@ -9,19 +9,19 @@
     "salvate": 0.791
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.452,
-    "salvate": 0.851
+    "n": 79,
+    "R": 0.479,
+    "salvate": 0.854
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.952,
-    "salvate": 0.818
+    "n": 36,
+    "R": 0.997,
+    "salvate": 0.826
    },
    "tutto": {
-    "n": 148,
-    "R": 0.236,
-    "salvate": 0.822
+    "n": 149,
+    "R": 0.251,
+    "salvate": 0.824
    },
    "cambiano_esito_rispetto_ad_A": 0,
    "t_contro_A_2020_26": null
@@ -33,22 +33,22 @@
     "salvate": 0.791
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.261,
-    "salvate": 0.809
+    "n": 79,
+    "R": 0.293,
+    "salvate": 0.812
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.545,
-    "salvate": 0.727
+    "n": 36,
+    "R": 0.607,
+    "salvate": 0.739
    },
    "tutto": {
-    "n": 148,
-    "R": 0.136,
-    "salvate": 0.8
+    "n": 149,
+    "R": 0.153,
+    "salvate": 0.802
    },
    "cambiano_esito_rispetto_ad_A": 6,
-   "t_contro_A_2020_26": -1.4
+   "t_contro_A_2020_26": -1.38
   },
   "C": {
    "IS 2014-19": {
@@ -57,22 +57,22 @@
     "salvate": 0.767
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.224,
-    "salvate": 0.766
+    "n": 79,
+    "R": 0.256,
+    "salvate": 0.771
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.545,
-    "salvate": 0.727
+    "n": 36,
+    "R": 0.607,
+    "salvate": 0.739
    },
    "tutto": {
-    "n": 148,
-    "R": 0.11,
-    "salvate": 0.767
+    "n": 149,
+    "R": 0.128,
+    "salvate": 0.769
    },
    "cambiano_esito_rispetto_ad_A": 9,
-   "t_contro_A_2020_26": -1.65
+   "t_contro_A_2020_26": -1.63
   },
   "D": {
    "IS 2014-19": {
@@ -81,22 +81,22 @@
     "salvate": 0.767
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.205,
-    "salvate": 0.745
+    "n": 79,
+    "R": 0.238,
+    "salvate": 0.75
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.545,
-    "salvate": 0.727
+    "n": 36,
+    "R": 0.607,
+    "salvate": 0.739
    },
    "tutto": {
-    "n": 148,
-    "R": 0.095,
-    "salvate": 0.756
+    "n": 149,
+    "R": 0.113,
+    "salvate": 0.758
    },
    "cambiano_esito_rispetto_ad_A": 11,
-   "t_contro_A_2020_26": -1.78
+   "t_contro_A_2020_26": -1.76
   },
   "E": {
    "IS 2014-19": {
@@ -105,22 +105,22 @@
     "salvate": 0.302
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": -0.086,
-    "salvate": 0.489
+    "n": 79,
+    "R": -0.05,
+    "salvate": 0.5
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.442,
-    "salvate": 0.636
+    "n": 36,
+    "R": 0.507,
+    "salvate": 0.652
    },
    "tutto": {
-    "n": 148,
-    "R": -0.308,
-    "salvate": 0.4
+    "n": 149,
+    "R": -0.287,
+    "salvate": 0.407
    },
    "cambiano_esito_rispetto_ad_A": 43,
-   "t_contro_A_2020_26": -3.47
+   "t_contro_A_2020_26": -3.45
   },
   "B+10": {
    "IS 2014-19": {
@@ -129,22 +129,22 @@
     "salvate": 0.814
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.338,
-    "salvate": 0.894
+    "n": 79,
+    "R": 0.365,
+    "salvate": 0.896
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.797,
-    "salvate": 0.909
+    "n": 36,
+    "R": 0.844,
+    "salvate": 0.913
    },
    "tutto": {
-    "n": 148,
-    "R": 0.152,
-    "salvate": 0.856
+    "n": 149,
+    "R": 0.168,
+    "salvate": 0.857
    },
    "cambiano_esito_rispetto_ad_A": 6,
-   "t_contro_A_2020_26": -3.15
+   "t_contro_A_2020_26": -3.19
   },
   "C+10": {
    "IS 2014-19": {
@@ -153,22 +153,22 @@
     "salvate": 0.814
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.302,
-    "salvate": 0.872
+    "n": 79,
+    "R": 0.33,
+    "salvate": 0.875
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.732,
-    "salvate": 0.864
+    "n": 36,
+    "R": 0.78,
+    "salvate": 0.87
    },
    "tutto": {
-    "n": 148,
-    "R": 0.129,
-    "salvate": 0.844
+    "n": 149,
+    "R": 0.145,
+    "salvate": 0.846
    },
    "cambiano_esito_rispetto_ad_A": 5,
-   "t_contro_A_2020_26": -3.07
+   "t_contro_A_2020_26": -3.1
   },
   "B0": {
    "IS 2014-19": {
@@ -177,22 +177,22 @@
     "salvate": 0.814
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.261,
-    "salvate": 0.809
+    "n": 79,
+    "R": 0.293,
+    "salvate": 0.812
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.545,
-    "salvate": 0.727
+    "n": 36,
+    "R": 0.607,
+    "salvate": 0.739
    },
    "tutto": {
-    "n": 148,
-    "R": 0.149,
-    "salvate": 0.811
+    "n": 149,
+    "R": 0.167,
+    "salvate": 0.813
    },
    "cambiano_esito_rispetto_ad_A": 8,
-   "t_contro_A_2020_26": -1.4
+   "t_contro_A_2020_26": -1.38
   },
   "B0+10": {
    "IS 2014-19": {
@@ -201,22 +201,22 @@
     "salvate": 0.86
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.352,
-    "salvate": 0.915
+    "n": 79,
+    "R": 0.378,
+    "salvate": 0.917
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.797,
-    "salvate": 0.909
+    "n": 36,
+    "R": 0.844,
+    "salvate": 0.913
    },
    "tutto": {
-    "n": 148,
-    "R": 0.188,
-    "salvate": 0.889
+    "n": 149,
+    "R": 0.204,
+    "salvate": 0.89
    },
    "cambiano_esito_rispetto_ad_A": 12,
-   "t_contro_A_2020_26": -2.57
+   "t_contro_A_2020_26": -2.61
   }
  },
  "aggiungere_10_pips": true
