@@ -17,22 +17,22 @@
     "stop_presi": 0.296
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.456,
-    "R_vera": 0.268,
-    "stop_presi": 0.359
+    "n": 79,
+    "R": 0.493,
+    "R_vera": 0.307,
+    "stop_presi": 0.354
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 1.04,
-    "R_vera": 0.751,
-    "stop_presi": 0.4
+    "n": 36,
+    "R": 1.105,
+    "R_vera": 0.824,
+    "stop_presi": 0.389
    },
    "tutto": {
-    "n": 149,
-    "R": 0.253,
-    "R_vera": 0.09,
-    "stop_presi": 0.329
+    "n": 150,
+    "R": 0.273,
+    "R_vera": 0.112,
+    "stop_presi": 0.327
    },
    "stop_mediano_per_anno": {
     "2014": 60,
@@ -58,22 +58,22 @@
     "stop_presi": 0.296
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.256,
-    "R_vera": 0.132,
-    "stop_presi": 0.295
+    "n": 79,
+    "R": 0.278,
+    "R_vera": 0.156,
+    "stop_presi": 0.291
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.594,
-    "R_vera": 0.447,
-    "stop_presi": 0.257
+    "n": 36,
+    "R": 0.634,
+    "R_vera": 0.491,
+    "stop_presi": 0.25
    },
    "tutto": {
-    "n": 149,
-    "R": 0.148,
-    "R_vera": 0.019,
-    "stop_presi": 0.295
+    "n": 150,
+    "R": 0.16,
+    "R_vera": 0.032,
+    "stop_presi": 0.293
    },
    "stop_mediano_per_anno": {
     "2014": 60,
@@ -99,22 +99,22 @@
     "stop_presi": 0.493
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.523,
-    "R_vera": 0.08,
-    "stop_presi": 0.487
+    "n": 79,
+    "R": 0.57,
+    "R_vera": 0.133,
+    "stop_presi": 0.481
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.913,
-    "R_vera": 0.221,
-    "stop_presi": 0.571
+    "n": 36,
+    "R": 1.006,
+    "R_vera": 0.334,
+    "stop_presi": 0.556
    },
    "tutto": {
-    "n": 149,
-    "R": 0.344,
-    "R_vera": -0.071,
-    "stop_presi": 0.49
+    "n": 150,
+    "R": 0.37,
+    "R_vera": -0.043,
+    "stop_presi": 0.487
    },
    "stop_mediano_per_anno": {
     "2014": 35,
@@ -140,22 +140,22 @@
     "stop_presi": 0.451
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.605,
-    "R_vera": 0.256,
-    "stop_presi": 0.449
+    "n": 79,
+    "R": 0.636,
+    "R_vera": 0.292,
+    "stop_presi": 0.443
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 1.177,
-    "R_vera": 0.66,
-    "stop_presi": 0.486
+    "n": 36,
+    "R": 1.231,
+    "R_vera": 0.728,
+    "stop_presi": 0.472
    },
    "tutto": {
-    "n": 149,
-    "R": 0.366,
-    "R_vera": 0.044,
-    "stop_presi": 0.45
+    "n": 150,
+    "R": 0.384,
+    "R_vera": 0.065,
+    "stop_presi": 0.447
    },
    "stop_mediano_per_anno": {
     "2014": 41,
@@ -181,22 +181,22 @@
     "stop_presi": 0.408
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.473,
-    "R_vera": 0.205,
-    "stop_presi": 0.423
+    "n": 79,
+    "R": 0.498,
+    "R_vera": 0.234,
+    "stop_presi": 0.418
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.948,
-    "R_vera": 0.58,
-    "stop_presi": 0.429
+    "n": 36,
+    "R": 0.99,
+    "R_vera": 0.632,
+    "stop_presi": 0.417
    },
    "tutto": {
-    "n": 149,
-    "R": 0.291,
-    "R_vera": 0.04,
-    "stop_presi": 0.416
+    "n": 150,
+    "R": 0.305,
+    "R_vera": 0.056,
+    "stop_presi": 0.413
    },
    "stop_mediano_per_anno": {
     "2014": 47,
@@ -222,22 +222,22 @@
     "stop_presi": 0.408
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.384,
-    "R_vera": 0.165,
-    "stop_presi": 0.397
+    "n": 79,
+    "R": 0.405,
+    "R_vera": 0.189,
+    "stop_presi": 0.392
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.805,
-    "R_vera": 0.498,
-    "stop_presi": 0.371
+    "n": 36,
+    "R": 0.839,
+    "R_vera": 0.54,
+    "stop_presi": 0.361
    },
    "tutto": {
-    "n": 149,
-    "R": 0.225,
-    "R_vera": 0.017,
-    "stop_presi": 0.403
+    "n": 150,
+    "R": 0.237,
+    "R_vera": 0.03,
+    "stop_presi": 0.4
    },
    "stop_mediano_per_anno": {
     "2014": 53,
@@ -252,7 +252,7 @@
     "2023": 50,
     "2024": 64,
     "2025": 60,
-    "2026": 82
+    "2026": 83
    }
   },
   "k0.25": {
@@ -263,22 +263,22 @@
     "stop_presi": 0.38
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.3,
-    "R_vera": 0.094,
-    "stop_presi": 0.385
+    "n": 79,
+    "R": 0.318,
+    "R_vera": 0.114,
+    "stop_presi": 0.38
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.659,
-    "R_vera": 0.398,
-    "stop_presi": 0.371
+    "n": 36,
+    "R": 0.688,
+    "R_vera": 0.435,
+    "stop_presi": 0.361
    },
    "tutto": {
-    "n": 149,
-    "R": 0.185,
-    "R_vera": -0.008,
-    "stop_presi": 0.383
+    "n": 150,
+    "R": 0.195,
+    "R_vera": 0.004,
+    "stop_presi": 0.38
    },
    "stop_mediano_per_anno": {
     "2014": 58,
@@ -304,22 +304,22 @@
     "stop_presi": 0.366
    },
    "OOS 2020-26": {
-    "n": 78,
-    "R": 0.264,
-    "R_vera": 0.1,
-    "stop_presi": 0.346
+    "n": 79,
+    "R": 0.279,
+    "R_vera": 0.118,
+    "stop_presi": 0.342
    },
    "ultimi 3 anni": {
-    "n": 35,
-    "R": 0.598,
-    "R_vera": 0.4,
-    "stop_presi": 0.343
+    "n": 36,
+    "R": 0.623,
+    "R_vera": 0.43,
+    "stop_presi": 0.333
    },
    "tutto": {
-    "n": 149,
-    "R": 0.155,
-    "R_vera": -0.001,
-    "stop_presi": 0.356
+    "n": 150,
+    "R": 0.164,
+    "R_vera": 0.009,
+    "stop_presi": 0.353
    },
    "stop_mediano_per_anno": {
     "2014": 64,
@@ -334,7 +334,7 @@
     "2023": 59,
     "2024": 81,
     "2025": 74,
-    "2026": 109
+    "2026": 110
    }
   }
  },
@@ -8687,6 +8687,62 @@
      "stop_pips": 140,
      "r": 2.233,
      "raw": 2.233,
+     "st": false
+    }
+   }
+  },
+  {
+   "id": "NFP_2026-11-06",
+   "d": "2026-11-06 13:30",
+   "y": 2026,
+   "stima": 353,
+   "res": {
+    "fisso_60": {
+     "stop_pips": 60,
+     "r": 3.381,
+     "raw": 3.382,
+     "st": false
+    },
+    "rif_60_100": {
+     "stop_pips": 100,
+     "r": 2.029,
+     "raw": 2.029,
+     "st": false
+    },
+    "k0.05": {
+     "stop_pips": 48,
+     "r": 4.257,
+     "raw": 4.258,
+     "st": false
+    },
+    "k0.10": {
+     "stop_pips": 65,
+     "r": 3.107,
+     "raw": 3.107,
+     "st": false
+    },
+    "k0.15": {
+     "stop_pips": 83,
+     "r": 2.446,
+     "raw": 2.446,
+     "st": false
+    },
+    "k0.20": {
+     "stop_pips": 101,
+     "r": 2.017,
+     "raw": 2.017,
+     "st": false
+    },
+    "k0.25": {
+     "stop_pips": 118,
+     "r": 1.716,
+     "raw": 1.716,
+     "st": false
+    },
+    "k0.30": {
+     "stop_pips": 136,
+     "r": 1.493,
+     "raw": 1.493,
      "st": false
     }
    }
