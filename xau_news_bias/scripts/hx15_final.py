@@ -26,6 +26,7 @@ END = pd.Timestamp("2026-10-07", tz="UTC")
 def fetch_final(t0: pd.Timestamp) -> Path:
     p = B.CACHE / f"{t0:%Y%m%d_%H%M}.npz"
     if not p.exists():
+        p.parent.mkdir(parents=True, exist_ok=True)  # in un container nuovo la cache non c'è
         tk = DukascopyProvider().ticks("XAUUSD", (t0 - pd.Timedelta(minutes=62)).to_pydatetime(),
                                        (t0 + pd.Timedelta(minutes=61)).to_pydatetime())
         t = tk.ts_ms.to_numpy(np.int64) - int(t0.value // 1_000_000)
