@@ -19,3 +19,8 @@
 {"n": 18, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "La terza la vedo short."}
 {"n": 19, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "passo", "lettura_m1": "SHORT", "lettura_dopo": "forse su", "parole": "Super compresso, non dovrei farla: manipolano sopra e sotto. Un primo short per poi andare forse long."}
 {"n": 20, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "sì (implicito)", "lettura_m1": "SHORT", "parole": "L'ultima mi sembra bello che short."}
+{"n": 21, "quando_utc": "2026-11-06T11:57:15+00:00", "trade": "incerto", "lettura_m1": "SHORT", "parole": "Molto compresso: sale tanto (in H1 tante candele che salgono), poi si comprime in un range, difficile. Secondo me va short."}
+{"n": 22, "quando_utc": "2026-11-06T11:57:15+00:00", "trade": "passo", "lettura_m1": "SHORT", "lettura_prima": "su (buy to sell)", "parole": "Non lo so, non l'avrei tradato: secondo me manipola, è un buy to sell."}
+{"n": 23, "quando_utc": "2026-11-06T11:57:15+00:00", "trade": "incerto", "lettura_m1": "LONG", "lettura_prima": "giù (sell to buy)", "parole": "Bruttissimo: sul daily tante candele e poi si ferma, di solito non muove tantissimo. Penso faccia un sell to buy: manipola ma poi va su, la direzione è buy."}
+{"n": 24, "quando_utc": "2026-11-06T11:57:15+00:00", "trade": "non detto", "lettura_m1": "LONG", "parole": "Il quarto secondo me potrebbe andare buy, sì."}
+{"n": 25, "quando_utc": "2026-11-06T11:57:15+00:00", "trade": "non detto", "lettura_m1": "LONG", "parole": "Il quinto buy."}
