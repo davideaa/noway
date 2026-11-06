@@ -30,3 +30,31 @@ Scritte il 06/11/2026, prima di mostrare la prima schermata.
 Se l'indizio c'è:
 - si scrive la sua lettura come regola, con le sue parole;
 - la si mette alla prova dal vivo sulle NFP prossime, come tutto il resto.
+
+## Risultati (06/11/2026)
+
+Risposte in `research_output/phase2/screen_nfp/risposte.jsonl`, scritte prima di aprire `chiave.json`.
+
+**Esclusioni:**
+- la #6: nessuna direzione;
+- la #34 (02/10/2026): Davide l'ha riconosciuta.
+
+**Restano 32 letture.**
+
+| | Giuste | p contro il caso (una coda) |
+|---|---|---|
+| Davide, prima candela M1 | **20 su 32 (62,5%)** | 0,11 |
+| Davide, chiusura M5 | 20 su 32 | 0,11 |
+| Regola del sito, sulle stesse | 19 su 32 | 0,19 |
+
+**Soglia scritta prima: non raggiunta.** Con 32 letture servivano 22 giuste.
+
+**Descrittivo:**
+- **Direzione secca**: 14 su 23. **Letture "manipola prima e poi"**: 6 su 9 sulla direzione puntata, ma la manipolazione prevista si è vista di rado.
+- **Quelle che non avrebbe tradato o su cui era incerto**: 12 su 18. **Le altre**: 8 su 14. Il filtro "la traderei / no" non ha aiutato.
+- **Ha detto SHORT 25 volte su 32**; la prima candela è scesa 17 volte.
+- **Sulle 6 NFP grandi del 2026** (#27, #28, #30, #31, #32, #33): 3 su 6.
+
+**Lettura.** L'occhio di Davide fa poco più della regola del sito e non si distingue dal caso con 32 prove. Non è una prova che non funzioni: è troppo poco per dire che funziona.
+
+Si continua **dal vivo**: Davide scrive la lettura prima di ogni NFP e si conta.
