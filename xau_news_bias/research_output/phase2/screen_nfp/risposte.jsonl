@@ -3,3 +3,4 @@
 {"n": 3, "quando_utc": "2026-11-06T11:19:42+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "Terza, la prima candela appunto giù."}
 {"n": 4, "quando_utc": "2026-11-06T11:20:03+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "Quarta pure la prima candela giù."}
 {"n": 5, "quando_utc": "2026-11-06T11:20:32+00:00", "trade": "passo", "lettura_m1": "SHORT", "lettura_dopo": "giù", "parole": "Short invece la quinta, cioè manipola su e poi va giù short. Anche se non l'avrei tradata."}
+{"n": 6, "quando_utc": "2026-11-06T11:23:00+00:00", "trade": "passo", "lettura_m1": "in attesa", "parole": "Non l'avrei tradata, cioè ti direi..."}
