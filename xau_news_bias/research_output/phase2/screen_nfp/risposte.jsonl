@@ -14,3 +14,8 @@
 {"n": 13, "quando_utc": "2026-11-06T11:32:43+00:00", "trade": "non detto", "lettura_m1": "LONG", "lettura_prima": "manipola sotto", "parole": "La terza è long: manipola sotto e poi va long."}
 {"n": 14, "quando_utc": "2026-11-06T11:32:43+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "La quarta short."}
 {"n": 15, "quando_utc": "2026-11-06T11:32:43+00:00", "trade": "incerto", "lettura_m1": "SHORT", "lettura_prima": "manipola su", "parole": "Sale tanto e poi è super compresso, non si sa dove può andare; manipola su; come ampiezza non dà una direzione unica. Secondo me è short."}
+{"n": 16, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "incerto", "lettura_m1": "SHORT", "lettura_dopo": "su", "parole": "Super salito, tosta. Short per me e poi va long."}
+{"n": 17, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "incerto", "lettura_m1": "SHORT", "parole": "In compressione negli ultimi 3-4 giorni, piccola ampiezza: difficile senza manipolare i minimi e prendere liquidità. Secondo me short."}
+{"n": 18, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "La terza la vedo short."}
+{"n": 19, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "passo", "lettura_m1": "SHORT", "lettura_dopo": "forse su", "parole": "Super compresso, non dovrei farla: manipolano sopra e sotto. Un primo short per poi andare forse long."}
+{"n": 20, "quando_utc": "2026-11-06T11:41:26+00:00", "trade": "sì (implicito)", "lettura_m1": "SHORT", "parole": "L'ultima mi sembra bello che short."}
