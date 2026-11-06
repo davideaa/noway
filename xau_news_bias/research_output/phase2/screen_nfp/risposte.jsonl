@@ -4,3 +4,8 @@
 {"n": 4, "quando_utc": "2026-11-06T11:20:03+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "Quarta pure la prima candela giù."}
 {"n": 5, "quando_utc": "2026-11-06T11:20:32+00:00", "trade": "passo", "lettura_m1": "SHORT", "lettura_dopo": "giù", "parole": "Short invece la quinta, cioè manipola su e poi va giù short. Anche se non l'avrei tradata."}
 {"n": 6, "quando_utc": "2026-11-06T11:23:00+00:00", "trade": "passo", "lettura_m1": "in attesa", "parole": "Non l'avrei tradata, cioè ti direi..."}
+{"n": 6, "quando_utc": "2026-11-06T11:24:13+00:00", "trade": "passo", "lettura_m1": "nessuna", "parole": "(prima del gruppo) non l'avrei tradata, nessuna direzione data"}
+{"n": 7, "quando_utc": "2026-11-06T11:24:13+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "la seconda ti direi short"}
+{"n": 8, "quando_utc": "2026-11-06T11:24:13+00:00", "trade": "incerto", "lettura_m1": "SHORT", "parole": "la terza ti direi short, non so se l'avrei tradata"}
+{"n": 9, "quando_utc": "2026-11-06T11:24:13+00:00", "trade": "passo", "lettura_m1": "SHORT", "parole": "la quarta non l'avrei tradata mai, ti direi short"}
+{"n": 10, "quando_utc": "2026-11-06T11:24:13+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "la quinta ti direi short"}
