@@ -30,3 +30,7 @@
 {"n": 29, "quando_utc": "2026-11-06T12:30:22+00:00", "trade": "incerto", "lettura_m1": "da confermare", "parole": "'Vai, anche se anche questo va a cagare' (forse 'buy' dettato come 'vai'): chiesto a Davide prima di aprire l'esito."}
 {"n": 30, "quando_utc": "2026-11-06T12:30:22+00:00", "trade": "non detto", "lettura_m1": "SHORT", "parole": "L'NFP 30 sell."}
 {"n": 29, "quando_utc": "2026-11-06T12:31:41+00:00", "trade": "incerto", "lettura_m1": "LONG", "parole": "Confermato: 'Vai' era 'buy'. Buy, anche se anche questo va a cagare."}
+{"n": 31, "quando_utc": "2026-11-06T12:35:58+00:00", "trade": "incerto", "lettura_m1": "SHORT", "lettura_dopo": "su", "parole": "Tutto in compressione, poco range; abbassando a H4 sembra comunque rialzista. Secondo me è short per poi andare long."}
+{"n": 32, "quando_utc": "2026-11-06T12:35:58+00:00", "trade": "incerto", "lettura_m1": "SHORT", "parole": "Già super esteso, fa cagare; manipola sia su che giù. Secondo me va giù."}
+{"n": 33, "quando_utc": "2026-11-06T12:35:58+00:00", "trade": "incerto", "lettura_m1": "SHORT", "parole": "Fa cagare anche lì, orribile. Short."}
+{"n": 34, "quando_utc": "2026-11-06T12:35:58+00:00", "trade": "non detto", "lettura_m1": "LONG", "ricordata": true, "parole": "Long. Ma questa l'avevo vista, è una delle... (la riconosce: esclusa dal conto)"}
