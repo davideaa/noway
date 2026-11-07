@@ -58,3 +58,17 @@ Risposte in `research_output/phase2/screen_nfp/risposte.jsonl`, scritte prima di
 **Lettura.** L'occhio di Davide fa poco più della regola del sito e non si distingue dal caso con 32 prove. Non è una prova che non funzioni: è troppo poco per dire che funziona.
 
 Si continua **dal vivo**: Davide scrive la lettura prima di ogni NFP e si conta.
+
+## Dal vivo
+
+Registro: `research_output/phase2/screen_nfp/dal_vivo.jsonl` (solo aggiunte). Conta solo la lettura scritta **prima** della news.
+
+| NFP | Lettura di Davide | Quando | Prima candela | Conta |
+|---|---|---|---|---|
+| 06/11/2026 | LONG, trade fatto ("non mi piaceva né long né short") | detta **dopo** la news | SHORT, −210 pips | no |
+
+- **06/11/2026.** Davide è entrato LONG e lo ha detto lui, dopo: sarebbe stata sbagliata. Non entra nel conteggio perché non era scritta prima. Si registra lo stesso: un errore va scritto anche quando non conta.
+- Con lo stop di 88 pips (ingresso 14:29:30, spread 30 pips prima della news) il LONG è stato preso **2 secondi dopo la news**, non prima: da 14:29:30 a 14:30:00 il prezzo è rimasto tra 4.059,3 e 4.062,7.
+- La schermata ferma alle 14:29 di quel giorno gli è stata data dopo, sapendo già il risultato: quello che ci legge ora non conta.
+
+**Conteggio dal vivo: 0 letture valide.** La prossima è la NFP del 04/12/2026.
