@@ -1,0 +1,125 @@
+<meta charset="utf-8">
+<title>Oro e news: cosa funziona</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: tabellone dei risultati. Legenda e conteggi in alto, poi quattro gruppi di schede con stato colorato + icona + parola */
+:root{
+  --bg:#f4f3ef; --panel:#ffffff; --ink:#17191c; --ink2:#41464d; --mute:#6c727a; --line:#e1dfd8;
+  --ok:#17804f; --ok-bg:#e3f3ea; --mid:#a86a00; --mid-bg:#fbf0d9; --no:#b8322c; --no-bg:#f9e3e1; --na:#6c727a; --na-bg:#ecebe6;
+  --f-disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif; --f-body:"Public Sans",ui-sans-serif,system-ui,sans-serif; --f-num:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036;
+  --ok:#4fcf8f; --ok-bg:#16301f; --mid:#f0b54a; --mid-bg:#33280f; --no:#f27a72; --no-bg:#3a1b19; --na:#979ca3; --na-bg:#23272c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111316; --panel:#1a1d21; --ink:#eeebe4; --ink2:#c9c6bf; --mute:#979ca3; --line:#2c3036;
+  --ok:#4fcf8f; --ok-bg:#16301f; --mid:#f0b54a; --mid-bg:#33280f; --no:#f27a72; --no-bg:#3a1b19; --na:#979ca3; --na-bg:#23272c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 56px}
+main{max-width:980px;margin:0 auto;display:grid;gap:34px}
+h1{font:800 clamp(30px,6.4vw,48px)/1.03 var(--f-disp);margin:6px 0 0;letter-spacing:-.015em;text-wrap:balance}
+h2{font:700 clamp(20px,3.6vw,26px)/1.15 var(--f-disp);margin:0;text-wrap:balance}
+p{margin:0}
+.eyebrow{font:700 11px/1 var(--f-num);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.lead{color:var(--ink2);max-width:68ch;margin-top:10px}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lg{border-radius:12px;padding:14px;display:grid;gap:4px}
+.lg b{font:800 30px/1 var(--f-disp)}
+.lg span{font-size:13px;font-weight:600}
+.lg.ok{background:var(--ok-bg);color:var(--ok)} .lg.mid{background:var(--mid-bg);color:var(--mid)} .lg.no{background:var(--no-bg);color:var(--no)} .lg.na{background:var(--na-bg);color:var(--na)}
+.group{display:grid;gap:12px}
+.ghead{display:grid;gap:4px}
+.ghead p{color:var(--ink2);font-size:14px;max-width:70ch}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.cards{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card.ok{border-left-color:var(--ok)} .card.mid{border-left-color:var(--mid)} .card.no{border-left-color:var(--no)} .card.na{border-left-color:var(--na)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h3{font:700 16px/1.3 var(--f-body);margin:0}
+.pill{font:700 12px/1 var(--f-body);padding:6px 10px;border-radius:999px;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.mid{background:var(--mid-bg);color:var(--mid)} .pill.no{background:var(--no-bg);color:var(--no)} .pill.na{background:var(--na-bg);color:var(--na)}
+.num{font:700 22px/1.15 var(--f-num);font-variant-numeric:tabular-nums}
+.card.ok .num{color:var(--ok)} .card.mid .num{color:var(--mid)} .card.no .num{color:var(--no)} .card.na .num{color:var(--na)}
+.why{font-size:14px;color:var(--ink2)}
+.code{font:500 11px var(--f-num);color:var(--mute);letter-spacing:.04em}
+.bottom{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:grid;gap:10px}
+.bottom ul{margin:0;padding-left:20px;display:grid;gap:6px}
+footer{color:var(--mute);font-size:12.5px;max-width:72ch}
+</style>
+<main>
+<header>
+  <div class="eyebrow">XAUUSD · NFP, CPI, Retail, PPI e news rosse · test 2008–2026</div>
+  <h1>Oro e news: cosa funziona</h1>
+  <p class="lead">Tutti i test fatti, uno per scheda. Ogni regola è stata scritta prima di guardare i risultati e provata solo con i dati disponibili prima di ogni news. Verde funziona, giallo va confermato dal vivo, rosso no.</p>
+</header>
+
+<section class="legend" id="legend" aria-label="Riepilogo"></section>
+
+<section class="group">
+  <div class="ghead"><h2>1 · Indovinare la direzione</h2><p>Da che parte va la candela delle 14:30. È la parte più difficile: il primo minuto è dominato dai computer veloci.</p></div>
+  <div class="cards" data-g="dir"></div>
+</section>
+
+<section class="group">
+  <div class="ghead"><h2>2 · Prevedere quanto si muove</h2><p>Quanti pips fa la news e quanto si muove l'oro nel giorno e nella settimana. Qui i dati aiutano davvero.</p></div>
+  <div class="cards" data-g="amp"></div>
+</section>
+
+<section class="group">
+  <div class="ghead"><h2>3 · Dove uscire</h2><p>Chiudere a fine candela, dopo 5 minuti, o con un take profit.</p></div>
+  <div class="cards" data-g="exit"></div>
+</section>
+
+<section class="group">
+  <div class="ghead"><h2>4 · Dove mettere lo stop</h2><p>Quanto spazio lasciare contro, entrando 30–60 secondi prima.</p></div>
+  <div class="cards" data-g="stop"></div>
+</section>
+
+<section class="bottom">
+  <h2>In una frase</h2>
+  <ul>
+    <li><b style="color:var(--ok)">Quanto rischiare e dove chiudere</b>: si calcola bene. Range del giorno e della settimana con le medie di 21 giorni e 4 settimane; candela della news con le ultime release della stessa news.</li>
+    <li><b style="color:var(--mid)">La direzione</b>: c'è solo la bias NFP, che va confermata dal vivo. Per il resto decide la tua analisi tecnica.</li>
+    <li><b style="color:var(--no)">Non serve</b>: indicatori tecnici, sorprese passate e modelli per la direzione, take profit sui livelli tipici, volatilità generale per stimare la candela della news.</li>
+  </ul>
+</section>
+
+<footer>Dettagli e numeri in xau_news_bias/docs (un file per test, codice H-X…). Siti: NFP (bias e dove chiudere) e Retail e PPI. Prezzi tick Dukascopy; 1 pip = 0,10 $; R = risultato diviso lo stop.</footer>
+</main>
+<script>
+const S = {ok: ["✓", "Funziona"], mid: ["~", "Da confermare"], no: ["✕", "Non funziona"], na: ["?", "Non testabile"]};
+const T = [
+  ["dir","mid","Bias NFP: fai il contrario della NFP precedente","61%","Indovina 90 NFP su 148 nel 2014–26 e rende +0,13R a trade. Su dati mai usati (oro 2003–07, euro 2003–13) però fa 45–50%: è un regime degli ultimi anni. Dal vivo: 1 su 1.","H-X8 · H-X14"],
+  ["dir","no","4,66 milioni di regole su CPI e NFP","0 su 17","Sorprese, tassi, dollaro, VIX, Fed, COT, candele: nessuna regola regge fuori campione dopo i costi.","Fase 2"],
+  ["dir","no","Modelli di machine learning sulla direzione","48%","Logistica, LightGBM, k-NN su NFP e CPI: nel 2020–26 indovinano come una moneta.","H-X7"],
+  ["dir","no","Le altre 11 news rosse, prima e dopo il primo minuto","t 0,42","FOMC, ISM, ADP, Claims, PIL, Michigan e altre: 2.346 combinazioni, nessuna guadagna dopo i costi.","H-X15"],
+  ["dir","no","Contesto tecnico alle 14:29 su Retail e PPI","46–55%","Supply/demand (vicino ai massimi e minimi), trend H1 e M5, range o trend, apertura del giorno, RSI: tutti come il caso.","H-X16"],
+  ["dir","no","Dopo il primo minuto, segui la sorpresa (NFP e CPI)","50%","Funzionava nel 2011–18 (58%), non nel 2019–26. Sulle news minori esiste ma vale 2–3 pips.","H-X17 · H-X15"],
+  ["dir","no","Dopo la candela, torna indietro","52%","Test pulito sul 2024–26 di 9 news mai guardate: 52% e 3 pips, come il caso.","H-X18"],
+  ["dir","no","Solo volatilità, direzione a caso","≈ 0R","Con il tuo ingresso (30 s prima, stop 100 pips) tirando a caso si va in pari. Paga solo se indovini la direzione: serve almeno il 44% sulla NFP, il 48% sul CPI, il 59% su Retail/PPI.","Test del 16/10"],
+  ["dir","na","Order flow, CVD, book degli ordini","—","Sull'oro spot non esiste un volume vero; servono i dati dei futures COMEX, a pagamento. Gli studi dicono che spiegano il movimento mentre succede, ma lo prevedono poco.","Ricerca"],
+  ["amp","ok","Range del giorno: media degli ultimi 21 giorni","79%","La fascia \"9 su 10\" ci prende il 79% dei giorni (obiettivo 80%), errore tipico ±30%. Oggi 682 pips. È il tuo ADR, verificato.","H-X21"],
+  ["amp","ok","Range della settimana: media delle ultime 4","77%","Fascia \"9 su 10\" giusta il 77% delle settimane. Questa settimana 1.388 pips. È il tuo AWR, verificato.","H-X21"],
+  ["amp","ok","Candela Retail/PPI: memoria della news, con taglio al cambio di regime","±34%","Le ultime release della stessa news, che ripartono da capo quando il regime cambia, battono le finestre fisse in tutti e due i periodi.","H-X20 · H-X22"],
+  ["amp","mid","Candela NFP: ultime 24 NFP","±40–55%","È la stima migliore, ma la NFP è la news meno prevedibile. Il metodo adattivo vince solo negli ultimi anni.","H-X20 · H-X22"],
+  ["amp","no","Volatilità generale per stimare la candela della news","corr ≈ 0","Settimana, mese, trimestre, semestre, anno, ATR H1: nessuno prevede la candela delle 14:30. Nel 2026 l'oro si muove il doppio, la news in proporzione meno.","H-X20"],
+  ["amp","ok","Pips in % del prezzo","3–4×","Gran parte della crescita dei pips viene dal prezzo dell'oro (da 1.300 a 4.150 $). Calcolare in % e poi convertire evita stime sbagliate.","H-X16"],
+  ["exit","mid","NFP: tenere fino alle 14:35 invece delle 14:31","+0,24R","Vantaggio sul caso da +0,20 a +0,24R, anche a 3 e 10 minuti. Visto su dati già usati: registrato dal vivo dal 6/11.","H-X13"],
+  ["exit","no","Take profit sui livelli tipici","1,10 → 0,73R","NFP con direzione giusta 2023–26: chiudere alle 14:31 rende +1,10R, il TP a 157 pips +0,73R. Il TP taglia i colpi grandi. Su Retail/PPI è uguale.","H-X19"],
+  ["exit","ok","Livelli di riferimento calibrati (ultime 24 release)","65% / 51%","\"2 volte su 3\" e \"1 su 2\" vengono toccati davvero il 65–67% e il 51–52% delle volte. Utili per sapere dove arriva, non come TP.","H-X19"],
+  ["exit","no","Uscire nei primi secondi","−9,5R","Uscire a 5–10 secondi rende meno della fine candela: lo spread è largo e costa.","H-X9"],
+  ["stop","ok","Stop di 100 pips sulla NFP oggi","9 su 10","Lascia vivere circa 9 trade giusti su 10 nel 2024–26. Prima del 2020 bastavano 40–60 pips.","H-X13"],
+  ["stop","mid","Stop calcolato con l'ATR","solo con −1R","Rende di più solo se la perdita è davvero tagliata a 1R dal full margin. Con la perdita vera vincono gli stop fissi da 80–100 pips.","H-X12"],
+  ["stop","no","CPI con 100 pips di stop","2 su 10","Il CPI va contro oltre 114 pips 2 volte su 10, anche quando poi va dalla tua parte. Più rischioso della NFP.","Test del 16/10"]
+];
+const cnt = {ok: 0, mid: 0, no: 0, na: 0}; T.forEach(t => cnt[t[1]]++);
+document.getElementById("legend").innerHTML = ["ok","mid","no","na"].map(k => `<div class="lg ${k}"><b>${cnt[k]}</b><span>${S[k][0]} ${S[k][1]}</span></div>`).join("");
+T.forEach(([g, s, title, num, why, code]) => {
+  const c = document.createElement("article"); c.className = "card " + s;
+  c.innerHTML = `<div class="top"><h3>${title}</h3><span class="pill ${s}" aria-label="${S[s][1]}">${S[s][0]} ${S[s][1]}</span></div><div class="num">${num}</div><p class="why">${why}</p><div class="code">${code}</div>`;
+  document.querySelector(`[data-g="${g}"]`).append(c);
+});
+</script>

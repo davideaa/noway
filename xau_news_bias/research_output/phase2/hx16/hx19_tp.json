@@ -1,0 +1,466 @@
+{
+ "prezzo_oggi": 4155.86,
+ "prezzo_ora": "2026-10-15 23:00",
+ "NFP": {
+  "finestre": {
+   "6": {
+    "tocca_A_2023_26": 0.605,
+    "tocca_B_2023_26": 0.535,
+    "errore": 0.097,
+    "n": 43
+   },
+   "12": {
+    "tocca_A_2023_26": 0.674,
+    "tocca_B_2023_26": 0.558,
+    "errore": 0.066,
+    "n": 43
+   },
+   "24": {
+    "tocca_A_2023_26": 0.651,
+    "tocca_B_2023_26": 0.512,
+    "errore": 0.027,
+    "n": 43
+   },
+   "tutte": {
+    "tocca_A_2023_26": 0.721,
+    "tocca_B_2023_26": 0.535,
+    "errore": 0.089,
+    "n": 43
+   }
+  },
+  "scelta": "24",
+  "uscite": {
+   "2019-22": {
+    "n": 47,
+    "C_giusta": 0.365,
+    "TPa_giusta": 0.287,
+    "TPb_giusta": 0.309,
+    "TPa5_giusta": 0.274,
+    "C_caso": -0.074,
+    "TPa_caso": -0.096,
+    "TPb_caso": -0.083,
+    "TPa5_caso": -0.079,
+    "C_bias": -0.031,
+    "TPa_bias": -0.053,
+    "TPb_bias": -0.031,
+    "TPa5_bias": -0.08,
+    "tocca_A": 0.66,
+    "tocca_B": 0.553
+   },
+   "2023-26": {
+    "n": 43,
+    "C_giusta": 1.098,
+    "TPa_giusta": 0.633,
+    "TPb_giusta": 0.732,
+    "TPa5_giusta": 0.548,
+    "C_caso": 0.13,
+    "TPa_caso": -0.087,
+    "TPb_caso": -0.036,
+    "TPa5_caso": -0.118,
+    "C_bias": 0.57,
+    "TPa_bias": 0.229,
+    "TPb_bias": 0.295,
+    "TPa5_bias": 0.182,
+    "tocca_A": 0.651,
+    "tocca_B": 0.512
+   }
+  },
+  "conviene": {
+   "TPa": false,
+   "TPb": false,
+   "TPa5": false
+  },
+  "per_anno": {
+   "2019": {
+    "n": 12,
+    "arrivo_pct": 0.37,
+    "chiusura_pct": 0.293,
+    "arrivo_pips": 49,
+    "chiusura_pips": 39,
+    "prezzo": 1375
+   },
+   "2020": {
+    "n": 12,
+    "arrivo_pct": 0.305,
+    "chiusura_pct": 0.14,
+    "arrivo_pips": 54,
+    "chiusura_pips": 25,
+    "prezzo": 1743
+   },
+   "2021": {
+    "n": 11,
+    "arrivo_pct": 0.452,
+    "chiusura_pct": 0.34,
+    "arrivo_pips": 85,
+    "chiusura_pips": 60,
+    "prezzo": 1797
+   },
+   "2022": {
+    "n": 12,
+    "arrivo_pct": 0.396,
+    "chiusura_pct": 0.244,
+    "arrivo_pips": 67,
+    "chiusura_pips": 43,
+    "prezzo": 1794
+   },
+   "2023": {
+    "n": 11,
+    "arrivo_pct": 0.45,
+    "chiusura_pct": 0.3,
+    "arrivo_pips": 83,
+    "chiusura_pips": 57,
+    "prezzo": 1933
+   },
+   "2024": {
+    "n": 12,
+    "arrivo_pct": 0.558,
+    "chiusura_pct": 0.456,
+    "arrivo_pips": 114,
+    "chiusura_pips": 98,
+    "prezzo": 2350
+   },
+   "2025": {
+    "n": 11,
+    "arrivo_pct": 0.331,
+    "chiusura_pct": 0.23,
+    "arrivo_pips": 102,
+    "chiusura_pips": 70,
+    "prezzo": 3302
+   },
+   "2026": {
+    "n": 9,
+    "arrivo_pct": 0.965,
+    "chiusura_pct": 0.727,
+    "arrivo_pips": 416,
+    "chiusura_pips": 365,
+    "prezzo": 4472
+   }
+  },
+  "oggi_pct": {
+   "A": 0.3028737713011629,
+   "B": 0.37778325661416473,
+   "C": 0.25811107291432367,
+   "P90": 1.1828369835013433,
+   "finestra_da": "2024-09-06",
+   "finestra_a": "2026-10-02",
+   "n": 24,
+   "A_pips": 126,
+   "B_pips": 157,
+   "C_pips": 107,
+   "P90_pips": 492
+  },
+  "ultime": [
+   {
+    "d": "2025-09-05",
+    "arr_pips": 207,
+    "clo_pips": 207,
+    "A_pips": 113,
+    "B_pips": 143
+   },
+   {
+    "d": "2025-11-20",
+    "arr_pips": 202,
+    "clo_pips": 51,
+    "A_pips": 133,
+    "B_pips": 175
+   },
+   {
+    "d": "2025-12-16",
+    "arr_pips": 59,
+    "clo_pips": 45,
+    "A_pips": 141,
+    "B_pips": 184
+   },
+   {
+    "d": "2026-01-09",
+    "arr_pips": 126,
+    "clo_pips": 11,
+    "A_pips": 140,
+    "B_pips": 192
+   },
+   {
+    "d": "2026-02-11",
+    "arr_pips": 635,
+    "clo_pips": 612,
+    "A_pips": 154,
+    "B_pips": 201
+   },
+   {
+    "d": "2026-03-06",
+    "arr_pips": 398,
+    "clo_pips": 365,
+    "A_pips": 154,
+    "B_pips": 201
+   },
+   {
+    "d": "2026-05-08",
+    "arr_pips": 64,
+    "clo_pips": 13,
+    "A_pips": 143,
+    "B_pips": 186
+   },
+   {
+    "d": "2026-06-05",
+    "arr_pips": 170,
+    "clo_pips": 136,
+    "A_pips": 135,
+    "B_pips": 176
+   },
+   {
+    "d": "2026-07-02",
+    "arr_pips": 561,
+    "clo_pips": 534,
+    "A_pips": 123,
+    "B_pips": 154
+   },
+   {
+    "d": "2026-08-07",
+    "arr_pips": 416,
+    "clo_pips": 394,
+    "A_pips": 131,
+    "B_pips": 163
+   },
+   {
+    "d": "2026-09-04",
+    "arr_pips": 797,
+    "clo_pips": 690,
+    "A_pips": 135,
+    "B_pips": 169
+   },
+   {
+    "d": "2026-10-02",
+    "arr_pips": 431,
+    "clo_pips": 304,
+    "A_pips": 127,
+    "B_pips": 158
+   }
+  ]
+ },
+ "RETAIL_PPI": {
+  "finestre": {
+   "6": {
+    "tocca_A_2023_26": 0.667,
+    "tocca_B_2023_26": 0.56,
+    "errore": 0.06,
+    "n": 75
+   },
+   "12": {
+    "tocca_A_2023_26": 0.653,
+    "tocca_B_2023_26": 0.52,
+    "errore": 0.033,
+    "n": 75
+   },
+   "24": {
+    "tocca_A_2023_26": 0.667,
+    "tocca_B_2023_26": 0.52,
+    "errore": 0.02,
+    "n": 75
+   },
+   "tutte": {
+    "tocca_A_2023_26": 0.827,
+    "tocca_B_2023_26": 0.68,
+    "errore": 0.34,
+    "n": 75
+   }
+  },
+  "scelta": "24",
+  "uscite": {
+   "2019-22": {
+    "n": 72,
+    "C_giusta": 0.146,
+    "TPa_giusta": 0.104,
+    "TPb_giusta": 0.121,
+    "TPa5_giusta": 0.107,
+    "C_caso": -0.037,
+    "TPa_caso": -0.037,
+    "TPb_caso": -0.036,
+    "TPa5_caso": -0.015,
+    "tocca_A": 0.764,
+    "tocca_B": 0.569
+   },
+   "2023-26": {
+    "n": 75,
+    "C_giusta": 0.316,
+    "TPa_giusta": 0.281,
+    "TPb_giusta": 0.313,
+    "TPa5_giusta": 0.271,
+    "C_caso": -0.074,
+    "TPa_caso": -0.077,
+    "TPb_caso": -0.066,
+    "TPa5_caso": -0.049,
+    "tocca_A": 0.667,
+    "tocca_B": 0.52
+   }
+  },
+  "conviene": {
+   "TPa": false,
+   "TPb": false,
+   "TPa5": false
+  },
+  "per_anno": {
+   "2019": {
+    "n": 18,
+    "arrivo_pct": 0.165,
+    "chiusura_pct": 0.081,
+    "arrivo_pips": 23,
+    "chiusura_pips": 11,
+    "prezzo": 1331
+   },
+   "2020": {
+    "n": 12,
+    "arrivo_pct": 0.104,
+    "chiusura_pct": 0.077,
+    "arrivo_pips": 20,
+    "chiusura_pips": 14,
+    "prezzo": 1771
+   },
+   "2021": {
+    "n": 18,
+    "arrivo_pct": 0.139,
+    "chiusura_pct": 0.062,
+    "arrivo_pips": 25,
+    "chiusura_pips": 11,
+    "prezzo": 1795
+   },
+   "2022": {
+    "n": 24,
+    "arrivo_pct": 0.137,
+    "chiusura_pct": 0.076,
+    "arrivo_pips": 25,
+    "chiusura_pips": 13,
+    "prezzo": 1811
+   },
+   "2023": {
+    "n": 20,
+    "arrivo_pct": 0.245,
+    "chiusura_pct": 0.144,
+    "arrivo_pips": 47,
+    "chiusura_pips": 28,
+    "prezzo": 1938
+   },
+   "2024": {
+    "n": 22,
+    "arrivo_pct": 0.257,
+    "chiusura_pct": 0.146,
+    "arrivo_pips": 53,
+    "chiusura_pips": 32,
+    "prezzo": 2424
+   },
+   "2025": {
+    "n": 18,
+    "arrivo_pct": 0.128,
+    "chiusura_pct": 0.066,
+    "arrivo_pips": 40,
+    "chiusura_pips": 21,
+    "prezzo": 3318
+   },
+   "2026": {
+    "n": 15,
+    "arrivo_pct": 0.19,
+    "chiusura_pct": 0.102,
+    "arrivo_pips": 96,
+    "chiusura_pips": 48,
+    "prezzo": 4704
+   }
+  },
+  "oggi_pct": {
+   "A": 0.12044547007390388,
+   "B": 0.18049882389759853,
+   "C": 0.09672970760824803,
+   "P90": 0.3746386277062766,
+   "finestra_da": "2025-06-12",
+   "finestra_a": "2026-10-15",
+   "n": 24,
+   "A_pips": 50,
+   "B_pips": 75,
+   "C_pips": 40,
+   "P90_pips": 156
+  },
+  "ultime": [
+   {
+    "d": "2026-02-27",
+    "arr_pips": 114,
+    "clo_pips": 107,
+    "A_pips": 56,
+    "B_pips": 68
+   },
+   {
+    "d": "2026-03-18",
+    "arr_pips": 105,
+    "clo_pips": 90,
+    "A_pips": 53,
+    "B_pips": 63
+   },
+   {
+    "d": "2026-04-01",
+    "arr_pips": 76,
+    "clo_pips": 54,
+    "A_pips": 51,
+    "B_pips": 64
+   },
+   {
+    "d": "2026-04-14",
+    "arr_pips": 74,
+    "clo_pips": 31,
+    "A_pips": 55,
+    "B_pips": 65
+   },
+   {
+    "d": "2026-04-21",
+    "arr_pips": 142,
+    "clo_pips": 41,
+    "A_pips": 55,
+    "B_pips": 66
+   },
+   {
+    "d": "2026-05-13",
+    "arr_pips": 87,
+    "clo_pips": 48,
+    "A_pips": 54,
+    "B_pips": 68
+   },
+   {
+    "d": "2026-05-14",
+    "arr_pips": 33,
+    "clo_pips": 25,
+    "A_pips": 57,
+    "B_pips": 74
+   },
+   {
+    "d": "2026-06-11",
+    "arr_pips": 46,
+    "clo_pips": 37,
+    "A_pips": 45,
+    "B_pips": 64
+   },
+   {
+    "d": "2026-07-15",
+    "arr_pips": 117,
+    "clo_pips": 94,
+    "A_pips": 44,
+    "B_pips": 59
+   },
+   {
+    "d": "2026-08-13",
+    "arr_pips": 138,
+    "clo_pips": 23,
+    "A_pips": 51,
+    "B_pips": 69
+   },
+   {
+    "d": "2026-09-10",
+    "arr_pips": 36,
+    "clo_pips": 25,
+    "A_pips": 53,
+    "B_pips": 73
+   },
+   {
+    "d": "2026-10-15",
+    "arr_pips": 217,
+    "clo_pips": 80,
+    "A_pips": 50,
+    "B_pips": 70
+   }
+  ]
+ }
+}

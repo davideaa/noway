@@ -1,0 +1,4035 @@
+{
+ "pre_registrazione": "docs/IPOTESI-HX26-ANCORAGGIO-CONSENSUS.md",
+ "verdetto": {
+  "criteri": {
+   "1_conferma_sorpresa": false,
+   "2_conferma_oro": true,
+   "3_studio_stesso_verso": true
+  },
+  "passa": false,
+  "nota": null
+ },
+ "T1_sorpresa": {
+  "descr_2008_10": {
+   "tutti": {
+    "n": 495,
+    "giuste": 263,
+    "quota": 0.5313,
+    "p": 0.08873512676943722,
+    "in_linea": 35,
+    "senza_previsione": 47,
+    "quota_attesa_indip": 0.4877,
+    "quota_prudente": 0.4962,
+    "p_permutazioni_indip": 0.026497350264973504
+   },
+   "FOMC": {
+    "n": 1,
+    "giuste": 1,
+    "quota": 1.0,
+    "p": 0.5,
+    "in_linea": 4,
+    "senza_previsione": 19,
+    "quota_attesa_indip": 1.0,
+    "quota_prudente": 0.2
+   },
+   "RETAIL": {
+    "n": 34,
+    "giuste": 20,
+    "quota": 0.5882,
+    "p": 0.19576415256597102,
+    "in_linea": 1,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.5069,
+    "quota_prudente": 0.5714
+   },
+   "PPI": {
+    "n": 33,
+    "giuste": 23,
+    "quota": 0.697,
+    "p": 0.01754101668484509,
+    "in_linea": 3,
+    "senza_previsione": 0,
+    "quota_attesa_indip": 0.5041,
+    "quota_prudente": 0.6389
+   },
+   "PIL": {
+    "n": 31,
+    "giuste": 18,
+    "quota": 0.5806,
+    "p": 0.23656482994556427,
+    "in_linea": 5,
+    "senza_previsione": 0,
+    "quota_attesa_indip": 0.4995,
+    "quota_prudente": 0.5
+   },
+   "ISM_M": {
+    "n": 32,
+    "giuste": 18,
+    "quota": 0.5625,
+    "p": 0.29830744792707264,
+    "in_linea": 1,
+    "senza_previsione": 3,
+    "quota_attesa_indip": 0.4297,
+    "quota_prudente": 0.5455
+   },
+   "ISM_S": {
+    "n": 36,
+    "giuste": 17,
+    "quota": 0.4722,
+    "p": 0.691140341485152,
+    "in_linea": 0,
+    "senza_previsione": 0,
+    "quota_attesa_indip": 0.5093,
+    "quota_prudente": 0.4722
+   },
+   "ADP": {
+    "n": 35,
+    "giuste": 18,
+    "quota": 0.5143,
+    "p": 0.5000000000000001,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4686,
+    "quota_prudente": 0.5143
+   },
+   "FIDUCIA": {
+    "n": 35,
+    "giuste": 22,
+    "quota": 0.6286,
+    "p": 0.087732624495402,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4963,
+    "quota_prudente": 0.6286
+   },
+   "MICHIGAN": {
+    "n": 35,
+    "giuste": 17,
+    "quota": 0.4857,
+    "p": 0.6320605995715596,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4841,
+    "quota_prudente": 0.4857
+   },
+   "CLAIMS": {
+    "n": 150,
+    "giuste": 71,
+    "quota": 0.4733,
+    "p": 0.7687252410665847,
+    "in_linea": 2,
+    "senza_previsione": 5,
+    "quota_attesa_indip": 0.4856,
+    "quota_prudente": 0.4671
+   },
+   "CPI": {
+    "n": 24,
+    "giuste": 15,
+    "quota": 0.625,
+    "p": 0.15372812747955322,
+    "in_linea": 7,
+    "senza_previsione": 5,
+    "quota_attesa_indip": 0.4931,
+    "quota_prudente": 0.4839
+   },
+   "CORE_CPI": {
+    "n": 14,
+    "giuste": 3,
+    "quota": 0.2143,
+    "p": 0.9935302734375,
+    "in_linea": 12,
+    "senza_previsione": 10,
+    "quota_attesa_indip": 0.5,
+    "quota_prudente": 0.1154
+   },
+   "NFP": {
+    "n": 35,
+    "giuste": 20,
+    "quota": 0.5714,
+    "p": 0.2497799166012556,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4735,
+    "quota_prudente": 0.5714
+   }
+  },
+  "studio": {
+   "tutti": {
+    "n": 1261,
+    "giuste": 652,
+    "quota": 0.517,
+    "p": 0.1184486068439709,
+    "in_linea": 112,
+    "senza_previsione": 164,
+    "quota_attesa_indip": 0.4926,
+    "quota_prudente": 0.4749,
+    "p_permutazioni_indip": 0.043795620437956206
+   },
+   "FOMC": {
+    "n": 0,
+    "giuste": 0,
+    "quota": null,
+    "p": null,
+    "in_linea": 9,
+    "senza_previsione": 55,
+    "quota_attesa_indip": null,
+    "quota_prudente": 0.0
+   },
+   "RETAIL": {
+    "n": 78,
+    "giuste": 46,
+    "quota": 0.5897,
+    "p": 0.07026914313476121,
+    "in_linea": 11,
+    "senza_previsione": 7,
+    "quota_attesa_indip": 0.4974,
+    "quota_prudente": 0.5169
+   },
+   "PPI": {
+    "n": 69,
+    "giuste": 37,
+    "quota": 0.5362,
+    "p": 0.31522824589339904,
+    "in_linea": 13,
+    "senza_previsione": 14,
+    "quota_attesa_indip": 0.5047,
+    "quota_prudente": 0.4512
+   },
+   "PIL": {
+    "n": 80,
+    "giuste": 46,
+    "quota": 0.575,
+    "p": 0.10925901973935187,
+    "in_linea": 13,
+    "senza_previsione": 3,
+    "quota_attesa_indip": 0.5016,
+    "quota_prudente": 0.4946
+   },
+   "ISM_M": {
+    "n": 92,
+    "giuste": 53,
+    "quota": 0.5761,
+    "p": 0.08749194923148088,
+    "in_linea": 2,
+    "senza_previsione": 2,
+    "quota_attesa_indip": 0.4901,
+    "quota_prudente": 0.5638
+   },
+   "ISM_S": {
+    "n": 91,
+    "giuste": 54,
+    "quota": 0.5934,
+    "p": 0.046473471558970594,
+    "in_linea": 2,
+    "senza_previsione": 3,
+    "quota_attesa_indip": 0.4937,
+    "quota_prudente": 0.5806
+   },
+   "ADP": {
+    "n": 95,
+    "giuste": 49,
+    "quota": 0.5158,
+    "p": 0.41877803536453695,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4821,
+    "quota_prudente": 0.5158
+   },
+   "FIDUCIA": {
+    "n": 94,
+    "giuste": 60,
+    "quota": 0.6383,
+    "p": 0.004773905233038708,
+    "in_linea": 0,
+    "senza_previsione": 2,
+    "quota_attesa_indip": 0.4993,
+    "quota_prudente": 0.6383
+   },
+   "MICHIGAN": {
+    "n": 95,
+    "giuste": 46,
+    "quota": 0.4842,
+    "p": 0.6591287470409073,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4864,
+    "quota_prudente": 0.4842
+   },
+   "CLAIMS": {
+    "n": 398,
+    "giuste": 174,
+    "quota": 0.4372,
+    "p": 0.9947570248660544,
+    "in_linea": 7,
+    "senza_previsione": 12,
+    "quota_attesa_indip": 0.4909,
+    "quota_prudente": 0.4296
+   },
+   "CPI": {
+    "n": 46,
+    "giuste": 25,
+    "quota": 0.5435,
+    "p": 0.3293690385118282,
+    "in_linea": 35,
+    "senza_previsione": 15,
+    "quota_attesa_indip": 0.4943,
+    "quota_prudente": 0.3086
+   },
+   "CORE_CPI": {
+    "n": 29,
+    "giuste": 9,
+    "quota": 0.3103,
+    "p": 0.987940227612853,
+    "in_linea": 19,
+    "senza_previsione": 48,
+    "quota_attesa_indip": 0.4625,
+    "quota_prudente": 0.1875
+   },
+   "NFP": {
+    "n": 94,
+    "giuste": 53,
+    "quota": 0.5638,
+    "p": 0.12822117446648493,
+    "in_linea": 1,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4995,
+    "quota_prudente": 0.5579
+   }
+  },
+  "conferma": {
+   "tutti": {
+    "n": 1215,
+    "giuste": 612,
+    "quota": 0.5037,
+    "p": 0.4092420280454118,
+    "in_linea": 118,
+    "senza_previsione": 147,
+    "quota_attesa_indip": 0.4913,
+    "quota_prudente": 0.4591,
+    "p_permutazioni_indip": 0.2096790320967903
+   },
+   "FOMC": {
+    "n": 2,
+    "giuste": 2,
+    "quota": 1.0,
+    "p": 0.25,
+    "in_linea": 19,
+    "senza_previsione": 40,
+    "quota_attesa_indip": 0.5,
+    "quota_prudente": 0.0952
+   },
+   "RETAIL": {
+    "n": 85,
+    "giuste": 57,
+    "quota": 0.6706,
+    "p": 0.0010974544538902963,
+    "in_linea": 3,
+    "senza_previsione": 5,
+    "quota_attesa_indip": 0.5009,
+    "quota_prudente": 0.6477
+   },
+   "PPI": {
+    "n": 63,
+    "giuste": 34,
+    "quota": 0.5397,
+    "p": 0.3073275078827309,
+    "in_linea": 13,
+    "senza_previsione": 16,
+    "quota_attesa_indip": 0.4999,
+    "quota_prudente": 0.4474
+   },
+   "PIL": {
+    "n": 70,
+    "giuste": 38,
+    "quota": 0.5429,
+    "p": 0.2752062559112356,
+    "in_linea": 16,
+    "senza_previsione": 5,
+    "quota_attesa_indip": 0.4967,
+    "quota_prudente": 0.4419
+   },
+   "ISM_M": {
+    "n": 88,
+    "giuste": 40,
+    "quota": 0.4545,
+    "p": 0.83130048157344,
+    "in_linea": 0,
+    "senza_previsione": 6,
+    "quota_attesa_indip": 0.4873,
+    "quota_prudente": 0.4545
+   },
+   "ISM_S": {
+    "n": 90,
+    "giuste": 51,
+    "quota": 0.5667,
+    "p": 0.12305322485813903,
+    "in_linea": 2,
+    "senza_previsione": 2,
+    "quota_attesa_indip": 0.4901,
+    "quota_prudente": 0.5543
+   },
+   "ADP": {
+    "n": 89,
+    "giuste": 47,
+    "quota": 0.5281,
+    "p": 0.3359043245873052,
+    "in_linea": 2,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.4983,
+    "quota_prudente": 0.5165
+   },
+   "FIDUCIA": {
+    "n": 92,
+    "giuste": 48,
+    "quota": 0.5217,
+    "p": 0.3773258748052495,
+    "in_linea": 0,
+    "senza_previsione": 1,
+    "quota_attesa_indip": 0.5,
+    "quota_prudente": 0.5217
+   },
+   "MICHIGAN": {
+    "n": 89,
+    "giuste": 52,
+    "quota": 0.5843,
+    "p": 0.068683985677826,
+    "in_linea": 0,
+    "senza_previsione": 5,
+    "quota_attesa_indip": 0.4903,
+    "quota_prudente": 0.5843
+   },
+   "CLAIMS": {
+    "n": 363,
+    "giuste": 160,
+    "quota": 0.4408,
+    "p": 0.9896031517148309,
+    "in_linea": 15,
+    "senza_previsione": 21,
+    "quota_attesa_indip": 0.493,
+    "quota_prudente": 0.4233
+   },
+   "CPI": {
+    "n": 49,
+    "giuste": 24,
+    "quota": 0.4898,
+    "p": 0.612275172659217,
+    "in_linea": 30,
+    "senza_previsione": 13,
+    "quota_attesa_indip": 0.4756,
+    "quota_prudente": 0.3038
+   },
+   "CORE_CPI": {
+    "n": 43,
+    "giuste": 17,
+    "quota": 0.3953,
+    "p": 0.9368552628072848,
+    "in_linea": 17,
+    "senza_previsione": 32,
+    "quota_attesa_indip": 0.4992,
+    "quota_prudente": 0.2833
+   },
+   "NFP": {
+    "n": 92,
+    "giuste": 42,
+    "quota": 0.4565,
+    "p": 0.8259293548403965,
+    "in_linea": 1,
+    "senza_previsione": 0,
+    "quota_attesa_indip": 0.4603,
+    "quota_prudente": 0.4516
+   }
+  }
+ },
+ "T2_T3_oro_trade": {
+  "descr_2008_10": {
+   "tutti": {
+    "slot": 455,
+    "senza_titolo": 0,
+    "senza_previsione": 34,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 421,
+     "giuste": 219,
+     "quota": 0.5202,
+     "p": 0.2177745358591695
+    },
+    "tetto_sorpresa_vera": {
+     "n": 416,
+     "giuste": 228,
+     "quota": 0.5481,
+     "p": 0.02786429280743076
+    },
+    "R60": {
+     "n": 421,
+     "regola": -0.0444,
+     "caso": -0.0473,
+     "t_regola": -8.88,
+     "scarto": 0.0029,
+     "t_scarto": 0.59,
+     "sd_regola": 0.103
+    },
+    "R300": {
+     "n": 421,
+     "regola": -0.0453,
+     "caso": -0.0465,
+     "t_regola": -4.41,
+     "scarto": 0.0012,
+     "t_scarto": 0.12,
+     "sd_regola": 0.211
+    }
+   },
+   "ADP": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 35,
+     "giuste": 18,
+     "quota": 0.5143,
+     "p": 0.5000000000000001
+    },
+    "tetto_sorpresa_vera": {
+     "n": 36,
+     "giuste": 18,
+     "quota": 0.5,
+     "p": 0.5660302997857798
+    },
+    "R60": {
+     "n": 35,
+     "regola": -0.0587,
+     "caso": -0.0433,
+     "t_regola": -4.28,
+     "scarto": -0.0154,
+     "t_scarto": -1.14,
+     "sd_regola": 0.081
+    },
+    "R300": {
+     "n": 35,
+     "regola": -0.0734,
+     "caso": -0.0424,
+     "t_regola": -2.73,
+     "scarto": -0.031,
+     "t_scarto": -1.17,
+     "sd_regola": 0.159
+    }
+   },
+   "CLAIMS": {
+    "slot": 102,
+    "senza_titolo": 0,
+    "senza_previsione": 2,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 100,
+     "giuste": 56,
+     "quota": 0.56,
+     "p": 0.1356265120369177
+    },
+    "tetto_sorpresa_vera": {
+     "n": 100,
+     "giuste": 51,
+     "quota": 0.51,
+     "p": 0.46020538130641103
+    },
+    "R60": {
+     "n": 100,
+     "regola": -0.0413,
+     "caso": -0.0489,
+     "t_regola": -5.03,
+     "scarto": 0.0076,
+     "t_scarto": 0.93,
+     "sd_regola": 0.082
+    },
+    "R300": {
+     "n": 100,
+     "regola": -0.0156,
+     "caso": -0.0472,
+     "t_regola": -0.85,
+     "scarto": 0.0316,
+     "t_scarto": 1.74,
+     "sd_regola": 0.183
+    }
+   },
+   "CPI": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 5,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 31,
+     "giuste": 18,
+     "quota": 0.5806,
+     "p": 0.23656482994556427
+    },
+    "tetto_sorpresa_vera": {
+     "n": 29,
+     "giuste": 13,
+     "quota": 0.4483,
+     "p": 0.77087084017694
+    },
+    "R60": {
+     "n": 31,
+     "regola": -0.0475,
+     "caso": -0.0471,
+     "t_regola": -2.57,
+     "scarto": -0.0004,
+     "t_scarto": -0.02,
+     "sd_regola": 0.103
+    },
+    "R300": {
+     "n": 31,
+     "regola": -0.0566,
+     "caso": -0.0472,
+     "t_regola": -1.61,
+     "scarto": -0.0094,
+     "t_scarto": -0.27,
+     "sd_regola": 0.196
+    }
+   },
+   "FIDUCIA": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 35,
+     "giuste": 17,
+     "quota": 0.4857,
+     "p": 0.6320605995715596
+    },
+    "tetto_sorpresa_vera": {
+     "n": 36,
+     "giuste": 16,
+     "quota": 0.4444,
+     "p": 0.7974838769296184
+    },
+    "R60": {
+     "n": 35,
+     "regola": -0.0277,
+     "caso": -0.0486,
+     "t_regola": -1.76,
+     "scarto": 0.021,
+     "t_scarto": 1.37,
+     "sd_regola": 0.093
+    },
+    "R300": {
+     "n": 35,
+     "regola": -0.0282,
+     "caso": -0.0482,
+     "t_regola": -0.99,
+     "scarto": 0.0201,
+     "t_scarto": 0.71,
+     "sd_regola": 0.168
+    }
+   },
+   "FOMC": {
+    "slot": 24,
+    "senza_titolo": 0,
+    "senza_previsione": 19,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 5,
+     "giuste": 2,
+     "quota": 0.4,
+     "p": 0.8125
+    },
+    "tetto_sorpresa_vera": {
+     "n": 1,
+     "giuste": 1,
+     "quota": 1.0,
+     "p": 0.5
+    },
+    "R60": {
+     "n": 5,
+     "regola": -0.0326,
+     "caso": -0.0438,
+     "t_regola": -0.21,
+     "scarto": 0.0112,
+     "t_scarto": 0.07,
+     "sd_regola": 0.351
+    },
+    "R300": {
+     "n": 5,
+     "regola": 0.1974,
+     "caso": -0.0137,
+     "t_regola": 0.65,
+     "scarto": 0.2111,
+     "t_scarto": 0.75,
+     "sd_regola": 0.683
+    }
+   },
+   "ISM_M": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 3,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 33,
+     "giuste": 14,
+     "quota": 0.4242,
+     "p": 0.8518968157004565
+    },
+    "tetto_sorpresa_vera": {
+     "n": 35,
+     "giuste": 22,
+     "quota": 0.6286,
+     "p": 0.087732624495402
+    },
+    "R60": {
+     "n": 33,
+     "regola": -0.0589,
+     "caso": -0.0455,
+     "t_regola": -4.77,
+     "scarto": -0.0134,
+     "t_scarto": -1.08,
+     "sd_regola": 0.071
+    },
+    "R300": {
+     "n": 33,
+     "regola": -0.0671,
+     "caso": -0.0457,
+     "t_regola": -2.42,
+     "scarto": -0.0215,
+     "t_scarto": -0.77,
+     "sd_regola": 0.159
+    }
+   },
+   "ISM_S": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 36,
+     "giuste": 16,
+     "quota": 0.4444,
+     "p": 0.7974838769296184
+    },
+    "tetto_sorpresa_vera": {
+     "n": 36,
+     "giuste": 23,
+     "quota": 0.6389,
+     "p": 0.06624908198136838
+    },
+    "R60": {
+     "n": 36,
+     "regola": -0.0499,
+     "caso": -0.0453,
+     "t_regola": -4.38,
+     "scarto": -0.0046,
+     "t_scarto": -0.42,
+     "sd_regola": 0.068
+    },
+    "R300": {
+     "n": 36,
+     "regola": -0.0551,
+     "caso": -0.0466,
+     "t_regola": -2.39,
+     "scarto": -0.0084,
+     "t_scarto": -0.36,
+     "sd_regola": 0.138
+    }
+   },
+   "MICHIGAN": {
+    "slot": 29,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 28,
+     "giuste": 13,
+     "quota": 0.4643,
+     "p": 0.7142059057950974
+    },
+    "tetto_sorpresa_vera": {
+     "n": 29,
+     "giuste": 12,
+     "quota": 0.4138,
+     "p": 0.867534551769495
+    },
+    "R60": {
+     "n": 28,
+     "regola": -0.041,
+     "caso": -0.0464,
+     "t_regola": -2.42,
+     "scarto": 0.0054,
+     "t_scarto": 0.33,
+     "sd_regola": 0.09
+    },
+    "R300": {
+     "n": 28,
+     "regola": 0.0068,
+     "caso": -0.0471,
+     "t_regola": 0.18,
+     "scarto": 0.0539,
+     "t_scarto": 1.47,
+     "sd_regola": 0.194
+    }
+   },
+   "NFP": {
+    "slot": 36,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 35,
+     "giuste": 19,
+     "quota": 0.5429,
+     "p": 0.3679394004284405
+    },
+    "tetto_sorpresa_vera": {
+     "n": 36,
+     "giuste": 25,
+     "quota": 0.6944,
+     "p": 0.014408359827939423
+    },
+    "R60": {
+     "n": 35,
+     "regola": -0.0435,
+     "caso": -0.0491,
+     "t_regola": -1.66,
+     "scarto": 0.0056,
+     "t_scarto": 0.22,
+     "sd_regola": 0.155
+    },
+    "R300": {
+     "n": 35,
+     "regola": -0.1455,
+     "caso": -0.0488,
+     "t_regola": -2.44,
+     "scarto": -0.0967,
+     "t_scarto": -1.61,
+     "sd_regola": 0.352
+    }
+   },
+   "PIL": {
+    "slot": 24,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 24,
+     "giuste": 13,
+     "quota": 0.5417,
+     "p": 0.4194098711013794
+    },
+    "tetto_sorpresa_vera": {
+     "n": 22,
+     "giuste": 14,
+     "quota": 0.6364,
+     "p": 0.14313936233520508
+    },
+    "R60": {
+     "n": 24,
+     "regola": -0.0469,
+     "caso": -0.05,
+     "t_regola": -3.83,
+     "scarto": 0.0031,
+     "t_scarto": 0.25,
+     "sd_regola": 0.06
+    },
+    "R300": {
+     "n": 24,
+     "regola": -0.0529,
+     "caso": -0.048,
+     "t_regola": -1.31,
+     "scarto": -0.0049,
+     "t_scarto": -0.12,
+     "sd_regola": 0.198
+    }
+   },
+   "PPI": {
+    "slot": 27,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 27,
+     "giuste": 15,
+     "quota": 0.5556,
+     "p": 0.3505540192127228
+    },
+    "tetto_sorpresa_vera": {
+     "n": 25,
+     "giuste": 10,
+     "quota": 0.4,
+     "p": 0.885238528251648
+    },
+    "R60": {
+     "n": 27,
+     "regola": -0.0422,
+     "caso": -0.0476,
+     "t_regola": -2.38,
+     "scarto": 0.0054,
+     "t_scarto": 0.3,
+     "sd_regola": 0.092
+    },
+    "R300": {
+     "n": 27,
+     "regola": -0.0534,
+     "caso": -0.0471,
+     "t_regola": -1.73,
+     "scarto": -0.0063,
+     "t_scarto": -0.2,
+     "sd_regola": 0.16
+    }
+   },
+   "RETAIL": {
+    "slot": 33,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 32,
+     "giuste": 18,
+     "quota": 0.5625,
+     "p": 0.29830744792707264
+    },
+    "tetto_sorpresa_vera": {
+     "n": 31,
+     "giuste": 23,
+     "quota": 0.7419,
+     "p": 0.005336920265108347
+    },
+    "R60": {
+     "n": 32,
+     "regola": -0.0386,
+     "caso": -0.0473,
+     "t_regola": -1.41,
+     "scarto": 0.0087,
+     "t_scarto": 0.32,
+     "sd_regola": 0.155
+    },
+    "R300": {
+     "n": 32,
+     "regola": -0.043,
+     "caso": -0.0475,
+     "t_regola": -1.17,
+     "scarto": 0.0045,
+     "t_scarto": 0.12,
+     "sd_regola": 0.208
+    }
+   }
+  },
+  "studio": {
+   "tutti": {
+    "slot": 1224,
+    "senza_titolo": 0,
+    "senza_previsione": 105,
+    "tick_mancanti_o_non_validi": 5,
+    "oro": {
+     "n": 1112,
+     "giuste": 591,
+     "quota": 0.5315,
+     "p": 0.019241070782505997
+    },
+    "tetto_sorpresa_vera": {
+     "n": 1070,
+     "giuste": 820,
+     "quota": 0.7664,
+     "p": 1.3900557839731866e-71
+    },
+    "R60": {
+     "n": 1112,
+     "regola": -0.0199,
+     "caso": -0.0332,
+     "t_regola": -2.61,
+     "scarto": 0.0133,
+     "t_scarto": 1.78,
+     "sd_regola": 0.255
+    },
+    "R300": {
+     "n": 1112,
+     "regola": -0.0162,
+     "caso": -0.0301,
+     "t_regola": -1.6,
+     "scarto": 0.0139,
+     "t_scarto": 1.4,
+     "sd_regola": 0.338
+    }
+   },
+   "ADP": {
+    "slot": 93,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 92,
+     "giuste": 44,
+     "quota": 0.4783,
+     "p": 0.6987938611519247
+    },
+    "tetto_sorpresa_vera": {
+     "n": 93,
+     "giuste": 76,
+     "quota": 0.8172,
+     "p": 2.223153468882768e-10
+    },
+    "R60": {
+     "n": 92,
+     "regola": -0.028,
+     "caso": -0.0328,
+     "t_regola": -1.26,
+     "scarto": 0.0048,
+     "t_scarto": 0.22,
+     "sd_regola": 0.212
+    },
+    "R300": {
+     "n": 92,
+     "regola": -0.0231,
+     "caso": -0.0311,
+     "t_regola": -0.88,
+     "scarto": 0.008,
+     "t_scarto": 0.31,
+     "sd_regola": 0.252
+    }
+   },
+   "CLAIMS": {
+    "slot": 285,
+    "senza_titolo": 0,
+    "senza_previsione": 4,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 280,
+     "giuste": 133,
+     "quota": 0.475,
+     "p": 0.8149718027637901
+    },
+    "tetto_sorpresa_vera": {
+     "n": 278,
+     "giuste": 220,
+     "quota": 0.7914,
+     "p": 1.1135047236045399e-23
+    },
+    "R60": {
+     "n": 280,
+     "regola": -0.0369,
+     "caso": -0.0334,
+     "t_regola": -3.82,
+     "scarto": -0.0035,
+     "t_scarto": -0.37,
+     "sd_regola": 0.161
+    },
+    "R300": {
+     "n": 280,
+     "regola": -0.0361,
+     "caso": -0.0331,
+     "t_regola": -2.7,
+     "scarto": -0.003,
+     "t_scarto": -0.23,
+     "sd_regola": 0.224
+    }
+   },
+   "CPI": {
+    "slot": 96,
+    "senza_titolo": 0,
+    "senza_previsione": 15,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 80,
+     "giuste": 40,
+     "quota": 0.5,
+     "p": 0.5444639393869536
+    },
+    "tetto_sorpresa_vera": {
+     "n": 55,
+     "giuste": 42,
+     "quota": 0.7636,
+     "p": 5.680530160345753e-05
+    },
+    "R60": {
+     "n": 80,
+     "regola": -0.0341,
+     "caso": -0.0337,
+     "t_regola": -1.28,
+     "scarto": -0.0004,
+     "t_scarto": -0.02,
+     "sd_regola": 0.239
+    },
+    "R300": {
+     "n": 80,
+     "regola": -0.0613,
+     "caso": -0.0328,
+     "t_regola": -1.77,
+     "scarto": -0.0286,
+     "t_scarto": -0.83,
+     "sd_regola": 0.31
+    }
+   },
+   "FIDUCIA": {
+    "slot": 93,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 91,
+     "giuste": 51,
+     "quota": 0.5604,
+     "p": 0.1472348922842665
+    },
+    "tetto_sorpresa_vera": {
+     "n": 92,
+     "giuste": 64,
+     "quota": 0.6957,
+     "p": 0.00011125056478790201
+    },
+    "R60": {
+     "n": 91,
+     "regola": -0.0278,
+     "caso": -0.0324,
+     "t_regola": -1.5,
+     "scarto": 0.0046,
+     "t_scarto": 0.26,
+     "sd_regola": 0.177
+    },
+    "R300": {
+     "n": 91,
+     "regola": -0.0271,
+     "caso": -0.0284,
+     "t_regola": -1.03,
+     "scarto": 0.0013,
+     "t_scarto": 0.05,
+     "sd_regola": 0.25
+    }
+   },
+   "FOMC": {
+    "slot": 64,
+    "senza_titolo": 0,
+    "senza_previsione": 55,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 9,
+     "giuste": 5,
+     "quota": 0.5556,
+     "p": 0.5
+    },
+    "tetto_sorpresa_vera": {
+     "n": 0,
+     "giuste": 0,
+     "quota": null,
+     "p": null
+    },
+    "R60": {
+     "n": 9,
+     "regola": -0.0289,
+     "caso": -0.0663,
+     "t_regola": -0.17,
+     "scarto": 0.0374,
+     "t_scarto": 0.21,
+     "sd_regola": 0.52
+    },
+    "R300": {
+     "n": 9,
+     "regola": -0.044,
+     "caso": -0.094,
+     "t_regola": -0.29,
+     "scarto": 0.05,
+     "t_scarto": 0.32,
+     "sd_regola": 0.451
+    }
+   },
+   "ISM_M": {
+    "slot": 95,
+    "senza_titolo": 0,
+    "senza_previsione": 2,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 93,
+     "giuste": 55,
+     "quota": 0.5914,
+     "p": 0.048282598648852315
+    },
+    "tetto_sorpresa_vera": {
+     "n": 93,
+     "giuste": 73,
+     "quota": 0.7849,
+     "p": 1.4600724384857279e-08
+    },
+    "R60": {
+     "n": 93,
+     "regola": -0.0067,
+     "caso": -0.0309,
+     "t_regola": -0.35,
+     "scarto": 0.0242,
+     "t_scarto": 1.25,
+     "sd_regola": 0.186
+    },
+    "R300": {
+     "n": 93,
+     "regola": -0.0029,
+     "caso": -0.0281,
+     "t_regola": -0.08,
+     "scarto": 0.0252,
+     "t_scarto": 0.75,
+     "sd_regola": 0.332
+    }
+   },
+   "ISM_S": {
+    "slot": 95,
+    "senza_titolo": 0,
+    "senza_previsione": 3,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 91,
+     "giuste": 53,
+     "quota": 0.5824,
+     "p": 0.07089668727237357
+    },
+    "tetto_sorpresa_vera": {
+     "n": 92,
+     "giuste": 66,
+     "quota": 0.7174,
+     "p": 1.8350229618997067e-05
+    },
+    "R60": {
+     "n": 91,
+     "regola": 0.0036,
+     "caso": -0.0318,
+     "t_regola": 0.22,
+     "scarto": 0.0354,
+     "t_scarto": 2.21,
+     "sd_regola": 0.154
+    },
+    "R300": {
+     "n": 91,
+     "regola": 0.036,
+     "caso": -0.0314,
+     "t_regola": 1.56,
+     "scarto": 0.0673,
+     "t_scarto": 2.93,
+     "sd_regola": 0.219
+    }
+   },
+   "MICHIGAN": {
+    "slot": 76,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 75,
+     "giuste": 35,
+     "quota": 0.4667,
+     "p": 0.7556585145484285
+    },
+    "tetto_sorpresa_vera": {
+     "n": 76,
+     "giuste": 50,
+     "quota": 0.6579,
+     "p": 0.003952590013929892
+    },
+    "R60": {
+     "n": 75,
+     "regola": -0.0458,
+     "caso": -0.0321,
+     "t_regola": -2.65,
+     "scarto": -0.0136,
+     "t_scarto": -0.79,
+     "sd_regola": 0.15
+    },
+    "R300": {
+     "n": 75,
+     "regola": -0.0474,
+     "caso": -0.0331,
+     "t_regola": -2.19,
+     "scarto": -0.0142,
+     "t_scarto": -0.65,
+     "sd_regola": 0.188
+    }
+   },
+   "NFP": {
+    "slot": 96,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 93,
+     "giuste": 50,
+     "quota": 0.5376,
+     "p": 0.2670299308673033
+    },
+    "tetto_sorpresa_vera": {
+     "n": 93,
+     "giuste": 79,
+     "quota": 0.8495,
+     "p": 1.80889037430031e-12
+    },
+    "R60": {
+     "n": 93,
+     "regola": -0.0251,
+     "caso": -0.0387,
+     "t_regola": -0.39,
+     "scarto": 0.0136,
+     "t_scarto": 0.22,
+     "sd_regola": 0.625
+    },
+    "R300": {
+     "n": 93,
+     "regola": -0.0437,
+     "caso": -0.0154,
+     "t_regola": -0.53,
+     "scarto": -0.0283,
+     "t_scarto": -0.36,
+     "sd_regola": 0.789
+    }
+   },
+   "PIL": {
+    "slot": 83,
+    "senza_titolo": 0,
+    "senza_previsione": 3,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 79,
+     "giuste": 49,
+     "quota": 0.6203,
+     "p": 0.021082721997475566
+    },
+    "tetto_sorpresa_vera": {
+     "n": 72,
+     "giuste": 53,
+     "quota": 0.7361,
+     "p": 3.777905742215698e-05
+    },
+    "R60": {
+     "n": 79,
+     "regola": 0.0136,
+     "caso": -0.031,
+     "t_regola": 0.57,
+     "scarto": 0.0446,
+     "t_scarto": 1.86,
+     "sd_regola": 0.213
+    },
+    "R300": {
+     "n": 79,
+     "regola": 0.0612,
+     "caso": -0.0241,
+     "t_regola": 1.54,
+     "scarto": 0.0852,
+     "t_scarto": 2.36,
+     "sd_regola": 0.352
+    }
+   },
+   "PPI": {
+    "slot": 67,
+    "senza_titolo": 0,
+    "senza_previsione": 14,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 53,
+     "giuste": 26,
+     "quota": 0.4906,
+     "p": 0.6080768488952506
+    },
+    "tetto_sorpresa_vera": {
+     "n": 56,
+     "giuste": 43,
+     "quota": 0.7679,
+     "p": 3.666609198474391e-05
+    },
+    "R60": {
+     "n": 53,
+     "regola": -0.0322,
+     "caso": -0.0301,
+     "t_regola": -2.42,
+     "scarto": -0.0021,
+     "t_scarto": -0.16,
+     "sd_regola": 0.097
+    },
+    "R300": {
+     "n": 53,
+     "regola": -0.0091,
+     "caso": -0.0294,
+     "t_regola": -0.45,
+     "scarto": 0.0202,
+     "t_scarto": 0.99,
+     "sd_regola": 0.148
+    }
+   },
+   "RETAIL": {
+    "slot": 81,
+    "senza_titolo": 0,
+    "senza_previsione": 5,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 76,
+     "giuste": 50,
+     "quota": 0.6579,
+     "p": 0.003952590013929892
+    },
+    "tetto_sorpresa_vera": {
+     "n": 70,
+     "giuste": 54,
+     "quota": 0.7714,
+     "p": 2.926977764694055e-06
+    },
+    "R60": {
+     "n": 76,
+     "regola": 0.0394,
+     "caso": -0.0327,
+     "t_regola": 1.57,
+     "scarto": 0.0721,
+     "t_scarto": 2.88,
+     "sd_regola": 0.219
+    },
+    "R300": {
+     "n": 76,
+     "regola": 0.0292,
+     "caso": -0.0319,
+     "t_regola": 0.89,
+     "scarto": 0.0611,
+     "t_scarto": 1.86,
+     "sd_regola": 0.287
+    }
+   }
+  },
+  "conferma": {
+   "tutti": {
+    "slot": 885,
+    "senza_titolo": 0,
+    "senza_previsione": 84,
+    "tick_mancanti_o_non_validi": 4,
+    "oro": {
+     "n": 797,
+     "giuste": 424,
+     "quota": 0.532,
+     "p": 0.03823988643946427
+    },
+    "tetto_sorpresa_vera": {
+     "n": 758,
+     "giuste": 596,
+     "quota": 0.7863,
+     "p": 2.0205209039012194e-59
+    },
+    "R60": {
+     "n": 797,
+     "regola": -0.0244,
+     "caso": -0.0486,
+     "t_regola": -1.06,
+     "scarto": 0.0242,
+     "t_scarto": 1.33,
+     "sd_regola": 0.653
+    },
+    "R300": {
+     "n": 797,
+     "regola": -0.0286,
+     "caso": -0.0539,
+     "t_regola": -1.08,
+     "scarto": 0.0254,
+     "t_scarto": 1.23,
+     "sd_regola": 0.744
+    }
+   },
+   "ADP": {
+    "slot": 70,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 70,
+     "giuste": 39,
+     "quota": 0.5571,
+     "p": 0.20148153752303988
+    },
+    "tetto_sorpresa_vera": {
+     "n": 68,
+     "giuste": 63,
+     "quota": 0.9265,
+     "p": 3.8255314714630284e-14
+    },
+    "R60": {
+     "n": 70,
+     "regola": -0.0692,
+     "caso": -0.0493,
+     "t_regola": -1.78,
+     "scarto": -0.0199,
+     "t_scarto": -0.52,
+     "sd_regola": 0.326
+    },
+    "R300": {
+     "n": 70,
+     "regola": -0.0686,
+     "caso": -0.052,
+     "t_regola": -1.57,
+     "scarto": -0.0166,
+     "t_scarto": -0.39,
+     "sd_regola": 0.366
+    }
+   },
+   "CLAIMS": {
+    "slot": 101,
+    "senza_titolo": 0,
+    "senza_previsione": 5,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 96,
+     "giuste": 45,
+     "quota": 0.4688,
+     "p": 0.7624239750067136
+    },
+    "tetto_sorpresa_vera": {
+     "n": 98,
+     "giuste": 80,
+     "quota": 0.8163,
+     "p": 8.303348785522802e-11
+    },
+    "R60": {
+     "n": 96,
+     "regola": -0.0954,
+     "caso": -0.0728,
+     "t_regola": -3.23,
+     "scarto": -0.0226,
+     "t_scarto": -0.82,
+     "sd_regola": 0.29
+    },
+    "R300": {
+     "n": 96,
+     "regola": -0.0954,
+     "caso": -0.0821,
+     "t_regola": -2.21,
+     "scarto": -0.0134,
+     "t_scarto": -0.33,
+     "sd_regola": 0.424
+    }
+   },
+   "CPI": {
+    "slot": 92,
+    "senza_titolo": 0,
+    "senza_previsione": 13,
+    "tick_mancanti_o_non_validi": 1,
+    "oro": {
+     "n": 78,
+     "giuste": 41,
+     "quota": 0.5256,
+     "p": 0.3671710165149233
+    },
+    "tetto_sorpresa_vera": {
+     "n": 57,
+     "giuste": 43,
+     "quota": 0.7544,
+     "p": 7.694451122217115e-05
+    },
+    "R60": {
+     "n": 78,
+     "regola": 0.0073,
+     "caso": -0.0284,
+     "t_regola": 0.06,
+     "scarto": 0.0357,
+     "t_scarto": 0.41,
+     "sd_regola": 1.002
+    },
+    "R300": {
+     "n": 78,
+     "regola": 0.0196,
+     "caso": -0.028,
+     "t_regola": 0.15,
+     "scarto": 0.0477,
+     "t_scarto": 0.48,
+     "sd_regola": 1.164
+    }
+   },
+   "FIDUCIA": {
+    "slot": 47,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 46,
+     "giuste": 28,
+     "quota": 0.6087,
+     "p": 0.09196241068849531
+    },
+    "tetto_sorpresa_vera": {
+     "n": 47,
+     "giuste": 34,
+     "quota": 0.7234,
+     "p": 0.0015438382307593197
+    },
+    "R60": {
+     "n": 46,
+     "regola": -0.0065,
+     "caso": -0.0392,
+     "t_regola": -0.23,
+     "scarto": 0.0327,
+     "t_scarto": 1.19,
+     "sd_regola": 0.188
+    },
+    "R300": {
+     "n": 46,
+     "regola": -0.0182,
+     "caso": -0.0384,
+     "t_regola": -0.47,
+     "scarto": 0.0202,
+     "t_scarto": 0.53,
+     "sd_regola": 0.261
+    }
+   },
+   "FOMC": {
+    "slot": 61,
+    "senza_titolo": 0,
+    "senza_previsione": 40,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 21,
+     "giuste": 8,
+     "quota": 0.381,
+     "p": 0.9053764343261719
+    },
+    "tetto_sorpresa_vera": {
+     "n": 2,
+     "giuste": 1,
+     "quota": 0.5,
+     "p": 0.75
+    },
+    "R60": {
+     "n": 21,
+     "regola": -0.2435,
+     "caso": -0.1552,
+     "t_regola": -1.59,
+     "scarto": -0.0883,
+     "t_scarto": -0.66,
+     "sd_regola": 0.703
+    },
+    "R300": {
+     "n": 21,
+     "regola": -0.3225,
+     "caso": -0.1721,
+     "t_regola": -1.81,
+     "scarto": -0.1504,
+     "t_scarto": -0.92,
+     "sd_regola": 0.818
+    }
+   },
+   "ISM_M": {
+    "slot": 88,
+    "senza_titolo": 0,
+    "senza_previsione": 6,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 82,
+     "giuste": 35,
+     "quota": 0.4268,
+     "p": 0.9246623961868481
+    },
+    "tetto_sorpresa_vera": {
+     "n": 88,
+     "giuste": 71,
+     "quota": 0.8068,
+     "p": 2.5769773483004237e-09
+    },
+    "R60": {
+     "n": 82,
+     "regola": -0.1285,
+     "caso": -0.0594,
+     "t_regola": -2.9,
+     "scarto": -0.069,
+     "t_scarto": -1.66,
+     "sd_regola": 0.402
+    },
+    "R300": {
+     "n": 82,
+     "regola": -0.1613,
+     "caso": -0.0831,
+     "t_regola": -3.34,
+     "scarto": -0.0782,
+     "t_scarto": -1.74,
+     "sd_regola": 0.438
+    }
+   },
+   "ISM_S": {
+    "slot": 78,
+    "senza_titolo": 0,
+    "senza_previsione": 1,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 77,
+     "giuste": 41,
+     "quota": 0.5325,
+     "p": 0.32439558115532247
+    },
+    "tetto_sorpresa_vera": {
+     "n": 77,
+     "giuste": 63,
+     "quota": 0.8182,
+     "p": 7.07036204397304e-09
+    },
+    "R60": {
+     "n": 77,
+     "regola": -0.0254,
+     "caso": -0.0707,
+     "t_regola": -0.6,
+     "scarto": 0.0453,
+     "t_scarto": 1.03,
+     "sd_regola": 0.374
+    },
+    "R300": {
+     "n": 77,
+     "regola": -0.016,
+     "caso": -0.0814,
+     "t_regola": -0.26,
+     "scarto": 0.0654,
+     "t_scarto": 1.15,
+     "sd_regola": 0.548
+    }
+   },
+   "MICHIGAN": {
+    "slot": 37,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 37,
+     "giuste": 21,
+     "quota": 0.5676,
+     "p": 0.2556878907926148
+    },
+    "tetto_sorpresa_vera": {
+     "n": 37,
+     "giuste": 28,
+     "quota": 0.7568,
+     "p": 0.0012816039961762726
+    },
+    "R60": {
+     "n": 37,
+     "regola": -0.0593,
+     "caso": -0.0653,
+     "t_regola": -1.14,
+     "scarto": 0.006,
+     "t_scarto": 0.13,
+     "sd_regola": 0.316
+    },
+    "R300": {
+     "n": 37,
+     "regola": -0.0229,
+     "caso": -0.0666,
+     "t_regola": -0.41,
+     "scarto": 0.0436,
+     "t_scarto": 0.9,
+     "sd_regola": 0.339
+    }
+   },
+   "NFP": {
+    "slot": 93,
+    "senza_titolo": 0,
+    "senza_previsione": 0,
+    "tick_mancanti_o_non_validi": 3,
+    "oro": {
+     "n": 90,
+     "giuste": 47,
+     "quota": 0.5222,
+     "p": 0.37601660079929755
+    },
+    "tetto_sorpresa_vera": {
+     "n": 89,
+     "giuste": 69,
+     "quota": 0.7753,
+     "p": 8.884820300356943e-08
+    },
+    "R60": {
+     "n": 90,
+     "regola": 0.1914,
+     "caso": 0.0236,
+     "t_regola": 1.3,
+     "scarto": 0.1678,
+     "t_scarto": 1.64,
+     "sd_regola": 1.396
+    },
+    "R300": {
+     "n": 90,
+     "regola": 0.2143,
+     "caso": 0.0305,
+     "t_regola": 1.37,
+     "scarto": 0.1838,
+     "t_scarto": 1.68,
+     "sd_regola": 1.482
+    }
+   },
+   "PIL": {
+    "slot": 71,
+    "senza_titolo": 0,
+    "senza_previsione": 3,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 68,
+     "giuste": 33,
+     "quota": 0.4853,
+     "p": 0.6418496199228315
+    },
+    "tetto_sorpresa_vera": {
+     "n": 61,
+     "giuste": 44,
+     "quota": 0.7213,
+     "p": 0.00036495225546738427
+    },
+    "R60": {
+     "n": 68,
+     "regola": -0.0723,
+     "caso": -0.0417,
+     "t_regola": -1.57,
+     "scarto": -0.0306,
+     "t_scarto": -0.64,
+     "sd_regola": 0.381
+    },
+    "R300": {
+     "n": 68,
+     "regola": -0.0674,
+     "caso": -0.0545,
+     "t_regola": -1.01,
+     "scarto": -0.0129,
+     "t_scarto": -0.22,
+     "sd_regola": 0.549
+    }
+   },
+   "PPI": {
+    "slot": 60,
+    "senza_titolo": 0,
+    "senza_previsione": 11,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 49,
+     "giuste": 30,
+     "quota": 0.6122,
+     "p": 0.07620388598073902
+    },
+    "tetto_sorpresa_vera": {
+     "n": 51,
+     "giuste": 41,
+     "quota": 0.8039,
+     "p": 7.368857942502416e-06
+    },
+    "R60": {
+     "n": 49,
+     "regola": -0.0012,
+     "caso": -0.065,
+     "t_regola": -0.02,
+     "scarto": 0.0638,
+     "t_scarto": 1.1,
+     "sd_regola": 0.444
+    },
+    "R300": {
+     "n": 49,
+     "regola": -0.0434,
+     "caso": -0.0666,
+     "t_regola": -0.58,
+     "scarto": 0.0232,
+     "t_scarto": 0.34,
+     "sd_regola": 0.52
+    }
+   },
+   "RETAIL": {
+    "slot": 87,
+    "senza_titolo": 0,
+    "senza_previsione": 4,
+    "tick_mancanti_o_non_validi": 0,
+    "oro": {
+     "n": 83,
+     "giuste": 56,
+     "quota": 0.6747,
+     "p": 0.0009657187411125238
+    },
+    "tetto_sorpresa_vera": {
+     "n": 83,
+     "giuste": 59,
+     "quota": 0.7108,
+     "p": 7.727970539164584e-05
+    },
+    "R60": {
+     "n": 83,
+     "regola": 0.0215,
+     "caso": -0.0533,
+     "t_regola": 0.61,
+     "scarto": 0.0748,
+     "t_scarto": 2.06,
+     "sd_regola": 0.324
+    },
+    "R300": {
+     "n": 83,
+     "regola": 0.0,
+     "caso": -0.0498,
+     "t_regola": 0.0,
+     "scarto": 0.0498,
+     "t_scarto": 1.18,
+     "sd_regola": 0.397
+    }
+   }
+  }
+ },
+ "varianti": {
+  "T1_ultimo_pubblicato": {
+   "descr_2008_10": {
+    "tutti": {
+     "n": 490,
+     "giuste": 254,
+     "quota": 0.5184,
+     "p": 0.2212650527277214,
+     "in_linea": 33,
+     "senza_previsione": 54,
+     "quota_attesa_indip": 0.4878,
+     "quota_prudente": 0.4857
+    },
+    "FOMC": {
+     "n": 1,
+     "giuste": 1,
+     "quota": 1.0,
+     "p": 0.5,
+     "in_linea": 4,
+     "senza_previsione": 19,
+     "quota_attesa_indip": 1.0,
+     "quota_prudente": 0.2
+    },
+    "RETAIL": {
+     "n": 34,
+     "giuste": 20,
+     "quota": 0.5882,
+     "p": 0.19576415256597102,
+     "in_linea": 1,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.5069,
+     "quota_prudente": 0.5714
+    },
+    "PPI": {
+     "n": 33,
+     "giuste": 23,
+     "quota": 0.697,
+     "p": 0.01754101668484509,
+     "in_linea": 3,
+     "senza_previsione": 0,
+     "quota_attesa_indip": 0.5041,
+     "quota_prudente": 0.6389
+    },
+    "PIL": {
+     "n": 25,
+     "giuste": 10,
+     "quota": 0.4,
+     "p": 0.885238528251648,
+     "in_linea": 3,
+     "senza_previsione": 8,
+     "quota_attesa_indip": 0.4992,
+     "quota_prudente": 0.3571
+    },
+    "ISM_M": {
+     "n": 32,
+     "giuste": 18,
+     "quota": 0.5625,
+     "p": 0.29830744792707264,
+     "in_linea": 1,
+     "senza_previsione": 3,
+     "quota_attesa_indip": 0.4297,
+     "quota_prudente": 0.5455
+    },
+    "ISM_S": {
+     "n": 36,
+     "giuste": 17,
+     "quota": 0.4722,
+     "p": 0.691140341485152,
+     "in_linea": 0,
+     "senza_previsione": 0,
+     "quota_attesa_indip": 0.5093,
+     "quota_prudente": 0.4722
+    },
+    "ADP": {
+     "n": 35,
+     "giuste": 18,
+     "quota": 0.5143,
+     "p": 0.5000000000000001,
+     "in_linea": 0,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4686,
+     "quota_prudente": 0.5143
+    },
+    "FIDUCIA": {
+     "n": 35,
+     "giuste": 22,
+     "quota": 0.6286,
+     "p": 0.087732624495402,
+     "in_linea": 0,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4963,
+     "quota_prudente": 0.6286
+    },
+    "MICHIGAN": {
+     "n": 36,
+     "giuste": 16,
+     "quota": 0.4444,
+     "p": 0.7974838769296184,
+     "in_linea": 0,
+     "senza_previsione": 0,
+     "quota_attesa_indip": 0.4877,
+     "quota_prudente": 0.4444
+    },
+    "CLAIMS": {
+     "n": 150,
+     "giuste": 71,
+     "quota": 0.4733,
+     "p": 0.7687252410665847,
+     "in_linea": 2,
+     "senza_previsione": 5,
+     "quota_attesa_indip": 0.4856,
+     "quota_prudente": 0.4671
+    },
+    "CPI": {
+     "n": 24,
+     "giuste": 15,
+     "quota": 0.625,
+     "p": 0.15372812747955322,
+     "in_linea": 7,
+     "senza_previsione": 5,
+     "quota_attesa_indip": 0.4931,
+     "quota_prudente": 0.4839
+    },
+    "CORE_CPI": {
+     "n": 14,
+     "giuste": 3,
+     "quota": 0.2143,
+     "p": 0.9935302734375,
+     "in_linea": 12,
+     "senza_previsione": 10,
+     "quota_attesa_indip": 0.5,
+     "quota_prudente": 0.1154
+    },
+    "NFP": {
+     "n": 35,
+     "giuste": 20,
+     "quota": 0.5714,
+     "p": 0.2497799166012556,
+     "in_linea": 0,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4735,
+     "quota_prudente": 0.5714
+    }
+   },
+   "studio": {
+    "tutti": {
+     "n": 1246,
+     "giuste": 642,
+     "quota": 0.5152,
+     "p": 0.14727246499485466,
+     "in_linea": 109,
+     "senza_previsione": 182,
+     "quota_attesa_indip": 0.4914,
+     "quota_prudente": 0.4738
+    },
+    "FOMC": {
+     "n": 0,
+     "giuste": 0,
+     "quota": null,
+     "p": null,
+     "in_linea": 9,
+     "senza_previsione": 55,
+     "quota_attesa_indip": null,
+     "quota_prudente": 0.0
+    },
+    "RETAIL": {
+     "n": 78,
+     "giuste": 46,
+     "quota": 0.5897,
+     "p": 0.07026914313476121,
+     "in_linea": 11,
+     "senza_previsione": 7,
+     "quota_attesa_indip": 0.4974,
+     "quota_prudente": 0.5169
+    },
+    "PPI": {
+     "n": 69,
+     "giuste": 37,
+     "quota": 0.5362,
+     "p": 0.31522824589339904,
+     "in_linea": 13,
+     "senza_previsione": 14,
+     "quota_attesa_indip": 0.5047,
+     "quota_prudente": 0.4512
+    },
+    "PIL": {
+     "n": 69,
+     "giuste": 40,
+     "quota": 0.5797,
+     "p": 0.11420011267664851,
+     "in_linea": 10,
+     "senza_previsione": 17,
+     "quota_attesa_indip": 0.4995,
+     "quota_prudente": 0.5063
+    },
+    "ISM_M": {
+     "n": 92,
+     "giuste": 53,
+     "quota": 0.5761,
+     "p": 0.08749194923148088,
+     "in_linea": 2,
+     "senza_previsione": 2,
+     "quota_attesa_indip": 0.4901,
+     "quota_prudente": 0.5638
+    },
+    "ISM_S": {
+     "n": 91,
+     "giuste": 54,
+     "quota": 0.5934,
+     "p": 0.046473471558970594,
+     "in_linea": 2,
+     "senza_previsione": 3,
+     "quota_attesa_indip": 0.4937,
+     "quota_prudente": 0.5806
+    },
+    "ADP": {
+     "n": 95,
+     "giuste": 49,
+     "quota": 0.5158,
+     "p": 0.41877803536453695,
+     "in_linea": 0,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4821,
+     "quota_prudente": 0.5158
+    },
+    "FIDUCIA": {
+     "n": 94,
+     "giuste": 60,
+     "quota": 0.6383,
+     "p": 0.004773905233038708,
+     "in_linea": 0,
+     "senza_previsione": 2,
+     "quota_attesa_indip": 0.4993,
+     "quota_prudente": 0.6383
+    },
+    "MICHIGAN": {
+     "n": 91,
+     "giuste": 42,
+     "quota": 0.4615,
+     "p": 0.7990936019650601,
+     "in_linea": 0,
+     "senza_previsione": 5,
+     "quota_attesa_indip": 0.4714,
+     "quota_prudente": 0.4615
+    },
+    "CLAIMS": {
+     "n": 398,
+     "giuste": 174,
+     "quota": 0.4372,
+     "p": 0.9947570248660544,
+     "in_linea": 7,
+     "senza_previsione": 12,
+     "quota_attesa_indip": 0.4909,
+     "quota_prudente": 0.4296
+    },
+    "CPI": {
+     "n": 46,
+     "giuste": 25,
+     "quota": 0.5435,
+     "p": 0.3293690385118282,
+     "in_linea": 35,
+     "senza_previsione": 15,
+     "quota_attesa_indip": 0.4943,
+     "quota_prudente": 0.3086
+    },
+    "CORE_CPI": {
+     "n": 29,
+     "giuste": 9,
+     "quota": 0.3103,
+     "p": 0.987940227612853,
+     "in_linea": 19,
+     "senza_previsione": 48,
+     "quota_attesa_indip": 0.4625,
+     "quota_prudente": 0.1875
+    },
+    "NFP": {
+     "n": 94,
+     "giuste": 53,
+     "quota": 0.5638,
+     "p": 0.12822117446648493,
+     "in_linea": 1,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4995,
+     "quota_prudente": 0.5579
+    }
+   },
+   "conferma": {
+    "tutti": {
+     "n": 1185,
+     "giuste": 600,
+     "quota": 0.5063,
+     "p": 0.34212477693892274,
+     "in_linea": 106,
+     "senza_previsione": 189,
+     "quota_attesa_indip": 0.4917,
+     "quota_prudente": 0.4648
+    },
+    "FOMC": {
+     "n": 2,
+     "giuste": 2,
+     "quota": 1.0,
+     "p": 0.25,
+     "in_linea": 19,
+     "senza_previsione": 40,
+     "quota_attesa_indip": 0.5,
+     "quota_prudente": 0.0952
+    },
+    "RETAIL": {
+     "n": 85,
+     "giuste": 57,
+     "quota": 0.6706,
+     "p": 0.0010974544538902963,
+     "in_linea": 3,
+     "senza_previsione": 5,
+     "quota_attesa_indip": 0.5009,
+     "quota_prudente": 0.6477
+    },
+    "PPI": {
+     "n": 63,
+     "giuste": 34,
+     "quota": 0.5397,
+     "p": 0.3073275078827309,
+     "in_linea": 13,
+     "senza_previsione": 16,
+     "quota_attesa_indip": 0.4999,
+     "quota_prudente": 0.4474
+    },
+    "PIL": {
+     "n": 41,
+     "giuste": 22,
+     "quota": 0.5366,
+     "p": 0.3776143287523155,
+     "in_linea": 4,
+     "senza_previsione": 46,
+     "quota_attesa_indip": 0.5009,
+     "quota_prudente": 0.4889
+    },
+    "ISM_M": {
+     "n": 88,
+     "giuste": 40,
+     "quota": 0.4545,
+     "p": 0.83130048157344,
+     "in_linea": 0,
+     "senza_previsione": 6,
+     "quota_attesa_indip": 0.4873,
+     "quota_prudente": 0.4545
+    },
+    "ISM_S": {
+     "n": 90,
+     "giuste": 51,
+     "quota": 0.5667,
+     "p": 0.12305322485813903,
+     "in_linea": 2,
+     "senza_previsione": 2,
+     "quota_attesa_indip": 0.4901,
+     "quota_prudente": 0.5543
+    },
+    "ADP": {
+     "n": 89,
+     "giuste": 47,
+     "quota": 0.5281,
+     "p": 0.3359043245873052,
+     "in_linea": 2,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.4983,
+     "quota_prudente": 0.5165
+    },
+    "FIDUCIA": {
+     "n": 92,
+     "giuste": 48,
+     "quota": 0.5217,
+     "p": 0.3773258748052495,
+     "in_linea": 0,
+     "senza_previsione": 1,
+     "quota_attesa_indip": 0.5,
+     "quota_prudente": 0.5217
+    },
+    "MICHIGAN": {
+     "n": 88,
+     "giuste": 56,
+     "quota": 0.6364,
+     "p": 0.006875192869251456,
+     "in_linea": 0,
+     "senza_previsione": 6,
+     "quota_attesa_indip": 0.4961,
+     "quota_prudente": 0.6364
+    },
+    "CLAIMS": {
+     "n": 363,
+     "giuste": 160,
+     "quota": 0.4408,
+     "p": 0.9896031517148309,
+     "in_linea": 15,
+     "senza_previsione": 21,
+     "quota_attesa_indip": 0.493,
+     "quota_prudente": 0.4233
+    },
+    "CPI": {
+     "n": 49,
+     "giuste": 24,
+     "quota": 0.4898,
+     "p": 0.612275172659217,
+     "in_linea": 30,
+     "senza_previsione": 13,
+     "quota_attesa_indip": 0.4756,
+     "quota_prudente": 0.3038
+    },
+    "CORE_CPI": {
+     "n": 43,
+     "giuste": 17,
+     "quota": 0.3953,
+     "p": 0.9368552628072848,
+     "in_linea": 17,
+     "senza_previsione": 32,
+     "quota_attesa_indip": 0.4992,
+     "quota_prudente": 0.2833
+    },
+    "NFP": {
+     "n": 92,
+     "giuste": 42,
+     "quota": 0.4565,
+     "p": 0.8259293548403965,
+     "in_linea": 1,
+     "senza_previsione": 0,
+     "quota_attesa_indip": 0.4603,
+     "quota_prudente": 0.4516
+    }
+   }
+  },
+  "T2_T3_ultimo_pubblicato": {
+   "descr_2008_10": {
+    "tutti": {
+     "slot": 455,
+     "senza_titolo": 0,
+     "senza_previsione": 33,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 422,
+      "giuste": 213,
+      "quota": 0.5047,
+      "p": 0.44195698625271046
+     },
+     "tetto_sorpresa_vera": {
+      "n": 416,
+      "giuste": 228,
+      "quota": 0.5481,
+      "p": 0.02786429280743076
+     },
+     "R60": {
+      "n": 422,
+      "regola": -0.0449,
+      "caso": -0.0474,
+      "t_regola": -9.01,
+      "scarto": 0.0024,
+      "t_scarto": 0.48,
+      "sd_regola": 0.102
+     },
+     "R300": {
+      "n": 422,
+      "regola": -0.0471,
+      "caso": -0.0465,
+      "t_regola": -4.6,
+      "scarto": -0.0006,
+      "t_scarto": -0.06,
+      "sd_regola": 0.21
+     }
+    },
+    "ADP": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 35,
+      "giuste": 18,
+      "quota": 0.5143,
+      "p": 0.5000000000000001
+     },
+     "tetto_sorpresa_vera": {
+      "n": 36,
+      "giuste": 18,
+      "quota": 0.5,
+      "p": 0.5660302997857798
+     },
+     "R60": {
+      "n": 35,
+      "regola": -0.0587,
+      "caso": -0.0433,
+      "t_regola": -4.28,
+      "scarto": -0.0154,
+      "t_scarto": -1.14,
+      "sd_regola": 0.081
+     },
+     "R300": {
+      "n": 35,
+      "regola": -0.0734,
+      "caso": -0.0424,
+      "t_regola": -2.73,
+      "scarto": -0.031,
+      "t_scarto": -1.17,
+      "sd_regola": 0.159
+     }
+    },
+    "CLAIMS": {
+     "slot": 102,
+     "senza_titolo": 0,
+     "senza_previsione": 2,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 100,
+      "giuste": 56,
+      "quota": 0.56,
+      "p": 0.1356265120369177
+     },
+     "tetto_sorpresa_vera": {
+      "n": 100,
+      "giuste": 51,
+      "quota": 0.51,
+      "p": 0.46020538130641103
+     },
+     "R60": {
+      "n": 100,
+      "regola": -0.0413,
+      "caso": -0.0489,
+      "t_regola": -5.03,
+      "scarto": 0.0076,
+      "t_scarto": 0.93,
+      "sd_regola": 0.082
+     },
+     "R300": {
+      "n": 100,
+      "regola": -0.0156,
+      "caso": -0.0472,
+      "t_regola": -0.85,
+      "scarto": 0.0316,
+      "t_scarto": 1.74,
+      "sd_regola": 0.183
+     }
+    },
+    "CPI": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 5,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 31,
+      "giuste": 18,
+      "quota": 0.5806,
+      "p": 0.23656482994556427
+     },
+     "tetto_sorpresa_vera": {
+      "n": 29,
+      "giuste": 13,
+      "quota": 0.4483,
+      "p": 0.77087084017694
+     },
+     "R60": {
+      "n": 31,
+      "regola": -0.0475,
+      "caso": -0.0471,
+      "t_regola": -2.57,
+      "scarto": -0.0004,
+      "t_scarto": -0.02,
+      "sd_regola": 0.103
+     },
+     "R300": {
+      "n": 31,
+      "regola": -0.0566,
+      "caso": -0.0472,
+      "t_regola": -1.61,
+      "scarto": -0.0094,
+      "t_scarto": -0.27,
+      "sd_regola": 0.196
+     }
+    },
+    "FIDUCIA": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 35,
+      "giuste": 17,
+      "quota": 0.4857,
+      "p": 0.6320605995715596
+     },
+     "tetto_sorpresa_vera": {
+      "n": 36,
+      "giuste": 16,
+      "quota": 0.4444,
+      "p": 0.7974838769296184
+     },
+     "R60": {
+      "n": 35,
+      "regola": -0.0277,
+      "caso": -0.0486,
+      "t_regola": -1.76,
+      "scarto": 0.021,
+      "t_scarto": 1.37,
+      "sd_regola": 0.093
+     },
+     "R300": {
+      "n": 35,
+      "regola": -0.0282,
+      "caso": -0.0482,
+      "t_regola": -0.99,
+      "scarto": 0.0201,
+      "t_scarto": 0.71,
+      "sd_regola": 0.168
+     }
+    },
+    "FOMC": {
+     "slot": 24,
+     "senza_titolo": 0,
+     "senza_previsione": 19,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 5,
+      "giuste": 2,
+      "quota": 0.4,
+      "p": 0.8125
+     },
+     "tetto_sorpresa_vera": {
+      "n": 1,
+      "giuste": 1,
+      "quota": 1.0,
+      "p": 0.5
+     },
+     "R60": {
+      "n": 5,
+      "regola": -0.0326,
+      "caso": -0.0438,
+      "t_regola": -0.21,
+      "scarto": 0.0112,
+      "t_scarto": 0.07,
+      "sd_regola": 0.351
+     },
+     "R300": {
+      "n": 5,
+      "regola": 0.1974,
+      "caso": -0.0137,
+      "t_regola": 0.65,
+      "scarto": 0.2111,
+      "t_scarto": 0.75,
+      "sd_regola": 0.683
+     }
+    },
+    "ISM_M": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 3,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 33,
+      "giuste": 14,
+      "quota": 0.4242,
+      "p": 0.8518968157004565
+     },
+     "tetto_sorpresa_vera": {
+      "n": 35,
+      "giuste": 22,
+      "quota": 0.6286,
+      "p": 0.087732624495402
+     },
+     "R60": {
+      "n": 33,
+      "regola": -0.0589,
+      "caso": -0.0455,
+      "t_regola": -4.77,
+      "scarto": -0.0134,
+      "t_scarto": -1.08,
+      "sd_regola": 0.071
+     },
+     "R300": {
+      "n": 33,
+      "regola": -0.0671,
+      "caso": -0.0457,
+      "t_regola": -2.42,
+      "scarto": -0.0215,
+      "t_scarto": -0.77,
+      "sd_regola": 0.159
+     }
+    },
+    "ISM_S": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 36,
+      "giuste": 16,
+      "quota": 0.4444,
+      "p": 0.7974838769296184
+     },
+     "tetto_sorpresa_vera": {
+      "n": 36,
+      "giuste": 23,
+      "quota": 0.6389,
+      "p": 0.06624908198136838
+     },
+     "R60": {
+      "n": 36,
+      "regola": -0.0499,
+      "caso": -0.0453,
+      "t_regola": -4.38,
+      "scarto": -0.0046,
+      "t_scarto": -0.42,
+      "sd_regola": 0.068
+     },
+     "R300": {
+      "n": 36,
+      "regola": -0.0551,
+      "caso": -0.0466,
+      "t_regola": -2.39,
+      "scarto": -0.0084,
+      "t_scarto": -0.36,
+      "sd_regola": 0.138
+     }
+    },
+    "MICHIGAN": {
+     "slot": 29,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 29,
+      "giuste": 14,
+      "quota": 0.4828,
+      "p": 0.644464448094368
+     },
+     "tetto_sorpresa_vera": {
+      "n": 29,
+      "giuste": 12,
+      "quota": 0.4138,
+      "p": 0.867534551769495
+     },
+     "R60": {
+      "n": 29,
+      "regola": -0.0371,
+      "caso": -0.0465,
+      "t_regola": -2.29,
+      "scarto": 0.0093,
+      "t_scarto": 0.59,
+      "sd_regola": 0.087
+     },
+     "R300": {
+      "n": 29,
+      "regola": 0.0003,
+      "caso": -0.0473,
+      "t_regola": 0.01,
+      "scarto": 0.0475,
+      "t_scarto": 1.33,
+      "sd_regola": 0.192
+     }
+    },
+    "NFP": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 35,
+      "giuste": 19,
+      "quota": 0.5429,
+      "p": 0.3679394004284405
+     },
+     "tetto_sorpresa_vera": {
+      "n": 36,
+      "giuste": 25,
+      "quota": 0.6944,
+      "p": 0.014408359827939423
+     },
+     "R60": {
+      "n": 35,
+      "regola": -0.0435,
+      "caso": -0.0491,
+      "t_regola": -1.66,
+      "scarto": 0.0056,
+      "t_scarto": 0.22,
+      "sd_regola": 0.155
+     },
+     "R300": {
+      "n": 35,
+      "regola": -0.1455,
+      "caso": -0.0488,
+      "t_regola": -2.44,
+      "scarto": -0.0967,
+      "t_scarto": -1.61,
+      "sd_regola": 0.352
+     }
+    },
+    "PIL": {
+     "slot": 24,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 24,
+      "giuste": 6,
+      "quota": 0.25,
+      "p": 0.9966946244239807
+     },
+     "tetto_sorpresa_vera": {
+      "n": 22,
+      "giuste": 14,
+      "quota": 0.6364,
+      "p": 0.14313936233520508
+     },
+     "R60": {
+      "n": 24,
+      "regola": -0.061,
+      "caso": -0.05,
+      "t_regola": -5.14,
+      "scarto": -0.011,
+      "t_scarto": -0.91,
+      "sd_regola": 0.058
+     },
+     "R300": {
+      "n": 24,
+      "regola": -0.0793,
+      "caso": -0.048,
+      "t_regola": -1.98,
+      "scarto": -0.0313,
+      "t_scarto": -0.78,
+      "sd_regola": 0.196
+     }
+    },
+    "PPI": {
+     "slot": 27,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 27,
+      "giuste": 15,
+      "quota": 0.5556,
+      "p": 0.3505540192127228
+     },
+     "tetto_sorpresa_vera": {
+      "n": 25,
+      "giuste": 10,
+      "quota": 0.4,
+      "p": 0.885238528251648
+     },
+     "R60": {
+      "n": 27,
+      "regola": -0.0422,
+      "caso": -0.0476,
+      "t_regola": -2.38,
+      "scarto": 0.0054,
+      "t_scarto": 0.3,
+      "sd_regola": 0.092
+     },
+     "R300": {
+      "n": 27,
+      "regola": -0.0534,
+      "caso": -0.0471,
+      "t_regola": -1.73,
+      "scarto": -0.0063,
+      "t_scarto": -0.2,
+      "sd_regola": 0.16
+     }
+    },
+    "RETAIL": {
+     "slot": 33,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 32,
+      "giuste": 18,
+      "quota": 0.5625,
+      "p": 0.29830744792707264
+     },
+     "tetto_sorpresa_vera": {
+      "n": 31,
+      "giuste": 23,
+      "quota": 0.7419,
+      "p": 0.005336920265108347
+     },
+     "R60": {
+      "n": 32,
+      "regola": -0.0386,
+      "caso": -0.0473,
+      "t_regola": -1.41,
+      "scarto": 0.0087,
+      "t_scarto": 0.32,
+      "sd_regola": 0.155
+     },
+     "R300": {
+      "n": 32,
+      "regola": -0.043,
+      "caso": -0.0475,
+      "t_regola": -1.17,
+      "scarto": 0.0045,
+      "t_scarto": 0.12,
+      "sd_regola": 0.208
+     }
+    }
+   },
+   "studio": {
+    "tutti": {
+     "slot": 1224,
+     "senza_titolo": 0,
+     "senza_previsione": 114,
+     "tick_mancanti_o_non_validi": 5,
+     "oro": {
+      "n": 1104,
+      "giuste": 581,
+      "quota": 0.5263,
+      "p": 0.043103893963440526
+     },
+     "tetto_sorpresa_vera": {
+      "n": 1070,
+      "giuste": 820,
+      "quota": 0.7664,
+      "p": 1.3900557839731866e-71
+     },
+     "R60": {
+      "n": 1104,
+      "regola": -0.0211,
+      "caso": -0.0332,
+      "t_regola": -2.74,
+      "scarto": 0.0122,
+      "t_scarto": 1.62,
+      "sd_regola": 0.255
+     },
+     "R300": {
+      "n": 1104,
+      "regola": -0.02,
+      "caso": -0.0301,
+      "t_regola": -1.99,
+      "scarto": 0.01,
+      "t_scarto": 1.01,
+      "sd_regola": 0.335
+     }
+    },
+    "ADP": {
+     "slot": 93,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 92,
+      "giuste": 44,
+      "quota": 0.4783,
+      "p": 0.6987938611519247
+     },
+     "tetto_sorpresa_vera": {
+      "n": 93,
+      "giuste": 76,
+      "quota": 0.8172,
+      "p": 2.223153468882768e-10
+     },
+     "R60": {
+      "n": 92,
+      "regola": -0.028,
+      "caso": -0.0328,
+      "t_regola": -1.26,
+      "scarto": 0.0048,
+      "t_scarto": 0.22,
+      "sd_regola": 0.212
+     },
+     "R300": {
+      "n": 92,
+      "regola": -0.0231,
+      "caso": -0.0311,
+      "t_regola": -0.88,
+      "scarto": 0.008,
+      "t_scarto": 0.31,
+      "sd_regola": 0.252
+     }
+    },
+    "CLAIMS": {
+     "slot": 285,
+     "senza_titolo": 0,
+     "senza_previsione": 4,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 280,
+      "giuste": 133,
+      "quota": 0.475,
+      "p": 0.8149718027637901
+     },
+     "tetto_sorpresa_vera": {
+      "n": 278,
+      "giuste": 220,
+      "quota": 0.7914,
+      "p": 1.1135047236045399e-23
+     },
+     "R60": {
+      "n": 280,
+      "regola": -0.0369,
+      "caso": -0.0334,
+      "t_regola": -3.82,
+      "scarto": -0.0035,
+      "t_scarto": -0.37,
+      "sd_regola": 0.161
+     },
+     "R300": {
+      "n": 280,
+      "regola": -0.0361,
+      "caso": -0.0331,
+      "t_regola": -2.7,
+      "scarto": -0.003,
+      "t_scarto": -0.23,
+      "sd_regola": 0.224
+     }
+    },
+    "CPI": {
+     "slot": 96,
+     "senza_titolo": 0,
+     "senza_previsione": 15,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 80,
+      "giuste": 40,
+      "quota": 0.5,
+      "p": 0.5444639393869536
+     },
+     "tetto_sorpresa_vera": {
+      "n": 55,
+      "giuste": 42,
+      "quota": 0.7636,
+      "p": 5.680530160345753e-05
+     },
+     "R60": {
+      "n": 80,
+      "regola": -0.0341,
+      "caso": -0.0337,
+      "t_regola": -1.28,
+      "scarto": -0.0004,
+      "t_scarto": -0.02,
+      "sd_regola": 0.239
+     },
+     "R300": {
+      "n": 80,
+      "regola": -0.0613,
+      "caso": -0.0328,
+      "t_regola": -1.77,
+      "scarto": -0.0286,
+      "t_scarto": -0.83,
+      "sd_regola": 0.31
+     }
+    },
+    "FIDUCIA": {
+     "slot": 93,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 91,
+      "giuste": 51,
+      "quota": 0.5604,
+      "p": 0.1472348922842665
+     },
+     "tetto_sorpresa_vera": {
+      "n": 92,
+      "giuste": 64,
+      "quota": 0.6957,
+      "p": 0.00011125056478790201
+     },
+     "R60": {
+      "n": 91,
+      "regola": -0.0278,
+      "caso": -0.0324,
+      "t_regola": -1.5,
+      "scarto": 0.0046,
+      "t_scarto": 0.26,
+      "sd_regola": 0.177
+     },
+     "R300": {
+      "n": 91,
+      "regola": -0.0271,
+      "caso": -0.0284,
+      "t_regola": -1.03,
+      "scarto": 0.0013,
+      "t_scarto": 0.05,
+      "sd_regola": 0.25
+     }
+    },
+    "FOMC": {
+     "slot": 64,
+     "senza_titolo": 0,
+     "senza_previsione": 55,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 9,
+      "giuste": 5,
+      "quota": 0.5556,
+      "p": 0.5
+     },
+     "tetto_sorpresa_vera": {
+      "n": 0,
+      "giuste": 0,
+      "quota": null,
+      "p": null
+     },
+     "R60": {
+      "n": 9,
+      "regola": -0.0289,
+      "caso": -0.0663,
+      "t_regola": -0.17,
+      "scarto": 0.0374,
+      "t_scarto": 0.21,
+      "sd_regola": 0.52
+     },
+     "R300": {
+      "n": 9,
+      "regola": -0.044,
+      "caso": -0.094,
+      "t_regola": -0.29,
+      "scarto": 0.05,
+      "t_scarto": 0.32,
+      "sd_regola": 0.451
+     }
+    },
+    "ISM_M": {
+     "slot": 95,
+     "senza_titolo": 0,
+     "senza_previsione": 2,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 93,
+      "giuste": 55,
+      "quota": 0.5914,
+      "p": 0.048282598648852315
+     },
+     "tetto_sorpresa_vera": {
+      "n": 93,
+      "giuste": 73,
+      "quota": 0.7849,
+      "p": 1.4600724384857279e-08
+     },
+     "R60": {
+      "n": 93,
+      "regola": -0.0067,
+      "caso": -0.0309,
+      "t_regola": -0.35,
+      "scarto": 0.0242,
+      "t_scarto": 1.25,
+      "sd_regola": 0.186
+     },
+     "R300": {
+      "n": 93,
+      "regola": -0.0029,
+      "caso": -0.0281,
+      "t_regola": -0.08,
+      "scarto": 0.0252,
+      "t_scarto": 0.75,
+      "sd_regola": 0.332
+     }
+    },
+    "ISM_S": {
+     "slot": 95,
+     "senza_titolo": 0,
+     "senza_previsione": 3,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 91,
+      "giuste": 53,
+      "quota": 0.5824,
+      "p": 0.07089668727237357
+     },
+     "tetto_sorpresa_vera": {
+      "n": 92,
+      "giuste": 66,
+      "quota": 0.7174,
+      "p": 1.8350229618997067e-05
+     },
+     "R60": {
+      "n": 91,
+      "regola": 0.0036,
+      "caso": -0.0318,
+      "t_regola": 0.22,
+      "scarto": 0.0354,
+      "t_scarto": 2.21,
+      "sd_regola": 0.154
+     },
+     "R300": {
+      "n": 91,
+      "regola": 0.036,
+      "caso": -0.0314,
+      "t_regola": 1.56,
+      "scarto": 0.0673,
+      "t_scarto": 2.93,
+      "sd_regola": 0.219
+     }
+    },
+    "MICHIGAN": {
+     "slot": 76,
+     "senza_titolo": 0,
+     "senza_previsione": 2,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 74,
+      "giuste": 36,
+      "quota": 0.4865,
+      "p": 0.6362264582552651
+     },
+     "tetto_sorpresa_vera": {
+      "n": 76,
+      "giuste": 50,
+      "quota": 0.6579,
+      "p": 0.003952590013929892
+     },
+     "R60": {
+      "n": 74,
+      "regola": -0.0384,
+      "caso": -0.0319,
+      "t_regola": -2.2,
+      "scarto": -0.0065,
+      "t_scarto": -0.37,
+      "sd_regola": 0.15
+     },
+     "R300": {
+      "n": 74,
+      "regola": -0.0704,
+      "caso": -0.033,
+      "t_regola": -3.24,
+      "scarto": -0.0374,
+      "t_scarto": -1.71,
+      "sd_regola": 0.187
+     }
+    },
+    "NFP": {
+     "slot": 96,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 93,
+      "giuste": 50,
+      "quota": 0.5376,
+      "p": 0.2670299308673033
+     },
+     "tetto_sorpresa_vera": {
+      "n": 93,
+      "giuste": 79,
+      "quota": 0.8495,
+      "p": 1.80889037430031e-12
+     },
+     "R60": {
+      "n": 93,
+      "regola": -0.0251,
+      "caso": -0.0387,
+      "t_regola": -0.39,
+      "scarto": 0.0136,
+      "t_scarto": 0.22,
+      "sd_regola": 0.625
+     },
+     "R300": {
+      "n": 93,
+      "regola": -0.0437,
+      "caso": -0.0154,
+      "t_regola": -0.53,
+      "scarto": -0.0283,
+      "t_scarto": -0.36,
+      "sd_regola": 0.789
+     }
+    },
+    "PIL": {
+     "slot": 83,
+     "senza_titolo": 0,
+     "senza_previsione": 11,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 72,
+      "giuste": 38,
+      "quota": 0.5278,
+      "p": 0.36197407287345706
+     },
+     "tetto_sorpresa_vera": {
+      "n": 72,
+      "giuste": 53,
+      "quota": 0.7361,
+      "p": 3.777905742215698e-05
+     },
+     "R60": {
+      "n": 72,
+      "regola": -0.0088,
+      "caso": -0.0315,
+      "t_regola": -0.34,
+      "scarto": 0.0227,
+      "t_scarto": 0.88,
+      "sd_regola": 0.219
+     },
+     "R300": {
+      "n": 72,
+      "regola": 0.0334,
+      "caso": -0.0237,
+      "t_regola": 0.92,
+      "scarto": 0.0571,
+      "t_scarto": 1.44,
+      "sd_regola": 0.309
+     }
+    },
+    "PPI": {
+     "slot": 67,
+     "senza_titolo": 0,
+     "senza_previsione": 14,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 53,
+      "giuste": 26,
+      "quota": 0.4906,
+      "p": 0.6080768488952506
+     },
+     "tetto_sorpresa_vera": {
+      "n": 56,
+      "giuste": 43,
+      "quota": 0.7679,
+      "p": 3.666609198474391e-05
+     },
+     "R60": {
+      "n": 53,
+      "regola": -0.0322,
+      "caso": -0.0301,
+      "t_regola": -2.42,
+      "scarto": -0.0021,
+      "t_scarto": -0.16,
+      "sd_regola": 0.097
+     },
+     "R300": {
+      "n": 53,
+      "regola": -0.0091,
+      "caso": -0.0294,
+      "t_regola": -0.45,
+      "scarto": 0.0202,
+      "t_scarto": 0.99,
+      "sd_regola": 0.148
+     }
+    },
+    "RETAIL": {
+     "slot": 81,
+     "senza_titolo": 0,
+     "senza_previsione": 5,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 76,
+      "giuste": 50,
+      "quota": 0.6579,
+      "p": 0.003952590013929892
+     },
+     "tetto_sorpresa_vera": {
+      "n": 70,
+      "giuste": 54,
+      "quota": 0.7714,
+      "p": 2.926977764694055e-06
+     },
+     "R60": {
+      "n": 76,
+      "regola": 0.0394,
+      "caso": -0.0327,
+      "t_regola": 1.57,
+      "scarto": 0.0721,
+      "t_scarto": 2.88,
+      "sd_regola": 0.219
+     },
+     "R300": {
+      "n": 76,
+      "regola": 0.0292,
+      "caso": -0.0319,
+      "t_regola": 0.89,
+      "scarto": 0.0611,
+      "t_scarto": 1.86,
+      "sd_regola": 0.287
+     }
+    }
+   },
+   "conferma": {
+    "tutti": {
+     "slot": 885,
+     "senza_titolo": 0,
+     "senza_previsione": 112,
+     "tick_mancanti_o_non_validi": 4,
+     "oro": {
+      "n": 769,
+      "giuste": 408,
+      "quota": 0.5306,
+      "p": 0.04854606437829734
+     },
+     "tetto_sorpresa_vera": {
+      "n": 758,
+      "giuste": 596,
+      "quota": 0.7863,
+      "p": 2.0205209039012194e-59
+     },
+     "R60": {
+      "n": 769,
+      "regola": -0.0207,
+      "caso": -0.0491,
+      "t_regola": -0.87,
+      "scarto": 0.0284,
+      "t_scarto": 1.54,
+      "sd_regola": 0.657
+     },
+     "R300": {
+      "n": 769,
+      "regola": -0.0254,
+      "caso": -0.0535,
+      "t_regola": -0.94,
+      "scarto": 0.0281,
+      "t_scarto": 1.34,
+      "sd_regola": 0.745
+     }
+    },
+    "ADP": {
+     "slot": 70,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 70,
+      "giuste": 39,
+      "quota": 0.5571,
+      "p": 0.20148153752303988
+     },
+     "tetto_sorpresa_vera": {
+      "n": 68,
+      "giuste": 63,
+      "quota": 0.9265,
+      "p": 3.8255314714630284e-14
+     },
+     "R60": {
+      "n": 70,
+      "regola": -0.0692,
+      "caso": -0.0493,
+      "t_regola": -1.78,
+      "scarto": -0.0199,
+      "t_scarto": -0.52,
+      "sd_regola": 0.326
+     },
+     "R300": {
+      "n": 70,
+      "regola": -0.0686,
+      "caso": -0.052,
+      "t_regola": -1.57,
+      "scarto": -0.0166,
+      "t_scarto": -0.39,
+      "sd_regola": 0.366
+     }
+    },
+    "CLAIMS": {
+     "slot": 101,
+     "senza_titolo": 0,
+     "senza_previsione": 5,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 96,
+      "giuste": 45,
+      "quota": 0.4688,
+      "p": 0.7624239750067136
+     },
+     "tetto_sorpresa_vera": {
+      "n": 98,
+      "giuste": 80,
+      "quota": 0.8163,
+      "p": 8.303348785522802e-11
+     },
+     "R60": {
+      "n": 96,
+      "regola": -0.0954,
+      "caso": -0.0728,
+      "t_regola": -3.23,
+      "scarto": -0.0226,
+      "t_scarto": -0.82,
+      "sd_regola": 0.29
+     },
+     "R300": {
+      "n": 96,
+      "regola": -0.0954,
+      "caso": -0.0821,
+      "t_regola": -2.21,
+      "scarto": -0.0134,
+      "t_scarto": -0.33,
+      "sd_regola": 0.424
+     }
+    },
+    "CPI": {
+     "slot": 92,
+     "senza_titolo": 0,
+     "senza_previsione": 13,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 78,
+      "giuste": 41,
+      "quota": 0.5256,
+      "p": 0.3671710165149233
+     },
+     "tetto_sorpresa_vera": {
+      "n": 57,
+      "giuste": 43,
+      "quota": 0.7544,
+      "p": 7.694451122217115e-05
+     },
+     "R60": {
+      "n": 78,
+      "regola": 0.0073,
+      "caso": -0.0284,
+      "t_regola": 0.06,
+      "scarto": 0.0357,
+      "t_scarto": 0.41,
+      "sd_regola": 1.002
+     },
+     "R300": {
+      "n": 78,
+      "regola": 0.0196,
+      "caso": -0.028,
+      "t_regola": 0.15,
+      "scarto": 0.0477,
+      "t_scarto": 0.48,
+      "sd_regola": 1.164
+     }
+    },
+    "FIDUCIA": {
+     "slot": 47,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 46,
+      "giuste": 28,
+      "quota": 0.6087,
+      "p": 0.09196241068849531
+     },
+     "tetto_sorpresa_vera": {
+      "n": 47,
+      "giuste": 34,
+      "quota": 0.7234,
+      "p": 0.0015438382307593197
+     },
+     "R60": {
+      "n": 46,
+      "regola": -0.0065,
+      "caso": -0.0392,
+      "t_regola": -0.23,
+      "scarto": 0.0327,
+      "t_scarto": 1.19,
+      "sd_regola": 0.188
+     },
+     "R300": {
+      "n": 46,
+      "regola": -0.0182,
+      "caso": -0.0384,
+      "t_regola": -0.47,
+      "scarto": 0.0202,
+      "t_scarto": 0.53,
+      "sd_regola": 0.261
+     }
+    },
+    "FOMC": {
+     "slot": 61,
+     "senza_titolo": 0,
+     "senza_previsione": 40,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 21,
+      "giuste": 8,
+      "quota": 0.381,
+      "p": 0.9053764343261719
+     },
+     "tetto_sorpresa_vera": {
+      "n": 2,
+      "giuste": 1,
+      "quota": 0.5,
+      "p": 0.75
+     },
+     "R60": {
+      "n": 21,
+      "regola": -0.2435,
+      "caso": -0.1552,
+      "t_regola": -1.59,
+      "scarto": -0.0883,
+      "t_scarto": -0.66,
+      "sd_regola": 0.703
+     },
+     "R300": {
+      "n": 21,
+      "regola": -0.3225,
+      "caso": -0.1721,
+      "t_regola": -1.81,
+      "scarto": -0.1504,
+      "t_scarto": -0.92,
+      "sd_regola": 0.818
+     }
+    },
+    "ISM_M": {
+     "slot": 88,
+     "senza_titolo": 0,
+     "senza_previsione": 6,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 82,
+      "giuste": 35,
+      "quota": 0.4268,
+      "p": 0.9246623961868481
+     },
+     "tetto_sorpresa_vera": {
+      "n": 88,
+      "giuste": 71,
+      "quota": 0.8068,
+      "p": 2.5769773483004237e-09
+     },
+     "R60": {
+      "n": 82,
+      "regola": -0.1285,
+      "caso": -0.0594,
+      "t_regola": -2.9,
+      "scarto": -0.069,
+      "t_scarto": -1.66,
+      "sd_regola": 0.402
+     },
+     "R300": {
+      "n": 82,
+      "regola": -0.1613,
+      "caso": -0.0831,
+      "t_regola": -3.34,
+      "scarto": -0.0782,
+      "t_scarto": -1.74,
+      "sd_regola": 0.438
+     }
+    },
+    "ISM_S": {
+     "slot": 78,
+     "senza_titolo": 0,
+     "senza_previsione": 1,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 77,
+      "giuste": 41,
+      "quota": 0.5325,
+      "p": 0.32439558115532247
+     },
+     "tetto_sorpresa_vera": {
+      "n": 77,
+      "giuste": 63,
+      "quota": 0.8182,
+      "p": 7.07036204397304e-09
+     },
+     "R60": {
+      "n": 77,
+      "regola": -0.0254,
+      "caso": -0.0707,
+      "t_regola": -0.6,
+      "scarto": 0.0453,
+      "t_scarto": 1.03,
+      "sd_regola": 0.374
+     },
+     "R300": {
+      "n": 77,
+      "regola": -0.016,
+      "caso": -0.0814,
+      "t_regola": -0.26,
+      "scarto": 0.0654,
+      "t_scarto": 1.15,
+      "sd_regola": 0.548
+     }
+    },
+    "MICHIGAN": {
+     "slot": 37,
+     "senza_titolo": 0,
+     "senza_previsione": 2,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 35,
+      "giuste": 20,
+      "quota": 0.5714,
+      "p": 0.2497799166012556
+     },
+     "tetto_sorpresa_vera": {
+      "n": 37,
+      "giuste": 28,
+      "quota": 0.7568,
+      "p": 0.0012816039961762726
+     },
+     "R60": {
+      "n": 35,
+      "regola": -0.0003,
+      "caso": -0.0662,
+      "t_regola": -0.01,
+      "scarto": 0.0659,
+      "t_scarto": 1.45,
+      "sd_regola": 0.267
+     },
+     "R300": {
+      "n": 35,
+      "regola": -0.0054,
+      "caso": -0.0676,
+      "t_regola": -0.11,
+      "scarto": 0.0622,
+      "t_scarto": 1.28,
+      "sd_regola": 0.302
+     }
+    },
+    "NFP": {
+     "slot": 93,
+     "senza_titolo": 0,
+     "senza_previsione": 0,
+     "tick_mancanti_o_non_validi": 3,
+     "oro": {
+      "n": 90,
+      "giuste": 47,
+      "quota": 0.5222,
+      "p": 0.37601660079929755
+     },
+     "tetto_sorpresa_vera": {
+      "n": 89,
+      "giuste": 69,
+      "quota": 0.7753,
+      "p": 8.884820300356943e-08
+     },
+     "R60": {
+      "n": 90,
+      "regola": 0.1914,
+      "caso": 0.0236,
+      "t_regola": 1.3,
+      "scarto": 0.1678,
+      "t_scarto": 1.64,
+      "sd_regola": 1.396
+     },
+     "R300": {
+      "n": 90,
+      "regola": 0.2143,
+      "caso": 0.0305,
+      "t_regola": 1.37,
+      "scarto": 0.1838,
+      "t_scarto": 1.68,
+      "sd_regola": 1.482
+     }
+    },
+    "PIL": {
+     "slot": 71,
+     "senza_titolo": 0,
+     "senza_previsione": 29,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 42,
+      "giuste": 18,
+      "quota": 0.4286,
+      "p": 0.8600218807355304
+     },
+     "tetto_sorpresa_vera": {
+      "n": 61,
+      "giuste": 44,
+      "quota": 0.7213,
+      "p": 0.00036495225546738427
+     },
+     "R60": {
+      "n": 42,
+      "regola": -0.0836,
+      "caso": -0.0455,
+      "t_regola": -2.21,
+      "scarto": -0.0381,
+      "t_scarto": -1.01,
+      "sd_regola": 0.245
+     },
+     "R300": {
+      "n": 42,
+      "regola": -0.047,
+      "caso": -0.0466,
+      "t_regola": -0.73,
+      "scarto": -0.0004,
+      "t_scarto": -0.01,
+      "sd_regola": 0.417
+     }
+    },
+    "PPI": {
+     "slot": 60,
+     "senza_titolo": 0,
+     "senza_previsione": 11,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 49,
+      "giuste": 30,
+      "quota": 0.6122,
+      "p": 0.07620388598073902
+     },
+     "tetto_sorpresa_vera": {
+      "n": 51,
+      "giuste": 41,
+      "quota": 0.8039,
+      "p": 7.368857942502416e-06
+     },
+     "R60": {
+      "n": 49,
+      "regola": -0.0012,
+      "caso": -0.065,
+      "t_regola": -0.02,
+      "scarto": 0.0638,
+      "t_scarto": 1.1,
+      "sd_regola": 0.444
+     },
+     "R300": {
+      "n": 49,
+      "regola": -0.0434,
+      "caso": -0.0666,
+      "t_regola": -0.58,
+      "scarto": 0.0232,
+      "t_scarto": 0.34,
+      "sd_regola": 0.52
+     }
+    },
+    "RETAIL": {
+     "slot": 87,
+     "senza_titolo": 0,
+     "senza_previsione": 4,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 83,
+      "giuste": 56,
+      "quota": 0.6747,
+      "p": 0.0009657187411125238
+     },
+     "tetto_sorpresa_vera": {
+      "n": 83,
+      "giuste": 59,
+      "quota": 0.7108,
+      "p": 7.727970539164584e-05
+     },
+     "R60": {
+      "n": 83,
+      "regola": 0.0215,
+      "caso": -0.0533,
+      "t_regola": 0.61,
+      "scarto": 0.0748,
+      "t_scarto": 2.06,
+      "sd_regola": 0.324
+     },
+     "R300": {
+      "n": 83,
+      "regola": 0.0,
+      "caso": -0.0498,
+      "t_regola": 0.0,
+      "scarto": 0.0498,
+      "t_scarto": 1.18,
+      "sd_regola": 0.397
+     }
+    }
+   }
+  },
+  "T2_T3_cpi_core": {
+   "descr_2008_10": {
+    "tutti": {
+     "slot": 455,
+     "senza_titolo": 0,
+     "senza_previsione": 39,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 416,
+      "giuste": 213,
+      "quota": 0.512,
+      "p": 0.32953779399824074
+     },
+     "tetto_sorpresa_vera": {
+      "n": 410,
+      "giuste": 229,
+      "quota": 0.5585,
+      "p": 0.010083035692408574
+     },
+     "R60": {
+      "n": 416,
+      "regola": -0.0463,
+      "caso": -0.0473,
+      "t_regola": -9.24,
+      "scarto": 0.001,
+      "t_scarto": 0.19,
+      "sd_regola": 0.102
+     },
+     "R300": {
+      "n": 416,
+      "regola": -0.0464,
+      "caso": -0.0465,
+      "t_regola": -4.47,
+      "scarto": 0.0001,
+      "t_scarto": 0.01,
+      "sd_regola": 0.212
+     }
+    },
+    "CPI": {
+     "slot": 36,
+     "senza_titolo": 0,
+     "senza_previsione": 10,
+     "tick_mancanti_o_non_validi": 0,
+     "oro": {
+      "n": 26,
+      "giuste": 12,
+      "quota": 0.4615,
+      "p": 0.7214014530181885
+     },
+     "tetto_sorpresa_vera": {
+      "n": 23,
+      "giuste": 14,
+      "quota": 0.6087,
+      "p": 0.2024364471435547
+     },
+     "R60": {
+      "n": 26,
+      "regola": -0.0789,
+      "caso": -0.0464,
+      "t_regola": -4.36,
+      "scarto": -0.0325,
+      "t_scarto": -1.82,
+      "sd_regola": 0.092
+     },
+     "R300": {
+      "n": 26,
+      "regola": -0.0764,
+      "caso": -0.0476,
+      "t_regola": -1.85,
+      "scarto": -0.0288,
+      "t_scarto": -0.69,
+      "sd_regola": 0.211
+     }
+    }
+   },
+   "studio": {
+    "tutti": {
+     "slot": 1224,
+     "senza_titolo": 0,
+     "senza_previsione": 138,
+     "tick_mancanti_o_non_validi": 5,
+     "oro": {
+      "n": 1080,
+      "giuste": 574,
+      "quota": 0.5315,
+      "p": 0.02071293171644035
+     },
+     "tetto_sorpresa_vera": {
+      "n": 1069,
+      "giuste": 817,
+      "quota": 0.7643,
+      "p": 2.268155282006107e-70
+     },
+     "R60": {
+      "n": 1080,
+      "regola": -0.0206,
+      "caso": -0.0332,
+      "t_regola": -2.64,
+      "scarto": 0.0126,
+      "t_scarto": 1.66,
+      "sd_regola": 0.256
+     },
+     "R300": {
+      "n": 1080,
+      "regola": -0.0155,
+      "caso": -0.0299,
+      "t_regola": -1.5,
+      "scarto": 0.0144,
+      "t_scarto": 1.43,
+      "sd_regola": 0.339
+     }
+    },
+    "CPI": {
+     "slot": 96,
+     "senza_titolo": 0,
+     "senza_previsione": 48,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 48,
+      "giuste": 23,
+      "quota": 0.4792,
+      "p": 0.6672670939616906
+     },
+     "tetto_sorpresa_vera": {
+      "n": 54,
+      "giuste": 39,
+      "quota": 0.7222,
+      "p": 0.0007481294426967542
+     },
+     "R60": {
+      "n": 48,
+      "regola": -0.0593,
+      "caso": -0.0339,
+      "t_regola": -1.58,
+      "scarto": -0.0254,
+      "t_scarto": -0.71,
+      "sd_regola": 0.26
+     },
+     "R300": {
+      "n": 48,
+      "regola": -0.075,
+      "caso": -0.0304,
+      "t_regola": -1.77,
+      "scarto": -0.0447,
+      "t_scarto": -1.06,
+      "sd_regola": 0.293
+     }
+    }
+   },
+   "conferma": {
+    "tutti": {
+     "slot": 885,
+     "senza_titolo": 0,
+     "senza_previsione": 103,
+     "tick_mancanti_o_non_validi": 4,
+     "oro": {
+      "n": 778,
+      "giuste": 412,
+      "quota": 0.5296,
+      "p": 0.05330654071099758
+     },
+     "tetto_sorpresa_vera": {
+      "n": 764,
+      "giuste": 606,
+      "quota": 0.7932,
+      "p": 6.491539992687509e-63
+     },
+     "R60": {
+      "n": 778,
+      "regola": -0.0278,
+      "caso": -0.0475,
+      "t_regola": -1.25,
+      "scarto": 0.0197,
+      "t_scarto": 1.1,
+      "sd_regola": 0.619
+     },
+     "R300": {
+      "n": 778,
+      "regola": -0.037,
+      "caso": -0.0532,
+      "t_regola": -1.49,
+      "scarto": 0.0161,
+      "t_scarto": 0.79,
+      "sd_regola": 0.695
+     }
+    },
+    "CPI": {
+     "slot": 92,
+     "senza_titolo": 0,
+     "senza_previsione": 32,
+     "tick_mancanti_o_non_validi": 1,
+     "oro": {
+      "n": 59,
+      "giuste": 29,
+      "quota": 0.4915,
+      "p": 0.6025781730085695
+     },
+     "tetto_sorpresa_vera": {
+      "n": 63,
+      "giuste": 53,
+      "quota": 0.8413,
+      "p": 1.6910842512017805e-08
+     },
+     "R60": {
+      "n": 59,
+      "regola": -0.0272,
+      "caso": -0.0073,
+      "t_regola": -0.27,
+      "scarto": -0.0198,
+      "t_scarto": -0.21,
+      "sd_regola": 0.782
+     },
+     "R300": {
+      "n": 59,
+      "regola": -0.0765,
+      "caso": -0.0097,
+      "t_regola": -0.72,
+      "scarto": -0.0669,
+      "t_scarto": -0.61,
+      "sd_regola": 0.815
+     }
+    }
+   }
+  }
+ },
+ "per_anno": {
+  "2008": {
+   "sorpresa": "87/158",
+   "oro": "67/129",
+   "R60_regola": -0.04
+  },
+  "2009": {
+   "sorpresa": "91/169",
+   "oro": "75/140",
+   "R60_regola": -0.044
+  },
+  "2010": {
+   "sorpresa": "85/168",
+   "oro": "77/152",
+   "R60_regola": -0.049
+  },
+  "2011": {
+   "sorpresa": "84/159",
+   "oro": "81/145",
+   "R60_regola": -0.018
+  },
+  "2012": {
+   "sorpresa": "81/160",
+   "oro": "76/147",
+   "R60_regola": -0.029
+  },
+  "2013": {
+   "sorpresa": "80/159",
+   "oro": "61/143",
+   "R60_regola": -0.058
+  },
+  "2014": {
+   "sorpresa": "86/158",
+   "oro": "88/148",
+   "R60_regola": 0.034
+  },
+  "2015": {
+   "sorpresa": "87/155",
+   "oro": "78/147",
+   "R60_regola": -0.047
+  },
+  "2016": {
+   "sorpresa": "78/156",
+   "oro": "82/144",
+   "R60_regola": -0.005
+  },
+  "2017": {
+   "sorpresa": "81/157",
+   "oro": "70/138",
+   "R60_regola": -0.025
+  },
+  "2018": {
+   "sorpresa": "75/157",
+   "oro": "55/100",
+   "R60_regola": -0.01
+  },
+  "2019": {
+   "sorpresa": "79/146",
+   "oro": "49/86",
+   "R60_regola": -0.024
+  },
+  "2020": {
+   "sorpresa": "84/161",
+   "oro": "43/77",
+   "R60_regola": -0.036
+  },
+  "2021": {
+   "sorpresa": "77/165",
+   "oro": "32/68",
+   "R60_regola": -0.096
+  },
+  "2022": {
+   "sorpresa": "78/158",
+   "oro": "60/103",
+   "R60_regola": -0.035
+  },
+  "2023": {
+   "sorpresa": "81/158",
+   "oro": "64/135",
+   "R60_regola": -0.047
+  },
+  "2024": {
+   "sorpresa": "76/154",
+   "oro": "72/136",
+   "R60_regola": -0.005
+  },
+  "2025": {
+   "sorpresa": "79/146",
+   "oro": "62/117",
+   "R60_regola": -0.081
+  },
+  "2026": {
+   "sorpresa": "58/127",
+   "oro": "42/75",
+   "R60_regola": 0.159
+  }
+ },
+ "controllo_previous_ff_uguale_actual_precedente": {
+  "ADP": 0.036,
+  "CLAIMS": 0.208,
+  "CORE_CPI": 1.0,
+  "CPI": 1.0,
+  "FIDUCIA": 0.027,
+  "FOMC": 1.0,
+  "ISM_M": 1.0,
+  "ISM_S": 0.996,
+  "MICHIGAN": 0.031,
+  "NFP": 0.018,
+  "PIL": 0.054,
+  "PPI": 0.844,
+  "RETAIL": 0.164
+ },
+ "spread_mediano_T0_30s_pips": 3.8,
+ "errori_download": []
+}

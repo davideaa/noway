@@ -1,0 +1,63 @@
+{
+ "altre": {
+  "2019-22": {
+   "acceso": {
+    "n": 113,
+    "errore": 0.431,
+    "copertura": 0.398,
+    "sopra": 42
+   },
+   "spento": {
+    "n": 236,
+    "errore": 0.371,
+    "copertura": 0.445,
+    "sopra": 82
+   }
+  },
+  "2023-26": {
+   "acceso": {
+    "n": 163,
+    "errore": 0.365,
+    "copertura": 0.423,
+    "sopra": 57
+   },
+   "spento": {
+    "n": 336,
+    "errore": 0.356,
+    "copertura": 0.443,
+    "sopra": 68
+   }
+  }
+ },
+ "nfp_descrittivo": {
+  "2019-22": {
+   "acceso": {
+    "n": 15,
+    "errore": 0.474,
+    "copertura": 0.267,
+    "sopra": 5
+   },
+   "spento": {
+    "n": 32,
+    "errore": 0.313,
+    "copertura": 0.5,
+    "sopra": 11
+   }
+  },
+  "2023-26": {
+   "acceso": {
+    "n": 13,
+    "errore": 0.359,
+    "copertura": 0.385,
+    "sopra": 4
+   },
+   "spento": {
+    "n": 29,
+    "errore": 0.245,
+    "copertura": 0.448,
+    "sopra": 7
+   }
+  }
+ },
+ "passa": false
+}

@@ -1,0 +1,10 @@
+# docker compose up -d   ->   http://IP-DEL-SERVER:8765 (metti davanti un reverse proxy con password/HTTPS)
+services:
+  xnb:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/data
+    ports:
+      - "127.0.0.1:8765:8765"
