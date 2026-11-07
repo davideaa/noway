@@ -5,6 +5,75 @@ partendo da `social/metriche.json` (storico scaricato da `social/metriche.py`). 
 **segnali**, non conclusioni; una conclusione richiede almeno ~10 reel confrontabili e qualche centinaio di visualizzazioni.
 Tutto dentro `LINEA-EDITORIALE.md`.
 
+## 7/11/2026 — dopo 25 reel (settimana 5, puntate 21–25)
+**Dati in breve.** 3 follower (nessun cambio). Settimana 5: 271 visualizzazioni in tutto, **media 54, mediana 50**, contro media 108
+e mediana 123 della settimana 4. Quota vista media (media semplice dei 5 reel) **9%** contro 15%. Like 4, salvataggi 1 (la 21), commenti e
+condivisioni 0. Tutto alle 12:00: sull'orario ancora niente da dire. Le views si fermano dopo circa 24 ore, quindi 22 h (la 25) e 46 h (la 24)
+si confrontano con 24 h senza correzioni; la 25 potrebbe salire di poco.
+
+| Puntata | 21 | 22 | 23 | 24 | 25 |
+|---|---|---|---|---|---|
+| Gancio | banconota da 50 € | prestito | cassaforte | «fino a centomila euro» | «oltre quaranta miliardi» |
+| Views | 121 | 14 | 50 | 22 | 64 |
+| Quota vista | 15% | 15% | 6% | 8% | 3% |
+| Visione media | 9,7 s | 10,9 s | 3,7 s | 5,8 s | 2,0 s |
+
+**Esito della prova «numero in apertura»: nessun segnale a favore; se mai, un segnale contrario. Con 2 reel contro 3 non è una conclusione.**
+Regola dichiarata il 31/10: «a favore» solo se la 24 **e** la 25 superano la mediana delle views di 21–23 (50) **e** hanno quota ≥ 13%.
+- 24: 22 views (sotto 50), quota 8% → non soddisfa.
+- 25: 64 views (sopra 50), quota **2,7%**, la più bassa di tutta la serie → non soddisfa. Le persone se ne vanno in media dopo 2 secondi.
+- Previsione del 31/10 («se conta la cifra, 21–23 stanno sotto ~60 views; se restano sopra 100, l'ipotesi perde sostegno»): 14 e 50 sono
+  sotto 60, ma la **21 ha fatto 121 senza cifra sull'Italia**. Risultato misto, non decisivo.
+- Vista d'insieme: con cifra sull'Italia in prima frase ora sono 5 reel su 6 sopra 100 views (8, 15, 17, 19, 20; no la 24); senza, 2 su 18
+  (la 18 e la 21). La separazione c'è ancora, ma l'ipotesi è nata guardando questi stessi reel; l'unico test **in avanti** (24 e 25) è 0 su 2.
+  Quindi la lettura più prudente è che la cifra non basta e che il «momento buono» delle puntate 17–21 avesse anche altre ragioni.
+
+**Attenzione: la prova non era pulita, per due motivi.**
+1. *La 25 non rispetta la regola «dato che riguarda chi guarda».* La cifra è su una banca americana, nel 2023, col nome letto all'italiana
+   («Silicon Valli Benk»). La 24 invece sì (la tua banca, per persona), ed è il test vero: 22 views, quota 8%.
+2. *Nelle scene dei ganci 24 e 25 il numero compare gigante e animato* («100.000 €» e «40» che gira come un contachilometri), mentre la
+   prova prevedeva «nessun cambio al regista». Quindi si è mossa anche la parte visiva: non sappiamo se pesa il numero detto o quello
+   mostrato. Non è una colpa: è un limite da tenere presente leggendo l'esito.
+
+**Segnali deboli (da verificare, non regole).**
+- *Dalla 23 in poi il calo è netto:* 23, 24, 25 hanno quota 3–8% mentre le 16–22 stavano tutte tra 13% e 17% (la 22 con soli 14 views: poco
+  affidabile). Le 23–25 sono le tre puntate sulle banche: può essere il tema (più astratto, istituzioni invece di «te»), può essere la scena
+  d'apertura, può essere l'account. Il tema non lo scegliamo noi (ordine del corso).
+- *Le scene di gancio delle puntate che hanno tenuto meglio (15–21) mostravano un'immagine concreta da confrontare:* torta con le candeline (15),
+  due carrelli della spesa (17), due città (18), due gruppi di persone (19), 27 torri (20). Nelle due peggiori (24, 25) c'era un numerone.
+  Sono 7 contro 2 e le scene sono state classificate a posteriori: indizio, non regola.
+- *La lunghezza delle parole del gancio non spiega nulla:* la 23 ha il gancio più corto (11 parole) e la quota quasi più bassa; la 19 ha 21 parole e 13%.
+- *Il giorno non spiega nulla:* lunedì 121, martedì 14, mercoledì 50, giovedì 22, venerdì 64 (settimana 4: 23, 123, 109, 154, 130).
+- Interazioni: ancora quasi zero. L'invito a commentare resta senza risposta.
+
+**Conclusioni (solo dove i dati bastano).** Una sola, in negativo: con 25 reel e al massimo ~150 views a reel **non abbiamo ancora nessun fattore
+che spieghi le differenze tra reel**. Regge solo questo: le visualizzazioni vanno a ondate (5 buone di fila, poi 4 su 5 deboli) e la quota vista
+dipende molto dalla puntata. Dire altro sarebbe inventare.
+
+**Settimana 6 (26–30, già prodotta): la prova continua.** Tutte aprono con una cifra e hanno ganci con scene di conteggio/quadrante.
+Lettura sabato 14/11: se 26–30 restano a quota < 13% e mediana < 50 views, sono 7 reel con cifra in prima frase che non reggono la
+settimana 4 e l'ipotesi «la cifra conta» si abbandona. Se almeno 3 su 5 superano 13%, torna in piedi, ma le cifre di 28 e 30 non riguardano
+il pubblico italiano come persona (titolo di Stato, jackpot): leggerle con cautela.
+
+**Prova per la settimana 7 (31–35, dal 16/11), una sola: «la scena del gancio mostra un'immagine concreta da confrontare, non un numero gigante».**
+- *Perché:* è l'unica differenza visibile tra le puntate che hanno tenuto di più (15–21) e le più deboli (24, 25), ed è sotto il nostro
+  controllo. È una variabile diversa dal gancio a parole e dal tema, e la settimana 6 (cifre in scena) fa da confronto naturale.
+- *Cosa cambia per l'autore:* niente. Il gancio resta come lo scrive ora (stessa regola della settimana 6, cifra detta in prima frase se c'è
+  un dato che riguarda chi guarda). Così cambia una sola cosa rispetto alla 26–30.
+- *Cosa cambia per il regista (`pN.html`, scena `hook`):* nei primi ~4 secondi dopo il numero della puntata si vede **un'immagine fatta di
+  oggetti o sagome in due gruppi da confrontare** (come i due carrelli della 17 o le torri della 20), pensata dal primo fotogramma in movimento.
+  La cifra, se c'è, entra **piccola** come etichetta, dopo la prima immagine, mai come numerone o contatore. Resta uguale tutto il resto: voce a 0,62 s,
+  copertina a 0,3 s, numero della puntata, struttura, durata 70–90 s, stile noir.
+- *Come si misura (sabato 21/11):* views e quota vista a ~24 h di 31–35 contro 26–30 (e contro 15–21 come riferimento storico).
+  «Segnale a favore» solo se la mediana delle views di 31–35 supera quella di 26–30 **e** almeno 3 su 5 hanno quota ≥ 13%. Altrimenti «non si può dire».
+  Il tema cambia di settimana in settimana, quindi anche un buon risultato resta un segnale.
+- *Dichiarato prima:* se 26–30 (numerone) vanno bene (≥ 3 su 5 con quota ≥ 13%), la prova 7 non serve a «correggere» niente ma si fa lo stesso,
+  perché misura se l'immagine concreta fa almeno altrettanto.
+- *Linea editoriale:* sta dentro «Si può migliorare» (animazioni: varietà, leggibilità, contrasto). Non tocca «Non si tocca»: il numero grande della
+  puntata, lo stile noir, la voce, la struttura restano.
+- *Dato mancante che aiuterebbe (non è una prova):* se Instagram lo mostra, annotare per ogni reel la **percentuale di chi se ne va nei
+  primi 3 secondi**. Oggi vediamo solo la visione media; con questo dato si capirebbe se il problema sono davvero i primi secondi.
+
 ## 31/10/2026 — dopo 20 reel (settimane 1–4)
 **Dati in breve.** 3 follower (+1 in una settimana). Settimana 4 (puntate 16–20, voce a 0,62 s e copertina a 0,3 s identiche alla 3,
 come deciso da Davide): 539 visualizzazioni in tutto, **media 108 a reel (mediana 123)**, contro 225 della settimana 3
