@@ -1,0 +1,11 @@
+node_modules/
+out/
+f/
+scene.json
+sfx.wav
+mix.m4a
+*.mp4
+*.m4a
+*.mov
+pl*
+r?.log

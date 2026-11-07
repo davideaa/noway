@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="t d">
+  <title id="t">Marchio Plateau su fondo scuro</title>
+  <desc id="d">Linea lime che sale e si appiattisce su un quadrato quasi nero.</desc>
+  <rect width="64" height="64" rx="14" fill="var(--surf, #10151a)"/>
+  <g transform="translate(16 16)">
+    <path d="M5 29 H27" fill="none" stroke="var(--mut, #939fa9)" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M5 25 L14.5 8 H27" fill="none" stroke="var(--acc, #c8fa72)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
