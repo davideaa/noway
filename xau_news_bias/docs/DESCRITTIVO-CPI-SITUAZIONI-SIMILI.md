@@ -81,3 +81,15 @@ File: `research_output/phase2/hx16/descr_cpi_oro_dxy.json` (`scripts/descr_cpi_o
 
 - Per il 10/11/2026: stima 0,76% del prezzo, fascia 0,55–1,41%, livello alto 1,69%.
 - Nelle ultime 5 CPI la candela vera è sempre stata sopra la stima: 341, 605, 503, 565, 372 pips contro 112, 139, 225, 253, 295.
+
+## Il dollaro anticipa l'oro nei primi secondi? (definizione scritta prima di calcolare)
+
+Chiesto da Davide alle 11:50 italiane del 10/11/2026: guardare il DXY per capire cosa fa l'oro nei primi minuti.
+
+- CPI dal 2025 con i tick di oro e delle sei valute del DXY.
+- Oro e DXY su una griglia da 100 ms, nei primi 10 secondi dopo il dato.
+- **Mezza mossa**: il primo istante in cui la serie ha coperto metà della sua mossa dei primi 10 secondi.
+- **Anticipo** = istante dell'oro − istante del DXY. Positivo vuol dire che il dollaro arriva prima.
+- Si riportano: la mediana, quante volte il dollaro arriva prima di almeno 0,5 s e di almeno 1 s, quante volte i due vanno in verso opposto nei primi 10 s e nel primo minuto.
+- Per servire a un trader a mano l'anticipo dovrebbe essere di almeno 1–2 secondi nella maggior parte dei casi. Sotto, è solo una conferma.
+- I tick Dukascopy hanno l'ora del loro server: sotto il mezzo secondo la misura non è affidabile.
