@@ -1,0 +1,784 @@
+{
+ "n": 221,
+ "da": "2008-01-16",
+ "a": "2026-09-11",
+ "gruppi": {
+  "tutti": {
+   "tutti": {
+    "n": 221,
+    "su": 131,
+    "quota_su": 0.593,
+    "mossa_mediana_pct": 0.029,
+    "ampiezza_mediana_pct": 0.197
+   },
+   "caldo": {
+    "n": 86,
+    "su": 32,
+    "quota_su": 0.372,
+    "mossa_mediana_pct": -0.055,
+    "ampiezza_mediana_pct": 0.208
+   },
+   "in_linea": {
+    "n": 35,
+    "su": 19,
+    "quota_su": 0.543,
+    "mossa_mediana_pct": 0.013,
+    "ampiezza_mediana_pct": 0.191
+   },
+   "freddo": {
+    "n": 100,
+    "su": 80,
+    "quota_su": 0.8,
+    "mossa_mediana_pct": 0.088,
+    "ampiezza_mediana_pct": 0.178
+   }
+  },
+  "C1": {
+   "tutti": {
+    "n": 35,
+    "su": 17,
+    "quota_su": 0.486,
+    "mossa_mediana_pct": -0.015,
+    "ampiezza_mediana_pct": 0.383
+   },
+   "caldo": {
+    "n": 12,
+    "su": 2,
+    "quota_su": 0.167,
+    "mossa_mediana_pct": -0.262,
+    "ampiezza_mediana_pct": 0.444
+   },
+   "in_linea": {
+    "n": 11,
+    "su": 4,
+    "quota_su": 0.364,
+    "mossa_mediana_pct": -0.11,
+    "ampiezza_mediana_pct": 0.237
+   },
+   "freddo": {
+    "n": 12,
+    "su": 11,
+    "quota_su": 0.917,
+    "mossa_mediana_pct": 0.337,
+    "ampiezza_mediana_pct": 0.414
+   }
+  },
+  "C1+C2": {
+   "tutti": {
+    "n": 26,
+    "su": 12,
+    "quota_su": 0.462,
+    "mossa_mediana_pct": -0.1,
+    "ampiezza_mediana_pct": 0.415
+   },
+   "caldo": {
+    "n": 12,
+    "su": 2,
+    "quota_su": 0.167,
+    "mossa_mediana_pct": -0.262,
+    "ampiezza_mediana_pct": 0.444
+   },
+   "in_linea": {
+    "n": 7,
+    "su": 3,
+    "quota_su": 0.429,
+    "mossa_mediana_pct": -0.11,
+    "ampiezza_mediana_pct": 0.284
+   },
+   "freddo": {
+    "n": 7,
+    "su": 7,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.546,
+    "ampiezza_mediana_pct": 0.698
+   }
+  },
+  "C1+C4": {
+   "tutti": {
+    "n": 13,
+    "su": 6,
+    "quota_su": 0.462,
+    "mossa_mediana_pct": -0.089,
+    "ampiezza_mediana_pct": 0.413
+   },
+   "caldo": {
+    "n": 5,
+    "su": 1,
+    "quota_su": 0.2,
+    "mossa_mediana_pct": -0.256,
+    "ampiezza_mediana_pct": 0.413
+   },
+   "in_linea": {
+    "n": 5,
+    "su": 2,
+    "quota_su": 0.4,
+    "mossa_mediana_pct": -0.11,
+    "ampiezza_mediana_pct": 0.198
+   },
+   "freddo": {
+    "n": 3,
+    "su": 3,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.819,
+    "ampiezza_mediana_pct": 0.857
+   }
+  },
+  "C1+C3+C4": {
+   "tutti": {
+    "n": 5,
+    "su": 3,
+    "quota_su": 0.6,
+    "mossa_mediana_pct": 0.121,
+    "ampiezza_mediana_pct": 0.413
+   },
+   "caldo": {
+    "n": 2,
+    "su": 0,
+    "quota_su": 0.0,
+    "mossa_mediana_pct": -0.179,
+    "ampiezza_mediana_pct": 0.275
+   },
+   "in_linea": {
+    "n": 1,
+    "su": 1,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.121,
+    "ampiezza_mediana_pct": 0.383
+   },
+   "freddo": {
+    "n": 2,
+    "su": 2,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.683,
+    "ampiezza_mediana_pct": 0.778
+   }
+  },
+  "C1+C2+C3+C4": {
+   "tutti": {
+    "n": 5,
+    "su": 3,
+    "quota_su": 0.6,
+    "mossa_mediana_pct": 0.121,
+    "ampiezza_mediana_pct": 0.413
+   },
+   "caldo": {
+    "n": 2,
+    "su": 0,
+    "quota_su": 0.0,
+    "mossa_mediana_pct": -0.179,
+    "ampiezza_mediana_pct": 0.275
+   },
+   "in_linea": {
+    "n": 1,
+    "su": 1,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.121,
+    "ampiezza_mediana_pct": 0.383
+   },
+   "freddo": {
+    "n": 2,
+    "su": 2,
+    "quota_su": 1.0,
+    "mossa_mediana_pct": 0.683,
+    "ampiezza_mediana_pct": 0.778
+   }
+  }
+ },
+ "casi_C1": [
+  {
+   "data": "2015-11-17",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.2,
+    0.2
+   ],
+   "esito": 0,
+   "oro_pct": -0.225,
+   "oro_usd": -2.43,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2015-12-15",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.0,
+    0.0
+   ],
+   "esito": 0,
+   "oro_pct": -0.175,
+   "oro_usd": -1.87,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2016-11-17",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.4,
+    0.4
+   ],
+   "esito": -1,
+   "oro_pct": -0.151,
+   "oro_usd": -1.86,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2017-02-15",
+   "core": [
+    0.2,
+    0.3
+   ],
+   "totale": [
+    0.3,
+    0.6
+   ],
+   "esito": 1,
+   "oro_pct": -0.342,
+   "oro_usd": -4.19,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2017-03-15",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.0,
+    0.1
+   ],
+   "esito": 1,
+   "oro_pct": -0.089,
+   "oro_usd": -1.07,
+   "C2": true,
+   "C3": true,
+   "C4": true
+  },
+  {
+   "data": "2017-05-12",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.3,
+    0.2
+   ],
+   "esito": -1,
+   "oro_pct": 0.086,
+   "oro_usd": 1.06,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2017-06-14",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.2,
+    -0.1
+   ],
+   "esito": -1,
+   "oro_pct": 0.344,
+   "oro_usd": 4.36,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2017-11-15",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.1,
+    0.1
+   ],
+   "esito": 0,
+   "oro_pct": -0.133,
+   "oro_usd": -1.71,
+   "C2": false,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2017-12-13",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.4,
+    0.4
+   ],
+   "esito": -1,
+   "oro_pct": 0.331,
+   "oro_usd": 4.1,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-02-14",
+   "core": [
+    0.2,
+    0.3
+   ],
+   "totale": [
+    0.3,
+    0.5
+   ],
+   "esito": 1,
+   "oro_pct": -0.497,
+   "oro_usd": -6.61,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2018-03-13",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.2,
+    0.2
+   ],
+   "esito": 0,
+   "oro_pct": 0.121,
+   "oro_usd": 1.59,
+   "C2": true,
+   "C3": true,
+   "C4": true
+  },
+  {
+   "data": "2018-05-10",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.3,
+    0.2
+   ],
+   "esito": -1,
+   "oro_pct": 0.194,
+   "oro_usd": 2.55,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-06-12",
+   "core": [
+    0.1,
+    0.2
+   ],
+   "totale": [
+    0.2,
+    0.2
+   ],
+   "esito": 1,
+   "oro_pct": 0.09,
+   "oro_usd": 1.16,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-08-10",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.2,
+    0.2
+   ],
+   "esito": 0,
+   "oro_pct": -0.015,
+   "oro_usd": -0.18,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-09-13",
+   "core": [
+    0.2,
+    0.1
+   ],
+   "totale": [
+    0.3,
+    0.2
+   ],
+   "esito": -1,
+   "oro_pct": 0.113,
+   "oro_usd": 1.37,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-11-14",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.3,
+    0.3
+   ],
+   "esito": 0,
+   "oro_pct": 0.088,
+   "oro_usd": 1.06,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2018-12-12",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.0,
+    0.0
+   ],
+   "esito": 0,
+   "oro_pct": 0.021,
+   "oro_usd": 0.27,
+   "C2": false,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2022-02-10",
+   "core": [
+    0.5,
+    0.6
+   ],
+   "totale": [
+    0.4,
+    0.6
+   ],
+   "esito": 1,
+   "oro_pct": -0.268,
+   "oro_usd": -4.91,
+   "C2": true,
+   "C3": true,
+   "C4": true
+  },
+  {
+   "data": "2022-03-10",
+   "core": [
+    0.5,
+    0.5
+   ],
+   "totale": [
+    0.8,
+    0.8
+   ],
+   "esito": 0,
+   "oro_pct": 0.061,
+   "oro_usd": 1.22,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2022-04-12",
+   "core": [
+    0.5,
+    0.3
+   ],
+   "totale": [
+    1.2,
+    1.2
+   ],
+   "esito": -1,
+   "oro_pct": 0.264,
+   "oro_usd": 5.17,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2022-05-11",
+   "core": [
+    0.4,
+    0.6
+   ],
+   "totale": [
+    0.2,
+    0.3
+   ],
+   "esito": 1,
+   "oro_pct": -0.256,
+   "oro_usd": -4.74,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2022-06-10",
+   "core": [
+    0.5,
+    0.6
+   ],
+   "totale": [
+    0.7,
+    1.0
+   ],
+   "esito": 1,
+   "oro_pct": -0.163,
+   "oro_usd": -3.0,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2022-07-13",
+   "core": [
+    0.5,
+    0.7
+   ],
+   "totale": [
+    1.1,
+    1.3
+   ],
+   "esito": 1,
+   "oro_pct": -0.237,
+   "oro_usd": -4.1,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2022-08-10",
+   "core": [
+    0.5,
+    0.3
+   ],
+   "totale": [
+    0.2,
+    0.0
+   ],
+   "esito": -1,
+   "oro_pct": 0.819,
+   "oro_usd": 14.67,
+   "C2": true,
+   "C3": true,
+   "C4": true
+  },
+  {
+   "data": "2022-09-13",
+   "core": [
+    0.3,
+    0.6
+   ],
+   "totale": [
+    -0.1,
+    0.1
+   ],
+   "esito": 1,
+   "oro_pct": -0.753,
+   "oro_usd": -13.04,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2022-10-13",
+   "core": [
+    0.4,
+    0.6
+   ],
+   "totale": [
+    0.2,
+    0.4
+   ],
+   "esito": 1,
+   "oro_pct": -0.851,
+   "oro_usd": -14.26,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2022-11-10",
+   "core": [
+    0.5,
+    0.3
+   ],
+   "totale": [
+    0.6,
+    0.4
+   ],
+   "esito": -1,
+   "oro_pct": 1.278,
+   "oro_usd": 21.87,
+   "C2": true,
+   "C3": true,
+   "C4": false
+  },
+  {
+   "data": "2022-12-13",
+   "core": [
+    0.3,
+    0.2
+   ],
+   "totale": [
+    0.3,
+    0.1
+   ],
+   "esito": -1,
+   "oro_pct": 0.835,
+   "oro_usd": 14.94,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2023-01-12",
+   "core": [
+    0.3,
+    0.3
+   ],
+   "totale": [
+    -0.1,
+    -0.1
+   ],
+   "esito": 0,
+   "oro_pct": -0.11,
+   "oro_usd": -2.08,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2023-02-14",
+   "core": [
+    0.4,
+    0.4
+   ],
+   "totale": [
+    0.5,
+    0.5
+   ],
+   "esito": 0,
+   "oro_pct": -0.491,
+   "oro_usd": -9.14,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2023-03-14",
+   "core": [
+    0.4,
+    0.5
+   ],
+   "totale": [
+    0.4,
+    0.4
+   ],
+   "esito": 1,
+   "oro_pct": 0.172,
+   "oro_usd": 3.28,
+   "C2": true,
+   "C3": false,
+   "C4": true
+  },
+  {
+   "data": "2023-04-12",
+   "core": [
+    0.4,
+    0.4
+   ],
+   "totale": [
+    0.2,
+    0.1
+   ],
+   "esito": -1,
+   "oro_pct": 0.546,
+   "oro_usd": 10.97,
+   "C2": true,
+   "C3": true,
+   "C4": true
+  },
+  {
+   "data": "2023-07-12",
+   "core": [
+    0.3,
+    0.2
+   ],
+   "totale": [
+    0.3,
+    0.2
+   ],
+   "esito": -1,
+   "oro_pct": 0.479,
+   "oro_usd": 9.27,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2026-08-12",
+   "core": [
+    0.2,
+    0.2
+   ],
+   "totale": [
+    0.1,
+    0.1
+   ],
+   "esito": 0,
+   "oro_pct": -0.755,
+   "oro_usd": -33.41,
+   "C2": false,
+   "C3": false,
+   "C4": false
+  },
+  {
+   "data": "2026-09-11",
+   "core": [
+    0.2,
+    0.3
+   ],
+   "totale": [
+    0.4,
+    0.4
+   ],
+   "esito": 1,
+   "oro_pct": -1.026,
+   "oro_usd": -44.55,
+   "C2": true,
+   "C3": false,
+   "C4": false
+  }
+ ]
+}

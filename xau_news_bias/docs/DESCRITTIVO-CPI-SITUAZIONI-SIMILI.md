@@ -1,6 +1,6 @@
 # CPI in situazioni simili a oggi: cosa ha fatto l'oro (descrittivo, scritto prima di calcolare)
 
-Scritto il 10/11/2026 alle 10:45 UTC, **prima** di calcolare e prima del CPI delle 13:30 UTC.
+Scritto il 10/11/2026 verso le 10:38 UTC (ora del commit), **prima** di calcolare e prima del CPI delle 13:30 UTC.
 
 ## Domanda di Davide
 
@@ -44,4 +44,40 @@ Si elencano anche uno per uno i CPI del gruppo C1.
 
 ## Risultati
 
-(da scrivere dopo il calcolo)
+File: `research_output/phase2/hx16/descr_cpi_simili.json` (`scripts/descr_cpi_simili.py`). 221 CPI con tick e attese, dal 16/01/2008 all'11/09/2026. Il CPI del 14/10/2026 non c'è: nel file delle attese manca dal set con i tick.
+
+**Prima del dato la direzione è una moneta.** Nel gruppo C1 (Fed che alza alla riunione dopo) l'oro ha chiuso la prima candela su 17 volte su 35.
+
+**Dopo il dato segue la sorpresa**, e con la Fed in rialzo di più:
+
+| Gruppo | Esito | Casi | Oro giù | Oro su | Mossa mediana |
+|---|---|---|---|---|---|
+| Tutti i CPI | caldo | 86 | 54 | 32 | −0,06% |
+| Tutti i CPI | in linea | 35 | 16 | 19 | +0,01% |
+| Tutti i CPI | freddo | 100 | 20 | 80 | +0,09% |
+| C1, Fed in rialzo | caldo | 12 | 10 | 2 | −0,26% |
+| C1, Fed in rialzo | in linea | 11 | 7 | 4 | −0,11% |
+| C1, Fed in rialzo | freddo | 12 | 1 | 11 | +0,34% |
+| C1 dal 2022 | caldo | 8 | 7 | 1 | −0,26% |
+| C1 dal 2022 | in linea | 4 | 3 | 1 | −0,30% |
+| C1 dal 2022 | freddo | 6 | 0 | 6 | +0,68% |
+
+**Gruppi più stretti: troppo pochi casi.**
+- C1+C2 (anche NFP forte prima): 26 casi. Caldo 12 (oro giù 10), in linea 7 (giù 4), freddo 7 (su 7, mediana +0,55%).
+- C1+C4: 13 casi. C1+C3+C4 e tutte e quattro: 5 casi (2 caldi giù, 1 in linea su, 2 freddi su). Non dicono niente.
+
+**Gli ultimi due casi C1, nel 2026, sono stati molto più grandi della mediana:** 12/08 in linea −0,76% (−33 $), 11/09 core caldo −1,03% (−45 $).
+
+**Lettura.**
+- Il dato che conta è il core rispetto alle attese (oggi 0,2%).
+- Senza conoscere il dato non c'è direzione: resta il verdetto NO RELIABLE EDGE.
+- 12 casi per esito sono pochi. La regolarità (21 su 24 nel verso della sorpresa) è coerente con il tetto già misurato (73–87% conoscendo la sorpresa), non una scoperta nuova.
+
+## Ampiezza della prima candela (oro) e indice del dollaro
+
+File: `research_output/phase2/hx16/descr_cpi_oro_dxy.json` (`scripts/descr_cpi_oro_dxy.py`).
+
+**Oro.** Stima EW3 con fascia 25–75, la stessa formula usata per la NFP, mai provata sul CPI. Qui si conta solo quante volte la candela vera stava nella fascia: 49% nel 2019–22 (47 CPI) e 49% nel 2023–26 (45 CPI). Il livello "1 volta su 10" è stato superato più spesso: 19% e 13%.
+
+- Per il 10/11/2026: stima 0,76% del prezzo, fascia 0,55–1,41%, livello alto 1,69%.
+- Nelle ultime 5 CPI la candela vera è sempre stata sopra la stima: 341, 605, 503, 565, 372 pips contro 112, 139, 225, 253, 295.
