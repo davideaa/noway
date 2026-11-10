@@ -37,12 +37,10 @@ def meta(x):
 if __name__ == "__main__":
     R = get_settings().research_dir / "phase2" / "hx16"
     base = json.loads((R / "descr_cpi_oro_dxy.json").read_text())["dxy"]["righe"]
+    ev = json.loads((get_settings().research_dir / "phase2" / "hx11" / "site.json").read_text(encoding="utf-8"))["ev"]
     duka = DukascopyProvider()
     righe = []
     for r in base:
-        t0 = pd.Timestamp(r["data"] + (" 13:30" if r["data"][5:7] in ("11", "12", "01", "02") or r["data"] in ("2025-03-12",) and False else " 12:30"), tz="UTC")
-        # l'ora vera la prendo dal sito: estate 12:30 UTC, inverno 13:30 UTC
-        ev = json.loads((get_settings().research_dir / "phase2" / "hx11" / "site.json").read_text(encoding="utf-8"))["ev"]
         t0 = next(pd.Timestamp(e["d"], tz="UTC") for e in ev if e["f"] == "CPI" and e["d"].startswith(r["data"]))
         oro = serie(duka, "XAUUSD", t0)
         logv, ok = np.full(len(G), np.log(DXY_CONST)), oro is not None
