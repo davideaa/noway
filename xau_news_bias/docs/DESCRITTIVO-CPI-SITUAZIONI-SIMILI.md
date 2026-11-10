@@ -93,3 +93,17 @@ Chiesto da Davide alle 11:50 italiane del 10/11/2026: guardare il DXY per capire
 - Si riportano: la mediana, quante volte il dollaro arriva prima di almeno 0,5 s e di almeno 1 s, quante volte i due vanno in verso opposto nei primi 10 s e nel primo minuto.
 - Per servire a un trader a mano l'anticipo dovrebbe essere di almeno 1–2 secondi nella maggior parte dei casi. Sotto, è solo una conferma.
 - I tick Dukascopy hanno l'ora del loro server: sotto il mezzo secondo la misura non è affidabile.
+
+## La candela M1 e la M5 dicono la direzione del resto della giornata? (definizione scritta prima di calcolare)
+
+Chiesto da Davide verso le 12:15 italiane del 10/11/2026.
+
+- CPI dal 2015, candele M1 Dukascopy (bid). **p0** = apertura del minuto del dato.
+- **Verso della M1** = chiusura del primo minuto contro p0. **Verso della M5** = chiusura del quinto minuto contro p0.
+- **Continua dopo la M1**: dal prezzo di chiusura della M1 il prezzo va ancora nel verso della M1, misurato a +5, +15, +60 minuti e alla chiusura del giorno (17:00 di New York).
+- **Continua dopo la M5**: lo stesso partendo dalla chiusura della M5, a +15, +60 minuti e alla chiusura del giorno.
+- La mossa si misura **dalla chiusura della candela in poi**, non da p0: se no la candela stessa trucca il conto (errore già dichiarato sul descrittivo NFP).
+- Gruppi: 2015–26, 2020–26, 2023–26, e le M1 grandi (sopra la mediana del periodo).
+- Si riportano: quante volte continua, il p contro la moneta, la mossa mediana e media in pips al prezzo di oggi nel verso della candela.
+- Per servire deve continuare ben sopra il 50% **e** la mossa media deve restare positiva tolti 30–40 pips di costi. Nessuna decisione: descrittivo.
+- Già provato in H-X17 (deriva nel verso della sorpresa a +5 e +15 minuti): CPI in conferma 2019–26 47% e 51%, non passa.
