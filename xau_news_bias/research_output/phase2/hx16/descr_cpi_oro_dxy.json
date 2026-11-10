@@ -1,0 +1,306 @@
+{
+ "n_cpi": 157,
+ "copertura_fascia": {
+  "2019-22": {
+   "n": 47,
+   "dentro_25_75": 0.489,
+   "sopra_q90": 0.191
+  },
+  "2023-26": {
+   "n": 45,
+   "dentro_25_75": 0.489,
+   "sopra_q90": 0.133
+  }
+ },
+ "oggi_pct": {
+  "stima": 0.7579,
+  "lo": 0.5464,
+  "hi": 1.4078,
+  "hi90": 1.685
+ },
+ "ultime": [
+  {
+   "data": "2025-10-24",
+   "r1_pct": 0.771,
+   "pips": 313,
+   "dir": 1,
+   "stima_pips": 142
+  },
+  {
+   "data": "2025-12-18",
+   "r1_pct": 0.352,
+   "pips": 152,
+   "dir": 1,
+   "stima_pips": 190
+  },
+  {
+   "data": "2026-01-13",
+   "r1_pct": 0.293,
+   "pips": 135,
+   "dir": 1,
+   "stima_pips": 183
+  },
+  {
+   "data": "2026-02-13",
+   "r1_pct": 0.647,
+   "pips": 321,
+   "dir": 1,
+   "stima_pips": 177
+  },
+  {
+   "data": "2026-03-11",
+   "r1_pct": 0.233,
+   "pips": 121,
+   "dir": -1,
+   "stima_pips": 206
+  },
+  {
+   "data": "2026-04-10",
+   "r1_pct": 0.32,
+   "pips": 153,
+   "dir": 1,
+   "stima_pips": 158
+  },
+  {
+   "data": "2026-05-12",
+   "r1_pct": 0.2,
+   "pips": 94,
+   "dir": -1,
+   "stima_pips": 151
+  },
+  {
+   "data": "2026-06-10",
+   "r1_pct": 0.823,
+   "pips": 341,
+   "dir": 1,
+   "stima_pips": 112
+  },
+  {
+   "data": "2026-07-14",
+   "r1_pct": 1.5,
+   "pips": 605,
+   "dir": 1,
+   "stima_pips": 139
+  },
+  {
+   "data": "2026-08-12",
+   "r1_pct": 1.137,
+   "pips": 503,
+   "dir": -1,
+   "stima_pips": 225
+  },
+  {
+   "data": "2026-09-11",
+   "r1_pct": 1.302,
+   "pips": 565,
+   "dir": -1,
+   "stima_pips": 253
+  },
+  {
+   "data": "2026-10-14",
+   "r1_pct": 0.896,
+   "pips": 372,
+   "dir": -1,
+   "stima_pips": 295
+  }
+ ],
+ "dxy": {
+  "n": 21,
+  "r1_pct_mediana": 0.2452,
+  "r1_pct_q75": 0.3578,
+  "r1_pct_max": 0.4431,
+  "verso_opposto_all_oro": 21,
+  "rapporto_oro_su_dxy_mediana": 1.66,
+  "righe": [
+   {
+    "data": "2025-01-15",
+    "oro_r1_pct": 0.331,
+    "oro_dir": 1,
+    "dxy": 109.0929,
+    "dxy_r1": 0.3965,
+    "dxy_mv": -0.3631,
+    "eur_mv_pips": 38.15
+   },
+   {
+    "data": "2025-02-12",
+    "oro_r1_pct": 0.431,
+    "oro_dir": -1,
+    "dxy": 108.0083,
+    "dxy_r1": 0.4431,
+    "dxy_mv": 0.3914,
+    "eur_mv_pips": -39.75
+   },
+   {
+    "data": "2025-03-12",
+    "oro_r1_pct": 0.236,
+    "oro_dir": 1,
+    "dxy": 103.6446,
+    "dxy_r1": 0.3578,
+    "dxy_mv": -0.2125,
+    "eur_mv_pips": 22.45
+   },
+   {
+    "data": "2025-04-10",
+    "oro_r1_pct": 0.264,
+    "oro_dir": 1,
+    "dxy": 101.7409,
+    "dxy_r1": 0.2591,
+    "dxy_mv": -0.235,
+    "eur_mv_pips": 28.6
+   },
+   {
+    "data": "2025-05-13",
+    "oro_r1_pct": 0.235,
+    "oro_dir": 1,
+    "dxy": 101.5461,
+    "dxy_r1": 0.1412,
+    "dxy_mv": -0.0611,
+    "eur_mv_pips": 6.9
+   },
+   {
+    "data": "2025-06-11",
+    "oro_r1_pct": 0.398,
+    "oro_dir": 1,
+    "dxy": 99.0443,
+    "dxy_r1": 0.3035,
+    "dxy_mv": -0.2823,
+    "eur_mv_pips": 32.7
+   },
+   {
+    "data": "2025-07-15",
+    "oro_r1_pct": 0.18,
+    "oro_dir": 1,
+    "dxy": 98.1149,
+    "dxy_r1": 0.1593,
+    "dxy_mv": -0.1171,
+    "eur_mv_pips": 14.85
+   },
+   {
+    "data": "2025-08-12",
+    "oro_r1_pct": 0.396,
+    "oro_dir": 1,
+    "dxy": 98.5869,
+    "dxy_r1": 0.3675,
+    "dxy_mv": -0.206,
+    "eur_mv_pips": 25.4
+   },
+   {
+    "data": "2025-09-11",
+    "oro_r1_pct": 0.596,
+    "oro_dir": 1,
+    "dxy": 97.951,
+    "dxy_r1": 0.358,
+    "dxy_mv": -0.133,
+    "eur_mv_pips": 15.6
+   },
+   {
+    "data": "2025-10-24",
+    "oro_r1_pct": 0.771,
+    "oro_dir": 1,
+    "dxy": 99.0237,
+    "dxy_r1": 0.3143,
+    "dxy_mv": -0.2415,
+    "eur_mv_pips": 27.7
+   },
+   {
+    "data": "2025-12-18",
+    "oro_r1_pct": 0.352,
+    "oro_dir": 1,
+    "dxy": 98.4156,
+    "dxy_r1": 0.2122,
+    "dxy_mv": -0.1401,
+    "eur_mv_pips": 17.7
+   },
+   {
+    "data": "2026-01-13",
+    "oro_r1_pct": 0.293,
+    "oro_dir": 1,
+    "dxy": 99.0604,
+    "dxy_r1": 0.2196,
+    "dxy_mv": -0.1547,
+    "eur_mv_pips": 16.95
+   },
+   {
+    "data": "2026-02-13",
+    "oro_r1_pct": 0.647,
+    "oro_dir": 1,
+    "dxy": 97.048,
+    "dxy_r1": 0.2175,
+    "dxy_mv": -0.1805,
+    "eur_mv_pips": 20.1
+   },
+   {
+    "data": "2026-03-11",
+    "oro_r1_pct": 0.233,
+    "oro_dir": -1,
+    "dxy": 98.9909,
+    "dxy_r1": 0.0784,
+    "dxy_mv": 0.0415,
+    "eur_mv_pips": -5.6
+   },
+   {
+    "data": "2026-04-10",
+    "oro_r1_pct": 0.32,
+    "oro_dir": 1,
+    "dxy": 98.7188,
+    "dxy_r1": 0.0899,
+    "dxy_mv": -0.0557,
+    "eur_mv_pips": 6.5
+   },
+   {
+    "data": "2026-05-12",
+    "oro_r1_pct": 0.2,
+    "oro_dir": -1,
+    "dxy": 98.3005,
+    "dxy_r1": 0.0376,
+    "dxy_mv": 0.0288,
+    "eur_mv_pips": -3.05
+   },
+   {
+    "data": "2026-06-10",
+    "oro_r1_pct": 0.823,
+    "oro_dir": 1,
+    "dxy": 99.9336,
+    "dxy_r1": 0.0798,
+    "dxy_mv": -0.0383,
+    "eur_mv_pips": 4.8
+   },
+   {
+    "data": "2026-07-14",
+    "oro_r1_pct": 1.5,
+    "oro_dir": 1,
+    "dxy": 100.9918,
+    "dxy_r1": 0.43,
+    "dxy_mv": -0.3575,
+    "eur_mv_pips": 43.15
+   },
+   {
+    "data": "2026-08-12",
+    "oro_r1_pct": 1.137,
+    "oro_dir": -1,
+    "dxy": 99.7397,
+    "dxy_r1": 0.2452,
+    "dxy_mv": 0.1067,
+    "eur_mv_pips": -11.9
+   },
+   {
+    "data": "2026-09-11",
+    "oro_r1_pct": 1.302,
+    "oro_dir": -1,
+    "dxy": 99.1241,
+    "dxy_r1": 0.2297,
+    "dxy_mv": 0.2009,
+    "eur_mv_pips": -20.9
+   },
+   {
+    "data": "2026-10-14",
+    "oro_r1_pct": 0.896,
+    "oro_dir": -1,
+    "dxy": 102.1929,
+    "dxy_r1": 0.3228,
+    "dxy_mv": 0.3195,
+    "eur_mv_pips": -39.95
+   }
+  ]
+ }
+}

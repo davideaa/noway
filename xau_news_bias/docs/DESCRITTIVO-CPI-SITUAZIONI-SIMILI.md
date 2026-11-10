@@ -107,3 +107,13 @@ Chiesto da Davide verso le 12:15 italiane del 10/11/2026.
 - Si riportano: quante volte continua, il p contro la moneta, la mossa mediana e media in pips al prezzo di oggi nel verso della candela.
 - Per servire deve continuare ben sopra il 50% **e** la mossa media deve restare positiva tolti 30–40 pips di costi. Nessuna decisione: descrittivo.
 - Già provato in H-X17 (deriva nel verso della sorpresa a +5 e +15 minuti): CPI in conferma 2019–26 47% e 51%, non passa.
+
+## Risultati: indice del dollaro (dopo i commit con le definizioni)
+
+File: `descr_cpi_oro_dxy.json` e `descr_cpi_anticipo_dxy.json` in `research_output/phase2/hx16/`. 21 CPI, dal 15/01/2025 al 14/10/2026.
+
+- **Verso.** Nel primo minuto il DXY è andato al contrario dell'oro 21 volte su 21; nei primi 10 secondi 20 su 21.
+- **Ampiezza del DXY nel primo minuto.** Mediana 0,25% (circa 0,25 punti con il DXY a 101,65), tre quarti dei casi sotto 0,36%, massimo 0,44%. Su EURUSD: mediana 20 pips, tre quarti sotto 29, massimo 43.
+- **L'oro si muove di più.** In % fa circa 1,7 volte il DXY (mediana). Nel 2026 molto di più: oro 0,8–1,5%, DXY 0,08–0,43%.
+- **Anticipo.** Mediana −100 ms, cioè insieme (sotto il mezzo secondo la misura non è affidabile). Il DXY arriva a metà mossa almeno 0,5 s prima dell'oro in 5 casi su 21, almeno 1 s prima in 4. L'oro non è mai arrivato prima di 0,5 s.
+- **Lettura.** Il dollaro conferma il verso ma non lo anticipa in modo usabile a mano: nella maggior parte dei casi reagiscono nello stesso istante.
