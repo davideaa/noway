@@ -117,3 +117,21 @@ File: `descr_cpi_oro_dxy.json` e `descr_cpi_anticipo_dxy.json` in `research_outp
 - **L'oro si muove di più.** In % fa circa 1,7 volte il DXY (mediana). Nel 2026 molto di più: oro 0,8–1,5%, DXY 0,08–0,43%.
 - **Anticipo.** Mediana −100 ms, cioè insieme (sotto il mezzo secondo la misura non è affidabile). Il DXY arriva a metà mossa almeno 0,5 s prima dell'oro in 5 casi su 21, almeno 1 s prima in 4. L'oro non è mai arrivato prima di 0,5 s.
 - **Lettura.** Il dollaro conferma il verso ma non lo anticipa in modo usabile a mano: nella maggior parte dei casi reagiscono nello stesso istante.
+
+## Risultati: M1 e M5 contro il resto della giornata (dopo il commit con la definizione)
+
+File: `descr_cpi_m1_m5_giornata.json` e `.csv` in `research_output/phase2/hx16/`. 138 CPI dal 2015, pips al prezzo di 4.075 $.
+
+| Da dove | Fino a | 2015–26 (138) | 2020–26 (79) | 2023–26 (45) |
+|---|---|---|---|---|
+| chiusura M1 | +5 min | 55% | 49% | 49% |
+| chiusura M1 | +15 min | 57% | 52% | 49% |
+| chiusura M1 | +60 min | 46% | 44% | 44% |
+| chiusura M1 | chiusura giorno | 49% | 47% | 56% |
+| chiusura M5 | +60 min | 47% | 51% | 53% |
+| chiusura M5 | chiusura giorno | 45% | 52% | 51% |
+
+- Nessuna riga si distingue dalla moneta (p da 0,11 a 1). Le mosse medie dopo la candela sono da −55 a +8 pips: tolti i costi non resta niente.
+- Con le M1 grandi (2020–26, 40 casi) è uguale: 43–55%.
+- **Errore dichiarato.** A conto non finito (107 CPI, senza il 2024–26) avevo scritto a Davide che dal 2020 la giornata andava contro la M1 30 volte su 48. Con tutti i dati è 42 su 79: una moneta.
+- Nel 2026 (10 CPI) dalla chiusura della M1 alla chiusura del giorno ha continuato 3 volte e girato 7. Troppo pochi.

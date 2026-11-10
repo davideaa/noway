@@ -1,0 +1,238 @@
+{
+ "n": 138,
+ "prezzo_di_riferimento": 4075.0,
+ "gruppi": {
+  "2015-26": {
+   "dopo_m1_5": {
+    "n": 138,
+    "continua": 76,
+    "quota": 0.551,
+    "p": 0.268,
+    "mediana_pips": 9,
+    "media_pips": -2
+   },
+   "dopo_m1_15": {
+    "n": 138,
+    "continua": 79,
+    "quota": 0.572,
+    "p": 0.105,
+    "mediana_pips": 17,
+    "media_pips": -4
+   },
+   "dopo_m1_60": {
+    "n": 138,
+    "continua": 64,
+    "quota": 0.464,
+    "p": 0.444,
+    "mediana_pips": -9,
+    "media_pips": -10
+   },
+   "dopo_m1_g": {
+    "n": 138,
+    "continua": 68,
+    "quota": 0.493,
+    "p": 0.932,
+    "mediana_pips": -6,
+    "media_pips": -46
+   },
+   "dopo_m5_15": {
+    "n": 138,
+    "continua": 68,
+    "quota": 0.493,
+    "p": 0.932,
+    "mediana_pips": -4,
+    "media_pips": 5
+   },
+   "dopo_m5_60": {
+    "n": 138,
+    "continua": 65,
+    "quota": 0.471,
+    "p": 0.551,
+    "mediana_pips": -5,
+    "media_pips": -4
+   },
+   "dopo_m5_g": {
+    "n": 138,
+    "continua": 62,
+    "quota": 0.449,
+    "p": 0.268,
+    "mediana_pips": -10,
+    "media_pips": -55
+   }
+  },
+  "2020-26": {
+   "dopo_m1_5": {
+    "n": 79,
+    "continua": 39,
+    "quota": 0.494,
+    "p": 1.0,
+    "mediana_pips": -1,
+    "media_pips": -13
+   },
+   "dopo_m1_15": {
+    "n": 79,
+    "continua": 41,
+    "quota": 0.519,
+    "p": 0.822,
+    "mediana_pips": 4,
+    "media_pips": -21
+   },
+   "dopo_m1_60": {
+    "n": 79,
+    "continua": 35,
+    "quota": 0.443,
+    "p": 0.368,
+    "mediana_pips": -22,
+    "media_pips": -22
+   },
+   "dopo_m1_g": {
+    "n": 79,
+    "continua": 37,
+    "quota": 0.468,
+    "p": 0.653,
+    "mediana_pips": -16,
+    "media_pips": -44
+   },
+   "dopo_m5_15": {
+    "n": 79,
+    "continua": 40,
+    "quota": 0.506,
+    "p": 1.0,
+    "mediana_pips": 5,
+    "media_pips": 8
+   },
+   "dopo_m5_60": {
+    "n": 79,
+    "continua": 40,
+    "quota": 0.506,
+    "p": 1.0,
+    "mediana_pips": 2,
+    "media_pips": 5
+   },
+   "dopo_m5_g": {
+    "n": 79,
+    "continua": 41,
+    "quota": 0.519,
+    "p": 0.822,
+    "mediana_pips": 21,
+    "media_pips": -27
+   }
+  },
+  "2023-26": {
+   "dopo_m1_5": {
+    "n": 45,
+    "continua": 22,
+    "quota": 0.489,
+    "p": 1.0,
+    "mediana_pips": -2,
+    "media_pips": -16
+   },
+   "dopo_m1_15": {
+    "n": 45,
+    "continua": 22,
+    "quota": 0.489,
+    "p": 1.0,
+    "mediana_pips": -6,
+    "media_pips": -18
+   },
+   "dopo_m1_60": {
+    "n": 45,
+    "continua": 20,
+    "quota": 0.444,
+    "p": 0.551,
+    "mediana_pips": -10,
+    "media_pips": -28
+   },
+   "dopo_m1_g": {
+    "n": 45,
+    "continua": 25,
+    "quota": 0.556,
+    "p": 0.551,
+    "mediana_pips": 8,
+    "media_pips": -42
+   },
+   "dopo_m5_15": {
+    "n": 45,
+    "continua": 20,
+    "quota": 0.444,
+    "p": 0.551,
+    "mediana_pips": -13,
+    "media_pips": -2
+   },
+   "dopo_m5_60": {
+    "n": 45,
+    "continua": 24,
+    "quota": 0.533,
+    "p": 0.766,
+    "mediana_pips": 18,
+    "media_pips": -18
+   },
+   "dopo_m5_g": {
+    "n": 45,
+    "continua": 23,
+    "quota": 0.511,
+    "p": 1.0,
+    "mediana_pips": 14,
+    "media_pips": -34
+   }
+  },
+  "2020-26 M1 grande": {
+   "dopo_m1_5": {
+    "n": 40,
+    "continua": 19,
+    "quota": 0.475,
+    "p": 0.875,
+    "mediana_pips": -3,
+    "media_pips": -11
+   },
+   "dopo_m1_15": {
+    "n": 40,
+    "continua": 22,
+    "quota": 0.55,
+    "p": 0.636,
+    "mediana_pips": 14,
+    "media_pips": -5
+   },
+   "dopo_m1_60": {
+    "n": 40,
+    "continua": 17,
+    "quota": 0.425,
+    "p": 0.43,
+    "mediana_pips": -15,
+    "media_pips": 6
+   },
+   "dopo_m1_g": {
+    "n": 40,
+    "continua": 19,
+    "quota": 0.475,
+    "p": 0.875,
+    "mediana_pips": -25,
+    "media_pips": -50
+   },
+   "dopo_m5_15": {
+    "n": 40,
+    "continua": 18,
+    "quota": 0.45,
+    "p": 0.636,
+    "mediana_pips": -8,
+    "media_pips": 6
+   },
+   "dopo_m5_60": {
+    "n": 40,
+    "continua": 20,
+    "quota": 0.5,
+    "p": 1.0,
+    "mediana_pips": 0,
+    "media_pips": 5
+   },
+   "dopo_m5_g": {
+    "n": 40,
+    "continua": 19,
+    "quota": 0.475,
+    "p": 0.875,
+    "mediana_pips": -4,
+    "media_pips": -41
+   }
+  }
+ }
+}
