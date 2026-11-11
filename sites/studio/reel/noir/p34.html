@@ -90,7 +90,7 @@ function sEsempio(t, a, b) { bg('30,40,46', 0.7); x.save(); zoom(t, a, b, 1.04);
   lab(t, 'ESEMPIO · CIFRE INVENTATE', 540, 1395, a + 0.3, { color: C.amber, size: 30, ls: 3 });
   const CY = 900;
   [[290, -1, tMas, 'MASTER', C.lime, LIME], [790, 1, tVac, 'VACANZA', C.amber, AMB]].forEach(([cx, dir, tw0, name, col, rgb], j) => {
-    const k = oB(seg(t, tDue - 0.2 + j * 0.12, tDue + 0.5 + j * 0.12)), off = (1 - clamp(k, 0, 1)) * 260 * dir;
+    const k = oB(seg(t, a + 0.25 + j * 0.12, a + 0.95 + j * 0.12)), off = (1 - clamp(k, 0, 1)) * 260 * dir;
     if (k <= 0) return; x.save(); x.translate(off, 0); x.globalAlpha *= clamp(k * 1.5);
     glass(cx, CY, 400, 500, 36, 1);
     const ki = oB(seg(t, tw0 - 0.1, tw0 + 0.45)); x.save(); x.translate(cx, 785); x.scale(clamp(ki, 0, 1.1), clamp(ki, 0, 1.1)); x.translate(-cx, -785);
@@ -110,7 +110,7 @@ function sBilancia(t, a, b) { bg('34,40,30', 0.6); x.save(); zoom(t, a, b, 1.03)
   const k1 = oB(seg(t, tAnn - 0.1, tAnn + 0.5)), k2 = oB(seg(t, tAnn - 0.1, tAnn + 0.5));
   pop(120, L1, k1, () => capIcon(120, L1, 40, C.lime));
   const kv = oC(seg(t, tFin, tFin + 0.7)); pop(120, L2, k2, () => sunIcon(120, L2, 40, C.amber, lerp(1, 0.22, kv)));
-  lab(t, 'MASTER', 190, L1, tAnn, { color: C.lime, size: 28, align: 'left', ls: 3 }); lab(t, 'VACANZA', 190, L2, tAnn + 0.1, { color: C.amber, size: 28, align: 'left', ls: 3, alpha: oC(seg(t, tAnn + 0.1, tAnn + 0.45)) * lerp(1, 0.4, kv) });
+  lab(t, 'MASTER', 190, L1, tAnn, { color: C.lime, size: 28, align: 'left', ls: 3 }); lab(t, 'VACANZA', 190, L2, tAnn + 0.1, { color: C.amber, size: 28, align: 'left', ls: 3, alpha: oC(seg(t, tAnn + 0.1, tAnn + 0.45)) * lerp(1, 0.7, kv) });
   for (let i = 0; i < 12; i++) for (const [ly, j] of [[L1, 0], [L2, 1]]) { const ti = tRat + i * 0.11 + j * 0.03, k = oB(seg(t, ti, ti + 0.4)), ghost = oC(seg(t, tAnn - 0.1, tAnn + 0.4)); const cx = DX0 + i * DP;
     x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.globalAlpha *= ghost; x.beginPath(); x.arc(cx, ly, 17, 0, 7); x.stroke(); x.restore();
     if (k > 0) { x.save(); glow(cx, ly, 34, AMB, 0.25 * clamp(k)); x.fillStyle = C.amber; x.globalAlpha *= clamp(k); x.beginPath(); x.arc(cx, ly, 15 * clamp(k, 0, 1.15), 0, 7); x.fill(); x.restore(); } }
@@ -129,10 +129,10 @@ function sBilancia(t, a, b) { bg('34,40,30', 0.6); x.save(); zoom(t, a, b, 1.03)
 function sOcse(t, a, b) { bg('30,44,34', 0.7); x.save(); zoom(t, a, b, 1.04);
   const tOcs = WA('ocse', ['ocse', 'ocs'], 1, 0.1), tDis = WA('ocse', ['distinguere', 'distingu'], 1, 0.42), tCre = WA('ocse', ['credito', 'credit'], 1, 0.52), tGen = WA('ocse', ['genera', 'gener'], 1, 0.68), tRed = WA('ocse', ['reddito'], 1, 0.74), tCon = WA('ocse', ['consumare', 'consum'], 1, 0.92);
   phrase(t, a + 0.05, [['Due usi', C.ink], ['del credito', C.lime]], 345, { size: 92 });
-  const kO = seg(t, tOcs - 0.1, tOcs + 0.4); if (kO > 0) glassPill(540, 1405, 'STANDARD OCSE', kO, C.ink, 34);
-  const kc = seg(t, tCre - 0.25, tCre + 0.25); if (kc > 0) glassPill(540, 610, 'CREDITO', kc, C.ink, 40);
+  const kO = seg(t, Math.min(tOcs - 0.1, a + 0.3), Math.min(tOcs - 0.1, a + 0.3) + 0.5); if (kO > 0) glassPill(540, 1405, 'STANDARD OCSE', kO, C.ink, 34);
+  const tC0 = Math.min(tCre - 0.25, a + 0.45), kc = seg(t, tC0, tC0 + 0.5); if (kc > 0) glassPill(540, 610, 'CREDITO', kc, C.ink, 40);
   const Pf = [540, 810], PL = [260, 1050], PR = [820, 1050], CL = [540, 960], CR = [540, 960];
-  const ktr = oC(seg(t, tCre, tCre + 0.4)); dash(540, 665, 540, 665 + 145 * ktr, C.muted, 5, [4, 12], ktr);
+  const ktr = oC(seg(t, tC0 + 0.25, tC0 + 0.65)); dash(540, 665, 540, 665 + 145 * ktr, C.muted, 5, [4, 12], ktr);
   const kb = oC(seg(t, tDis - 0.1, tDis + 0.6));
   for (const [P1, col, cc] of [[PL, C.lime, CL], [PR, C.amber, CR]]) { if (kb <= 0) continue; x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineCap = 'round'; x.setLineDash([2, 14]); x.beginPath(); x.moveTo(...Pf);
     for (let i = 1; i <= 40 * kb; i++) x.lineTo(...qpt(Pf, cc, P1, i / 40)); x.stroke(); x.restore(); }
@@ -190,6 +190,7 @@ function sCriterio(t, a, b) { bg('30,40,46', 0.6); x.save(); zoom(t, a, b, 1.04)
   const tCri = WA('criterio', ['criterio'], 1, 0.05), tPro = WA('criterio', ['produce', 'produc'], 1, 0.4), tCos = WA('criterio', ['costa', 'cost'], 1, 0.6), tPag = WA('criterio', ['pagarlo', 'pagar'], 1, 0.88);
   phrase(t, a + 0.05, [['Tre criteri', C.ink], ['insieme', C.lime]], 345, { size: 92 });
   const R = 175, cs = [[540, 830, tPro, LIME, C.lime, ['PRODUCE'], 765], [395, 1070, tCos, AMB, C.amber, ['COSTA'], 1145], [685, 1070, tPag, RED, C.red, ['SI RIESCE', 'A PAGARLO'], 1130]];
+  const k0 = oC(seg(t, a + 0.3, a + 0.9)); if (k0 > 0) cs.forEach(([cx, cy, , , col]) => { x.save(); x.globalAlpha *= 0.35 * k0; x.strokeStyle = col; x.lineWidth = 3; x.setLineDash([8, 12]); x.beginPath(); x.arc(cx, cy, R * lerp(0.7, 1, k0), 0, 7); x.stroke(); x.restore(); });
   x.save(); x.globalCompositeOperation = 'lighter';
   cs.forEach(([cx, cy, t0, rgb]) => { const k = oB(seg(t, t0 - 0.2, t0 + 0.55)); if (k <= 0) return; x.fillStyle = `rgba(${rgb},0.16)`; x.beginPath(); x.arc(cx, cy, R * clamp(k, 0, 1.08), 0, 7); x.fill(); }); x.restore();
   cs.forEach(([cx, cy, t0, rgb, col, lines, ly]) => { const k = oB(seg(t, t0 - 0.2, t0 + 0.55)); if (k <= 0) return;
@@ -204,7 +205,7 @@ function sCasa(t, a, b) { bg('34,46,30', 0.5); x.save(); zoom(t, a, b, 1.03);
   const tPro = WA('casa', ['produce', 'produc'], 1, 0.4), tNon = WA('casa', ['non'], 1, 0.62), tNom = WA('casa', ['nome'], 1, 0.7), tDai = WA('casa', ['dai'], 1, 0.9);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
   const kb = oB(seg(t, a + 0.2, a + 0.8)); pop(540, 860, kb, () => glass(540, 860, 760, 420, 40, 1));
-  const kp = oC(seg(t, tPro - 0.1, tPro + 0.5)); if (kp > 0) { glow(540, 800, 330, LIME, 0.14 * kp); txt('CIÒ CHE PRODUCE', 540, 780, { size: 66, weight: 800, color: C.lime, alpha: kp, blur: (1 - kp) * 12, ls: -1 }); }
+  const kp = oC(seg(t, tPro - 0.1, tPro + 0.5)); if (kp > 0) { glow(540, 800, 330, LIME, 0.14 * kp); txt('PRODUCE · COSTA · SI PAGA', 540, 780, { size: 50, weight: 800, color: C.lime, alpha: kp, blur: (1 - kp) * 12, ls: -1 }); }
   for (let i = 0; i < 5; i++) { const k = oB(seg(t, tPro + 0.15 + i * 0.09, tPro + 0.55 + i * 0.09)); if (k > 0) coin(540, 985 - i * 24 - (1 - clamp(k, 0, 1)) * 120, 110, clamp(k * 1.4), LIME, '€'); }
   lab(t, 'NON IL NOME CHE GLI DAI', 540, 1130, tNon - 0.1, { color: C.muted, size: 28, ls: 3 });
   const fall = (j) => { const u = seg(t, tDai - 0.1 + j * 0.12, tDai + 0.7 + j * 0.12); return u * u; };
