@@ -45,6 +45,13 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 - Niente affermazioni più forti delle fonti nemmeno a schermo («la voce più…», «la maggior parte…»): stesse parole della voce.
 - Le altezze di barre e podi sono in scala con i numeri (11,2 / 10,8 / 10,1 non possono sembrare 1,8 a 1).
 
+- **Nessuna scena quasi vuota** (settimana 7: cinque puntate bocciate su cinque, sette giri di controllo in più, 11/11/2026): entro
+  0,8 s dall'inizio di OGNI scena deve esserci a schermo, oltre al titolo, un oggetto grande. Gli elementi agganciati a una parola
+  che arriva tardi (`WA(...)` oltre 1 s dall'inizio) entrano SUBITO attenuati (opacità ~0,4, tratteggio, binario vuoto, numero 1-2-3)
+  con `a + 0.3 … a + 0.9` e si ACCENDONO sulla parola (opacità piena, colpo di scala): mai `seg(t, tParola - 0.1, …)` come unico
+  ingresso di ciò che riempie la scena. Controllo prima di consegnare: un fotogramma a `a + 1.0` e uno a `a + 2.0` di ogni scena;
+  se si vede solo il titolo (o titolo + una pillola), la scena è da rifare.
+
 ## Output
 `noir/pN.html` + il foglio provini (percorso del jpg). Rispondi con: elenco scene (chiave → cosa si vede) e cosa hai corretto.
 Non avviare il render vero e non toccare altri file.
