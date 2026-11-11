@@ -109,7 +109,7 @@ function sTaeg(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
 
 /* ================= DENTRO: una scatola di vetro «nel Taeg»; le voci ci cadono dentro una per una e si spuntano ================= */
 function sDentro(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
-  const tCom = WA('dentro', ['commissioni', 'commiss'], 1, 0.2), tPra = WA('dentro', ['pratica'], 1, 0.45), tImp = WA('dentro', ['imposte', 'impost'], 1, 0.66), tPol = WA('dentro', ['polizze', 'poliz'], 1, 0.84);
+  const tCom = WA('dentro', ['commissioni', 'commiss'], 1, 0.2), tPra = WA('dentro', ['pratica'], 1, 0.45), tImp = WA('dentro', ['imposte', 'impost'], 1, 0.66), tPol = WA('dentro', ['assicurazioni', 'assicurazion', 'polizze', 'poliz'], 1, 0.84);
   phrase(t, a + 0.05, [['Dentro il Taeg', C.lime]], 345, { size: 96 });
   const kb = oB(seg(t, a + 0.15, a + 0.7)); const bx = 540, by = 935;
   x.save(); x.translate(bx, by); x.scale(clamp(kb, 0, 1.08), clamp(kb, 0, 1.08)); x.translate(-bx, -by); glass(bx, by, 880, 600, 34, 1);
