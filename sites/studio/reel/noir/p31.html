@@ -209,7 +209,7 @@ function sDato(t, a, b) { bg('52,42,22', 0.55); x.save(); zoom(t, a, b, 1.03);
 function envelope(cx, cy, k, open, col) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy + (1 - clamp(k, 0, 1)) * 60); x.fillStyle = 'rgba(241,244,238,0.12)'; rr(-80, -52, 160, 104, 12); x.fill(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; rr(-80, -52, 160, 104, 12); x.stroke();
   x.beginPath(); x.moveTo(-80, -46 + (1 - open) * 8); x.lineTo(0, 10 - open * 70 + 0); x.lineTo(80, -46 + (1 - open) * 8); x.stroke(); x.restore(); }
 function sCasa(t, a, b) { bg('34,46,34', 0.55); x.save(); zoom(t, a, b, 1.03);
-  const tAr = WA('casa', ['archivi', 'archiv'], 1, 0.2), tTe = WA('casa', ['tempi', 'temp'], 1, 0.36), tGr = WA('casa', ['gratis'], 1, 0.62), tIt = WA('casa', ['italia', 'ditalia'], 1, 0.8), tCr = WA('casa', ['crif'], 1, 0.94);
+  const tAr = WA('casa', ['archivi', 'archiv'], 1, 0.2), tTe = WA('casa', ['tempi', 'temp'], 1, 0.36), tGr = WA('casa', ['gratis'], 1, 0.62), tCr = WA('casa', ['privati', 'privat'], 1, 0.78), tIt = WA('casa', ['italia', 'ditalia'], 1, 0.92);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
   const DX = 120, DW = 520;
   function drawer(y, label, col, len, k, kt) { if (k <= 0) return; const ox = (1 - clamp(k, 0, 1)) * -60; x.save(); x.globalAlpha *= clamp(k); x.translate(ox, 0);
@@ -219,8 +219,8 @@ function sCasa(t, a, b) { bg('34,46,34', 0.55); x.save(); zoom(t, a, b, 1.03);
   drawer(640, 'CRIF e altri', C.amber, 300, oB(seg(t, tAr - 0.1, tAr + 0.4)), seg(t, tTe - 0.1, tTe + 0.8));
   drawer(800, 'CENTRALE RISCHI', C.lime, 160, oB(seg(t, tAr + 0.1, tAr + 0.6)), seg(t, tTe + 0.1, tTe + 0.9));
   lab(t, 'ARCHIVI E TEMPI DIVERSI', 540, 990, tTe, { color: C.ink, size: 24 });
-  envelope(300, 1130, oB(seg(t, tIt - 0.2, tIt + 0.4)), oC(seg(t, tIt + 0.2, tIt + 0.7)), C.lime); lab(t, "BANCA D'ITALIA", 300, 1230, tIt, { color: C.ink, size: 24 });
-  envelope(780, 1130, oB(seg(t, tCr - 0.2, tCr + 0.4)), oC(seg(t, tCr + 0.2, tCr + 0.7)), C.lime); lab(t, 'CRIF', 780, 1230, tCr, { color: C.ink, size: 24 });
+  envelope(780, 1130, oB(seg(t, tIt - 0.2, tIt + 0.4)), oC(seg(t, tIt + 0.2, tIt + 0.7)), C.lime); lab(t, "BANCA D'ITALIA", 780, 1230, tIt, { color: C.ink, size: 24 });
+  envelope(300, 1130, oB(seg(t, tCr - 0.2, tCr + 0.4)), oC(seg(t, tCr + 0.2, tCr + 0.7)), C.lime); lab(t, 'CRIF E ALTRI', 300, 1230, tCr, { color: C.ink, size: 24 });
   const kg = seg(t, tGr - 0.1, tGr + 0.45); if (kg > 0) glassPill(540, 1395, 'DATI GRATIS SU RICHIESTA', kg, C.lime, 36);
   x.restore(); finish(t); }
 
