@@ -63,18 +63,18 @@ function sHook(t, a, b) { bg('44,40,22', 0.7); x.save(); zoom(t, a, b, 1.05);
 function sSic(t, a, b) { bg('34,46,34', 0.6); x.save(); zoom(t, a, b, 1.04);
   const tCr = WA('sic', ['crif'], 1, 0.28), tPi = WA('sic', ['piccoli', 'picc'], 1, 0.5), tPr = WA('sic', ['preavviso', 'preavv'], 1, 0.74), tQ = WA('sic', ['quindici', '15'], 1, 0.88);
   phrase(t, a + 0.05, [['Sistemi privati,', C.ink], ['CRIF e altri', C.lime]], 345, { size: 92 });
-  const kc = oB(seg(t, tCr - 0.2, tCr + 0.4)); pop(540, 740, kc, () => { glass(540, 740, 800, 190, 28, 1); });
+  const kc = oB(seg(t, a + 0.3, a + 0.9)); pop(540, 740, kc, () => { glass(540, 740, 800, 190, 28, 1); });
   const CH = [[210, 130], [330, 56], [450, 120], [560, 50], [660, 80], [760, 56]];
   CH.forEach(([cx, w], i) => { const k = oB(seg(t, tCr + 0.1 + i * 0.12, tCr + 0.55 + i * 0.12)); if (k <= 0) return; const small = i % 2 === 1, hot = small ? oC(seg(t, tPi - 0.1 + (i >> 1) * 0.12, tPi + 0.3 + (i >> 1) * 0.12)) : 0, y = 745 - (1 - clamp(k, 0, 1)) * 170;
     x.save(); x.globalAlpha *= clamp(k * 1.5); if (hot > 0) glow(cx, 745, 70, LIM, 0.3 * hot); x.fillStyle = hot > 0.5 ? C.lime : 'rgba(241,244,238,0.55)'; rr(cx - w / 2, y - 27, w, 54, 14); x.fill(); x.restore(); });
   lab(t, 'ANCHE I PRESTITI PICCOLI', 540, 880, tPi - 0.1, { color: C.lime });
-  const RX = 540, RY = 1160, RR = 140, ke = oC(seg(t, tPr - 0.1, tPr + 0.4));
+  const RX = 540, RY = 1160, RR = 140, ke = oC(seg(t, a + 1.3, a + 1.9));   /* l'anello dei quindici giorni e la busta entrano presto, spenti: si accendono su «quindici» */
   for (let i = 0; i < 15; i++) { const a0 = -Math.PI / 2 + i * 2 * Math.PI / 15 + 0.05, a1 = a0 + 2 * Math.PI / 15 - 0.1, kl = oC(seg(t, tQ - 0.05 + i * 0.07, tQ + 0.3 + i * 0.07));
     x.save(); x.lineCap = 'round'; x.lineWidth = 22; x.strokeStyle = kl > 0.4 ? C.lime : 'rgba(241,244,238,0.16)'; if (kl > 0.4) { x.shadowColor = C.lime; x.shadowBlur = 14 * kl; } x.globalAlpha *= ke; x.beginPath(); x.arc(RX, RY, RR, a0, a1); x.stroke(); x.restore(); }
   const kq = oC(seg(t, tQ, tQ + 0.4));
   x.save(); x.globalAlpha *= ke * (1 - kq); x.strokeStyle = C.ink; x.lineWidth = 5; x.lineJoin = 'round'; rr(RX - 58, 1092, 116, 80, 10); x.stroke(); x.beginPath(); x.moveTo(RX - 58, 1096); x.lineTo(RX, 1140); x.lineTo(RX + 58, 1096); x.stroke(); x.restore();
   lab(t, 'PREAVVISO', RX, 1214, tPr + 0.1, { color: C.ink, size: 24, alpha: oC(seg(t, tPr + 0.1, tPr + 0.45)) * (1 - kq) });
-  txt('15', RX, 1136, { size: 96, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -2 }); lab(t, 'GIORNI', RX, 1210, tQ + 0.15, { color: C.lime, size: 26 });
+  txt('15', RX, 1136, { size: 96, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -2 }); lab(t, 'GIORNI', RX, 1210, tQ + 0.15, { color: C.lime, size: 26 }); lab(t, 'ALMENO', RX, 1070, tQ + 0.1, { color: C.lime, size: 22 });
   const kp = seg(t, tQ + 1.1, tQ + 1.55); if (kp > 0) glassPill(540, 1405, 'POI SI VEDE', kp, C.lime, 40);
   x.restore(); finish(t); }
 
@@ -182,8 +182,8 @@ function sSocial(t, a, b) { bg('36,40,48', 0.55); x.save(); zoom(t, a, b, 1.03);
     if (i === 1) { rr(cx - 36, BY - 28, 72, 48, 14); x.fill(); x.beginPath(); x.moveTo(cx - 14, BY + 16); x.lineTo(cx - 24, BY + 36); x.lineTo(cx + 4, BY + 16); x.fill(); }
     if (i === 2) txt('#', cx, BY + 2, { size: 76, weight: 800, color: C.ink }); }); });
   if (kx > 0) { x.save(); x.strokeStyle = C.red; x.lineWidth = 10; x.lineCap = 'round'; x.beginPath(); x.moveTo(200, 640); x.lineTo(200 + 680 * kx, 640 + 190 * kx); x.stroke(); x.restore(); }
-  const ka = oB(seg(t, tAl - 0.2, tAl + 0.4)); pop(300, 1170, ka, () => gear(300, 1170, 100, t * 0.9, C.amber)); lab(t, 'ALGORITMO', 300, 1318, tAl, { color: C.amber, size: 26 });
-  const kv = oB(seg(t, tIv - 0.15, tIv + 0.45)); pop(780, 1170, kv, () => { glow(780, 1170, 200, LIM, 0.2); glass(780, 1170, 230, 230, 115, 1); person(780, 1176, 1.0, C.lime); }); lab(t, 'PERSONA', 780, 1318, tIv, { color: C.lime, size: 26 });
+  const ka = oB(seg(t, a + 1.0, a + 1.6)), kaF = oC(seg(t, tAl - 0.15, tAl + 0.3)); pop(300, 1170, ka, () => { x.globalAlpha *= 0.4 + 0.6 * kaF; gear(300, 1170, 100, t * 0.9, C.amber); }); lab(t, 'ALGORITMO', 300, 1318, tAl, { color: C.amber, size: 26 });
+  const kv = oB(seg(t, a + 1.3, a + 1.9)), kvF = oC(seg(t, tIv - 0.15, tIv + 0.3)); pop(780, 1170, kv, () => { x.globalAlpha *= 0.4 + 0.6 * kvF; glow(780, 1170, 200, LIM, 0.2 * kvF); glass(780, 1170, 230, 230, 115, 1); person(780, 1176, 1.0, C.lime); }); lab(t, 'PERSONA', 780, 1318, tIv, { color: C.lime, size: 26 });
   const ca = oC(seg(t, tIv + 0.1, tIv + 0.6)); dash(420, 1170, 420 + 230 * ca, 1170, C.muted, 4, [4, 12], ca > 0 ? 1 : 0);
   const k2 = seg(t, tUm - 0.2, tUm + 0.4); if (k2 > 0) glassPill(540, 1405, "DIRITTO ALL'INTERVENTO UMANO", k2, C.lime, 34);
   x.restore(); finish(t); }
@@ -216,8 +216,8 @@ function sCasa(t, a, b) { bg('34,46,34', 0.55); x.save(); zoom(t, a, b, 1.03);
     const sl = len * oC(kt); if (sl > 1) { x.fillStyle = col; x.globalAlpha *= 0.9; rr(DX + DW - 20, y + 30, sl + 20, 60, 12); x.fill(); x.globalAlpha = 1; for (let i = 1; i * 40 < sl; i++) { x.strokeStyle = 'rgba(5,6,7,0.45)'; x.lineWidth = 3; x.beginPath(); x.moveTo(DX + DW + i * 40, y + 38); x.lineTo(DX + DW + i * 40, y + 82); x.stroke(); } }
     x.fillStyle = 'rgba(241,244,238,0.12)'; rr(DX, y, DW, 120, 18); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 4; rr(DX, y, DW, 120, 18); x.stroke();
     x.fillStyle = C.ink; rr(DX + DW - 150, y + 52, 100, 16, 8); x.fill(); txt(label, DX + 28, y + 36, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 1, align: 'left' }); x.restore(); }
-  drawer(640, 'CRIF e altri', C.amber, 300, oB(seg(t, tAr - 0.1, tAr + 0.4)), seg(t, tTe - 0.1, tTe + 0.8));
-  drawer(800, 'CENTRALE RISCHI', C.lime, 160, oB(seg(t, tAr + 0.1, tAr + 0.6)), seg(t, tTe + 0.1, tTe + 0.9));
+  drawer(640, 'CRIF E ALTRI', C.amber, 300, oB(seg(t, a + 0.3, a + 0.8)), seg(t, tTe - 0.1, tTe + 0.8));
+  drawer(800, 'CENTRALE RISCHI', C.lime, 160, oB(seg(t, a + 0.5, a + 1.0)), seg(t, tTe + 0.1, tTe + 0.9));
   lab(t, 'ARCHIVI E TEMPI DIVERSI', 540, 990, tTe, { color: C.ink, size: 24 });
   envelope(780, 1130, oB(seg(t, tIt - 0.2, tIt + 0.4)), oC(seg(t, tIt + 0.2, tIt + 0.7)), C.lime); lab(t, "BANCA D'ITALIA", 780, 1230, tIt, { color: C.ink, size: 24 });
   envelope(300, 1130, oB(seg(t, tCr - 0.2, tCr + 0.4)), oC(seg(t, tCr + 0.2, tCr + 0.7)), C.lime); lab(t, 'CRIF E ALTRI', 300, 1230, tCr, { color: C.ink, size: 24 });
