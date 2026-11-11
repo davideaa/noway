@@ -618,17 +618,17 @@
  },
  {
   "n": 35,
-  "titolo": "quanto costa davvero uno smartphone a rate",
+  "titolo": "quanto costa davvero un acquisto a rate",
   "caso_reale": true,
-  "gancio": "Smartphone da 1.000 € a «sole» 47 € al mese. Quanto paghi davvero?",
+  "gancio": "Un prodotto da 789 € a «sole» 37,20 € al mese. Quanto paghi davvero?",
   "spiega": [
-   "Somma le rate: 24 rate da 47 € fanno 1.128 €, cioè 128 € in più del prezzo.",
+   "Somma le rate: 24 rate da 37,20 € fanno 892,80 €, cioè 103,80 € in più del prezzo.",
    "Il tasso implicito si trova con il valore attuale: è il tasso che rende le rate uguali al prezzo.",
-   "Qui il TAEG è circa 12,5%: va confrontato con altre forme di pagamento, comprese le spese."
+   "Qui il TAEG è 12,86%: va confrontato con altre forme di pagamento, comprese le spese."
   ],
-  "esempio": "1.000 € pagati in 24 rate mensili da 47 €: TAN implicito circa 11,8%, TAEG circa 12,5%. Esempio di calcolo, non un'offerta reale.",
+  "esempio": "789 € pagati in 24 rate mensili da 37,20 €: TAN 12,16%, TAEG 12,86%. Esempio ufficiale di finanziamento di una grande catena, valido a novembre 2026 per questo importo e questa durata.",
   "ti_serve": "Fare il conto vero prima di firmare un'offerta a rate in negozio o online.",
-  "visual": "Smartphone di vetro che si spezza in 24 tasselli; il conteggio finale supera il prezzo.",
+  "visual": "Cartellino del prezzo accanto a una pila di 24 ricevute che lo supera; le ultime tre in rosso.",
   "collega": [
    28,
    32,
