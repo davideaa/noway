@@ -76,7 +76,7 @@ function ring(cx, cy, r, frac, col, rgb, k) { const a0 = Math.PI * 0.75, full = 
   x.strokeStyle = 'rgba(241,244,238,0.14)'; x.beginPath(); x.arc(cx, cy, r, a0, a0 + full); x.stroke();
   if (frac > 0.005) { glow(cx + r * Math.cos(a0 + full * frac), cy + r * Math.sin(a0 + full * frac), 90, rgb, 0.3); x.strokeStyle = col; x.beginPath(); x.arc(cx, cy, r, a0, a0 + full * frac); x.stroke(); } x.restore(); }
 function sTassi(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
-  const tSed = WA('tassi', ['sedici', '16'], 1, 0.3), tMez = WA('tassi', ['mezzo', 'mezz'], 1, 0.4), tDod = WA('tassi', ['dodici', '12'], 1, 0.75);
+  const tSed = WA('tassi', ['sedici', '16'], 1, 0.3), tMez = WA('tassi', ['mezzo', 'mezz', '5'], 1, 0.4), tDod = WA('tassi', ['dodici', '12'], 1, 0.75);
   phrase(t, a + 0.05, [['Tasso medio:', C.ink], ['revolving più alto', C.amber]], 345, { size: 84 });
   const MAXV = 20, cy = 900, r = 170, k0 = oC(seg(t, a + 0.15, a + 0.7));
   const v1 = 16 * oC(seg(t, tSed - 0.1, tSed + 0.7)) + 0.5 * oC(seg(t, tMez - 0.1, tMez + 0.35)), v2 = 12 * oC(seg(t, tDod - 0.1, tDod + 0.8));
