@@ -1,0 +1,552 @@
+{
+ "scenari": [
+  {
+   "nome": "perde",
+   "rendimento": -0.03,
+   "fonte": "Come i nostri due test: coppie cripto −9% annuo, carry sotto la liquidità di circa 1,6 punti."
+  },
+  {
+   "nome": "niente",
+   "rendimento": 0.0,
+   "fonte": "Il vantaggio è sparito dopo la pubblicazione: McLean-Pontiff misurano −58% di rendimento dopo la pubblicazione; Do-Faff trovano pairs quasi a zero dopo il 2002."
+  },
+  {
+   "nome": "come un fondo",
+   "rendimento": 0.03,
+   "fonte": "HFRI Equity Market Neutral 2017–2023: media semplice ≈ 2,9% annuo, già al netto delle commissioni del fondo (e non tutto sopra la liquidità)."
+  },
+  {
+   "nome": "letteratura migliore",
+   "rendimento": 0.045,
+   "fonte": "Rad-Low-Faff, distance pairs su azioni USA 1962–2014: 38 punti base al mese dopo i costi ≈ 4,6% annuo, in calo dopo il 2009."
+  },
+  {
+   "nome": "eccezionale",
+   "rendimento": 0.1,
+   "fonte": "Sopra quasi tutto ciò che è documentato per strategie neutrali al mercato accessibili a un privato. Messo solo come limite superiore."
+  }
+ ],
+ "capitali": [
+  5000,
+  10000,
+  25000,
+  50000,
+  100000
+ ],
+ "tasse": 0.26,
+ "costi_fissi": {
+  "gratis": 0,
+  "base": 360
+ },
+ "ore_sviluppo": 300,
+ "ore_mese": 6,
+ "righe": [
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 5000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": -150,
+   "euro_ora_regime": -2.1,
+   "euro_ora_primo_anno": -0.4
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 5000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -510,
+   "euro_ora_regime": -7.1,
+   "euro_ora_primo_anno": -1.4
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 10000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": -300,
+   "euro_ora_regime": -4.2,
+   "euro_ora_primo_anno": -0.8
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 10000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -660,
+   "euro_ora_regime": -9.2,
+   "euro_ora_primo_anno": -1.8
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 25000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": -750,
+   "euro_ora_regime": -10.4,
+   "euro_ora_primo_anno": -2.0
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 25000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -1110,
+   "euro_ora_regime": -15.4,
+   "euro_ora_primo_anno": -3.0
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 50000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": -1500,
+   "euro_ora_regime": -20.8,
+   "euro_ora_primo_anno": -4.0
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 50000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -1860,
+   "euro_ora_regime": -25.8,
+   "euro_ora_primo_anno": -5.0
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 100000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": -3000,
+   "euro_ora_regime": -41.7,
+   "euro_ora_primo_anno": -8.1
+  },
+  {
+   "scenario": "perde",
+   "rendimento": -0.03,
+   "capitale": 100000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -3360,
+   "euro_ora_regime": -46.7,
+   "euro_ora_primo_anno": -9.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 5000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 0,
+   "euro_ora_regime": 0.0,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 5000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -360,
+   "euro_ora_regime": -5.0,
+   "euro_ora_primo_anno": -1.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 10000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 0,
+   "euro_ora_regime": 0.0,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 10000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -360,
+   "euro_ora_regime": -5.0,
+   "euro_ora_primo_anno": -1.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 25000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 0,
+   "euro_ora_regime": 0.0,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 25000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -360,
+   "euro_ora_regime": -5.0,
+   "euro_ora_primo_anno": -1.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 50000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 0,
+   "euro_ora_regime": 0.0,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 50000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -360,
+   "euro_ora_regime": -5.0,
+   "euro_ora_primo_anno": -1.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 100000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 0,
+   "euro_ora_regime": 0.0,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "niente",
+   "rendimento": 0.0,
+   "capitale": 100000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -360,
+   "euro_ora_regime": -5.0,
+   "euro_ora_primo_anno": -1.0
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 5000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 111,
+   "euro_ora_regime": 1.5,
+   "euro_ora_primo_anno": 0.3
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 5000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -249,
+   "euro_ora_regime": -3.5,
+   "euro_ora_primo_anno": -0.7
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 10000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 222,
+   "euro_ora_regime": 3.1,
+   "euro_ora_primo_anno": 0.6
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 10000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -138,
+   "euro_ora_regime": -1.9,
+   "euro_ora_primo_anno": -0.4
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 25000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 555,
+   "euro_ora_regime": 7.7,
+   "euro_ora_primo_anno": 1.5
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 25000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 195,
+   "euro_ora_regime": 2.7,
+   "euro_ora_primo_anno": 0.5
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 50000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 1110,
+   "euro_ora_regime": 15.4,
+   "euro_ora_primo_anno": 3.0
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 50000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 750,
+   "euro_ora_regime": 10.4,
+   "euro_ora_primo_anno": 2.0
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 100000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 2220,
+   "euro_ora_regime": 30.8,
+   "euro_ora_primo_anno": 6.0
+  },
+  {
+   "scenario": "come un fondo",
+   "rendimento": 0.03,
+   "capitale": 100000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 1860,
+   "euro_ora_regime": 25.8,
+   "euro_ora_primo_anno": 5.0
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 5000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 166,
+   "euro_ora_regime": 2.3,
+   "euro_ora_primo_anno": 0.4
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 5000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -194,
+   "euro_ora_regime": -2.7,
+   "euro_ora_primo_anno": -0.5
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 10000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 333,
+   "euro_ora_regime": 4.6,
+   "euro_ora_primo_anno": 0.9
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 10000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": -27,
+   "euro_ora_regime": -0.4,
+   "euro_ora_primo_anno": -0.1
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 25000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 832,
+   "euro_ora_regime": 11.6,
+   "euro_ora_primo_anno": 2.2
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 25000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 472,
+   "euro_ora_regime": 6.6,
+   "euro_ora_primo_anno": 1.3
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 50000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 1665,
+   "euro_ora_regime": 23.1,
+   "euro_ora_primo_anno": 4.5
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 50000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 1305,
+   "euro_ora_regime": 18.1,
+   "euro_ora_primo_anno": 3.5
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 100000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 3330,
+   "euro_ora_regime": 46.2,
+   "euro_ora_primo_anno": 9.0
+  },
+  {
+   "scenario": "letteratura migliore",
+   "rendimento": 0.045,
+   "capitale": 100000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 2970,
+   "euro_ora_regime": 41.2,
+   "euro_ora_primo_anno": 8.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 5000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 370,
+   "euro_ora_regime": 5.1,
+   "euro_ora_primo_anno": 1.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 5000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 10,
+   "euro_ora_regime": 0.1,
+   "euro_ora_primo_anno": 0.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 10000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 740,
+   "euro_ora_regime": 10.3,
+   "euro_ora_primo_anno": 2.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 10000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 380,
+   "euro_ora_regime": 5.3,
+   "euro_ora_primo_anno": 1.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 25000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 1850,
+   "euro_ora_regime": 25.7,
+   "euro_ora_primo_anno": 5.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 25000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 1490,
+   "euro_ora_regime": 20.7,
+   "euro_ora_primo_anno": 4.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 50000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 3700,
+   "euro_ora_regime": 51.4,
+   "euro_ora_primo_anno": 9.9
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 50000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 3340,
+   "euro_ora_regime": 46.4,
+   "euro_ora_primo_anno": 9.0
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 100000,
+   "costi": "gratis",
+   "costi_fissi": 0,
+   "netto_anno": 7400,
+   "euro_ora_regime": 102.8,
+   "euro_ora_primo_anno": 19.9
+  },
+  {
+   "scenario": "eccezionale",
+   "rendimento": 0.1,
+   "capitale": 100000,
+   "costi": "base",
+   "costi_fissi": 360,
+   "netto_anno": 7040,
+   "euro_ora_regime": 97.8,
+   "euro_ora_primo_anno": 18.9
+  }
+ ],
+ "capitale_per_1000_euro": {
+  "perde": null,
+  "niente": null,
+  "come un fondo": 61261,
+  "letteratura migliore": 40841,
+  "eccezionale": 18378
+ }
+}

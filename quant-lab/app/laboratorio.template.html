@@ -122,6 +122,7 @@ summary{cursor:pointer;font-weight:600}
     <div class="brand"><b>Laboratorio Arbitraggio Statistico</b><span id="upd"></span></div>
     <nav class="tabs" aria-label="Sezioni">
       <a href="#motore">Il motore</a>
+      <a href="#conviene">Conviene?</a>
       <a href="#coppie">Esplora coppie</a>
       <a href="#strategie">Strategie</a>
       <a href="#mestiere">Il mestiere</a>
@@ -164,6 +165,55 @@ summary{cursor:pointer;font-weight:600}
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ============ CONVIENE ============ -->
+<section class="view" id="v-conviene" hidden>
+  <div class="stack">
+    <div class="eyebrow">Rapporto di convenienza</div>
+    <h1>Vale la pena farlo da casa?</h1>
+    <p class="lede">Dove lo fanno i fondi, quanto rendono davvero, quanto costa a te e quanto ti resta in tasca. Poi quanto ci si può fidare di questo laboratorio.</p>
+  </div>
+  <div class="grid2">
+    <div class="panel stack" style="border-color:var(--bad)">
+      <div class="st-head"><h2>Come attività per guadagnare</h2><span class="chip c-bad">no, con capitali da privato</span></div>
+      <p>Anche nello scenario realistico migliore, cioè quanto rendono i fondi neutrali al mercato, per avere 1.000 € netti l'anno servono circa <b class="num" id="cap1000"></b> di capitale, per circa 370 ore di lavoro nel primo anno.</p>
+    </div>
+    <div class="panel stack" style="border-color:var(--warn)">
+      <div class="st-head"><h2>Come ricerca a costo zero</h2><span class="chip c-warn">sì, limitata, con regola di stop</span></div>
+      <p>Due test soli, scelti per accessibilità: <b>spread tra scadenze dei futures</b> (crediti gratuiti Databento) e <b>coppie di settori e azioni USA</b> (dati gratuiti French e Tiingo). Se falliscono i criteri dichiarati, il laboratorio chiude con un risultato negativo. Anche quello vale.</p>
+    </div>
+  </div>
+  <div class="panel stack">
+    <h2>Quanto ti resta in tasca, all'anno</h2>
+    <p class="note">Rendimento sopra la liquidità e dopo i costi di trading, tasse al 26%, 360 € l'anno di dati e server. Ogni scenario è legato a un numero misurato o pubblicato: passa sul nome per la fonte.</p>
+    <div class="tscroll"><table id="bizTab"></table></div>
+  </div>
+  <div class="panel stack">
+    <h2>Dove lo fanno i fondi, e cosa è accessibile a te</h2>
+    <div class="tscroll"><table id="doveTab"></table></div>
+  </div>
+  <div class="grid2">
+    <div class="panel stack">
+      <h2>Quanto rendono davvero</h2>
+      <div class="tscroll"><table id="rendTab"></table></div>
+    </div>
+    <div class="panel stack">
+      <h2>Quanto costano i dati</h2>
+      <div class="tscroll"><table id="budTab"></table></div>
+    </div>
+  </div>
+  <div class="panel stack">
+    <h2>Quanto ci si può fidare del motore</h2>
+    <p class="note">Test con dati inventati di cui si conosce la risposta giusta. Se il motore li sbaglia, non ci si può fidare dei risultati veri.</p>
+    <div class="crit" id="testList"></div>
+  </div>
+  <div class="panel stack">
+    <h2>Il prompt, punto per punto</h2>
+    <p class="note" id="copNote"></p>
+    <div class="tscroll"><table id="copTab"></table></div>
   </div>
 </section>
 
@@ -339,7 +389,7 @@ const PIPE = [
   ["done", "Backtest con costi veri", "Commissioni, slittamento, funding su entrambe le gambe, esecuzione il giorno dopo il segnale."],
   ["done", "Verifica fuori campione", "2023–2026 guardato una volta sola. Entrambe le strategie bocciate."],
   ["done", "Revisione indipendente", "Codice ricontrollato da un modello diverso: trovato e corretto un errore sui costi."],
-  ["block", "Nuovi mercati", "Coppie di ETF/azioni e spread tra futures: servono dati che costano o un account. Aspetta la tua decisione."],
+  ["block", "Nuovi mercati", "Spread tra futures e coppie di azioni USA, con dati gratuiti (crediti Databento, French, Tiingo). Aspetta la tua decisione: vedi la sezione Conviene?."],
   ["idle", "Paper trading", "Solo se una strategia passa la verifica."],
   ["idle", "Live", "Mai senza la tua approvazione esplicita."],
 ];
@@ -352,6 +402,33 @@ $("#pipe").replaceChildren(...PIPE.map(([s, t, d]) => el("li", { class: s }, el(
   const mx = steps[0][0];
   $("#funnel").replaceChildren(...steps.map(([v, t], i) => el("div", { class: "frow" }, el("div", { style: "display:grid;gap:4px;min-width:0" }, el("div", { class: "flab" }, t), el("div", { class: "fbar" }, el("i", { style: `width:${Math.max(.4, Math.sqrt(v / mx) * 100)}%;${i === 2 ? "background:var(--s3)" : ""}` }))), el("div", { class: "num" }, fmt(v, 0)))));
   $("#funnel").append(el("p", { class: "note" }, `Le coppie "legate" sono tante quante ne produce il caso, e quasi nessuna lo resta. Nella strategia A: ${tr.length} operazioni, ${rev} tornate davvero alla media. Barre in scala a radice quadrata.`));
+})();
+
+
+/* ---------- CONVIENE ---------- */
+(function conviene() {
+  const C = D.convenienza, eur = v => (v < 0 ? "−" : "+") + fmt(Math.abs(v), 0) + " €";
+  $("#cap1000").textContent = fmt(C.capitale_per_1000_euro["letteratura migliore"], 0) + "–" + fmt(C.capitale_per_1000_euro["come un fondo"], 0) + " €";
+  const t = $("#bizTab"); t.innerHTML = "<thead><tr><th>Scenario</th><th class=n>Sopra liquidità</th>" + C.capitali.map(c => `<th class=n>${fmt(c, 0)} €</th>`).join("") + "</tr></thead>";
+  const tb = el("tbody");
+  for (const sc of C.scenari) {
+    const cells = C.capitali.map(cap => { const r = C.righe.find(x => x.scenario === sc.nome && x.capitale === cap && x.costi === "base"); const v = r.netto_anno; return el("td", { class: "n", style: `background:var(${v < 0 ? "--bad-soft" : v < 1000 ? "--warn-soft" : "--ok-soft"})` }, eur(v)); });
+    tb.append(el("tr", {}, el("td", { title: sc.fonte }, el("b", {}, sc.nome), el("div", { class: "src" }, sc.fonte)), el("td", { class: "n" }, (sc.rendimento > 0 ? "+" : "") + fmt(sc.rendimento * 100, 1) + "%"), ...cells));
+  }
+  t.append(tb);
+  const acc = { alto: "c-ok", medio: "c-warn", basso: "c-bad", no: "c-bad" };
+  const d = $("#doveTab"); d.innerHTML = "<thead><tr><th>Mercato</th><th>Come lo fanno i fondi</th><th>Leva</th><th>Per te</th><th>Perché</th></tr></thead>";
+  const db = el("tbody"); for (const c of D.dove.classi) db.append(el("tr", {}, el("td", {}, el("b", {}, c.nome)), el("td", {}, c.come), el("td", {}, c.leva), el("td", {}, el("span", { class: "chip " + (acc[c.accessibile_privato] || "c-idle") }, c.accessibile_privato)), el("td", {}, c.perche, c.fonti?.length ? el("div", { class: "src" }, ...c.fonti.slice(0, 2).map((f, i) => [i ? " · " : "", el("a", { href: f.url, target: "_blank", rel: "noopener" }, f.titolo || "fonte")]).flat()) : null))); d.append(db);
+  const r = $("#rendTab"); r.innerHTML = "<thead><tr><th>Cosa</th><th>Periodo</th><th>Valore</th></tr></thead>";
+  const rb = el("tbody"); for (const x of D.dove.rendimenti) rb.append(el("tr", {}, el("td", {}, x.fonte ? el("a", { href: x.fonte, target: "_blank", rel: "noopener" }, x.cosa) : x.cosa, x.verificato === "parziale" ? el("div", { class: "src" }, "fonte parziale") : null), el("td", {}, x.periodo), el("td", { class: "num" }, x.valore))); r.append(rb);
+  const b = $("#budTab"); b.innerHTML = "<thead><tr><th>Budget</th><th>Cosa si può fare</th><th>Cosa no</th></tr></thead>";
+  const bb = el("tbody"); for (const x of D.dati_eco.percorsi) bb.append(el("tr", {}, el("td", { class: "num" }, el("b", {}, x.budget)), el("td", {}, x.cosa_si_puo_fare), el("td", {}, x.cosa_no))); b.append(bb);
+  $("#testList").replaceChildren(...D.test_motore.map(x => el("div", {}, el("span", {}, x.test, x.dettaglio ? el("span", { class: "src" }, "  " + x.dettaglio) : null), el("span", { class: "chip " + (x.passa === "True" ? "c-ok" : "c-bad") }, x.passa === "True" ? "passa" : "fallisce"))));
+  const st = { fatto: ["c-ok", "fatto"], parziale: ["c-warn", "a metà"], no: ["c-bad", "non fatto"], dopo: ["c-idle", "dopo"] };
+  const cnt = k => D.copertura.voci.filter(v => v.stato === k).length;
+  $("#copNote").textContent = `${cnt("fatto")} voci fatte, ${cnt("parziale")} a metà, ${cnt("dopo")} rimandate perché servono solo con una strategia promossa. ${D.copertura.nota}`;
+  const c = $("#copTab"); c.innerHTML = "<thead><tr><th>Sez.</th><th>Cosa chiedeva il prompt</th><th>Stato</th><th>Dettaglio</th></tr></thead>";
+  const cb = el("tbody"); for (const v of D.copertura.voci) cb.append(el("tr", {}, el("td", { class: "num" }, v.sez), el("td", {}, v.titolo), el("td", {}, el("span", { class: "chip " + st[v.stato][0] }, st[v.stato][1])), el("td", {}, v.nota))); c.append(cb);
 })();
 
 /* ---------- COPPIE ---------- */
@@ -506,13 +583,13 @@ function md(s) {
 }
 $("#devBody").innerHTML = md(D.deviazioni);
 (function ag() {
-  const R = [["Coordinamento, codice, calcoli, report", "Opus", "sessione principale"], ["Specifiche Fusion Markets", "Sonnet", "completato"], ["Specifiche Interactive Brokers", "Sonnet", "completato, solo fonti secondarie"], ["Exchange cripto e MiCA", "Sonnet", "completato, registro ESMA letto"], ["Database della letteratura", "Sonnet", "37 articoli"], ["Revisione indipendente del codice", "Fable", "1 errore grave trovato e corretto"], ["Scheda sul mestiere", "Sonnet", D.mestiere ? "completato" : "in corso"]];
+  const R = [["Coordinamento, codice, calcoli, report", "Opus", "sessione principale"], ["Specifiche Fusion Markets", "Sonnet", "completato"], ["Specifiche Interactive Brokers", "Sonnet", "completato, solo fonti secondarie"], ["Exchange cripto e MiCA", "Sonnet", "completato, registro ESMA letto"], ["Database della letteratura", "Sonnet", "37 articoli"], ["Revisione indipendente del codice", "Fable", "1 errore grave trovato e corretto"], ["Scheda sul mestiere", "Sonnet", "completato"], ["Dove lo fanno i fondi e quanto rendono", "Sonnet", "completato; indici HFRI di lungo periodo dietro login"], ["Costo dei dati", "Sonnet", "18 fornitori, test da qui"]];
   const t = $("#agTab"); t.innerHTML = "<thead><tr><th>Compito</th><th>Modello</th><th>Esito</th></tr></thead>";
   const tb = el("tbody"); for (const r of R) tb.append(el("tr", {}, ...r.map(x => el("td", {}, x)))); t.append(tb);
 })();
 
 /* ---------- router ---------- */
-const VIEWS = ["motore", "coppie", "strategie", "mestiere", "broker", "registro"];
+const VIEWS = ["motore", "conviene", "coppie", "strategie", "mestiere", "broker", "registro"];
 function render() {
   const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "motore";
   VIEWS.forEach(n => { $("#v-" + n).hidden = n !== v; });

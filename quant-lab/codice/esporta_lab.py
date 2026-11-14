@@ -118,6 +118,11 @@ def main():
         fonti=read_csv(ROOT / "registri/DATA_SOURCE_REGISTRY.csv"),
         strategie=read_csv(ROOT / "registri/STRATEGY_REGISTRY.csv"),
         deviazioni=(ROOT / "registri/DEVIAZIONI.md").read_text(encoding="utf-8"),
+        convenienza=json.load(open(ROOT / "esperimenti/convenienza.json")),
+        dove=json.load(open(ROOT / "ricerca/dove_si_fa.json")),
+        dati_eco=json.load(open(ROOT / "ricerca/dati_economici.json")),
+        copertura=json.load(open(ROOT / "registri/copertura_prompt.json")),
+        test_motore=read_csv(ROOT / "registri/TEST_MOTORE.csv"),
         mestiere=json.load(open(ROOT / "ricerca/mestiere.json")) if (ROOT / "ricerca/mestiere.json").exists() else None,
     )
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
