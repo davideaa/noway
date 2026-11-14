@@ -3,6 +3,8 @@
 # Uso: python verifica_finale.py CARTELLA_FRASI(con righe.json e cues.json) mix.wav
 import json, subprocess, re, sys, difflib, os
 from faster_whisper import WhisperModel
+sys.path[:0] = [os.path.dirname(os.path.abspath(__file__))]
+from numeri import mancanti   # numeri del copione contro numeri sentiti (da 20 in su)
 D, MIX = sys.argv[1], sys.argv[2]
 m = WhisperModel("large-v3-turbo", device="cpu", compute_type="int8")
 C = json.load(open(f"{D}/cues.json"))["cues"]; R = {k: s for s, k in json.load(open(f"{D}/righe.json"))}
@@ -29,6 +31,6 @@ for k, (a, b) in C.items():
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(max(0, a - 0.05)), "-to", str(b + 0.1), "-i", MIX, seg])
     W = [w for s in m.transcribe(seg, language="it", beam_size=5, word_timestamps=True)[0] for w in s.words]
     got = " ".join(w.word.strip() for w in W); sim = difflib.SequenceMatcher(None, norm(R[k]), norm(got)).ratio()
-    ok = sim >= 0.95; bad += not ok
-    print(f"{'OK ' if ok else 'NO!'} {k:9s} {a:6.2f}s sim {sim:.2f} pmin {min((w.probability for w in W), default=0):.2f} | {got}", flush=True)
+    manca = mancanti(R[k], got); ok = sim >= 0.95 and not manca; bad += not ok
+    print(f"{'OK ' if ok else 'NO!'} {k:9s} {a:6.2f}s sim {sim:.2f} pmin {min((w.probability for w in W), default=0):.2f}{' NUM! manca ' + str(manca) if manca else ''} | {got}", flush=True)
 os.remove(seg); print("VERIFICA FINALE:", "TUTTO OK" if not bad else f"{bad} FRASI DA RIFARE"); sys.exit(1 if bad else 0)

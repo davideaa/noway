@@ -9,6 +9,8 @@ import json, re, sys, difflib, shutil, wave, numpy as np, torch, torchaudio as t
 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 from faster_whisper import WhisperModel
 import os, hashlib
+sys.path[:0] = [os.path.dirname(os.path.abspath(__file__)), '/home/user/noway/sites/studio/reel/noir/voce']
+from numeri import mancanti   # i numeri del copione devono comparire uguali nella trascrizione (P31: «trentasei» → «56»; P36: «trentatremila» → «32.000»)
 R = json.load(open("righe.json")); SKIP = set(os.environ.get("SKIP", "num").split(","))
 idx = [i for i, (_, k) in enumerate(R) if k not in SKIP] if sys.argv[1:] == ["tutte"] else [int(v) for v in sys.argv[1:]]
 # rifare una frase già promossa ma segnalata dalla verifica finale: NOCACHE=1 SEEDS="505 606 ..." PMIN=0.6 python rigenera2.py 3
@@ -53,9 +55,10 @@ for i in idx:
         pmin = min((w.probability for w in W), default=0)
         fine, minimo = coda(f, W[-1].end if W else dur)
         ok_fine = fine < -30 or minimo < -38
-        passa = sim >= 0.985 and pmin >= PMIN and ok_fine and dur <= 1.6 * exp + 1
-        score = sim + 0.3 * pmin + (0.2 if ok_fine else 0) - (1 if dur > 1.6 * exp + 1 else 0)
-        print(f"{i:02d} seed {seed:3d} {'PASSA' if passa else 'no   '} sim {sim:.2f} pmin {pmin:.2f} fine {fine:5.0f}dB min {minimo:5.0f}dB {dur:.1f}s | {got}", flush=True)
+        manca = mancanti(R[i][0], got)
+        passa = sim >= 0.985 and pmin >= PMIN and ok_fine and dur <= 1.6 * exp + 1 and not manca
+        score = sim + 0.3 * pmin + (0.2 if ok_fine else 0) - (1 if dur > 1.6 * exp + 1 else 0) - (2 if manca else 0)
+        print(f"{i:02d} seed {seed:3d} {'PASSA' if passa else 'no   '} sim {sim:.2f} pmin {pmin:.2f} fine {fine:5.0f}dB min {minimo:5.0f}dB {dur:.1f}s{' NUM! manca ' + str(manca) if manca else ''} | {got}", flush=True)
         if passa: best = (9, f); break          # chi passa tutti i controlli è SEMPRE la scelta (prima vinceva il punteggio più alto, anche se bocciato)
         if score > best[0]: best = (score, f)
     shutil.copy(best[1], f"r{i:02d}.wav")
