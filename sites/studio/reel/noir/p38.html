@@ -46,6 +46,9 @@ function casaSag(cx, cy, s, fill, line, al = 1, lw = 3) { x.save(); x.globalAlph
   x.beginPath(); x.moveTo(cx - s * 0.42, cy + s * 0.34); x.lineTo(cx - s * 0.42, cy - s * 0.04); x.lineTo(cx, cy - s * 0.4); x.lineTo(cx + s * 0.42, cy - s * 0.04); x.lineTo(cx + s * 0.42, cy + s * 0.34); x.closePath(); x.fill(); x.stroke(); x.restore(); }
 function luna(cx, cy, r, col, al) { if (al <= 0) return; x.save(); x.globalAlpha *= al; x.beginPath(); x.rect(cx - r * 2, cy - r * 2, r * 4, r * 4); x.arc(cx + r * 0.5, cy - r * 0.25, r * 0.82, 0, 7, true); x.clip('evenodd');
   x.fillStyle = col; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.restore(); }
+/* pillola attenuata che entra subito (a0) e si accende sulla parola (tOn) */
+function ghostPill(t, s, cx, cy, a0, tOn, col, size) { const e = oC(seg(t, a0, a0 + 0.5)), on = oC(seg(t, tOn - 0.1, tOn + 0.35)); if (e <= 0) return;
+  x.save(); x.globalAlpha *= e * (0.5 + 0.5 * on); const k = 1 + 0.08 * Math.sin(Math.PI * clamp(seg(t, tOn - 0.1, tOn + 0.3))); x.translate(cx, cy); x.scale(k, k); x.translate(-cx, -cy); glassPill(cx, cy, s, 1, col, size); x.restore(); }
 const smooth = (k) => { k = clamp(k); return k * k * (3 - 2 * k); };
 
 /* ================= HOOK: venti case, due volte — gia' in movimento dal primo fotogramma ================= */
@@ -81,9 +84,9 @@ function sFisso(t, a, b) { bg('30,44,28', 0.75); x.save(); zoom(t, a, b, 1.04);
   x.fillStyle = 'rgba(241,244,238,0.16)'; for (let i = 0; i < 18; i++) { const sx = ((i * 72 - t * V) % 1296 + 1296) % 1296 - 60; if (sx > 40 && sx < 1040 && sx < 40 + 1000 * kr) { rr(sx - 20, RY + 14, 40, 36, 4); x.fill(); } } x.restore();
   dash(60, RY - 4 - 130, 1020, RY - 4 - 130, C.lime, 3, [4, 12], 0.5 * kr);
   for (let i = 0; i < 5; i++) { const ex = ((i * SP - t * V) % 1350 + 1350) % 1350 - 150, al = clamp(Math.min(ex - 40, 1040 - ex) / 80) * kr; busta(ex, RY - 4 - 65, 200, 130, C.lime, LIME, al, 0.2); }
-  const kp = seg(t, tCos - 0.1, tCos + 0.45); if (kp > 0) glassPill(540, 1040, 'DI SOLITO COSTA DI PIÙ ALL’INIZIO', kp, C.amber, 30);
-  const kb = seg(t, tBan - 0.1, tBan + 0.45); if (kb > 0) glassPill(540, 1150, 'BANCA D’ITALIA', kb, C.ink, 30);
-  const kd = oC(seg(t, tDor - 0.15, tDor + 0.45)), km = 0.42 + 0.58 * kd, ka = oC(seg(t, a + 0.5, a + 1.0));
+  ghostPill(t, 'DI SOLITO COSTA DI PIÙ ALL’INIZIO', 540, 1040, a + 0.45, tCos, C.amber, 30);
+  ghostPill(t, 'BANCA D’ITALIA', 540, 1150, a + 0.6, tBan, C.ink, 30);
+  const kd = oC(seg(t, tDor - 0.15, tDor + 0.45)), km = 0.42 + 0.58 * kd, ka = oC(seg(t, a + 0.3, a + 0.8));
   if (kd > 0) glow(540, 1290, 230, LIME, 0.2 * kd); luna(540, 1290, 92, C.lime, ka * km);
   for (let i = 0; i < 5; i++) { const sx = 540 + [-190, -130, 150, 205, 120][i], sy = 1260 + [-80, 50, -90, 20, 95][i], tw0 = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
     x.save(); x.globalAlpha *= ka * (0.3 + 0.5 * tw0) * km; x.fillStyle = C.ink; x.beginPath(); x.arc(sx, sy, 4 + 2 * tw0, 0, 7); x.fill(); x.restore(); }
@@ -109,8 +112,8 @@ function sVariabile(t, a, b) { bg('44,38,26', 0.7); x.save(); zoom(t, a, b, 1.04
   const kx = oC(seg(t, a + 0.4, a + 0.9)); dash(60, 1160, 1020, 1160, C.muted, 3, [4, 12], 0.7 * kx);
   for (let i = 1; i < 8; i++) { const fl = n >= 0 && tt > 0.05 ? 1 - oC(seg(r, 0, 0.5)) : 0; x.save(); x.globalAlpha *= kx; x.strokeStyle = fl > 0.05 ? C.lime : C.muted; x.lineWidth = 3 + 3 * fl; x.lineCap = 'round'; x.beginPath(); x.moveTo(XS[i], 1142); x.lineTo(XS[i], 1178); x.stroke(); x.restore(); }
   dl(t, 'SCADENZE FISSATE DAL CONTRATTO', 540, 1225, a + 0.5, tSca, { color: C.ink, size: 26, ls: 2 });
-  const k1 = seg(t, tSal - 0.1, tSal + 0.45); if (k1 > 0) glassPill(540, 1320, 'SE SALE: COSTA DI PIÙ', k1, C.red, 34);
-  const k2 = seg(t, tSce - 0.1, tSce + 0.45); if (k2 > 0) glassPill(540, 1425, 'SE SCENDE: PAGHI MENO', k2, C.lime, 34);
+  ghostPill(t, 'SE SALE: COSTA DI PIÙ', 540, 1320, a + 0.5, tSal, C.red, 34);
+  ghostPill(t, 'SE SCENDE: PAGHI MENO', 540, 1425, a + 0.7, tSce, C.lime, 34);
   x.restore(); finish(t); }
 
 /* ================= DATI: due provette in scala vera (0–5 %), il liquido sale sulla parola ================= */
@@ -176,7 +179,7 @@ function sScenario(t, a, b) { bg('46,34,28', 0.6); x.save(); zoom(t, a, b, 1.04)
 function sRischio(t, a, b) { bg('44,36,28', 0.7); x.save(); zoom(t, a, b, 1.04);
   const tBan = WA('rischio', ['banca', 'banc'], 1, 0.32), tAum = WA('rischio', ['aumento', 'aument'], 1, 0.52), tPes = WA('rischio', ['pesa', 'pes'], 1, 0.82), tLun = WA('rischio', ['lunghi', 'lungh'], 1, 0.95);
   phrase(t, a, [['Il rischio principale:', C.ink], ['rate più alte', C.amber]], 345, { size: 92 });
-  const kb = seg(t, tBan - 0.1, tBan + 0.45); if (kb > 0) glassPill(540, 590, 'BANCA D’ITALIA', kb, C.ink, 30);
+  ghostPill(t, 'BANCA D’ITALIA', 540, 590, a + 0.3, tBan, C.ink, 30);
   const ROWS = [[860, 5, 'MUTUO PIÙ CORTO'], [1215, 12, 'MUTUO PIÙ LUNGO']];
   ROWS.forEach(([ry, cnt, nm], j) => { const kr = oC(seg(t, a + 0.1 + j * 0.15, a + 0.7 + j * 0.15)), len = 80 * cnt;
     lab(t, nm, 70, ry - 120, a + 0.2 + j * 0.15, { color: C.ink, size: 26, ls: 3, align: 'left' });
@@ -186,7 +189,7 @@ function sRischio(t, a, b) { bg('44,36,28', 0.7); x.save(); zoom(t, a, b, 1.04);
       if (ki <= 0) continue; const cA = mixc(AMBa, REDa, u * 0.7);
       busta(px, ry + 60 - h0 / 2 + bob, 68, h0, `rgb(${cA})`, cA.join(','), clamp(ki), 0.22);
       if (ex > 1) { x.save(); x.globalAlpha *= 0.9; x.fillStyle = `rgba(${RED},0.55)`; x.strokeStyle = C.red; x.lineWidth = 3; rr(px - 34, ry + 60 - h0 - ex + bob, 68, ex, 7); x.fill(); x.stroke(); x.restore(); } } });
-  const kp = seg(t, tPes - 0.1, tPes + 0.45); if (kp > 0) glassPill(540, 1415, 'PESA DI PIÙ SUI MUTUI PIÙ LUNGHI', kp, C.red, 30);
+  ghostPill(t, 'PESA DI PIÙ SUI MUTUI PIÙ LUNGHI', 540, 1415, a + 0.6, tPes, C.red, 30);
   x.restore(); finish(t); }
 
 /* ================= PREVISIONE: una strada che sparisce nella nebbia, nessuna freccia ================= */
@@ -206,7 +209,7 @@ function sPrevisione(t, a, b) { bg('30,38,44', 0.7); x.save(); zoom(t, a, b, 1.0
   txt('?', 540, 670, { size: 110, weight: 800, color: C.ink, alpha: oC(seg(t, a + 0.5, a + 1.0)) * (0.55 + 0.1 * Math.sin(t * 2)), blur: 1 });
   dl(t, 'NESSUNO PUÒ PREVEDERE', 540, 572, a + 0.4, tNes, { color: C.ink, size: 28, ls: 3 });
   lab(t, 'FISSO', 347, 1285, a + 0.6, { color: C.lime, size: 28, ls: 4 }); lab(t, 'VARIABILE', 733, 1285, a + 0.6, { color: C.amber, size: 28, ls: 4 });
-  const kb = seg(t, tBan - 0.1, tBan + 0.45); if (kb > 0) glassPill(540, 1415, 'BANCA D’ITALIA', kb, C.ink, 30);
+  ghostPill(t, 'BANCA D’ITALIA', 540, 1415, a + 0.6, tBan, C.ink, 30);
   x.restore(); finish(t); }
 
 /* ================= CASA: due carte di vetro verso la casa ================= */
