@@ -1,0 +1,530 @@
+<title>Laboratorio Arbitraggio Statistico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: instrument-panel lab — a sticky tab rail over one working view at a time; summary first, detail below. */
+:root{
+  --bg:#f3f6f7; --panel:#ffffff; --ink:#132029; --muted:#5b6b75; --line:#d7e0e4;
+  --accent:#0d7585; --accent-soft:#d9eef1;
+  --ok:#2c8a4b; --ok-soft:#ddf1e3; --bad:#be3d26; --bad-soft:#f8e1dc; --warn:#a86d12; --warn-soft:#f6ebd6; --idle:#7a8790; --idle-soft:#e8edf0;
+  --s1:#0d7585; --s2:#c2571a; --s3:#6b7b86; --s4:#7a4fb0;
+  --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-text:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1419; --panel:#141e25; --ink:#dde7ec; --muted:#93a4ae; --line:#26343d;
+  --accent:#4fc2d2; --accent-soft:#163339;
+  --ok:#5cc47e; --ok-soft:#173424; --bad:#f07a62; --bad-soft:#3a1d17; --warn:#e0a648; --warn-soft:#352a14; --idle:#8d9ba4; --idle-soft:#1f2a31;
+  --s1:#4fc2d2; --s2:#f08b4e; --s3:#9aabb5; --s4:#b392e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1419; --panel:#141e25; --ink:#dde7ec; --muted:#93a4ae; --line:#26343d;
+  --accent:#4fc2d2; --accent-soft:#163339;
+  --ok:#5cc47e; --ok-soft:#173424; --bad:#f07a62; --bad-soft:#3a1d17; --warn:#e0a648; --warn-soft:#352a14; --idle:#8d9ba4; --idle-soft:#1f2a31;
+  --s1:#4fc2d2; --s2:#f08b4e; --s3:#9aabb5; --s4:#b392e6; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-text);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-block:12px 4px}
+.brand b{font-family:var(--f-display);font-size:18px;letter-spacing:-.01em}
+.brand span{color:var(--muted);font-size:13px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:6px 8px}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;padding:7px 12px;border-radius:7px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px}
+nav.tabs a:hover{color:var(--ink);background:var(--idle-soft)}
+nav.tabs a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:24px 64px}
+section.view{display:grid;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.015em}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.15}
+h2{font-size:20px}
+h3{font-size:16px}
+p{margin:0;max-width:68ch}
+.lede{color:var(--muted);font-size:16px;max-width:70ch}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stack{display:grid;gap:12px;min-width:0;align-content:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.grid2{display:grid;align-items:start;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.c-ok{color:var(--ok);background:var(--ok-soft)} .c-bad{color:var(--bad);background:var(--bad-soft)}
+.c-warn{color:var(--warn);background:var(--warn-soft)} .c-idle{color:var(--idle);background:var(--idle-soft)}
+.c-acc{color:var(--accent);background:var(--accent-soft)}
+/* pipeline */
+ol.pipe{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:st}
+ol.pipe li{display:grid;grid-template-columns:34px 1fr;gap:14px;position:relative;padding-bottom:18px}
+ol.pipe li::before{counter-increment:st;content:counter(st);font-family:var(--f-mono);font-size:13px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:var(--panel);color:var(--muted);z-index:1}
+ol.pipe li.done::before{border-color:var(--ok);color:var(--ok)}
+ol.pipe li.prog::before{border-color:var(--warn);color:var(--warn)}
+ol.pipe li.block::before{border-color:var(--bad);color:var(--bad)}
+ol.pipe li::after{content:"";position:absolute;left:15px;top:30px;bottom:0;width:1.5px;background:var(--line)}
+ol.pipe li:last-child::after{display:none}
+.st-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.st-body{color:var(--muted);font-size:14px;margin-top:3px}
+/* funnel */
+.funnel{display:grid;gap:6px}
+.frow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.fbar{height:10px;border-radius:5px;background:var(--accent-soft);position:relative;overflow:hidden}
+.fbar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:5px;min-width:3px}
+.fbar span{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:500;color:var(--ink);mix-blend-mode:normal}
+.flab{font-size:13px;color:var(--muted)}
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile{border-left:3px solid var(--line);padding:4px 0 4px 12px}
+.tile .v{font-family:var(--f-display);font-size:28px;font-weight:600;line-height:1.1}
+.tile .k{font-size:13px;color:var(--muted)}
+/* tables */
+.tscroll{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sel td{background:var(--accent-soft)}
+/* heatmap */
+.hm{display:grid;gap:2px;font-family:var(--f-mono);font-size:10.5px}
+.hm div{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;min-width:0}
+.hm .lab{color:var(--muted);aspect-ratio:auto;padding:2px}
+.hm button{all:unset;cursor:pointer;aspect-ratio:1;border-radius:3px;display:block}
+.hm button:hover{outline:2px solid var(--ink)} .hm button:focus-visible{outline:2px solid var(--accent)}
+.hm button.on{outline:2px solid var(--ink);outline-offset:1px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input[type=search]{font:inherit;font-size:14px;padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:13px;padding:6px 11px;border:0;background:var(--panel);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel)}
+canvas.chart{width:100%;height:260px;display:block}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px}
+.kv div{display:grid}
+.kv .k{font-size:12px;color:var(--muted)} .kv .v{font-family:var(--f-mono);font-size:15px}
+.note{font-size:13px;color:var(--muted)}
+.crit{display:grid;gap:6px}
+.crit div{display:flex;justify-content:space-between;gap:10px;font-size:14px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.md h1,.md h2,.md h3{margin:14px 0 6px}.md p{margin:0 0 8px}.md ol,.md ul{margin:0 0 8px;padding-left:20px}
+.md code{font-family:var(--f-mono);font-size:.9em;background:var(--idle-soft);padding:1px 4px;border-radius:4px}
+a{color:var(--accent)}
+.src{font-size:12.5px;color:var(--muted)} .src a{word-break:break-all}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion:no-preference){.fbar i{transition:width .6s ease}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>Laboratorio Arbitraggio Statistico</b><span id="upd"></span></div>
+    <nav class="tabs" aria-label="Sezioni">
+      <a href="#motore">Il motore</a>
+      <a href="#coppie">Esplora coppie</a>
+      <a href="#strategie">Strategie</a>
+      <a href="#mestiere">Il mestiere</a>
+      <a href="#broker">Broker e dati</a>
+      <a href="#registro">Registro</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ MOTORE ============ -->
+<section class="view" id="v-motore">
+  <div class="stack">
+    <div class="eyebrow">Come lavora il laboratorio</div>
+    <h1>Ogni idea passa da una serie di cancelli. Quasi nessuna arriva in fondo.</h1>
+    <p class="lede">Il laboratorio cerca un vantaggio statistico vero, cioè uno che sopravvive ai costi, ai dati che non ha mai visto e a un controllo indipendente. Qui vedi a che punto è il motore e cosa è successo alle idee provate finora.</p>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <div class="grid2">
+    <div class="panel stack">
+      <h2>Le fasi del motore</h2>
+      <ol class="pipe" id="pipe"></ol>
+    </div>
+    <div class="stack">
+      <div class="panel stack">
+        <h2>L'imbuto delle coppie</h2>
+        <p class="note">Quante coppie di monete sopravvivono a ogni passaggio, anno per anno.</p>
+        <div class="funnel" id="funnel"></div>
+      </div>
+      <div class="panel stack">
+        <h2>Regole che non si negoziano</h2>
+        <div class="crit">
+          <div><span>Criteri scritti e salvati in git prima del test</span><span class="chip c-ok">attivo</span></div>
+          <div><span>Dati fuori campione guardati una volta sola</span><span class="chip c-ok">attivo</span></div>
+          <div><span>Ogni prova conta nel numero di tentativi (Deflated Sharpe)</span><span class="chip c-ok">attivo</span></div>
+          <div><span>Revisione del codice con un modello diverso</span><span class="chip c-ok">attivo</span></div>
+          <div><span>Universo scelto con i dati di allora, non di oggi</span><span class="chip c-ok">attivo</span></div>
+          <div><span>Niente accessi forzati a siti protetti</span><span class="chip c-ok">attivo</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COPPIE ============ -->
+<section class="view" id="v-coppie" hidden>
+  <div class="stack">
+    <div class="eyebrow">Esploratore delle relazioni</div>
+    <h1>Due monete legate da un elastico: quanto regge?</h1>
+    <p class="lede">Una coppia è <b>cointegrata</b> quando la distanza tra i due prezzi (lo <i>spread</i>) torna sempre verso la sua media, come se fossero legati da un elastico. Il p-value dice quanto è probabile vedere quell'effetto per puro caso: sotto 0,05 sembra un legame. Scegli un anno, tocca una casella e guarda cosa succede l'anno dopo.</p>
+  </div>
+  <div class="panel stack">
+    <div class="ctrl">
+      <span class="note">Anno di formazione</span>
+      <div class="seg" id="yearSeg" role="group" aria-label="Anno"></div>
+    </div>
+    <div class="grid2">
+      <div class="stack">
+        <div class="hm" id="hm"></div>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--accent)"></i>p &lt; 0,01</span>
+          <span><i class="sw" style="background:color-mix(in srgb,var(--accent) 50%,var(--panel))"></i>0,01–0,05</span>
+          <span><i class="sw" style="background:var(--idle-soft)"></i>&gt; 0,05</span>
+          <span><i class="sw" style="background:var(--panel);outline:1px dashed var(--line)"></i>dati insufficienti</span>
+        </div>
+      </div>
+      <div class="stack" id="pairPanel"></div>
+    </div>
+  </div>
+  <div class="panel stack">
+    <h2>Il legame dura? Persistenza anno per anno</h2>
+    <p class="note">Con 105 coppie testate, circa 5 risultano "cointegrate" anche se nessun legame esiste davvero: è il 5% che passa per caso. La colonna decisiva è l'ultima: quante restano legate l'anno dopo.</p>
+    <div class="tscroll"><table id="persTab"></table></div>
+  </div>
+</section>
+
+<!-- ============ STRATEGIE ============ -->
+<section class="view" id="v-strategie" hidden>
+  <div class="stack">
+    <div class="eyebrow">Registro delle strategie</div>
+    <h1>Due strategie provate, due bocciate</h1>
+    <p class="lede">Ogni strategia ha parametri fissati prima del test, costi veri e un periodo di verifica (2023–2026) mai usato per costruirla. Passa solo se rispetta tutti e quattro i criteri dichiarati.</p>
+  </div>
+  <div class="grid2" id="stratCards"></div>
+  <div class="panel stack">
+    <h2>Guadagno cumulato, in percentuale del capitale</h2>
+    <p class="note">Senza interesse composto, in modo da confrontare i periodi alla pari. La linea tratteggiata verticale separa la costruzione dalla verifica.</p>
+    <div class="legend" id="eqLegend"></div>
+    <canvas class="chart" id="eqChart" aria-label="Curve di guadagno cumulato delle strategie A e B e del T-bill"></canvas>
+  </div>
+  <div class="panel stack">
+    <h2>Perché il carry si è spento: il funding mese per mese</h2>
+    <p class="note">Il funding è quanto chi compra a leva paga a chi vende, espresso qui in percentuale annua. È il guadagno della strategia B prima dei costi.</p>
+    <div class="legend" id="fuLegend"></div>
+    <canvas class="chart" id="fuChart" aria-label="Funding mensile annualizzato di BTC ed ETH"></canvas>
+  </div>
+  <div class="panel stack">
+    <h2>Robustezza: tutte le varianti provate</h2>
+    <p class="note">Le varianti non servono a scegliere la migliore, ma a vedere se il risultato regge. Ognuna conta come un tentativo in più.</p>
+    <div class="tscroll"><table id="robTab"></table></div>
+  </div>
+</section>
+
+<!-- ============ MESTIERE ============ -->
+<section class="view" id="v-mestiere" hidden>
+  <div class="stack">
+    <div class="eyebrow">Chi lo fa, come e dove</div>
+    <h1>Il mestiere dell'arbitraggio statistico</h1>
+    <p class="lede">Da dove viene, chi lo fa oggi, con quali studi e quali mezzi, e cosa resta realisticamente a un privato. Ogni affermazione ha una fonte.</p>
+  </div>
+  <div id="mestiereBody" class="stack"></div>
+  <div class="panel stack">
+    <h2>Cosa dice la ricerca accademica</h2>
+    <div class="ctrl"><input type="search" id="litQ" placeholder="Cerca per autore, tema, mercato…" aria-label="Cerca negli articoli"><span class="note" id="litN"></span></div>
+    <div class="tscroll"><table id="litTab"></table></div>
+  </div>
+  <div class="panel stack">
+    <h2>Idee ancora da provare</h2>
+    <div class="tscroll"><table id="ideaTab"></table></div>
+  </div>
+</section>
+
+<!-- ============ BROKER ============ -->
+<section class="view" id="v-broker" hidden>
+  <div class="stack">
+    <div class="eyebrow">Dove si può eseguire</div>
+    <h1>Broker, exchange e dati per un privato in Italia</h1>
+    <p class="lede">Una relazione statistica non serve a niente se non la puoi comprare e vendere a costi bassi. Prima si guarda dove si può operare, poi si cerca.</p>
+  </div>
+  <div class="panel stack">
+    <h2>Sedi di esecuzione</h2>
+    <div class="tscroll"><table id="venTab"></table></div>
+    <p class="src">Dettaglio con fonte e stato di verifica per ogni voce: <code>quant-lab/ricerca/broker/</code>. I siti IBKR hanno rifiutato l'accesso automatico: quei dati vengono da fonti secondarie e vanno ricontrollati.</p>
+  </div>
+  <div class="panel stack">
+    <h2>Fonti di dati</h2>
+    <div class="tscroll"><table id="srcTab"></table></div>
+  </div>
+</section>
+
+<!-- ============ REGISTRO ============ -->
+<section class="view" id="v-registro" hidden>
+  <div class="stack">
+    <div class="eyebrow">Tracciabilità</div>
+    <h1>Errori, deviazioni e chi ha fatto cosa</h1>
+    <p class="lede">Ogni errore trovato è scritto qui, con il suo effetto sui numeri. Due errori avrebbero fatto sembrare eccezionale una strategia che non lo è.</p>
+  </div>
+  <div class="panel md" id="devBody"></div>
+  <div class="panel stack">
+    <h2>Agenti e modelli usati</h2>
+    <div class="tscroll"><table id="agTab"></table></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const el = (t, a = {}, ...kids) => { const e = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const c of kids) if (c != null) e.append(c); return e; };
+const fmt = (v, d = 2) => v == null || Number.isNaN(v) ? "—" : Number(v).toLocaleString("it-IT", { minimumFractionDigits: d, maximumFractionDigits: d });
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+$("#upd").textContent = "aggiornato " + D.aggiornato.split("-").reverse().join("/");
+
+/* ---------- canvas line chart ---------- */
+function lineChart(cv, series, o = {}) {
+  const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  const pad = { l: 46, r: 12, t: 10, b: 24 };
+  const xs = series.flatMap(s => s.pts.map(p => p[0])), ys = series.flatMap(s => s.pts.map(p => p[1])).filter(v => v != null && isFinite(v));
+  if (!xs.length) return;
+  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys, o.y0 ?? Infinity), y1 = Math.max(...ys, o.y1 ?? -Infinity);
+  if (o.sym) { const m = Math.max(Math.abs(y0), Math.abs(y1)); y0 = -m; y1 = m; }
+  const span = (y1 - y0) || 1; y0 -= span * .05; y1 += span * .05;
+  const X = x => pad.l + (x - x0) / (x1 - x0 || 1) * (W - pad.l - pad.r), Y = y => pad.t + (y1 - y) / (y1 - y0) * (H - pad.t - pad.b);
+  g.font = `11px ${css("--f-mono")}`; g.fillStyle = css("--muted"); g.strokeStyle = css("--line"); g.lineWidth = 1;
+  const step = niceStep((y1 - y0) / 4);
+  for (let v = Math.ceil(y0 / step) * step; v <= y1; v += step) {
+    g.beginPath(); g.moveTo(pad.l, Y(v)); g.lineTo(W - pad.r, Y(v)); g.stroke();
+    g.textAlign = "right"; g.textBaseline = "middle"; g.fillText((o.yfmt || (z => fmt(z, step < 1 ? 1 : 0)))(Math.abs(v) < step / 1e6 ? 0 : v), pad.l - 6, Y(v));
+  }
+  if (o.xlabels) { g.textAlign = "center"; g.textBaseline = "top"; for (const [x, t] of o.xlabels) { if (x < x0 || x > x1) continue; g.fillText(t, X(x), H - pad.b + 6); } }
+  for (const b of o.hbands || []) { g.fillStyle = b.c; g.fillRect(pad.l, Y(b.hi), W - pad.l - pad.r, Y(b.lo) - Y(b.hi)); }
+  if (o.zero && y0 < 0 && y1 > 0) { g.strokeStyle = css("--muted"); g.beginPath(); g.moveTo(pad.l, Y(0)); g.lineTo(W - pad.r, Y(0)); g.stroke(); }
+  for (const vx of o.vlines || []) { g.save(); g.setLineDash([4, 4]); g.strokeStyle = css("--muted"); g.beginPath(); g.moveTo(X(vx.x), pad.t); g.lineTo(X(vx.x), H - pad.b); g.stroke(); g.restore(); if (vx.t) { g.fillStyle = css("--muted"); g.textAlign = "left"; g.textBaseline = "top"; g.fillText(vx.t, X(vx.x) + 5, pad.t + 2); } }
+  for (const s of series) {
+    g.strokeStyle = css(s.color); g.lineWidth = s.w || 1.8; g.setLineDash(s.dash || []); g.beginPath(); let up = false;
+    for (const [x, y] of s.pts) { if (y == null || !isFinite(y)) { up = false; continue; } up ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)); up = true; }
+    g.stroke(); g.setLineDash([]);
+    const last = [...s.pts].reverse().find(p => p[1] != null && isFinite(p[1]));
+    if (last && !s.noDot) { g.fillStyle = css(s.color); g.beginPath(); g.arc(X(last[0]), Y(last[1]), 3, 0, 7); g.fill(); }
+  }
+}
+function niceStep(r) { const p = Math.pow(10, Math.floor(Math.log10(r))); const m = r / p; return (m < 1.5 ? 1 : m < 3 ? 2 : m < 7 ? 5 : 10) * p; }
+const dnum = s => Date.parse(s) / 864e5;
+const yearLabels = (a, b) => { const out = []; for (let y = a; y <= b; y++) out.push([dnum(y + "-01-01"), String(y)]); return out; };
+function legend(node, items) { node.replaceChildren(...items.map(([c, t, dash]) => el("span", {}, el("i", { class: "sw", style: `background:var(${c})${dash ? ";opacity:.6" : ""}` }), t))); }
+
+/* ---------- MOTORE ---------- */
+const A = D.risultati_A, B = D.risultati_B, Amain = A["entry2.0_form365_cost1"], Bmain = B["soglia10_cost1"];
+const nTestsA = Object.entries(A).filter(([k]) => k.endsWith("cost1")).reduce((s, [, v]) => s + v.test_totali, 0);
+const nConf = Object.keys(A).length + Object.keys(B).filter(k => k.includes("_cost")).length;
+$("#tiles").replaceChildren(
+  ...[[fmt(nTestsA, 0), "test statistici di cointegrazione eseguiti"], [String(nConf), "configurazioni di strategia provate"], ["2", "strategie bocciate"], ["0", "strategie promosse"], [String(D.letteratura.length), "articoli scientifici schedati"]]
+    .map(([v, k], i) => el("div", { class: "tile", style: i === 3 ? "border-color:var(--bad)" : "" }, el("div", { class: "v num" }, v), el("div", { class: "k" }, k))));
+const PIPE = [
+  ["done", "Fattibilità di esecuzione", "Broker ed exchange accessibili a un italiano, costi, divieti (PRIIPs sugli ETF USA, MiCA sulle cripto)."],
+  ["done", "Dati e qualità", "Binance public data con checksum su ogni file, controlli su buchi, duplicati e salti. Azioni ed ETF: fonti gratuite bloccate."],
+  ["done", "Universo senza senno di poi", "15 monete scelte per volume a dicembre 2018, comprese quelle poi delistate."],
+  ["done", "Relazioni statistiche", "Correlazione, cointegrazione Engle-Granger, hedge ratio, half-life, correzione per test multipli."],
+  ["done", "Protocollo dichiarato prima", "Regole e criteri salvati in git prima di ogni test."],
+  ["done", "Backtest con costi veri", "Commissioni, slittamento, funding su entrambe le gambe, esecuzione il giorno dopo il segnale."],
+  ["done", "Verifica fuori campione", "2023–2026 guardato una volta sola. Entrambe le strategie bocciate."],
+  ["done", "Revisione indipendente", "Codice ricontrollato da un modello diverso: trovato e corretto un errore sui costi."],
+  ["block", "Nuovi mercati", "Coppie di ETF/azioni e spread tra futures: servono dati che costano o un account. Aspetta la tua decisione."],
+  ["idle", "Paper trading", "Solo se una strategia passa la verifica."],
+  ["idle", "Live", "Mai senza la tua approvazione esplicita."],
+];
+const chipFor = { done: ["c-ok", "fatto"], prog: ["c-warn", "in corso"], block: ["c-bad", "serve una decisione"], idle: ["c-idle", "da fare"] };
+$("#pipe").replaceChildren(...PIPE.map(([s, t, d]) => el("li", { class: s }, el("div", { style: "min-width:0" }, el("div", { class: "st-head" }, el("h3", {}, t), el("span", { class: "chip " + chipFor[s][0] }, chipFor[s][1])), el("div", { class: "st-body" }, d)))));
+(function funnel() {
+  const P = D.persistenza, sum = k => P.reduce((s, r) => s + r[k], 0);
+  const tr = D.trade_A, rev = tr.filter(t => t.reason === "media").length;
+  const steps = [[sum("testate"), "test: ogni coppia, ogni anno 2019–2025"], [sum("sotto_005"), "sembrano legate (p < 0,05)"], [Math.round(sum("attese_per_caso")), "quante ne uscirebbero per puro caso"], [sum("bh"), "passano la correzione per test multipli"], [sum("ancora_anno_dopo"), "ancora legate l'anno dopo"]];
+  const mx = steps[0][0];
+  $("#funnel").replaceChildren(...steps.map(([v, t], i) => el("div", { class: "frow" }, el("div", { style: "display:grid;gap:4px;min-width:0" }, el("div", { class: "flab" }, t), el("div", { class: "fbar" }, el("i", { style: `width:${Math.max(.4, Math.sqrt(v / mx) * 100)}%;${i === 2 ? "background:var(--s3)" : ""}` }))), el("div", { class: "num" }, fmt(v, 0)))));
+  $("#funnel").append(el("p", { class: "note" }, `Le coppie "legate" sono tante quante ne produce il caso, e quasi nessuna lo resta. Nella strategia A: ${tr.length} operazioni, ${rev} tornate davvero alla media. Barre in scala a radice quadrata.`));
+})();
+
+/* ---------- COPPIE ---------- */
+const U = D.universo, years = [...new Set(D.coppie.map(r => r.y))];
+let curY = 2022, curPair = null;
+const byKey = new Map(D.coppie.map(r => [r.y + "|" + r.a + "|" + r.b, r]));
+const date0 = dnum(D.date0);
+function yearSeg() { $("#yearSeg").replaceChildren(...years.map(y => el("button", { "aria-pressed": String(y === curY), onclick: () => { curY = y; render(); } }, String(y)))); }
+function cellColor(r) { if (!r || r.p_ab == null) return null; const p = Math.min(r.p_ab, r.p_ba); return p < 0.01 ? "var(--accent)" : p < 0.05 ? "color-mix(in srgb,var(--accent) 50%,var(--panel))" : "var(--idle-soft)"; }
+function heat() {
+  const n = U.length, hm = $("#hm"); hm.style.gridTemplateColumns = `34px repeat(${n},minmax(0,1fr))`;
+  const kids = [el("div", { class: "lab" })];
+  U.forEach(c => kids.push(el("div", { class: "lab", style: "writing-mode:vertical-rl;transform:rotate(180deg);aspect-ratio:auto;height:34px" }, c)));
+  U.forEach((a, i) => {
+    kids.push(el("div", { class: "lab" }, a));
+    U.forEach((b, j) => {
+      if (i === j) { kids.push(el("div", { style: "background:var(--line)" })); return; }
+      const [x, y] = i < j ? [a, b] : [b, a]; const r = byKey.get(curY + "|" + x + "|" + y);
+      const col = cellColor(r);
+      if (!col) { kids.push(el("div", { style: "outline:1px dashed var(--line);outline-offset:-2px" })); return; }
+      const on = curPair && curPair[0] === x && curPair[1] === y;
+      kids.push(el("button", { class: on ? "on" : "", style: `background:${col}`, title: `${x}/${y} p=${fmt(Math.min(r.p_ab, r.p_ba), 3)}`, "aria-label": `${x} e ${y}, p ${fmt(Math.min(r.p_ab, r.p_ba), 3)}`, onclick: () => { curPair = [x, y]; render(); } }));
+    });
+  });
+  hm.replaceChildren(...kids);
+}
+function pickDefault() { const c = D.coppie.filter(r => r.y === curY && r.p_ab != null).sort((a, b) => Math.min(a.p_ab, a.p_ba) - Math.min(b.p_ab, b.p_ba))[0]; curPair = c ? [c.a, c.b] : null; }
+function pairPanel() {
+  const P = $("#pairPanel");
+  if (!curPair) { P.replaceChildren(el("p", { class: "note" }, "Nessuna coppia con dati sufficienti in questo anno.")); return; }
+  const [a, b] = curPair, r = byKey.get(curY + "|" + a + "|" + b), nx = byKey.get((curY + 1) + "|" + a + "|" + b);
+  const la = D.logprezzi[a], lb = D.logprezzi[b];
+  const i0 = Math.round(dnum(curY + "-01-01") - date0), i1 = Math.round(dnum(curY + "-12-31") - date0), i2 = Math.min(la.length - 1, Math.round(dnum((curY + 1) + "-12-31") - date0));
+  const sp = []; for (let i = i0; i <= i1; i++) if (la[i] != null && lb[i] != null) sp.push(la[i] - r.beta * lb[i]);
+  const mu = sp.reduce((s, v) => s + v, 0) / sp.length, sd = Math.sqrt(sp.reduce((s, v) => s + (v - mu) ** 2, 0) / (sp.length - 1));
+  const inS = [], outS = [];
+  for (let i = i0; i <= i2; i++) { const v = la[i] != null && lb[i] != null ? (la[i] - r.beta * lb[i] - mu) / sd : null; (i <= i1 ? inS : outS).push([date0 + i, v]); }
+  const p = Math.min(r.p_ab, r.p_ba), verdict = p < 0.05 ? (nx && nx.p_ab != null && Math.min(nx.p_ab, nx.p_ba) < 0.05 ? ["c-warn", "il test lo ritrova l'anno dopo, ma con un β diverso"] : ["c-bad", "l'anno dopo il legame sparisce"]) : ["c-idle", "nessun legame"];
+  const cv = el("canvas", { class: "chart", "aria-label": `Spread normalizzato ${a}/${b}` });
+  P.replaceChildren(
+    el("div", { class: "st-head" }, el("h2", {}, `${a} / ${b}`), el("span", { class: "chip " + verdict[0] }, verdict[1])),
+    el("div", { class: "kv" },
+      ...[["p-value (" + a + " su " + b + ")", fmt(r.p_ab, 3)], ["p-value (" + b + " su " + a + ")", fmt(r.p_ba, 3)], ["passa test multipli", r.bh ? "sì" : "no"], ["hedge ratio β", fmt(r.beta, 2)], ["half-life", r.hl == null ? "—" : fmt(r.hl, 0) + " giorni"], ["correlazione rendimenti", fmt(r.corr, 2)], ["p-value anno dopo", nx && nx.p_ab != null ? fmt(Math.min(nx.p_ab, nx.p_ba), 3) : "—"]]
+        .map(([k, v]) => el("div", {}, el("span", { class: "k" }, k), el("span", { class: "v" }, v)))),
+    el("div", { class: "legend" }, el("span", {}, el("i", { class: "sw", style: "background:var(--s1)" }), `spread ${curY} (dove è stato misurato)`), el("span", {}, el("i", { class: "sw", style: "background:var(--s2)" }), `${curY + 1} con gli stessi numeri`), el("span", {}, el("i", { class: "sw", style: "background:var(--warn-soft)" }), "zona ±2: ingresso")),
+    cv,
+    el("p", { class: "note" }, "Lo spread è espresso in deviazioni standard dalla media dell'anno di formazione. Se l'elastico regge, la linea arancione continua a oscillare intorno a 0. Se scappa e non torna, con quei numeri non si poteva operare: anche quando il test ritrova un legame l'anno dopo, di solito lo fa con un hedge ratio diverso, che nessuno conosceva in anticipo."),
+  );
+  requestAnimationFrame(() => lineChart(cv, [{ pts: inS, color: "--s1" }, { pts: outS, color: "--s2" }], { zero: true, xlabels: yearLabels(curY, curY + 2), vlines: [{ x: dnum((curY + 1) + "-01-01"), t: "fuori campione" }], hbands: [{ lo: -2, hi: 2, c: css("--warn-soft") }], yfmt: v => fmt(v, 0) }));
+}
+function persTab() {
+  const t = $("#persTab");
+  t.innerHTML = "<thead><tr><th>Anno</th><th class=n>Coppie testate</th><th class=n>p &lt; 0,05</th><th class=n>Attese per caso</th><th class=n>Passano i test multipli</th><th class=n>Ancora legate l'anno dopo</th></tr></thead>";
+  const tb = el("tbody");
+  for (const r of D.persistenza) tb.append(el("tr", { class: r.anno === curY ? "sel" : "" }, ...[r.anno, r.testate, r.sotto_005, fmt(r.attese_per_caso, 1), r.bh, r.ancora_anno_dopo].map((v, i) => el("td", { class: i ? "n" : "" }, String(v)))));
+  t.append(tb);
+}
+
+/* ---------- STRATEGIE ---------- */
+function crit(res, dsr, excessKey = "sharpe_eccesso") {
+  const o = res.OOS, yrs = Object.values(o.anni), pos = yrs.filter(v => v > 0).length;
+  return [["Guadagno medio > 0 con p < 0,05", o.p_boot < 0.05, "p = " + fmt(o.p_boot, 3)], ["Sharpe sopra il T-bill ≥ 0,5", o[excessKey] >= 0.5, fmt(o[excessKey], 2)], ["In utile in almeno 3 anni su 4", pos >= 3, pos + " su " + yrs.length], ["Deflated Sharpe ≥ 0,95", dsr >= 0.95, fmt(dsr, 4)]];
+}
+function stratCard(title, sub, res, dsr, extra) {
+  const c = crit(res, dsr);
+  return el("div", { class: "panel stack" },
+    el("div", { class: "st-head" }, el("h2", {}, title), el("span", { class: "chip c-bad" }, "bocciata")),
+    el("p", { class: "note" }, sub),
+    el("div", { class: "kv" }, ...[["Costruzione, annuo", fmt(res.IS["rend_annuo_%"], 1) + "%"], ["Verifica, annuo", fmt(res.OOS["rend_annuo_%"], 1) + "%"], ["Perdita massima verifica", fmt(res.OOS["max_dd_%"], 1) + "%"], ["Sharpe sopra T-bill, verifica", fmt(res.OOS.sharpe_eccesso, 2)]].map(([k, v]) => el("div", {}, el("span", { class: "k" }, k), el("span", { class: "v" }, v)))),
+    el("div", { class: "crit" }, ...c.map(([t, ok, v]) => el("div", {}, el("span", {}, t), el("span", { class: "chip " + (ok ? "c-ok" : "c-bad") }, v)))),
+    el("p", { class: "note" }, extra));
+}
+$("#stratCards").replaceChildren(
+  stratCard("A · Coppie cointegrate", "Ogni 90 giorni sceglie fino a 5 coppie cointegrate sull'anno precedente. Entra quando lo spread è a 2 deviazioni standard e scommette sul ritorno alla media.", Amain, D.dsr_A ?? 0, `Solo ${D.trade_A.filter(t => t.reason === "media").length} operazioni su ${D.trade_A.length} sono tornate alla media. Nel giugno 2023 cinque coppie erano tutte short BCH, che è raddoppiato in una settimana.`),
+  stratCard("B · Cash-and-carry sul funding", "Compra BTC ed ETH e vende la stessa quantità di perpetuo: il prezzo non conta, incassa il funding quando la media degli ultimi 7 giorni supera il 10% annuo.", Bmain, B.DSR_soglia10, "Rendeva l'11% annuo nel 2020–2022, poi è sceso sotto il rendimento dei titoli di Stato a 3 mesi (4,5% nel 2023–2026)."));
+function eqChart() {
+  const tp = s => s.map(([d, v]) => [dnum(d), v * 100]);
+  legend($("#eqLegend"), [["--s1", "A · coppie"], ["--s2", "B · carry"], ["--s3", "T-bill 3 mesi"]]);
+  lineChart($("#eqChart"), [{ pts: tp(D.curve.TBILL), color: "--s3", dash: [5, 4] }, { pts: tp(D.curve.A), color: "--s1" }, { pts: tp(D.curve.B), color: "--s2" }], { zero: true, xlabels: yearLabels(2019, 2026), vlines: [{ x: dnum("2023-01-01"), t: "verifica" }], yfmt: v => fmt(v, 0) + "%" });
+  legend($("#fuLegend"), [["--s1", "BTC"], ["--s4", "ETH"]]);
+  lineChart($("#fuChart"), [{ pts: D.funding.map(r => [dnum(r[0] + "-15"), r[1]]), color: "--s1" }, { pts: D.funding.map(r => [dnum(r[0] + "-15"), r[2]]), color: "--s4" }], { zero: true, xlabels: yearLabels(2020, 2026), vlines: [{ x: dnum("2023-01-01"), t: "verifica" }], yfmt: v => fmt(v, 0) + "%" });
+}
+(function robTab() {
+  const name = k => k.replace("entry", "ingresso z ").replace("_form", ", formazione ").replace("_cost", " gg, costi ×").replace("soglia", "soglia ").replace("sempre", "sempre aperta").replace(/_cost(\d)/, ", costi ×$1");
+  const rows = [...Object.entries(A).map(([k, v]) => ["A", name(k), v]), ...Object.entries(B).filter(([k]) => k.includes("_cost")).map(([k, v]) => ["B", name(k).replace(/_cost/, ", costi ×"), v])];
+  const t = $("#robTab"); t.innerHTML = "<thead><tr><th>Strat.</th><th>Variante</th><th class=n>Costruzione annuo</th><th class=n>Verifica annuo</th><th class=n>Sharpe sopra T-bill</th><th class=n>Perdita max</th></tr></thead>";
+  const tb = el("tbody"); for (const [s, n, v] of rows) tb.append(el("tr", {}, el("td", {}, s), el("td", {}, n), ...[v.IS["rend_annuo_%"], v.OOS["rend_annuo_%"], v.OOS.sharpe_eccesso, v.OOS["max_dd_%"]].map((x, i) => el("td", { class: "n", style: i === 1 ? `color:var(${x > 0 ? "--ok" : "--bad"})` : "" }, fmt(x, i === 2 ? 2 : 1) + (i === 2 ? "" : "%"))))); t.append(tb);
+})();
+
+/* ---------- MESTIERE ---------- */
+(function mestiere() {
+  const M = D.mestiere, body = $("#mestiereBody");
+  if (!M) { body.append(el("div", { class: "panel" }, el("p", { class: "note" }, "La scheda sul mestiere è in preparazione."))); return; }
+  const grid = el("div", { class: "grid2" });
+  for (const s of M.sezioni) grid.append(el("div", { class: "panel stack" }, el("h2", {}, s.titolo), ...s.paragrafi.map(p => el("p", {}, p)), s.fonti?.length ? el("details", {}, el("summary", {}, `Fonti (${s.fonti.length})`), el("ul", { class: "src" }, ...s.fonti.map(f => el("li", {}, el("a", { href: f.url, target: "_blank", rel: "noopener" }, f.titolo || f.url))))) : null));
+  body.append(grid);
+  if (M.confronto?.length) {
+    const t = el("table"); t.innerHTML = "<thead><tr><th>Voce</th><th>Un fondo istituzionale</th><th>Un privato da casa</th></tr></thead>";
+    const tb = el("tbody"); for (const r of M.confronto) tb.append(el("tr", {}, el("td", {}, el("b", {}, r.voce)), el("td", {}, r.istituzione), el("td", {}, r.privato, r.fonte ? el("div", { class: "src" }, el("a", { href: r.fonte, target: "_blank", rel: "noopener" }, "fonte")) : null))); t.append(tb);
+    body.append(el("div", { class: "panel stack" }, el("h2", {}, "Fondo contro privato, voce per voce"), el("div", { class: "tscroll" }, t)));
+  }
+})();
+function litTab() {
+  const q = ($("#litQ").value || "").toLowerCase(), rows = D.letteratura.filter(r => !q || Object.values(r).join(" ").toLowerCase().includes(q));
+  $("#litN").textContent = `${rows.length} di ${D.letteratura.length} articoli`;
+  const t = $("#litTab"); t.innerHTML = "<thead><tr><th>Anno</th><th>Autori</th><th>Titolo</th><th>Tema</th><th>Risultato principale</th><th>Per un privato</th></tr></thead>";
+  const tb = el("tbody"); for (const r of rows) tb.append(el("tr", {}, el("td", { class: "n" }, r.year), el("td", {}, r.authors), el("td", {}, r.url ? el("a", { href: r.url, target: "_blank", rel: "noopener" }, r.title) : r.title), el("td", {}, r.topic), el("td", {}, r.main_findings), el("td", {}, r.retail_feasibility))); t.append(tb);
+}
+$("#litQ").addEventListener("input", litTab);
+(function ideaTab() {
+  const t = $("#ideaTab"); t.innerHTML = "<thead><tr><th class=n>Priorità</th><th>Idea</th><th>Famiglia</th><th>Dati gratuiti</th><th>Fattibile per un privato</th></tr></thead>";
+  const tb = el("tbody"); for (const r of [...D.idee].sort((a, b) => b.priority - a.priority)) tb.append(el("tr", {}, el("td", { class: "n" }, r.priority), el("td", {}, r.idea), el("td", {}, r.family), el("td", {}, r.data_free), el("td", {}, r.retail_feasible))); t.append(tb);
+})();
+
+/* ---------- BROKER ---------- */
+(function ven() {
+  const V = [
+    ["Interactive Brokers (Irlanda)", "Azioni e ETF UCITS veri, short, futures CME, opzioni, ordini a più gambe insieme", "c-ok", "accessibile", "ETF USA vietati (PRIIPs). Prestito titoli variabile. Storico futures scaduti solo 2 anni"],
+    ["OKX Europe (Malta)", "Spot + perpetui (X-Perps)", "c-warn", "da confermare in app", "Autorizzato MiCA. Commissioni basse. Condizioni sui perpetui da fonte secondaria"],
+    ["Kraken (UE)", "Spot + perpetui e futures a scadenza", "c-warn", "da confermare in app", "Autorizzato MiCA. Spot caro (0,40/0,80%)"],
+    ["Coinbase", "Futures nel SEE dal 2026", "c-warn", "non verificato", "Italia citata solo da fonte secondaria"],
+    ["Fusion Markets", "Solo CFD", "c-bad", "sconsigliato", "Entità extra-UE (Vanuatu/Seychelles), nessuna tutela ESMA. L'arbitraggio può essere trattato come inadempimento. Swap su entrambe le gambe"],
+    ["Binance, Deribit", "—", "c-bad", "non utilizzabile", "Non presenti nel registro MiCA per l'Italia"],
+  ];
+  const t = $("#venTab"); t.innerHTML = "<thead><tr><th>Sede</th><th>Cosa offre</th><th>Stato</th><th>Note</th></tr></thead>";
+  const tb = el("tbody"); for (const [n, o, c, s, x] of V) tb.append(el("tr", {}, el("td", {}, el("b", {}, n)), el("td", {}, o), el("td", {}, el("span", { class: "chip " + c }, s)), el("td", {}, x))); t.append(tb);
+})();
+(function srcTab() {
+  const cls = s => /^ACCESSIBLE/.test(s) || s === "ALTERNATIVE_SOURCE_FOUND" ? "c-ok" : /TEMPORARILY|USER_AUTH/.test(s) ? "c-warn" : "c-bad";
+  const lab = { ACCESSIBLE: "accessibile", ACCESSIBLE_VIA_API: "via API", ACCESSIBLE_VIA_DOWNLOAD: "via download", ALTERNATIVE_SOURCE_FOUND: "alternativa trovata", TEMPORARILY_UNAVAILABLE: "bloccato ora", USER_AUTHENTICATION_REQUIRED: "serve un tuo account", PAID_ACCESS_REQUIRED: "a pagamento", RESTRICTED: "protetto", NOT_AVAILABLE: "non disponibile" };
+  const t = $("#srcTab"); t.innerHTML = "<thead><tr><th>Fonte</th><th>Copre</th><th>Stato</th><th>Costo</th><th>Uso previsto</th></tr></thead>";
+  const tb = el("tbody"); for (const r of D.fonti) tb.append(el("tr", {}, el("td", {}, el("b", {}, r.provider)), el("td", {}, r.coverage), el("td", {}, el("span", { class: "chip " + cls(r.status) }, lab[r.status] || r.status)), el("td", {}, r.cost), el("td", {}, r.intended_use))); t.append(tb);
+})();
+
+/* ---------- REGISTRO ---------- */
+function md(s) {
+  const lines = esc(s).split("\n"); let h = "", list = null;
+  const inl = x => x.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`(.+?)`/g, "<code>$1</code>");
+  const close = () => { if (list) { h += `</${list}>`; list = null; } };
+  let buf = [];
+  const flush = () => { if (buf.length) { h += `<p>${inl(buf.join(" "))}</p>`; buf = []; } };
+  for (const l of lines) {
+    let m;
+    if ((m = l.match(/^(#{1,3}) (.*)/))) { flush(); close(); h += `<h${m[1].length + 1}>${inl(m[2])}</h${m[1].length + 1}>`; }
+    else if ((m = l.match(/^\d+\. (.*)/))) { flush(); if (list !== "ol") { close(); h += "<ol>"; list = "ol"; } h += `<li>${inl(m[1])}`; }
+    else if ((m = l.match(/^\s+- (.*)/)) && list) { h += `<br>· ${inl(m[1])}`; }
+    else if (/^\s+\S/.test(l) && list) { h += " " + inl(l.trim()); }
+    else if (l.trim() === "") { flush(); }
+    else { close(); buf.push(l); }
+  }
+  flush(); close(); return h;
+}
+$("#devBody").innerHTML = md(D.deviazioni);
+(function ag() {
+  const R = [["Coordinamento, codice, calcoli, report", "Opus", "sessione principale"], ["Specifiche Fusion Markets", "Sonnet", "completato"], ["Specifiche Interactive Brokers", "Sonnet", "completato, solo fonti secondarie"], ["Exchange cripto e MiCA", "Sonnet", "completato, registro ESMA letto"], ["Database della letteratura", "Sonnet", "37 articoli"], ["Revisione indipendente del codice", "Fable", "1 errore grave trovato e corretto"], ["Scheda sul mestiere", "Sonnet", D.mestiere ? "completato" : "in corso"]];
+  const t = $("#agTab"); t.innerHTML = "<thead><tr><th>Compito</th><th>Modello</th><th>Esito</th></tr></thead>";
+  const tb = el("tbody"); for (const r of R) tb.append(el("tr", {}, ...r.map(x => el("td", {}, x)))); t.append(tb);
+})();
+
+/* ---------- router ---------- */
+const VIEWS = ["motore", "coppie", "strategie", "mestiere", "broker", "registro"];
+function render() {
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "motore";
+  VIEWS.forEach(n => { $("#v-" + n).hidden = n !== v; });
+  document.querySelectorAll("nav.tabs a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + v) || a.removeAttribute("aria-current"));
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current", "page"); });
+  if (v === "coppie") { yearSeg(); if (!curPair || !byKey.get(curY + "|" + curPair[0] + "|" + curPair[1])?.p_ab) pickDefault(); heat(); pairPanel(); persTab(); }
+  if (v === "strategie") requestAnimationFrame(eqChart);
+  if (v === "mestiere") litTab();
+}
+addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
+addEventListener("resize", () => { clearTimeout(window._rt); window._rt = setTimeout(render, 150); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+render();
+</script>
