@@ -78,7 +78,7 @@ function card(t, a, cy, i, tOn, label, val, icon) {
   if (icon === 0) { x.beginPath(); x.moveTo(-64, -6); x.lineTo(0, -62); x.lineTo(64, -6); x.stroke(); x.beginPath(); x.moveTo(-48, -8); x.lineTo(-48, 52); x.lineTo(48, 52); x.lineTo(48, -8); x.stroke(); x.beginPath(); x.rect(-14, 10, 28, 42); x.stroke(); }
   if (icon === 1) { x.beginPath(); x.arc(-26, -28, 15, 0, 7); x.stroke(); x.beginPath(); x.arc(26, 28, 15, 0, 7); x.stroke(); x.beginPath(); x.moveTo(40, -50); x.lineTo(-40, 50); x.stroke(); }
   if (icon === 2) { for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) { const n = r * 5 + c, on = t >= tOn + n * 0.025; x.fillStyle = on ? C.lime : 'rgba(241,244,238,0.30)'; x.beginPath(); x.arc((c - 2) * 28, (r - 2) * 28, 9, 0, 7); x.fill(); } }
-  x.restore(); txt(label, 320, cy - 62, { fam: 'mono', size: 26, weight: 600, color: kl > 0.5 ? C.lime : C.muted, align: 'left', ls: 3, alpha: al });
+  x.restore(); txt(label, 320, cy - 62, { fam: 'mono', size: 26, weight: 600, color: kl > 0.5 ? C.lime : C.ink, align: 'left', ls: 3, alpha: kIn * (0.85 + 0.15 * kl) });   /* etichetta leggibile anche a scheda spenta (controllo: 2,2:1 con muted a 0,65) */
   txt(val, 320, cy + 24, { size: 88, weight: 800, color: C.lime, align: 'left', alpha: kl, blur: (1 - kl) * 12, ls: -2 }); x.restore(); }
 function sEsempio(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
   const tImp = WA('esempio', ['centocinquantamila', '150000', '150.000', '150'], 1, 0.32), tTas = WA('esempio', ['tre', '3'], 1, 0.62), tAnn = WA('esempio', ['venticinque', '25'], 1, 0.86);
@@ -232,7 +232,7 @@ function sCasa(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   lab(t, 'INIZIO', X0 + PW / 2, 1335, a + 0.5, { color: C.muted, size: 24 }); lab(t, 'FINE', X0 + 9 * PI + PW / 2, 1335, a + 0.5, { color: C.muted, size: 24 });
   const kr = lit(t, tIni); if (kr > 0) { x.save(); x.globalAlpha = kr; x.strokeStyle = C.red; x.lineWidth = 5; rr(X0 - 8, BOT - H - 8, PW + 16, H + 16, 20); x.stroke(); x.restore(); glow(X0 + PW / 2, BOT - H * 0.25, 200, '255,90,78', 0.22 * kr); }
   const kt = lit(t, tAlt); txt('interessi più alti all’inizio', 540, 1395, { size: 40, weight: 800, color: C.red, alpha: kt, blur: (1 - kt) * 8 });
-  x.restore(); finish(t); }
+  x.restore(); exTag(t, a + 0.1); finish(t); }
 
 serie({ hook: sHook, esempio: sEsempio, rata: sRata, parti: sParti, prima: sPrima, debito: sDebito, meta: sMeta, ultima: sUltima, piano: sPiano, totale: sTotale, spese: sSpese, casa: sCasa }, ORDER, ['hook', 'esempio', 'piano', 'totale', 'casa']);
 </script></body></html>
