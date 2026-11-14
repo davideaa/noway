@@ -1,0 +1,244 @@
+[
+ {
+  "start": "2019-01-01",
+  "tested": 10,
+  "selected": 1,
+  "pairs": [
+   "LTC/NEO"
+  ]
+ },
+ {
+  "start": "2019-04-01",
+  "tested": 10,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2019-06-30",
+  "tested": 78,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2019-09-28",
+  "tested": 91,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2019-12-27",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2020-03-26",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2020-06-24",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2020-09-22",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2020-12-21",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2021-03-21",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2021-06-19",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2021-09-17",
+  "tested": 105,
+  "selected": 1,
+  "pairs": [
+   "EOS/NEO"
+  ]
+ },
+ {
+  "start": "2021-12-16",
+  "tested": 105,
+  "selected": 4,
+  "pairs": [
+   "BCH/EOS",
+   "EOS/NEO",
+   "XRP/TRX",
+   "XRP/VET"
+  ]
+ },
+ {
+  "start": "2022-03-16",
+  "tested": 105,
+  "selected": 2,
+  "pairs": [
+   "TRX/ICX",
+   "XLM/ONT"
+  ]
+ },
+ {
+  "start": "2022-06-14",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2022-09-12",
+  "tested": 105,
+  "selected": 5,
+  "pairs": [
+   "XLM/ICX",
+   "NEO/ICX",
+   "VET/ICX",
+   "LTC/ONT",
+   "ADA/ICX"
+  ]
+ },
+ {
+  "start": "2022-12-11",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2023-03-11",
+  "tested": 105,
+  "selected": 1,
+  "pairs": [
+   "ONT/VET"
+  ]
+ },
+ {
+  "start": "2023-06-09",
+  "tested": 105,
+  "selected": 5,
+  "pairs": [
+   "BCH/ETC",
+   "BCH/NEO",
+   "BCH/BNB",
+   "BCH/LTC",
+   "BCH/EOS"
+  ]
+ },
+ {
+  "start": "2023-09-07",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2023-12-06",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2024-03-05",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2024-06-03",
+  "tested": 105,
+  "selected": 1,
+  "pairs": [
+   "BCH/BNB"
+  ]
+ },
+ {
+  "start": "2024-09-01",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2024-11-30",
+  "tested": 105,
+  "selected": 1,
+  "pairs": [
+   "NEO/ONT"
+  ]
+ },
+ {
+  "start": "2025-02-28",
+  "tested": 105,
+  "selected": 5,
+  "pairs": [
+   "BNB/ADA",
+   "BNB/XLM",
+   "BNB/VET",
+   "BNB/LTC",
+   "BCH/NEO"
+  ]
+ },
+ {
+  "start": "2025-05-29",
+  "tested": 105,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2025-08-27",
+  "tested": 91,
+  "selected": 0,
+  "pairs": []
+ },
+ {
+  "start": "2025-11-25",
+  "tested": 91,
+  "selected": 5,
+  "pairs": [
+   "XRP/XLM",
+   "XRP/ETC",
+   "XRP/LTC",
+   "XRP/BCH",
+   "XRP/ADA"
+  ]
+ },
+ {
+  "start": "2026-02-23",
+  "tested": 91,
+  "selected": 3,
+  "pairs": [
+   "XRP/XLM",
+   "ONT/VET",
+   "XRP/LTC"
+  ]
+ },
+ {
+  "start": "2026-05-24",
+  "tested": 91,
+  "selected": 1,
+  "pairs": [
+   "VET/ICX"
+  ]
+ },
+ {
+  "start": "2026-08-22",
+  "tested": 91,
+  "selected": 1,
+  "pairs": [
+   "XRP/ETC"
+  ]
+ }
+]

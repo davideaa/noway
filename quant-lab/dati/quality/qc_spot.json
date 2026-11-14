@@ -1,0 +1,155 @@
+{
+ "BTC": {
+  "first": "2018-01-01",
+  "last": "2026-10-31",
+  "n": 3226,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "ETH": {
+  "first": "2018-01-01",
+  "last": "2026-10-31",
+  "n": 3226,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "XRP": {
+  "first": "2018-05-04",
+  "last": "2026-10-31",
+  "n": 3103,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-12-23",
+   "2023-07-13"
+  ]
+ },
+ "BCH": {
+  "first": "2018-11-16",
+  "last": "2026-10-31",
+  "n": 2907,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "EOS": {
+  "first": "2018-05-28",
+  "last": "2025-05-26",
+  "n": 2556,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "TRX": {
+  "first": "2018-06-11",
+  "last": "2026-10-31",
+  "n": 3065,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12",
+   "2024-12-03"
+  ]
+ },
+ "BNB": {
+  "first": "2018-01-01",
+  "last": "2026-10-31",
+  "n": 3226,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12",
+   "2021-02-19"
+  ]
+ },
+ "ADA": {
+  "first": "2018-04-17",
+  "last": "2026-10-31",
+  "n": 3120,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12",
+   "2025-03-02"
+  ]
+ },
+ "XLM": {
+  "first": "2018-05-31",
+  "last": "2026-10-31",
+  "n": 3076,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2021-01-06"
+  ]
+ },
+ "LTC": {
+  "first": "2018-01-01",
+  "last": "2026-10-31",
+  "n": 3226,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": []
+ },
+ "NEO": {
+  "first": "2018-01-01",
+  "last": "2026-10-31",
+  "n": 3226,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "ETC": {
+  "first": "2018-06-12",
+  "last": "2026-10-31",
+  "n": 3064,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "ONT": {
+  "first": "2018-06-08",
+  "last": "2026-10-31",
+  "n": 3068,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12",
+   "2021-05-19"
+  ]
+ },
+ "VET": {
+  "first": "2018-07-25",
+  "last": "2026-10-31",
+  "n": 3021,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ },
+ "ICX": {
+  "first": "2018-06-13",
+  "last": "2026-09-03",
+  "n": 3005,
+  "missing_days": 0,
+  "nonpositive": 0,
+  "jumps_gt_50pct": [
+   "2020-03-12"
+  ]
+ }
+}

@@ -1,0 +1,241 @@
+{
+ "soglia10_cost1": {
+  "ingressi": 21,
+  "esposizione": 0.587,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 11.89,
+   "vol_annua_%": 1.41,
+   "sharpe": 8.44,
+   "sharpe_eccesso": 7.79,
+   "max_dd_%": -1.18,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 13.44,
+    "2021": 22.3,
+    "2022": -0.04
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 3.43,
+   "vol_annua_%": 0.4,
+   "sharpe": 8.59,
+   "sharpe_eccesso": -2.71,
+   "max_dd_%": -0.3,
+   "p_boot": 0.9748,
+   "anni": {
+    "2023": 4.24,
+    "2024": 7.6,
+    "2025": 1.28,
+    "2026": 0.03
+   }
+  }
+ },
+ "soglia10_cost2": {
+  "ingressi": 21,
+  "esposizione": 0.587,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 11.32,
+   "vol_annua_%": 1.46,
+   "sharpe": 7.74,
+   "sharpe_eccesso": 7.12,
+   "max_dd_%": -1.4,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 12.72,
+    "2021": 21.87,
+    "2022": -0.6
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 3.1,
+   "vol_annua_%": 0.5,
+   "sharpe": 6.23,
+   "sharpe_eccesso": -2.83,
+   "max_dd_%": -0.58,
+   "p_boot": 0.9942,
+   "anni": {
+    "2023": 3.81,
+    "2024": 7.31,
+    "2025": 0.86,
+    "2026": -0.11
+   }
+  }
+ },
+ "soglia10_cost3": {
+  "ingressi": 21,
+  "esposizione": 0.587,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 10.75,
+   "vol_annua_%": 1.54,
+   "sharpe": 6.99,
+   "sharpe_eccesso": 6.41,
+   "max_dd_%": -1.61,
+   "p_boot": 0.0002,
+   "anni": {
+    "2020": 12.0,
+    "2021": 21.43,
+    "2022": -1.16
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 2.76,
+   "vol_annua_%": 0.63,
+   "sharpe": 4.42,
+   "sharpe_eccesso": -2.78,
+   "max_dd_%": -0.86,
+   "p_boot": 0.998,
+   "anni": {
+    "2023": 3.39,
+    "2024": 7.02,
+    "2025": 0.44,
+    "2026": -0.25
+   }
+  }
+ },
+ "soglia0_cost1": {
+  "ingressi": 59,
+  "esposizione": 0.912,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 11.57,
+   "vol_annua_%": 1.46,
+   "sharpe": 7.93,
+   "sharpe_eccesso": 7.31,
+   "max_dd_%": -1.32,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 13.4,
+    "2021": 21.71,
+    "2022": -0.37
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 3.93,
+   "vol_annua_%": 0.46,
+   "sharpe": 8.6,
+   "sharpe_eccesso": -1.23,
+   "max_dd_%": -1.39,
+   "p_boot": 0.8054,
+   "anni": {
+    "2023": 4.71,
+    "2024": 7.94,
+    "2025": 2.47,
+    "2026": -0.04
+   }
+  }
+ },
+ "soglia5_cost1": {
+  "ingressi": 39,
+  "esposizione": 0.816,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 11.86,
+   "vol_annua_%": 1.44,
+   "sharpe": 8.25,
+   "sharpe_eccesso": 7.61,
+   "max_dd_%": -1.18,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 13.66,
+    "2021": 22.33,
+    "2022": -0.38
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 4.12,
+   "vol_annua_%": 0.42,
+   "sharpe": 9.87,
+   "sharpe_eccesso": -0.89,
+   "max_dd_%": -0.48,
+   "p_boot": 0.7132,
+   "anni": {
+    "2023": 4.78,
+    "2024": 7.99,
+    "2025": 2.26,
+    "2026": 0.76
+   }
+  }
+ },
+ "soglia20_cost1": {
+  "ingressi": 11,
+  "esposizione": 0.383,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 11.42,
+   "vol_annua_%": 1.4,
+   "sharpe": 8.18,
+   "sharpe_eccesso": 7.53,
+   "max_dd_%": -1.18,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 12.47,
+    "2021": 21.67,
+    "2022": 0.13
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 2.12,
+   "vol_annua_%": 0.33,
+   "sharpe": 6.49,
+   "sharpe_eccesso": -7.43,
+   "max_dd_%": -0.23,
+   "p_boot": 1.0,
+   "anni": {
+    "2023": 0.8,
+    "2024": 6.68,
+    "2025": 0.65,
+    "2026": 0.0
+   }
+  }
+ },
+ "sempre_cost1": {
+  "ingressi": 2,
+  "esposizione": 0.997,
+  "IS": {
+   "giorni": 1096,
+   "rend_annuo_%": 12.82,
+   "vol_annua_%": 1.41,
+   "sharpe": 9.09,
+   "sharpe_eccesso": 8.43,
+   "max_dd_%": -1.17,
+   "p_boot": 0.0,
+   "anni": {
+    "2020": 14.06,
+    "2021": 22.87,
+    "2022": 1.59
+   }
+  },
+  "OOS": {
+   "giorni": 1400,
+   "rend_annuo_%": 4.81,
+   "vol_annua_%": 0.36,
+   "sharpe": 13.34,
+   "sharpe_eccesso": 0.91,
+   "max_dd_%": -0.34,
+   "p_boot": 0.257,
+   "anni": {
+    "2023": 5.28,
+    "2024": 8.37,
+    "2025": 3.34,
+    "2026": 1.45
+   }
+  }
+ },
+ "DSR_soglia10": 6.933070995488002e-31,
+ "oos_sharpes_eccesso": {
+  "soglia10": -2.71,
+  "soglia0": -1.23,
+  "soglia5": -0.89,
+  "soglia20": -7.43,
+  "sempre": 0.91
+ }
+}

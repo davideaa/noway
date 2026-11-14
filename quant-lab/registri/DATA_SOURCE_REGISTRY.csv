@@ -1,0 +1,16 @@
+provider,coverage,period,frequency,granularity,cost,license,quality,access_method,restrictions,intended_use,status,verified_on
+Binance public data (data.binance.vision),spot klines; USD-M perp klines; funding rates,spot 2017-08..; funding 2020-01..,1m..1d (bulk monthly zip),OHLCV + funding events,free,Binance terms (no redistribution assumed),high: SHA256 checksum per file verified; 0 bad checksums,HTTPS bulk download,main api.binance.com geo-blocked (451) from this environment,crypto pairs + carry research,ACCESSIBLE_VIA_DOWNLOAD,2026-11-14
+FRED (St. Louis Fed),US rates (DTB3) + SP500 price index,DTB3 1954..; SP500 last 10y,daily,close,free,public domain mostly; SP500 licensed (S&P) — price only no dividends,high,CSV fredgraph endpoint,SP500 limited to 10y and no total return,risk-free benchmark; equity benchmark,ACCESSIBLE,2026-11-14
+ECB reference FX rates,~30 FX vs EUR,1999..,daily,fixing 14:15 CET,free,public,high (fixing not tradable price),zip download,fixing not executable,FX research (not yet used),ACCESSIBLE_VIA_DOWNLOAD,2026-11-14
+Kraken public API / OHLCVT download,crypto spot,varies,1m..1d,OHLCVT,free,Kraken terms,unverified,REST + bulk download,REST only ~720 candles,cross-venue check (not yet used),ACCESSIBLE,2026-11-14
+OKX public API,spot + perps + funding,funding from 2022-03 (declared),various,OHLCV + funding,free,OKX terms,unverified,REST,—,venue-specific funding for the executable venue (next step),ACCESSIBLE,2026-11-14
+Deribit public API,BTC/ETH futures + options,candles 2018-08..; funding ~2019-04..,various,OHLCV + funding,free,Deribit terms,unverified,REST (744 records/request),not usable for execution by IT retail,options/vol research,ACCESSIBLE_VIA_API,2026-11-14
+Coinbase Exchange public API,crypto spot,varies,various,OHLCV,free,Coinbase terms,unverified,REST,website 403,cross-venue check,ACCESSIBLE_VIA_API,2026-11-14
+Yahoo Finance,equities/ETFs,—,daily,OHLCV,free (unofficial),Yahoo ToS,—,query1/query2 chart API,HTTP 429 persistently,equity pairs,TEMPORARILY_UNAVAILABLE,2026-11-14
+Stooq,equities/ETFs/indices,—,daily,OHLCV,free,—,—,CSV,JavaScript anti-bot challenge (not bypassed),equity pairs,RESTRICTED,2026-11-14
+Nasdaq.com API,equities/ETFs,—,daily,OHLCV,free,Nasdaq ToS,—,JSON,connection reset,equity pairs,RESTRICTED,2026-11-14
+Dukascopy,FX/metals tick,—,tick,bid/ask,free,Dukascopy terms,—,datafeed,HTTP 429,FX/metals research,TEMPORARILY_UNAVAILABLE,2026-11-14
+Alpha Vantage,equities,—,daily,OHLCV,free key required (demo key only IBM),AV terms,—,REST,needs user's free API key,equity pairs,USER_AUTHENTICATION_REQUIRED,2026-11-14
+CME DataMine,futures history incl. expired,—,tick..daily,full,paid,CME license,high (official),download,paid; cmegroup.com unreachable from here,futures calendar spreads,PAID_ACCESS_REQUIRED,2026-11-14
+IBKR historical API,all IBKR products,expired futures only 2y after expiry,bars,OHLCV,with account (+market data subs),IBKR terms,good,TWS API,needs account; pacing limits,execution-matched data,USER_AUTHENTICATION_REQUIRED,2026-11-14
+MT5 broker history (PUPrime/Fusion),CFD FX/metals/indices,broker-dependent,M1..D1 + ticks,bid/ask (spread),free with account,broker terms,matches execution,export from terminal by user,only via user's terminal,CFD research,USER_AUTHENTICATION_REQUIRED,2026-11-14
