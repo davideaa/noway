@@ -1,0 +1,122 @@
+{
+ "BTCUSDT": {
+  "rows": 7488,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETHUSDT": {
+  "rows": 7488,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XRPUSDT": {
+  "rows": 7472,
+  "range": "2020-01-06..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BCHUSDT": {
+  "rows": 7488,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "EOSUSDT": {
+  "rows": 7466,
+  "range": "2020-01-08..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "TRXUSDT": {
+  "rows": 7445,
+  "range": "2020-01-15..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BNBUSDT": {
+  "rows": 7367,
+  "range": "2020-02-10..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ADAUSDT": {
+  "rows": 7432,
+  "range": "2020-01-19..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XLMUSDT": {
+  "rows": 7432,
+  "range": "2020-01-19..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "LTCUSDT": {
+  "rows": 7463,
+  "range": "2020-01-09..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "NEOUSDT": {
+  "rows": 7346,
+  "range": "2020-02-17..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETCUSDT": {
+  "rows": 7442,
+  "range": "2020-01-16..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ONTUSDT": {
+  "rows": 8760,
+  "range": "2020-02-11..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "VETUSDT": {
+  "rows": 7355,
+  "range": "2020-02-14..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ICXUSDT": {
+  "rows": 7052,
+  "range": "2020-09-14..2026-08-26",
+  "ok": 72,
+  "missing": 14,
+  "badsum": [],
+  "nochecksum": 0
+ }
+}
