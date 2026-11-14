@@ -44,7 +44,7 @@ function busta(cx, cy, w, h, col, rgb, al = 1, fillA = 0.18) { if (al <= 0) retu
   const fd = Math.min(h * 0.5, 38); x.beginPath(); x.moveTo(cx - w / 2 + 5, cy - h / 2 + 5); x.lineTo(cx, cy - h / 2 + fd); x.lineTo(cx + w / 2 - 5, cy - h / 2 + 5); x.stroke(); x.restore(); }
 function casaSag(cx, cy, s, fill, line, al = 1, lw = 3) { x.save(); x.globalAlpha *= al; x.fillStyle = fill; x.strokeStyle = line; x.lineWidth = lw; x.lineJoin = 'round';
   x.beginPath(); x.moveTo(cx - s * 0.42, cy + s * 0.34); x.lineTo(cx - s * 0.42, cy - s * 0.04); x.lineTo(cx, cy - s * 0.4); x.lineTo(cx + s * 0.42, cy - s * 0.04); x.lineTo(cx + s * 0.42, cy + s * 0.34); x.closePath(); x.fill(); x.stroke(); x.restore(); }
-function luna(cx, cy, r, col, al) { if (al <= 0) return; x.save(); x.globalAlpha *= al; x.beginPath(); x.rect(cx - r * 2, cy - r * 2, r * 4, r * 4); x.arc(cx + r * 0.5, cy - r * 0.25, r * 0.82, 0, 7, true); x.clip('evenodd');
+function luna(cx, cy, r, col, al) { if (al <= 0) return; x.save(); x.globalAlpha *= al; x.beginPath(); x.rect(cx - r * 2, cy - r * 2, r * 4, r * 4); x.moveTo(cx + r * 1.32, cy - r * 0.25); x.arc(cx + r * 0.5, cy - r * 0.25, r * 0.82, 0, 7, true); x.clip('evenodd');
   x.fillStyle = col; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.restore(); }
 /* pillola attenuata che entra subito (a0) e si accende sulla parola (tOn) */
 function ghostPill(t, s, cx, cy, a0, tOn, col, size) { const e = oC(seg(t, a0, a0 + 0.5)), on = oC(seg(t, tOn - 0.1, tOn + 0.35)); if (e <= 0) return;
@@ -85,13 +85,13 @@ function sFisso(t, a, b) { bg('30,44,28', 0.75); x.save(); zoom(t, a, b, 1.04);
   dash(60, RY - 4 - 130, 1020, RY - 4 - 130, C.lime, 3, [4, 12], 0.5 * kr);
   for (let i = 0; i < 5; i++) { const ex = ((i * SP - t * V) % 1350 + 1350) % 1350 - 150, al = clamp(Math.min(ex - 40, 1040 - ex) / 80) * kr; busta(ex, RY - 4 - 65, 200, 130, C.lime, LIME, al, 0.2); }
   ghostPill(t, 'DI SOLITO COSTA DI PIÙ ALL’INIZIO', 540, 1040, a + 0.45, tCos, C.amber, 30);
-  ghostPill(t, 'BANCA D’ITALIA', 540, 1150, a + 0.6, tBan, C.ink, 30);
+  ghostPill(t, 'BANCA D’ITALIA', 540, 1135, a + 0.6, tBan, C.ink, 30);
   const kd = oC(seg(t, tDor - 0.15, tDor + 0.45)), km = 0.42 + 0.58 * kd, ka = oC(seg(t, a + 0.3, a + 0.8));
-  if (kd > 0) glow(540, 1290, 230, LIME, 0.2 * kd); luna(540, 1290, 92, C.lime, ka * km);
-  for (let i = 0; i < 5; i++) { const sx = 540 + [-190, -130, 150, 205, 120][i], sy = 1260 + [-80, 50, -90, 20, 95][i], tw0 = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
+  if (kd > 0) glow(540, 1320, 230, LIME, 0.2 * kd); luna(540, 1320, 85, C.lime, ka * km);
+  for (let i = 0; i < 5; i++) { const sx = 540 + [-190, -130, 150, 205, 120][i], sy = 1320 + [-80, 50, -90, 20, 95][i], tw0 = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
     x.save(); x.globalAlpha *= ka * (0.3 + 0.5 * tw0) * km; x.fillStyle = C.ink; x.beginPath(); x.arc(sx, sy, 4 + 2 * tw0, 0, 7); x.fill(); x.restore(); }
-  for (let i = 0; i < 3; i++) { const u = ((t - tDor) * 0.45 + i / 3) % 1; if (t < tDor || u < 0) continue; txt('z', 650 + u * 40 + i * 14, 1255 - u * 90, { size: 34 + i * 8, weight: 800, color: C.lime, alpha: Math.sin(Math.PI * u) * 0.9 }); }
-  dl(t, 'SOGNI TRANQUILLI', 540, 1420, a + 0.6, tSog, { color: C.lime, size: 30, ls: 3 });
+  for (let i = 0; i < 3; i++) { const u = ((t - tDor) * 0.45 + i / 3) % 1; if (t < tDor || u < 0) continue; txt('z', 650 + u * 40 + i * 14, 1315 - u * 90, { size: 34 + i * 8, weight: 800, color: C.lime, alpha: Math.sin(Math.PI * u) * 0.9 }); }
+  dl(t, 'SOGNI TRANQUILLI', 540, 1442, a + 0.6, tSog, { color: C.lime, size: 30, ls: 3 });
   x.restore(); finish(t); }
 
 /* ================= VARIABILE: una rotaia a onda; le buste cambiano spessore a ogni scadenza ================= */
