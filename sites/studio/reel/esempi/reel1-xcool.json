@@ -1,0 +1,514 @@
+[
+{
+"t0": 0,
+"t1": 5.129,
+"type": "phone",
+"home": 1,
+"open": 99,
+"s0": 0,
+"s1": 1,
+"win": "film",
+"keys": [
+[
+0,
+12,
+210,
+-18,
+0.24,
+0,
+80
+],
+[
+0.98,
+8,
+150,
+-10,
+0.34,
+0,
+40
+],
+[
+1.7,
+4,
+20,
+-4,
+0.5,
+0,
+0
+],
+[
+2.6,
+2,
+4,
+-1,
+0.66,
+0,
+0
+],
+[
+3.054,
+0,
+0,
+0,
+0.74,
+0,
+0
+],
+[
+3.4,
+24,
+0,
+42,
+0.8,
+0,
+180
+],
+[
+3.85,
+64,
+0,
+90,
+0.84,
+0,
+470
+],
+[
+5.129,
+66,
+0,
+90,
+0.86,
+0,
+480
+]
+],
+"tap": {
+"t": 3.054,
+"x": 0.5,
+"y": 0.5
+},
+"holo": 3.5
+},
+{
+"t0": 5.129,
+"t1": 6.166,
+"type": "type",
+"text": "Investi con un metodo.",
+"hl": [
+"metodo."
+]
+},
+{
+"t0": 6.166,
+"t1": 7.203,
+"type": "words",
+"lines": [
+"MODELLI",
+"*QUANTITATIVI*."
+],
+"tr": "flash"
+},
+{
+"t0": 7.203,
+"t1": 8.24,
+"type": "markets",
+"tr": "whip"
+},
+{
+"t0": 8.24,
+"t1": 9.278,
+"type": "words",
+"lines": [
+"VALIDATO",
+"*FUORI CAMPIONE*."
+],
+"tr": "punch"
+},
+{
+"t0": 9.278,
+"t1": 10.315,
+"type": "timeline",
+"tr": "whip"
+},
+{
+"t0": 10.315,
+"t1": 11.871,
+"type": "tel",
+"s0": 18.8,
+"s1": 21.9,
+"win": "film",
+"tr": "blur"
+},
+{
+"t0": 11.871,
+"t1": 13.426,
+"type": "tel",
+"s0": 24.8,
+"s1": 28.4,
+"win": "film",
+"tr": "punch",
+"tap": {
+"t": 13.167,
+"x": 0.5,
+"y": 0.855
+}
+},
+{
+"t0": 13.426,
+"t1": 13.945,
+"type": "count",
+"v": 3,
+"label": "strategie",
+"sub": "XAUUSD \u00b7 NASDAQ \u00b7 USDJPY",
+"tr": "punch"
+},
+{
+"t0": 13.945,
+"t1": 14.982,
+"type": "count",
+"v": 4206,
+"label": "operazioni",
+"sub": "backtest 2019\u20132026",
+"tr": "punch"
+},
+{
+"t0": 14.982,
+"t1": 15.501,
+"type": "count",
+"v": 93,
+"label": "mesi misurati",
+"sub": "senza togliere quelli in perdita",
+"tr": "punch"
+},
+{
+"t0": 15.501,
+"t1": 17.575,
+"type": "cards",
+"at": [
+15.501,
+16.019,
+16.538,
+17.057
+],
+"tr": "whip",
+"tap": {
+"t": 17.357,
+"x": 0.5,
+"y": 0.727
+}
+},
+{
+"t0": 17.575,
+"t1": 18.612,
+"type": "ddchart",
+"tr": "whip",
+"label": "LE DISCESE, IN CHIARO"
+},
+{
+"t0": 18.612,
+"t1": 19.65,
+"type": "words",
+"lines": [
+"3 STRATEGIE.",
+"*1 PORTAFOGLIO*."
+],
+"tr": "punch"
+},
+{
+"t0": 19.65,
+"t1": 20.687,
+"type": "months",
+"tr": "whip"
+},
+{
+"t0": 20.687,
+"t1": 21.724,
+"type": "type",
+"text": "Prova il simulatore.",
+"hl": [
+"simulatore."
+]
+},
+{
+"t0": 21.724,
+"t1": 24.317,
+"type": "form",
+"tr": "whip",
+"taps": [
+{
+"t": 23.344,
+"x": 0.62,
+"y": 0.598
+},
+{
+"t": 23.924,
+"x": 0.5,
+"y": 0.683
+}
+],
+"drag": {
+"t0": 22.524,
+"t1": 23.074,
+"x0": 0.12,
+"x1": 0.44,
+"y": 0.505
+}
+},
+{
+"t0": 24.317,
+"t1": 27.429,
+"type": "fan",
+"tr": "flash",
+"label": "500 FUTURI POSSIBILI"
+},
+{
+"t0": 27.429,
+"t1": 28.984,
+"type": "scen",
+"at": [
+27.429,
+27.947,
+28.466
+],
+"tr": "flash"
+},
+{
+"t0": 28.984,
+"t1": 30.022,
+"type": "words",
+"lines": [
+"CONOSCI IL RISCHIO.",
+"*PRIMA*."
+],
+"tr": "punch"
+},
+{
+"t0": 30.022,
+"t1": 31.059,
+"type": "dd",
+"tr": "punch"
+},
+{
+"t0": 31.059,
+"t1": 33.133,
+"type": "bench",
+"tr": "whip",
+"tap": {
+"t": 31.379,
+"x": 0.63,
+"y": 0.205
+},
+"label": "CONFRONTO COL MERCATO"
+},
+{
+"t0": 33.133,
+"t1": 34.17,
+"type": "words",
+"lines": [
+"PI\u00d9 RISCHIO,",
+"PI\u00d9 *POTENZIALE*."
+],
+"tr": "punch"
+},
+{
+"t0": 34.17,
+"t1": 35.208,
+"type": "words",
+"lines": [
+"MA ANCHE PI\u00d9",
+"#DISCESE POTENZIALI#."
+],
+"tr": "punch"
+},
+{
+"t0": 35.208,
+"t1": 37.282,
+"type": "risk",
+"tr": "punch",
+"taps": [
+{
+"t": 35.828,
+"x": 0.3,
+"y": 0.387
+},
+{
+"t": 36.528,
+"x": 0.72,
+"y": 0.387
+}
+]
+},
+{
+"t0": 37.282,
+"t1": 38.319,
+"type": "words",
+"lines": [
+"PER CHI INVESTE",
+"CON LA *TESTA*."
+],
+"tr": "punch"
+},
+{
+"t0": 38.319,
+"t1": 39.356,
+"type": "words",
+"lines": [
+"NON CON",
+"#L\u2019ISTINTO#."
+],
+"tr": "punch"
+},
+{
+"t0": 39.356,
+"t1": 39.875,
+"type": "words",
+"lines": [
+"*ALGORITMI*."
+],
+"tr": "punch"
+},
+{
+"t0": 39.875,
+"t1": 40.394,
+"type": "words",
+"lines": [
+"*DATI*."
+],
+"tr": "punch"
+},
+{
+"t0": 40.394,
+"t1": 41.431,
+"type": "words",
+"lines": [
+"*METODO*."
+],
+"tr": "flash"
+},
+{
+"t0": 41.431,
+"t1": 42.468,
+"type": "type",
+"text": "Vuoi vederlo?",
+"hl": [
+"vederlo?"
+]
+},
+{
+"t0": 42.468,
+"t1": 45.061,
+"type": "search",
+"tr": "whip",
+"tap": {
+"t": 44.761,
+"x": 0.5,
+"y": 0.617
+}
+},
+{
+"t0": 45.061,
+"t1": 46.617,
+"type": "hero",
+"tr": "flash",
+"tap": {
+"t": 46.167,
+"x": 0.36,
+"y": 0.66
+}
+},
+{
+"t0": 46.617,
+"t1": 48.691,
+"type": "stats",
+"tr": "whip",
+"at": [
+46.617,
+47.135,
+47.654
+],
+"taps": [
+{
+"t": 47.115,
+"x": 0.5,
+"y": 0.215
+},
+{
+"t": 47.634,
+"x": 0.74,
+"y": 0.215
+}
+]
+},
+{
+"t0": 48.691,
+"t1": 49.21,
+"type": "words",
+"lines": [
+"*XAUUSD*."
+],
+"hlc": "#e8b04a",
+"tr": "punch"
+},
+{
+"t0": 49.21,
+"t1": 49.728,
+"type": "words",
+"lines": [
+"*NASDAQ*."
+],
+"hlc": "#5b9dff",
+"tr": "punch"
+},
+{
+"t0": 49.728,
+"t1": 50.247,
+"type": "words",
+"lines": [
+"*USDJPY*."
+],
+"hlc": "#a78bfa",
+"tr": "punch"
+},
+{
+"t0": 50.247,
+"t1": 50.766,
+"type": "words",
+"lines": [
+"*INSIEME*."
+],
+"tr": "punch"
+},
+{
+"t0": 50.766,
+"t1": 52.84,
+"type": "trades",
+"tr": "whip"
+},
+{
+"t0": 52.84,
+"t1": 53.877,
+"type": "words",
+"lines": [
+"IL TUO CAPITALE,",
+"*CON METODO*."
+],
+"tr": "punch"
+},
+{
+"t0": 53.877,
+"t1": 54.914,
+"type": "words",
+"lines": [
+"SCOPRI",
+"*PORTFOLIO*",
+"*ALGO MANAGER*."
+],
+"tr": "punch"
+},
+{
+"t0": 54.914,
+"t1": 57.589,
+"type": "outro",
+"tr": "flash"
+}
+]

@@ -1,0 +1,228 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 31, DAY: 0, CAP: 1, NEXT: ['TAN', 'e TAEG'], FONTE: 'DATI: BANCA D\'ITALIA · GARANTE PRIVACY · CRIF (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 31 — «Come la banca decide se prestarti». Lunedì 16/11/2026, lezione 1 di 5, capitolo 1. Numeri SOLO da p31-fonti.md:
+   ritardo sanato visibile 12 o 24 mesi (SIC) · non sanato fino a 36 mesi, mai oltre 60 · preavviso 15 giorni · CR: soglia 30.000 euro verso un intermediario,
+   250 euro per le sofferenze · intermediari vedono gli ultimi 36 mesi · undici gruppi bancari (indagine Banca d'Italia, ottobre): credito al consumo piu' selettivo, mutui invariati.
+   Niente riga di fonte nel video, niente logo CRIF, niente data per le nuove regole. Animazioni diverse da P26-30: linee del tempo con cursore, anello a 15 spicchi, miccia con muro,
+   edificio che cresce, cancelli con monete, finestra scorrevole su 60 tessere, foglio che si gira con scansione, bolle social barrate + ingranaggio, porte che si stringono, cassetti con strisce ed buste. */
+const AMB = '245,165,36', LIM = '200,250,114', RED = '255,90,78';
+const ORDER = ['num', 'hook', 'sic', 'nonsanati', 'centrale', 'soglie', 'trentasei', 'regole', 'social', 'dato', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola che inizia con UNA delle alternative (lettere E cifre). Senza voce usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function disc(cx, cy, r, col, label, k = 1, lc = '#050607') { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); glow(cx, cy, r * 2, col === C.red ? RED : LIM, 0.22);
+  x.fillStyle = col; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); if (label) txt(label, cx, cy + 2, { size: r * 1.05, weight: 800, color: lc }); x.restore(); }
+function person(cx, cy, s, col, k = 1) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.scale(s, s); x.fillStyle = col; x.beginPath(); x.arc(0, -34, 28, 0, 7); x.fill();
+  x.beginPath(); x.moveTo(-58, 56); x.arc(0, 40, 58, Math.PI, 0); x.lineTo(58, 56); x.closePath(); x.fill(); x.restore(); }
+function gear(cx, cy, R, rot, col, k = 1) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.rotate(rot); const n = 10; x.beginPath();
+  for (let i = 0; i < n; i++) { const a = i * 2 * Math.PI / n; for (const [da, r] of [[-0.24, 0.82], [-0.13, 1], [0.13, 1], [0.24, 0.82]]) { const px = Math.cos(a + da) * R * r, py = Math.sin(a + da) * R * r; if (i === 0 && da === -0.24) x.moveTo(px, py); else x.lineTo(px, py); } }
+  x.closePath(); x.fillStyle = 'rgba(241,244,238,0.10)'; x.fill(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.stroke(); x.beginPath(); x.arc(0, 0, R * 0.32, 0, 7); x.stroke(); x.restore(); }
+
+/* ================= HOOK: due linee del tempo della stessa persona; un cursore le percorre, la traccia resta 12 / 24 mesi (sanato) o fino a 36 (non sanato) ================= */
+const HX = (m) => 120 + m * 840 / 36;
+function sHook(t, a, b) { bg('44,40,22', 0.7); x.save(); zoom(t, a, b, 1.05);
+  const tA = Math.max(a + 1.2, WA('hook', ['anno', '1'], 1, 0.78)), tD = Math.max(tA + 0.45, WA('hook', ['due', '2'], 1, 0.95));
+  const tF = Math.max(tD + 0.3, Math.min(tD + 0.8, b - 0.05));
+  const mo = t <= a ? 0 : t < tA ? 12 * (t - a) / (tA - a) : t < tD ? 12 + 12 * (t - tA) / (tD - tA) : 24 + 12 * clamp((t - tD) / (tF - tD));
+  phrase(t, a + 0.05, [['Il ritardo', C.ink], ['lascia traccia', C.amber]], 345, { size: 92 });
+  glassPill(540, 640, 'STESSA PERSONA', oB(seg(t, a, a + 0.4)), C.ink, 30);
+  const Y1 = 900, Y2b = 1250;
+  function row(y, kind) {
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.20)'; x.lineWidth = 3; x.beginPath(); x.moveTo(HX(0), y); x.lineTo(HX(36), y); x.stroke();
+    for (const m of [12, 24, 36]) { x.beginPath(); x.moveTo(HX(m), y - 38); x.lineTo(HX(m), y + 38); x.strokeStyle = 'rgba(241,244,238,0.28)'; x.stroke(); }
+    const bandCol = kind ? `rgba(${RED},0.92)` : `rgba(${AMB},0.92)`;
+    const e1 = Math.min(mo, kind ? 36 : 12); x.fillStyle = bandCol; rr(HX(0), y - 16, Math.max(0.1, HX(e1) - HX(0)), 32, 16); x.fill();
+    if (!kind && mo > 12) { const e2 = Math.min(mo, 24); x.fillStyle = `rgba(${AMB},0.30)`; rr(HX(12), y - 16, HX(e2) - HX(12), 32, 16); x.fill();
+      x.setLineDash([9, 8]); x.strokeStyle = C.amber; x.lineWidth = 3; rr(HX(12), y - 16, HX(e2) - HX(12), 32, 16); x.stroke(); x.setLineDash([]); }
+    for (let i = 0; i <= 36; i++) { const on = i <= mo, big = i % 12 === 0; x.fillStyle = on ? 'rgba(5,6,7,0.55)' : 'rgba(241,244,238,0.32)'; x.beginPath(); x.arc(HX(i), y, big ? 7 : 4.5, 0, 7); x.fill(); }
+    x.fillStyle = C.red; x.beginPath(); x.arc(HX(0), y, 20, 0, 7); x.fill(); txt('!', HX(0), y + 1, { size: 28, weight: 800, color: '#050607' });
+    const cxm = HX(mo); glow(cxm, y, 70, LIM, 0.35); x.strokeStyle = C.lime; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(cxm, y - 44); x.lineTo(cxm, y + 44); x.stroke(); x.restore(); }
+  lab(t, 'RITARDO SANATO', 120, Y1 - 76, a + 0.05, { color: C.lime, align: 'left' }); row(Y1, 0);
+  lab(t, 'NON SANATO', 120, Y2b - 76, a + 0.05, { color: C.red, align: 'left' }); row(Y2b, 1);
+  lab(t, '12 MESI', HX(12), Y1 + 78, tA - 0.1, { color: C.amber }); lab(t, '24 MESI', HX(24), Y1 + 78, tD - 0.1, { color: C.amber });
+  lab(t, '36 MESI', 972, Y2b + 78, tF - 0.25, { color: C.red, align: 'right' });
+  x.restore(); finish(t); }
+
+/* ================= SIC: archivio privato, entrano anche i prestiti piccoli; anello a 15 spicchi per il preavviso ================= */
+function sSic(t, a, b) { bg('34,46,34', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCr = WA('sic', ['crif'], 1, 0.28), tPi = WA('sic', ['piccoli', 'picc'], 1, 0.5), tPr = WA('sic', ['preavviso', 'preavv'], 1, 0.74), tQ = WA('sic', ['quindici', '15'], 1, 0.88);
+  phrase(t, a + 0.05, [['Sistemi privati,', C.ink], ['CRIF e altri', C.lime]], 345, { size: 92 });
+  const kc = oB(seg(t, a + 0.3, a + 0.9)); pop(540, 740, kc, () => { glass(540, 740, 800, 190, 28, 1); });
+  const CH = [[210, 130], [330, 56], [450, 120], [560, 50], [660, 80], [760, 56]];
+  CH.forEach(([cx, w], i) => { const k = oB(seg(t, tCr + 0.1 + i * 0.12, tCr + 0.55 + i * 0.12)); if (k <= 0) return; const small = i % 2 === 1, hot = small ? oC(seg(t, tPi - 0.1 + (i >> 1) * 0.12, tPi + 0.3 + (i >> 1) * 0.12)) : 0, y = 745 - (1 - clamp(k, 0, 1)) * 170;
+    x.save(); x.globalAlpha *= clamp(k * 1.5); if (hot > 0) glow(cx, 745, 70, LIM, 0.3 * hot); x.fillStyle = hot > 0.5 ? C.lime : 'rgba(241,244,238,0.55)'; rr(cx - w / 2, y - 27, w, 54, 14); x.fill(); x.restore(); });
+  lab(t, 'ANCHE I PRESTITI PICCOLI', 540, 880, tPi - 0.1, { color: C.lime });
+  const RX = 540, RY = 1160, RR = 140, ke = oC(seg(t, a + 1.3, a + 1.9));   /* l'anello dei quindici giorni e la busta entrano presto, spenti: si accendono su «quindici» */
+  for (let i = 0; i < 15; i++) { const a0 = -Math.PI / 2 + i * 2 * Math.PI / 15 + 0.05, a1 = a0 + 2 * Math.PI / 15 - 0.1, kl = oC(seg(t, tQ - 0.05 + i * 0.07, tQ + 0.3 + i * 0.07));
+    x.save(); x.lineCap = 'round'; x.lineWidth = 22; x.strokeStyle = kl > 0.4 ? C.lime : 'rgba(241,244,238,0.16)'; if (kl > 0.4) { x.shadowColor = C.lime; x.shadowBlur = 14 * kl; } x.globalAlpha *= ke; x.beginPath(); x.arc(RX, RY, RR, a0, a1); x.stroke(); x.restore(); }
+  const kq = oC(seg(t, tQ, tQ + 0.4));
+  x.save(); x.globalAlpha *= ke * (1 - kq); x.strokeStyle = C.ink; x.lineWidth = 5; x.lineJoin = 'round'; rr(RX - 58, 1092, 116, 80, 10); x.stroke(); x.beginPath(); x.moveTo(RX - 58, 1096); x.lineTo(RX, 1140); x.lineTo(RX + 58, 1096); x.stroke(); x.restore();
+  lab(t, 'PREAVVISO', RX, 1214, tPr + 0.1, { color: C.ink, size: 24, alpha: oC(seg(t, tPr + 0.1, tPr + 0.45)) * (1 - kq) });
+  txt('15', RX, 1136, { size: 96, weight: 800, color: C.lime, alpha: kq, blur: (1 - kq) * 10, ls: -2 }); lab(t, 'GIORNI', RX, 1210, tQ + 0.15, { color: C.lime, size: 26 }); lab(t, 'ALMENO', RX, 1070, tQ + 0.1, { color: C.lime, size: 22 });
+  const kp = seg(t, tQ + 1.1, tQ + 1.55); if (kp > 0) glassPill(540, 1405, 'POI SI VEDE', kp, C.lime, 40);
+  x.restore(); finish(t); }
+
+/* ================= NON SANATI: una miccia rossa percorre il righello dei mesi fino a 36, poi un muro cala a 60 ================= */
+const NX = (m) => 120 + m * 840 / 60;
+function sNonsanati(t, a, b) { bg('50,30,28', 0.55); x.save(); zoom(t, a, b, 1.04);
+  const tTre = WA('nonsanati', ['trentasei', '36'], 1, 0.55), tSes = WA('nonsanati', ['sessanta', '60'], 1, 0.9);
+  phrase(t, a + 0.05, [['Se non lo sani,', C.ink]], 345, { size: 92 });
+  phrase(t, tTre - 0.12, [['fino a 36 mesi', C.red]], Y2, { size: 92 });
+  const Y = 930, m = 36 * oC(seg(t, a + 0.5, tTre + 0.25)), ghost = oC(seg(t, tTre + 0.25, tSes));
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.20)'; x.lineWidth = 3; x.beginPath(); x.moveTo(NX(0), Y); x.lineTo(NX(60), Y); x.stroke();
+  for (let i = 0; i <= 60; i += 12) { x.beginPath(); x.moveTo(NX(i), Y - 34); x.lineTo(NX(i), Y + 34); x.stroke(); }
+  for (let i = 0; i < 60; i++) { if (i % 12 === 0) continue; x.fillStyle = 'rgba(241,244,238,0.30)'; x.beginPath(); x.arc(NX(i), Y, 3.5, 0, 7); x.fill(); }
+  if (ghost > 0) { x.setLineDash([7, 9]); x.strokeStyle = 'rgba(255,90,78,0.55)'; x.lineWidth = 3; rr(NX(36), Y - 17, (NX(60) - NX(36)) * ghost, 34, 17); x.stroke(); x.setLineDash([]); }
+  x.fillStyle = `rgba(${RED},0.95)`; rr(NX(0), Y - 19, Math.max(0.1, NX(m) - NX(0)), 38, 19); x.fill(); x.restore();
+  const hx = NX(m); glow(hx, Y, 90, '255,150,60', 0.5); for (let i = 0; i < 6; i++) { const ph = (t * 2.2 + i * 0.37) % 1; x.fillStyle = `rgba(255,${170 + i * 12},80,${1 - ph})`; x.beginPath(); x.arc(hx + Math.sin(i * 7 + t * 5) * 14, Y - 14 - ph * 60, 3.4 * (1 - ph) + 1, 0, 7); x.fill(); }
+  for (let i = 0; i < 5; i++) lab(t, String(i + 1), NX(i * 12 + 6), Y + 72, a + 0.4 + i * 0.1, { color: C.ink, size: 26 });
+  lab(t, 'ANNI', 540, Y + 128, a + 0.9, { color: C.muted, size: 24 });
+  const kw = oB(seg(t, tSes - 0.15, tSes + 0.4)); if (kw > 0) { const wy = lerp(640, 0, clamp(kw, 0, 1.0)); x.save(); glow(NX(60), Y, 140, RED, 0.35 * clamp(kw)); x.fillStyle = C.red; rr(NX(60) - 9, Y - 160 - wy, 18, 320, 6); x.fill(); x.restore(); }
+  const kp = seg(t, tSes + 0.15, tSes + 0.6); if (kp > 0) glassPill(540, 1230, 'MAI OLTRE 60 MESI', kp, C.red, 40);
+  x.restore(); finish(t); }
+
+/* ================= CENTRALE: l'edificio cresce colonna per colonna; non e' privata, ha delle soglie ================= */
+function sCentrale(t, a, b) { bg('40,46,42', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tIt = WA('centrale', ['italia', 'ditalia'], 1, 0.4), tPv = WA('centrale', ['privata', 'priva'], 1, 0.62), tSg = WA('centrale', ['soglie', 'sogli'], 1, 0.9);
+  phrase(t, a + 0.05, [['Centrale', C.ink], ['dei Rischi', C.lime]], 345, { size: 92 });
+  const col = (i) => oB(seg(t, a + 0.3 + i * 0.16, a + 0.9 + i * 0.16)), cl = (i) => 'rgba(241,244,238,0.14)';
+  for (let i = 0; i < 3; i++) { const k = oC(seg(t, a + 0.15 + i * 0.1, a + 0.55 + i * 0.1)); x.save(); x.globalAlpha *= k; x.fillStyle = cl(); rr(300 - i * 40, 1040 + i * 26, 480 + i * 80, 26, 6); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke(); x.restore(); }
+  for (let i = 0; i < 5; i++) { const k = clamp(col(i)), h = 250 * k, cx = 290 + i * 125; if (h < 2) continue; x.save(); x.fillStyle = cl(); rr(cx - 30, 1040 - h, 60, h, 8); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke(); x.restore(); }
+  const kt = oC(seg(t, a + 1.2, a + 1.8)); x.save(); x.globalAlpha *= kt; x.fillStyle = 'rgba(241,244,238,0.14)'; x.strokeStyle = C.ink; x.lineWidth = 3; rr(230, 760, 620, 30, 6); x.fill(); x.stroke();
+  x.beginPath(); x.moveTo(230, 760); x.lineTo(540, 650 - (1 - kt) * 40); x.lineTo(850, 760); x.closePath(); x.fill(); x.stroke(); x.restore();
+  lab(t, "BANCA D'ITALIA", 540, 738, tIt - 0.1, { color: C.lime, size: 26 });
+  const kd = oC(seg(t, tSg - 0.1, tSg + 0.5)); if (kd > 0) { dash(250, 915, 250 + 580 * kd, 915, C.lime, 4, [14, 10], 1); glow(250 + 580 * kd, 915, 60, LIM, 0.3); }
+  const k1 = seg(t, tPv - 0.1, tPv + 0.4); if (k1 > 0) glassPill(540, 1230, 'NON È PRIVATA', k1, C.lime, 40);
+  const k2 = seg(t, tSg - 0.1, tSg + 0.4); if (k2 > 0) glassPill(540, 1360, 'HA DELLE SOGLIE', k2, C.ink, 40);
+  x.restore(); finish(t); }
+
+/* ================= SOGLIE: due cancelli; le monete piccole rimbalzano sul primo, passano sul secondo ================= */
+function sSoglie(t, a, b) { bg('30,44,32', 0.55); x.save(); zoom(t, a, b, 1.03);
+  const tDb = WA('soglie', ['debito'], 1, 0.2), tIn = WA('soglie', ['intermediario', 'intermediar'], 1, 0.12), tT = WA('soglie', ['trentamila', 'trenta', '30000', '30'], 1, 0.36), tD = WA('soglie', ['duecentocinquanta', 'duecento', '250'], 1, 0.62),
+    tSo = WA('soglie', ['sofferenza', 'sofferen'], 1, 0.74), tGr = WA('soglie', ['gravi', 'grave'], 1, 0.84);
+  phrase(t, a + 0.05, [['Ci entri sopra', C.ink], ['una soglia', C.lime]], 345, { size: 92 });
+  const LX = 300, RX = 780, GY = 960;
+  lab(t, 'DEBITO', LX, 606, tDb - 0.1, { color: C.ink }); lab(t, 'IN SOFFERENZA', RX, 606, tSo - 0.1, { color: C.red });
+  const kn1 = oC(seg(t, tT - 0.1, tT + 0.4)), kn2 = oC(seg(t, tD - 0.1, tD + 0.4));
+  txt('30.000 €', LX, 680, { size: 66, weight: 800, color: C.lime, alpha: kn1, blur: (1 - kn1) * 10, ls: -1 }); txt('250 €', RX, 680, { size: 66, weight: 800, color: C.lime, alpha: kn2, blur: (1 - kn2) * 10, ls: -1 });
+  lab(t, 'VERSO UN INTERMEDIARIO', LX, 740, tIn - 0.1, { color: C.ink, size: 24 }); lab(t, 'GRAVI DIFFICOLTÀ', RX, 740, tGr - 0.1, { color: C.red, size: 24 });
+  const gL = ioC(seg(t, tT + 0.25, tT + 0.7)), gR = ioC(seg(t, tD + 0.25, tD + 0.7));
+  function gate(cx, g, col) { x.save(); x.strokeStyle = col; x.lineWidth = 10; x.lineCap = 'round'; const hw = 150, gap = g * 70; x.beginPath(); x.moveTo(cx - hw, GY); x.lineTo(cx - 10 - gap, GY); x.moveTo(cx + 10 + gap, GY); x.lineTo(cx + hw, GY); x.stroke(); x.restore(); }
+  gate(LX, gL, gL > 0.2 ? C.lime : C.ink); gate(RX, gR, gR > 0.2 ? C.lime : C.ink);
+  const kb = oB(seg(t, a + 0.3, a + 0.9)); pop(540, 1210, kb, () => { glass(540, 1210, 880, 160, 30, 1); });
+  /* tre monete piccole sul cancello a sinistra: scendono e rimbalzano via */
+  for (let i = 0; i < 3; i++) { const t0 = tIn + 0.15 + i * 0.4, u = seg(t, t0, t0 + 0.9); if (u <= 0 || u >= 1) continue; const fall = clamp(u / 0.45), bn = clamp((u - 0.45) / 0.55);
+    const cy = lerp(800, GY - 38, fall * fall) - Math.sin(Math.PI * bn) * 70 * (bn > 0 ? 1 : 0), cx = LX + (i - 1) * 60 + bn * (i - 1) * 90; disc(cx, cy, 28, 'rgba(241,244,238,0.7)', '€', 1 - bn * bn); }
+  const uB = seg(t, tT + 0.1, tT + 1.6); if (uB > 0) { const cy = uB < 0.6 ? lerp(800, GY - 120, ioC(uB / 0.6)) : lerp(GY - 120, 1190, ioC((uB - 0.6) / 0.4)); disc(LX, cy, 50, C.lime, '€', cy > 1170 ? 0 : 1);
+    if (uB > 0.98) glow(LX, 1210, 140, LIM, 0.3); }
+  const uS = seg(t, tD + 0.1, tD + 1.5); if (uS > 0) { const cy = lerp(800, 1190, ioC(uS)); disc(RX, cy, 28, C.red, '€', cy > 1170 ? 0 : 1); }
+  lab(t, 'CENTRALE DEI RISCHI', 540, 1340, a + 0.9, { color: C.ink });
+  x.restore(); finish(t); }
+
+/* ================= TRENTASEI: una finestra di vetro scivola su 60 tessere; gli intermediari vedono solo le ultime 36 ================= */
+function sTrentasei(t, a, b) { bg('34,44,40', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tTr = WA('trentasei', ['trentasei', '36'], 1, 0.7), tInt = WA('trentasei', ['intermediari', 'intermediar'], 1, 0.05);
+  phrase(t, a + 0.05, [['Gli intermediari', C.ink]], 345, { size: 92 });
+  phrase(t, tTr - 0.12, [['ne vedono 36 mesi', C.lime]], Y2, { size: 92 });
+  const TX = 138, TY = 690, TS = 56, TG = 12, sh = ioC(seg(t, tTr - 0.4, tTr + 0.6));
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 12; c++) { const i = r * 12 + c, k = oB(seg(t, a + 0.15 + i * 0.012, a + 0.6 + i * 0.012)); if (k <= 0) continue; const old = r < 2, cx = TX + c * (TS + TG) + TS / 2, cy = TY + r * (TS + TG) + TS / 2, s = clamp(k, 0, 1.1);
+    x.save(); x.translate(cx, cy); x.scale(s, s); x.fillStyle = old ? `rgba(241,244,238,${lerp(0.5, 0.14, sh)})` : (sh > 0.5 ? `rgba(${LIM},0.9)` : 'rgba(241,244,238,0.5)'); rr(-TS / 2, -TS / 2, TS, TS, 10); x.fill(); x.restore(); }
+  const top = lerp(TY - 14, TY + 2 * (TS + TG) - 14, sh), bot = TY + 5 * (TS + TG) - TG + 14, fk = oC(seg(t, tInt - 0.1, tInt + 0.4));
+  if (fk > 0) { glow(540, (top + bot) / 2, 460, LIM, 0.12 * fk * sh); x.save(); x.globalAlpha *= fk; x.strokeStyle = C.lime; x.lineWidth = 5; rr(TX - 20, top, 12 * (TS + TG) - TG + 40, bot - top, 24); x.stroke(); x.restore(); }
+  lab(t, 'OGGI', 972, bot + 38, a + 0.9, { color: C.ink, size: 24, align: 'right' });
+  const kp = seg(t, tTr + 0.1, tTr + 0.6); if (kp > 0) glassPill(540, 1190, '36 MESI VISIBILI', kp, C.lime, 40);
+  const ex = 540, ey = 1345, ke = oC(seg(t, tInt - 0.1, tInt + 0.45)), look = Math.sin(t * 2.2) * 22;
+  x.save(); x.globalAlpha *= ke; x.strokeStyle = C.ink; x.lineWidth = 5; x.beginPath(); x.moveTo(ex - 120, ey); x.quadraticCurveTo(ex, ey - 90, ex + 120, ey); x.quadraticCurveTo(ex, ey + 90, ex - 120, ey); x.stroke();
+  x.fillStyle = C.lime; x.beginPath(); x.arc(ex + look, ey, 24, 0, 7); x.fill(); x.fillStyle = '#050607'; x.beginPath(); x.arc(ex + look, ey, 10, 0, 7); x.fill(); x.restore();
+  lab(t, 'INTERMEDIARI', 790, ey, tInt, { color: C.ink, size: 24, align: 'left' });
+  x.restore(); finish(t); }
+
+/* ================= REGOLE: il foglio del contratto si gira (nuove regole), una scansione lo attraversa prima di firmare ================= */
+function sRegole(t, a, b) { bg('34,46,34', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCa = WA('regole', ['cambiando', 'cambia'], 1, 0.22), tVa = WA('regole', ['valutare', 'valut'], 1, 0.5), tFi = WA('regole', ['firmare', 'firm'], 1, 0.66), tRe = WA('regole', ['restituire', 'restitu'], 1, 0.9);
+  phrase(t, a + 0.05, [['Le regole', C.ink], ['stanno cambiando', C.lime]], 345, { size: 92 });
+  const SX = 540, SY = 960, SW = 560, SH = 600, fl = ioC(seg(t, tCa - 0.2, tCa + 0.7)), sx = Math.max(0.02, Math.abs(Math.cos(Math.PI * fl))), nw = fl > 0.5, ks = oB(seg(t, a + 0.2, a + 0.8));
+  x.save(); x.translate(SX, SY); x.scale(clamp(ks, 0, 1.05) * sx, clamp(ks, 0, 1.05)); x.translate(-SX, -SY);
+  x.fillStyle = 'rgba(241,244,238,0.10)'; rr(SX - SW / 2, SY - SH / 2, SW, SH, 24); x.fill(); x.strokeStyle = nw ? C.lime : C.ink; x.lineWidth = 4; x.stroke();
+  const sc = oC(seg(t, tVa - 0.1, tVa + 1.1)), scy = SY - SH / 2 + 40 + sc * (SH - 200);
+  x.fillStyle = nw ? `rgba(${LIM},0.9)` : 'rgba(241,244,238,0.45)'; rr(SX - SW / 2 + 40, SY - SH / 2 + 36, 240, 26, 8); x.fill();
+  for (let i = 0; i < 7; i++) { const ly = SY - SH / 2 + 100 + i * 52, hit = sc > 0 && ly < scy; x.fillStyle = hit ? `rgba(${LIM},0.7)` : 'rgba(241,244,238,0.30)'; rr(SX - SW / 2 + 40, ly, i % 3 === 2 ? 330 : 480, 16, 8); x.fill(); }
+  if (sc > 0 && sc < 1) { glow(SX, scy, 300, LIM, 0.25); x.strokeStyle = C.lime; x.lineWidth = 4; x.beginPath(); x.moveTo(SX - SW / 2 + 10, scy); x.lineTo(SX + SW / 2 - 10, scy); x.stroke(); }
+  const sy = SY + SH / 2 - 58; txt('✕', SX - SW / 2 + 52, sy - 4, { size: 30, weight: 800, color: C.ink }); x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(SX - SW / 2 + 80, sy + 10); x.lineTo(SX + SW / 2 - 50, sy + 10); x.stroke(); x.setLineDash([]);
+  lab(t, 'FIRMA', SX - SW / 2 + 50, sy + 48, a + 0.8, { color: C.muted, size: 24, align: 'left' });
+  const kp = oC(seg(t, tFi - 0.1, tFi + 0.4)); if (kp > 0) { x.save(); x.globalAlpha *= kp; x.translate(SX + 120 + Math.sin(t * 5) * 8, sy - 60 - (1 - kp) * 40); x.rotate(0.7); x.fillStyle = C.ink; rr(-9, -70, 18, 110, 5); x.fill(); x.fillStyle = C.lime; x.beginPath(); x.moveTo(-9, 40); x.lineTo(9, 40); x.lineTo(0, 62); x.closePath(); x.fill(); x.restore(); }
+  x.restore();
+  const k1 = seg(t, tRe - 0.1, tRe + 0.4); if (k1 > 0) glassPill(540, 1385, 'PUOI RESTITUIRE?', k1, C.lime, 40);
+  x.restore(); finish(t); }
+
+/* ================= SOCIAL: tre bolle social barrate; un ingranaggio gira, ma una persona puo' intervenire ================= */
+function sSocial(t, a, b) { bg('36,40,48', 0.55); x.save(); zoom(t, a, b, 1.03);
+  const tSo = WA('social', ['social'], 1, 0.04), tFo = WA('social', ['fonte'], 1, 0.2), tAl = WA('social', ['algoritmo', 'algorit'], 1, 0.5), tIv = WA('social', ['intervento', 'interven'], 1, 0.84), tUm = WA('social', ['umano'], 1, 0.94);
+  phrase(t, a + 0.05, [['Social:', C.ink], ['non sono una fonte', C.red]], 345, { size: 92 });
+  const BX = [300, 540, 780], BY = 735, kx = oC(seg(t, tFo - 0.15, tFo + 0.4));
+  BX.forEach((cx, i) => { const k = oB(seg(t, tSo + i * 0.14, tSo + 0.45 + i * 0.14)); pop(cx, BY, k, () => { x.globalAlpha *= lerp(1, 0.4, kx); glass(cx, BY, 140, 140, 70, 1);
+    x.fillStyle = C.ink; x.strokeStyle = C.ink; x.lineWidth = 5; x.lineJoin = 'round';
+    if (i === 0) { x.beginPath(); x.moveTo(cx, BY + 28); x.bezierCurveTo(cx - 46, BY - 6, cx - 26, BY - 40, cx, BY - 16); x.bezierCurveTo(cx + 26, BY - 40, cx + 46, BY - 6, cx, BY + 28); x.fill(); }
+    if (i === 1) { rr(cx - 36, BY - 28, 72, 48, 14); x.fill(); x.beginPath(); x.moveTo(cx - 14, BY + 16); x.lineTo(cx - 24, BY + 36); x.lineTo(cx + 4, BY + 16); x.fill(); }
+    if (i === 2) txt('#', cx, BY + 2, { size: 76, weight: 800, color: C.ink }); }); });
+  if (kx > 0) { x.save(); x.strokeStyle = C.red; x.lineWidth = 10; x.lineCap = 'round'; x.beginPath(); x.moveTo(200, 640); x.lineTo(200 + 680 * kx, 640 + 190 * kx); x.stroke(); x.restore(); }
+  const ka = oB(seg(t, a + 1.0, a + 1.6)), kaF = oC(seg(t, tAl - 0.15, tAl + 0.3)); pop(300, 1170, ka, () => { x.globalAlpha *= 0.4 + 0.6 * kaF; gear(300, 1170, 100, t * 0.9, C.amber); }); lab(t, 'ALGORITMO', 300, 1318, tAl, { color: C.amber, size: 26 });
+  const kv = oB(seg(t, a + 1.3, a + 1.9)), kvF = oC(seg(t, tIv - 0.15, tIv + 0.3)); pop(780, 1170, kv, () => { x.globalAlpha *= 0.4 + 0.6 * kvF; glow(780, 1170, 200, LIM, 0.2 * kvF); glass(780, 1170, 230, 230, 115, 1); person(780, 1176, 1.0, C.lime); }); lab(t, 'PERSONA', 780, 1318, tIv, { color: C.lime, size: 26 });
+  const ca = oC(seg(t, tIv + 0.1, tIv + 0.6)); dash(420, 1170, 420 + 230 * ca, 1170, C.muted, 4, [4, 12], ca > 0 ? 1 : 0);
+  const k2 = seg(t, tUm - 0.2, tUm + 0.4); if (k2 > 0) glassPill(540, 1405, "DIRITTO ALL'INTERVENTO UMANO", k2, C.lime, 34);
+  x.restore(); finish(t); }
+
+/* ================= DATO: undici gruppi; la porta del consumo si stringe, quella dei mutui resta com'e' ================= */
+function sDato(t, a, b) { bg('52,42,22', 0.55); x.save(); zoom(t, a, b, 1.03);
+  const tUn = WA('dato', ['undici', '11'], 1, 0.3), tCo = WA('dato', ['consumo'], 1, 0.55), tSe = WA('dato', ['selettivo', 'selett'], 1, 0.66), tMu = WA('dato', ['mutui', 'mutu'], 1, 0.8), tIn = WA('dato', ['invariati', 'invariat'], 1, 0.92);
+  phrase(t, a + 0.05, [['A ottobre,', C.ink], ['più selettivo', C.amber]], 345, { size: 92 });
+  for (let i = 0; i < 11; i++) { const k = oB(seg(t, tUn - 0.1 + i * 0.07, tUn + 0.3 + i * 0.07)); if (k > 0) { x.save(); x.globalAlpha *= clamp(k); glass(130 + i * 82, 640, 52, 52, 26, 1); x.fillStyle = C.ink; x.beginPath(); x.arc(130 + i * 82, 640, 8, 0, 7); x.fill(); x.restore(); } }
+  lab(t, 'GRUPPI BANCARI', 540, 704, tUn + 0.6, { color: C.ink, size: 24 });
+  function door(cx, L, col, col2) { x.save(); glow(cx, 970, 200, col2, 0.14); x.fillStyle = 'rgba(0,0,0,0.35)'; rr(cx - 130, 800, 260, 340, 14); x.fill(); x.strokeStyle = col; x.lineWidth = 5; rr(cx - 130, 800, 260, 340, 14); x.stroke();
+    x.fillStyle = 'rgba(241,244,238,0.20)'; rr(cx - 130, 803, L, 334, 8); x.fill(); rr(cx + 130 - L, 803, L, 334, 8); x.fill(); x.restore(); }
+  const kd = oB(seg(t, a + 0.2, a + 0.8)), LL = lerp(28, 100, ioC(seg(t, tSe - 0.1, tSe + 0.9))), LR = 28;
+  pop(300, 970, kd, () => door(300, LL, C.amber, AMB)); pop(780, 970, kd, () => door(780, LR, C.lime, LIM));
+  const OFF = [-80, -40, 0, 40, 80, -60];
+  for (const [cx, L, col] of [[300, LL, C.amber], [780, LR, C.lime]]) for (let j = 0; j < 6; j++) { const u = ((t - a) * 0.55 + j / 6) % 1, dy = 770 + u * 420, off = OFF[j], ok = Math.abs(off) <= (130 - L) - 18; if (kd < 0.9) continue;
+    const al = dy < 800 ? 1 : ok ? 1 : 0; if (al > 0 && dy < 1130) { x.fillStyle = col; x.globalAlpha = 0.9; x.beginPath(); x.arc(cx + off, dy, 14, 0, 7); x.fill(); x.globalAlpha = 1; } }
+  lab(t, 'CREDITO AL CONSUMO', 300, 1195, tCo - 0.1, { color: C.ink }); lab(t, 'MUTUI', 780, 1195, tMu - 0.1, { color: C.ink });
+  const k1 = seg(t, tSe - 0.1, tSe + 0.4), k2 = seg(t, tIn - 0.1, tIn + 0.4); if (k1 > 0) glassPill(300, 1300, 'PIÙ SELETTIVO', k1, C.amber, 30); if (k2 > 0) glassPill(780, 1300, 'INVARIATI', k2, C.lime, 30);
+  x.restore(); finish(t); }
+
+/* ================= CASA: due cassetti con strisce di lunghezze diverse; due buste, dati gratis su richiesta ================= */
+function envelope(cx, cy, k, open, col) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy + (1 - clamp(k, 0, 1)) * 60); x.fillStyle = 'rgba(241,244,238,0.12)'; rr(-80, -52, 160, 104, 12); x.fill(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; rr(-80, -52, 160, 104, 12); x.stroke();
+  x.beginPath(); x.moveTo(-80, -46 + (1 - open) * 8); x.lineTo(0, 10 - open * 70 + 0); x.lineTo(80, -46 + (1 - open) * 8); x.stroke(); x.restore(); }
+function sCasa(t, a, b) { bg('34,46,34', 0.55); x.save(); zoom(t, a, b, 1.03);
+  const tAr = WA('casa', ['archivi', 'archiv'], 1, 0.2), tTe = WA('casa', ['tempi', 'temp'], 1, 0.36), tGr = WA('casa', ['gratis'], 1, 0.62), tCr = WA('casa', ['privati', 'privat'], 1, 0.78), tIt = WA('casa', ['italia', 'ditalia'], 1, 0.92);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
+  const DX = 120, DW = 520;
+  function drawer(y, label, col, len, k, kt) { if (k <= 0) return; const ox = (1 - clamp(k, 0, 1)) * -60; x.save(); x.globalAlpha *= clamp(k); x.translate(ox, 0);
+    const sl = len * oC(kt); if (sl > 1) { x.fillStyle = col; x.globalAlpha *= 0.9; rr(DX + DW - 20, y + 30, sl + 20, 60, 12); x.fill(); x.globalAlpha = 1; for (let i = 1; i * 40 < sl; i++) { x.strokeStyle = 'rgba(5,6,7,0.45)'; x.lineWidth = 3; x.beginPath(); x.moveTo(DX + DW + i * 40, y + 38); x.lineTo(DX + DW + i * 40, y + 82); x.stroke(); } }
+    x.fillStyle = 'rgba(241,244,238,0.12)'; rr(DX, y, DW, 120, 18); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 4; rr(DX, y, DW, 120, 18); x.stroke();
+    x.fillStyle = C.ink; rr(DX + DW - 150, y + 52, 100, 16, 8); x.fill(); txt(label, DX + 28, y + 36, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 1, align: 'left' }); x.restore(); }
+  drawer(640, 'CRIF E ALTRI', C.amber, 300, oB(seg(t, a + 0.3, a + 0.8)), seg(t, tTe - 0.1, tTe + 0.8));
+  drawer(800, 'CENTRALE RISCHI', C.lime, 160, oB(seg(t, a + 0.5, a + 1.0)), seg(t, tTe + 0.1, tTe + 0.9));
+  lab(t, 'ARCHIVI E TEMPI DIVERSI', 540, 990, tTe, { color: C.ink, size: 24 });
+  envelope(780, 1130, oB(seg(t, tIt - 0.2, tIt + 0.4)), oC(seg(t, tIt + 0.2, tIt + 0.7)), C.lime); lab(t, "BANCA D'ITALIA", 780, 1230, tIt, { color: C.ink, size: 24 });
+  envelope(300, 1130, oB(seg(t, tCr - 0.2, tCr + 0.4)), oC(seg(t, tCr + 0.2, tCr + 0.7)), C.lime); lab(t, 'CRIF E ALTRI', 300, 1230, tCr, { color: C.ink, size: 24 });
+  const kg = seg(t, tGr - 0.1, tGr + 0.45); if (kg > 0) glassPill(540, 1395, 'DATI GRATIS SU RICHIESTA', kg, C.lime, 36);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, sic: sSic, nonsanati: sNonsanati, centrale: sCentrale, soglie: sSoglie, trentasei: sTrentasei, regole: sRegole, social: sSocial, dato: sDato, casa: sCasa }, ORDER, ['hook', 'nonsanati', 'regole']);
+</script></body></html>

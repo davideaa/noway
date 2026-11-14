@@ -1,0 +1,68 @@
+# Puntata 29 (gio 12/11/2026) — «Tassi nominali e reali» — fonti (verificate il 05/11/2026)
+
+Vintage e metodo (letto sui PDF primari il 05/11/2026, con `pdftotext` e, per le tavole, controllo sull'immagine della pagina):
+- **Inflazione = Istat**, comunicato «Prezzi al consumo – dati provvisori – Ottobre 2026», diffuso il **30/10/2026** (18 pagg., base 2025=100). Prossima diffusione Istat: **17/11/2026** (dopo l'uscita del reel: il 12/11 il dato di ottobre resta **provvisorio**).
+- **Ultimo dato definitivo = settembre 2026** (comunicato Istat del **16/10/2026**): NIC +4,2% tendenziale, «confermando la stima preliminare».
+- **Tassi sui depositi = Banca d'Italia**, «Banche e moneta: serie nazionali», statistiche del **9/10/2026**, periodo di riferimento **agosto 2026**, Tavole 2.7 (MIR0700, nuove operazioni) e 2.8 (MIR0800, consistenze). Nel fascicolo «i dati fra parentesi sono provvisori»: **agosto 2026 è provvisorio** (luglio 2026 è definitivo). Non ho trovato né letto un'uscita successiva (settembre 2026): la prossima va controllata il 10-11/11 (vedi dubbi).
+- **Sfasamento da dichiarare**: inflazione a **ottobre**, tassi a **agosto**. Non esiste un tasso sui depositi di ottobre. Nel reel non dire «oggi i depositi rendono X»: dire «a fine estate» / «ad agosto».
+- Il **tasso reale vero** qui sotto è un calcolo nostro su due dati ufficiali, non un dato pubblicato da un ente.
+
+## A. Dati per la prima frase («chi guarda»)
+
+| Detto nel reel | Dato esatto | Fonte (ente, titolo, data, tabella/pagina) |
+|---|---|---|
+| «A ottobre i prezzi sono saliti di oltre il cinque per cento in un anno» | **NIC ottobre 2026 (stima preliminare): +5,4% tendenziale**, +0,9% congiunturale (da +4,2% di settembre). Testo: «nel mese di ottobre 2026 l'indice nazionale dei prezzi al consumo per l'intera collettività (NIC), al lordo dei tabacchi, registra una variazione pari a +0,9% su base mensile e a +5,4% su base annua (da +4,2% del mese precedente)». Il commento: «tornando al livello registrato ad agosto 2023» | Istat, «Prezzi al consumo. Dati provvisori – Ottobre 2026», 30/10/2026, p. 1 e Prospetto 1 (p. 2): https://www.istat.it/wp-content/uploads/2026/10/CS_Prezzi-al-consumo_Prov_Ottobre2026.pdf |
+| (alternativa, se si vuole l'indice europeo) «L'indice europeo, l'IPCA, dice cinque virgola sei» | **IPCA ottobre 2026 (provvisorio): +5,6% tendenziale**, +1,2% congiunturale (da +4,2% di settembre). Nota: l'IPCA è l'indice usato per confronti europei (a tassazione non costante); il NIC è quello che Istat chiama «inflazione» nel titolo | Istat, stesso comunicato, p. 1 e Prospetto 1 (p. 2) |
+| «Ad agosto il conto corrente delle famiglie italiane rendeva in media lo zero virgola due per cento» | **Tasso medio sui conti correnti delle famiglie, consistenze: 0,20% ad agosto 2026 (provvisorio)**; 0,19% a giugno e luglio; 0,17% a dicembre 2025 | Banca d'Italia, «Banche e moneta: serie nazionali», 9/10/2026, Tavola 2.8 (MIR0800), seconda parte, colonna «Depositi in conto corrente – Famiglie», p. 29: https://www.bancaditalia.it/pubblicazioni/moneta-banche/2026-moneta/statistiche_BAM_20261009.pdf |
+| «In media i depositi delle famiglie rendevano meno di uno per cento» (**dato consigliato come «tasso medio sui depositi»**) | **Tasso medio su tutti i depositi delle famiglie (esclusi i PcT), consistenze: 0,64% ad agosto 2026 (provvisorio)**, 0,64% a luglio (definitivo), 0,59% a dicembre 2025. Contro 0,69% se si include anche le società non finanziarie (frase del fascicolo: «I tassi passivi sul complesso dei depositi in essere sono stati pari allo 0,69 per cento (come nel mese precedente)») | Banca d'Italia, ibid., Tavola 2.8, colonna «Totale depositi (esclusi i PcT) – Famiglie», p. 29; testo di sintesi p. 1 |
+| (se si vuole il caso «migliore») «Un deposito vincolato nuovo, fino a un anno, rendeva circa due e mezzo» | **Nuove operazioni, famiglie, depositi con durata prestabilita fino a 1 anno: 2,46% ad agosto 2026 (provvisorio)** (luglio 2,44%). Totale famiglie durata prestabilita 2,50%; oltre 1 anno 2,85%. Sono i tassi sui contratti **nuovi** del mese, non quello che prende chi ha già un conto | Banca d'Italia, ibid., Tavola 2.7 (MIR0700), p. 28 |
+| «Tasso reale: meno quattro virgola cinque per cento» | **Calcolo nostro, Fisher esatta**: (1 + 0,0064) / (1 + 0,054) − 1 = **−4,52%**. Approssimata: 0,64 − 5,4 = **−4,76 punti**. Con NIC 5,4% e depositi famiglie 0,64% | Calcolo su Istat (ott. 2026, NIC provv.) e Banca d'Italia (ago. 2026, Tav. 2.8, provv.). **Va detto «circa meno quattro e mezzo» / «quasi meno cinque»**: due dati provvisori di mesi diversi |
+| (versione prudente, solo dati definitivi) | **Fisher esatta: (1,0064 / 1,042) − 1 = −3,42%**; approssimata 0,64 − 4,2 = −3,56. Usa NIC **settembre** definitivo (+4,2%) e depositi **luglio** definitivo (0,64%). Oltre «circa meno tre e mezzo» | Istat, «Prezzi al consumo. Dati definitivi – Settembre 2026», 16/10/2026, p. 1: https://www.istat.it/wp-content/uploads/2026/10/Prezzi-al-consumo-def-Set2026-1.pdf · Banca d'Italia, Tav. 2.8 |
+| (con il deposito vincolato) «Anche col deposito vincolato il reale era negativo» | **Fisher esatta: 1,0246 / 1,054 − 1 = −2,79%**; approssimata 2,46 − 5,4 = −2,94. Con NIC 5,4% e nuove operazioni famiglie fino a 1 anno 2,46% | Calcolo su Istat (ott. 2026) e Banca d'Italia (Tav. 2.7, ago. 2026, provv.) |
+| (conto corrente) | **Fisher esatta: 1,0020 / 1,054 − 1 = −4,93%**; approssimata 0,20 − 5,4 = −5,20 | Calcolo su Istat (ott. 2026) e Banca d'Italia (Tav. 2.8, c/c famiglie, ago. 2026, provv.) |
+| «Su diecimila euro in banca, in un anno compri come se ne avessi circa novemilacinquecento» (opzionale) | 10.000 × 1,0064 / 1,054 = **9.548 €** di potere d'acquisto di oggi. È **un'ipotesi ex post**: vale se i prezzi continuassero a salire del 5,4% per dodici mesi e il tasso restasse 0,64% | Calcolo nostro. **Cifre illustrative, non dati**: non dire «perderai» ma «a questi ritmi» |
+
+Contesto utile se serve un inciso (non nella prima frase): inflazione di fondo (senza energetici e alimentari freschi) **+2,0%** a ottobre (da +1,6%); energetici da +22,6% a +31,4% (commento Istat); «carrello della spesa» +2,5% (da +1,5%); inflazione acquisita 2026 **+3,4%**. L'accelerazione è trainata dall'energia: «ancora influenzato dal quadro geopolitico internazionale». Serie 2026 NIC tendenziale: gen 1,0; feb 1,5; mar 1,7; apr 2,7; mag 3,2; giu 3,0; lug 2,9; ago 3,3; set 4,2; ott 5,4 (prov.) (Prospetto 1).
+
+## B. Equazione di Fisher (dalla scheda: «circa nominale meno aumento dei prezzi»)
+
+| Detto nel reel | Dato esatto | Fonte |
+|---|---|---|
+| «Il tasso reale è circa il nominale meno l'inflazione» | Approssimazione: r ≈ i − π. **Esatta**: (1 + r) = (1 + i) / (1 + π), cioè r = (1 + i)/(1 + π) − 1. L'approssimazione regge con tassi bassi; con inflazione al 5% l'errore è già di circa 0,1 punti, con 5,4% e depositi allo 0,64% di circa 0,24 punti (−4,76 contro −4,52) | Formula standard (equazione di Fisher, Irving Fisher, *The Theory of Interest*, 1930). **Non ho letto una fonte primaria per la citazione**: nel reel basta il nome «equazione di Fisher», già nella scheda; non citare anno o pagina |
+
+## C. Esempi inventati («cifre illustrative, non dati»)
+
+| Esempio nel reel | Natura |
+|---|---|
+| «Il conto ti dà il 3%, i prezzi salgono del 5%» (gancio della scheda) | **Cifre illustrative, non dati.** Fisher esatta: 1,03 / 1,05 − 1 = **−1,905%**, cioè **−1,9%**. Approssimata: 3 − 5 = **−2%**. La scheda dice «circa −2%»: coerente, ma se si dice «esattamente meno due» è **sbagliato**: dire «circa meno due» |
+| «Su 10.000 € al 3% hai 10.300 €; ma ciò che costava 10.000 € ora costa 10.500 €» (se usato) | **Cifre illustrative, non dati.** 10.300 / 10.500 = 0,9810: il capitale compra il **98,1%** di prima (−1,9%). Coerente col −1,9% esatto |
+| «Un 3% sul conto con prezzi +5% è un tasso nominale positivo ma reale negativo» | **Illustrativo.** Attenzione: il **3%** non è un tasso medio dei conti italiani (0,20% c/c, 0,64% tutti i depositi famiglie, ago. 2026). Nel reel il 3% deve restare «esempio», non «quanto rende il tuo conto» |
+| «Con cento euro di spesa di oggi, tra un anno ne servono 105» | **Illustrativo** (il +5% è inventato; il dato vero è 5,4% NIC ott. 2026). Se lo si lega al dato vero: 100 × 1,054 = 105,40 € |
+
+## Cosa NON si può dire
+
+- NON «oggi l'inflazione in Italia è 5,4%» come dato fermo: è la **stima preliminare** di ottobre (Istat 30/10/2026), che il **17/11/2026** diventa definitiva e può essere rivista. Dire «a ottobre, secondo la stima Istat». (Settembre: stima e definitivo coincidono per il NIC, +4,2%; l'IPCA settembre è stato rivisto di +0,1 punti, da +4,1 a +4,2, secondo la ricerca sul comunicato definitivo; il +4,2% dell'IPCA settembre si legge anche nel Prospetto 1 del comunicato di ottobre.)
+- NON mescolare NIC e IPCA nella stessa frase: sono due indici diversi (+5,4% e +5,6%). Scegliere uno e nominarlo («l'indice dei prezzi al consumo Istat»).
+- NON «i depositi italiani rendono lo 0,64%» senza «in media» e «a fine estate»: è la media su **tutti i depositi esistenti delle famiglie** (consistenze, esclusi i PcT), agosto 2026, **provvisorio**. Il «mio conto» può rendere di più o di meno; i depositi vincolati nuovi rendevano ~2,5% (ago.).
+- NON «tutti i risparmiatori hanno perso il quattro e mezzo»: il tasso reale −4,5% vale per **chi ha un deposito a rendimento medio** e per **chi spende secondo il paniere medio Istat**; l'inflazione personale può essere diversa. Né «hai perso 4,5% dei tuoi soldi»: gli euro non diminuiscono, **compra meno**.
+- NON «il tasso reale di oggi è −4,5%» come previsione: è un tasso **ex post/misto** (inflazione già osservata a ottobre su dodici mesi contro tassi correnti sui depositi). Il tasso reale «vero» ex ante dipende dall'inflazione attesa, che qui **non è stata verificata** (nessuna fonte letta).
+- NON abbinare l'inflazione di ottobre con un tasso «di ottobre»: non esiste ancora (ultimo dato agosto).
+- NON «il dato è provvisorio quindi forse falso»: è una stima preliminare ufficiale; dire solo «stima».
+- NON attribuire a Istat o Banca d'Italia il numero −4,5%: è nostro (Fisher su due dati ufficiali).
+- NON dire che l'inflazione è alta «per colpa della guerra/energia» come fatto: l'Istat scrive che l'accelerazione dei beni energetici è «ancora influenzata dal quadro geopolitico internazionale» e che l'accelerazione «risente principalmente» dell'energia: si può citare la frase, non spiegare di più.
+- NON «5,4% è il livello più alto di sempre»: Istat dice «tornando al livello registrato ad agosto 2023». Si può dire «il più alto da agosto 2023», non altro.
+- NON «con inflazione al 5% perdi sempre»: dipende dal tasso. Reale = (1+i)/(1+π) − 1: con i > π è positivo.
+- NON usare l'approssimazione come uguaglianza («esattamente nominale meno inflazione»): dire «circa».
+- NON dire che l'equazione di Fisher è «una legge» ma «una relazione tra tassi»: nessuna fonte letta la qualifica.
+
+## Dubbi aperti
+
+1. **Sfasamento temporale** (ottobre contro agosto). Decisione editoriale: usare la coppia **ottobre + agosto** (più attuale, entrambi provvisori) con formulazione prudente, oppure la coppia **settembre + luglio** (entrambi definitivi, −3,4%). Il tasso reale cambia molto: **−4,5% o −3,4%** (differenza di circa 1,1 punti, tutta dovuta al salto di inflazione tra settembre e ottobre). In ogni caso dire «circa» e «tra meno tre e mezzo e meno quattro e mezzo» se si vuole un solo intervallo onesto.
+2. **Uscita Banca d'Italia di novembre non verificata**: se le statistiche «Banche e moneta» di novembre (dati di **settembre 2026**) escono prima del 12/11 e il tasso sui depositi delle famiglie cambia, la riga va aggiornata. Il calendario Banca d'Italia non è stato letto (pagina non raggiungibile: 404): **ricontrollare il 10-11/11**. Settembre, quando uscirà, sostituisce agosto; agosto passa da provvisorio a definitivo e può variare di qualche centesimo.
+3. **Istat 17/11/2026**: ottobre definitivo dopo l'uscita del reel. Se cambia il +5,4%, il reel resta con «stima preliminare»: dirlo a voce.
+4. **«Tasso medio sui depositi in Italia»**: ho scelto Banca d'Italia (Tav. 2.8, famiglie, 0,64%), non BCE MIR: **non ho consultato il portale BCE** (i dati MIR nazionali Banca d'Italia sono la stessa statistica armonizzata, ma non ho confrontato i valori). Il «tasso medio» sul conto corrente (0,20%) e sul complesso dei depositi (0,64%) sono molto diversi: nel reel scegliere una sola definizione e nominarla.
+5. **Il 3% del gancio** non somiglia al dato vero (0,20% c/c; 0,64% totale depositi famiglie; 2,46% vincolati nuovi). Con la prova editoriale «prima frase = dato vero di chi guarda» il gancio della scheda diventa un esempio successivo, non la prima frase: da decidere con l'orchestratore se tenerlo come esempio inventato dichiarato.
+6. **Tasso reale ex post contro ex ante**: la formula di Fisher teorica usa l'inflazione **attesa**; qui si usa l'inflazione già osservata. Nessuna fonte su aspettative d'inflazione letta (Banca d'Italia/BCE): non dire «il tasso reale atteso».
+7. **Fonte primaria di Fisher** non letta (formula nota, nessun testo consultato). Se il reel cita l'autore, ricontrollare.
+8. **IPCA settembre «rivisto da +4,1 a +4,2»** e **inflazione di fondo settembre «rivista da +1,7 a +1,6»**: informazioni da riassunto di ricerca sul comunicato definitivo, **non verificate riga per riga sul PDF** (letti solo i punti elenco in prima pagina: NIC +4,2% «confermando la stima preliminare»). Non usare nel reel.
+9. Il file sorgente Istat ottobre riporta nel commento un refuso («si attesa»): non è un dato, ma non copiare la frase testualmente.
