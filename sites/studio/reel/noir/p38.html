@@ -53,7 +53,7 @@ const smooth = (k) => { k = clamp(k); return k * k * (3 - 2 * k); };
 
 /* ================= HOOK: venti case, due volte — gia' in movimento dal primo fotogramma ================= */
 function sHook(t, a, b) { bg('34,46,28', 0.8); x.save(); zoom(t, a, b, 1.04);
-  const tAut = WA('hook', ['autunno', 'autun'], 1, 0.3), tUna = WA('hook', ['una'], 1, 0.46), tTre = WA('hook', ['tre', '3'], 1, 0.56), tAgo = WA('hook', ['agosto', 'agost'], 1, 0.7), tQua = WA('hook', ['quattro', '4'], 1, 0.92);
+  const tAut = WA('hook', ['autunno', 'autun'], 1, 0.3), tUna = WA('hook', ['una', '1'], 1, 0.46), tTre = WA('hook', ['tre', '3'], 1, 0.56), tAgo = WA('hook', ['agosto', 'agost'], 1, 0.7), tQua = WA('hook', ['quattro', '4'], 1, 0.92);
   phrase(t, a, [['Fisso o', C.ink], ['variabile?', C.lime]], 345, { size: 92 });
   lab(t, 'MUTUI NUOVI', 540, 548, a + 0.3, { color: C.ink, size: 26, ls: 4 });
   const G = [{ y0: 695, nOn: 7, tOn: tUna - 0.05, gap: 0.08, base: 0.1, ph: 0 }, { y0: 1090, nOn: 15, tOn: tAgo - 0.05, gap: 0.05, base: 0.4, ph: 2 }];
