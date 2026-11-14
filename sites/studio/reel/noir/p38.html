@@ -210,7 +210,7 @@ function sPrevisione(t, a, b) { bg('30,38,44', 0.7); x.save(); zoom(t, a, b, 1.0
   x.restore(); finish(t); }
 
 /* ================= CASA: due carte di vetro verso la casa ================= */
-function miniRotaia(cx, cy, t, a0, wave) { const k = oC(seg(t, a0, a0 + 0.6)); if (k <= 0) return; x.save(); x.globalAlpha *= k;
+function miniRotaia(cx, cy, t, a0, wave) { const k = oC(seg(t, a0, a0 + 0.6)); if (k <= 0) return; x.save(); x.globalAlpha *= k; x.translate(cx, cy); x.scale(1.1, 1.1); x.translate(-cx, -cy);
   const hs2 = wave ? [40, 76, 54] : [56, 56, 56], ys = wave ? [-22, 14, -8] : [0, 0, 0];
   x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 190, cy + ys[0]);
   if (wave) { x.bezierCurveTo(cx - 120, cy - 60, cx - 70, cy + 50, cx, cy + 14); x.bezierCurveTo(cx + 60, cy - 20, cx + 110, cy + 20, cx + 190, cy - 8); } else x.lineTo(cx + 190, cy); x.stroke();
