@@ -12,6 +12,7 @@ NUM = r"\b(un terzo|un|duemila\w*|centotrenta\w*|duecento|cento|venti|dieci|nove
 NUMRE = r"(?:zero|un|uno|una|due|tre|quattro|cinque|sei|sette|otto|nove|dieci|undici|dodici|tredici|quattordici|quindici|sedici|diciassette|diciotto|diciannove|vent|venti|trent|trenta|quarant|quaranta|cinquant|cinquanta|sessant|sessanta|settant|settanta|ottant|ottanta|novant|novanta|cento|cent|mille|mila|milione|milioni|miliardo|miliardi_no|virgola|terzo)+"   # una parola fatta solo di pezzi di numero («duemilaventitre», «venticinque», «virgola»)
 def norm(s):
     s = s.lower().replace("’", "'").replace("è", "e").replace("'", " ").replace("%", " per cento ").replace("g7", "gi sette").replace("€", " euro ")
+    s = re.sub(r"\bper cento\b", " ", s)   # Whisper aggiunge o toglie «%» a piacere («oltre il tre e mezzo» → «3 ,5 %»): non conta, i numeri li confronta numeri.py
     s = re.sub(r"\be mezzo\b", " ", s)
     s = s.replace("dov eri", "doveri").replace("dove eri", "doveri")   # «dov'eri»: Whisper lo scrive attaccato o per esteso
     s = s.replace("baby boom", "bebi bum").replace("babyboom", "bebi bum")   # copione scritto come si pronuncia
