@@ -1,0 +1,14 @@
+test,passa,dettaglio
+"cointegrazione vera riconosciuta (p<0,01)",True,p=0.0000
+falsi positivi su passeggiate casuali tra 2% e 9%,True,0.048
+BH su p-value tutti casuali: al massimo 1 scoperta,True,0
+BH ritrova 5 segnali veri tra 105,True,5 scoperte
+"bootstrap su rumore puro: p > 0,05",True,
+"bootstrap su rendimento con deriva forte: p < 0,01",True,
+DSR scende quando aumentano i tentativi,True,"1 prova 0.941, 100 prove 0.001"
+pairs su coppia sintetica che torna alla media: guadagno > 0 senza costi,True,"P&L 0.287, trade 17"
+pairs: la maggior parte delle uscite è un ritorno alla media,True,0.65
+pairs su monete indipendenti: nessun guadagno sistematico (≤ 0 o pochi trade),True,"P&L -0.043, trade 2"
+carry: incassa esattamente il funding atteso (prezzo irrilevante),True,0.2977 vs 0.2973
+carry: con funding zero e base ferma il P&L è zero anche se il prezzo crolla o esplode,True,0.00e+00
+niente look-ahead: cambiare il futuro non cambia il passato,True,

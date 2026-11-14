@@ -1,0 +1,122 @@
+{
+ "BTCUSDT": {
+  "rows": 2496,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETHUSDT": {
+  "rows": 2496,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XRPUSDT": {
+  "rows": 2486,
+  "range": "2020-01-06..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BCHUSDT": {
+  "rows": 2496,
+  "range": "2020-01-01..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "EOSUSDT": {
+  "rows": 1961,
+  "range": "2020-01-08..2025-05-21",
+  "ok": 65,
+  "missing": 21,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "TRXUSDT": {
+  "rows": 2477,
+  "range": "2020-01-15..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BNBUSDT": {
+  "rows": 2456,
+  "range": "2020-02-10..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ADAUSDT": {
+  "rows": 2466,
+  "range": "2020-01-31..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XLMUSDT": {
+  "rows": 2472,
+  "range": "2020-01-20..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "LTCUSDT": {
+  "rows": 2483,
+  "range": "2020-01-09..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "NEOUSDT": {
+  "rows": 2449,
+  "range": "2020-02-17..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETCUSDT": {
+  "rows": 2481,
+  "range": "2020-01-16..2026-10-31",
+  "ok": 82,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ONTUSDT": {
+  "rows": 2455,
+  "range": "2020-02-11..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "VETUSDT": {
+  "rows": 2447,
+  "range": "2020-02-14..2026-10-31",
+  "ok": 81,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ICXUSDT": {
+  "rows": 2238,
+  "range": "2020-09-15..2026-10-31",
+  "ok": 74,
+  "missing": 12,
+  "badsum": [],
+  "nochecksum": 0
+ }
+}

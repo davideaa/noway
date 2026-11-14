@@ -1,0 +1,330 @@
+{
+ "classi": [
+  {
+   "id": "azioni",
+   "nome": "Azioni: coppie, stat arb fattoriale (PCA), market-neutral",
+   "come": "Si comprano e si vendono allo scoperto titoli simili (coppie dello stesso settore) oppure interi panieri neutrali rispetto a fattori/ETF di settore (residui di una PCA), scommettendo che lo scarto torni a zero. Gatev et al. abbinano i titoli per distanza minima tra prezzi normalizzati e aprono quando lo scarto supera 2 deviazioni standard.",
+   "fonte_edge": "Ritorno a media di breve termine di titoli sostituti stretti; piccoli errori di prezzo temporanei. Gli autori dicono che non è spiegato dai fattori di rischio convenzionali.",
+   "orizzonte": "Da giorni a poche settimane (coppie); intraday-giorni per la stat arb fattoriale.",
+   "leva": "Self-financing long/short; leva lorda tipica di fondi: non verificata. Per il privato il vincolo è il margine di Reg T / portfolio margin, non la leva.",
+   "dati": "Prezzi giornalieri o intraday di migliaia di titoli, dati settoriali/fattoriali, costi di prestito titoli.",
+   "chi": "Hedge fund quantitativi e desk proprietari; coppie semplici anche da privati.",
+   "accessibile_privato": "medio",
+   "perche": "Tecnicamente fattibile con IBKR (azioni europee/USA, short con prestito titoli), ma i profitti documentati sono scesi molto dopo il 2002 e dopo i costi restano piccoli; costi di borrow e commissioni mangiano l'edge su basket larghi. Valutazione mia, basata sui numeri accademici sotto.",
+   "fonti": [
+    {
+     "titolo": "Gatev, Goetzmann, Rouwenhorst (RFS 2006), abstract",
+     "url": "https://econpapers.repec.org/RePEc:oup:rfinst:v:19:y:2006:i:3:p:797-827"
+    },
+    {
+     "titolo": "Avellaneda e Lee, Statistical arbitrage in the U.S. equities market (2010)",
+     "url": "https://econpapers.repec.org/RePEc:taf:quantf:v:10:y:2010:i:7:p:761-782"
+    }
+   ]
+  },
+  {
+   "id": "etf",
+   "nome": "ETF contro paniere sottostante (creazione/rimborso, authorized participant)",
+   "come": "Gli authorized participant creano o rimborsano quote ETF in cambio del paniere, e questo tiene il prezzo vicino al NAV. Quando prezzo e NAV divergono si compra il lato economico e si vende l'altro.",
+   "fonte_edge": "Petajisto trova che i prezzi ETF possono scostarsi dal NAV entro una banda di circa 200 punti base; circa 100 punti base dopo aver corretto per prezzi sottostanti non aggiornati, con scostamenti maggiori per ETF internazionali o illiquidi. Il guadagno dipende dal lato creazione/rimborso, riservato agli AP.",
+   "orizzonte": "Da intraday a pochi giorni.",
+   "leva": "Bassa-moderata; conta il capitale per tenere il paniere e il suo finanziamento.",
+   "dati": "NAV intraday indicativo (iNAV), prezzi dei componenti in tempo reale, composizione del paniere.",
+   "chi": "Market maker e authorized participant (banche, grandi desk).",
+   "accessibile_privato": "basso",
+   "perche": "Il privato non può creare/rimborsare quote: può solo tradare lo scarto ETF-vs-simili, in competizione con chi lo fa a latenza minima. L'abstract di Petajisto parla di extra-rendimenti prima dei costi; l'esito netto non l'ho potuto verificare. Inoltre da IBKR Ireland molti ETF USA non sono tradabili da retail senza KID (PRIIPs).",
+   "fonti": [
+    {
+     "titolo": "Petajisto, Inefficiencies in the pricing of ETFs (FAJ 2017)",
+     "url": "https://econpapers.repec.org/RePEc:taf:ufajxx:v:73:y:2017:i:1:p:24-54"
+    },
+    {
+     "titolo": "IBKR: PRIIPs overview",
+     "url": "https://ibkb.interactivebrokers.com/de/node/3324"
+    }
+   ]
+  },
+  {
+   "id": "futures",
+   "nome": "Futures: spread di calendario, spread inter-commodity, basis indice-contante",
+   "come": "Calendar spread: lungo una scadenza, corto un'altra dello stesso sottostante (carry/curva). Inter-commodity: es. crack (petrolio/raffinati) e crush (soia/farina/olio). Basis indice: future contro paniere azionario (cash-and-carry).",
+   "fonte_edge": "Premio di carry e di forma della curva, stagionalità, vincoli di stoccaggio/domanda di copertura. Koijen et al. mostrano che il carry predice i rendimenti in molte classi (azioni, obbligazioni, materie prime, valute, credito, opzioni) e che non è spiegato interamente da rischi noti; ha drawdown nelle recessioni e crisi di liquidità.",
+   "orizzonte": "Da giorni a mesi (calendar), fino alla scadenza (basis).",
+   "leva": "Implicita nei margini del future; gli spread hanno margine ridotto. IBKR: chi tiene posizioni opposte su scadenze diverse ottiene spesso un margine di spread inferiore alla somma delle singole gambe; il beneficio si riduce vicino alla scadenza.",
+   "dati": "Curve complete dei futures, costi di stoccaggio/dividendi/tassi, calendario di roll.",
+   "chi": "CTA, fondi macro/commodity, desk di trading, arbitraggisti dell'indice.",
+   "accessibile_privato": "alto",
+   "perche": "I margini di spread sono riconosciuti dalle borse (SPAN/CME) e IBKR li applica; esistono micro-contratti per ridurre la dimensione; si va corti senza prestito titoli. Limiti: i crediti inter-commodity dipendono dalle regole della borsa (percentuali non verificate per IBKR Ireland), liquidità delle scadenze lontane, rischio roll. Classifica: la più accessibile.",
+   "fonti": [
+    {
+     "titolo": "IBKR: margini sugli spread di futures (tag futures)",
+     "url": "https://ibkb.interactivebrokers.com/tag/futures"
+    },
+    {
+     "titolo": "CME Group: Scanning Based Spreads",
+     "url": "https://www.cmegroup.com/solutions/risk-management/margin-services/spread-calc.html"
+    },
+    {
+     "titolo": "Koijen, Moskowitz, Pedersen, Vrugt, Carry (JFE 2018)",
+     "url": "https://econpapers.repec.org/RePEc:eee:jfinec:v:127:y:2018:i:2:p:197-225"
+    }
+   ]
+  },
+  {
+   "id": "reddito_fisso",
+   "nome": "Reddito fisso RV: on-the-run/off-the-run, basis cash-future sui Treasury, swap spread",
+   "come": "Basis trade: si compra un Treasury consegnabile, finanziato in repo, e si vende il future corrispondente; il profitto è F - P(1+r)T. Altre varianti: on-the-run contro off-the-run, swap spread.",
+   "fonte_edge": "La basis è di norma minuscola e converge alla scadenza; l'OFR la descrive come un obbligo sintetico (T-bill) più un premio al rischio per margine, rollover e liquidità, positivo in media ma variabile e negativo in stress.",
+   "orizzonte": "Settimane-mesi, fino alla consegna del future.",
+   "leva": "Estrema e necessaria perché lo scarto è piccolo. Dato Fed (Form PF, dicembre 2022): leva effettiva sul repo Treasury 56 a 1 ($553 mld di repo su $9,88 mld di capitale); il 73,8% dei prestiti repo a haircut zero o negativo. Con un haircut minimo ipotetico del 200 bp scenderebbe a circa 25 a 1. Non ho trovato una fonte primaria per la cifra '50-100x'.",
+   "dati": "Curve Treasury, prezzi CTD/conversion factor, tassi repo, margini dei future.",
+   "chi": "Hedge fund relative value con prime brokerage e repo bilaterale/cleared; dealer.",
+   "accessibile_privato": "no",
+   "perche": "Senza repo a haircut quasi nullo il rendimento della basis non copre il costo del capitale; il privato non ha accesso al repo né al prime brokerage. Resta solo l'esposizione indiretta tramite fondi/ETF. Classifica: inaccessibile.",
+   "fonti": [
+    {
+     "titolo": "OFR Brief 20-01, Basis trades and Treasury market illiquidity (2020)",
+     "url": "https://www.financialresearch.gov/briefs/files/OFRBr_2020_01_Basis-Trades.pdf"
+    },
+    {
+     "titolo": "Fed FEDS Note, Hedge fund Treasury exposures, repo and margining (2023)",
+     "url": "https://www.federalreserve.gov/econres/notes/feds-notes/hedge-fund-treasury-exposures-repo-and-margining-20230908.html"
+    },
+    {
+     "titolo": "Fed FEDS Note, Quantifying Treasury cash-futures basis trades (2024)",
+     "url": "https://www.federalreserve.gov/econres/notes/feds-notes/quantifying-treasury-cash-futures-basis-trades-20240308.html"
+    }
+   ]
+  },
+  {
+   "id": "fx",
+   "nome": "Cambi: triangolare, cross-rate, panieri carry",
+   "come": "Arbitraggio triangolare/cross-rate: incongruenze tra tre coppie di cambi. Carry basket: lungo valute ad alto tasso, corto a basso tasso.",
+   "fonte_edge": "Triangolare: errori di quotazione di millisecondi, oggi quasi nulli. Carry: premio per il rischio di crash (Koijen et al. includono le valute tra le classi con carry predittivo).",
+   "orizzonte": "Triangolare: millisecondi. Carry: mesi.",
+   "leva": "Alta sui cambi (margine) ma la triangolare richiede latenza bassissima. Cifre specifiche: non verificate.",
+   "dati": "Quotazioni tick multi-venue (triangolare); tassi a breve e forward (carry).",
+   "chi": "Market maker bancari e HFT (triangolare); fondi macro e CTA (carry).",
+   "accessibile_privato": "medio",
+   "perche": "Triangolare: no (latenza, spread del broker, nessuna fonte consultata sul punto). Carry: sì, ma è un premio di rischio con code pesanti, non un arbitraggio. Valutazione mia. Il carry cross-asset è documentato in Koijen et al.",
+   "fonti": [
+    {
+     "titolo": "Koijen, Moskowitz, Pedersen, Vrugt, Carry (JFE 2018)",
+     "url": "https://econpapers.repec.org/RePEc:eee:jfinec:v:127:y:2018:i:2:p:197-225"
+    }
+   ]
+  },
+  {
+   "id": "opzioni",
+   "nome": "Opzioni e volatilità: implicita contro realizzata, dispersione",
+   "come": "Vendere volatilità implicita quando supera la realizzata; dispersione: corto opzioni sull'indice, lungo opzioni sui componenti.",
+   "fonte_edge": "Premio al rischio di varianza e premio di correlazione. Nessuna fonte consultata in questa ricerca: descrizione di conoscenza generale, NON verificata.",
+   "orizzonte": "Settimane-mesi (a scadenza dell'opzione).",
+   "leva": "Non verificata; il margine sulle opzioni corte è alto e variabile.",
+   "dati": "Superfici di volatilità, dati intraday per la volatilità realizzata, correlazioni.",
+   "chi": "Hedge fund di volatilità/relative value, market maker. HFR include un indice dedicato (HFRI RV: Volatility).",
+   "accessibile_privato": "medio",
+   "perche": "Strumenti disponibili su Eurex/CBOE tramite IBKR, ma la dispersione richiede decine di gambe e costi elevati; la vendita di vol nuda ha rischio di coda illimitato. Valutazione mia, non sostenuta da una fonte accademica letta qui.",
+   "fonti": [
+    {
+     "titolo": "HFR Flash Dec 2024 (cita l'indice HFRI RV: Volatility)",
+     "url": "https://hfr-wp-s3.s3.amazonaws.com/wp-content/uploads/2025/01/08164759/2024.12_HFRI-Flash-1.pdf"
+    }
+   ]
+  },
+  {
+   "id": "crypto",
+   "nome": "Crypto: basis, funding, cross-exchange",
+   "come": "Cash-and-carry: lungo spot, corto future/perpetuo, incassando la differenza o il funding. Cross-exchange: stessa moneta, prezzi diversi tra piattaforme.",
+   "fonte_edge": "BIS WP 1087: il carry sui future di Bitcoin ed Ether supera in media il 10% annuo e arriva fino a punte del 40-60%; secondo gli autori nasce da domanda di leva da investitori piccoli e dalla scarsità di capitale arbitraggista per attriti regolamentari e di margine. Carry alto precede crash.",
+   "orizzonte": "Settimane-mesi (basis); minuti (cross-exchange).",
+   "leva": "Moderata sul perpetuo; il rischio è la liquidazione per margine sulla gamba corta.",
+   "dati": "Prezzi spot/future per venue, funding rate, saldi sulle piattaforme.",
+   "chi": "Hedge fund crypto, market maker, desk proprietari.",
+   "accessibile_privato": "basso",
+   "perche": "Per un residente UE tramite IBKR Ireland l'accesso a future/perpetui crypto per retail è limitato (non verificato qui) e l'operatività richiede conti su più exchange con rischio controparte. L'edge è reale ma comprimibile e con rischio piattaforma.",
+   "fonti": [
+    {
+     "titolo": "BIS Working Paper 1087, Crypto carry",
+     "url": "https://www.bis.org/publ/work1087.pdf"
+    }
+   ]
+  }
+ ],
+ "rendimenti": [
+  {
+   "cosa": "HFRI EH: Equity Market Neutral, ritorno annuo",
+   "periodo": "2023",
+   "valore": "+5,97%",
+   "note": "Tabella mensile HFR (valore annuale, dato 2024-08-15, soggetto a revisione).",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI EH: Equity Market Neutral, ritorno annuo",
+   "periodo": "2022",
+   "valore": "+1,21%",
+   "note": "Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI EH: Equity Market Neutral, ritorno annuo",
+   "periodo": "2021",
+   "valore": "+7,05%",
+   "note": "Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI EH: Equity Market Neutral, ritorno annuo",
+   "periodo": "2020",
+   "valore": "-0,11% (primo trimestre -3,45%)",
+   "note": "Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI EH: Equity Market Neutral, ritorno annuo",
+   "periodo": "2019 / 2018 / 2017",
+   "valore": "+2,33% / -0,98% / +4,88%",
+   "note": "Stessa fonte. Media aritmetica semplice 2017-2023 (7 anni): circa 2,9% annuo, calcolo mio sui valori annuali elencati: 4,88-0,98+2,33-0,11+7,05+1,21+5,97 = 20,35, diviso 7 = 2,9%.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI Relative Value (Total), ritorno annuo",
+   "periodo": "2023 / 2022 / 2021",
+   "valore": "+6,95% / -0,68% / +7,59%",
+   "note": "Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI Relative Value (Total), ritorno annuo",
+   "periodo": "2020 (marzo 2020 -9,77%, primo trimestre -10,30%)",
+   "valore": "+3,38%",
+   "note": "Mostra il crollo e il recupero nello stesso anno. Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI Relative Value (Total), ritorno annuo",
+   "periodo": "2019 / 2018",
+   "valore": "+7,42% / -0,43%",
+   "note": "Stessa fonte.",
+   "fonte": "https://mondovisione.com/_assets/files/HFR-Media-Reference-Guide-2024.08.15.pdf",
+   "verificato": "si"
+  },
+  {
+   "cosa": "HFRI 2024 (stima HFR a 8 gen 2025)",
+   "periodo": "2024",
+   "valore": "Relative Value Total: 14 mesi consecutivi di guadagno a dicembre; RV Yield Alternatives +11,3%; Equity Market Neutral +0,5% a dicembre (anno intero non riportato)",
+   "note": "Il valore annuo 2024 di EMN e RV Total non compare nel testo che ho potuto leggere.",
+   "fonte": "https://hfr-wp-s3.s3.amazonaws.com/wp-content/uploads/2025/01/08164759/2024.12_HFRI-Flash-1.pdf",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "HFRI indici Equity Market Neutral / RV / FI Arbitrage: rendimento annualizzato dal 1990 e ultimo decennio",
+   "periodo": "1990-oggi",
+   "valore": "NON OTTENUTO",
+   "note": "I dati annualizzati per sotto-strategia sono dietro il login/accettazione termini di HFR. Non ho trovato un valore verificabile e non lo invento. Eurekahedge, Credit Suisse/Wilshire e Barclay non consultati.",
+   "fonte": "https://www.hfr.com/indices/",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "Coppie su azioni USA (Gatev, Goetzmann, Rouwenhorst)",
+   "periodo": "1962-2002",
+   "valore": "Rendimenti in eccesso annualizzati fino all'11% per portafogli self-financing; profitti 'tipicamente superiori' a stime prudenti dei costi",
+   "note": "La versione NBER su 1962-1997 diceva fino al 12%. Cifra 'fino a', dei portafogli migliori.",
+   "fonte": "https://econpapers.repec.org/RePEc:oup:rfinst:v:19:y:2006:i:3:p:797-827",
+   "verificato": "si"
+  },
+  {
+   "cosa": "Coppie (Do e Faff, FAJ 2010)",
+   "periodo": "1962-2009",
+   "valore": "Circa 1% al mese nella letteratura precedente; 0,24% al mese nel 2003-2009",
+   "note": "Profitti in calo; il fattore hedge fund spiega solo in parte il calo. Fonte: riassunto del sito Bond University/CFA, non il testo integrale.",
+   "fonte": "https://research.bond.edu.au/en/publications/does-simple-pairs-trading-still-work/",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "Coppie con costi (Do e Faff, 2012 J. Financial Research)",
+   "periodo": "fino al 2009",
+   "valore": "Circa 30 punti base al mese corretti per rischio dopo commissioni, impatto e short fee, solo per coppie ben abbinate in gruppi industriali ristretti; pairs trading in gran parte non profittevole dopo il 2002",
+   "note": "Fonte secondaria (riassunto di ricerca), testo non letto.",
+   "fonte": "https://research.bond.edu.au/en/publications/does-simple-pairs-trading-still-work/",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "Coppie: distanza, cointegrazione, copula (Rad, Low, Faff, Quantitative Finance 2016)",
+   "periodo": "1962-2014",
+   "valore": "Eccesso medio mensile lordo 91, 85, 43 bp; netto dei costi 38, 33, 5 bp (distanza, cointegrazione, copula)",
+   "note": "Opportunità di trading in calo del 40% e 35% tra 2007-2011 e 2012-2014 per distanza e cointegrazione. Fonte: abstract via EconPapers/ricerca.",
+   "fonte": "https://econpapers.repec.org/RePEc:taf:quantf:v:16:y:2016:i:10:p:1541-1558",
+   "verificato": "si"
+  },
+  {
+   "cosa": "Stat arb PCA/ETF (Avellaneda e Lee 2010)",
+   "periodo": "1997-2007",
+   "valore": "Sharpe annuo medio 1,44 (PCA) dopo i costi; circa 0,9 nel 2003-2007; ETF circa 1,1",
+   "note": "Numeri discordanti tra versioni (working paper vs. pubblicata): da leggere con cautela.",
+   "fonte": "https://econpapers.repec.org/RePEc:taf:quantf:v:10:y:2010:i:7:p:761-782",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "Carry crypto (BIS WP 1087)",
+   "periodo": "Bitcoin/Ether, vari anni fino al 2025",
+   "valore": "Carry medio sopra il 10% annuo; punte fino al 40-60%",
+   "note": "Fonte primaria BIS. Il tetto cambia tra pagina riassuntiva (40%) e testo (60%).",
+   "fonte": "https://www.bis.org/publ/work1087.pdf",
+   "verificato": "parziale"
+  },
+  {
+   "cosa": "Leva effettiva sul repo Treasury degli hedge fund (Fed)",
+   "periodo": "dicembre 2022",
+   "valore": "56 a 1 ($553 mld di repo su $9,88 mld di capitale); 25 a 1 con haircut minimo ipotetico 200 bp",
+   "note": "Dati Form PF. Il 73,8% del repo a haircut zero o negativo. La cifra '50-100x' non è stata trovata come tale: il 56x è il numero verificato più vicino.",
+   "fonte": "https://www.federalreserve.gov/econres/notes/feds-notes/hedge-fund-treasury-exposures-repo-and-margining-20230908.html",
+   "verificato": "si"
+  },
+  {
+   "cosa": "Dimensione della basis trade (Fed 2024)",
+   "periodo": "gen 2024",
+   "valore": "Proxy TRACE $317 mld; picco stimato $352 mld a novembre 2023; short sui future dei fondi a leva $991 mld (CFTC)",
+   "note": "I $991 mld sono sovrastima della basis.",
+   "fonte": "https://www.federalreserve.gov/econres/notes/feds-notes/quantifying-treasury-cash-futures-basis-trades-20240308.html",
+   "verificato": "si"
+  },
+  {
+   "cosa": "LTCM",
+   "periodo": "1994-1997",
+   "valore": "Rendimenti 20% (1994), 43% (1995), 41% (1996), 17% (1997); leva circa 30 a 1 a fine 1997",
+   "note": "Poi perse il 44% nel solo agosto 1998.",
+   "fonte": "https://www.federalreservehistory.org/essays/ltcm-near-failure",
+   "verificato": "si"
+  }
+ ],
+ "eventi_rischio": [
+  {
+   "anno": "1998",
+   "evento": "LTCM: fondo di relative value con circa 30 dollari di debito per 1 di capitale a fine 1997; perse il 44% in agosto 1998. Il 23 settembre 1998 quattordici banche e broker investirono circa $3,6 mld sotto regia della New York Fed per il 90% della proprietà.",
+   "cosa_insegna": "Un edge piccolo amplificato dalla leva sopravvive finché i prezzi convergono; la convergenza può arrivare dopo il fallimento. La liquidità sparisce quando serve.",
+   "fonte": "https://www.federalreservehistory.org/essays/ltcm-near-failure"
+  },
+  {
+   "anno": "2007",
+   "evento": "Quant quake di agosto: perdite dei fondi long/short azionari quantitativi nella settimana del 6 agosto. Khandani e Lo attribuiscono la causa a deleveraging di portafoglio a luglio e inizio agosto e al ritiro temporaneo del capitale di market making dall'8 agosto; due 'unwind' l'1 e il 6 agosto (conclusioni definite speculative dagli autori).",
+   "cosa_insegna": "Le stat arb affollate sono correlate tra loro: il rischio non è il titolo, è che gli altri liquidino le stesse posizioni.",
+   "fonte": "https://econpapers.repec.org/RePEc:nbr:nberwo:14465"
+  },
+  {
+   "anno": "2020",
+   "evento": "Marzo 2020: stress sul mercato Treasury; i fondi svolsero rapidamente le basis trade dopo grosse perdite, margini sui future a livelli record. Secondo la Fed, gli hedge fund vendettero circa $173 mld di Treasury. Nei dati HFR, RV Total fece -9,77% a marzo 2020 e chiuse l'anno +3,38%.",
+   "cosa_insegna": "Il rendimento della basis è un compenso per rischio di margine e rollover. L'OFR sostiene che lo stress sulla basis non sembra aver amplificato l'illiquidità; è un punto discusso.",
+   "fonte": "https://www.financialresearch.gov/briefs/files/OFRBr_2020_01_Basis-Trades.pdf"
+  }
+ ],
+ "capacita": "Prove documentate, in parte solo indirette. (1) Gli edge di stat arb su azioni si sono erosi con la concorrenza: Do e Faff mostrano che i profitti delle coppie sono scesi da circa l'1% mensile a 0,24% mensile nel 2003-2009; Rad, Low e Faff trovano che le opportunità sono calate del 40% e 35% tra 2007-2011 e 2012-2014 e che il netto dei costi è tra 5 e 38 punti base mensili; Avellaneda e Lee vedono lo Sharpe PCA scendere da 1,44 (media 1997-2007) a circa 0,9 nel 2003-2007. (2) Sulla scala: Pastor, Stambaugh e Taylor trovano nei fondi comuni USA che la capacità di battere i benchmark scende con le dimensioni del fondo perché i grandi ordini muovono i prezzi, con stime a livello di fondo più deboli quando si correggono i bias econometrici (risultato su fondi comuni, non hedge fund; sul dettaglio non ho letto il testo integrale). Un riassunto non verificato nel risultato di ricerca cita che i piccoli hedge fund superano i grandi del 2,75% annuo: autore non identificato, da non usare come prova. (3) A favore del piccolo: nel carry crypto gli autori BIS indicano la carenza di capitale arbitraggista per attriti di margine e regolamentari, ma questo non è un vantaggio per il privato, che affronta gli stessi attriti. (4) Contro il piccolo: le evidenze lette su costi, borrow e latenza sono indirette. Do e Faff correggono per commissioni, impatto e short fee e il profitto crolla; Petajisto descrive scostamenti ETF di 100-200 punti base catturabili da chi ha il canale creazione/rimborso; il privato non ha repo (leva Fed 56 a 1 sul repo) né prime brokerage. Non ho trovato evidenza diretta e quantificata su borrow fee per il dettaglio né sulla latenza: quella parte resta non verificata. Conclusione operativa mia: la capacità libera esiste solo in nicchie piccole e illiquide, ma sono le stesse dove costi, spread e borrow sono peggiori.",
+ "aggiornato": "2026-11-14"
+}

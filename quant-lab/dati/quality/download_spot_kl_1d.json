@@ -1,0 +1,130 @@
+{
+ "BTCUSDT": {
+  "rows": 3226,
+  "range": "2018-01-01..2026-10-31",
+  "ok": 106,
+  "missing": 0,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETHUSDT": {
+  "rows": 3226,
+  "range": "2018-01-01..2026-10-31",
+  "ok": 106,
+  "missing": 0,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XRPUSDT": {
+  "rows": 3103,
+  "range": "2018-05-04..2026-10-31",
+  "ok": 102,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BCHABCUSDT": {
+  "rows": 378,
+  "range": "2018-11-16..2019-11-28",
+  "ok": 13,
+  "missing": 93,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BCHUSDT": {
+  "rows": 2530,
+  "range": "2019-11-28..2026-10-31",
+  "ok": 84,
+  "missing": 22,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "EOSUSDT": {
+  "rows": 2556,
+  "range": "2018-05-28..2025-05-26",
+  "ok": 85,
+  "missing": 21,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "TRXUSDT": {
+  "rows": 3065,
+  "range": "2018-06-11..2026-10-31",
+  "ok": 101,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "BNBUSDT": {
+  "rows": 3226,
+  "range": "2018-01-01..2026-10-31",
+  "ok": 106,
+  "missing": 0,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ADAUSDT": {
+  "rows": 3120,
+  "range": "2018-04-17..2026-10-31",
+  "ok": 103,
+  "missing": 3,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "XLMUSDT": {
+  "rows": 3076,
+  "range": "2018-05-31..2026-10-31",
+  "ok": 102,
+  "missing": 4,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "LTCUSDT": {
+  "rows": 3226,
+  "range": "2018-01-01..2026-10-31",
+  "ok": 106,
+  "missing": 0,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "NEOUSDT": {
+  "rows": 3226,
+  "range": "2018-01-01..2026-10-31",
+  "ok": 106,
+  "missing": 0,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ETCUSDT": {
+  "rows": 3064,
+  "range": "2018-06-12..2026-10-31",
+  "ok": 101,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ONTUSDT": {
+  "rows": 3068,
+  "range": "2018-06-08..2026-10-31",
+  "ok": 101,
+  "missing": 5,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "VETUSDT": {
+  "rows": 3021,
+  "range": "2018-07-25..2026-10-31",
+  "ok": 100,
+  "missing": 6,
+  "badsum": [],
+  "nochecksum": 0
+ },
+ "ICXUSDT": {
+  "rows": 3005,
+  "range": "2018-06-13..2026-09-03",
+  "ok": 100,
+  "missing": 6,
+  "badsum": [],
+  "nochecksum": 0
+ }
+}
