@@ -123,6 +123,7 @@ summary{cursor:pointer;font-weight:600}
     <nav class="tabs" aria-label="Sezioni">
       <a href="#motore">Il motore</a>
       <a href="#conviene">Conviene?</a>
+      <a href="#catalogo">Catalogo</a>
       <a href="#coppie">Esplora coppie</a>
       <a href="#strategie">Strategie</a>
       <a href="#mestiere">Il mestiere</a>
@@ -192,6 +193,11 @@ summary{cursor:pointer;font-weight:600}
     <div class="tscroll"><table id="bizTab"></table></div>
   </div>
   <div class="panel stack">
+    <h2>Tutte le famiglie di arbitraggio, in una tabella</h2>
+    <p class="note" id="famNote"></p>
+    <div class="tscroll"><table id="famTab"></table></div>
+  </div>
+  <div class="panel stack">
     <h2>Dove lo fanno i fondi, e cosa è accessibile a te</h2>
     <div class="tscroll"><table id="doveTab"></table></div>
   </div>
@@ -215,6 +221,26 @@ summary{cursor:pointer;font-weight:600}
     <p class="note" id="copNote"></p>
     <div class="tscroll"><table id="copTab"></table></div>
   </div>
+</section>
+
+
+<!-- ============ CATALOGO ============ -->
+<section class="view" id="v-catalogo" hidden>
+  <div class="stack">
+    <div class="eyebrow">Strategie dai paper</div>
+    <h1>Il catalogo: strategie documentate, ordinate per quanto sono adatte a te</h1>
+    <p class="lede">Ogni strategia viene da ricerca pubblicata. Il punteggio misura sei cose: quanto è solida l'evidenza, se c'è un motivo economico, se un privato può eseguirla, se i dati sono gratis, quanto poco si opera e se ha resistito dopo la pubblicazione. Un punteggio alto non vuol dire che funziona: vuol dire che merita il test.</p>
+  </div>
+  <div class="panel stack">
+    <div class="ctrl">
+      <input type="search" id="catQ" placeholder="Cerca strategia, mercato, autore…" aria-label="Cerca nel catalogo">
+      <label class="note"><input type="checkbox" id="catFree"> solo con dati gratuiti</label>
+      <span class="note" id="catN"></span>
+    </div>
+    <div class="tscroll"><table id="catTab"></table></div>
+    <p class="note">Tocca una riga per vedere i dettagli: idea, rischi, cosa è successo dopo la pubblicazione.</p>
+  </div>
+  <div class="panel stack" id="catDet" hidden></div>
 </section>
 
 <!-- ============ COPPIE ============ -->
@@ -431,6 +457,43 @@ $("#pipe").replaceChildren(...PIPE.map(([s, t, d]) => el("li", { class: s }, el(
   const cb = el("tbody"); for (const v of D.copertura.voci) cb.append(el("tr", {}, el("td", { class: "num" }, v.sez), el("td", {}, v.titolo), el("td", {}, el("span", { class: "chip " + st[v.stato][0] }, st[v.stato][1])), el("td", {}, v.nota))); c.append(cb);
 })();
 
+
+/* ---------- FAMIGLIE + CATALOGO ---------- */
+(function fam() {
+  $("#famNote").textContent = D.famiglie.nota;
+  const t = $("#famTab"); t.innerHTML = "<thead><tr><th>Famiglia</th><th>Da dove viene il guadagno</th><th>Perché è dura per un privato</th><th>Dati</th><th>Verdetto</th></tr></thead>";
+  const tb = el("tbody"); for (const f of D.famiglie.famiglie) tb.append(el("tr", {}, el("td", {}, el("b", {}, f.nome), f.testata === "sì" ? el("div", { class: "src" }, "testata con dati nostri") : null), el("td", {}, f.guadagno), el("td", {}, f.problema), el("td", {}, f.dati), el("td", {}, el("span", { class: "chip c-" + f.livello }, f.verdetto)))); t.append(tb);
+})();
+const SC = [["robustezza_evidenza", "Evidenza"], ["motivo_economico", "Motivo"], ["accessibilita_retail", "Accesso"], ["dati_gratuiti", "Dati"], ["basso_turnover", "Pochi scambi"], ["resistenza_alla_decadenza", "Regge nel tempo"]];
+let catSel = null;
+function catTab() {
+  const C = D.catalogo, t = $("#catTab");
+  if (!C) { t.innerHTML = "<tbody><tr><td>Catalogo in preparazione.</td></tr></tbody>"; return; }
+  const q = ($("#catQ").value || "").toLowerCase(), free = $("#catFree").checked;
+  const rows = C.strategie.filter(s => (!q || JSON.stringify(s).toLowerCase().includes(q)) && (!free || /^si/i.test(s.dati_gratuiti || "")));
+  $("#catN").textContent = `${rows.length} di ${C.strategie.length} strategie`;
+  const mx = SC.length * 5;
+  t.innerHTML = "<thead><tr><th class=n>#</th><th>Strategia</th><th>Paper</th>" + SC.map(([, l]) => `<th class=n>${l}</th>`).join("") + "<th class=n>Totale</th></tr></thead>";
+  const tb = el("tbody");
+  rows.forEach((s, i) => {
+    const tr = el("tr", { class: catSel === s.id ? "sel" : "", style: "cursor:pointer", tabindex: "0", onclick: () => { catSel = s.id; catTab(); catDet(s); }, onkeydown: e => { if (e.key === "Enter") { catSel = s.id; catTab(); catDet(s); } } },
+      el("td", { class: "n" }, String(i + 1)), el("td", {}, el("b", {}, s.nome), el("div", { class: "src" }, s.famiglia || "")), el("td", {}, s.paper_principale || ""),
+      ...SC.map(([k]) => { const v = +(s.punteggi?.[k] ?? 0); return el("td", { class: "n", style: `color:var(${v >= 4 ? "--ok" : v <= 2 ? "--bad" : "--ink"})` }, String(v || "—")); }),
+      el("td", { class: "n" }, el("b", {}, `${s.totale}/${mx}`)));
+    tb.append(tr);
+  });
+  t.append(tb);
+}
+function catDet(s) {
+  const P = $("#catDet"); P.hidden = false;
+  const kv = [["Idea", s.idea], ["Strumenti", s.strumenti], ["Ribilanciamento", s.frequenza_ribilanciamento], ["Dati del paper", s.periodo_dati_paper], ["Risultato nel paper", s.risultato_paper], ["Dopo la pubblicazione", s.evidenza_dopo_pubblicazione], ["Perché dovrebbe durare", s.motivo_economico], ["Dati gratuiti", s.dati_gratuiti], ["Eseguibile da te", s.eseguibile_retail_IT], ["Costi e scambi", s.costi_turnover], ["Capitale minimo", s.capitale_minimo_indicativo], ["Rischio di coda", s.rischio_coda], ["Perché questi punteggi", s.giustificazione_punteggi]];
+  P.replaceChildren(el("div", { class: "st-head" }, el("h2", {}, s.nome), el("span", { class: "chip c-acc" }, `${s.totale}/${SC.length * 5}`), el("span", { class: "chip c-idle" }, "IDEA_ONLY: non ancora testata")),
+    el("div", { class: "tscroll" }, el("table", {}, el("tbody", {}, ...kv.filter(([, v]) => v).map(([k, v]) => el("tr", {}, el("th", { style: "text-transform:none;letter-spacing:0;font-size:13px;width:180px" }, k), el("td", {}, String(v))))))),
+    el("div", { class: "src" }, s.url ? el("a", { href: s.url, target: "_blank", rel: "noopener" }, "Paper principale") : null, ...(s.fonti_extra || []).map((u, i) => [" · ", el("a", { href: u, target: "_blank", rel: "noopener" }, "fonte " + (i + 2))]).flat()));
+  P.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+}
+$("#catQ").addEventListener("input", catTab); $("#catFree").addEventListener("change", catTab);
+
 /* ---------- COPPIE ---------- */
 const U = D.universo, years = [...new Set(D.coppie.map(r => r.y))];
 let curY = 2022, curPair = null;
@@ -589,7 +652,7 @@ $("#devBody").innerHTML = md(D.deviazioni);
 })();
 
 /* ---------- router ---------- */
-const VIEWS = ["motore", "conviene", "coppie", "strategie", "mestiere", "broker", "registro"];
+const VIEWS = ["motore", "conviene", "catalogo", "coppie", "strategie", "mestiere", "broker", "registro"];
 function render() {
   const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "motore";
   VIEWS.forEach(n => { $("#v-" + n).hidden = n !== v; });
@@ -598,6 +661,7 @@ function render() {
   if (v === "coppie") { yearSeg(); if (!curPair || !byKey.get(curY + "|" + curPair[0] + "|" + curPair[1])?.p_ab) pickDefault(); heat(); pairPanel(); persTab(); }
   if (v === "strategie") requestAnimationFrame(eqChart);
   if (v === "mestiere") litTab();
+  if (v === "catalogo") catTab();
 }
 addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 addEventListener("resize", () => { clearTimeout(window._rt); window._rt = setTimeout(render, 150); });

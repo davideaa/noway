@@ -77,6 +77,19 @@ def read_csv(p):
         return list(csv.DictReader(f))
 
 
+def catalogo():
+    """Rank catalog strategies: total score = sum of the six 1-5 scores (computed here, not by the page)."""
+    f = ROOT / "ricerca" / "catalogo_strategie.json"
+    if not f.exists():
+        return None
+    c = json.load(open(f, encoding="utf-8"))
+    for s in c["strategie"]:
+        p = s.get("punteggi", {})
+        s["totale"] = int(sum(int(v) for v in p.values() if str(v).isdigit()))
+    c["strategie"].sort(key=lambda s: -s["totale"])
+    return c
+
+
 def main():
     price = pd.read_parquet(PROC / "spot_close.parquet").loc["2018-01-01":"2026-10-31"]
     fund = pd.read_parquet(PROC / "funding_daily.parquet")
@@ -121,6 +134,8 @@ def main():
         convenienza=json.load(open(ROOT / "esperimenti/convenienza.json")),
         dove=json.load(open(ROOT / "ricerca/dove_si_fa.json")),
         dati_eco=json.load(open(ROOT / "ricerca/dati_economici.json")),
+        famiglie=json.load(open(ROOT / "registri/famiglie_valutate.json")),
+        catalogo=catalogo(),
         copertura=json.load(open(ROOT / "registri/copertura_prompt.json")),
         test_motore=read_csv(ROOT / "registri/TEST_MOTORE.csv"),
         mestiere=json.load(open(ROOT / "ricerca/mestiere.json")) if (ROOT / "ricerca/mestiere.json").exists() else None,

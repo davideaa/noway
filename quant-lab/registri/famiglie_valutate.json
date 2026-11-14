@@ -1,0 +1,12 @@
+{
+ "nota": "Valutazione delle famiglie di arbitraggio e relative value per un privato. Testate con dati nostri: solo le cripto. Le altre righe vengono da letteratura, costi e accesso ai dati (vedi ricerca/dove_si_fa.md).",
+ "famiglie": [
+  {"nome": "Coppie di azioni / stat-arb", "guadagno": "lo spread torna alla media", "problema": "vantaggio di pochi decimi per operazione; costi e prestito titoli se lo mangiano; servono migliaia di posizioni", "dati": "gratis in piccolo, cari per farlo bene", "testata": "no", "verdetto": "non conviene", "livello": "bad"},
+  {"nome": "Coppie e carry sulle cripto", "guadagno": "elastico tra monete, funding", "problema": "testato: coppie −9% annuo, carry sotto la liquidità dal 2023", "dati": "gratis", "testata": "sì", "verdetto": "bocciato con i nostri dati", "livello": "bad"},
+  {"nome": "Spread tra scadenze dei futures", "guadagno": "carry, stagionalità, costo di stoccaggio", "problema": "il meno svantaggiato, ma rendimenti modesti e rischio sul rinnovo dei contratti", "dati": "in parte gratis (crediti Databento), poi a pagamento", "testata": "no", "verdetto": "l'unico che varrebbe un test", "livello": "warn"},
+  {"nome": "Volatilità e opzioni", "guadagno": "chi compra protezione la paga cara", "problema": "poco e regolare, poi il crollo (XIV: oltre −90% in un giorno, febbraio 2018); margini alti; molte gambe", "dati": "cari (storico delle opzioni)", "testata": "no", "verdetto": "non conviene", "livello": "bad"},
+  {"nome": "Carry sulle valute", "guadagno": "differenza di tassi tra paesi", "problema": "premio per il rischio, non arbitraggio: crolla nelle crisi", "dati": "gratis", "testata": "no", "verdetto": "non è arbitraggio", "livello": "warn"},
+  {"nome": "ETF contro paniere", "guadagno": "differenza tra prezzo e valore", "problema": "lo fanno solo gli intermediari autorizzati; molti ETF USA vietati ai retail UE", "dati": "—", "testata": "no", "verdetto": "inaccessibile", "livello": "bad"},
+  {"nome": "Obbligazioni (basis trade)", "guadagno": "piccole differenze di prezzo", "problema": "leva effettiva intorno a 56 a 1 via repo (Fed, 2022)", "dati": "—", "testata": "no", "verdetto": "inaccessibile", "livello": "bad"}
+ ]
+}
