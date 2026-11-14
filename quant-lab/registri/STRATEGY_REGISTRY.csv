@@ -1,0 +1,3 @@
+id,name,family,instruments,protocol,classification,is_result,oos_result,reason,date
+A1,Pairs cointegrati walk-forward,pairs trading,15 cripto (Binance spot/perp),PROTOCOLLO_01,REJECTED,-2.0%/anno Sharpe -0.68,-9.2%/anno Sharpe -0.69 maxDD -38%,negativa dentro e fuori; ritorno alla media 8% dei trade; DSR 0.0004,2026-11-14
+B1,Cash-and-carry funding BTC+ETH (soglia 10%),basis/carry,BTC ETH spot + perp USD-M,PROTOCOLLO_01,REJECTED,+10.8%/anno,+2.9%/anno (T-bill 4.5%),non batte la liquidità fuori campione; premio del funding crollato dopo il 2021,2026-11-14

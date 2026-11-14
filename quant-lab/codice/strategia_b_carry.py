@@ -33,8 +33,8 @@ def run_coin(spot, perp, fund, n_notional, enter=0.10, exit_=0.0, always=False,
             rp = f.iloc[i] / f.iloc[i - 1] - 1
             pnl[d] += n_notional * (rs - rp)
             pnl[d] += n_notional * (1 + rp) * fr.iloc[i]   # short perp receives positive funding
-            # daily rebalance cost: traded notional ~ N*|rs - rp| per leg pair (small)
-            pnl[d] -= c_rt * n_notional * abs(rs - rp)
+            # daily rebalance back to constant notional: trade N*|rs| spot and N*|rp| perp (audit fix)
+            pnl[d] -= n_notional * ((fee_spot + slip) * abs(rs) + (fee_perp + slip) * abs(rp)) * cost_mult
         if pending is not None:
             if pending == 1 and not state:
                 state, qs = 1, n_notional / s.iloc[i]
