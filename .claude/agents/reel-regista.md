@@ -47,7 +47,8 @@ il tuo compito è mantenere quel livello, con **animazioni sempre diverse a seco
 
 - **Nessuna scena quasi vuota** (settimana 7: cinque puntate bocciate su cinque, sette giri di controllo in più, 11/11/2026): entro
   0,8 s dall'inizio di OGNI scena deve esserci a schermo, oltre al titolo, un oggetto grande. Gli elementi agganciati a una parola
-  che arriva tardi (`WA(...)` oltre 1 s dall'inizio) entrano SUBITO attenuati (opacità ~0,4, tratteggio, binario vuoto, numero 1-2-3)
+  che arriva tardi (`WA(...)` oltre 1 s dall'inizio) entrano SUBITO attenuati (FORME: opacità ~0,4, tratteggio, binario vuoto, numero 1-2-3;
+  SCRITTE e pillole con testo: mai sotto opacità 0,8, perché a 0,5 il rosso e l'ambra scendono sotto 3:1 — Puntata 38, 14/11)
   con `a + 0.3 … a + 0.9` e si ACCENDONO sulla parola (opacità piena, colpo di scala): mai `seg(t, tParola - 0.1, …)` come unico
   ingresso di ciò che riempie la scena. Controllo prima di consegnare: un fotogramma a `a + 1.0` e uno a `a + 2.0` di ogni scena;
   se si vede solo il titolo (o titolo + una pillola), la scena è da rifare.

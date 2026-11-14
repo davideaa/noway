@@ -48,7 +48,7 @@ function luna(cx, cy, r, col, al) { if (al <= 0) return; x.save(); x.globalAlpha
   x.fillStyle = col; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.restore(); }
 /* pillola attenuata che entra subito (a0) e si accende sulla parola (tOn) */
 function ghostPill(t, s, cx, cy, a0, tOn, col, size) { const e = oC(seg(t, a0, a0 + 0.5)), on = oC(seg(t, tOn - 0.1, tOn + 0.35)); if (e <= 0) return;
-  x.save(); x.globalAlpha *= e * (0.5 + 0.5 * on); const k = 1 + 0.08 * Math.sin(Math.PI * clamp(seg(t, tOn - 0.1, tOn + 0.3))); x.translate(cx, cy); x.scale(k, k); x.translate(-cx, -cy); glassPill(cx, cy, s, 1, col, size); x.restore(); }
+  x.save(); x.globalAlpha *= e * (0.82 + 0.18 * on); const k = 1 + 0.08 * Math.sin(Math.PI * clamp(seg(t, tOn - 0.1, tOn + 0.3))); x.translate(cx, cy); x.scale(k, k); x.translate(-cx, -cy); glassPill(cx, cy, s, 1, col, size); x.restore(); }
 const smooth = (k) => { k = clamp(k); return k * k * (3 - 2 * k); };
 
 /* ================= HOOK: venti case, due volte — gia' in movimento dal primo fotogramma ================= */

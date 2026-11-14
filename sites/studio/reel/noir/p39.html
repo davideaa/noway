@@ -119,7 +119,7 @@ function sEuribor(t, a, b) { bg('34,40,30', 0.6); x.save(); zoom(t, a, b, 1.03);
   const kM = oC(seg(t, tMis - 0.1, tMis + 0.4));
   dash(CX + TW / 2 + 6, ySurf, 770, ySurf, C.lime, 4, [3, 9], 0.35 + 0.65 * kM);
   x.save(); x.globalAlpha *= 0.35 + 0.65 * kM; glow(770, ySurf, 50, LIME, 0.5 * kM); x.fillStyle = C.lime; x.beginPath(); x.arc(770, ySurf, 10, 0, 7); x.fill(); x.restore();
-  txt('EURIBOR', 790, ySurf, { fam: 'mono', size: 30, weight: 700, color: C.lime, ls: 2, align: 'left', alpha: oC(seg(t, a + 0.5, a + 0.85)) * (0.4 + 0.6 * kM) });
+  txt('EURIBOR', 790, ySurf, { fam: 'mono', size: 30, weight: 700, color: C.lime, ls: 2, align: 'left', alpha: oC(seg(t, a + 0.5, a + 0.85)) * (0.75 + 0.25 * kM) });
   /* cinque banche: contorni subito, si accendono sulla parola «banche», il denaro scorre su «procurarsi» */
   const BX = [170, 355, 540, 725, 910], BYb = 1350, kB = oC(seg(t, a + 0.3, a + 0.9));
   BX.forEach((bx, i) => { const kL = oB(seg(t, tBan - 0.05 + i * 0.09, tBan + 0.4 + i * 0.09)), q = clamp(kL);
@@ -251,8 +251,8 @@ function sBce(t, a, b) { bg('30,44,34', 0.7); x.save(); zoom(t, a, b, 1.04);
   const kP = oB(seg(t, a + 0.15, a + 0.7)); pop(540, 930, kP, () => glass(540, 930, 900, 600, 36, 1));
   /* legenda */
   const kLg = oC(seg(t, a + 0.35, a + 0.7)); x.save(); x.globalAlpha *= kLg; x.fillStyle = C.lime; x.beginPath(); x.arc(135, 685, 9, 0, 7); x.fill(); x.fillStyle = C.amber; x.beginPath(); x.arc(135, 735, 9, 0, 7); x.fill(); x.restore();
-  txt('TASSI DI MERCATO', 160, 685, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, align: 'left', alpha: kLg * (0.5 + 0.5 * oC(seg(t, tMer - 0.1, tMer + 0.3))) });
-  txt('BANCA CENTRALE EUROPEA', 160, 735, { fam: 'mono', size: 26, weight: 600, color: C.amber, ls: 2, align: 'left', alpha: kLg * (0.5 + 0.5 * oC(seg(t, tBce - 0.1, tBce + 0.3))) });
+  txt('TASSI DI MERCATO', 160, 685, { fam: 'mono', size: 26, weight: 600, color: C.lime, ls: 2, align: 'left', alpha: kLg * (0.78 + 0.22 * oC(seg(t, tMer - 0.1, tMer + 0.3))) });
+  txt('BANCA CENTRALE EUROPEA', 160, 735, { fam: 'mono', size: 26, weight: 600, color: C.amber, ls: 2, align: 'left', alpha: kLg * (0.78 + 0.22 * oC(seg(t, tBce - 0.1, tBce + 0.3))) });
   const XA = 130, XB = 950, stroke = (fn, k, col, w, al, d, glowHead) => { if (k <= 0) return; x.save(); x.globalAlpha *= al; x.strokeStyle = col; x.lineWidth = w; x.lineJoin = 'round'; x.lineCap = 'round'; x.setLineDash(d); x.beginPath(); const xe = XA + (XB - XA) * k;
     for (let xx = XA; xx <= xe; xx += 2) xx === XA ? x.moveTo(xx, fn(xx)) : x.lineTo(xx, fn(xx)); x.stroke(); x.restore();
     if (glowHead) { const hy = fn(xe); x.save(); glow(xe, hy, 50, LIME, 0.5); x.fillStyle = C.lime; x.beginPath(); x.arc(xe, hy, 11, 0, 7); x.fill(); x.restore(); } };

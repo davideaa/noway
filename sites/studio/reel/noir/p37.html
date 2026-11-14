@@ -71,7 +71,7 @@ function sHook(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
 
 /* ================= ESEMPIO: tre schede di vetro (importo, tasso, durata), subito attenuate, si accendono sulla parola ================= */
 function card(t, a, cy, i, tOn, label, val, icon) {
-  const kIn = oC(seg(t, a + 0.3 + i * 0.15, a + 0.8 + i * 0.15)), kl = lit(t, tOn); if (kIn <= 0) return; const al = kIn * (0.42 + 0.58 * kl), sc = 1 + 0.035 * Math.sin(Math.PI * clamp(seg(t, tOn - 0.05, tOn + 0.45)));
+  const kIn = oC(seg(t, a + 0.3 + i * 0.15, a + 0.8 + i * 0.15)), kl = lit(t, tOn); if (kIn <= 0) return; const al = kIn * (0.65 + 0.35 * kl),   /* testi attenuati mai sotto 3:1 */ sc = 1 + 0.035 * Math.sin(Math.PI * clamp(seg(t, tOn - 0.05, tOn + 0.45)));
   x.save(); x.translate(540, cy); x.scale(sc, sc); x.translate(-540, -cy); glass(540, cy, 860, 220, 36, al * 0.9);
   x.save(); x.globalAlpha = al; x.strokeStyle = kl > 0.5 ? C.lime : 'rgba(200,250,114,0.55)'; x.lineWidth = 3.5; if (kl < 0.5) x.setLineDash([12, 10]); rr(110, cy - 110, 860, 220, 36); x.stroke(); x.setLineDash([]);
   x.translate(205, cy); x.strokeStyle = kl > 0.5 ? C.lime : C.ink; x.fillStyle = C.lime; x.lineWidth = 6; x.lineCap = 'round'; x.lineJoin = 'round';
