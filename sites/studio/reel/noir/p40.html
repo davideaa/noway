@@ -156,7 +156,7 @@ function sEsempio(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   const kA = oC(seg(t, tPar - 0.05, tPar + 0.35)), kB = oC(seg(t, tMez - 0.1, tMez + 0.35)), kE = oB(seg(t, a + 0.6, a + 1.1));
   pop(330, 1235, kE, () => { glass(330, 1235, 460, 120, 30, 1); if (kA > 0) { x.save(); x.globalAlpha = kA; x.strokeStyle = C.lime; x.lineWidth = 3.5; rr(100, 1175, 460, 120, 30); x.stroke(); x.restore(); } });
   pop(810, 1235, kE, () => { x.save(); x.setLineDash([10, 8]); x.strokeStyle = kB > 0 ? C.amber : 'rgba(245,165,36,0.5)'; x.lineWidth = 3.5; rr(640, 1175, 340, 120, 30); x.stroke(); x.restore(); });
-  txt('EURIBOR', 330, 1237, { size: 56, weight: 800, color: kA > 0.5 ? C.lime : C.ink, alpha: 0.6 + 0.4 * kA, ls: -1 }); txt('+', 600, 1235, { size: 56, weight: 800, color: C.ink, alpha: kE });
+  txt('EURIBOR', 330, 1237, { size: 56, weight: 800, color: kA > 0.5 ? C.lime : C.ink, alpha: 0.85 + 0.15 * kA, ls: -1 }); txt('+', 600, 1235, { size: 56, weight: 800, color: C.ink, alpha: kE });
   txt('+ 1,5', 810, 1237, { size: 56, weight: 800, color: C.amber, alpha: kB, blur: (1 - kB) * 10, ls: -1 });
   lab(t, 'VERO', 330, 1340, tVer - 0.1, { color: C.lime, size: 28, ls: 4 }); lab(t, 'INVENTATO', 810, 1340, tMez + 0.3, { color: C.amber, size: 28, ls: 4 });
   x.restore(); finish(t); }

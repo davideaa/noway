@@ -69,8 +69,8 @@ function sHook(t, a, b) { bg('42,50,45', 0.6); x.save(); zoom(t, a, b, 1.04);
   rise(300, BOT, k1, () => { tower(300, BOT, TW, nbL, C.lime, LIME, { glowK: 0.7, brick: 70 }); });
   rise(780, BOT, k2, () => { tower(780, BOT, TW, nbR, C.ink, INK, { glowK: kF, brick: 70 }); lockI(780, BOT - 35, 48, kL > 0.5 ? C.ink : 'rgba(241,244,238,0.6)', kL, 0.95); });
   if (kL > 0 && kL < 1) { x.save(); x.strokeStyle = `rgba(241,244,238,${0.6 * (1 - kL)})`; x.lineWidth = 4; x.beginPath(); x.arc(780, BOT - 35, 40 + 60 * kL, 0, 7); x.stroke(); x.restore(); }
-  labd(t, 'CAMBIA OGNI GIORNO', 300, 1410, a + 0.6, tGio, { color: C.lime, size: 28, dim: 0.0 });
-  labd(t, 'FERMO DOPO LA FIRMA', 780, 1410, a + 0.6, tFir, { color: C.ink, size: 28, dim: 0.0 });
+  labd(t, 'CAMBIA OGNI GIORNO', 300, 1410, a + 0.6, tGio, { color: C.lime, size: 28, dim: 0.85 });
+  labd(t, 'FERMO DOPO LA FIRMA', 780, 1410, a + 0.6, tFir, { color: C.ink, size: 28, dim: 0.85 });
   x.restore(); finish(t); }
 
 /* ================= SOMMA: due pezzi (base + margine) cadono nella barra «tasso del variabile» ================= */
@@ -87,8 +87,8 @@ function sSomma(t, a, b) { bg('30,40,46', 0.7); x.save(); zoom(t, a, b, 1.04);
     if (kf > 0) { x.save(); x.globalAlpha *= kf; glow(cx, 810, 200, col === C.lime ? LIME : AMB, 0.25); x.fillStyle = col; rr(cx - w / 2, 750, w, 120, 18); x.fill(); x.restore(); }
     txt(name, cx, 811, { fam: 'mono', size: 32, weight: 700, color: kf > 0.5 ? DK : col, ls: 3, alpha: KG }); x.restore(); };
   piece(280, 340, 'BASE', tBas, C.lime); piece(800, 340, 'MARGINE', tMar, C.amber);
-  const kp = oB(seg(t, tSom - 0.1, tSom + 0.4)); txt('+', 540, 806, { size: 100, weight: 800, color: C.ink, alpha: 0.35 * KG + 0.65 * clamp(kp) });
-  txt('=', 540, 955, { size: 100, weight: 800, color: C.ink, alpha: 0.35 * KG + 0.65 * clamp(kp) });
+  const kp = oB(seg(t, tSom - 0.1, tSom + 0.4)); txt('+', 540, 806, { size: 100, weight: 800, color: C.ink, alpha: 0.85 * KG + 0.15 * clamp(kp) });
+  txt('=', 540, 955, { size: 100, weight: 800, color: C.ink, alpha: 0.85 * KG + 0.15 * clamp(kp) });
   /* la barra del tasso: bozza subito; i pezzi ci scendono sopra */
   const BY = 1090, BH = 130, BX = 100, BW = 880, LW = 540;
   x.save(); x.globalAlpha *= KG; x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 4; x.setLineDash([10, 10]); rr(BX, BY - BH / 2, BW, BH, 22); x.stroke(); x.restore();
@@ -169,8 +169,8 @@ function sSottozero(t, a, b) { bg('46,34,30', 0.6); x.save(); zoom(t, a, b, 1.03
   const kj = oC(seg(t, tGiu - 0.1, tGiu + 0.4)); if (kj > 0) { dash(X0 + 41 * DX, ZY + 220, X0 + 41 * DX, ZY + 255, C.ink, 3, [], kj); txt('GIUGNO 2022', X0 + 41 * DX + 10, ZY + 290, { fam: 'mono', size: 28, weight: 700, color: C.ink, ls: 3, align: 'right', alpha: kj }); }
   /* contatore: si ferma a 42 quando la voce lo dice */
   const kc = oC(seg(t, f0 - 0.1, f0 + 0.3)), kn = oC(seg(t, tQ - 0.1, tQ + 0.5)); const cnt = Math.min(42, nOn);
-  txt(String(cnt), 540, 1290, { size: 230, weight: 800, color: C.red, ls: -8, alpha: Math.max(0.4, kc) * (cnt === 42 ? 1 : 0.9), blur: (1 - Math.max(0.4, kc)) * 6 });
-  labd(t, 'MESI DI FILA SOTTO ZERO', 540, 1420, a + 0.6, tQ, { color: C.ink, size: 28, ls: 3, dim: 0.5 });
+  txt(String(cnt), 540, 1290, { size: 230, weight: 800, color: C.red, ls: -8, alpha: Math.max(0.85, kc) * (cnt === 42 ? 1 : 0.9), blur: (1 - Math.max(0.85, kc)) * 6 });
+  labd(t, 'MESI DI FILA SOTTO ZERO', 540, 1420, a + 0.6, tQ, { color: C.ink, size: 28, ls: 3, dim: 0.85 });
   x.restore(); finish(t); }
 
 /* ================= SALITA: i punti veri delle medie mensili collegati da una linea tratteggiata; si ferma a ottobre ================= */
@@ -217,7 +217,7 @@ function sIrs(t, a, b) { bg('30,40,46', 0.7); x.save(); zoom(t, a, b, 1.04);
     if (kg > 0.95) { const e = bez(...Cb, 1), e2 = bez(...Cb, 0.93), an = Math.atan2(e[1] - e2[1], e[0] - e2[0]); x.fillStyle = col; x.beginPath(); x.moveTo(e[0] + Math.cos(an) * 16, e[1] + Math.sin(an) * 16); x.lineTo(e[0] + Math.cos(an + 2.5) * 20, e[1] + Math.sin(an + 2.5) * 20); x.lineTo(e[0] + Math.cos(an - 2.5) * 20, e[1] + Math.sin(an - 2.5) * 20); x.closePath(); x.fill(); } x.restore();
     if (ks > 0) for (let j = 0; j < 3; j++) { const u = ((t - tSca) * 0.45 + j / 3 + ph) % 1; if (u < 0) continue; const [qx, qy] = bez(...Cb, u); x.save(); x.globalAlpha *= ks; glow(qx, qy, 30, rgb, 0.4); x.fillStyle = col; x.beginPath(); x.arc(qx, qy, 10, 0, 7); x.fill(); x.restore(); } };
   arr(Cf, C.ink, INK, tFis, 0); arr(Cv, C.lime, LIME, tVar, 0.1);
-  labd(t, 'FISSO', 420, 912, a + 0.5, tFis, { color: C.ink, size: 28, ls: 3, dim: 0.45 }); labd(t, 'VARIABILE', 700, 912, a + 0.6, tVar, { color: C.lime, size: 28, ls: 3, dim: 0.45 });
+  labd(t, 'FISSO', 420, 912, a + 0.5, tFis, { color: C.ink, size: 28, ls: 3, dim: 0.85 }); labd(t, 'VARIABILE', 700, 912, a + 0.6, tVar, { color: C.lime, size: 28, ls: 3, dim: 0.85 });
   x.restore();
   x.restore(); finish(t); }
 
@@ -230,13 +230,13 @@ function sFissi(t, a, b) { bg('34,40,30', 0.6); x.save(); zoom(t, a, b, 1.03);
   const kA = oB(seg(t, a + 0.2, a + 0.8)), PA = [540, 765, 900, 230];
   pop(540, 765, kA, () => { glass(...PA, 30, 1); x.save(); rr(PA[0] - PA[2] / 2 + 6, PA[1] - PA[3] / 2 + 6, PA[2] - 12, PA[3] - 12, 24); x.clip(); x.strokeStyle = C.lime; x.lineWidth = 7; x.lineJoin = 'round'; x.beginPath();
     for (let i = 0; i <= 90; i++) { const px = 100 + i * 9.6, py = 765 + 46 * Math.sin(px * 0.021 + t * 2.4) + 24 * Math.sin(px * 0.047 - t * 1.4 + 1); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); x.restore(); });
-  labd(t, 'RIFERIMENTO DEI FISSI', 540, 625, a + 0.4, tRif, { color: C.lime, size: 26, ls: 3, dim: 0.6 });
+  labd(t, 'RIFERIMENTO DEI FISSI', 540, 625, a + 0.4, tRif, { color: C.lime, size: 26, ls: 3, dim: 0.85 });
   /* sotto: pannello con la linea piatta; il lucchetto si chiude su «gia'» */
   const kB = oB(seg(t, a + 0.3, a + 0.9)), kl = oC(seg(t, tGia - 0.1, tGia + 0.4)), PB = [540, 1120, 900, 230];
   pop(540, 1120, kB, () => { glass(...PB, 30, 1); const ks = 0.35 + 0.65 * kl; x.save(); x.strokeStyle = C.ink; x.lineWidth = 7; x.lineCap = 'round'; x.globalAlpha *= ks; if (kl < 0.5) x.setLineDash([14, 12]); x.beginPath(); x.moveTo(250, 1120); x.lineTo(950, 1120); x.stroke(); x.restore();
     lockI(165, 1120, 54, C.ink, kl, 0.65 + 0.35 * kl); });
   if (kl > 0 && kl < 1) { x.save(); x.strokeStyle = `rgba(241,244,238,${0.7 * (1 - kl)})`; x.lineWidth = 4; x.beginPath(); x.arc(165, 1120, 48 + 60 * kl, 0, 7); x.stroke(); x.restore(); }
-  labd(t, 'FISSO CHE HAI GIÀ', 540, 985, a + 0.4, tGia, { color: C.ink, size: 26, ls: 3, dim: 0.6 });
+  labd(t, 'FISSO CHE HAI GIÀ', 540, 985, a + 0.4, tGia, { color: C.ink, size: 26, ls: 3, dim: 0.85 });
   pillAt(t, 'BANCA D’ITALIA', 540, 1305, tScr - 0.1, C.ink, 32); pillAt(t, 'NON CAMBIA NULLA', 540, 1408, tNon - 0.05, C.lime, 36);
   x.restore(); finish(t); }
 
@@ -269,7 +269,7 @@ function sBce(t, a, b) { bg('30,44,34', 0.7); x.save(); zoom(t, a, b, 1.04);
 function sCasa(t, a, b) { bg('34,46,30', 0.5); x.save(); zoom(t, a, b, 1.03);
   const tTas = WA('casa', ['tasso'], 1, 0.36), tRif = WA('casa', ['riferimento', 'riferim'], 1, 0.45), tMar = WA('casa', ['margine', 'margin'], 1, 0.6), tFis = WA('casa', ['fissi', 'fiss'], 1, 0.72), tVar = WA('casa', ['variabili', 'variabil'], 1, 0.82), tDiv = WA('casa', ['diversi', 'divers'], 1, 0.96);
   phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70 });
-  labd(t, 'TASSO =', 540, 470, a + 0.3, tTas, { color: C.ink, size: 30, ls: 4, dim: 0.45 });
+  labd(t, 'TASSO =', 540, 470, a + 0.3, tTas, { color: C.ink, size: 30, ls: 4, dim: 0.85 });
   const KG = oC(seg(t, a + 0.25, a + 0.8));
   const blk = (cx, w, name, t0, col, rgb) => { const kf = oC(seg(t, t0 - 0.1, t0 + 0.4)), bump = 1 + 0.07 * Math.sin(Math.PI * kf);
     x.save(); x.translate(cx, 580); x.scale(bump, bump); x.translate(-cx, -580);
@@ -277,13 +277,13 @@ function sCasa(t, a, b) { bg('34,46,30', 0.5); x.save(); zoom(t, a, b, 1.03);
     if (kf > 0) { x.save(); x.globalAlpha *= kf; glow(cx, 580, 200, rgb, 0.22); x.fillStyle = col; rr(cx - w / 2, 525, w, 110, 18); x.fill(); x.restore(); }
     txt(name, cx, 581, { fam: 'mono', size: 30, weight: 700, color: kf > 0.5 ? DK : col, ls: 2, alpha: KG }); x.restore(); };
   blk(270, 340, 'RIFERIMENTO', tRif, C.lime, LIME); blk(800, 340, 'MARGINE', tMar, C.amber, AMB);
-  txt('+', 540, 576, { size: 90, weight: 800, color: C.ink, alpha: 0.4 * KG + 0.6 * oC(seg(t, tMar - 0.3, tMar + 0.1)) });
+  txt('+', 540, 576, { size: 90, weight: 800, color: C.ink, alpha: 0.85 * KG + 0.15 * oC(seg(t, tMar - 0.3, tMar + 0.1)) });
   const BOT = 1300, TW = 260, k1 = oB(seg(t, a + 0.1, a + 0.65)), k2 = oB(seg(t, a + 0.2, a + 0.75)), kf = oC(seg(t, tFis - 0.1, tFis + 0.4)), kv = oC(seg(t, tVar - 0.1, tVar + 0.4));
   dash(100, BOT + 6, 980, BOT + 6, 'rgba(241,244,238,0.35)', 3, [2, 12], oC(seg(t, a + 0.1, a + 0.6)));
   rise(300, BOT, k1, () => { tower(300, BOT, TW, stepV(t, 3, 3, 5), C.lime, LIME, { glowK: kv }); });
   rise(780, BOT, k2, () => { tower(780, BOT, TW, 5, C.ink, INK, { glowK: kf }); lockI(780, BOT - 32, 44, C.ink, 1, 0.9); });
   labd(t, 'VARIABILI', 300, 1385, a + 0.5, tVar, { color: C.lime, size: 28, ls: 3 }); labd(t, 'FISSI', 780, 1385, a + 0.5, tFis, { color: C.ink, size: 28, ls: 3 });
-  labd(t, 'DI SOLITO EURIBOR', 300, 1425, a + 0.6, tDiv - 0.1, { color: C.muted, size: 24, ls: 1, dim: 0.0 }); labd(t, 'DI SOLITO IRS', 780, 1425, a + 0.6, tDiv - 0.1, { color: C.muted, size: 24, ls: 1, dim: 0.0 });
+  labd(t, 'DI SOLITO EURIBOR', 300, 1425, a + 0.6, tDiv - 0.1, { color: C.muted, size: 24, ls: 1, dim: 0.85 }); labd(t, 'DI SOLITO IRS', 780, 1425, a + 0.6, tDiv - 0.1, { color: C.muted, size: 24, ls: 1, dim: 0.85 });
   x.restore(); finish(t); }
 
 serie({ hook: sHook, somma: sSomma, euribor: sEuribor, ente: sEnte, sottozero: sSottozero, salita: sSalita, irs: sIrs, fissi: sFissi, bce: sBce, casa: sCasa }, ORDER, ['hook', 'ente', 'irs', 'casa']);
