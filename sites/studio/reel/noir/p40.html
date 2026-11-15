@@ -180,7 +180,7 @@ function sPrima(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
   x.restore(); finish(t); }
 
 function sDopo(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.03);
-  const tOtt = WA('dopo', ['ottobre'], 1, 0.12), tSal = WA('dopo', ['sale'], 1, 0.3), tNov = WA('dopo', ['novecentoventi', 'novecento', '920', '900'], 1, 0.52), tTre = WA('dopo', ['trecentocinquanta', 'trecento', '350'], 1, 0.7), tQua = WA('dopo', ['quattromila', '4000', '4.000', 'quattro'], 1, 0.9);
+  const tOtt = WA('dopo', ['ottobre'], 1, 0.12), tSal = WA('dopo', ['sale'], 1, 0.3), tNov = WA('dopo', ['novecentoventi', 'novecento', '920', '900'], 1, 0.52), tTre = WA('dopo', ['trecentocinquanta', 'trecento', '350'], 1, 0.7), tQua = WA('dopo', ['quattromila', '4000', '4.000', 'quattro', '4'], 1, 0.9);
   phrase(t, a + 0.05, [['Dopo,', C.ink]], 345, { size: 92 });
   phrase(t, tSal - 0.1, [['la rata sale', C.red]], Y2, { size: 92 });
   lab(t, EX, 540, 570, a + 0.3, { color: C.amber, size: 22 });
