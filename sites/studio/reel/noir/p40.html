@@ -105,7 +105,7 @@ function sEuribor(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
   labs.forEach(([big, sub, ic], i) => { const k = oB(seg(t, a + 0.25 + i * 0.15, a + 0.75 + i * 0.15)), l = lit[i]; pop(540, NY[i], k, () => {
       if (l > 0) glow(540, NY[i], 300, '200,250,114', 0.16 * l); glass(540, NY[i], NW, NH, 40, 1);
       if (l > 0) { x.save(); x.globalAlpha = l; x.strokeStyle = C.lime; x.lineWidth = 3.5; rr(540 - NW / 2, NY[i] - NH / 2, NW, NH, 40); x.stroke(); x.restore(); }
-      const al = 0.55 + 0.45 * l; if (ic) ic(250, NY[i], l > 0.5 ? C.lime : C.ink);
+      const al = 0.85 + 0.15 * l; if (ic) ic(250, NY[i], l > 0.5 ? C.lime : C.ink);
       txt(big, ic ? 590 : 540, NY[i] - 22, { size: 58, weight: 800, color: l > 0.5 ? C.lime : C.ink, alpha: al, ls: -1 });
       txt(sub, ic ? 590 : 540, NY[i] + 40, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 2, alpha: al }); }); });
   const kp = seg(t, tBan - 0.1, tBan + 0.45); if (kp > 0) glassPill(540, 1405, 'BANCA D’ITALIA', kp, C.ink, 40);
@@ -137,7 +137,7 @@ function sSale(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
 /* ================= ESEMPIO: il mutuo inventato in tre pezzi: un blocco (importo), 25 tessere (anni), due blocchi (Euribor vero + spread inventato) ================= */
 function sEsempio(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   const tImp = WA('esempio', ['centocinquantamila', '150000', '150.000', '150', 'centocinquanta'], 1, 0.2), tVen = WA('esempio', ['venticinque', '25'], 1, 0.34), tTas = WA('esempio', ['tasso'], 1, 0.5), tPar = WA('esempio', ['pari'], 1, 0.55),
-    tMez = WA('esempio', ['mezzo', '1,5', '1'], 1, 0.7), tVer = WA('esempio', ['vero'], 1, 0.95);
+    tMez = WA('esempio', ['mezzo', 'più'], 1, 0.7), tVer = WA('esempio', ['vero'], 1, 0.95);
   phrase(t, a + 0.05, [['Un mutuo', C.ink], ['inventato', C.amber]], 345, { size: 92 });
   stamp(t, a + 0.3, EX, 610, C.amber);
   /* importo: blocco di vetro */
@@ -240,7 +240,7 @@ function sMediana(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   lab(t, 'LA RATA, PRIMA', BX, B1 - 66, a + 0.5, { align: 'left', size: 26, color: C.ink }); lab(t, 'LA RATA, DOPO', BX, B2 - 66, a + 0.6, { align: 'left', size: 26, color: C.ink });
   [[B1, 600, k1, C.lime], [B2, 780, k2, C.red]].forEach(([y, v, kk, col]) => { x.save(); x.globalAlpha = ke * (1 - kk) * 0.6; x.fillStyle = 'rgba(241,244,238,0.12)'; rr(BX, y - BH / 2, 840, BH, 14); x.fill(); x.setLineDash([8, 7]); x.strokeStyle = col; x.lineWidth = 3; rr(BX, y - BH / 2, 840, BH, 14); x.stroke(); x.restore();
     if (kk > 0) { x.save(); x.fillStyle = col; rr(BX, y - BH / 2, v * kk, BH, 14); x.fill(); x.restore(); } });
-  const kt1 = oC(seg(t, tSei, tSei + 0.5)), kt2 = oC(seg(t, tSet, tSet + 0.5));
+  const kt1 = oC(seg(t, tSei + 0.45, tSei + 0.8)), kt2 = oC(seg(t, tSet + 0.45, tSet + 0.8));
   txt('circa 600 €', BX + 600 - 28, B1 + 2, { size: 52, weight: 800, color: '#15200C', align: 'right', alpha: kt1, ls: -1 }); txt('circa 780 €', BX + 780 - 28, B2 + 2, { size: 52, weight: 800, color: '#2A0806', align: 'right', alpha: kt2, ls: -1 });
   lab(t, 'AL MESE', 540, 1320, tSei + 0.3, { color: C.ink, size: 28, ls: 6 });
   x.restore(); finish(t); }
