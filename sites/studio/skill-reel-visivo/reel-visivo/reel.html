@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reel visivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>html,body{margin:0;height:100%;background:#050607;overflow:hidden}body{display:flex;align-items:center;justify-content:center}
+canvas{height:100vh;max-width:100vw;aspect-ratio:9/16;display:block;cursor:pointer}#h{position:fixed;bottom:6px;left:0;right:0;text-align:center;font:12px system-ui;color:#6c756f}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas><div id="h">tocca: pausa · doppio tocco: da capo</div>
+<!-- ===== LA STORIA: è l'unica parte da cambiare. Schema completo in SKILL.md ===== -->
+<script id="storia" type="application/json">
+{
+ "marchio": "RICERCA QUANT · ORO",
+ "scene": [
+  {"tipo": "titolo", "kicker": "UNA STRATEGIA BOCCIATA", "righe": ["Perché questa strategia", "è stata scartata"], "sotto": "Il caso della «trappola»"},
+  {"tipo": "testo", "titolo": ["Prima regola", "dei test"], "righe": ["I criteri si scrivono prima di guardare i risultati.", "Poi si rispettano, anche quando sono scomodi."], "evidenzia": ["prima", "rispettano"]},
+  {"tipo": "linea", "titolo": ["Dentro sale,", "fuori crolla"], "unita": "R", "base": 0,
+   "serie": [{"nome": "Risultato cumulato", "punti": [0,3,2,6,9,8,13,17,16,21,26,24,30,35,33,40,46,44,50,47,42,38,30,26,19,14,10,8,6,5.1]}],
+   "divisione": {"indice": 18, "etichetta": "FUORI CAMPIONE"}, "inizio": "inizio test", "fine": "oggi", "tag": "FORMA ILLUSTRATIVA · I TOTALI SONO VERI"},
+  {"tipo": "confronto", "titolo": ["Stessa strategia,", "due mondi"], "unita": "R",
+   "sinistra": {"titolo": "Dentro il campione", "valore": 50, "nota": "dove è stata costruita"},
+   "destra": {"titolo": "Fuori campione", "valore": -44.9, "nota": "su anni mai visti"}, "tag": "DATI DEL BACKTEST"},
+  {"tipo": "formula", "titolo": ["Come si misura", "se è fortuna"], "formula": "t = ΣR / (σ · √n)",
+   "spiegazioni": [{"simbolo": "ΣR", "testo": "la somma dei risultati, in multipli del rischio"}, {"simbolo": "σ", "testo": "quanto variano i singoli trade (1,45 R)"}, {"simbolo": "n", "testo": "quanti trade ci sono"}]},
+  {"tipo": "griglia", "titolo": ["Plateau,", "non picco"], "colonne": ["10","20","30","40","50","60"], "righe": ["1,0","1,5","2,0","2,5","3,0"],
+   "valori": [[-3,-1,0,1,-2,-4],[-2,1,3,2,0,-3],[-1,2,9,1,-1,-2],[-3,0,1,0,-2,-4],[-4,-2,-1,-3,-3,-5]],
+   "evidenzia": [{"r": 2, "c": 2, "etichetta": "UN PICCO ISOLATO = FORTUNA"}], "legenda": "periodo ↔ · moltiplicatore ↕", "tag": "ESEMPIO ILLUSTRATIVO"},
+  {"tipo": "checklist", "titolo": ["I criteri", "dichiarati prima"], "voci": [{"testo": "Criteri scritti prima del test", "esito": "si"}, {"testo": "Utile dentro il campione", "esito": "si"}, {"testo": "Utile fuori campione", "esito": "no"}]},
+  {"tipo": "verdetto", "esito": "BOCCIATA", "numeri": [{"valore": "+50 R", "etichetta": "dentro il campione", "colore": "lime"}, {"valore": "−44,9 R", "etichetta": "fuori campione", "colore": "red"}], "motivo": ["Vinceva solo sugli anni su cui era stata costruita."]},
+  {"tipo": "fine", "righe": ["Un buon risultato", "non basta:", "deve reggere fuori"], "firma": "Ricerca quantitativa su XAUUSD"}
+ ]
+}
+</script>
+<script>
+/* Motore dei reel visivi (stile «Dalla teoria alla realtà»): 1080×1920, nessun audio, tutto disegnato in codice.
+   render(t) è funzione pura del tempo: si può guardare nel browser (riproduzione automatica) o rendere fotogramma per fotogramma. */
+const S = JSON.parse(document.getElementById('storia').textContent);
+const cv = document.getElementById('c'), x = cv.getContext('2d'), W = 1080, H = 1920;
+const C = { bg: '#050607', ink: '#F1F4EE', muted: '#9AA39D', dim: '#5B635E', lime: '#C8FA72', cyan: '#5CE1E6', amber: '#F5A524', red: '#FF6B5E', vio: '#A99BFF' };
+const RGB = { lime: '200,250,114', cyan: '92,225,230', amber: '245,165,36', red: '255,107,94', vio: '169,155,255', ink: '241,244,238' };
+const col = (n) => C[n] || n || C.lime, rgbOf = (n) => RGB[n] || RGB.lime;
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), seg = (t, a, b) => clamp((t - a) / (b - a)), lerp = (a, b, k) => a + (b - a) * k;
+const oC = (k) => 1 - Math.pow(1 - clamp(k), 3), ioC = (k) => { k = clamp(k); return k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; };
+const oB = (k, s = 1.7) => (k <= 0 ? 0 : k >= 1 ? 1 : 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2));
+const FONT = (w, s, m) => `${w} ${s}px ${m ? '"IBM Plex Mono", ui-monospace, monospace' : 'Manrope, system-ui, sans-serif'}`;
+function tw(s, size, weight = 700, mono = false, ls = 0) { x.save(); x.font = FONT(weight, size, mono); x.letterSpacing = ls + 'px'; const w = x.measureText(s).width; x.restore(); return w; }
+function txt(s, px, py, o = {}) {
+  let { size = 40, weight = 700, color = C.ink, align = 'center', mono = false, alpha = 1, maxW = 0, ls = 0 } = o;
+  if (alpha <= 0.004 || s == null || s === '') return; s = String(s);
+  if (maxW) { const w = tw(s, size, weight, mono, ls); if (w > maxW) size = Math.floor(size * maxW / w); }
+  x.save(); x.globalAlpha *= alpha; x.font = FONT(weight, size, mono); x.letterSpacing = ls + 'px'; x.fillStyle = color; x.textAlign = align; x.textBaseline = 'middle'; x.fillText(s, px, py); x.restore();
+}
+const rr = (a, b, w, h, r) => { x.beginPath(); x.roundRect(a, b, w, h, Math.min(r, Math.abs(h) / 2, Math.abs(w) / 2)); };
+function glow(cx, cy, r, rgb, a) { if (a <= 0) return; const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`); x.fillStyle = g; x.fillRect(cx - r, cy - r, 2 * r, 2 * r); }
+function glass(a, b, w, h, r, al = 1, stroke = 'rgba(255,255,255,0.14)') { if (al <= 0) return; x.save(); x.globalAlpha *= al; rr(a, b, w, h, r); x.fillStyle = 'rgba(255,255,255,0.05)'; x.fill(); x.strokeStyle = stroke; x.lineWidth = 2; x.stroke(); x.restore(); }
+function pill(cx, cy, label, k, color = C.amber, size = 24) {
+  if (k <= 0) return; const w = tw(label, size, 600, true, 3) + 46; x.save(); x.globalAlpha *= clamp(k * 1.5); const s = lerp(0.85, 1, oB(clamp(k))); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy);
+  rr(cx - w / 2, cy - size, w, size * 2, size); x.fillStyle = 'rgba(5,6,7,0.75)'; x.fill(); x.strokeStyle = color; x.lineWidth = 2; x.stroke(); txt(label, cx, cy + 1, { size, weight: 600, mono: true, color, ls: 3 }); x.restore();
+}
+function fmtN(v, dec) { const s = Math.abs(v).toFixed(dec).split('.'); s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.'); return s.join(','); }
+const decOf = (v) => { const s = String(v); return s.includes('.') ? Math.min(2, s.split('.')[1].length) : 0; };
+function fmtS(v, dec, unit = '', plus = true) { return (v < 0 ? '−' : plus && v > 0 ? '+' : '') + fmtN(v, dec) + (unit ? (unit === '%' ? '%' : ' ' + unit) : ''); }
+function wrap(s, size, maxW, weight = 700) { const out = []; let line = []; for (const w of String(s).split(' ')) { const t = [...line, w].join(' '); if (line.length && tw(t, size, weight) > maxW) { out.push(line); line = [w]; } else line.push(w); } if (line.length) out.push(line); return out; }
+function words(o) { if (o == null) return 0; if (typeof o === 'string') return o.split(/\s+/).filter(Boolean).length; if (typeof o === 'number') return 0.3; if (Array.isArray(o)) return o.reduce((a, b) => a + words(b), 0); if (typeof o === 'object') return Object.entries(o).filter(([k]) => !['tipo', 'colore', 'valori', 'punti', 'serie_valori'].includes(k)).reduce((a, [, v]) => a + words(v), 0); return 0; }
+const EXTRA = { linea: 2.5, griglia: 2, distribuzione: 2, confronto: 1.5, verdetto: 1.2, barre: 1.5, formula: 1.5 };
+
+/* ---------- testata comune: titolo della scena (2 righe, parole sfalsate) ---------- */
+function titolo(u, sc, y = 410) {
+  const L = sc.titolo; if (!L) return; const lines = Array.isArray(L) ? L : [L], acc = sc.accento ?? lines.length - 1; let n = 0;
+  lines.forEach((ln, li) => { let z = lines.length > 2 ? 68 : 84; const full = tw(ln, z, 800); if (full > 940) z = Math.floor(z * 940 / full);
+    let cx = 540 - tw(ln, z, 800) / 2; const yy = y + li * z * 1.12, sp = tw(' ', z, 800);
+    ln.split(' ').forEach((w) => { const k = oC(seg(u, 0.08 + n * 0.055, 0.45 + n * 0.055)); n++; const ww = tw(w, z, 800);
+      txt(w, cx + ww / 2, yy + (1 - k) * 28, { size: z, weight: 800, color: li === acc ? C.lime : C.ink, alpha: k }); cx += ww + sp; }); });
+}
+
+/* ---------- le scene ---------- */
+const SCENE = {
+  titolo(u, D, sc) {
+    if (sc.kicker) pill(540, 700, sc.kicker, oC(seg(u, 0.05, 0.4)), C.amber, 26);
+    const L = sc.righe || []; let n = 0;
+    L.forEach((ln, li) => { let z = 112; const full = tw(ln, z, 800); if (full > 960) z = Math.floor(z * 960 / full); let cx = 540 - tw(ln, z, 800) / 2; const yy = 860 + li * z * 1.08, sp = tw(' ', z, 800);
+      ln.split(' ').forEach((w) => { const k = oB(seg(u, 0.2 + n * 0.07, 0.6 + n * 0.07), 2); n++; const ww = tw(w, z, 800);
+        x.save(); x.translate(cx + ww / 2, yy); const s = lerp(1.6, 1, clamp(k)); x.scale(s, s); txt(w, 0, 0, { size: z, weight: 800, color: li === L.length - 1 ? C.lime : C.ink, alpha: clamp(k * 2) }); x.restore(); cx += ww + sp; }); });
+    const yb = 860 + L.length * 112 * 1.08 - 30, kb = oC(seg(u, 0.9, 1.5)); x.fillStyle = C.lime; rr(540 - 200 * kb, yb, 400 * kb, 8, 4); x.fill();
+    if (sc.sotto) txt(sc.sotto, 540, yb + 80, { size: 40, weight: 600, color: C.muted, alpha: oC(seg(u, 1.2, 1.7)), maxW: 940 });
+  },
+  testo(u, D, sc) {
+    titolo(u, sc); const R = sc.righe || [], hi = new Set((sc.evidenzia || []).map((w) => w.toLowerCase())); let y = sc.titolo ? 640 : 560; const step = Math.min(1.4, (D * 0.6) / Math.max(1, R.length));
+    R.forEach((r, i) => { const k = oC(seg(u, 0.4 + i * step, 0.9 + i * step)); if (k <= 0) { y += 200; return; } let z = 58; let L = wrap(r, z, 860, 700); if (L.length > 3) { z = 46; L = wrap(r, z, 860, 700); }
+      const h = L.length * z * 1.25; x.save(); x.globalAlpha *= k; x.translate((1 - k) * -40, 0); x.fillStyle = C.lime; rr(90, y, 8, h, 4); x.fill();
+      L.forEach((ws, li) => { let cx = 130; ws.forEach((w) => { const clean = w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''); const ww = tw(w, z, 700); txt(w, cx, y + z * 0.62 + li * z * 1.25, { size: z, weight: 700, align: 'left', color: hi.has(clean) ? C.lime : C.ink }); cx += ww + tw(' ', z, 700); }); });
+      x.restore(); y += h + 70; });
+  },
+  numero(u, D, sc) {
+    titolo(u, sc); const s = String(sc.valore), m = s.match(/[-−+]?\d[\d.]*(,\d+)?/); const k = oC(seg(u, 0.4, 1.6)), c = col(sc.colore || 'lime');
+    let shown = s; if (m) { const num = parseFloat(m[0].replace('−', '-').replace(/\./g, '').replace(',', '.')), dec = m[1] ? m[1].length - 1 : 0, sign = /^[+]/.test(m[0]); const v = num * k;
+      shown = s.slice(0, m.index) + (v < 0 ? '−' : sign ? '+' : '') + fmtN(v, dec) + s.slice(m.index + m[0].length); }
+    glow(540, 920, 420, rgbOf(sc.colore || 'lime'), 0.18 * k); txt(shown, 540, 920, { size: 230, weight: 800, color: c, alpha: oC(seg(u, 0.3, 0.6)), maxW: 960, ls: -6 });
+    txt(sc.etichetta, 540, 1110, { size: 44, weight: 700, color: C.ink, alpha: oC(seg(u, 1.0, 1.4)), maxW: 940 });
+  },
+  confronto(u, D, sc) {
+    titolo(u, sc); const A = [sc.sinistra, sc.destra], un = sc.unita || '', V = A.map((s) => s.valore), m = Math.max(...V.map(Math.abs)) || 1;
+    const mix = Math.min(...V) < 0 && Math.max(...V) > 0, allNeg = Math.max(...V) <= 0, Z = mix ? 1020 : allNeg ? 720 : 1300, MH = mix ? 290 : 540;
+    x.save(); x.globalAlpha = oC(seg(u, 0.2, 0.6)) * 0.5; x.fillStyle = C.ink; x.fillRect(110, Z - 1.5, 860, 3); x.restore();
+    A.forEach((s, j) => { const cx = j ? 780 : 300, d = 0.5 + j * 0.8, kin = oC(seg(u, d - 0.4, d)), k = oC(seg(u, d, d + 1.1)), pos = s.valore >= 0, c = col(s.colore || (pos ? 'lime' : 'red'));
+      txt((s.titolo || '').toUpperCase(), cx, 600, { size: 28, weight: 600, mono: true, color: C.muted, alpha: kin, maxW: 420, ls: 2 });
+      const hf = MH * Math.abs(s.valore) / m, h = hf * k; x.save(); x.globalAlpha = 0.45 * kin; x.strokeStyle = c; x.lineWidth = 3; x.setLineDash([10, 9]); rr(cx - 120, pos ? Z - hf : Z, 240, hf, 14); x.stroke(); x.restore();
+      if (h > 1) { glow(cx, pos ? Z - h / 2 : Z + h / 2, 220, rgbOf(s.colore || (pos ? 'lime' : 'red')), 0.18 * k); x.fillStyle = c; rr(cx - 120, pos ? Z - h : Z, 240, h, 14); x.fill(); }
+      txt(fmtS(s.valore * k, sc.decimali ?? decOf(s.valore), un), cx, pos ? Z - h - 48 : Z + h + 48, { size: 62, weight: 800, color: c, alpha: kin });
+      if (s.nota) txt(s.nota, cx, pos ? Z + 52 : Z - 52, { size: 28, weight: 600, color: C.muted, alpha: oC(seg(u, d + 1, d + 1.4)), maxW: 430 }); });
+  },
+  barre(u, D, sc) {
+    titolo(u, sc); const V = sc.voci, n = V.length, un = sc.unita || '', neg = V.some((v) => v.valore < 0), pos = V.some((v) => v.valore > 0), m = Math.max(...V.map((v) => Math.abs(v.valore))) || 1;
+    const ZX = neg && pos ? 560 : neg ? 990 : 90, L = neg && pos ? 280 : neg ? 640 : 720, top = 610, gap = Math.min(130, 820 / n);
+    if (neg && pos) { x.save(); x.globalAlpha = 0.4; x.fillStyle = C.ink; x.fillRect(ZX - 1.5, top - 10, 3, n * gap); x.restore(); }
+    V.forEach((v, i) => { const d = 0.4 + i * Math.min(0.35, (D * 0.45) / n), k = oC(seg(u, d, d + 0.8)), kin = oC(seg(u, d - 0.25, d + 0.15)), y = top + i * gap + gap * 0.55, p = v.valore >= 0, c = col(v.colore || (p ? 'lime' : 'red')), len = L * Math.abs(v.valore) / m * k;
+      txt(v.nome, 90, y - 40, { size: 30, weight: 700, align: 'left', color: C.ink, alpha: kin, maxW: 900 });
+      if (len > 1) { x.fillStyle = c; rr(p ? ZX : ZX - len, y - 20, len, 40, 10); x.fill(); }
+      txt(fmtS(v.valore * k, sc.decimali ?? decOf(v.valore), un), p ? ZX + len + 16 : ZX - len - 16, y, { size: 34, weight: 800, mono: true, align: p ? 'left' : 'right', color: c, alpha: kin }); });
+  },
+  linea(u, D, sc) {
+    titolo(u, sc); const SE = sc.serie, all = SE.flatMap((s) => s.punti); let lo = Math.min(...all), hi = Math.max(...all); if (sc.base != null) { lo = Math.min(lo, sc.base); hi = Math.max(hi, sc.base); }
+    const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad; const X0 = 170, X1 = 950, Y0 = 640, Y1 = 1240, N = Math.max(...SE.map((s) => s.punti.length)), X = (i) => X0 + (X1 - X0) * i / (N - 1), Y = (v) => Y1 - (Y1 - Y0) * (v - lo) / (hi - lo), un = sc.unita || '';
+    const kin = oC(seg(u, 0.1, 0.5)); glass(90, 600, 900, 690, 30, kin);
+    for (let g = 0; g <= 4; g++) { const v = lerp(lo + pad, hi - pad, g / 4), yy = Y(v); x.save(); x.globalAlpha = 0.08 * kin; x.fillStyle = C.ink; x.fillRect(X0, yy, X1 - X0, 2); x.restore(); txt(fmtN(v, Math.abs(hi - lo) < 10 ? 1 : 0), X0 - 14, yy, { size: 20, weight: 500, mono: true, align: 'right', color: C.dim, alpha: kin }); }
+    if (sc.base != null) { x.save(); x.globalAlpha = 0.5 * kin; x.fillStyle = C.ink; x.fillRect(X0, Y(sc.base) - 1, X1 - X0, 2.5); x.restore(); }
+    if (sc.divisione) { const dx = X(sc.divisione.indice), kd = oC(seg(u, 0.6, 1.1)); x.save(); x.globalAlpha = kd; x.fillStyle = 'rgba(245,165,36,0.09)'; x.fillRect(dx, Y0 - 10, X1 - dx, Y1 - Y0 + 20); x.strokeStyle = C.amber; x.lineWidth = 3; x.setLineDash([10, 10]); x.beginPath(); x.moveTo(dx, Y0 - 10); x.lineTo(dx, Y1 + 10); x.stroke(); x.restore(); pill((dx + X1) / 2, Y0 + 30, sc.divisione.etichetta || 'FUORI CAMPIONE', kd, C.amber, 20); }
+    const p = ioC(seg(u, 0.7, 0.7 + Math.max(1.6, D * 0.55))) * (N - 1);
+    SE.forEach((s, j) => { const c = col(s.colore || ['lime', 'cyan', 'vio'][j % 3]), P = s.punti, n = Math.min(p, P.length - 1); if (n <= 0) return;
+      x.save(); x.strokeStyle = c; x.lineWidth = 5; x.lineJoin = 'round'; x.shadowColor = c; x.shadowBlur = 14; x.beginPath(); x.moveTo(X(0), Y(P[0]));
+      for (let i = 1; i <= Math.floor(n); i++) x.lineTo(X(i), Y(P[i])); const f = n - Math.floor(n), i0 = Math.floor(n); let tx = X(i0), ty = Y(P[i0]);
+      if (f > 0 && i0 + 1 < P.length) { tx = lerp(X(i0), X(i0 + 1), f); ty = lerp(Y(P[i0]), Y(P[i0 + 1]), f); x.lineTo(tx, ty); } x.stroke(); x.restore();
+      glow(tx, ty, 40, rgbOf(s.colore || ['lime', 'cyan', 'vio'][j % 3]), 0.6); x.fillStyle = C.ink; x.beginPath(); x.arc(tx, ty, 8, 0, 7); x.fill();
+      const v = lerp(P[i0], P[Math.min(i0 + 1, P.length - 1)], f); txt(fmtS(v, decOf(sc.decimali ?? 0), un, false), Math.min(tx + 14, X1 - 90), ty - 34, { size: 26, weight: 700, mono: true, align: 'left', color: c }); });
+    txt(sc.inizio, X0, Y1 + 30, { size: 22, mono: true, weight: 500, align: 'left', color: C.dim, alpha: kin }); txt(sc.fine, X1, Y1 + 30, { size: 22, mono: true, weight: 500, align: 'right', color: C.dim, alpha: kin });
+    if (SE.length > 1) { let lx = 120; SE.forEach((s, j) => { const c = col(s.colore || ['lime', 'cyan', 'vio'][j % 3]); x.fillStyle = c; x.globalAlpha = kin; x.beginPath(); x.arc(lx, 1340, 9, 0, 7); x.fill(); x.globalAlpha = 1; txt(s.nome, lx + 20, 1341, { size: 26, weight: 700, align: 'left', alpha: kin }); lx += tw(s.nome, 26, 700) + 70; }); }
+  },
+  distribuzione(u, D, sc) {
+    titolo(u, sc); let bins = sc.bins, lo = sc.da, hi = sc.a; if (sc.valori) { const v = sc.valori, nb = sc.classi || 24; lo = Math.min(...v); hi = Math.max(...v); bins = new Array(nb).fill(0); v.forEach((a) => { bins[Math.min(nb - 1, Math.floor((a - lo) / ((hi - lo) || 1) * nb))]++; }); }
+    const nb = bins.length, mx = Math.max(...bins) || 1, X0 = 120, X1 = 960, B = 1230, MH = 520, bw = (X1 - X0) / nb, c = col(sc.colore || 'cyan'), un = sc.unita || '', Xv = (v) => X0 + (X1 - X0) * (v - lo) / ((hi - lo) || 1);
+    x.save(); x.globalAlpha = 0.4; x.fillStyle = C.ink; x.fillRect(X0, B, X1 - X0, 2); x.restore();
+    bins.forEach((b, i) => { const k = oC(seg(u, 0.4 + i * 0.03, 0.9 + i * 0.03)), h = MH * b / mx * k; if (h < 1) return; x.fillStyle = c; x.globalAlpha = 0.85; rr(X0 + i * bw + 2, B - h, bw - 4, h, 5); x.fill(); x.globalAlpha = 1; });
+    txt(fmtS(lo, decOf(sc.decimali ?? 0), un, false), X0, B + 32, { size: 22, mono: true, weight: 500, align: 'left', color: C.muted }); txt(fmtS(hi, decOf(sc.decimali ?? 0), un, false), X1, B + 32, { size: 22, mono: true, weight: 500, align: 'right', color: C.muted });
+    (sc.marcatori || []).forEach((m, j) => { const kd = oC(seg(u, 1.4 + j * 0.6, 1.9 + j * 0.6)); if (kd <= 0) return; const mx2 = Xv(m.valore), mc = col(m.colore || 'amber');
+      x.save(); x.globalAlpha = kd; x.strokeStyle = mc; x.lineWidth = 4; x.setLineDash([10, 8]); x.beginPath(); x.moveTo(mx2, B); x.lineTo(mx2, B - (MH + 40) * kd); x.stroke(); x.restore();
+      pill(clamp(mx2, 260, 820), 640 + j * 64, m.etichetta, kd, mc, 22); });
+    txt(sc.legenda, 540, 1330, { size: 28, weight: 600, color: C.muted, alpha: oC(seg(u, 1, 1.4)), maxW: 900 });
+  },
+  griglia(u, D, sc) {
+    titolo(u, sc); const R = sc.righe, Cs = sc.colonne, V = sc.valori, nr = R.length, nc = Cs.length, X0 = 200, Y0 = 650, cw = 780 / nc, ch = Math.min(580 / nr, cw * 1.05);
+    const all = V.flat(), mn = Math.min(...all), mx = Math.max(...all), mid = sc.centro ?? 0;
+    const colr = (v) => { const t = v >= mid ? (v - mid) / ((mx - mid) || 1) : -(mid - v) / ((mid - mn) || 1); const a = t >= 0 ? [42, 48, 45] : [42, 48, 45], b = t >= 0 ? [200, 250, 114] : [255, 107, 94], q = Math.abs(t); return `rgb(${a.map((z, i) => Math.round(lerp(z, b[i], q))).join(',')})`; };
+    Cs.forEach((cn, c) => txt(cn, X0 + c * cw + cw / 2, Y0 - 26, { size: 22, mono: true, weight: 500, color: C.muted, alpha: oC(seg(u, 0.3, 0.6)) }));
+    V.forEach((row, r) => { txt(R[r], X0 - 16, Y0 + r * ch + ch / 2, { size: 22, mono: true, weight: 500, align: 'right', color: C.muted, alpha: oC(seg(u, 0.3, 0.6)) });
+      row.forEach((v, c) => { const k = oC(seg(u, 0.4 + (r + c) * 0.05, 0.8 + (r + c) * 0.05)); if (k <= 0) return; const s = lerp(0.6, 1, k); x.save(); x.globalAlpha = k; x.translate(X0 + c * cw + cw / 2, Y0 + r * ch + ch / 2); x.scale(s, s);
+        x.fillStyle = colr(v); rr(-cw / 2 + 3, -ch / 2 + 3, cw - 6, ch - 6, 10); x.fill(); if (sc.mostraValori !== false && cw > 70) txt(fmtS(v, decOf(sc.decimali ?? 0), '', true), 0, 1, { size: 24, weight: 700, mono: true, color: Math.abs(v - mid) > (mx - mn) * 0.3 ? '#0B0D0C' : C.ink }); x.restore(); }); });
+    const yb = Y0 + nr * ch; txt(sc.legenda, 540, yb + 46, { size: 24, mono: true, weight: 500, color: C.muted, alpha: oC(seg(u, 0.8, 1.2)), maxW: 900 });
+    (sc.evidenzia || []).forEach((e, j) => { const k = oB(seg(t0(u), 1.6 + j * 0.5, 2.1 + j * 0.5)); if (k <= 0) return; const cx = X0 + e.c * cw + cw / 2, cy = Y0 + e.r * ch + ch / 2, ec = col(e.colore || 'amber'), pu = 1 + 0.06 * Math.sin(u * 5);
+      x.save(); x.strokeStyle = ec; x.lineWidth = 6; x.globalAlpha = clamp(k); rr(cx - cw / 2 * pu - 4, cy - ch / 2 * pu - 4, cw * pu + 8, ch * pu + 8, 14); x.stroke(); x.restore();
+      if (e.etichetta) pill(540, yb + 110 + j * 64, e.etichetta, k, ec, 22); });
+  },
+  checklist(u, D, sc) {
+    titolo(u, sc); const V = sc.voci, n = V.length, gap = Math.min(130, 760 / n), step = Math.min(0.7, (D * 0.6) / n);
+    V.forEach((v, i) => { const d = 0.4 + i * step, k = oC(seg(u, d, d + 0.4)), ki = oB(seg(u, d + 0.35, d + 0.7), 2.4), y = 660 + i * gap, e = v.esito, c = e === 'si' ? C.lime : e === 'no' ? C.red : C.amber;
+      glass(80, y - 48, 920, 96, 24, k); txt(v.testo, 210, y, { size: 38, weight: 700, align: 'left', alpha: k, maxW: 760 });
+      if (ki > 0) { x.save(); x.translate(140, y); x.scale(ki, ki); x.fillStyle = c; x.beginPath(); x.arc(0, 0, 30, 0, 7); x.fill(); x.strokeStyle = '#0B0D0C'; x.lineWidth = 7; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath();
+        if (e === 'si') { x.moveTo(-13, 1); x.lineTo(-3, 11); x.lineTo(14, -10); x.stroke(); } else if (e === 'no') { x.moveTo(-10, -10); x.lineTo(10, 10); x.moveTo(10, -10); x.lineTo(-10, 10); x.stroke(); } else txt('?', 0, 2, { size: 40, weight: 800, color: '#0B0D0C' }); x.restore(); } });
+  },
+  verdetto(u, D, sc) {
+    titolo(u, sc); const e = String(sc.esito || '').toUpperCase(), c = col(sc.colore || (/BOCC|SCART|NO/.test(e) ? 'red' : /PROM|OK|PASS/.test(e) ? 'lime' : 'amber')), k = oB(seg(u, 0.2, 0.75), 2.2);
+    if (k > 0) { x.save(); x.translate(540, 740); x.rotate(-0.07); const s = lerp(1.8, 1, clamp(k)); x.scale(s, s); x.globalAlpha = clamp(k * 2); const w = Math.min(900, tw(e, 140, 800) + 90);
+      x.strokeStyle = c; x.lineWidth = 10; rr(-w / 2, -110, w, 220, 28); x.stroke(); txt(e, 0, 6, { size: 140, weight: 800, color: c, maxW: w - 70 }); x.restore(); glow(540, 740, 380, rgbOf(sc.colore || (/BOCC|SCART|NO/.test(e) ? 'red' : 'lime')), 0.15 * clamp(k)); }
+    const N = sc.numeri || [], cw = N.length ? Math.min(300, 920 / N.length - 20) : 0;
+    N.forEach((m, i) => { const cx = 540 + (i - (N.length - 1) / 2) * (cw + 24), kk = oB(seg(u, 1 + i * 0.25, 1.5 + i * 0.25)); if (kk <= 0) return; x.save(); x.globalAlpha = clamp(kk * 1.5); x.translate(cx, 1050); x.scale(lerp(0.85, 1, clamp(kk)), lerp(0.85, 1, clamp(kk))); x.translate(-cx, -1050);
+      glass(cx - cw / 2, 960, cw, 180, 26, 1); txt(m.valore, cx, 1030, { size: 60, weight: 800, color: col(m.colore || 'ink'), maxW: cw - 30 }); txt((m.etichetta || '').toUpperCase(), cx, 1100, { size: 20, mono: true, weight: 600, color: C.muted, maxW: cw - 30, ls: 2 }); x.restore(); });
+    (sc.motivo || []).forEach((r, i) => { const kk = oC(seg(u, 1.6 + i * 0.4, 2.1 + i * 0.4)); wrap(r, 38, 900, 600).forEach((ws, li) => txt(ws.join(' '), 540, 1230 + i * 110 + li * 48, { size: 38, weight: 600, color: C.ink, alpha: kk })); });
+  },
+  passi(u, D, sc) {
+    titolo(u, sc); const V = sc.voci, n = V.length, gap = n > 1 ? Math.min(160, 780 / (n - 1)) : 0, step = Math.min(0.7, (D * 0.6) / n), y0 = 650;
+    V.forEach((v, i) => { const d = 0.4 + i * step, k = oB(seg(u, d, d + 0.5)), y = y0 + i * gap, st = typeof v === 'object' ? v.stato : null, label = typeof v === 'object' ? v.testo : v, c = st === 'ok' ? C.lime : st === 'no' ? C.red : 'rgba(255,255,255,0.18)';
+      if (i < n - 1) { const kc = oC(seg(u, d + 0.3, d + step + 0.1)); x.save(); x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.setLineDash([6, 8]); x.beginPath(); x.moveTo(540, y + 48); x.lineTo(540, y + 48 + (gap - 96) * kc); x.stroke(); x.restore(); }
+      if (k <= 0) return; x.save(); x.globalAlpha = clamp(k * 1.5); x.translate(540, y); x.scale(lerp(0.8, 1, clamp(k)), lerp(0.8, 1, clamp(k))); x.translate(-540, -y);
+      glass(140, y - 48, 800, 96, 26, 1, c); x.fillStyle = st === 'no' ? C.red : C.lime; x.beginPath(); x.arc(200, y, 26, 0, 7); x.fill(); txt(String(i + 1), 200, y + 2, { size: 30, weight: 800, color: '#0B0D0C' });
+      txt(label, 250, y, { size: 34, weight: 700, align: 'left', maxW: 660 }); x.restore(); });
+  },
+  formula(u, D, sc) {
+    titolo(u, sc); const f = sc.formula || '', kt = seg(u, 0.4, 1.6), n = Math.floor(kt * f.length); glass(90, 620, 900, 190, 30, oC(seg(u, 0.2, 0.5)));
+    txt(f.slice(0, n), 540, 716, { size: 64, weight: 600, mono: true, color: C.ink, maxW: 840 }); if (kt < 1 && (u * 2) % 1 < 0.6) { const w = tw(f.slice(0, n), 64, 600, true); x.fillStyle = C.lime; x.fillRect(540 + w / 2 + 6, 690, 18, 52); }
+    (sc.spiegazioni || []).forEach((s, i) => { const k = oC(seg(u, 1.8 + i * 0.5, 2.3 + i * 0.5)), y = 900 + i * 120; if (k <= 0) return; x.save(); x.globalAlpha = k; x.translate((1 - k) * -30, 0);
+      txt(s.simbolo, 120, y, { size: 44, weight: 700, mono: true, color: C.lime, align: 'left' }); const L = wrap(s.testo, 34, 680, 600); L.forEach((ws, li) => txt(ws.join(' '), 300, y + (li - (L.length - 1) / 2) * 42, { size: 34, weight: 600, align: 'left' })); x.restore(); });
+  },
+  fine(u, D, sc) {
+    const L = sc.righe || []; let n = 0; L.forEach((ln, li) => { let z = 96; const full = tw(ln, z, 800); if (full > 960) z = Math.floor(z * 960 / full); let cx = 540 - tw(ln, z, 800) / 2; const yy = 820 + li * z * 1.1, sp = tw(' ', z, 800);
+      ln.split(' ').forEach((w) => { const k = oC(seg(u, 0.2 + n * 0.08, 0.6 + n * 0.08)); n++; const ww = tw(w, z, 800); txt(w, cx + ww / 2, yy + (1 - k) * 30, { size: z, weight: 800, color: li === L.length - 1 ? C.lime : C.ink, alpha: k }); cx += ww + sp; }); });
+    txt(sc.firma, 540, 820 + L.length * 106 + 60, { size: 34, weight: 600, color: C.muted, alpha: oC(seg(u, 1.2, 1.7)), maxW: 900 });
+    txt(sc.avviso ?? 'Contenuto di ricerca · Non è consulenza finanziaria', 540, 1470, { size: 22, mono: true, weight: 500, color: C.dim, alpha: oC(seg(u, 1.4, 1.9)), ls: 1, maxW: 940 });
+  },
+};
+SCENE.immagine = SCENE.testo;   // alias di sicurezza
+let _u = 0; const t0 = (u) => u;
+
+/* ---------- tempi: durata di lettura (≈3,2 parole al secondo) + tempo per le animazioni ---------- */
+const SC = S.scene.map((sc) => ({ ...sc, dur: sc.durata || clamp(2.4 + words(sc) / 3.2 + (EXTRA[sc.tipo] || 0), 3.8, 11) }));
+let acc = 0.2; SC.forEach((sc) => { sc.a = acc; acc += sc.dur; }); const DUR = acc + 0.5; window.DUR = DUR; window.TEMPI = SC.map((sc) => sc.a + sc.dur * 0.75);
+
+function sfondo(t) { x.fillStyle = C.bg; x.fillRect(0, 0, W, H); [[RGB.lime, 0.07, 0.11, 0.6], [RGB.cyan, 0.06, 0.15, 2.2], [RGB.vio, 0.07, 0.09, 4.1]].forEach(([c, a, sp, ph]) => glow(540 + Math.sin(t * sp + ph) * 420, 960 + Math.cos(t * sp * 1.3 + ph) * 620, 900, c, a)); }
+function testata(t) {
+  const k = oC(seg(t, 0, 0.5)); txt((S.marchio || '').toUpperCase(), 70, 196, { size: 22, mono: true, weight: 600, align: 'left', color: C.muted, alpha: k, ls: 3, maxW: 700 });
+  let cur = 0; SC.forEach((sc, i) => { if (t >= sc.a) cur = i; }); txt(`${String(cur + 1).padStart(2, '0')} / ${String(SC.length).padStart(2, '0')}`, 1010, 196, { size: 22, mono: true, weight: 600, align: 'right', color: C.muted, alpha: k });
+  const gw = (940 - (SC.length - 1) * 8) / SC.length; SC.forEach((sc, i) => { const x0 = 70 + i * (gw + 8), p = seg(t, sc.a, sc.a + sc.dur); x.fillStyle = 'rgba(241,244,238,0.16)'; rr(x0, 228, gw, 6, 3); x.fill(); if (p > 0) { x.fillStyle = C.lime; rr(x0, 228, gw * p, 6, 3); x.fill(); } });
+}
+function render(t) {
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; sfondo(t);
+  SC.forEach((sc) => { const u = t - sc.a; if (u < 0 || u > sc.dur + 0.35) return; const kin = oC(seg(u, 0, 0.35)), kout = seg(u, sc.dur, sc.dur + 0.35); const f = SCENE[sc.tipo] || SCENE.testo;
+    x.save(); x.globalAlpha = kin * (1 - kout); x.translate(0, (1 - kin) * 40 - kout * 30); f(u, sc.dur, sc);
+    if (sc.nota) txt(sc.nota, 540, 1420, { size: 26, weight: 600, color: C.muted, alpha: oC(seg(u, 0.8, 1.2)), maxW: 940 });
+    if (sc.tag) pill(540, 1500, sc.tag, oC(seg(u, 0.3, 0.7)), col(sc.coloreTag || 'amber'), 22); x.restore(); });
+  testata(t);
+  const v = x.createRadialGradient(540, 960, 600, 540, 960, 1300); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.55)'); x.fillStyle = v; x.fillRect(0, 0, W, H);
+}
+window.render = render;
+const RENDER = /render/.test(location.search);
+Promise.all(['800 50px Manrope', '700 50px Manrope', '600 50px Manrope', '600 50px "IBM Plex Mono"', '500 50px "IBM Plex Mono"'].map((f) => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready).then(() => {
+  window.READY = true; render(0);
+  if (RENDER) { document.getElementById('h').style.display = 'none'; return; }
+  let start = performance.now(), paused = false, pt = 0;
+  cv.addEventListener('click', () => { paused = !paused; if (!paused) start = performance.now() - pt * 1000; });
+  cv.addEventListener('dblclick', () => { start = performance.now(); paused = false; });
+  (function loop(now) { if (!paused) { pt = ((now - start) / 1000) % (DUR + 1.5); render(Math.min(pt, DUR)); } requestAnimationFrame(loop); })(performance.now());
+});
+</script>
+</body></html>
