@@ -217,3 +217,7 @@ trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correz
 | 02/10 | Scene P3–P5 | 3 × reel-regista (Opus) in parallelo | 15–17 min (più l'attesa della voce per l'anteprima vera) |
 | 02/10 | Voci P3–P5 in fila (+ 2 frasi rifatte) | macchina | ~25 min a puntata con i registi che occupano il processore |
 | 02/10 | Controlli indipendenti P3–P5 | reel-controllo (Sonnet) | 7–10 min (ancora sopra i 5) |
+
+### 15/11/2026 — aggancio su un decimale (P40)
+- `WA(..., ['1,5'])`: la normalizzazione toglie la virgola, «1,5» diventa «15» e combacia con «150» detto prima → pillola in anticipo di 3 s. **Regola:** per i decimali non usare la forma con la virgola; agganciare la parola prima («più») o la forma in lettere («mezzo»).
+- Whisper scrive «4 .000» come due parole: nella lista di un aggancio su migliaia mettere anche la parte intera («4»).
