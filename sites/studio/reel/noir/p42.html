@@ -67,7 +67,7 @@ function sPaniere(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
 function sPesi(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
   const tCib = WA('pesi', ['cibo'], 1, 0.3), tTra = WA('pesi', ['trasporti'], 1, 0.45), tRis = WA('pesi', ['ristoranti'], 1, 0.6), tCas = WA('pesi', ['abitazione', 'casa', 'case'], 1, 0.75), tDec = WA('pesi', ['decimo'], 1, 0.62);
   phrase(t, a + 0.05, [['Ogni voce pesa', C.ink], ['quanto ci spendiamo', C.lime]], 345, { size: 92 });
-  const BX = 100, U = 40, BH = 64, R = [['CIBO', 17.2, 700, tCib, '17,2%'], ['TRASPORTI', 15.5, 860, tTra, '15,5%'], ['RISTORANTI E ALBERGHI', 12.2, 1020, tRis, '12,2%'], ['CASA E BOLLETTE', 12.0, 1180, tCas, '12,0%']];
+  const BX = 100, U = 40, BH = 64, R = [['CIBO', 17.2, 700, tCib, '17,2%'], ['TRASPORTI', 15.5, 860, tTra, '15,5%'], ['RISTORANTI E ALBERGHI', 12.2, 1020, tRis, '12,2%'], ['ABITAZIONE E BOLLETTE', 12.0, 1180, tCas, '12,0%']];
   const kg = oC(seg(t, a + 0.3, a + 0.9)), kd = oC(seg(t, tDec - 0.1, tDec + 0.35));
   R.forEach(([nm, v, y, ts, vt], i) => { const ke = oC(seg(t, a + 0.3 + i * 0.1, a + 0.8 + i * 0.1)), kk = oC(seg(t, ts - 0.1, ts + 0.7)), on = t >= ts - 0.1;
     tb(ke, nm, BX, y - 58, { align: 'left', color: on ? C.lime : C.ink, size: 26 });
@@ -83,7 +83,7 @@ function sPesi(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
 function houseBig(cx, cy, col, lw = 8) { x.save(); x.strokeStyle = col; x.lineWidth = lw; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 70, cy - 4); x.lineTo(cx, cy - 66); x.lineTo(cx + 70, cy - 4); x.stroke(); x.beginPath(); x.rect(cx - 52, cy - 4, 104, 76); x.stroke(); x.beginPath(); x.rect(cx - 14, cy + 28, 28, 44); x.stroke(); x.restore(); }
 function sCasaAff(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.03);
   const tNon = WA('casa-affitti', ['rientra', 'investimento'], 1, 0.3), tAff = WA('casa-affitti', ['affitti'], 1, 0.62), tTre = WA('casa-affitti', ['tre', '3'], 1, 0.86);
-  phrase(t, a + 0.05, [['La casa', C.ink], ['non è nel paniere', C.red]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['Comprare casa', C.ink], ['non è nel paniere', C.red]], 345, { size: 92 });
   const CX = 540, CY = 830, kh = oB(seg(t, a + 0.2, a + 0.7)), kn = oC(seg(t, tNon - 0.1, tNon + 0.4));
   pop(CX, CY, kh, () => { glow(CX, CY, 220, '255,90,78', 0.12 + 0.12 * kn); houseBig(CX, CY - 6, C.ink);
     x.save(); x.strokeStyle = C.red; x.lineWidth = 10; x.lineCap = 'round'; x.globalAlpha = 0.4 + 0.6 * kn; if (kn < 1) x.setLineDash([14, 12]); x.beginPath(); x.arc(CX, CY, 120, 0, 7); x.stroke(); x.setLineDash([]);
