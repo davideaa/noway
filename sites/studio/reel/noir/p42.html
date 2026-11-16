@@ -65,7 +65,7 @@ function sPaniere(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
 
 /* ================= PESI: quattro barre in scala (1% = 40 px) contro la linea del decimo ================= */
 function sPesi(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
-  const tCib = WA('pesi', ['cibo'], 1, 0.3), tTra = WA('pesi', ['trasporti'], 1, 0.45), tRis = WA('pesi', ['ristoranti'], 1, 0.6), tCas = WA('pesi', ['casa'], 1, 0.75), tDec = WA('pesi', ['decimo'], 1, 0.62);
+  const tCib = WA('pesi', ['cibo'], 1, 0.3), tTra = WA('pesi', ['trasporti'], 1, 0.45), tRis = WA('pesi', ['ristoranti'], 1, 0.6), tCas = WA('pesi', ['abitazione', 'casa', 'case'], 1, 0.75), tDec = WA('pesi', ['decimo'], 1, 0.62);
   phrase(t, a + 0.05, [['Ogni voce pesa', C.ink], ['quanto ci spendiamo', C.lime]], 345, { size: 92 });
   const BX = 100, U = 40, BH = 64, R = [['CIBO', 17.2, 700, tCib, '17,2%'], ['TRASPORTI', 15.5, 860, tTra, '15,5%'], ['RISTORANTI E ALBERGHI', 12.2, 1020, tRis, '12,2%'], ['CASA E BOLLETTE', 12.0, 1180, tCas, '12,0%']];
   const kg = oC(seg(t, a + 0.3, a + 0.9)), kd = oC(seg(t, tDec - 0.1, tDec + 0.35));
