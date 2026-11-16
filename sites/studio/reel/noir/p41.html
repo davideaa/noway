@@ -1,0 +1,226 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 41, DAY: 0, CAP: 2, NEXT: ['Il paniere', 'dell’Istat'], FONTE: 'DATI: ISTAT, EUROSTAT, BCE' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 41 — «Cos'è l'inflazione» (lunedì 16/11/2026, lezione 1 di 5, capitolo 3). Numeri SOLO da p41-fonti.md:
+   media annua Italia: circa 8% (2022: 8,1) e circa 6% (2023: 5,7) · conto nostro: 100 € (media 2021) → circa 114 € (1,081 × 1,057) ·
+   ESEMPIO (CIFRE INVENTATE): caffè 1,00 € → 1,10 €, benzina che scende, media ferma. Niente righe di fonte, niente dato provvisorio di ottobre.
+   Testo mai sotto opacità 0,85 da fermo (entra con dissolvenza breve sulla parola); le forme possono essere spente. */
+const ORDER = ['num', 'hook', 'def', 'esempio', 'misura', 'reale', 'conto', 'euro', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12;
+const PAPER = '#ECE8DA', DK = '#15200C';
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.3)), ...o });
+/* testo che entra sulla parola: dissolvenza 0,4 s, poi opacità piena */
+const T = (t, tWord, s, px, py, o = {}) => { const k = oC(seg(t, tWord - 0.1, tWord + 0.3)); txt(s, px, py, { ...o, alpha: k, blur: (1 - k) * 10 }); return k; };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const stamp = (t, a0, label, cy, col = C.amber) => { const ke = oC(seg(t, a0, a0 + 0.4)), lw = tw(label, 26, 600, 'mono', 2) + 64;
+  x.save(); x.globalAlpha = ke; x.strokeStyle = col; x.lineWidth = 3; rr(540 - lw / 2, cy - 30, lw, 60, 30); x.stroke(); x.fillStyle = 'rgba(245,165,36,0.10)'; x.fill(); x.restore();
+  txt(label, 540, cy + 1, { fam: 'mono', size: 26, weight: 600, color: col, ls: 2, alpha: ke }); };
+const EX = 'ESEMPIO · CIFRE INVENTATE';
+function tagShape(cx, cy, w, h) { x.beginPath(); x.moveTo(cx - w / 2, cy); x.lineTo(cx - w / 2 + h * 0.5, cy - h / 2); x.lineTo(cx + w / 2, cy - h / 2); x.lineTo(cx + w / 2, cy + h / 2); x.lineTo(cx - w / 2 + h * 0.5, cy + h / 2); x.closePath(); }
+function tag(cx, cy, w, h, col, fillA = 0.14, dashed = false, a = 1) { x.save(); x.globalAlpha *= a; tagShape(cx, cy, w, h); x.fillStyle = col; x.globalAlpha *= fillA; x.fill(); x.globalAlpha = a * (x.globalAlpha > 0 ? 1 : 1);
+  x.strokeStyle = col; x.lineWidth = 4; x.lineJoin = 'round'; if (dashed) x.setLineDash([9, 8]); tagShape(cx, cy, w, h); x.stroke(); x.setLineDash([]); x.beginPath(); x.arc(cx - w / 2 + h * 0.5, cy, 6, 0, 7); x.stroke(); x.restore(); }
+function arrowUp(cx, cy, s, col, a = 1) { x.save(); x.globalAlpha *= a; x.fillStyle = col; x.beginPath(); x.moveTo(cx, cy - s); x.lineTo(cx + s * 0.8, cy); x.lineTo(cx + s * 0.3, cy); x.lineTo(cx + s * 0.3, cy + s); x.lineTo(cx - s * 0.3, cy + s); x.lineTo(cx - s * 0.3, cy); x.lineTo(cx - s * 0.8, cy); x.closePath(); x.fill(); x.restore(); }
+function arrowDown(cx, cy, s, col, a = 1) { x.save(); x.translate(cx, cy); x.scale(1, -1); arrowUp(0, 0, s, col, a); x.restore(); }
+
+/* ================= HOOK: una tazzina con un cartellino che sale; sotto, gli altri prezzi sono caselle vuote con «?» ================= */
+function cup(cx, cy, t, a, k) { x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy);
+  x.fillStyle = 'rgba(241,244,238,0.10)'; x.strokeStyle = C.ink; x.lineWidth = 6; x.lineJoin = 'round';
+  x.beginPath(); x.ellipse(0, 150, 230, 46, 0, 0, 7); x.stroke(); x.fill();
+  x.beginPath(); x.moveTo(-150, -60); x.lineTo(150, -60); x.bezierCurveTo(150, 90, 90, 150, 0, 150); x.bezierCurveTo(-90, 150, -150, 90, -150, -60); x.closePath(); x.fill(); x.stroke();
+  x.beginPath(); x.ellipse(0, -60, 150, 28, 0, 0, 7); x.fillStyle = 'rgba(245,165,36,0.35)'; x.fill(); x.stroke();
+  x.beginPath(); x.moveTo(148, -30); x.bezierCurveTo(260, -40, 260, 80, 130, 80); x.stroke();
+  for (let i = 0; i < 3; i++) { const u = ((t - a) * 0.4 + i / 3) % 1, sx = -50 + i * 50, sy = -110 - u * 150; x.save(); x.globalAlpha *= Math.sin(Math.PI * u) * 0.7; x.strokeStyle = C.ink; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(sx, sy); x.bezierCurveTo(sx + 22, sy - 25, sx - 22, sy - 45, sx, sy - 70); x.stroke(); x.restore(); }
+  x.restore(); }
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tBas = WA('hook', ['basta'], 1, 0.9), tCos = WA('hook', ['costa'], 1, 0.3);
+  phrase(t, a + 0.05, [['Un solo prezzo', C.ink]], 345, { size: 92 });
+  phrase(t, tBas - 0.3, [['non basta', C.red]], Y2, { size: 92 });
+  const kc = oB(seg(t, a + 0.15, a + 0.7)); glow(470, 860, 360, '245,165,36', 0.10 * clamp(kc)); cup(470, 860, t, a, kc);
+  /* cartellino del caffè: pende a destra e sale sulla parola «costa» */
+  const up = oC(seg(t, tCos - 0.1, tCos + 0.7)), kt = oB(seg(t, a + 0.35, a + 0.85)), ty = lerp(780, 700, up) + Math.sin((t - a) * 2) * 4;
+  pop(830, ty, kt, () => { glow(830, ty, 150, '255,90,78', 0.22 * up); tag(830, ty, 230, 120, up > 0.3 ? C.red : C.ink, 0.16); arrowUp(840, ty, 40, up > 0.3 ? C.red : 'rgba(241,244,238,0.55)'); });
+  lab(t, 'CAFFÈ', 830, ty + 96, a + 0.5, { color: C.ink, size: 28, ls: 4 });
+  /* gli altri prezzi: caselle vuote */
+  for (let i = 0; i < 5; i++) { const k = oC(seg(t, a + 0.5 + i * 0.07, a + 0.95 + i * 0.07)), cx = 170 + i * 185; if (k <= 0) continue;
+    tag(cx, 1190, 150, 76, 'rgba(241,244,238,0.6)', 0.05, true, k); txt('?', cx + 14, 1192, { size: 40, weight: 800, color: C.ink, alpha: k * 0.92 }); }
+  lab(t, 'GLI ALTRI PREZZI?', 540, 1290, a + 0.9, { color: C.ink, size: 28, ls: 4 });
+  x.restore(); finish(t); }
+
+/* ================= DEF: dodici barre-prezzo; salgono tutte insieme, la linea della media con loro ================= */
+const BH0 = [190, 400, 270, 500, 330, 220, 450, 300, 420, 210, 360, 280];
+function sDef(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tAum = WA('def', ['aumento'], 1, 0.12), tGen = WA('def', ['generale'], 1, 0.22), tMed = WA('def', ['media'], 1, 0.62), tTan = WA('def', ['tanti'], 1, 0.72);
+  phrase(t, a + 0.05, [['Un aumento', C.ink]], 345, { size: 92 });
+  phrase(t, tGen - 0.3, [['generale', C.lime]], Y2, { size: 92 });
+  const BASE = 1270, BW = 50, X0 = 120, DX = 74, GR = 120, avg = BH0.reduce((p, c) => p + c, 0) / BH0.length;
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(90, BASE + 6); x.lineTo(990, BASE + 6); x.stroke(); x.restore();
+  const g = oB(seg(t, tGen - 0.15, tGen + 0.9));
+  BH0.forEach((h, i) => { const cx = X0 + i * DX, k = oC(seg(t, a + 0.15 + i * 0.04, a + 0.65 + i * 0.04)), up = clamp(g * 1) * GR, kk = oC(seg(t, tGen - 0.15 + i * 0.03, tGen + 0.6 + i * 0.03));
+    x.save(); x.fillStyle = 'rgba(241,244,238,0.34)'; rr(cx - BW / 2, BASE - h * k, BW, h * k, 6); x.fill(); x.restore();
+    const gh = GR * kk; x.save(); x.setLineDash([8, 7]); x.strokeStyle = C.lime; x.lineWidth = 3; x.globalAlpha = 0.45 * k * (1 - kk); rr(cx - BW / 2, BASE - h - GR, BW, GR, 6); x.stroke(); x.restore();
+    if (gh > 0) { x.save(); x.fillStyle = C.lime; rr(cx - BW / 2, BASE - h - gh, BW, gh, 6); x.fill(); x.restore(); } });
+  /* la media: linea tratteggiata, sale con le barre */
+  const ym = BASE - avg - GR * clamp(g), kl = oC(seg(t, a + 0.5, a + 1.0));
+  dash(90, ym, 990, ym, C.ink, 4, [14, 10], kl); glow(540, ym, 400, '200,250,114', 0.08 * kl);
+  x.save(); x.globalAlpha = kl; x.fillStyle = '#050607'; rr(780, ym - 64, 190, 54, 14); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 2.5; x.stroke(); x.restore();
+  T(t, a + 0.5, 'MEDIA', 875, ym - 36, { fam: 'mono', size: 30, weight: 700, color: C.ink, ls: 4 });
+  lab(t, 'TANTI PREZZI', 540, 1340, a + 0.6, { color: C.ink, size: 28, ls: 6 });
+  x.restore(); finish(t); }
+
+/* ================= ESEMPIO: caffè e benzina su due colonne di vetro; la media sotto resta ferma ================= */
+function sEsempio(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tEu = WA('esempio', ['euro', 'uno', '1'], 1, 0.12), tDie = WA('esempio', ['dieci', '110', '10', '1'], 1, 0.42), tSce = WA('esempio', ['scende', 'scend'], 1, 0.55), tCal = WA('esempio', ['calano', 'calan'], 1, 0.78), tFer = WA('esempio', ['ferma'], 1, 0.95);
+  phrase(t, a + 0.05, [['Uno sale,', C.red], ['l’altro scende', C.lime]], 345, { size: 92 });
+  stamp(t, a + 0.3, EX, 640, C.amber);
+  const CX = [300, 780], PY = 940, PH = 440, TT = 800, TB = 1050, TH = TB - TT;
+  const lc = lerp(0.35, 0.80, ioC(seg(t, tDie - 0.2, tDie + 0.8))), lb = lerp(0.75, 0.30, ioC(seg(t, tSce - 0.2, tSce + 0.9)));
+  [['CAFFÈ', C.red, '255,90,78', lc], ['BENZINA', C.lime, '200,250,114', lb]].forEach(([nm, col, rgb, lv], i) => { const cx = CX[i], k = oB(seg(t, a + 0.25 + i * 0.1, a + 0.8 + i * 0.1));
+    pop(cx, PY, k, () => { glass(cx, PY, 400, PH, 40, 1);
+      txt(nm, cx, PY - PH / 2 + 46, { fam: 'mono', size: 30, weight: 700, color: C.ink, ls: 4 });
+      x.save(); x.strokeStyle = 'rgba(241,244,238,0.30)'; x.lineWidth = 3; rr(cx - 14, TT, 28, TH, 14); x.stroke(); x.restore();
+      const hy = TB - lv * TH; x.save(); x.fillStyle = 'rgba(241,244,238,0.7)'; rr(cx - 14, hy, 28, TB - hy, 14); x.fill(); x.fillStyle = col; x.beginPath(); x.arc(cx, hy, 24, 0, 7); x.fill(); x.restore();
+      glow(cx, hy, 100, rgb, 0.3); }); });
+  /* frecce di direzione accanto alle maniglie */
+  const ac = oC(seg(t, tDie - 0.1, tDie + 0.4)), ab = oC(seg(t, tSce - 0.1, tSce + 0.4));
+  arrowUp(CX[0] + 90, 925, 30, C.red, ac); arrowDown(CX[1] + 90, 925, 30, C.lime, ab);
+  /* valori */
+  const k1 = oC(seg(t, tEu - 0.1, tEu + 0.3)), k2 = oC(seg(t, tDie - 0.1, tDie + 0.3));
+  txt('1,00 €', CX[0], 1112, { size: 54, weight: 800, color: C.ink, alpha: k1 * (1 - k2), blur: (1 - k1) * 10, ls: -1 }); txt('1,10 €', CX[0], 1112, { size: 54, weight: 800, color: C.red, alpha: k2, blur: (1 - k2) * 10, ls: -1 });
+  T(t, tCal, 'CALA', CX[1], 1112, { fam: 'mono', size: 36, weight: 700, color: C.lime, ls: 6 });
+  /* la media: ferma al centro */
+  const km = oC(seg(t, a + 0.5, a + 1.0)); dash(140, 1300, 940, 1300, 'rgba(241,244,238,0.45)', 4, [10, 9], km);
+  x.save(); x.globalAlpha = km; x.fillStyle = tFer - 0.1 <= t ? C.lime : C.ink; x.beginPath(); x.arc(540, 1300, 17, 0, 7); x.fill(); x.restore();
+  lab(t, 'MEDIA', 140, 1260, a + 0.6, { align: 'left', color: C.ink, size: 28, ls: 4 });
+  T(t, tFer, 'RESTA FERMA', 940, 1260, { fam: 'mono', size: 28, weight: 700, color: C.lime, ls: 3, align: 'right' });
+  x.restore(); finish(t); }
+
+/* ================= MISURA: due ceste, la cesta di oggi e quella di un anno fa; la seconda si riempie sulla parola «anno» ================= */
+function glyph(i, cx, cy, a, ghost) { x.save(); x.globalAlpha *= a; x.lineWidth = 4; x.lineJoin = 'round';
+  const col = [C.amber, C.ink, C.red, C.lime, C.amber][i]; x.strokeStyle = col; x.fillStyle = ghost ? 'rgba(0,0,0,0)' : col;
+  x.beginPath();
+  if (i === 0) x.ellipse(cx, cy, 32, 20, 0, 0, 7); else if (i === 1) x.roundRect(cx - 15, cy - 28, 30, 56, 6); else if (i === 2) x.arc(cx, cy, 24, 0, 7);
+  else if (i === 3) x.roundRect(cx - 20, cy - 26, 40, 52, 4); else { x.moveTo(cx, cy - 28); x.quadraticCurveTo(cx + 30, cy + 6, cx, cy + 26); x.quadraticCurveTo(cx - 30, cy + 6, cx, cy - 28); }
+  if (!ghost) x.fill(); else x.stroke(); x.restore(); }
+function basket(cx, cy, col, dashed, itemsFn) { x.save(); x.translate(cx, cy); x.lineJoin = 'round'; x.strokeStyle = col; x.lineWidth = 8; if (dashed) x.setLineDash([14, 10]);
+  x.beginPath(); x.arc(0, -90, 110, Math.PI, 0); x.stroke(); x.setLineDash([]); x.restore();
+  x.save(); x.translate(cx, cy); itemsFn(); x.restore();
+  x.save(); x.translate(cx, cy); x.beginPath(); x.moveTo(-150, -90); x.lineTo(150, -90); x.lineTo(115, 110); x.lineTo(-115, 110); x.closePath(); x.fillStyle = '#0b0e0c'; x.fill();
+  x.strokeStyle = col; x.lineWidth = 5; if (dashed) x.setLineDash([14, 10]); x.stroke(); x.setLineDash([]);
+  x.strokeStyle = col; x.globalAlpha *= 0.5; x.lineWidth = 3; [-40, 10, 60].forEach((yy) => { const hw = lerp(150, 115, (yy + 90) / 200); x.beginPath(); x.moveTo(-hw, yy); x.lineTo(hw, yy); x.stroke(); }); x.restore(); }
+function sMisura(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tPan = WA('misura', ['paniere'], 1, 0.6), tAnn = WA('misura', ['anno'], 1, 0.82);
+  phrase(t, a + 0.05, [['Sale la media', C.ink], ['di quasi tutti', C.lime]], 345, { size: 92 });
+  const kp = seg(t, tPan - 0.1, tPan + 0.45); if (kp > 0) glassPill(540, 650, 'PANIERE', kp, C.lime, 44);
+  const POS = [[-92, -112], [-46, -118], [0, -110], [46, -118], [92, -112]], CY = 1010;
+  const fall = (i, t0) => oB(seg(t, t0 + i * 0.16, t0 + 0.4 + i * 0.16));
+  /* a destra la cesta di oggi: si riempie subito */
+  const kR = oB(seg(t, a + 0.1, a + 0.6)), kL = oB(seg(t, a + 0.2, a + 0.7));
+  pop(790, CY, kR, () => { glow(790, CY, 260, '200,250,114', 0.10); basket(790, CY, C.lime, false, () => { POS.forEach(([px, py], i) => { const k = fall(i, a + 0.3); glyph(i, px, py - (1 - clamp(k)) * 240, clamp(k * 3), false); }); }); });
+  /* a sinistra la cesta di un anno prima: vuota, a tratti, si riempie sulla parola «anno» */
+  pop(290, CY, kL, () => { basket(290, CY, 'rgba(241,244,238,0.7)', true, () => { POS.forEach(([px, py], i) => { const k = fall(i, tAnn - 0.1), kg = oC(seg(t, a + 0.5, a + 1.0));
+    if (k <= 0.01) glyph(i, px, py, 0.5 * kg, true); else glyph(i, px, py - (1 - clamp(k)) * 240, clamp(k * 3), false); }); }); });
+  const ka = oC(seg(t, tAnn + 0.3, tAnn + 0.8)); if (ka > 0) { x.save(); x.globalAlpha = ka; x.strokeStyle = C.lime; x.fillStyle = C.lime; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(500, 1010); x.lineTo(580, 1010); x.stroke();
+    x.beginPath(); x.moveTo(500, 1010); x.lineTo(520, 992); x.lineTo(520, 1028); x.closePath(); x.fill(); x.beginPath(); x.moveTo(580, 1010); x.lineTo(560, 992); x.lineTo(560, 1028); x.closePath(); x.fill(); x.restore(); }
+  lab(t, 'UN ANNO FA', 290, 1230, a + 0.5, { color: C.ink, size: 28, ls: 4 }); lab(t, 'OGGI', 790, 1230, a + 0.5, { color: C.lime, size: 28, ls: 4 });
+  x.restore(); finish(t); }
+
+/* ================= REALE: due quadranti a lancetta (2022, 2023); la lancetta sale sul numero ================= */
+function gauge(t, cx, cy, R, v, col, rgb, tY, tN, label, year, a, k) {
+  x.save(); x.globalAlpha *= clamp(k);
+  x.strokeStyle = 'rgba(241,244,238,0.28)'; x.lineWidth = 26; x.lineCap = 'round'; x.setLineDash([2, 22]); x.beginPath(); x.arc(cx, cy, R, Math.PI, 2 * Math.PI); x.stroke(); x.setLineDash([]);
+  for (let i = 0; i <= 10; i++) { const an = Math.PI + i * Math.PI / 10; x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = i % 5 === 0 ? 5 : 3; x.beginPath(); x.moveTo(cx + Math.cos(an) * (R - 26), cy + Math.sin(an) * (R - 26)); x.lineTo(cx + Math.cos(an) * (R - 8), cy + Math.sin(an) * (R - 8)); x.stroke(); }
+  const p = oB(seg(t, tN - 0.1, tN + 0.9), 1.2), pv = clamp(p) * v / 10;
+  if (pv > 0) { x.strokeStyle = col; x.lineWidth = 26; x.lineCap = 'round'; x.beginPath(); x.arc(cx, cy, R, Math.PI, Math.PI + pv * Math.PI); x.stroke(); }
+  const an = Math.PI + clamp(p, 0, 1.15) * v / 10 * Math.PI; glow(cx, cy, 120, rgb, 0.18 * clamp(p));
+  x.strokeStyle = C.ink; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(an) * (R - 40), cy + Math.sin(an) * (R - 40)); x.stroke();
+  x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 18, 0, 7); x.fill(); x.restore();
+  T(t, tY, year, cx, cy + 80, { size: 60, weight: 800, color: C.ink, ls: -1 });
+  T(t, tN, label, cx, cy + 170, { size: 66, weight: 800, color: col, ls: -1 }); }
+function sReale(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.03);
+  const tY1 = WA('reale', ['duemilaventidue', '2022', '2.022', 'duemila'], 1, 0.05), tY2 = WA('reale', ['duemilaventitre', '2023', '2.023'], 1, 0.6),
+    t8 = WA('reale', ['otto', '8'], 1, 0.32), t6 = WA('reale', ['sei', '6'], 1, 0.88);
+  phrase(t, a + 0.05, [['Prezzi in Italia,', C.ink], ['in media', C.lime]], 345, { size: 92 });
+  const kA = oB(seg(t, a + 0.3, a + 0.8)), kB = oB(seg(t, a + 0.45, a + 0.95));
+  gauge(t, 290, 1000, 190, 8, C.red, '255,90,78', tY1, t8, 'circa 8%', '2022', a, kA);
+  gauge(t, 790, 1000, 190, 6, C.amber, '245,165,36', tY2, t6, 'circa 6%', '2023', a, kB);
+  x.restore(); finish(t); }
+
+/* ================= CONTO: due scontrini della stessa spesa; il totale passa da 100 a circa 114 ================= */
+function receipt(t, cx, top, w, h, kR, yearS, tYear, tot1, totS, tTot, col) { if (kR <= 0) return;
+  x.save(); x.beginPath(); x.rect(cx - w / 2 - 6, top - 6, w + 12, (h + 40) * kR + 6); x.clip();
+  x.beginPath(); x.moveTo(cx - w / 2, top); x.lineTo(cx + w / 2, top); x.lineTo(cx + w / 2, top + h); for (let i = 0; i < Math.round(w / 22); i++) { const xx = cx + w / 2 - (i + 0.5) * (w / Math.round(w / 22)); x.lineTo(xx, top + h + 22); x.lineTo(xx - w / Math.round(w / 22) / 2, top + h); } x.closePath();
+  x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 30; x.fillStyle = PAPER; x.fill(); x.shadowBlur = 0;
+  txt('SPESA', cx, top + 46, { fam: 'mono', size: 26, weight: 700, color: DK, ls: 6, alpha: 0.92 });
+  [0, 1, 2, 3].forEach((i) => { x.fillStyle = 'rgba(21,32,12,0.55)'; rr(cx - w / 2 + 34, top + 156 + i * 54, 130 + (i % 2) * 40, 12, 6); x.fill(); rr(cx + w / 2 - 34 - 56, top + 156 + i * 54, 56, 12, 6); x.fill(); });
+  x.strokeStyle = 'rgba(21,32,12,0.6)'; x.lineWidth = 3; x.setLineDash([8, 7]); x.beginPath(); x.moveTo(cx - w / 2 + 24, top + 378); x.lineTo(cx + w / 2 - 24, top + 378); x.stroke(); x.setLineDash([]);
+  txt(tot1, cx, top + 420, { fam: 'mono', size: 24, weight: 700, color: DK, ls: 2, alpha: 0.92 });
+  x.restore();
+  T(t, tYear, yearS, cx, top + 100, { size: 48, weight: 800, color: DK, ls: -1 }); T(t, tTot, totS, cx, top + 486, { size: 64, weight: 800, color: col, ls: -2 }); }
+function sConto(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tY = WA('conto', ['duemilaventuno', '2021', '2.021', 'duemila'], 1, 0.4), tCen = WA('conto', ['cento', '100'], 1, 0.55), tDop = WA('conto', ['dopo'], 1, 0.68), tCir = WA('conto', ['centoquattordici', '114', 'centoquattordic', 'centoquattro'], 1, 0.92);
+  phrase(t, a + 0.05, [['Il conto', C.ink], ['sulle medie', C.lime]], 345, { size: 92 });
+  const kA = oC(seg(t, a + 0.1, a + 0.9)), kB = oC(seg(t, a + 0.3, a + 1.1)), TOP = 650, RW = 340, RH = 540;
+  receipt(t, 270, TOP, RW, RH, kA, '2021', tY, 'TOTALE', '100 €', tCen, DK);
+  receipt(t, 810, TOP, RW, RH, kB, '2023', tDop + 0.1, 'TOTALE · CIRCA', '114 €', tCir, '#9B1E14');
+  const kw = oC(seg(t, tDop - 0.1, tDop + 0.4)); if (kw > 0) { x.save(); x.globalAlpha = kw; x.strokeStyle = C.lime; x.fillStyle = C.lime; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(485, 900); x.lineTo(590, 900); x.stroke(); x.beginPath(); x.moveTo(612, 900); x.lineTo(588, 880); x.lineTo(588, 920); x.closePath(); x.fill(); x.restore();
+    txt('DOPO', 540, 840, { fam: 'mono', size: 26, weight: 700, color: C.lime, ls: 4, alpha: kw }); }
+  lab(t, 'STESSA SPESA', 540, 1290, a + 0.8, { color: C.ink, size: 28, ls: 6 });
+  x.restore(); finish(t); }
+
+/* ================= EURO: la moneta da un euro riempie dieci pagnotte; poi ne compra meno; sotto, rendimento contro inflazione ================= */
+function loaf(cx, cy, k, on) { x.save(); x.globalAlpha *= clamp(k); x.lineWidth = 4; x.beginPath(); x.ellipse(cx, cy, 30, 19, 0, 0, 7);
+  if (on) { x.fillStyle = C.amber; x.fill(); x.strokeStyle = 'rgba(255,255,255,0.4)'; x.lineWidth = 3; x.beginPath(); x.moveTo(cx - 10, cy - 9); x.lineTo(cx - 4, cy + 9); x.moveTo(cx + 4, cy - 10); x.lineTo(cx + 10, cy + 8); x.stroke(); }
+  else { x.setLineDash([7, 6]); x.strokeStyle = 'rgba(245,165,36,0.8)'; x.stroke(); } x.restore(); }
+function sEuro(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tCom = WA('euro', ['compra'], 1, 0.3), tMen = WA('euro', ['meno'], 1, 0.36), tRis = WA('euro', ['risparmio'], 1, 0.7), tTas = WA('euro', ['tasso'], 1, 0.78), tRea = WA('euro', ['reale'], 1, 0.92);
+  phrase(t, a + 0.05, [['Ogni euro', C.ink]], 345, { size: 92 });
+  phrase(t, tCom - 0.3, [['compra meno', C.red]], Y2, { size: 92 });
+  /* moneta che si restringe */
+  const sh = ioC(seg(t, tMen - 0.1, tMen + 0.8)), r = lerp(86, 62, sh), kc = oB(seg(t, a + 0.2, a + 0.7)), cy = 720;
+  pop(540, cy, kc, () => { glow(540, cy, 200, '200,250,114', 0.14); x.beginPath(); x.arc(540, cy, r, 0, 7); x.fillStyle = 'rgba(200,250,114,0.18)'; x.fill(); x.strokeStyle = C.lime; x.lineWidth = 6; x.stroke(); x.beginPath(); x.arc(540, cy, r - 14, 0, 7); x.lineWidth = 2.5; x.stroke(); txt('€', 540, cy + 3, { size: r * 1.0, weight: 800, color: C.lime }); });
+  /* dieci pagnotte: le ultime tre diventano tratteggiate */
+  for (let i = 0; i < 10; i++) { const cx = 540 + (i - 4.5) * 82, k = oB(seg(t, a + 0.35 + i * 0.05, a + 0.8 + i * 0.05)), gone = i >= 7 && t >= tMen - 0.05 + (i - 7) * 0.12; loaf(cx, 905 + (gone ? 0 : 0), k, !gone); }
+  lab(t, 'COSA COMPRI', 540, 980, a + 0.8, { color: C.ink, size: 26, ls: 5 });
+  /* rendimento contro inflazione: due binari, il netto è il tasso reale */
+  const BX = 140, BW0 = 800, ky = oC(seg(t, a + 0.6, a + 1.1)), fr = oC(seg(t, tRis - 0.1, tRis + 0.7)), fi = oC(seg(t, tTas - 0.1, tTas + 0.7));
+  lab(t, 'QUANTO TI RENDE IL RISPARMIO', BX, 1075, a + 0.9, { align: 'left', color: C.ink, size: 26, ls: 2 }); lab(t, 'INFLAZIONE', BX, 1190, a + 1.0, { align: 'left', color: C.ink, size: 26, ls: 2 });
+  [[1120, 520, fr, C.lime], [1235, 380, fi, C.red]].forEach(([yy, v, kk, col]) => { x.save(); x.globalAlpha = ky * (1 - kk) * 0.6; x.setLineDash([8, 7]); x.strokeStyle = col; x.lineWidth = 3; rr(BX, yy - 20, v, 40, 10); x.stroke(); x.restore(); if (kk > 0) { x.save(); x.fillStyle = col; rr(BX, yy - 20, v * kk, 40, 10); x.fill(); x.restore(); } });
+  const kr = seg(t, tRea - 0.1, tRea + 0.45); if (kr > 0) { dash(BX + 380, 1175, BX + 380, 1330, C.lime, 3, [6, 7], oC(kr)); glassPill(540, 1340, 'TASSO REALE', kr, C.lime, 40); }
+  x.restore(); finish(t); }
+
+/* ================= CASA: tre schede di vetro: un prezzo (no), la media di tanti prezzi (sì), lo stesso euro compra meno ================= */
+function sCasa(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tNon = WA('casa', ['non'], 1, 0.3), tMed = WA('casa', ['media'], 1, 0.55), tEu = WA('casa', ['euro'], 1, 0.92);
+  phrase(t, a + 0.05, [['Cosa ti porti', C.ink], ['a casa?', C.lime]], 345, { size: 92 });
+  const CY = [700, 940, 1180], CH = 200, CW = 860, ST = [tNon, tMed, tEu], COL = [C.red, C.lime, C.amber];
+  const TX = ['UN SOLO PREZZO CHE SALE', 'LA MEDIA DI TANTI PREZZI', 'STESSO EURO, COMPRI MENO'];
+  CY.forEach((cy, i) => { const k = oB(seg(t, a + 0.25 + i * 0.12, a + 0.8 + i * 0.12)), on = oC(seg(t, ST[i] - 0.15, ST[i] + 0.35));
+    pop(540, cy, k, () => { glass(540, cy, CW, CH, 36, 1); if (on > 0) { x.save(); x.globalAlpha = on; x.strokeStyle = COL[i]; x.lineWidth = 3.5; rr(540 - CW / 2, cy - CH / 2, CW, CH, 36); x.stroke(); x.restore(); glow(540, cy, 420, i === 0 ? '255,90,78' : i === 1 ? '200,250,114' : '245,165,36', 0.08 * on); }
+      let fs = 38; while (tw(TX[i], fs, 800) > 560 && fs > 28) fs--; txt(TX[i], 270, cy + 2, { size: fs, weight: 800, color: C.ink, align: 'left', ls: -0.5 });
+      /* icona a sinistra */
+      if (i === 0) tag(165, cy, 120, 64, C.ink, 0.14); if (i === 1) [0, 1, 2].forEach((j) => { x.save(); x.fillStyle = C.ink; x.globalAlpha = 0.9; rr(125 + j * 30, cy + 28 - (j + 1) * 20, 22, (j + 1) * 20 + 4, 4); x.fill(); x.restore(); });
+      if (i === 2) { x.beginPath(); x.arc(165, cy, 38, 0, 7); x.strokeStyle = C.ink; x.lineWidth = 5; x.stroke(); txt('€', 165, cy + 2, { size: 40, weight: 800, color: C.ink }); }
+      /* stato a destra: cerchio vuoto, poi X / spunta / freccia giù */
+      const sx = 900; x.save(); x.beginPath(); x.arc(sx, cy, 40, 0, 7); x.strokeStyle = on > 0.2 ? COL[i] : 'rgba(241,244,238,0.45)'; x.lineWidth = 5; if (on <= 0.2) x.setLineDash([8, 7]); x.stroke(); x.setLineDash([]);
+      x.strokeStyle = COL[i]; x.fillStyle = COL[i]; x.lineWidth = 8; x.lineCap = 'round'; x.lineJoin = 'round'; x.globalAlpha = on;
+      if (i === 0) { x.beginPath(); x.moveTo(sx - 16, cy - 16); x.lineTo(sx + 16, cy + 16); x.moveTo(sx + 16, cy - 16); x.lineTo(sx - 16, cy + 16); x.stroke(); }
+      if (i === 1) { x.beginPath(); x.moveTo(sx - 18, cy + 2); x.lineTo(sx - 4, cy + 16); x.lineTo(sx + 20, cy - 14); x.stroke(); }
+      if (i === 2) arrowDown(sx, cy, 18, C.amber, on);
+      x.restore(); }); });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, def: sDef, esempio: sEsempio, misura: sMisura, reale: sReale, conto: sConto, euro: sEuro, casa: sCasa }, ORDER, ['hook', 'esempio', 'casa']);
+</script></body></html>
