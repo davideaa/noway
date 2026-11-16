@@ -573,6 +573,18 @@
   "caption": "La rata di un mutuo a tasso fisso resta ferma, quella di un variabile può crescere a scatti: tra il 2022 e il 2023 è successo davvero. 🏦\nPuntata 40 di «Dalla teoria alla realtà»: le rate dei mutui nel 2022–2023, un caso reale.\n\n• Da luglio 2022 la Banca centrale europea alza i tassi dieci volte di fila: quelli sui depositi vanno da −0,5% a 4%. Secondo la Banca d'Italia il rialzo si trasmette all'Euribor a 3 mesi, che arriva a circa il 4% nell'autunno 2023\n• Esempio con cifre inventate (150.000 €, 25 anni, tasso = Euribor + 1,5, semplificato): con l'Euribor di fine 2021 la rata è di circa 560 € al mese, con quello di ottobre 2023 di circa 920 €. Più di 350 € al mese, oltre 4.000 € l'anno\n• Stima della Banca d'Italia: circa 256.000 famiglie hanno avuto un aumento della rata superiore al 30%; per la famiglia mediana di quel gruppo da circa 600 a circa 780 € al mese\n• Con il fisso già firmato, la rata resta quella\n\nLunedì, puntata 41: cos'è l'inflazione.\nUna puntata al giorno, dal lunedì al venerdì, alle 12:00.\n\nFonti: Banca centrale europea (tassi di riferimento, Data Portal Euribor a 3 mesi, dati letti il 14/11/2026); EMMI (newsletter novembre 2023); Banca d'Italia (Relazione annuale 2023, Rapporto sulla stabilità finanziaria 2/2023).\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #mutuo #tassivariabili #euribor #educazionefinanziaria #università #economiaitaliana"
  },
  {
+  "puntata": 41,
+  "titolo": "Cos'è l'inflazione",
+  "data": "2026-11-30",
+  "ora": "12:00",
+  "stato": "programmato",
+  "file": "sites/studio/social/pubblicati/2026-11-30-p41.mp4",
+  "thumb_offset": 300,
+  "durata_s": 68.9,
+  "fonti": "sites/studio/reel/noir/p41-fonti.md",
+  "caption": "Se il caffè al bar costa più di prima, un solo prezzo che sale non basta per dire che c'è inflazione. ☕\nPuntata 41 di «Dalla teoria alla realtà»: cos'è l'inflazione, in 69 secondi.\n\n• L'inflazione è un aumento generale dei prezzi, non di un solo prodotto: per questo si guarda la media di tanti prezzi, il paniere\n• Esempio con cifre inventate: un caffè da 1 € a 1,10 € mentre la benzina scende. Alcuni prezzi salgono, altri calano, e la media può restare ferma. Il prezzo reale del caffè non è verificato\n• Dati Istat: nel 2022 i prezzi in Italia sono cresciuti in media dell'8,1%, nel 2023 del 5,7%\n• Nostro calcolo sulle due medie annue: quello che nel 2021 costava 100 euro, dopo due anni ne costava circa 114\n\nDomani, puntata 42: il paniere Istat.\nUna puntata al giorno, dal lunedì al venerdì, alle 12:00.\n\nFonti: Istat (Prezzi al consumo, comunicati definitivi dicembre 2022 e dicembre 2023); Banca centrale europea (What is inflation?). Il conto sui 114 euro è un calcolo nostro sulle medie annue Istat.\nContenuto educativo · Non è consulenza finanziaria.\n\n#economia #finanza #inflazione #prezzi #istat #educazionefinanziaria #università #economiaitaliana"
+ },
+ {
   "puntata": 43,
   "titolo": "Inflazione generale e «core»",
   "data": "2026-12-02",
