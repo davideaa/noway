@@ -221,3 +221,6 @@ trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correz
 ### 15/11/2026 — aggancio su un decimale (P40)
 - `WA(..., ['1,5'])`: la normalizzazione toglie la virgola, «1,5» diventa «15» e combacia con «150» detto prima → pillola in anticipo di 3 s. **Regola:** per i decimali non usare la forma con la virgola; agganciare la parola prima («più») o la forma in lettere («mezzo»).
 - Whisper scrive «4 .000» come due parole: nella lista di un aggancio su migliaia mettere anche la parte intera («4»).
+
+### 16/11/2026 — disco pieno (P41)
+- Il render falliva con «Unable to capture screenshot» / «Target page closed»: non era la pagina, era il **disco pieno** (quota della sessione esaurita: `df` mostra 100%). **Regola:** prima di ogni settimana `df -h /`; se sotto 3 GB liberi cancellare `~/.cache/pip` e i fotogrammi intermedi in scratchpad.
