@@ -182,7 +182,7 @@ function sQuinti2(t, a, b) { quintiScena(t, a, b, 'quinti2', 2); }
 
 /* ================= PESI: due ciambelle (il bilancio di una famiglia) con la fetta dell'energia: più di 14 contro meno di 7, in scala ================= */
 function sPesi(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
-  const t14 = WA('pesi', ['quattordici', '14'], 1, 0.62), t7 = WA('pesi', ['sette', '7'], 1, 0.62), tMeno = WA('pesi', ['meno'], 2, 0.25);
+  const t14 = WA('pesi', ['quattordici', '14'], 1, 0.62), t7 = WA('pesi', ['meno'], 2, 0.9) + 0.4, tMeno = WA('pesi', ['meno'], 2, 0.25);
   phrase(t, a + 0.05, [['Il peso', C.ink], ['dell’energia', C.lime]], 345, { size: 92 });
   lab(t, 'QUOTA DELLA SPESA PER L’ENERGIA', 540, 690, a + 0.3, { color: C.ink, size: 26 });
   [[300, 14.6, C.red, '255,90,78', t14, 'più di 14%', 'CHI SPENDE MENO'], [780, 6.7, C.lime, '200,250,114', t7, 'meno di 7%', 'CHI SPENDE DI PIÙ']].forEach(([cx, v, col, rgb, tOn, txtN, cap], i) => {
