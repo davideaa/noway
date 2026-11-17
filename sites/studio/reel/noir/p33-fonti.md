@@ -99,3 +99,5 @@ Alternativa (più concreta, meno «istituzionale»): lo stesso acquisto da 90 �
 8. **TEGM vs TAEG**: il TEGM segue le istruzioni di rilevazione della Banca d'Italia (L. 108/96) e non coincide letteralmente col TAEG del foglio informativo del singolo prodotto: in voce chiamarlo «tasso medio».
 9. **Esempi E**: tasso mensile = TEGM/12, rate costanti: semplificazione dichiarata. Se si vogliono cifre da mostrare a schermo, ricalcolare con il foglio di calcolo.
 10. **Data di uscita 18/11**: due giorni prima del 20/11. Se il reel dice «dal 20 novembre», ricontrollare il 18/11 mattina i punti 1 e 4.
+
+- **Ricontrollo 17/11/2026:** la Banca d'Italia non ha ancora pubblicato istruzioni attuative definitive della CCD2 (pagina «Disposizioni relative a specifici prodotti/materie»: direttiva «in via di recepimento»). La formula prudente della voce e della caption resta corretta. Nessuna modifica.
