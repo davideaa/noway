@@ -169,7 +169,7 @@ function sProduzione(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.0
   phrase(t, a + 0.05, [['Prezzi alla produzione', C.ink]], 345, { size: 92 });
   phrase(t, t34 - 0.12, [['oltre +34%', C.red]], Y2, { size: 92 });
   const X0 = 130, U = 4, kk = oB(seg(t, a + 0.05, a + 0.6));
-  const ROW = [[830, 'TUTTI I PRODOTTI', 134, C.red, '255,90,78', t34], [1030, 'ENERGETICI', 204, C.amber, '245,165,36', tPiu]];
+  const ROW = [[830, 'INDUSTRIA', 134, C.red, '255,90,78', t34], [1030, 'ENERGETICI', 204, C.amber, '245,165,36', tPiu]];
   ROW.forEach(([yc, nome, v, col, rgb, tOn], i) => {
     const kf = ioC(seg(t, i === 0 ? tOn - 0.3 : tEn - 0.2, i === 0 ? tOn + 0.9 : tPiu + 0.8)), kb = oC(seg(t, a + 0.1 + i * 0.12, a + 0.6 + i * 0.12));
     lab(t, nome, X0, yc - 68, a + 0.2 + i * 0.1, { color: C.ink, align: 'left', size: 26 });

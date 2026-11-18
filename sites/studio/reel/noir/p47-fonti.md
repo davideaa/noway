@@ -74,3 +74,10 @@ Nessun esempio numerico inventato nella scheda. Il visual «fiamma di gas… car
 3. **Intervento Visco 31/10/2022**: letto su un sito che ospita i testi Banca d'Italia; la stessa cifra (340) è nel *Bollettino Economico* 4/2022, p. 12, che è la citazione consigliata.
 4. **Pagine WP BCE 2905**: citate per sezione (nota 1, introduzione, sez. 4), non per numero di pagina stampata.
 5. **Valori ISTAT PPI** del 2022: base 2015=100; dal marzo 2023 l'ISTAT ha cambiato base di calcolo (dicembre 2022). I valori 2022 compaiono invariati nel comunicato dicembre 2023.
+
+## Righe aggiunte dopo il controllo finale (18/11/2026)
+| Frase | Dato | Fonte |
+|---|---|---|
+| «a oltre trecento nell'estate del 2022» | Picco a fine agosto 2022 «quasi i 340 euro» per MWh: regge «oltre trecento». La Relazione 2022 scrive «massimo storico di 300»: la formula «oltre trecento» si appoggia al Bollettino. Sostituisce l'indicazione «circa trecento» del punto 2 sopra | Banca d'Italia, *Bollettino economico* 4/2022, p. 12 |
+| «da meno di venti euro … a inizio 2021» | «da valori inferiori a 20 all'inizio del 2021»: intervento del Governatore (testo della Banca d'Italia, letto su copia esterna; da riscontrare sul sito bancaditalia.it) | Visco, Giornata Mondiale del Risparmio, 31/10/2022 |
+| «le imprese provano a scaricare il rincaro sui prezzi: è l'inflazione da costi» | Definizione BCE di cost-push inflation (offerta), contrapposta a demand-pull; vedi p46-fonti.md, blog BCE del 29/07/2026 | BCE, blog 29/07/2026 |

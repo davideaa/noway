@@ -27,7 +27,7 @@ const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26
 /* tag: scritta SEMPRE presente (entra in 0,35 s, poi opacità 1); sulla parola cambia colore e fa un colpo di scala */
 const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1;
   x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
-  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.muted, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
 function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
 function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
 const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); };
@@ -43,9 +43,9 @@ function spirDraw(Pn, u, col, w, al = 1, dots = false) { if (u <= 0 || al <= 0) 
 
 /* ================= HOOK: la spirale si avvita (prezzi, salari, prezzi); a «non» si spegne e sopra compare una croce rossa ================= */
 function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
-  const tPre = WA('hook', ['prezzi'], 1, 0.02), tSal = WA('hook', ['salari'], 1, 0.08), tEur = WA('hook', ['euro'], 1, 0.7), tNon = WA('hook', ['non'], 1, 0.86);
-  phrase(t, a + 0.05, [['La spirale del', C.ink]], 345, { size: 92 });
-  phrase(t, a + 0.05, [['2022', C.amber]], Y2, { size: 92 });
+  const tPre = WA('hook', ['prezzi'], 1, 0.02), tSal = WA('hook', ['salari'], 1, 0.08), tEur = WA('hook', ['euro'], 2, 0.7), tNon = WA('hook', ['non'], 1, 0.86);
+  phrase(t, a + 0.05, [['La spirale', C.ink]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['prezzi-salari', C.amber]], Y2, { size: 92 });
   const CX = 540, CY = 960, Pn = spirPts(CX, CY, 70, 310), kIn = oC(seg(t, a + 0.05, a + 0.6)), dim = oC(seg(t, tNon, tNon + 0.5));
   spirDraw(Pn, kIn, 'rgba(245,165,36,0.45)', 6, 1, true);
   const u = ioC(seg(t, a + 0.3, Math.max(a + 1.6, tNon - 0.3))), head = spirAt(Pn, u);
@@ -110,7 +110,7 @@ function sCautela(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   tag(t, 'RITARDO', (x1 + x2) / 2, yR - 40, a + 0.3, tRit, C.amber, { size: 28 });
   tag(t, 'PREZZI', 960, 680, a + 0.3, tDiv, C.red, { align: 'right', size: 28 }); tag(t, 'SALARI', 960, 1040, a + 0.3, tSal, C.amber, { align: 'right', size: 28 });
   const kp = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tBus; glassPill(540, 1340, 'NON LA BUSTA PAGA', kp, on ? C.amber : C.ink, 32);
-  lab(t, 'SCHEMA · NON IN SCALA', 540, 590, a + 0.5, { color: C.muted, size: 22, ls: 3 });
+  lab(t, 'SCHEMA · NON IN SCALA', 540, 590, a + 0.5, { color: C.ink, size: 22, ls: 3 });
   x.restore(); finish(t); }
 
 /* ================= PERCHE: la spirale gira, poi un'àncora cala sulla sua punta e la blocca; sotto, l'indicizzazione conta poco ================= */
@@ -145,7 +145,7 @@ function sCosto(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
   const tOtt = WA('costo', ['otto', '8'], 1, 0.82);
   phrase(t, a + 0.05, [['Non è stato', C.ink], ['indolore', C.red]], 345, { size: 92 });
   const CX = 540, CY = 960, R = 230, w0 = -Math.PI / 2, w1 = w0 + 0.084 * Math.PI * 2, am = (w0 + w1) / 2, kIn = oB(seg(t, a + 0.05, a + 0.6)), kS = ioC(seg(t, tOtt - 0.2, tOtt + 0.8));
-  lab(t, 'RETRIBUZIONI REALI · 2021', 540, 575, a + 0.3, { color: C.ink, size: 26 });
+  lab(t, 'RETRIBUZIONI EFFETTIVE REALI · 2021', 540, 575, a + 0.3, { color: C.ink, size: 26 });
   pop(CX, CY, kIn, () => {
     glow(CX, CY, 330, '200,250,114', 0.12);
     const g = x.createRadialGradient(CX, CY - 60, 20, CX, CY, R); g.addColorStop(0, 'rgba(200,250,114,0.42)'); g.addColorStop(1, 'rgba(200,250,114,0.16)');
