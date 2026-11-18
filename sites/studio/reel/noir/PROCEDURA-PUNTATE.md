@@ -225,3 +225,4 @@ trovati da `reel-controllo` nelle puntate 1–2 e il giro «controllo → correz
 ### 16/11/2026 — disco pieno (P41)
 - Il render falliva con «Unable to capture screenshot» / «Target page closed»: non era la pagina, era il **disco pieno** (quota della sessione esaurita: `df` mostra 100%). **Regola:** prima di ogni settimana `df -h /`; se sotto 3 GB liberi cancellare `~/.cache/pip` e i fotogrammi intermedi in scratchpad.
 - (16/11) Falsi allarmi della verifica finale su un pezzo di mix tagliato stretto («paniere dei pezzi», «lunedà 23»): prima di rifare la voce, ritrascrivere dal video finale con 5–8 s di contesto (`ffmpeg -ss … -t 10` + large-v3-turbo). Se lì è giusta, la frase va bene.
+- (18/11) **Lo spazio lo mangiano le cartelle `noir/out-pN`** (fotogrammi del render, ~600 MB a puntata, non nel repo): cancellarle appena la puntata è programmata. Con quelle tolte: da 1,7 a 12 GB liberi.
