@@ -78,3 +78,5 @@ Proposta: **lo scontrino contro i 24 scontrini.** A sinistra un cartellino prezz
 6. **TIM**: pagina senza data; non usata nei calcoli.
 
 Calcoli rifatti con python (bisezione sul valore attuale), arrotondamenti a 2 decimali sulla rata, a 3 sul tasso.
+
+- **Ricontrollo 19/11/2026:** la pagina ora riporta, valido dal 13/11 al 30/11/2026, l'esempio 789 € in 24 rate da 37,70 €, TAN 13,51%, TAEG 14,38%, totale 904,80 €. L'esempio della puntata (37,20 €, TAN 12,16%, TAEG 12,86%) è quindi quello in vigore a inizio novembre. Il tasso zero (1.599 € in 10 rate, valido dal 29/10 al 29/11) è invariato. Caption corretta con le date; la voce («valido a novembre duemilaventisei») resta vera.
