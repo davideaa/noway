@@ -22,6 +22,13 @@ all'inizio basta: non serve rileggere le vecchie conversazioni né i documenti l
   - cosa non è stato verificato;
   - poi chiedere cosa cambiare.
 
+- **Testi in italiano: sempre «umanizzati»** (chiesto il 19/11/2026). Tutto quello che scrivo per lui o a nome suo (mail, messaggi, didascalie, testi dei siti) deve sembrare scritto da una persona, non da un'IA:
+  - frasi di lunghezza diversa, tono parlato e naturale, parole semplici;
+  - niente trattini lunghi «—», niente elenchi a tre a tutti i costi, niente grassetti sparsi;
+  - niente formule da IA: «non è solo X, è Y», «in un mondo in cui», «scopri», «esperienza unica», «immergiti», «fiore all'occhiello», «a 360 gradi», domande retoriche in apertura, chiuse ad effetto;
+  - niente complimenti di apertura né frasi di congedo di circostanza;
+  - qualche imperfezione naturale va bene, gli errori no.
+
 ## 2. Regole fisse
 
 1. **Onestà sui numeri.**
