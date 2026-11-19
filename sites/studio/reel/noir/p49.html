@@ -167,7 +167,7 @@ function sCautela(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
   const tTen = WA('cautela', ['tenuto'], 1, 0.3), tPre = WA('cautela', ['previsori'], 1, 0.34), tFam = WA('cautela', ['famiglie'], 1, 0.7), tDeb = WA('cautela', ['debole'], 1, 0.6);
   phrase(t, a + 0.05, [['Attenzione:', C.ink], ['tenuta diversa', C.amber]], 345, { size: 92 });
   lab(t, 'SCHEMA · NON IN SCALA', 540, 640, a + 0.3, { size: 24, ls: 3 });
-  const kIn = oB(seg(t, a + 0.05, a + 0.6)), rows = [[830, 'PREVISORI E MERCATI', tPre, C.lime], [1180, 'FAMIGLIE E IMPRESE', tFam, C.amber]];
+  const kIn = oB(seg(t, a + 0.05, a + 0.6)), rows = [[830, 'PREVISORI E MERCATI', tPre, C.lime], [1180, 'FAMIGLIE', tFam, C.amber]];
   const SP = [-330, -260, -190, -120, 90, 150, 230, 290, 335, 20], TG = [-55, -35, -15, 10, 30, 50, -25, 5, 40, -5], conv = ioC(seg(t, tTen - 0.1, tTen + 0.9));
   rows.forEach(([cy, nm, tOn, col], r) => { pop(540, cy, kIn, () => { glass(540, cy, 900, 270, 40, 1);
       x.fillStyle = 'rgba(200,250,114,0.18)'; rr(480, cy - 55, 120, 150, 20); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.7)'; x.setLineDash([8, 8]); x.lineWidth = 3; rr(480, cy - 55, 120, 150, 20); x.stroke(); x.setLineDash([]);

@@ -25,11 +25,11 @@ const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|
 const tag = (t, s, px, py, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1, a0 = o.a0 || 0;
   x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
   txt(s, px, py, { fam: 'mono', size: 26, weight: 700, ls: 2, color: on ? colOn : C.ink, alpha: oC(seg(t, a0, a0 + 0.3)), ...o }); x.restore(); };
-const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 700, color: C.ink, ls: 2, alpha: oC(seg(t, a0, a0 + 0.3)), ...o });
+const lab = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.3)); if (k <= 0) return; txt(s, px, py, { fam: 'mono', size: 26, weight: 700, color: C.ink, ls: 2, alpha: 0.85 + 0.15 * k, blur: (1 - k) * 6, ...o }); };
 function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
 function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
 /* numero grande: segnaposto «—» finché la voce non lo dice, poi il valore con un colpo */
-function num(t, v, ph, px, py, tOn, col, size = 62) { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.35)), p = on ? 1 + 0.18 * Math.sin(Math.PI * kk) : 1;
+function num(t, v, ph, px, py, tOn, col, size = 62) { if (t < tOn) return; const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.35)), p = on ? 1 + 0.18 * Math.sin(Math.PI * kk) : 1;
   x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py); txt(on ? v : ph, px, py, { size, weight: 800, ls: -1, color: on ? col : C.ink }); x.restore(); }
 const rgbOf = (c) => (c === C.red ? '255,90,78' : c === C.lime ? '200,250,114' : '245,165,36');
 
@@ -101,7 +101,7 @@ function sCalcolo(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
     const k = oB(seg(t, a + 0.05 + i * 0.1, a + 0.6 + i * 0.1)), h = v * SC;
     pop(cx, BASE - 200, k, () => { glass(cx, BASE - 180, W2 + 60, 560, 36, 1); x.save(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(cx - W2 / 2, BASE - 100 * SC, W2, 100 * SC, 14); x.stroke(); x.restore();
       if (t >= tOn - 0.1) glow(cx, BASE - h, 150, rgbOf(col), 0.22); x.fillStyle = col; x.globalAlpha *= 0.92; rr(cx - W2 / 2, BASE - h, W2, h, 14); x.fill(); x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(cx - W2 / 2 + 14, BASE - h + 10, 5, Math.max(0, h - 30)); });
-    num(t, vTxt, ph, cx, 700, tOn, col, 64); tag(t, nome, cx, BASE + 70, tOn, col, { size: 26 }); });
+    num(t, vTxt, ph, cx, 650, tOn, col, 64); tag(t, nome, cx, BASE + 70, tOn, col, { size: 26 }); });
   dash(XL + 150, BASE - 100 * SC, XR - 150, BASE - 100 * SC, C.ink, 3, [10, 10], oC(seg(t, a + 0.4, a + 0.9)) * 0.9);
   x.restore(); finish(t); }
 
@@ -130,8 +130,8 @@ function sCaso(t, a, b) { bg('30,44,40', 0.6); x.save(); zoom(t, a, b, 1.04);
   const fl = 1 - (1 - 1250 / 1500) * ioC(seg(t, t12 - 0.1, t12 + 0.9));
   pop(300, 960, oB(seg(t, a + 0.05, a + 0.6)), () => bottle(300, 1230, 1, '#6FD3C0', 0));
   pop(780, 960, oB(seg(t, a + 0.15, a + 0.7)), () => bottle(780, 1230, fl, '#6FD3C0', 1));
-  num(t, '1.500 ml', '— ml', 300, 1292, t15, C.lime, 48); num(t, '1.250 ml', '— ml', 780, 1292, t12, C.amber, 48);
-  tag(t, 'PRIMA', 300, 1345, 1e9, C.ink, { size: 26 }); tag(t, 'DOPO', 780, 1345, 1e9, C.ink, { size: 26 });
+  num(t, '1.500 ml', '— ml', 300, 1330, t15, C.lime, 48); num(t, '1.250 ml', '— ml', 780, 1330, t12, C.amber, 48);
+  tag(t, 'PRIMA', 300, 1372, 1e9, C.ink, { size: 26 }); tag(t, 'DOPO', 780, 1372, 1e9, C.ink, { size: 26 });
   x.restore(); finish(t); }
 
 /* ================= CASO2: tre flaconi, uno a prezzo invariato; barre al litro 100 → 120 ================= */
