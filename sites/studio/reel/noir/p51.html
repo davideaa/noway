@@ -1,0 +1,195 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 51, DAY: 0, CAP: 2, NEXT: ['La', 'deflazione'] };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 51 — «L'iperinflazione» (lunedì, lezione 1 di 5, capitolo 3). Numeri SOLO da p51-fonti.md:
+   Cagan (convenzione): oltre 50% al mese · Germania, novembre 1923: 1 $ = circa 4.200 miliardi di marchi (Parlamento tedesco) ·
+   Zimbabwe: banconota da 100.000 miliardi (100 trilioni), gennaio 2009; inflazione 2008 stimata «centinaia di miliardi per cento» (FMI).
+   Le barre della scena «def» sono uno schema (nessun dato); la carriola è solo un'immagine. Niente pane, niente superlativi, niente righe di fonte.
+   Testo mai sotto opacità 0,85; il colore «spento» è C.ink; i numeri compaiono sulla parola (nessun segnaposto). */
+const ORDER = ['num', 'hook', 'def', 'germania', 'stampa', 'funzione', 'zimbabwe', 'dollaro', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere, cifre, parte intera). Senza voce usa la frazione f. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const A85 = (k) => 0.85 + 0.15 * clamp(k);
+/* scritta sempre presente (entra sfocata in 0,4 s, mai sotto 0,85), colore C.ink; sulla parola cambia colore e fa un colpo */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1, k0 = oC(seg(t, aIn, aIn + 0.4));
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: A85(k0), blur: (1 - k0) * 8, ...o }); x.restore(); };
+/* scritta che compare SOLO sulla parola (numeri e testi detti): nessun segnaposto prima */
+const late = (t, s, px, py, tOn, col, o = {}) => { if (t < tOn) return; const k = oC(seg(t, tOn, tOn + 0.4)), p = 1 + 0.12 * Math.sin(Math.PI * k);
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py); txt(s, px, py, { color: col, alpha: A85(k), blur: (1 - k) * 10, ...o }); x.restore(); };
+/* pillola di vetro: testo sempre nitido, ink da spenta */
+function pl(t, s, cx, cy, aIn, tOn, colOn, size = 28) { if (t < aIn) return; const k0 = oB(seg(t, aIn, aIn + 0.5)), on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = (on ? 1 + 0.1 * Math.sin(Math.PI * kk) : 1) * lerp(0.9, 1, clamp(k0)), w = tw(s, size, 700, 'mono', 2) + 70;
+  x.save(); x.translate(cx, cy); x.scale(p, p); x.translate(-cx, -cy); if (on) glow(cx, cy, w * 0.6, colOn === C.red ? '255,90,78' : colOn === C.amber ? '245,165,36' : '200,250,114', 0.22 * kk);
+  glass(cx, cy, w, 80, 40, clamp(k0 * 2)); txt(s, cx, cy + 2, { fam: 'mono', size, weight: 700, ls: 2, color: on ? colOn : C.ink, alpha: A85(k0), blur: (1 - clamp(k0)) * 8 }); x.restore(); }
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const rgbOf = (c) => (c === C.red ? '255,90,78' : c === C.lime ? '200,250,114' : '245,165,36');
+
+/* banconota stilizzata (vuota): fondo verde scuro, doppio bordo, emblema a sinistra */
+function note(cx, cy, w, h, rot, col, alpha = 1) { x.save(); x.translate(cx, cy); x.rotate(rot); x.globalAlpha *= alpha;
+  const g = x.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); g.addColorStop(0, '#173524'); g.addColorStop(1, '#0b1a12'); x.fillStyle = g; rr(-w / 2, -h / 2, w, h, Math.min(24, h / 6)); x.fill();
+  x.strokeStyle = col; x.lineWidth = Math.max(3, h / 55); rr(-w / 2, -h / 2, w, h, Math.min(24, h / 6)); x.stroke();
+  x.save(); x.globalAlpha *= 0.6; x.lineWidth = 2.5; x.setLineDash([8, 8]); rr(-w / 2 + 16, -h / 2 + 16, w - 32, h - 32, Math.min(16, h / 8)); x.stroke(); x.restore();
+  x.save(); x.globalAlpha *= 0.7; x.lineWidth = Math.max(3, h / 70); for (let i = 0; i < 3; i++) { x.beginPath(); x.arc(-w / 2 + h * 0.45, 0, h * (0.14 + i * 0.07), 0, 7); x.stroke(); } x.restore();
+  x.restore(); }
+/* moneta piatta di vetro con scritta (r = raggio) */
+function disc(cx, cy, r, label, col, on, lw = 8) { glass(cx, cy, r * 2 + 30, r * 2 + 30, r + 15, 1); if (on) glow(cx, cy, r * 1.8, rgbOf(col), 0.2);
+  x.save(); x.strokeStyle = col; x.lineWidth = lw; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke(); x.restore();
+  if (label) txt(label, cx, cy + 3, { size: r * 1.05, weight: 800, color: col }); }
+function strike(cx, cy, r, k) { if (k <= 0) return; x.save(); x.strokeStyle = C.red; x.lineWidth = 12; x.lineCap = 'round'; const u = oC(k); x.beginPath(); x.moveTo(cx - r, cy + r); x.lineTo(cx - r + 2 * r * u, cy + r - 2 * r * u); x.stroke(); x.restore(); }
+
+/* ================= HOOK: una banconota enorme, gli zeri arrivano sulla parola ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tGen = WA('hook', ['duemilanove', '2009'], 1, 0.2), tMila = WA('hook', ['centomila', '100000', '100'], 1, 0.4), tSfu = WA('hook', ['sfuggono', 'sfugg'], 1, 0.85);
+  phrase(t, a + 0.05, [['Una banconota da', C.ink]], 345, { size: 92 });
+  phrase(t, tMila - 0.12, [['100.000 miliardi', C.red]], Y2, { size: 92 });
+  const k = oB(seg(t, a + 0.05, a + 0.6)), fl = 6 * Math.sin(t * 1.5), CX = 540, CY = 960 + fl;
+  pop(CX, CY, k, () => { glow(CX, CY, 440, '255,90,78', 0.12 + 0.12 * oC(seg(t, tMila, tMila + 0.6)));
+    note(CX + 10, CY - 70, 820, 400, 0.09, 'rgba(200,250,114,0.55)', 0.8); note(CX - 8, CY - 36, 820, 400, -0.06, 'rgba(200,250,114,0.7)', 0.9); note(CX, CY, 820, 400, 0.0, C.lime, 1);
+    txt('ZIMBABWE', CX + 120, CY - 140, { fam: 'mono', size: 30, weight: 700, ls: 6, color: C.ink });
+    if (t < tMila) { x.save(); x.globalAlpha *= 0.5; x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([10, 10]); rr(CX - 190, CY - 70, 560, 150, 20); x.stroke(); x.restore(); } });
+  const kz = oC(seg(t, tMila, tMila + 0.5));
+  if (kz > 0) { x.save(); x.translate(CX + 135, CY + 8); x.scale(1 + 0.1 * Math.sin(Math.PI * kz), 1 + 0.1 * Math.sin(Math.PI * kz)); txt('100.000', 0, 0, { size: 116, weight: 800, color: C.lime, alpha: A85(kz), blur: (1 - kz) * 12, ls: -3 }); txt('MILIARDI', 0, 82, { fam: 'mono', size: 36, weight: 700, ls: 6, color: C.ink, alpha: A85(kz) }); x.restore(); }
+  late(t, 'GENNAIO 2009', 540, 1240, tGen, C.amber, { fam: 'mono', size: 36, weight: 700, ls: 5 });
+  pl(t, 'PREZZI FUORI CONTROLLO', 540, 1330, a + 0.3, tSfu, C.red, 28);
+  x.restore(); finish(t); }
+
+/* ================= DEF: scalini di +50% al mese; soglia di Cagan ================= */
+function sDef(t, a, b) { bg('34,44,30', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCag = WA('def', ['cagan', 'kagan'], 1, 0.25), tSal = WA('def', ['salgono'], 1, 0.4), tCinq = WA('def', ['cinquanta', '50'], 1, 0.5), tCon = WA('def', ['convenzione'], 1, 0.8), tLeg = WA('def', ['legge'], 1, 0.95);
+  phrase(t, a + 0.05, [['Iperinflazione:', C.ink]], 345, { size: 92 });
+  phrase(t, tCinq - 0.12, [['oltre 50% al mese', C.red]], Y2, { size: 92 });
+  tag(t, 'DEFINIZIONE DI CAGAN', 540, 640, a + 0.2, tCag, C.lime, { size: 30 });
+  const BX0 = 125, BW = 130, GP = 45, BASE = 1210, U = 62;
+  for (let i = 0; i < 5; i++) { const h = U * Math.pow(1.5, i), bx = BX0 + i * (BW + GP), k = oB(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1)), kf = ioC(seg(t, tSal + i * 0.16, tSal + i * 0.16 + 0.7));
+    pop(bx + BW / 2, BASE - h / 2, k, () => { x.save(); x.globalAlpha *= 0.45; x.setLineDash([9, 9]); x.strokeStyle = C.ink; x.lineWidth = 3; rr(bx, BASE - h, BW, h, 14); x.stroke(); x.restore();
+      if (kf > 0) { if (i === 4) glow(bx + BW / 2, BASE - h, 170, '255,90,78', 0.25 * kf); x.save(); x.globalAlpha *= 0.92; x.fillStyle = C.red; rr(bx, BASE - h * kf, BW, h * kf, 14); x.fill(); x.fillStyle = 'rgba(255,255,255,0.3)'; x.fillRect(bx + 14, BASE - h * kf + 10, 5, Math.max(0, h * kf - 30)); x.restore(); } }); }
+  const ka = oC(seg(t, a + 0.3, a + 0.8)); txt('MESE DOPO MESE', 540, 1265, { fam: 'mono', size: 26, weight: 600, ls: 4, color: C.ink, alpha: A85(ka), blur: (1 - ka) * 8 });
+  pl(t, 'CONVENZIONE', 300, 1340, a + 0.3, tCon, C.lime, 26); pl(t, 'NON UNA LEGGE', 770, 1340, a + 0.3, tLeg, C.amber, 26);
+  x.restore(); finish(t); }
+
+/* ================= GERMANIA: un dollaro da una parte, una carriola di banconote dall'altra ================= */
+function cart(cx, by, k) { /* carriola: solo un'immagine. k = quanto è colma (0..1) */
+  const bx = cx - 200, bt = by - 210, bb = by - 60;
+  x.save(); x.lineJoin = 'round'; x.lineCap = 'round';
+  /* mucchio di banconote */
+  x.save(); x.beginPath(); x.moveTo(bx, bt); x.lineTo(bx + 400, bt); x.lineTo(bx + 400, bt - 400); x.lineTo(bx, bt - 400); x.closePath(); x.clip();
+  const N = Math.round(lerp(6, 15, k)); for (let i = 0; i < N; i++) { const px = bx + 55 + ((i * 97) % 290), py = bt - 18 - ((i * 53) % 90) - (i % 3) * 12, r = Math.sin(i * 2.3) * 0.45;
+    note(px, py, 120, 62, r, i % 2 ? 'rgba(200,250,114,0.9)' : 'rgba(245,165,36,0.9)'); }
+  x.restore();
+  /* corpo */
+  x.beginPath(); x.moveTo(bx, bt); x.lineTo(bx + 400, bt); x.lineTo(bx + 330, bb); x.lineTo(bx + 70, bb); x.closePath(); x.fillStyle = 'rgba(241,244,238,0.1)'; x.fill(); x.strokeStyle = 'rgba(241,244,238,0.9)'; x.lineWidth = 7; x.stroke();
+  /* manici, gamba, ruota */
+  x.beginPath(); x.moveTo(bx + 60, bb - 20); x.lineTo(bx - 130, bb - 90); x.moveTo(bx + 90, bb); x.lineTo(bx + 20, by); x.stroke();
+  x.beginPath(); x.arc(bx + 365, by - 52, 52, 0, 7); x.stroke(); x.beginPath(); x.arc(bx + 365, by - 52, 12, 0, 7); x.stroke(); x.beginPath(); x.moveTo(bx + 330, bb); x.lineTo(bx + 365, by - 52); x.stroke();
+  x.restore(); }
+function sGermania(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tNov = WA('germania', ['millenovecentoventitre', 'millenovecento', '1923'], 1, 0.2), tDol = WA('germania', ['dollaro'], 1, 0.55), tQ = WA('germania', ['quattromiladuecento', 'quattromila', '4200', '4'], 1, 0.85);
+  phrase(t, a + 0.05, [['La Germania,', C.ink]], 345, { size: 92 });
+  phrase(t, tNov - 0.12, [['novembre 1923', C.amber]], Y2, { size: 92 });
+  const kc = oB(seg(t, a + 0.05, a + 0.6)), kw = oB(seg(t, a + 0.15, a + 0.7)), kh = ioC(seg(t, tQ - 0.2, tQ + 1.0));
+  pop(215, 930, kc, () => disc(215, 930, 105, '$', C.lime, t >= tDol, 8));
+  txt('≈', 392, 930, { size: 100, weight: 800, color: C.ink, alpha: A85(oC(seg(t, a + 0.3, a + 0.6))) });
+  pop(690, 960, kw, () => { if (t >= tQ) glow(690, 960, 330, '255,90,78', 0.16 * kh); cart(690, 1090, kh); });
+  late(t, '1 $', 215, 1085, tDol, C.lime, { size: 60 });
+  late(t, '4.200 miliardi', 540, 1245, tQ, C.red, { size: 88, ls: -2 });
+  late(t, 'DI MARCHI · CIRCA', 540, 1325, tQ + 0.1, C.ink, { fam: 'mono', size: 32, weight: 700, ls: 4 });
+  x.restore(); finish(t); }
+
+/* ================= STAMPA: governo, banca centrale, torre di moneta che cresce, beni che restano ================= */
+function sStampa(t, a, b) { bg('34,44,30', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tGov = WA('stampa', ['governo'], 1, 0.1), tFin = WA('stampa', ['finanziare'], 1, 0.22), tBan = WA('stampa', ['centrale'], 1, 0.35), tCir = WA('stampa', ['circolo'], 1, 0.5), tBen = WA('stampa', ['beni'], 1, 0.75), tMis = WA('stampa', ['misura'], 1, 0.95);
+  phrase(t, a + 0.05, [['Più moneta,', C.ink], ['beni non alla pari', C.red]], 345, { size: 92 });
+  pl(t, 'GOVERNO', 260, 660, a + 0.2, tGov, C.lime, 28); pl(t, 'BANCA CENTRALE', 770, 660, a + 0.2, tBan, C.amber, 28);
+  const ka = oC(seg(t, a + 0.3, a + 0.8)), kf = oC(seg(t, tFin, tFin + 0.4));
+  dash(595, 660, 385, 660, kf > 0 ? C.lime : C.ink, 4, [10, 10], 0.6 * ka + 0.4 * kf); x.save(); x.globalAlpha *= ka; x.fillStyle = kf > 0 ? C.lime : C.ink; x.beginPath(); x.moveTo(372, 660); x.lineTo(392, 650); x.lineTo(392, 670); x.closePath(); x.fill(); x.restore();
+  if (kf > 0) for (let j = 0; j < 3; j++) { const u = ((t - tFin) * 0.5 + j / 3) % 1; x.fillStyle = C.lime; x.beginPath(); x.arc(595 - 210 * u, 660, 9, 0, 7); x.fill(); }
+  txt('FINANZIA', 490, 612, { fam: 'mono', size: 24, weight: 600, ls: 2, color: kf > 0 ? C.lime : C.ink, alpha: A85(ka) });
+  const BASE = 1250, n = Math.round(3 + 11 * ioC(seg(t, tCir - 0.1, tCir + 2.0))), kt = oB(seg(t, a + 0.1, a + 0.6)), kt2 = oB(seg(t, a + 0.2, a + 0.7));
+  pop(300, 1000, kt, () => { for (let i = 0; i < n; i++) note(300, BASE - 17 - i * 34, 210, 30, 0, i === n - 1 && n > 3 ? C.amber : C.lime, 1); });
+  pop(780, 1100, kt2, () => { for (let i = 0; i < 3; i++) { x.save(); x.fillStyle = 'rgba(241,244,238,0.12)'; x.strokeStyle = 'rgba(241,244,238,0.9)'; x.lineWidth = 6; rr(680, BASE - 90 * (i + 1), 200, 84, 10); x.fill(); x.stroke(); x.beginPath(); x.moveTo(680, BASE - 48 - 90 * i); x.lineTo(880, BASE - 48 - 90 * i); x.stroke(); x.restore(); } });
+  const topM = BASE - 17 - (n - 1) * 34 - 15; dash(670, topM, 890, topM, C.amber, 4, [10, 8], oC(seg(t, tMis - 0.2, tMis + 0.3)) * 0.9);
+  tag(t, 'MONETA', 300, 1315, a + 0.3, tCir, C.lime, { size: 32 }); tag(t, 'BENI', 780, 1315, a + 0.3, tBen, C.amber, { size: 32 });
+  x.restore(); finish(t); }
+
+/* ================= FUNZIONE: la moneta perde il suo ruolo; sei giorni di paga, subito in merci ================= */
+function sFunzione(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tPer = WA('funzione', ['perso'], 1, 0.3), tGio = WA('funzione', ['giorno'], 1, 0.6), tMer = WA('funzione', ['merci'], 1, 0.9);
+  phrase(t, a + 0.05, [['Il denaro perde', C.ink], ['la sua funzione', C.red]], 345, { size: 92 });
+  const kc = oB(seg(t, a + 0.05, a + 0.6)), ks = seg(t, tPer - 0.1, tPer + 0.5);
+  pop(540, 830, kc, () => { disc(540, 830, 125, 'M', ks > 0 ? C.ink : C.lime, false, 10); strike(540, 830, 125, ks); });
+  const DAYS = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+  DAYS.forEach((d, i) => { const cx = 170 + i * 148, cy = 1130, k = oB(seg(t, a + 0.2 + i * 0.07, a + 0.7 + i * 0.07)), on = t >= tGio + i * 0.22, kk = oC(seg(t, tGio + i * 0.22, tGio + i * 0.22 + 0.35)), col = on ? C.lime : C.ink;
+    pop(cx, cy, k, () => { if (on) glow(cx, cy, 100, '200,250,114', 0.22 * kk); glass(cx, cy, 130, 150, 28, 1);
+      x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; if (!on) x.setLineDash([8, 8]); rr(cx - 38, cy - 14, 76, 52, 8); x.stroke(); x.beginPath(); x.moveTo(cx - 38, cy - 14); x.lineTo(cx, cy + 16); x.lineTo(cx + 38, cy - 14); x.stroke(); x.restore();
+      txt(d, cx, cy - 50, { fam: 'mono', size: 26, weight: 700, ls: 2, color: col }); }); });
+  pl(t, 'POI SUBITO IN MERCI', 540, 1320, a + 0.4, tMer, C.amber, 28);
+  x.restore(); finish(t); }
+
+/* ================= ZIMBABWE: la curva dell'inflazione 2008 esce dal grafico ================= */
+function sZimbabwe(t, a, b) { bg('30,44,40', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOtt = WA('zimbabwe', ['duemilaotto', '2008'], 1, 0.3), tCen = WA('zimbabwe', ['centinaia'], 1, 0.5), tBan = WA('zimbabwe', ['banconota'], 1, 0.9);
+  phrase(t, a + 0.05, [['In Zimbabwe,', C.ink]], 345, { size: 92 });
+  phrase(t, tOtt - 0.12, [['nel 2008', C.amber]], Y2, { size: 92 });
+  const FX = 100, FY = 760, FW = 880, FH = 500, X0 = 150, X1 = 900, YB = 1210, YT = 790;
+  const pt = (u) => [X0 + (X1 - X0) * u, YB - (YB - YT) * (Math.exp(5 * u) - 1) / (Math.exp(5) - 1)];
+  const kf = oB(seg(t, a + 0.05, a + 0.6)); pop(540, FY + FH / 2, kf, () => { glass(540, FY + FH / 2, FW, FH, 40, 1);
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.85)'; x.lineWidth = 4; x.beginPath(); x.moveTo(X0 - 20, YB + 8); x.lineTo(X1 + 40, YB + 8); x.moveTo(X0 - 20, YB + 8); x.lineTo(X0 - 20, FY + 40); x.stroke(); x.restore();
+    x.save(); x.globalAlpha *= 0.5; x.setLineDash([10, 10]); x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); for (let i = 0; i <= 60; i++) { const [px, py] = pt(i / 60); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); x.restore(); });
+  txt('INFLAZIONE', 200, 800, { fam: 'mono', size: 24, weight: 700, ls: 3, color: C.ink, align: 'left', alpha: A85(oC(seg(t, a + 0.3, a + 0.7))) });
+  const p = ioC(seg(t, tOtt - 0.1, tCen + 0.8)); if (p > 0) { x.save(); x.strokeStyle = C.red; x.lineWidth = 12; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); const nn = Math.max(2, Math.round(80 * p)); for (let i = 0; i <= nn; i++) { const [px, py] = pt(p * i / nn); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); const [ex, ey] = pt(p); glow(ex, ey, 70, '255,90,78', 0.4); x.fillStyle = C.red; x.beginPath(); x.arc(ex, ey, 14, 0, 7); x.fill(); x.restore(); }
+  late(t, 'CENTINAIA DI MILIARDI', 540, 640, tCen, C.red, { size: 58, ls: -1 });
+  late(t, 'PER CENTO', 540, 698, tCen + 0.15, C.ink, { fam: 'mono', size: 30, weight: 700, ls: 5 });
+  pl(t, 'POI, LA BANCONOTA', 540, 1335, a + 0.4, tBan, C.lime, 28);
+  x.restore(); finish(t); }
+
+/* ================= DOLLARO: la moneta locale esce, entrano valute straniere; i prezzi si fermano ================= */
+function sDollaro(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tAbb = WA('dollaro', ['abbandonato'], 1, 0.3), tVal = WA('dollaro', ['valute'], 1, 0.45), tFer = WA('dollaro', ['fermata'], 1, 0.9);
+  phrase(t, a + 0.05, [['Dollaro zimbabwiano', C.ink], ['abbandonato', C.amber]], 345, { size: 92 });
+  const kc = oB(seg(t, a + 0.05, a + 0.6)), ks = seg(t, tAbb, tAbb + 0.5);
+  pop(230, 860, kc, () => { disc(230, 860, 100, 'Z$', C.amber, false, 9); strike(230, 860, 100, ks); });
+  tag(t, 'DOLLARO ZIMBABWIANO', 230, 990, a + 0.3, tAbb, C.amber, { size: 22 });
+  [600, 740, 880].forEach((cx, i) => { const kk = oB(seg(t, tVal + i * 0.15, tVal + 0.5 + i * 0.15)), k0 = oB(seg(t, a + 0.15 + i * 0.1, a + 0.65 + i * 0.1));
+    pop(cx, 860, k0, () => { if (t < tVal + i * 0.15) { x.save(); x.globalAlpha *= 0.45; x.setLineDash([9, 9]); x.strokeStyle = C.ink; x.lineWidth = 5; x.beginPath(); x.arc(cx, 860, 70, 0, 7); x.stroke(); x.restore(); } else pop(cx, 860, kk, () => disc(cx, 860, 70, '¤', C.lime, true, 7)); }); });
+  tag(t, 'VALUTE STRANIERE', 740, 990, a + 0.3, tVal, C.lime, { size: 24 });
+  const CX0 = 100, CY0 = 1050, CW = 880, CH = 260, kg = oB(seg(t, a + 0.1, a + 0.6));
+  const pt = (u) => [150 + 780 * u, u < 0.5 ? 1280 - 150 * (Math.exp(6 * u) - 1) / (Math.exp(3) - 1) : 1130];
+  pop(540, CY0 + CH / 2, kg, () => { glass(540, CY0 + CH / 2, CW, CH, 36, 1); x.save(); x.globalAlpha *= 0.5; x.setLineDash([10, 10]); x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); for (let i = 0; i <= 60; i++) { const [px, py] = pt(i / 60); i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); x.restore(); });
+  txt('PREZZI', 140, 1090, { fam: 'mono', size: 24, weight: 700, ls: 3, color: C.ink, align: 'left', alpha: A85(oC(seg(t, a + 0.3, a + 0.7))) });
+  const p = ioC(seg(t, a + 0.5, tFer + 0.5)); if (p > 0) { x.save(); x.lineWidth = 11; x.lineCap = 'round'; const nn = Math.max(2, Math.round(80 * p)); let prev = pt(0);
+    for (let i = 1; i <= nn; i++) { const q = pt(p * i / nn); x.strokeStyle = (p * i / nn) > 0.5 && t >= tFer - 0.4 ? C.lime : C.red; x.beginPath(); x.moveTo(...prev); x.lineTo(...q); x.stroke(); prev = q; } x.restore(); }
+  tag(t, 'PER IL FONDO, SI È FERMATA', 540, 1352, a + 0.4, tFer, C.lime, { size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= CASA: due schede da portare via, ognuna si accende sulla sua parola ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tCinq = WA('casa', ['cinquanta', '50'], 1, 0.4), tCon = WA('casa', ['convenzione'], 1, 0.55), tGer = WA('casa', ['germania'], 1, 0.7), tSmi = WA('casa', ['smise', 'mestiere'], 1, 0.92);
+  phrase(t, a + 0.05, [['Cosa ti porti', C.ink], ['a casa', C.lime]], 345, { size: 92 });
+  const k1 = oB(seg(t, a + 0.15, a + 0.7)), k2 = oB(seg(t, a + 0.3, a + 0.85)), kn = ioC(seg(t, tCinq - 0.1, tCinq + 0.9)), on1 = t >= tCinq, on2 = t >= tSmi;
+  pop(540, 800, k1, () => { if (on1) glow(540, 800, 420, '255,90,78', 0.12); glass(540, 800, 900, 300, 44, 1);
+    x.save(); x.lineWidth = 20; x.lineCap = 'round'; x.globalAlpha *= 0.5; x.setLineDash([2, 24]); x.strokeStyle = C.ink; x.beginPath(); x.arc(235, 800, 85, 0, 7); x.stroke(); x.restore();
+    if (kn > 0) { x.save(); x.lineWidth = 20; x.lineCap = 'round'; x.strokeStyle = C.red; x.beginPath(); x.arc(235, 800, 85, -Math.PI / 2, -Math.PI / 2 + Math.PI * kn); x.stroke(); x.restore(); } });
+  late(t, '50%', 440, 770, tCinq, C.red, { size: 120, align: 'left', ls: -3 });
+  tag(t, 'AL MESE · CONVENZIONE', 440, 870, a + 0.4, tCon, C.lime, { size: 28, align: 'left' });
+  pop(540, 1170, k2, () => { if (on2) glow(540, 1170, 420, '200,250,114', 0.1); glass(540, 1170, 900, 300, 44, 1); disc(235, 1170, 80, 'M', on2 ? C.ink : C.lime, false, 9); strike(235, 1170, 80, seg(t, tSmi, tSmi + 0.5)); });
+  tag(t, 'GERMANIA', 380, 1085, a + 0.5, tGer, C.lime, { size: 28, align: 'left' });
+  txt('Il denaro smise', 380, 1160, { size: 50, weight: 800, align: 'left', color: on2 ? C.red : C.ink, alpha: A85(oC(seg(t, a + 0.5, a + 0.9))) });
+  txt('di fare il suo mestiere', 380, 1225, { size: 50, weight: 800, align: 'left', color: on2 ? C.red : C.ink, alpha: A85(oC(seg(t, a + 0.6, a + 1.0))) });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, def: sDef, germania: sGermania, stampa: sStampa, funzione: sFunzione, zimbabwe: sZimbabwe, dollaro: sDollaro, casa: sCasa }, ORDER, ['hook', 'germania', 'zimbabwe']);
+</script></body></html>
