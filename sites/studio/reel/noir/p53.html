@@ -1,0 +1,203 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 53, DAY: 2, CAP: 2, NEXT: ['Inflazione e debiti', 'chi vince e chi perde'], FONTE: 'DATI: FED, BANCA D’ITALIA, ISTAT, FRED (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 53 — «La stagflazione» (mercoledì, lezione 3 di 5, capitolo 3). Numeri SOLO da p53-fonti.md:
+   petrolio: da 2,90 a 11,65 $/barile (ottobre 1973; barili 1:4 in scala, «quasi quadruplicato») · 1979-80: «più che raddoppiato» (nessun prezzo in dollari) ·
+   Italia, inflazione media annua, serie FRED/OCSE (una sola serie): 1972 5,7 · 73 10,8 · 74 19,2 · 75 17,0 · 76 16,6 · 77 17,1 · 78 12,1 · 79 14,8 · 80 21,1 · 81 18,0 · 82 16,5 ·
+   PIL Italia 1975 circa −2% (−2,09%; barra in scala 100 px per punto). La scala mobile è solo un concetto (nessun numero). Schemi senza cifre: hook, def, cura, casa.
+   Niente righe di fonte nel video. Testo mai sotto opacità 0,85 a regime; «spento» = C.ink, «acceso» = colore. */
+const ORDER = ['num', 'hook', 'def', 'embargo', 'secondo', 'italia', 'calo', 'scala', 'cura', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+/* tag: scritta SEMPRE presente (entra in 0,35 s, poi opacità 1); sulla parola cambia colore e fa un colpo di scala */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1;
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); };
+function kf(t, K) { if (t <= K[0][0]) return K[0][1]; for (let i = 1; i < K.length; i++) if (t <= K[i][0]) { const d = Math.max(0.05, K[i][0] - K[i - 1][0]); return lerp(K[i - 1][1], K[i][1], (t - K[i - 1][0]) / d); } return K[K.length - 1][1]; }
+function polyPart(pts, k, col, w, a = 1, dots = false) { if (k <= 0) return null; let L = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); L += d; }
+  let acc = 0; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; if (dots) x.setLineDash([1, w * 2.6]); x.beginPath(); x.moveTo(...pts[0]);
+  let last = pts[0];
+  for (let i = 1; i < pts.length; i++) { const need = k * L - acc; if (need <= 0) break; if (need >= sg[i - 1]) { x.lineTo(...pts[i]); last = pts[i]; } else { const u = need / sg[i - 1]; last = [lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)]; x.lineTo(...last); } acc += sg[i - 1]; }
+  x.stroke(); x.restore(); return last; }
+const arrowHead = (px, py, ang, col, s = 22) => { x.save(); x.fillStyle = col; x.beginPath(); x.moveTo(px + Math.cos(ang) * s, py + Math.sin(ang) * s); x.lineTo(px + Math.cos(ang + 2.5) * s, py + Math.sin(ang + 2.5) * s); x.lineTo(px + Math.cos(ang - 2.5) * s, py + Math.sin(ang - 2.5) * s); x.closePath(); x.fill(); x.restore(); };
+const hit = (t, t0, k = 0.3) => 1 + 0.1 * Math.sin(Math.PI * oC(seg(t, t0, t0 + k)));  /* colpo di scala sulla parola */
+
+/* ================= HOOK: la forbice. Un barile; da lì i prezzi salgono e la produzione scende ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tQ = WA('hook', ['quadrupl'], 1, 0.18), tMesi = WA('hook', ['mesi'], 1, 0.3), tPre = WA('hook', ['prezzi'], 1, 0.62), tPro = WA('hook', ['produzione'], 1, 0.84);
+  phrase(t, a + 0.05, [['Il petrolio', C.ink]], 345, { size: 92 });
+  phrase(t, tQ - 0.12, [['quasi ×4', C.amber]], Y2, { size: 92 });
+  /* barile a sinistra: cresce sulla parola «quadruplicò» */
+  const kB = oB(seg(t, a + 0.05, a + 0.6)), sB = 0.38 + 0.12 * ioC(seg(t, tQ - 0.1, tQ + 0.7));
+  pop(150, 1060, kB, () => { glow(150, 960, 170, '245,165,36', 0.18); barrel(150, 1060, sB, 1, '245,165,36'); });
+  const S0 = [310, 985], PR = [], PD = []; for (let i = 0; i <= 40; i++) { const u = i / 40; PR.push([S0[0] + 630 * u, S0[1] - 300 * Math.pow(u, 1.6)]); PD.push([S0[0] + 630 * u, S0[1] + 250 * Math.pow(u, 1.25)]); }
+  const kg = oC(seg(t, a + 0.15, a + 0.7)), kP = ioC(seg(t, tPre - 0.15, tPre + 1.1)), kD = ioC(seg(t, tPro - 0.15, tPro + 1.1));
+  polyPart(PR, kg, 'rgba(255,90,78,0.4)', 6, 1, true); polyPart(PD, kg, 'rgba(245,165,36,0.4)', 6, 1, true);
+  const hp = polyPart(PR, kP, C.red, 13), hd = polyPart(PD, kD, C.amber, 13);
+  [[hp, kP, '255,90,78'], [hd, kD, '245,165,36']].forEach(([h, k, rgb]) => { if (h && k > 0.01) { glow(h[0], h[1], 90, rgb, 0.3); x.fillStyle = C.ink; x.beginPath(); x.arc(h[0], h[1], 12, 0, 7); x.fill(); } });
+  x.fillStyle = C.ink; x.beginPath(); x.arc(S0[0], S0[1], 11, 0, 7); x.fill();
+  tag(t, 'PREZZI', 940, 640, a + 0.3, tPre, C.red, { align: 'right', size: 32 }); tag(t, 'PRODUZIONE', 940, 1285, a + 0.35, tPro, C.amber, { align: 'right', size: 32 });
+  /* asse del tempo */
+  const ka = oC(seg(t, a + 0.3, a + 0.8)); dash(S0[0], 1320, 920, 1320, C.ink, 4, [1, 0], ka); if (ka > 0) arrowHead(932, 1320, 0, C.ink, 16);
+  tag(t, 'POCHI MESI', 620, 1355, a + 0.4, tMesi, C.lime, { size: 24 });
+  x.restore(); finish(t); }
+
+/* ================= DEF: due schede (ristagna, inflazione alta) che si fondono nella parola ================= */
+function sDef(t, a, b) { bg('52,44,20', 0.55); x.save(); zoom(t, a, b, 1.04);
+  const tSt = WA('def', ['stagflazione'], 1, 0.12), tRis = WA('def', ['ristagna'], 1, 0.62), tAlt = WA('def', ['alta'], 1, 0.78), tUn = WA('def', ['unica'], 1, 0.42);
+  phrase(t, a + 0.05, [['Si chiama', C.ink], ['stagflazione', C.lime]], 345, { size: 92 });
+  const CY = 840, kA = oB(seg(t, a + 0.1, a + 0.6)), kB = oB(seg(t, a + 0.2, a + 0.7)), kl = ioC(seg(t, a + 0.4, a + 1.4));
+  const card = (cx, k, head, fn) => pop(cx, CY, k, () => { glass(cx, CY, 400, 330, 44, 1); txt(head, cx, CY - 125, { fam: 'mono', size: 26, weight: 700, ls: 3, color: C.ink }); fn(); });
+  card(290, kA, 'PRODUZIONE', () => { polyPart([[130, CY + 10], [170, CY + 2], [210, CY + 16], [250, CY + 6], [290, CY + 14], [330, CY + 4], [370, CY + 12], [430, CY + 8]], kl, C.amber, 9); });
+  card(790, kB, 'INFLAZIONE', () => { const L = []; for (let i = 0; i <= 20; i++) { const u = i / 20; L.push([630 + 320 * u, CY + 70 - 170 * Math.pow(u, 1.5)]); } polyPart(L, kl, C.red, 9); });
+  const sc = (cx, tOn) => hit(t, tOn);
+  x.save(); x.translate(290, CY + 115); x.scale(sc(290, tRis), sc(290, tRis)); txt('RISTAGNA', 0, 0, { fam: 'mono', size: 30, weight: 700, ls: 3, color: t >= tRis ? C.amber : C.ink, alpha: oC(seg(t, a + 0.3, a + 0.65)) }); x.restore();
+  x.save(); x.translate(790, CY + 115); x.scale(sc(790, tAlt), sc(790, tAlt)); txt('ALTA · PERSISTENTE', 0, 0, { fam: 'mono', size: 24, weight: 700, ls: 2, color: t >= tAlt ? C.red : C.ink, alpha: oC(seg(t, a + 0.35, a + 0.7)) }); x.restore();
+  txt('+', 540, CY, { size: 80, weight: 800, color: C.ink, alpha: oC(seg(t, a + 0.3, a + 0.7)) });
+  /* frecce verso la parola, poi la scheda grande */
+  const kS = oB(seg(t, tSt - 0.05, tSt + 0.5)), ks0 = oC(seg(t, a + 0.3, a + 0.8));
+  dash(290, CY + 180, 430, 1100, C.ink, 4, [10, 10], 0.5 * ks0); dash(790, CY + 180, 650, 1100, C.ink, 4, [10, 10], 0.5 * ks0);
+  x.save(); x.globalAlpha = ks0 * (1 - kS); x.setLineDash([10, 10]); x.strokeStyle = C.ink; x.lineWidth = 3; rr(190, 1100, 700, 130, 65); x.stroke(); x.restore();
+  if (kS > 0) { pop(540, 1165, kS, () => { glow(540, 1165, 330, '200,250,114', 0.25); glass(540, 1165, 700, 130, 65, 1); x.strokeStyle = C.lime; x.lineWidth = 4; rr(190, 1100, 700, 130, 65); x.stroke(); txt('STAGFLAZIONE', 540, 1168, { size: 68, weight: 800, color: C.lime, ls: -1 }); }); }
+  const kp = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tUn; x.save(); x.translate(540, 1325); const s2 = on ? hit(t, tUn) : 1; x.scale(s2, s2); x.translate(-540, -1325); glassPill(540, 1325, 'NESSUNA DEFINIZIONE UNICA', kp, on ? C.amber : C.ink, 28); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= EMBARGO: un barile piccolo (2,90 $) e uno che cresce fino a 4 volte (11,65 $): altezze in scala 1 : 4 ================= */
+function sEmbargo(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tEmb = WA('embargo', ['lembargo', 'embargo'], 1, 0.08), tTre = WA('embargo', ['tre', '3'], 1, 0.55), tDod = WA('embargo', ['dodici', '12'], 1, 0.78);
+  phrase(t, a + 0.05, [['L’embargo', C.ink], ['sul petrolio', C.amber]], 345, { size: 92 });
+  const BY = 1130, XL = 300, XR = 770, kIn = oB(seg(t, a + 0.05, a + 0.6)), kG = ioC(seg(t, tDod - 0.4, tDod + 0.9)), s2 = lerp(0.25, 1, kG);
+  /* sagoma tratteggiata del barile grande, subito */
+  x.save(); x.globalAlpha = oC(seg(t, a + 0.1, a + 0.6)) * 0.5 * (1 - kG); x.setLineDash([10, 12]); x.strokeStyle = C.ink; x.lineWidth = 3; rr(XR - 150, BY - 400, 300, 400, 26); x.stroke(); x.restore();
+  pop(XL, BY, kIn, () => { glow(XL, BY - 50, 120, '245,165,36', 0.15); barrel(XL, BY, 0.25, 1, '200,250,114'); });
+  pop(XR, BY, kIn, () => { glow(XR, BY - 200 * s2, 300 * s2 + 60, '255,90,78', 0.2 * kG); barrel(XR, BY, s2, 1, kG > 0.5 ? '255,90,78' : '200,250,114'); });
+  x.save(); x.globalAlpha = 0.5 * oC(seg(t, a + 0.3, a + 0.8)) * (1 - kG); dash(XL + 90, BY - 50, XR - 170, BY - 50, C.ink, 4, [10, 12]); x.restore();
+  big(t, 'circa 3', XL, 1205, tTre - 0.1, { color: C.lime, size: 62 }); lab(t, '2,90 $ AL BARILE', XL, 1272, a + 0.4, { size: 24 });
+  big(t, 'quasi 12', XR, 1205, tDod - 0.1, { color: C.red, size: 80 }); lab(t, '11,65 $ AL BARILE', XR, 1272, a + 0.4, { size: 24 });
+  const kp = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tEmb; x.save(); x.translate(540, 620); const s3 = on ? hit(t, tEmb) : 1; x.scale(s3, s3); x.translate(-540, -620); glassPill(540, 620, 'EMBARGO · OTTOBRE 1973', kp, on ? C.lime : C.ink, 30); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= SECONDO: un quadrante; la lancetta parte da «x1» e oltrepassa «x2» in un anno ================= */
+function sSecondo(t, a, b) { bg('52,34,28', 0.55); x.save(); zoom(t, a, b, 1.04);
+  const tIr = WA('secondo', ['iraniana', 'iranian'], 1, 0.3), tAn = WA('secondo', ['anno'], 1, 0.6), tRad = WA('secondo', ['raddopp'], 1, 0.86);
+  phrase(t, a + 0.05, [['Il secondo shock', C.ink], ['più che raddoppia', C.red]], 345, { size: 92 });
+  const CX = 540, CY = 985, R = 280, kIn = oB(seg(t, a + 0.05, a + 0.6)), v = lerp(30, 80, ioC(seg(t, tRad - 0.3, tRad + 1.0))) + (t < tRad ? Math.sin((t - a) * 5) * 1.2 : 0);
+  pop(CX, CY, kIn, () => { glow(CX, CY, 360, '255,90,78', 0.12 + 0.1 * seg(v, 30, 80)); gauge(CX, CY, R, v, 1); });
+  const ang = (q) => Math.PI * 0.8 + q / 100 * Math.PI * 1.4;
+  [[30, '×1', C.ink], [60, '×2', t >= tRad ? C.lime : C.ink]].forEach(([q, s, col]) => { const p = [CX + Math.cos(ang(q)) * 345, CY + Math.sin(ang(q)) * 345]; x.save(); x.translate(...p); const sc = q === 60 ? hit(t, tRad) : 1; x.scale(sc, sc); txt(s, 0, 0, { fam: 'mono', size: 38, weight: 700, color: col, alpha: oC(seg(t, a + 0.25, a + 0.6)) }); x.restore(); });
+  big(t, 'più di ×2', 540, 1225, tRad - 0.1, { color: C.red, size: 80 });
+  const kr = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tIr; x.save(); x.translate(540, 585); const s3 = on ? hit(t, tIr) : 1; x.scale(s3, s3); x.translate(-540, -585); glassPill(540, 585, 'RIVOLUZIONE IRANIANA', kr, on ? C.amber : C.ink, 28); x.restore();
+  const on2 = t >= tAn; x.save(); x.translate(540, 1330); const s4 = on2 ? hit(t, tAn) : 1; x.scale(s4, s4); x.translate(-540, -1330); glassPill(540, 1330, 'IN UN ANNO', kr, on2 ? C.lime : C.ink, 30); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= ITALIA: la curva dell'inflazione media annua, due vette: 1974 e 1980 (serie FRED/OCSE) ================= */
+const INF = [5.7, 10.8, 19.2, 17.0, 16.6, 17.1, 12.1, 14.8, 21.1, 18.0, 16.5];  /* 1972 … 1982 */
+function sItalia(t, a, b) { bg('52,34,28', 0.55); x.save(); zoom(t, a, b, 1.03);
+  const tVen = WA('italia', ['venti', '20'], 1, 0.4), tVu = Math.max(tVen + 0.5, WA('italia', ['ventun', '21'], 1, 0.82));
+  phrase(t, a + 0.05, [['L’inflazione', C.ink], ['in Italia', C.lime]], 345, { size: 92 });
+  const X0 = 110, DX = 86, YB = 1260, SC = 24, px = (i) => X0 + i * DX, py = (v) => YB - v * SC, PTS = INF.map((v, i) => [px(i), py(v)]);
+  const kIn = oC(seg(t, a + 0.1, a + 0.7));
+  x.save(); x.globalAlpha = kIn; x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; x.beginPath(); x.moveTo(X0 - 30, YB + 8); x.lineTo(px(10) + 30, YB + 8); x.stroke(); x.restore();
+  dash(X0 - 30, py(20), px(10) + 30, py(20), C.ink, 3, [8, 10], 0.55 * kIn);
+  txt('20%', X0 - 30, py(20) - 26, { fam: 'mono', size: 24, weight: 600, color: C.ink, align: 'left', alpha: kIn });
+  for (let i = 0; i <= 10; i++) { if (i % 2) continue; txt(String(1972 + i), px(i), YB + 46, { fam: 'mono', size: 24, weight: 600, color: (i === 2 && t >= tVen) || (i === 8 && t >= tVu) ? C.ink : C.ink, alpha: kIn }); }
+  polyPart(PTS, kIn, 'rgba(245,165,36,0.45)', 6, 1, true);
+  const pr = kf(t, [[a + 0.3, 0], [tVen, 2], [tVen + 0.3, 2], [tVu - 0.1, 8], [tVu + 1.4, 10]]), head = polyPart(PTS, pr / 10, C.amber, 12);
+  if (head && pr > 0.05 && pr < 9.95) { glow(head[0], head[1], 80, '245,165,36', 0.3); x.fillStyle = C.ink; x.beginPath(); x.arc(head[0], head[1], 12, 0, 7); x.fill(); }
+  PTS.forEach(([qx, qy], i) => { if (pr >= i - 0.01) { x.fillStyle = C.amber; x.beginPath(); x.arc(qx, qy, 8, 0, 7); x.fill(); } });
+  [[2, tVen, C.amber, 'vicina al 20%', 745], [8, tVu, C.red, 'oltre il 21%', 690]].forEach(([i, tOn, col, s, ly]) => { const k = oB(seg(t, tOn - 0.1, tOn + 0.45)); if (k <= 0) return;
+    pop(PTS[i][0], PTS[i][1], k, () => { glow(PTS[i][0], PTS[i][1], 100, col === C.red ? '255,90,78' : '245,165,36', 0.3); x.fillStyle = col; x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); x.arc(PTS[i][0], PTS[i][1], 20, 0, 7); x.fill(); x.stroke(); });
+    big(t, s, PTS[i][0], ly, tOn - 0.1, { color: col, size: 42 }); });
+  x.restore(); finish(t); }
+
+/* ================= CALO: la linea dello zero; il PIL scende di circa 2 punti, i prezzi continuano a salire ================= */
+function sCalo(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tDue = WA('calo', ['due', '2'], 1, 0.5), tSal = WA('calo', ['salire', 'salir'], 1, 0.9), tPre = WA('calo', ['prezzi'], 1, 0.75);
+  phrase(t, a + 0.05, [['Italia, 1975:', C.ink]], 345, { size: 92 });
+  phrase(t, tDue - 0.12, [['PIL circa −2%', C.red]], Y2, { size: 92 });
+  const Z = 880, XA = 340, XB = 750, kIn = oC(seg(t, a + 0.1, a + 0.7)), kd = ioC(seg(t, tDue - 0.2, tDue + 0.9)), ku = ioC(seg(t, tPre - 0.2, tPre + 1.2));
+  dash(120, Z, 960, Z, C.ink, 4, [1, 0], kIn); txt('0', 100, Z, { fam: 'mono', size: 26, weight: 700, color: C.ink, align: 'right', alpha: kIn });
+  /* PIL: barra verso il basso, 100 px per punto → 200 px; sagoma tratteggiata subito */
+  x.save(); x.globalAlpha = kIn * 0.5 * (1 - kd); x.setLineDash([9, 9]); x.strokeStyle = C.red; x.lineWidth = 3; rr(XA - 70, Z + 6, 140, 200, 14); x.stroke(); x.restore();
+  if (kd > 0.01) { glow(XA, Z + 100, 160, '255,90,78', 0.2 * kd); x.fillStyle = C.red; x.globalAlpha = 0.92; rr(XA - 70, Z + 6, 140, Math.max(30, 200 * kd), 14); x.fill(); x.globalAlpha = 1; }
+  /* prezzi: freccia in su (non in scala) */
+  const top = lerp(Z - 20, 600, ku); x.save(); x.globalAlpha = kIn * 0.5 * (1 - ku); x.setLineDash([9, 9]); x.strokeStyle = C.red; x.lineWidth = 3; rr(XB - 70, 600, 140, 260, 14); x.stroke(); x.restore();
+  if (ku > 0.01) { glow(XB, (Z + top) / 2, 180, '255,90,78', 0.2 * ku); x.fillStyle = C.red; x.globalAlpha = 0.92; rr(XB - 70, top + 40, 140, Z - 20 - top - 40 + 4, 14); x.fill(); x.globalAlpha = 1; arrowHead(XB, top + 6, -Math.PI / 2, C.red, 70); }
+  tag(t, 'PIL', XA, 1190, a + 0.3, tDue, C.red, { size: 32 }); tag(t, 'PREZZI', XB, 1190, a + 0.35, tPre, C.red, { size: 32 });
+  big(t, 'circa −2%', XA, 1270, tDue - 0.1, { color: C.red, size: 62 });
+  big(t, 'ancora su', XB, 1270, tSal - 0.1, { color: C.amber, size: 62 });
+  x.restore(); finish(t); }
+
+/* ================= SCALA: una scala mobile: i salari salgono legati ai prezzi, che salgono ================= */
+function sScala(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tScm = WA('scala', ['scala'], 1, 0.3), tCri = WA('scala', ['crisi'], 1, 0.12), tLeg = WA('scala', ['legava'], 1, 0.72), tSal = WA('scala', ['salari'], 1, 0.78), tPre = WA('scala', ['prezzi'], 1, 0.92);
+  phrase(t, a + 0.05, [['Anche la', C.ink], ['scala mobile', C.amber]], 345, { size: 92 });
+  const P0 = [150, 1290], P1 = [930, 770], NS = 12, DXs = (P1[0] - P0[0]) / NS, DYs = (P1[1] - P0[1]) / NS, kIn = oC(seg(t, a + 0.05, a + 0.6));
+  x.save(); x.globalAlpha = kIn; x.fillStyle = 'rgba(241,244,238,0.07)'; x.beginPath(); x.moveTo(P0[0], 1335);
+  for (let i = 0; i < NS; i++) { x.lineTo(P0[0] + i * DXs, P0[1] + i * DYs); x.lineTo(P0[0] + i * DXs, P0[1] + (i + 1) * DYs); x.lineTo(P0[0] + (i + 1) * DXs, P0[1] + (i + 1) * DYs); }
+  x.lineTo(P1[0], 1335); x.closePath(); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.8)'; x.lineWidth = 5; x.lineJoin = 'round'; x.beginPath(); x.moveTo(P0[0], P0[1]);
+  for (let i = 0; i < NS; i++) { x.lineTo(P0[0] + i * DXs, P0[1] + (i + 1) * DYs); x.lineTo(P0[0] + (i + 1) * DXs, P0[1] + (i + 1) * DYs); } x.stroke(); x.restore();
+  /* il gradino acceso corre verso l'alto: la scala è «mobile» */
+  const ph = ((t - a) * 3.2) % NS; for (let i = 0; i < NS; i++) { const d = ((ph - i) % NS + NS) % NS, al = d < 3 ? (1 - d / 3) : 0; if (al <= 0) continue; x.save(); x.globalAlpha = al * kIn; x.strokeStyle = C.lime; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(P0[0] + i * DXs + 6, P0[1] + (i + 1) * DYs); x.lineTo(P0[0] + (i + 1) * DXs - 6, P0[1] + (i + 1) * DYs); x.stroke(); x.restore(); }
+  const pos = (u) => [P0[0] + (P1[0] - P0[0]) * u, P0[1] + (P1[1] - P0[1]) * u - 92], us = lerp(0.08, 0.5, ioC(seg(t, a + 0.3, b - 0.5))), up = us + 0.4, [sx, sy] = pos(us), [qx, qy] = pos(up), kr = oC(seg(t, a + 0.3, a + 0.8));
+  const onL = t >= tLeg; dash(sx + 112, sy, qx - 114, qy, onL ? C.lime : C.ink, onL ? 8 : 4, onL ? [1, 0] : [8, 10], onL ? 1 : 0.55 * kr);
+  x.save(); x.translate(sx, sy); const s1 = hit(t, tSal); x.scale(s1, s1); x.translate(-sx, -sy); glassPill(sx, sy, 'SALARI', kr, t >= tSal ? C.amber : C.ink, 32); x.restore();
+  x.save(); x.translate(qx, qy); const s2 = hit(t, tPre); x.scale(s2, s2); x.translate(-qx, -qy); glassPill(qx, qy, 'PREZZI', kr, t >= tPre ? C.red : C.ink, 32); x.restore();
+  tag(t, 'DUE CRISI PETROLIFERE', 540, 1358, a + 0.4, tCri, C.lime, { size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= CURA: un bersaglio; l'aspettativa si stacca dal centro e la stretta (barra) deve salire ================= */
+function sCura(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tSt = WA('cura', ['staccano', 'stacca'], 1, 0.45), tStr = WA('cura', ['stretta'], 1, 0.55), tSev = WA('cura', ['severa'], 1, 0.7), tCon = WA('cura', ['contribuire', 'contribuir'], 1, 0.88);
+  phrase(t, a + 0.05, [['Curarla è', C.ink], ['difficile', C.red]], 345, { size: 92 });
+  const CX = 540, CY = 850, kIn = oB(seg(t, a + 0.05, a + 0.6)), kd = ioC(seg(t, tSt - 0.2, tSt + 0.9)), ang = -0.6, dist = lerp(26, 205, kd);
+  pop(CX, CY, kIn, () => { [60, 120, 180, 235].forEach((r, i) => { x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; x.beginPath(); x.arc(CX, CY, r, 0, 7); x.stroke(); });
+    glow(CX, CY, 120, '200,250,114', 0.25); x.fillStyle = C.lime; x.beginPath(); x.arc(CX, CY, 24, 0, 7); x.fill(); });
+  const dx = CX + Math.cos(ang) * dist, dy = CY + Math.sin(ang) * dist; dash(CX, CY, dx, dy, C.ink, 3, [8, 10], 0.6 * kIn * seg(kd, 0.02, 0.2));
+  x.save(); x.globalAlpha = kIn; glow(dx, dy, 90, '255,90,78', 0.2 + 0.25 * kd); x.fillStyle = kd > 0.3 ? C.red : C.amber; x.strokeStyle = C.ink; x.lineWidth = 5; x.beginPath(); x.arc(dx, dy, 32, 0, 7); x.fill(); x.stroke(); x.restore();
+  tag(t, 'ASPETTATIVE', 300, 1130, a + 0.3, tSt, C.red, { size: 28 }); tag(t, 'OBIETTIVO', 780, 1130, a + 0.35, 1e9, C.lime, { size: 28, color: C.lime });
+  /* la stretta: barra che si riempie, da ambra a rossa */
+  const TX = 330, TW = 630, TY = 1240, v = lerp(0.18, 1, ioC(seg(t, tStr - 0.1, tSev + 0.5))), kb = oC(seg(t, a + 0.3, a + 0.8));
+  tag(t, 'STRETTA', 100, TY, a + 0.3, tStr, C.amber, { align: 'left', size: 30 });
+  x.save(); x.globalAlpha = kb; x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(TX, TY - 22, TW, 44, 22); x.stroke(); x.restore();
+  x.fillStyle = t >= tSev ? C.red : C.amber; x.globalAlpha = 0.92 * kb; rr(TX, TY - 22, Math.max(44, TW * v), 44, 22); x.fill(); x.globalAlpha = 1;
+  const on = t >= tCon; x.save(); x.translate(540, 1330); const s3 = on ? hit(t, tCon) : 1; x.scale(s3, s3); x.translate(-540, -1330); glassPill(540, 1330, 'RISCHIO STAGFLAZIONE', kb, on ? C.red : C.ink, 30); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= CASA: tre righe da spuntare ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tInf = WA('casa', ['inflazione'], 1, 0.42), tPro = WA('casa', ['produzione'], 1, 0.6), tSet = WA('casa', ['settanta'], 1, 0.82);
+  phrase(t, a + 0.05, [['Cosa ti porti', C.ink], ['a casa', C.lime]], 345, { size: 92 });
+  const rows = [[760, 'INFLAZIONE ALTA', null, tInf, C.red, 'up'], [950, 'PRODUZIONE FERMA', null, tPro, C.amber, 'flat'], [1140, 'ANNI SETTANTA', 'SHOCK PETROLIFERI', tSet, C.lime, 'barrel']];
+  rows.forEach(([cy, s1, s2, tOn, col, ic], i) => { const k = oB(seg(t, a + 0.1 + i * 0.12, a + 0.6 + i * 0.12)), on = t >= tOn, kk = oB(seg(t, tOn, tOn + 0.45), 1.8);
+    pop(540, cy, k, () => { if (on) glow(540, cy, 380, col === C.red ? '255,90,78' : col === C.amber ? '245,165,36' : '200,250,114', 0.12 * oC(seg(t, tOn, tOn + 0.4))); glass(540, cy, 880, 150, 36, 1);
+      if (ic === 'up') { x.strokeStyle = on ? col : C.ink; x.lineWidth = 9; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(150, cy + 34); x.lineTo(185, cy + 4); x.lineTo(205, cy + 18); x.lineTo(235, cy - 30); x.stroke(); arrowHead(238, cy - 33, -1.0, on ? col : C.ink, 20); }
+      if (ic === 'flat') { x.strokeStyle = on ? col : C.ink; x.lineWidth = 9; x.lineCap = 'round'; x.beginPath(); x.moveTo(150, cy + 6); x.lineTo(185, cy - 3); x.lineTo(205, cy + 9); x.lineTo(235, cy + 1); x.stroke(); }
+      if (ic === 'barrel') { barrel(192, cy + 44, 0.24, 1, on ? '200,250,114' : '241,244,238'); }
+      txt(s1, 290, s2 ? cy - 20 : cy, { size: s2 ? 46 : 48, weight: 800, color: on ? col : C.ink, align: 'left', ls: -1 });
+      if (s2) txt(s2, 290, cy + 32, { fam: 'mono', size: 28, weight: 600, ls: 2, color: on ? col : C.ink, align: 'left' });
+      x.strokeStyle = C.ink; x.lineWidth = 4; x.setLineDash([6, 8]); x.beginPath(); x.arc(895, cy, 34, 0, 7); x.stroke(); x.setLineDash([]);
+      if (kk > 0) { pop(895, cy, kk, () => { x.fillStyle = col; x.beginPath(); x.arc(895, cy, 34, 0, 7); x.fill(); x.strokeStyle = '#050607'; x.lineWidth = 8; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(879, cy + 1); x.lineTo(891, cy + 14); x.lineTo(913, cy - 12); x.stroke(); }); } }); });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, def: sDef, embargo: sEmbargo, secondo: sSecondo, italia: sItalia, calo: sCalo, scala: sScala, cura: sCura, casa: sCasa }, ORDER, ['hook', 'secondo', 'casa']);
+</script></body></html>
