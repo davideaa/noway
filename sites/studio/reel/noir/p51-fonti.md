@@ -66,3 +66,10 @@ Nota: è una **convenzione** di Cagan (1956, p. 25), non una legge; il testo ori
 2. Dollaro 1923: nessuna tavola Reichsbank/Bundesbank letta; Bundestag dice «novembre 1923» e flyer «fine 1923».
 3. Data del press statement RBZ: file intitolato 9/06/2015, citato come 11/06/2015 in altri archivi; non cambia il dato.
 4. Pane: 230 miliardi (Bundesbank) o 201 miliardi (Bundestag): scegliere uno solo.
+
+## Righe aggiunte dopo il controllo finale (20/11/2026)
+
+| Detto nel reel | Testo esatto | Fonte |
+|---|---|---|
+| Gancio: «una banconota da centomila miliardi: succede quando i prezzi sfuggono di mano» (nesso tra tagli sempre più alti e perdita di potere d'acquisto) | «The Zimbabwean government issued the Z$100 trillion bill in early 2009, among the last in a series of ever higher denominations distributed as inflation eroded purchasing power.» (riletto sul PDF il 20/11/2026) | Fed di Dallas, GMPI 2011, «Hyperinflation in Zimbabwe», p. 2: https://fraser.stlouisfed.org/files/docs/publications/frbdal_gmpi/frbdal_gmpiAR11.pdf |
+| «L'inflazione dei dodici mesi nel 2008 era stimata in centinaia di miliardi per cento» | Il dato FMI (≈500 miliardi per cento) è il **picco di settembre 2008** dell'inflazione sui dodici mesi, non il valore dell'intero anno; «centinaia di miliardi» è corretto come ordine di grandezza | FMI, CR 09/139, par. 3 (già in sezione C) |

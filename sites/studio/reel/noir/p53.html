@@ -10,7 +10,7 @@
 <script src="serie.js"></script>
 <script>
 /* Puntata 53 — «La stagflazione» (mercoledì, lezione 3 di 5, capitolo 3). Numeri SOLO da p53-fonti.md:
-   petrolio: da 2,90 a 11,65 $/barile (ottobre 1973; barili 1:4 in scala, «quasi quadruplicato») · 1979-80: «più che raddoppiato» (nessun prezzo in dollari) ·
+   petrolio: da 2,90 a 11,65 $/barile (ottobre 1973 → gennaio 1974; barili 1:4 in scala, «quasi quadruplicato») · 1979-80: «più che raddoppiato» (nessun prezzo in dollari) ·
    Italia, inflazione media annua, serie FRED/OCSE (una sola serie): 1972 5,7 · 73 10,8 · 74 19,2 · 75 17,0 · 76 16,6 · 77 17,1 · 78 12,1 · 79 14,8 · 80 21,1 · 81 18,0 · 82 16,5 ·
    PIL Italia 1975 circa −2% (−2,09%; barra in scala 100 px per punto). La scala mobile è solo un concetto (nessun numero). Schemi senza cifre: hook, def, cura, casa.
    Niente righe di fonte nel video. Testo mai sotto opacità 0,85 a regime; «spento» = C.ink, «acceso» = colore. */
@@ -91,7 +91,7 @@ function sEmbargo(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
   pop(XR, BY, kIn, () => { glow(XR, BY - 200 * s2, 300 * s2 + 60, '255,90,78', 0.2 * kG); barrel(XR, BY, s2, 1, kG > 0.5 ? '255,90,78' : '200,250,114'); });
   x.save(); x.globalAlpha = 0.5 * oC(seg(t, a + 0.3, a + 0.8)) * (1 - kG); dash(XL + 90, BY - 50, XR - 170, BY - 50, C.ink, 4, [10, 12]); x.restore();
   big(t, 'circa 3', XL, 1205, tTre - 0.1, { color: C.lime, size: 62 }); lab(t, '2,90 $ AL BARILE', XL, 1272, a + 0.4, { size: 24 });
-  big(t, 'quasi 12', XR, 1205, tDod - 0.1, { color: C.red, size: 80 }); lab(t, '11,65 $ AL BARILE', XR, 1272, a + 0.4, { size: 24 });
+  big(t, 'quasi 12', XR, 1205, tDod - 0.1, { color: C.red, size: 80 }); lab(t, '11,65 $ · GEN 1974', XR, 1272, a + 0.4, { size: 24 });
   const kp = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tEmb; x.save(); x.translate(540, 620); const s3 = on ? hit(t, tEmb) : 1; x.scale(s3, s3); x.translate(-540, -620); glassPill(540, 620, 'EMBARGO · OTTOBRE 1973', kp, on ? C.lime : C.ink, 30); x.restore();
   x.restore(); finish(t); }
 

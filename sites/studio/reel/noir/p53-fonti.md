@@ -95,3 +95,6 @@ Il **tasso di disoccupazione italiano degli anni '70** non è stato verificato (
 3. FRED PWT Italia: il dato 1974 (+5,5%) è solo da FRED, non incrociato.
 4. «1975 tra le recessioni più gravi»: non verificato (rapporto ISTAT non letto).
 5. Doppia cifra in Germania: la Bundesbank dice che il primo shock non portò a doppia cifra; la BCE (Schnabel) cita 13,2% per l'**area euro** nel 1974: non confondere (area euro attuale ≠ Germania).
+
+## Correzioni dopo il controllo finale (20/11)
+- Gancio: «Nel 1973 il petrolio quasi quadruplicò» → «Tra il settantatré e il settantaquattro il petrolio quasi quadruplicò in pochi mesi», perché il Fed dà 2,90 $ prima dell'embargo (ottobre 1973) e 11,65 $ a gennaio 1974 (riga 32). Scena embargo: l'etichetta del prezzo finale ora dice «11,65 $ · GEN 1974».

@@ -99,3 +99,31 @@ Media annua (Eurostat `prc_hicp_aind`, `RCH_A_AVG`): **2014 +0,4%, 2015 +0,2%, 2
 3. Conteggio anni negativi 1995-2016 = 11 su 22 (calcolo nostro).
 4. Eurostat ha sostituito `prc_hicp_manr` con `prc_hicp_minr` (COICOP 2018): i valori 2014-2016 non sono cambiati nel file letto.
 5. Causa petrolifera del calo dei prezzi 2014-15: non verificata.
+
+## Righe aggiunte dopo il controllo finale (20/11/2026)
+
+Valori **positivi e zero** della serie giapponese disegnati nel grafico (array `JP` di `p52.html`, 1990-2020), che nelle sezioni sopra non avevano riga. Scaricati e riletti il 20/11/2026 da FRED: `CPALTT01JPA659N` (OCSE, un decimale, già fonte della sezione B) e, come controllo indipendente, `FPCPITOTLZGJPN` («Inflation, consumer prices for Japan», annual %, World Bank): https://fred.stlouisfed.org/graph/fredgraph.csv?id=FPCPITOTLZGJPN (pagina https://fred.stlouisfed.org/series/FPCPITOTLZGJPN). Scarto massimo tra il valore disegnato e la serie World Bank: 0,19 punti (1992: 1,6 contro 1,76); tutti entro 0,3.
+
+| Anno | Disegnato (FRED/OCSE) | World Bank (FRED) | Anno | Disegnato | World Bank |
+|---|---|---|---|---|---|
+| 1990 | +3,1% | +3,08 | 2006 | +0,3% | +0,25 |
+| 1991 | +3,3% | +3,25 | 2007 | 0,0% | +0,06 |
+| 1992 | +1,6% | +1,76 | 2008 | +1,4% | +1,38 |
+| 1993 | +1,3% | +1,24 | 2012 | 0,0% | −0,04 |
+| 1994 | +0,7% | +0,70 | 2013 | +0,4% | +0,34 |
+| 1996 | +0,1% | +0,14 | 2014 | +2,7% | +2,76 |
+| 1997 | +1,8% | +1,75 | 2015 | +0,8% | +0,80 |
+| 1998 | +0,6% | +0,66 | 2017 | +0,5% (0,484) | +0,48 |
+| 2004 | 0,0% | −0,01 | 2018 | +1,0% (0,989) | +0,99 |
+| | | | 2019 | +0,5% (0,469) | +0,47 |
+| | | | 2020 | 0,0% (−0,025) | −0,03 |
+
+Anni negativi già in sezione B, confermati anche dalla serie World Bank (1995 −0,13, 1999 −0,34, 2000 −0,68, 2001 −0,74, 2002 −0,92, 2003 −0,26, 2005 −0,28, 2009 −1,35, 2010 −0,73, 2011 −0,27, 2016 −0,13). Il minimo −1,4% del 2009 coincide in entrambe le serie (World Bank −1,35, arrotondato −1,4).
+Il 2020 è disegnato come 0,0%: la serie OCSE dà −0,025 e la World Bank −0,03, quindi la barra è praticamente nulla; non va letta come calo.
+
+Etichetta «OBIETTIVO 2%» (scena hook): BCE, pagina «Our monetary policy / Price stability» (https://www.ecb.europa.eu/mopo/strategy/pricestab/html/index.en.html, letta il 20/11/2026): «the 2% inflation target is assessed on the basis of inflation developments in the euro area economy»; «We consider negative and positive deviations from our 2% inflation target to be equally undesirable» (obiettivo simmetrico del 2%). La definizione del 2011 (opuscolo, p. 61: «an increase in the HICP of below 2%») è quella già citata in sezione A.
+
+## Correzioni al copione dopo il controllo finale (20/11)
+- «rinvio»: tolta la clausola senza fonte «se lo fanno in tanti la spesa cala»; ora «come diceva Mario Draghi, a farlo potrebbero essere in tanti» (Draghi, 2/01/2015: «people might … postpone their spending», riga 23).
+- «euro»: «tra fine 2014 e inizio 2016» → «tra fine 2014 e il 2016» (mesi negativi anche aprile e maggio 2016).
+- «vera»: non più attribuito alla BCE come affermazione; ora «per la definizione della stessa banca centrale, quella non era deflazione vera» (applicazione della definizione BCE di calo prolungato).

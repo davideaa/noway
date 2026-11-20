@@ -172,7 +172,7 @@ function sDollaro(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
   txt('PREZZI', 140, 1090, { fam: 'mono', size: 24, weight: 700, ls: 3, color: C.ink, align: 'left', alpha: A85(oC(seg(t, a + 0.3, a + 0.7))) });
   const p = ioC(seg(t, a + 0.5, tFer + 0.5)); if (p > 0) { x.save(); x.lineWidth = 11; x.lineCap = 'round'; const nn = Math.max(2, Math.round(80 * p)); let prev = pt(0);
     for (let i = 1; i <= nn; i++) { const q = pt(p * i / nn); x.strokeStyle = (p * i / nn) > 0.5 && t >= tFer - 0.4 ? C.lime : C.red; x.beginPath(); x.moveTo(...prev); x.lineTo(...q); x.stroke(); prev = q; } x.restore(); }
-  tag(t, 'PER IL FONDO, SI È FERMATA', 540, 1352, a + 0.4, tFer, C.lime, { size: 28 });
+  tag(t, 'SECONDO L\'FMI: SI È FERMATA', 540, 1352, a + 0.4, tFer, C.lime, { size: 28 });
   x.restore(); finish(t); }
 
 /* ================= CASA: due schede da portare via, ognuna si accende sulla sua parola ================= */
