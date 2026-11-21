@@ -1,0 +1,240 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 47, DAY: 1, CAP: 2, NEXT: ['La spirale', 'prezzi-salari'], FONTE: 'DATI: BANCA D’ITALIA, ISTAT, BCE' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 47 — «Costi ed energia» (martedì, lezione 2 di 5, capitolo 3). Numeri SOLO da p47-fonti.md:
+   gas europeo (TTF, €/MWh): da meno di 20 (inizio 2021) a oltre 300 (estate 2022) · prezzi alla produzione ISTAT 2022: +34,4% (a schermo «oltre +34%»),
+   energetici +104,3% (a schermo «più che raddoppiati»; nastri in scala su indice 100: 134 e 204) · contributo dell'energia all'inflazione italiana 2022: circa due terzi
+   (la ricevuta è divisa esattamente 2/3 – 1/3). Nessun moltiplicatore scritto. «storia» = ESEMPIO (nessuna cifra). Niente righe di fonte nel video.
+   Testo mai sotto opacità 0,85: «si accende» = colore + glow. Scene: hook provetta · def curva dell'offerta (curva + linea della quantità) · energia tubature ·
+   storia percorso a serpentina · produzione nastri · scontrino ricevuta · casa cascata di vasche. */
+const ORDER = ['num', 'hook', 'def', 'energia', 'storia', 'produzione', 'scontrino', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere, cifre, parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+/* tag: scritta SEMPRE presente (entra in 0,35 s a inizio scena, poi opacità 1); sulla parola cambia colore (da off a colOn) e fa un piccolo colpo */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1, { off = C.ink, ...r } = o;
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : off, alpha: oC(seg(t, aIn, aIn + 0.35)), ...r }); x.restore(); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); return k; };
+const stamp = (t, a0, label, cy, col = C.amber) => { const ke = oC(seg(t, a0, a0 + 0.4)), lw = tw(label, 26, 600, 'mono', 2) + 64;
+  x.save(); x.globalAlpha = ke; x.strokeStyle = col; x.lineWidth = 3; rr(540 - lw / 2, cy - 30, lw, 60, 30); x.stroke(); x.fillStyle = 'rgba(245,165,36,0.10)'; x.fill(); x.restore();
+  txt(label, 540, cy + 1, { fam: 'mono', size: 26, weight: 600, color: col, ls: 2, alpha: ke }); };
+/* polilinea disegnata solo per la frazione k della sua lunghezza (ritorna l'ultimo punto) */
+function polyPart(pts, k, col, w, a = 1) { if (k <= 0) return null; let L = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); L += d; }
+  let acc = 0; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(...pts[0]);
+  let last = pts[0];
+  for (let i = 1; i < pts.length; i++) { const need = k * L - acc; if (need <= 0) break; if (need >= sg[i - 1]) { x.lineTo(...pts[i]); last = pts[i]; } else { const u = need / sg[i - 1]; last = [lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)]; x.lineTo(...last); } acc += sg[i - 1]; }
+  x.stroke(); x.restore(); return last; }
+function ptAt(pts, f) { let L = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); L += d; }
+  let need = f * L; for (let i = 1; i < pts.length; i++) { if (need <= sg[i - 1]) { const u = need / sg[i - 1]; return [lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)]; } need -= sg[i - 1]; } return pts[pts.length - 1]; }
+/* fiamma di gas (scalabile) */
+function fiamma(cx, cy, s, col, lw = 5) { x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = lw / s; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(0, -36); x.bezierCurveTo(10, -18, 28, -6, 22, 14); x.bezierCurveTo(18, 32, -18, 32, -22, 14); x.bezierCurveTo(-26, -2, -6, -10, 0, -36); x.stroke();
+  x.beginPath(); x.moveTo(0, -4); x.bezierCurveTo(8, 6, 12, 12, 8, 20); x.bezierCurveTo(4, 26, -8, 26, -10, 16); x.bezierCurveTo(-11, 8, -2, 4, 0, -4); x.stroke(); x.restore(); }
+function fiammaPiena(cx, cy, s, rgb, a) { x.save(); x.translate(cx, cy); x.scale(s, s); x.fillStyle = `rgba(${rgb},${a})`; x.beginPath(); x.moveTo(0, -36); x.bezierCurveTo(10, -18, 28, -6, 22, 14); x.bezierCurveTo(18, 32, -18, 32, -22, 14); x.bezierCurveTo(-26, -2, -6, -10, 0, -36); x.fill(); x.restore(); }
+
+/* ================= HOOK: una provetta di vetro si riempie di gas: da meno di 20 a oltre 300 (scala vera); a sinistra la fiamma cresce ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tV = WA('hook', ['venti', '20'], 1, 0.5), tT = WA('hook', ['trecento', '300', '3'], 1, 0.84);
+  phrase(t, a + 0.05, [['Il gas in Europa', C.ink]], 345, { size: 92 });
+  phrase(t, tV - 0.12, [['meno di 20', C.lime]], Y2, { size: 92, out: tT - 0.1 });
+  phrase(t, tT - 0.12, [['oltre 300', C.red]], Y2, { size: 92 });
+  lab(t, 'EURO PER MEGAWATTORA', 540, 590, a + 0.3, { color: C.ink, size: 24 });
+  const YB = 1320, PX = 660 / 320, TX = 540, ke = oB(seg(t, a + 0.05, a + 0.6));
+  const lv = 20 * oC(seg(t, a + 0.3, a + 0.9)) + 280 * ioC(seg(t, tT - 0.2, tT + 1.1)), hot = seg(t, tT - 0.2, tT + 1.1);
+  /* fiamma nella scheda di sinistra */
+  pop(235, 990, ke, () => { glass(235, 990, 290, 420, 40, 1); });
+  const fs = 2.6 + 1.6 * (lv / 300), fc = hot > 0.4 ? C.red : C.amber;
+  glow(235, 1000, 170 + 80 * hot, hot > 0.4 ? '255,90,78' : '245,165,36', 0.16 + 0.16 * hot);
+  fiammaPiena(235, 1010, fs, hot > 0.4 ? '255,90,78' : '245,165,36', 0.22 + 0.2 * hot); fiamma(235, 1010, fs, fc, 6);
+  lab(t, 'GAS', 235, 1165, a + 0.3, { color: C.ink, size: 28 });
+  /* provetta */
+  pop(TX, 990, ke, () => {
+    glass(TX, 990, 170, 720, 85, 1);
+    x.save(); rr(TX - 62, 650, 124, 680, 62); x.clip();
+    const top = YB - lv * PX; if (lv > 0.5) { const g = x.createLinearGradient(0, top, 0, YB); g.addColorStop(0, hot > 0.4 ? 'rgba(255,90,78,0.95)' : 'rgba(245,165,36,0.95)'); g.addColorStop(1, hot > 0.4 ? 'rgba(255,90,78,0.5)' : 'rgba(245,165,36,0.5)');
+      x.fillStyle = g; x.fillRect(TX - 62, top, 124, YB + 20 - top); x.fillStyle = 'rgba(255,255,255,0.5)'; x.fillRect(TX - 62, top, 124, 5); }
+    x.restore(); });
+  if (hot > 0.05) glow(TX, YB - lv * PX, 150, '255,90,78', 0.28 * hot);
+  for (let q = 0; q <= 6; q++) { const yy = YB - q * 50 * PX; x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; x.beginPath(); x.moveTo(TX + 68, yy); x.lineTo(TX + 88, yy); x.stroke(); }
+  /* linee guida e valori */
+  const y20 = YB - 20 * PX, y300 = YB - 300 * PX;
+  dash(TX + 90, y20, 690, y20, C.lime, 3, [8, 8], oC(seg(t, a + 0.3, a + 0.8))); dash(TX + 90, y300, 690, y300, 'rgba(255,90,78,0.8)', 3, [8, 8], 1);
+  tag(t, 'meno di 20', 705, y20 - 12, a + 0.3, tV, C.lime, { align: 'left', size: 34, weight: 800, fam: 'Manrope', ls: 0 }); lab(t, 'INIZIO 2021', 705, y20 + 26, a + 0.4, { color: C.ink, align: 'left', size: 24 });
+  tag(t, 'oltre 300', 705, y300 - 12, a + 0.3, tT, C.red, { align: 'left', size: 34, weight: 800, fam: 'Manrope', ls: 0 }); lab(t, 'ESTATE 2022', 705, y300 + 26, a + 0.4, { color: C.ink, align: 'left', size: 24 });
+  x.restore(); finish(t); }
+
+/* ================= DEF: l'offerta si sposta a sinistra, vista con una LINEA DELLA QUANTITÀ: a parità di quantità il prezzo salta in alto ================= */
+const OF = (u) => [330 + 540 * u, 1200 - 400 * Math.pow(u, 1.3)], SDX = -120, SDY = -100, QX = 640;
+const OFP = (() => { const L = []; for (let i = 0; i <= 50; i++) L.push(OF(i / 50)); return L; })();
+function sDef(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCosta = WA('def', ['costa'], 1, 0.1), tInfl = WA('def', ['inflazione'], 1, 0.55), tSp = WA('def', ['sposta'], 1, 0.8), tSin = WA('def', ['sinistra'], 1, 0.92);
+  phrase(t, a + 0.05, [['Produrre costa di più', C.ink]], 345, { size: 92 });
+  phrase(t, tInfl - 0.12, [['inflazione da costi', C.amber]], Y2, { size: 92 });
+  const ke = oB(seg(t, a + 0.05, a + 0.6)), p = ioC(seg(t, tSp - 0.15, tSp + 1.2));
+  pop(540, 975, ke, () => { glass(540, 975, 860, 730, 40, 1); });
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 4; x.lineCap = 'round'; x.beginPath(); x.moveTo(200, 690); x.lineTo(200, 1250); x.lineTo(930, 1250); x.stroke(); x.restore();
+  lab(t, 'PREZZO', 170, 660, a + 0.3, { color: C.ink, align: 'left', size: 26 }); lab(t, 'QUANTITÀ', 930, 1296, a + 0.3, { color: C.ink, align: 'right', size: 26 });
+  /* linea della quantità */
+  dash(QX, 1250, QX, 700, 'rgba(241,244,238,0.6)', 3, [9, 9], oC(seg(t, a + 0.2, a + 0.7))); lab(t, 'STESSA QUANTITÀ', QX, 662, a + 0.3, { color: C.ink, size: 24 });
+  /* offerta di prima (tratteggiata) e offerta spostata */
+  x.save(); x.globalAlpha = oC(seg(t, a + 0.15, a + 0.7)); x.setLineDash([10, 10]); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 4; x.beginPath(); OFP.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); x.stroke(); x.restore();
+  x.save(); x.translate(SDX * p, SDY * p); const lc = polyPart(OFP, oC(seg(t, a + 0.15, a + 0.9)), p > 0.5 ? C.red : C.lime, 10); x.restore();
+  if (lc && p > 0.02) glow(lc[0] + SDX * p, lc[1] + SDY * p, 120, '255,90,78', 0.3 * p);
+  lab(t, 'PRIMA', 405, 1222, a + 0.4, { color: C.ink, size: 24 }); lab(t, 'ORA', 232, 1130, tSp, { color: C.red, align: 'left', size: 26, weight: 700 });
+  /* punto d'incontro tra curva e linea della quantità: sale con lo spostamento */
+  const u = (QX - 330 - SDX * p) / 540, my = 1200 - 400 * Math.pow(u, 1.3) + SDY * p, y0 = 1200 - 400 * Math.pow((QX - 330) / 540, 1.3);
+  dash(200, my, QX, my, p > 0.3 ? C.amber : 'rgba(241,244,238,0.55)', 3, [8, 8], oC(seg(t, a + 0.3, a + 0.8)));
+  x.save(); x.strokeStyle = C.amber; x.lineWidth = 7; x.lineCap = 'round'; x.globalAlpha = oC(seg(t, tSp, tSp + 0.4)); x.beginPath(); x.moveTo(QX, y0); x.lineTo(QX, my); x.stroke(); x.restore();
+  x.fillStyle = p > 0.3 ? C.red : C.ink; x.strokeStyle = C.bg; x.lineWidth = 3; x.beginPath(); x.arc(QX, my, 15, 0, 7); x.fill(); x.stroke();
+  /* freccia dello spostamento (a metà curva) */
+  const k1 = oC(seg(t, tSp, tSp + 0.5)); if (k1 > 0) { const A = OF(0.5), B = [A[0] + SDX, A[1] + SDY];
+    x.save(); x.globalAlpha = k1; x.strokeStyle = C.amber; x.fillStyle = C.amber; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(A[0] - 6, A[1] - 6); x.lineTo(B[0] + 14, B[1] + 11); x.stroke();
+    const an = Math.atan2(B[1] - A[1], B[0] - A[0]); x.beginPath(); x.moveTo(B[0] + 4, B[1] + 3); x.lineTo(B[0] + 4 - 24 * Math.cos(an - 0.5), B[1] + 3 - 24 * Math.sin(an - 0.5)); x.lineTo(B[0] + 4 - 24 * Math.cos(an + 0.5), B[1] + 3 - 24 * Math.sin(an + 0.5)); x.closePath(); x.fill(); x.restore(); }
+  tag(t, 'PIÙ CARO', 668, 832, tSp + 0.3, tSin, C.red, { align: 'left', size: 26, weight: 700, off: C.amber });
+  /* blocco dei costi */
+  const kc = oB(seg(t, a + 0.1, a + 0.6)), on = t >= tCosta; if (on) glow(800, 1160, 160, '255,90,78', 0.25 * oC(seg(t, tCosta, tCosta + 0.4)));
+  glassPill(800, 1160, 'COSTI', kc, on ? C.red : C.ink, 40);
+  x.restore(); finish(t); }
+
+/* ================= ENERGIA: una sola sorgente si dirama in tre tubi: produrre, trasportare, cibo ================= */
+function iFab(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx - 40, cy + 30); x.lineTo(cx - 40, cy - 6); x.lineTo(cx - 14, cy - 22); x.lineTo(cx - 14, cy - 6); x.lineTo(cx + 12, cy - 22); x.lineTo(cx + 12, cy - 6); x.lineTo(cx + 40, cy - 22); x.lineTo(cx + 40, cy + 30); x.closePath(); x.stroke();
+  x.beginPath(); x.moveTo(cx + 22, cy - 18); x.lineTo(cx + 22, cy - 44); x.lineTo(cx + 34, cy - 44); x.lineTo(cx + 34, cy - 18); x.stroke(); x.restore(); }
+function iCamion(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.rect(cx - 46, cy - 26, 56, 44); x.stroke(); x.beginPath(); x.moveTo(cx + 10, cy - 12); x.lineTo(cx + 30, cy - 12); x.lineTo(cx + 46, cy + 4); x.lineTo(cx + 46, cy + 18); x.lineTo(cx + 10, cy + 18); x.stroke();
+  for (const wx of [cx - 26, cx + 28]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, cy + 22, 9, 0, 7); x.fill(); x.stroke(); } x.restore(); }
+function iMela(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx, cy - 18); x.bezierCurveTo(cx + 6, cy - 32, cx + 38, cy - 30, cx + 38, cy + 2); x.bezierCurveTo(cx + 38, cy + 30, cx + 16, cy + 40, cx, cy + 32); x.bezierCurveTo(cx - 16, cy + 40, cx - 38, cy + 30, cx - 38, cy + 2); x.bezierCurveTo(cx - 38, cy - 30, cx - 6, cy - 32, cx, cy - 18); x.stroke();
+  x.beginPath(); x.moveTo(cx, cy - 20); x.quadraticCurveTo(cx + 2, cy - 36, cx + 14, cy - 44); x.stroke(); x.restore(); }
+function sEnergia(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tPro = WA('energia', ['produrre'], 1, 0.4), tTra = WA('energia', ['trasportare'], 1, 0.58), tCib = WA('energia', ['cibo'], 1, 0.9);
+  phrase(t, a + 0.05, [['L’energia', C.ink], ['non resta in bolletta', C.lime]], 345, { size: 92 });
+  const ke = oB(seg(t, a + 0.05, a + 0.6)), YS = 750;
+  const BR = [[200, 'PRODURRE', iFab, tPro], [540, 'TRASPORTARE', iCamion, tTra], [880, 'CIBO', iMela, tCib]];
+  /* tubi: dalla sorgente (540, 840) ai tre nodi */
+  BR.forEach(([bx, nome, ic, tOn], i) => { const pts = bx === 540 ? [[540, 836], [540, 985]] : [[540, 836], [540, 905], [bx, 905], [bx, 985]];
+    polyPart(pts, 1, 'rgba(241,244,238,0.22)', 22, oC(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1)));
+    polyPart(pts, 1, 'rgba(5,6,7,0.7)', 10, oC(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1)));
+    const kf = ioC(seg(t, tOn - 0.6, tOn)), l = polyPart(pts, kf, C.amber, 10);
+    if (kf >= 1) for (let j = 0; j < 3; j++) { const q = ptAt(pts, ((t - tOn) * 0.55 + j / 3) % 1); glow(q[0], q[1], 34, '245,165,36', 0.55); x.fillStyle = C.ink; x.beginPath(); x.arc(q[0], q[1], 7, 0, 7); x.fill(); } });
+  /* sorgente */
+  glow(540, YS, 230, '245,165,36', 0.18);
+  pop(540, YS, ke, () => { glass(540, YS, 470, 170, 40, 1); fiamma(400, YS + 4, 1.8, C.amber, 6); });
+  tag(t, 'ENERGIA', 590, YS + 4, a + 0.25, a + 0.25, C.amber, { size: 40, weight: 700 });
+  /* nodi */
+  BR.forEach(([bx, nome, ic, tOn], i) => { const on = t >= tOn, k = oB(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1));
+    pop(bx, 1090, k, () => { if (on) glow(bx, 1090, 190, '245,165,36', 0.2 * oC(seg(t, tOn, tOn + 0.4))); glass(bx, 1090, 270, 220, 34, 1);
+      if (on) { x.save(); x.strokeStyle = C.amber; x.lineWidth = 4; rr(bx - 135, 980, 270, 220, 34); x.stroke(); x.restore(); } ic(bx, 1060, on ? C.amber : C.ink); });
+    tag(t, nome, bx, 1160, a + 0.25 + i * 0.1, tOn, C.amber, { size: nome.length > 9 ? 24 : 28 }); });
+  lab(t, 'PROBABILMENTE', 880, 1245, tCib - 0.2, { color: C.amber, size: 24, weight: 700 });
+  x.restore(); finish(t); }
+
+/* ================= STORIA (ESEMPIO): il rincaro del gas passa di mano in mano lungo un percorso a serpentina ================= */
+function iForno(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx - 44, cy + 14); x.bezierCurveTo(cx - 44, cy - 34, cx + 44, cy - 34, cx + 44, cy + 14); x.bezierCurveTo(cx + 44, cy + 28, cx - 44, cy + 28, cx - 44, cy + 14); x.stroke();
+  for (const dx of [-20, 0, 20]) { x.beginPath(); x.moveTo(cx + dx - 6, cy - 12); x.lineTo(cx + dx + 6, cy + 8); x.stroke(); } x.restore(); }
+function iScaffale(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx - 44, cy - 30); x.lineTo(cx - 44, cy + 34); x.moveTo(cx + 44, cy - 30); x.lineTo(cx + 44, cy + 34); x.moveTo(cx - 44, cy + 2); x.lineTo(cx + 44, cy + 2); x.moveTo(cx - 44, cy + 34); x.lineTo(cx + 44, cy + 34); x.stroke();
+  x.beginPath(); x.rect(cx - 34, cy - 18, 20, 20); x.rect(cx - 6, cy - 14, 18, 16); x.rect(cx - 30, cy + 14, 24, 20); x.rect(cx + 6, cy + 18, 20, 16); x.stroke(); x.restore(); }
+function sStoria(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tGas = WA('storia', ['gas'], 1, 0.28), tCuo = WA('storia', ['cuocere'], 1, 0.46), tTra = WA('storia', ['trasporta'], 1, 0.7), tMano = WA('storia', ['mano'], 1, 0.92);
+  phrase(t, a + 0.05, [['Il gas rincara,', C.ink], ['il pane costa di più', C.amber]], 345, { size: 92 });
+  const N = [[270, 790, 'GAS', (cx, cy, c) => fiamma(cx, cy, 1.6, c, 5), tGas], [810, 790, 'PANIFICIO', iForno, tCuo], [810, 1120, 'TRASPORTO', iCamion, tTra], [270, 1120, 'SCAFFALE', iScaffale, tMano]];
+  const AR = [[[450, 790], [630, 790], tCuo], [[810, 925], [810, 985], tTra], [[630, 1120], [450, 1120], tMano]];
+  AR.forEach(([p0, p1, tOn], i) => { const pts = [p0, p1], k0 = oC(seg(t, a + 0.2 + i * 0.1, a + 0.7 + i * 0.1));
+    dash(p0[0], p0[1], p1[0], p1[1], 'rgba(241,244,238,0.5)', 5, [10, 10], k0);
+    const kf = ioC(seg(t, tOn - 0.6, tOn)); polyPart(pts, kf, C.amber, 9);
+    if (kf >= 1) { const q = ptAt(pts, ((t - tOn) * 0.8) % 1); glow(q[0], q[1], 40, '245,165,36', 0.6); x.fillStyle = C.ink; x.beginPath(); x.arc(q[0], q[1], 8, 0, 7); x.fill(); } });
+  N.forEach(([cx, cy, nome, ic, tOn], i) => { const on = t >= tOn, k = oB(seg(t, a + 0.05 + i * 0.1, a + 0.55 + i * 0.1));
+    pop(cx, cy, k, () => { if (on) glow(cx, cy, 220, '245,165,36', 0.2 * oC(seg(t, tOn, tOn + 0.4))); glass(cx, cy, 360, 270, 40, 1);
+      if (on) { x.save(); x.strokeStyle = C.amber; x.lineWidth = 4; rr(cx - 180, cy - 135, 360, 270, 40); x.stroke(); x.restore(); } ic(cx, cy - 22, on ? C.amber : C.ink); });
+    tag(t, nome, cx, cy + 90, a + 0.25 + i * 0.1, tOn, C.amber, { size: 28 }); });
+  stamp(t, a + 0.3, 'ESEMPIO', 1345);
+  x.restore(); finish(t); }
+
+/* ================= PRODUZIONE: due nastri da misura (indice prima = 100): il totale cresce di un terzo, gli energetici oltre il doppio, in scala ================= */
+function sProduzione(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const t34 = WA('produzione', ['trentaquattro', '34', 'trenta'], 1, 0.62), tEn = WA('produzione', ['energetici'], 1, 0.78), tPiu = WA('produzione', ['piu'], 1, 0.86);
+  phrase(t, a + 0.05, [['Prezzi alla produzione', C.ink]], 345, { size: 92 });
+  phrase(t, t34 - 0.12, [['oltre +34%', C.red]], Y2, { size: 92 });
+  const X0 = 130, U = 4, kk = oB(seg(t, a + 0.05, a + 0.6));
+  const ROW = [[830, 'INDUSTRIA', 134, C.red, '255,90,78', t34], [1030, 'ENERGETICI', 204, C.amber, '245,165,36', tPiu]];
+  ROW.forEach(([yc, nome, v, col, rgb, tOn], i) => {
+    const kf = ioC(seg(t, i === 0 ? tOn - 0.3 : tEn - 0.2, i === 0 ? tOn + 0.9 : tPiu + 0.8)), kb = oC(seg(t, a + 0.1 + i * 0.12, a + 0.6 + i * 0.12));
+    lab(t, nome, X0, yc - 68, a + 0.2 + i * 0.1, { color: C.ink, align: 'left', size: 26 });
+    /* nastro: base (indice 100) subito, poi la parte che cresce */
+    x.save(); x.globalAlpha = kb; x.fillStyle = 'rgba(255,255,255,0.07)'; rr(X0, yc - 36, v * U, 72, 14); x.fill(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 3; rr(X0, yc - 36, v * U, 72, 14); x.stroke(); x.setLineDash([]);
+    x.fillStyle = 'rgba(241,244,238,0.5)'; rr(X0, yc - 36, 100 * U * kb, 72, 14); x.fill(); x.restore();
+    for (let q = 1; q * 10 < v; q++) { x.save(); x.globalAlpha = kb; x.strokeStyle = 'rgba(5,6,7,0.55)'; x.lineWidth = 2; x.beginPath(); x.moveTo(X0 + q * 10 * U, yc + 36); x.lineTo(X0 + q * 10 * U, yc + (q % 5 ? 24 : 14)); x.stroke(); x.restore(); }
+    const w = (v - 100) * U * kf; if (w > 3) { glow(X0 + 100 * U + w, yc, 150, rgb, 0.25); x.save(); x.fillStyle = col; x.globalAlpha = 0.95; x.beginPath(); x.roundRect(X0 + 100 * U - 4, yc - 36, w + 4, 72, [0, 14, 14, 0]); x.fill(); x.restore(); } });
+  dash(X0 + 100 * U, 740, X0 + 100 * U, 1090, C.ink, 3, [8, 8], oC(seg(t, a + 0.3, a + 0.8))); lab(t, 'PRIMA', X0 + 100 * U, 1128, a + 0.4, { color: C.ink, size: 24 });
+  dash(X0 + 200 * U, 940, X0 + 200 * U, 1090, C.amber, 3, [8, 8], oC(seg(t, a + 0.3, a + 0.8))); tag(t, 'RADDOPPIO', X0 + 200 * U, 1128, a + 0.4, tPiu, C.amber, { size: 24, off: C.ink });
+  big(t, 'più che raddoppiati', 540, 1260, tPiu - 0.1, { color: C.amber, size: 62 });
+  x.restore(); finish(t); }
+
+/* ================= SCONTRINO: una ricevuta stampata, divisa esattamente in tre: due terzi energia (diretta e indiretta), un terzo il resto ================= */
+function sScontrino(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCir = WA('scontrino', ['circa'], 1, 0.62), tInd = WA('scontrino', ['indiretti'], 1, 0.95);
+  phrase(t, a + 0.05, [['Inflazione italiana 2022', C.ink]], 345, { size: 86 });
+  phrase(t, tCir + 0.15 - 0.12, [['circa due terzi', C.amber]], 345 + 86 * 1.12, { size: 92 });
+  const RX0 = 290, RX1 = 790, RT = 670, RB = 1330, k = oC(seg(t, a + 0.05, a + 0.75)), off = -(1 - k) * (RB - RT + 30);
+  /* fessura della stampante */
+  glass(540, 640, 560, 44, 22, oC(seg(t, a + 0.0, a + 0.3)));
+  x.save(); x.beginPath(); x.rect(0, 656, W, 800); x.clip(); x.translate(0, off);
+  x.beginPath(); x.moveTo(RX0, RT); x.lineTo(RX1, RT); x.lineTo(RX1, RB); for (let i = 0; i < 25; i++) { x.lineTo(RX1 - (i + 0.5) * 20, RB + 16); x.lineTo(RX1 - (i + 1) * 20, RB); } x.closePath();
+  x.fillStyle = 'rgba(241,244,238,0.10)'; x.fill(); x.save(); x.clip();
+  /* righe di articoli (terzo di sopra) */
+  for (let i = 0; i < 5; i++) { x.fillStyle = 'rgba(241,244,238,0.28)'; rr(RX0 + 40, RT + 30 + i * 36, 200 + (i * 53) % 150, 14, 7); x.fill(); x.fillRect(RX1 - 110, RT + 30 + i * 36, 70, 14); }
+  /* i due terzi in basso: forma subito attenuata, poi si riempie sulla parola */
+  const Y3 = RT + (RB - RT) / 3, kf = ioC(seg(t, tCir + 0.1, tCir + 1.3)); x.fillStyle = 'rgba(245,165,36,0.16)'; x.fillRect(RX0, Y3, RX1 - RX0, RB - Y3 + 20);
+  x.fillStyle = 'rgba(245,165,36,0.92)'; const hh = (RB - Y3 + 20) * kf; x.fillRect(RX0, RB + 20 - hh, RX1 - RX0, hh); x.restore();
+  dash(RX0 + 10, Y3, RX1 - 10, Y3, C.ink, 3, [10, 8], 1);
+  x.strokeStyle = 'rgba(241,244,238,0.75)'; x.lineWidth = 4; x.lineJoin = 'round'; x.beginPath(); x.moveTo(RX0, RB); x.lineTo(RX0, RT); x.lineTo(RX1, RT); x.lineTo(RX1, RB); for (let i = 0; i < 25; i++) { x.lineTo(RX1 - (i + 0.5) * 20, RB + 16); x.lineTo(RX1 - (i + 1) * 20, RB); } x.stroke();
+  if (kf > 0.05) glow(540, RB + 20 - hh, 300, '245,165,36', 0.18 * kf);
+  /* etichette su pannelli scuri, sempre leggibili */
+  x.fillStyle = 'rgba(5,6,7,0.88)'; rr(RX0 + 50, 1090, 400, 140, 24); x.fill(); x.strokeStyle = 'rgba(245,165,36,0.7)'; x.lineWidth = 3; rr(RX0 + 50, 1090, 400, 140, 24); x.stroke();
+  txt('ENERGIA', 540, 1135, { size: 48, weight: 800, color: C.amber }); txt('EFFETTI DIRETTI E INDIRETTI', 540, 1192, { fam: 'mono', size: 22, weight: 600, ls: 1, color: C.ink });
+  x.fillStyle = 'rgba(5,6,7,0.88)'; rr(RX0 + 130, RT + 52, 240, 56, 18); x.fill(); txt('IL RESTO', 540, RT + 81, { fam: 'mono', size: 26, weight: 600, ls: 2, color: C.ink });
+  x.restore();
+  /* parentesi sul lato destro: i due terzi */
+  const kp = oC(seg(t, tCir + 0.1, tCir + 0.8)); x.save(); x.globalAlpha = kp; x.strokeStyle = C.amber; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(830, RT + (RB - RT) / 3 + 4); x.lineTo(850, RT + (RB - RT) / 3 + 4); x.lineTo(850, RB - 4); x.lineTo(830, RB - 4); x.stroke(); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= CASA: cascata di quattro vasche: il rincaro scende dai costi allo scontrino ================= */
+function sCasa(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tCos = WA('casa', ['costi'], 1, 0.12), tEn = WA('casa', ['energia'], 1, 0.28), tFil = WA('casa', ['filiera'], 1, 0.55), tPre = WA('casa', ['prezzo'], 1, 0.7), tBol = WA('casa', ['bolletta'], 1, 0.82), tSco = WA('casa', ['scontrino'], 1, 0.94);
+  phrase(t, a + 0.05, [['Il rincaro viaggia', C.ink], ['fino allo scontrino', C.lime]], 345, { size: 92 });
+  const TK = [[190, 720, 'COSTI', tCos, 0.8], [420, 830, 'FILIERA', tFil, 0.75], [650, 940, 'PREZZO', tPre, 0.7], [880, 1050, 'SCONTRINO', tSco, 0.7]], TH = 270;
+  const hot = t >= tEn;
+  /* getti tra le vasche */
+  for (let i = 0; i < 3; i++) { const [cx, ty] = TK[i], [nx, nty] = TK[i + 1], tOn = [tFil, tPre, tBol][i], kf = ioC(seg(t, tOn - 0.55, tOn - 0.05));
+    const p0 = [cx + 100, ty + 12], c1 = [cx + 175, ty - 4], p1 = [nx - 30, nty + 70];
+    x.save(); x.setLineDash([10, 10]); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 4; x.globalAlpha = oC(seg(t, a + 0.3, a + 0.8)); x.beginPath(); x.moveTo(...p0); x.quadraticCurveTo(...c1, ...p1); x.stroke(); x.restore();
+    if (kf > 0) { x.save(); x.strokeStyle = i === 2 ? C.red : C.amber; x.lineWidth = 12; x.lineCap = 'round'; x.setLineDash([22, 14]); x.lineDashOffset = -t * 90; x.beginPath(); x.moveTo(...p0);
+      const q = (u) => [(1 - u) * (1 - u) * p0[0] + 2 * (1 - u) * u * c1[0] + u * u * p1[0], (1 - u) * (1 - u) * p0[1] + 2 * (1 - u) * u * c1[1] + u * u * p1[1]]; for (let s = 1; s <= 24; s++) { const u = s / 24 * kf, qq = q(u); x.lineTo(qq[0], qq[1]); } x.stroke(); x.restore(); } }
+  TK.forEach(([cx, ty, nome, tOn, lvF], i) => { const k = oB(seg(t, a + 0.05 + i * 0.1, a + 0.55 + i * 0.1)), on = t >= tOn, fl = i === 0 ? 0.35 + 0.45 * ioC(seg(t, tOn - 0.2, tOn + 0.7)) : lvF * ioC(seg(t, tOn - 0.1, tOn + 0.9));
+    const redT = i === 3 ? on : (i === 0 && hot), col = redT ? '255,90,78' : '245,165,36';
+    pop(cx, ty + TH / 2, k, () => { glass(cx, ty + TH / 2, 200, TH, 30, 1);
+      if (fl > 0.01) { x.save(); rr(cx - 88, ty + 12, 176, TH - 24, 22); x.clip(); const top = ty + TH - 12 - (TH - 24) * fl; const g = x.createLinearGradient(0, top, 0, ty + TH); g.addColorStop(0, `rgba(${col},0.95)`); g.addColorStop(1, `rgba(${col},0.5)`);
+        x.fillStyle = g; x.beginPath(); x.moveTo(cx - 90, ty + TH); x.lineTo(cx - 90, top); for (let xx = cx - 90; xx <= cx + 90; xx += 15) x.lineTo(xx, top + 3 * Math.sin(xx * 0.05 + t * 3 + i)); x.lineTo(cx + 90, ty + TH); x.closePath(); x.fill(); x.restore(); }
+      if (on) { x.save(); x.strokeStyle = `rgb(${col})`; x.lineWidth = 4; rr(cx - 100, ty, 200, TH, 30); x.stroke(); x.restore(); } });
+    if (on) glow(cx, ty + TH / 2, 190, col, 0.16 * oC(seg(t, tOn, tOn + 0.4)));
+    tag(t, nome, cx, ty + TH + 42, a + 0.25 + i * 0.1, tOn, redT ? C.red : C.amber, { size: nome.length > 7 ? 24 : 28 }); });
+  /* la fiamma sopra la prima vasca: «soprattutto l'energia» */
+  const ke = oB(seg(t, a + 0.15, a + 0.65)); pop(190, 662, ke, () => { glow(190, 662, 90, hot ? '255,90,78' : '245,165,36', 0.25); fiamma(190, 664, 1.1, hot ? C.red : C.amber, 5); });
+  tag(t, 'ENERGIA', 190, 598, a + 0.3, tEn, C.red, { size: 26, off: C.ink });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, def: sDef, energia: sEnergia, storia: sStoria, produzione: sProduzione, scontrino: sScontrino, casa: sCasa }, ORDER, ['hook', 'produzione', 'casa']);
+</script></body></html>

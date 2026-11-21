@@ -1,0 +1,258 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 21, DAY: 0, CAP: 1, NEXT: ['Chi crea i soldi:', 'le banche'], FONTE: 'DATI: BCE (non scritta nel video dal 16/10/2026)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 21 — «Cos'è il denaro» (lezione 1 di 5, PRIMA del capitolo 2 «Soldi e banche»: CAP = 1).
+   Nessuna scena 'dove' (il copione non la prevede, come p16): P.CAP serve solo a quella scena.
+   Numeri SOLO da p21-fonti.md: M1 settembre 2026 = 11.333.724 milioni € → 11.334 miliardi (PROVVISORIO);
+   contante 1.618.447 milioni → 1.618 miliardi; depositi a vista = M1 − contante = 9.715 miliardi (calcolo nostro);
+   contante = 14,3% di M1, depositi 85,7%; rapporto 6,0 (circa sei sul conto per un euro di contante).
+   50 € = la banconota del gancio (nessun costo di stampa: dato NON verificato, non si usa). Niente righe di fonte a schermo (Davide, 16/10/2026).
+   Colori: contante ambra, conti correnti lime, «non è» rosso. Oggetti: banconota, bilancia no (sgabello a tre gambe), barra di vetro che si spezza,
+   registro della banca, 10 caselle da «8,6 su 10». */
+const ORDER = ['num', 'carta', 'fiducia', 'tre', 'oro', 'm1', 'conti', 'sei', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+const RGB = { lime: '200,250,114', red: '255,90,78', amber: '245,165,36', ink: '241,244,238' };
+const tl = (t, t0, d = 0.35) => oC(seg(t, t0, t0 + d));
+const sep = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const lab = (s, px, py, col, al = 1, size = 26) => txt(s, px, py, { fam: 'mono', size, weight: 600, color: col, ls: 3, alpha: al });
+function ring(cx, cy, r0, t, t0, rgb = RGB.lime, d = 0.6, gr = 60) { const k = seg(t, t0, t0 + d); if (k <= 0 || k >= 1) return; x.save(); x.strokeStyle = `rgba(${rgb},${1 - k})`; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r0 + gr * oC(k), 0, 7); x.stroke(); x.restore(); }
+function tagPill(cx, cy, label, k, col, size = 28) { if (k <= 0) return; const w = tw(label, size, 600, 'mono', 2) + 56, h = 64, s = lerp(0.8, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); glass(cx, cy, w, h, 32, clamp(k * 2));
+  x.save(); x.globalAlpha *= clamp(k * 2); x.strokeStyle = col; x.lineWidth = 3; rr(cx - w / 2, cy - h / 2, w, h, 32); x.stroke(); x.restore();
+  txt(label, cx, cy + 2, { fam: 'mono', size, weight: 600, color: col, ls: 2, alpha: clamp(k * 2) }); x.restore(); }
+function dashes(x0, y0, x1, y1, k, col, t, dots = true) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 1.5); x.strokeStyle = col; x.lineWidth = 4; x.setLineDash([2, 12]); x.lineCap = 'round';
+  x.beginPath(); x.moveTo(x0, y0); x.lineTo(lerp(x0, x1, oC(k)), lerp(y0, y1, oC(k))); x.stroke(); x.setLineDash([]);
+  if (dots && k >= 1) for (let j = 0; j < 3; j++) { const u = (t * 0.6 + j / 3) % 1; x.fillStyle = col; x.beginPath(); x.arc(lerp(x0, x1, u), lerp(y0, y1, u), 7, 0, 7); x.fill(); }
+  x.restore(); }
+
+/* ---------- OGGETTI ---------- */
+/* banconota (paper = 1: foglio di carta semplice), lit = alone */
+function note(cx, cy, w, k, o = {}) { const { rot = 0, paper = 0, val = '50', lit = 0, sc = 1 } = o; if (k <= 0) return;
+  const h = w * 0.52, s = lerp(0.85, 1, oB(clamp(k))) * sc;
+  x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(s, s); x.globalAlpha *= clamp(k * 1.6);
+  if (lit > 0) glow(0, 0, w * 0.8, RGB.lime, 0.3 * lit);
+  if (paper > 0) { x.save(); x.globalAlpha *= paper; const g = x.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); g.addColorStop(0, '#dfe2db'); g.addColorStop(1, '#b3b8b0');
+    x.fillStyle = g; rr(-w / 2, -h / 2, w, h, 14); x.fill(); x.strokeStyle = 'rgba(0,0,0,0.14)'; x.lineWidth = 2; x.beginPath(); x.moveTo(-w / 2, -h * 0.12); x.lineTo(w / 2, -h * 0.12); x.moveTo(-w * 0.1, -h / 2); x.lineTo(-w * 0.1, h / 2); x.stroke(); x.restore(); }
+  const kb = 1 - paper;
+  if (kb > 0) { x.save(); x.globalAlpha *= kb; const g = x.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); g.addColorStop(0, '#1f3023'); g.addColorStop(0.55, '#111b15'); g.addColorStop(1, '#1a2a1f');
+    x.fillStyle = g; rr(-w / 2, -h / 2, w, h, 16); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.85)'; x.lineWidth = 3; x.stroke();
+    x.strokeStyle = 'rgba(200,250,114,0.3)'; x.lineWidth = 2; rr(-w / 2 + 14, -h / 2 + 14, w - 28, h - 28, 10); x.stroke();
+    x.beginPath(); for (let i = 0; i <= 40; i++) { const px = -w / 2 + 24 + (w - 48) * i / 40, py = h * 0.36 + Math.sin(i * 0.9) * 6; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.strokeStyle = 'rgba(200,250,114,0.28)'; x.stroke();
+    for (let i = 0; i < 12; i++) { const an = i / 12 * Math.PI * 2; x.fillStyle = 'rgba(200,250,114,0.7)'; x.beginPath(); x.arc(-w * 0.24 + Math.cos(an) * h * 0.2, -h * 0.06 + Math.sin(an) * h * 0.2, h * 0.02, 0, 7); x.fill(); }
+    txt('€', -w * 0.24, -h * 0.06, { size: h * 0.24, weight: 800, color: 'rgba(200,250,114,0.55)' });
+    txt(val, w * 0.2, -h * 0.05, { size: h * 0.5, weight: 800, color: C.lime, ls: -2 });
+    txt('EURO', w * 0.2, h * 0.22, { fam: 'mono', size: Math.max(22, h * 0.09), weight: 600, color: 'rgba(200,250,114,0.7)', ls: 4 }); x.restore(); }
+  x.restore(); }
+/* lingotto d'oro; ghost = contorno tratteggiato */
+function goldbar(cx, cy, w, k, ghost = 0) { if (k <= 0) return; const h = w * 0.42, s = lerp(0.85, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.globalAlpha *= clamp(k * 1.6);
+  const top = () => { x.beginPath(); x.moveTo(-w / 2 + w * 0.12, -h / 2); x.lineTo(w / 2 - w * 0.12, -h / 2); x.lineTo(w / 2, -h / 2 + h * 0.32); x.lineTo(-w / 2, -h / 2 + h * 0.32); x.closePath(); };
+  const fr = () => { x.beginPath(); x.moveTo(-w / 2, -h / 2 + h * 0.32); x.lineTo(w / 2, -h / 2 + h * 0.32); x.lineTo(w / 2, h / 2 - 12); x.quadraticCurveTo(w / 2, h / 2, w / 2 - 12, h / 2); x.lineTo(-w / 2 + 12, h / 2); x.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - 12); x.closePath(); };
+  if (ghost < 1) { x.save(); x.globalAlpha *= 1 - ghost; glow(0, 0, w * 0.7, RGB.amber, 0.25);
+    const g1 = x.createLinearGradient(0, -h / 2, 0, h / 2); g1.addColorStop(0, '#FFD66B'); g1.addColorStop(1, '#C98A12'); x.fillStyle = g1; fr(); x.fill();
+    const g2 = x.createLinearGradient(0, -h / 2, 0, -h / 2 + h * 0.32); g2.addColorStop(0, '#FFF0B8'); g2.addColorStop(1, '#F5B833'); x.fillStyle = g2; top(); x.fill();
+    txt('ORO', 0, h * 0.2, { fam: 'mono', size: 34, weight: 600, color: '#4a3000', ls: 6 }); x.restore(); }
+  if (ghost > 0) { x.save(); x.globalAlpha *= ghost; x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 3; x.setLineDash([4, 12]); top(); x.stroke(); fr(); x.stroke(); x.setLineDash([]); x.restore(); }
+  x.restore(); }
+/* provetta orizzontale di vetro riempita di liquido */
+function vessel(x0, y0, w, h, fillW, c1, c2, t, rgb) { if (w <= 2) return; const r = Math.min(h / 2, w / 2);
+  x.save(); rr(x0, y0, w, h, r); x.fillStyle = 'rgba(255,255,255,0.04)'; x.fill();
+  if (fillW > 1) { x.save(); rr(x0, y0, w, h, r); x.clip(); const g = x.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, c1); g.addColorStop(1, c2); x.fillStyle = g;
+    x.beginPath(); x.moveTo(x0, y0); const fx = x0 + Math.min(fillW, w); if (fillW >= w - 1) x.lineTo(x0 + w + 10, y0); else for (let yy = 0; yy <= h; yy += 6) x.lineTo(fx + 7 * Math.sin(yy * 0.11 + t * 5), y0 + yy);
+    if (fillW >= w - 1) x.lineTo(x0 + w + 10, y0 + h); x.lineTo(x0, y0 + h); x.closePath(); x.fill();
+    for (let i = 0; i < 7; i++) { const bx = x0 + 20 + ((i * 0.137 + 0.05) % 1) * Math.max(10, Math.min(fillW, w) - 40), by = y0 + h - ((t * 0.25 + i / 7) % 1) * h; x.fillStyle = 'rgba(255,255,255,0.28)'; x.beginPath(); x.arc(bx, by, 3 + (i % 3) * 2, 0, 7); x.fill(); }
+    x.restore(); }
+  x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; rr(x0, y0, w, h, r); x.stroke();
+  x.strokeStyle = 'rgba(255,255,255,0.22)'; x.lineWidth = 4; x.lineCap = 'round'; x.beginPath(); x.moveTo(x0 + r, y0 + 16); x.lineTo(x0 + w - r, y0 + 16); x.stroke(); x.restore(); void rgb; }
+/* moneta frontale */
+function disc(cx, cy, r, col, label, k, fade = 1) { if (k <= 0) return; x.save(); x.translate(cx, cy); const s = clamp(k, 0, 1.2); x.scale(s, s); x.globalAlpha *= clamp(k * 2);
+  const g = x.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r); g.addColorStop(0, '#222b25'); g.addColorStop(1, '#0d110f'); x.fillStyle = g; x.beginPath(); x.arc(0, 0, r, 0, 7); x.fill();
+  x.strokeStyle = col; x.lineWidth = 4; x.stroke(); x.strokeStyle = col; x.globalAlpha *= 0.4; x.lineWidth = 2; x.beginPath(); x.arc(0, 0, r * 0.78, 0, 7); x.stroke(); x.globalAlpha /= 0.4;
+  txt(label, 0, 2, { size: r * 1.0, weight: 800, color: col, alpha: fade }); x.restore(); }
+/* croce rossa che rispetta l'alpha corrente (cross() di base.js lo sovrascrive) */
+function xcross(cx, cy, r, k) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 3); x.strokeStyle = C.red; x.lineWidth = 14; x.lineCap = 'round';
+  const a1 = oC(clamp(k * 2)), b1 = oC(clamp(k * 2 - 1)); x.beginPath(); x.moveTo(cx - r, cy - r); x.lineTo(cx - r + 2 * r * a1, cy - r + 2 * r * a1); x.stroke();
+  if (b1 > 0) { x.beginPath(); x.moveTo(cx + r, cy - r); x.lineTo(cx + r - 2 * r * b1, cy - r + 2 * r * b1); x.stroke(); } x.restore(); }
+function bust(cx, cy, s, col, k) { if (k <= 0) return; x.save(); x.translate(cx, cy); x.scale(s * lerp(0.7, 1, oB(clamp(k))), s * lerp(0.7, 1, oB(clamp(k)))); x.globalAlpha *= clamp(k * 2);
+  x.lineWidth = 5; x.strokeStyle = col; x.fillStyle = '#18201b'; x.beginPath(); x.arc(0, -26, 17, 0, 7); x.fill(); x.stroke(); x.beginPath(); x.arc(0, 34, 32, Math.PI, 0); x.closePath(); x.fill(); x.stroke(); x.restore(); }
+
+/* ================= CARTA: la banconota diventa un foglio, poi compra la roba ================= */
+function sCarta(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tC1 = WA('carta', ['cinquanta', '50'], 1, 1.0), tPz = WT('carta', 'pezzo', 1, 2.4), tPo = WT('carta', 'pochissimo', 1, 3.9), tEp = WT('carta', 'eppure', 1, 4.5),
+    tCo = WT('carta', 'compri', 1, 5.5), tC2 = WA('carta', ['cinquanta', '50'], 2, 5.9);
+  phrase(t, a + 0.03, [['Una banconota', C.ink]], 345, { size: 92, out: tPz - 0.35 });
+  phrase(t, tC1 - 0.1, [['da 50 €', C.lime]], Y2, { size: 92, out: tPz - 0.35 });
+  phrase(t, tPz - 0.1, [['Un pezzo di carta', C.ink]], 345, { size: 92, out: tEp - 0.35 });
+  phrase(t, tPo - 0.1, [['che vale pochissimo.', C.amber]], Y2, { size: 92, out: tEp - 0.35 });
+  phrase(t, tEp - 0.05, [['Eppure compri', C.ink]], 345, { size: 92 });
+  phrase(t, tC2 - 0.1, [['50 € di roba.', C.lime]], Y2, { size: 92 });
+  /* la banconota entra ruotando; diventa foglio sulla parola «pezzo», e torna banconota su «compri» */
+  const kIn = tl(t, a, 0.7), paper = ioC(seg(t, tPz, tPz + 0.5)) * (1 - ioC(seg(t, tCo - 0.1, tCo + 0.4)));
+  const sc = 1 - 0.12 * ioC(seg(t, tPo, tPo + 0.6)) * (1 - ioC(seg(t, tCo - 0.1, tCo + 0.4)));
+  note(540, lerp(1150, 790, oC(seg(t, a, a + 0.7))) + Math.sin(t * 1.7) * 7, 600, kIn, { rot: lerp(-0.6, 0, oC(seg(t, a, a + 0.8))) + 0.025 * Math.sin(t * 1.3), paper, sc, lit: seg(t, tCo, tCo + 0.4) });
+  tagPill(540, 1050, 'SOLO CARTA', seg(t, tPz + 0.1, tPz + 0.45) * (1 - seg(t, tCo - 0.2, tCo + 0.1)), C.ink);
+  /* la roba: pane, sacco, camion cadono sotto la banconota */
+  const G = [[250, 0], [540, 0.18], [830, 0.36]];
+  G.forEach(([gx, dl], i) => { const k = tl(t, tCo + dl, 0.5), dy = -(1 - k) * 110;
+    dashes(540 + (gx - 540) * 0.25, 950, gx, 1160, seg(t, tCo + dl - 0.1, tCo + dl + 0.4), 'rgba(200,250,114,0.75)', t, false);
+    x.save(); x.translate(0, dy); if (i === 0) loaf(gx, 1390, 0.7, k, ''); if (i === 1) sack(gx, 1390, 0.7, k, ''); if (i === 2) truck(gx, 1390, 0.9, k); x.restore(); });
+  x.restore(); finish(t); }
+
+/* ================= FIDUCIA: due pilastri sorreggono il foglio, che diventa denaro ================= */
+function sFiducia(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tAc = WT('fiducia', 'accettiamo', 1, 0.5), tTu = WT('fiducia', 'tutti', 1, 2.0), tBa = WT('fiducia', 'banche', 1, 3.2), tSt = WT('fiducia', 'stabile', 1, 4.8), tDi = WT('fiducia', 'diventa', 1, 7.0);
+  phrase(t, tAc - 0.05, [['Accettata da tutti,', C.ink]], 345, { size: 92, out: tDi - 0.45 });
+  phrase(t, tSt - 0.1, [['valore stabile.', C.lime]], Y2, { size: 92, out: tDi - 0.45 });
+  phrase(t, tDi - 0.15, [['La carta', C.ink]], 345, { size: 92 });
+  phrase(t, tDi + 0.15, [['diventa denaro.', C.lime]], Y2, { size: 92 });
+  const paper = 1 - ioC(seg(t, tDi, tDi + 0.5));
+  note(540, 730, 420, tl(t, a, 0.6), { paper, lit: 1 - paper });
+  ring(540, 730, 150, t, tDi, RGB.lime, 0.7, 120);
+  /* pilastro sinistro: la usano tutti */
+  const kl = tl(t, tTu - 0.4, 0.5), kr = tl(t, tBa - 0.2, 0.5);
+  glass(290, 1160, 440, 400, 30, kl); glass(790, 1160, 440, 400, 30, kr);
+  lab('LA USANO TUTTI', 290, 1020, C.ink, kl); lab('VALORE STABILE', 790, 1020, C.ink, kr);
+  for (let i = 0; i < 5; i++) { const on = seg(t, tTu + i * 0.1, tTu + i * 0.1 + 0.3); bust(130 + i * 80, 1160, 1, on > 0.5 ? C.lime : 'rgba(241,244,238,0.5)', kl * (on > 0 ? 1 : 0.6)); }
+  if (kr > 0) { icon('stato', 790, 1120, C.lime); const kf = oC(seg(t, tSt - 0.2, tSt + 0.8)); x.save(); x.globalAlpha *= kr; x.strokeStyle = C.lime; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath();
+    for (let i = 0; i <= 30; i++) { const u = i / 30; if (u > kf) break; const px = 620 + 340 * u, py = 1255 + Math.sin(u * 30 + t * 3) * 3; i ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke(); x.restore(); }
+  dashes(290, 960, 405, 852, seg(t, tTu + 0.4, tTu + 0.9), 'rgba(200,250,114,0.8)', t);
+  dashes(790, 960, 675, 852, seg(t, tSt, tSt + 0.5), 'rgba(200,250,114,0.8)', t);
+  x.restore(); finish(t); }
+
+/* ================= TRE: lo sgabello a tre gambe ================= */
+const LEGX = [230, 540, 850];
+function sTre(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tTre = WT('tre', 'tre', 1, 2.0), tPa = WT('tre', 'paghi', 1, 3.1), tPr = WT('tre', 'prezzi', 1, 4.5), tCs = WT('tre', 'conservi', 1, 5.5),
+    tN1 = WT('tre', 'non', 1, 6.9), tN2 = WT('tre', 'non', 2, 9.0);
+  phrase(t, a + 0.03, [['Il denaro fa', C.ink]], 345, { size: 92, out: tN1 - 0.3 });
+  phrase(t, tTre - 0.1, [['tre cose.', C.lime]], Y2, { size: 92, out: tN1 - 0.3 });
+  phrase(t, tN1 - 0.05, [['Ne manca una:', C.ink]], 345, { size: 92 });
+  phrase(t, tN2 - 0.1, [['non è denaro.', C.red]], Y2, { size: 92 });
+  const T = [tPa, tPr, tCs], L1 = [['PAGARE', ''], ['CONFRONTARE', 'I PREZZI'], ['CONSERVARE', 'VALORE']];
+  const kP = tl(t, a + 0.1, 0.5), tilt = 0.12 * ioC(seg(t, tN1 + 0.25, tN1 + 0.9)), gone = seg(t, tN1, tN1 + 0.6);
+  const fl = 1210; x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 3; x.beginPath(); x.moveTo(90, fl); x.lineTo(990, fl); x.stroke();
+  LEGX.forEach((lx, i) => { const k = tl(t, T[i] - 0.25, 0.5); if (k <= 0) return; const fall = i === 2 ? gone : 0, col = i === 2 && fall > 0 ? C.red : C.lime;
+    x.save(); x.translate(lx, fl); x.rotate(i === 2 ? 1.1 * oC(fall) : 0); x.translate(0, -0 + 140 * (i === 2 ? oC(fall) : 0)); x.globalAlpha *= (1 - fall);
+    const hh = 305 * k; x.fillStyle = i === 2 && fall > 0 ? 'rgba(255,90,78,0.2)' : 'rgba(200,250,114,0.14)'; rr(-42, -hh, 84, hh, 10); x.fill(); x.strokeStyle = col; x.globalAlpha *= 0.9; x.lineWidth = 3; rr(-42, -hh, 84, hh, 10); x.stroke(); x.restore();
+    const lc = i === 2 && fall > 0.3 ? C.red : C.ink; lab(L1[i][0], lx, 1275, lc, k * (1 - 0.3 * fall), 26); if (L1[i][1]) lab(L1[i][1], lx, 1315, lc, k * (1 - 0.3 * fall), 26);
+    ring(lx, 905, 40, t, T[i], RGB.lime, 0.6, 50); });
+  /* seduta con la moneta: ruota attorno alla gamba di sinistra quando ne manca una */
+  x.save(); x.globalAlpha *= clamp(kP * 1.5); x.translate(230, 905); x.rotate(tilt); x.translate(-230, -905);
+  x.fillStyle = 'rgba(200,250,114,0.2)'; rr(150, 850, 780, 55, 16); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.9)'; x.lineWidth = 3; rr(150, 850, 780, 55, 16); x.stroke();
+  const slide = ioC(seg(t, tN1 + 0.5, tN1 + 1.1)), onP = t < tN2 - 0.2; if (onP) coin(lerp(540, 790, slide), 822, 100, tl(t, a + 0.3, 0.5), RGB.lime, '€');
+  x.restore();
+  if (!onP) { const kf = seg(t, tN2 - 0.2, tN2 + 0.5), cy = lerp(950, 1150, kf * kf), k2 = tl(t, tN2 - 0.2, 0.1); coin(lerp(790, 860, kf), cy, 100, k2, '140,150,145', '€'); cross(860, 1150, 70, seg(t, tN2 + 0.35, tN2 + 0.9)); }
+  void tCs; x.restore(); finish(t); }
+
+/* ================= ORO: niente oro dietro, ma corso legale ================= */
+function sOro(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tOr = WA('oro', ['loro', 'oro'], 1, 0.7), tDi = WT('oro', 'dietro', 1, 1.1), tCv = WT('oro', 'convertibile', 1, 2.4), tCh = WT('oro', 'chiedere', 1, 3.4),
+    tBa = WT('oro', 'banca', 1, 4.5), tLe = WT('oro', 'legge', 1, 5.9), tCo = WT('oro', 'corso', 1, 7.6);
+  const fa = 1 - ioC(seg(t, tLe - 0.1, tLe + 0.35));   /* tutto sfuma tranne la banconota */
+  phrase(t, a + 0.03, [['Niente oro', C.ink]], 345, { size: 92, out: tLe - 0.3 });
+  phrase(t, tDi - 0.1, [['dietro l’euro.', C.lime]], Y2, { size: 92, out: tLe - 0.3 });
+  phrase(t, tLe - 0.05, [['Per legge:', C.ink]], 345, { size: 92 });
+  phrase(t, tCo - 0.1, [['corso legale.', C.lime]], Y2, { size: 92 });
+  /* banconota: da destra al centro quando arriva la legge */
+  const km = ioC(seg(t, tLe, tLe + 0.6));
+  note(lerp(810, 540, km), lerp(800, 850, km), lerp(400, 560, km), tl(t, a, 0.6), { lit: km });
+  /* lingotto: appare su «oro», poi diventa un fantasma barrato su «dietro» */
+  const gh = ioC(seg(t, tDi, tDi + 0.4));
+  x.save(); x.globalAlpha *= fa; goldbar(270, 800, 340, tl(t, tOr - 0.2, 0.5), gh); if (gh > 0) xcross(270, 800, 60, seg(t, tDi + 0.1, tDi + 0.6));
+  /* freccia bloccata: banconota → oro non si può */
+  const ka = seg(t, tCv - 0.1, tCv + 0.5); if (ka > 0) { x.save(); x.globalAlpha *= clamp(ka * 1.5); x.strokeStyle = C.red; x.lineWidth = 5; x.lineCap = 'round'; x.setLineDash([2, 12]); x.beginPath(); x.moveTo(600, 800); x.lineTo(lerp(600, 480, oC(ka)), 800); x.stroke(); x.setLineDash([]);
+    if (ka > 0.8) { x.beginPath(); x.moveTo(470, 770); x.lineTo(470, 830); x.stroke(); } x.restore(); }
+  lab('NON CONVERTIBILE', 540, 960, C.red, oC(ka));
+  /* chiedere oro alla banca centrale: la richiesta rimbalza */
+  const kb = tl(t, tBa - 0.5, 0.5); glass(770, 1190, 360, 230, 30, kb);
+  if (kb > 0) { icon('stato', 770, 1170, C.ink); lab('BANCA CENTRALE', 770, 1270, C.ink, kb); }
+  const kq = seg(t, tCh - 0.3, tCh + 0.2), go = ioC(seg(t, tBa + 0.2, tBa + 0.7)), back = ioC(seg(t, tBa + 0.8, tBa + 1.3));
+  glassPill(lerp(250, 420, go) - 90 * back, 1190, 'ORO?', kq, C.amber, 44);
+  xcross(420, 1190, 36, seg(t, tBa + 0.7, tBa + 1.1) * (1 - back));
+  x.restore();
+  /* sigillo di corso legale */
+  const ks = seg(t, tCo - 0.15, tCo + 0.35), slam = lerp(1.7, 1, oC(ks)); if (ks > 0) { x.save(); x.translate(540, 1230); x.rotate(-0.1); x.scale(slam, slam); x.globalAlpha *= clamp(ks * 3);
+    glow(0, 0, 220, RGB.lime, 0.25); x.strokeStyle = C.lime; x.lineWidth = 8; x.beginPath(); x.arc(0, 0, 130, 0, 7); x.stroke(); x.lineWidth = 3; x.beginPath(); x.arc(0, 0, 112, 0, 7); x.stroke();
+    txt('CORSO', 0, -26, { size: 48, weight: 800, color: C.lime, ls: 4 }); txt('LEGALE', 0, 30, { size: 48, weight: 800, color: C.lime, ls: 4 }); x.restore(); ring(540, 1230, 130, t, tCo + 0.1, RGB.lime, 0.6, 90); }
+  x.restore(); finish(t); }
+
+/* ================= M1: la provetta si riempie ================= */
+const TUBE = { cx: 540, cy: 800, w: 860, h: 90 };
+function sM1(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tSe = WT('m1', 'settembre', 1, 2.1), tDe = WT('m1', 'denaro', 1, 3.8), tOl = WT('m1', 'oltre', 1, 5.9), tMi = WT('m1', 'miliardi', 1, 6.6);
+  phrase(t, a + 0.03, [['Oggi, nell’area euro:', C.ink]], 345, { size: 92 });
+  phrase(t, tDe - 0.1, [['denaro spendibile', C.lime]], Y2, { size: 92 });
+  txt(typed('SETTEMBRE 2026 · DATO PROVVISORIO', t, tSe, 30), 540, 610, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2 });
+  const { cx, cy, w, h } = TUBE, kf = ioC(seg(t, tOl - 0.1, tMi + 0.3)), ki = tl(t, a + 0.2, 0.6);
+  x.save(); x.globalAlpha *= ki; vessel(cx - w / 2, cy - h / 2, w, h, w * kf, '#E4FFB5', '#8FCB3C', t, RGB.lime); x.restore();
+  txt(sep(11334 * kf), 540, 1050, { size: 190, weight: 800, color: C.lime, alpha: clamp(kf * 8), ls: -4 });
+  lab('MILIARDI DI EURO', 540, 1180, C.ink, clamp(kf * 8), 30);
+  x.restore(); finish(t); }
+
+/* ================= CONTI: la provetta si spezza in contante e conti correnti ================= */
+function sConti(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tCn = WT('conti', 'contante', 1, 0.2), tMl = WA('conti', ['milleseicento', '1600', '16', '1'], 1, 2.1), tRe = WT('conti', 'resto', 1, 3.4), tNv = WA('conti', ['novemila', '9700', '97', '9'], 1, 4.2), tCc = WT('conti', 'conti', 1, 5.2);
+  phrase(t, a + 0.03, [['Di cui contante,', C.ink]], 345, { size: 92 });
+  phrase(t, tRe - 0.1, [['il resto sul conto.', C.lime]], Y2, { size: 92 });
+  const { cx, cy, w, h } = TUBE, x0 = cx - w / 2, FR = 1618.447 / 11333.724, sw = FR * w, sp = ioC(seg(t, tCn - 0.1, tCn + 0.5)), gap = 16 * sp;
+  if (sp <= 0) vessel(x0, cy - h / 2, w, h, w, '#E4FFB5', '#8FCB3C', t, RGB.lime);
+  else { vessel(x0, cy - h / 2 - 0 * sp, sw - gap / 2, h, sw, '#FFD66B', '#C98A12', t, RGB.amber); vessel(x0 + sw + gap / 2, cy - h / 2, w - sw - gap / 2, h, w, '#E4FFB5', '#8FCB3C', t, RGB.lime); }
+  const xa = x0 + (sw - gap / 2) / 2, xb = x0 + sw + gap / 2 + (w - sw - gap / 2) / 2;
+  lab('CONTANTE', xa + 10, 690, C.amber, tl(t, tCn, 0.3)); lab('CONTI CORRENTI', xb, 690, C.lime, tl(t, tCc - 1.3, 0.3));
+  const ka = tl(t, tMl - 0.1, 0.4), kb = tl(t, tNv - 0.1, 0.4);
+  txt('1.618', xa + 20, 950, { size: 80, weight: 800, color: C.amber, alpha: ka, ls: -2 }); txt('9.715', xb, 960, { size: 150, weight: 800, color: C.lime, alpha: kb, ls: -3 });
+  lab('MILIARDI DI EURO', 540, 1150, C.ink, Math.max(ka, 0) * 0.9, 28);
+  x.restore(); finish(t); }
+
+/* ================= SEI: una moneta contro sei, che diventano righe di registro ================= */
+function sSei(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tEu = WT('sei', 'euro', 1, 1.2), tCn = WT('sei', 'contante', 1, 1.7), tSe = WA('sei', ['sei', '6'], 1, 3.4), tSa = WT('sei', 'saldo', 1, 4.8), tNu = WT('sei', 'numero', 1, 6.5), tRg = WT('sei', 'registro', 1, 7.2);
+  phrase(t, tEu - 0.1, [['1 € di contante,', C.ink]], 345, { size: 92, out: tNu - 0.3 });
+  phrase(t, tSe - 0.1, [['6 € sul conto.', C.lime]], Y2, { size: 92, out: tNu - 0.3 });
+  phrase(t, tNu - 0.05, [['Un numero', C.ink]], 345, { size: 92 });
+  phrase(t, tRg - 0.1, [['nel registro.', C.lime]], Y2, { size: 92 });
+  disc(200, 830, 100, C.amber, '€', tl(t, tCn - 0.2, 0.5)); lab('CONTANTE', 200, 985, C.amber, tl(t, tCn, 0.3));
+  const kR = tl(t, tRg - 0.4, 0.5);
+  glass(690, 830, 620, 350, 28, kR);
+  const GX = [520, 690, 860], GY = [760, 900];
+  for (let i = 0; i < 6; i++) { const gx = GX[i % 3], gy = GY[Math.floor(i / 3)], rx = 440, ry = 700 + i * 52, kd = tl(t, tSe - 0.2 + i * 0.1, 0.4), m = ioC(seg(t, tRg + 0.1 + i * 0.12, tRg + 0.6 + i * 0.12));
+    const px = lerp(gx, rx, m), py = lerp(gy, ry, m), r = lerp(56, 17, m);
+    if (m > 0.2) { const L = 120 + ((i * 97) % 5) * 70; x.fillStyle = 'rgba(200,250,114,0.45)'; rr(rx + 30, ry - 6, L * oC(seg(m, 0.2, 1)), 12, 6); x.fill(); }
+    disc(px, py, r, C.lime, '€', kd, 1 - clamp(m * 2.5)); }
+  lab('SUL CONTO', 690, 1050, C.lime, tl(t, tSe, 0.3) * (1 - seg(t, tRg - 0.5, tRg - 0.2))); lab('REGISTRO DELLA TUA BANCA', 690, 1050, C.ink, oC(seg(t, tRg - 0.1, tRg + 0.3)));
+  void tSa; x.restore(); finish(t); }
+
+/* ================= CASA: fiducia, poi dieci caselle da 8,6 su conto ================= */
+function sCasa(t, a, b) { bg('34,44,30', 0.8); x.save(); zoom(t, a, b, 1.05);
+  const tBn = WT('casa', 'banconota', 1, 2.4), tFi = WT('casa', 'fidano', 1, 4.1), tPi = WT('casa', 'piu', 1, 5.2), tOt = WA('casa', ['otto', '8'], 1, 5.9), tDi = WA('casa', ['dieci', '10'], 1, 6.9), tNu = WT('casa', 'numeri', 1, 7.6);
+  phrase(t, a + 0.03, [['Ti porti a casa:', C.ink]], 345, { size: 92, out: tPi - 0.4 });
+  phrase(t, tFi - 0.15, [['conta la fiducia.', C.lime]], Y2, { size: 92, out: tPi - 0.4 });
+  phrase(t, tOt - 0.15, [['Più di 8 € su 10', C.ink]], 345, { size: 92 });
+  phrase(t, tNu - 0.1, [['numeri su un conto.', C.lime]], Y2, { size: 92 });
+  const gone = ioC(seg(t, tPi - 0.3, tPi + 0.3));
+  if (gone < 1) { x.save(); x.globalAlpha *= 1 - gone; note(540, lerp(840, 760, gone), 600, tl(t, tBn - 0.4, 0.6), { lit: seg(t, tFi, tFi + 0.4) }); glassPill(540, 1110, 'FIDUCIA', seg(t, tFi, tFi + 0.4), C.lime, 44); ring(540, 840, 200, t, tFi, RGB.lime, 0.7, 100); x.restore(); }
+  /* dieci caselle: otto e mezza piene di lime (sul conto), il resto ambra (contante) */
+  const FILL = 8.57;
+  for (let i = 0; i < 10; i++) { const col = i % 5, row = Math.floor(i / 5), tx = 120 + col * 170, ty = 640 + row * 170, kk = tl(t, tOt - 0.3 + i * 0.05, 0.35); if (kk <= 0) continue;
+    const f = clamp(FILL - i), kf = oC(seg(t, tOt + 0.1 + i * 0.07, tOt + 0.45 + i * 0.07)), s = lerp(0.7, 1, oB(clamp(kk)));
+    x.save(); x.translate(tx + 70, ty + 70); x.scale(s, s); x.translate(-tx - 70, -ty - 70); x.globalAlpha *= clamp(kk * 2);
+    x.fillStyle = 'rgba(245,165,36,0.42)'; rr(tx, ty, 140, 140, 18); x.fill();
+    x.save(); rr(tx, ty, 140, 140, 18); x.clip(); x.fillStyle = 'rgba(200,250,114,0.55)'; x.fillRect(tx, ty, 140 * f * kf, 140); x.restore();
+    x.strokeStyle = f * kf >= 1 ? C.lime : 'rgba(241,244,238,0.5)'; x.lineWidth = 3; rr(tx, ty, 140, 140, 18); x.stroke();
+    txt('€', tx + 70, ty + 72, { size: 64, weight: 800, color: 'rgba(241,244,238,0.9)' }); x.restore(); }
+  const kn = oC(seg(t, tDi - 0.1, tDi + 1.0));
+  txt(count(85.7 * kn) + '%', 540, 1130, { size: 170, weight: 800, color: C.lime, alpha: clamp(kn * 6), ls: -3 }); lab('SU UN CONTO', 540, 1260, C.lime, clamp(kn * 4), 30);
+  x.restore(); finish(t); }
+const count = (v, d = 1) => v.toFixed(d).replace('.', ',');
+
+serie({ carta: sCarta, fiducia: sFiducia, tre: sTre, oro: sOro, m1: sM1, conti: sConti, sei: sSei, casa: sCasa }, ORDER, ['carta', 'tre', 'oro', 'm1', 'casa']);
+</script></body></html>

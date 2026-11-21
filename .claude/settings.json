@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 sites/studio/social/pubblica.py:*)",
+      "Bash(setsid nohup python3 sites/studio/social/pubblica.py:*)",
+      "Bash(python3 sites/studio/social/metriche.py:*)"
+    ]
+  }
+}

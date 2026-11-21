@@ -1,0 +1,260 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script>
+// Reel «Tokenization» — tema del video 1 (0x100x) rifatto con fonti verificate (t1-fonti.md).
+// Ogni scena parte quando la voce inizia la sua frase: window.CUES = {chiave: [inizio, fine]} da cues.json.
+const S = (k) => ((window.CUES || {})[k] || [0, 1])[0], E = (k) => ((window.CUES || {})[k] || [0, 1])[1];
+const ORDER = ['fink', 'quote', 'token', 't1', 'closed', 'seconds', 'check', 'grow', 'treas', 'gap', 'risk', 'rails', 'end'];
+const zoom = (t, a, b, z0 = 1.08) => { const z = lerp(z0, 1, oC(seg(t, a, b))); x.translate(540, 1000); x.scale(z, z); x.translate(-540, -1000); };
+
+function coin(cx, cy, r, k, rim = '200,250,114', label = '$') {
+  x.save(); x.globalAlpha *= k;
+  x.fillStyle = '#0c0f0d'; x.beginPath(); x.ellipse(cx, cy + 10, r, r * 0.32, 0, 0, 7); x.fill();
+  const g = x.createLinearGradient(cx - r, cy, cx + r, cy); g.addColorStop(0, '#1d2420'); g.addColorStop(0.5, '#0f1311'); g.addColorStop(1, '#1a201c');
+  x.fillStyle = g; x.beginPath(); x.ellipse(cx, cy, r, r * 0.32, 0, 0, 7); x.fill();
+  x.strokeStyle = `rgba(${rim},0.85)`; x.lineWidth = 2.5; x.beginPath(); x.ellipse(cx, cy, r, r * 0.32, 0, Math.PI, Math.PI * 2); x.stroke();
+  x.save(); x.translate(cx, cy); x.scale(1, 0.32); txt(label, 0, 0, { size: r * 0.9, weight: 800, color: `rgba(${rim},0.6)` }); x.restore();
+  x.restore();
+}
+function hexToken(cx, cy, r, k, glowA = 0.3) {
+  if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k * 1.5); const s = lerp(0.6, 1, oB(clamp(k))); x.translate(cx, cy); x.scale(s, s);
+  glow(0, 0, r * 2.2, '200,250,114', glowA);
+  x.beginPath(); for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath();
+  const g = x.createLinearGradient(-r, -r, r, r); g.addColorStop(0, '#2b3a1c'); g.addColorStop(1, '#0e140b'); x.fillStyle = g; x.fill();
+  x.strokeStyle = C.lime; x.lineWidth = 4; x.stroke();
+  x.beginPath(); for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; x.lineTo(Math.cos(a) * r * 0.72, Math.sin(a) * r * 0.72); } x.closePath();
+  x.strokeStyle = 'rgba(200,250,114,0.35)'; x.lineWidth = 2; x.stroke();
+  txt('T', 0, 4, { size: r * 0.8, weight: 800, color: C.lime });
+  x.restore();
+}
+function certificate(cx, cy, w, h, k, morph = 0) {
+  if (k <= 0 || morph >= 1) return; x.save(); x.globalAlpha *= k * (1 - morph); x.translate(cx, cy); const s = lerp(1, 0.25, ioC(morph)); x.scale(s, s); x.rotate(lerp(-0.04, 0.3, morph));
+  const g = x.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); g.addColorStop(0, '#f2efe6'); g.addColorStop(1, '#d4cfc1');
+  x.fillStyle = g; rr(-w / 2, -h / 2, w, h, 14); x.fill();
+  x.strokeStyle = '#8a8574'; x.lineWidth = 3; rr(-w / 2 + 18, -h / 2 + 18, w - 36, h - 36, 8); x.stroke();
+  txt('SHARE CERTIFICATE', 0, -h / 2 + 70, { fam: 'mono', size: 26, weight: 600, color: '#3a3528', ls: 4 });
+  for (let i = 0; i < 4; i++) { x.fillStyle = 'rgba(58,53,40,0.25)'; x.fillRect(-w / 2 + 60, -h / 2 + 130 + i * 34, w - 120 - (i % 2) * 80, 10); }
+  x.strokeStyle = '#8a8574'; x.lineWidth = 3; x.beginPath(); x.arc(w / 2 - 90, h / 2 - 80, 40, 0, 7); x.stroke();
+  x.restore();
+}
+function chain(cx, cy, n, k, litUpTo) {
+  const bw = 120, gap = 50, tot = n * bw + (n - 1) * gap; let x0 = cx - tot / 2;
+  for (let i = 0; i < n; i++) {
+    const ki = oB(seg(k, i * 0.12, i * 0.12 + 0.4)); if (ki <= 0) continue;
+    const lit = i < litUpTo; x.save(); x.globalAlpha = clamp(ki); x.translate(x0 + bw / 2, cy); x.scale(clamp(ki, 0, 1.2), clamp(ki, 0, 1.2));
+    rr(-bw / 2, -bw / 2, bw, bw, 18); x.fillStyle = lit ? 'rgba(200,250,114,0.14)' : '#111613'; x.fill(); x.strokeStyle = lit ? C.lime : 'rgba(241,244,238,0.25)'; x.lineWidth = 3; x.stroke();
+    txt('#' + (1024 + i), 0, 0, { fam: 'mono', size: 20, weight: 600, color: lit ? C.lime : C.muted });
+    x.restore();
+    if (i < n - 1) { x.save(); x.globalAlpha = clamp(ki); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(x0 + bw, cy); x.lineTo(x0 + bw + gap, cy); x.stroke(); x.restore(); }
+    x0 += bw + gap;
+  }
+}
+function calCard(cx, cy, top, big, k, col) {
+  if (k <= 0) return; x.save(); x.globalAlpha = clamp(k * 2); x.translate(cx, cy); const s = lerp(0.85, 1, oB(clamp(k))); x.scale(s, s);
+  glass(0, 0, 300, 340, 26, 1);
+  rr(-150, -170, 300, 80, { upperLeft: 26, upperRight: 26, lowerLeft: 0, lowerRight: 0 }); x.fillStyle = col; x.fill();
+  txt(top, 0, -130, { fam: 'mono', size: 26, weight: 600, color: '#0b0d0c', ls: 3 });
+  txt(big, 0, 30, { size: 96, weight: 800, color: C.ink });
+  x.restore();
+}
+function clock(cx, cy, r, k, hh = 4, mm = 0) {
+  x.save(); x.globalAlpha *= k; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fillStyle = '#0f1311'; x.fill(); x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 4; x.stroke();
+  for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 4; x.beginPath(); x.moveTo(cx + Math.cos(a) * (r - 18), cy + Math.sin(a) * (r - 18)); x.lineTo(cx + Math.cos(a) * (r - 34), cy + Math.sin(a) * (r - 34)); x.stroke(); }
+  const ah = (hh % 12 + mm / 60) / 12 * Math.PI * 2 - Math.PI / 2, am = mm / 60 * Math.PI * 2 - Math.PI / 2;
+  x.lineCap = 'round'; x.strokeStyle = C.ink; x.lineWidth = 12; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(ah) * r * 0.5, cy + Math.sin(ah) * r * 0.5); x.stroke();
+  x.lineWidth = 7; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(am) * r * 0.75, cy + Math.sin(am) * r * 0.75); x.stroke();
+  x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 12, 0, 7); x.fill(); x.restore();
+}
+function envelope(cx, cy, w, k) { x.save(); x.globalAlpha *= k; const h = w * 0.62; x.translate(cx, cy);
+  rr(-w / 2, -h / 2, w, h, 10); x.fillStyle = '#e9e5d9'; x.fill(); x.strokeStyle = '#a49f90'; x.lineWidth = 3;
+  x.beginPath(); x.moveTo(-w / 2, -h / 2); x.lineTo(0, 10); x.lineTo(w / 2, -h / 2); x.stroke();
+  x.fillStyle = '#b53134'; rr(w / 2 - 70, -h / 2 + 18, 46, 54, 4); x.fill(); x.restore(); }
+function phone(cx, cy, k) { x.save(); x.globalAlpha *= k; x.translate(cx, cy);
+  rr(-170, -330, 340, 660, 52); x.fillStyle = '#0d110f'; x.fill(); x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 4; x.stroke();
+  rr(-150, -305, 300, 610, 38); x.fillStyle = '#060807'; x.fill(); rr(-50, -292, 100, 26, 13); x.fillStyle = '#000'; x.fill(); x.restore(); }
+
+
+// vetro liquido: sfoca ciò che c'è sotto, velo chiaro, riflesso in alto, bordo luminoso
+function glass(cx, cy, w, h, r, k, tint = '255,255,255') {
+  if (k <= 0) return; const m = x.getTransform();
+  const p0 = m.transformPoint(new DOMPoint(cx - w / 2, cy - h / 2)), p1 = m.transformPoint(new DOMPoint(cx + w / 2, cy + h / 2));
+  x.save(); x.globalAlpha *= clamp(k); x.beginPath(); x.roundRect(cx - w / 2, cy - h / 2, w, h, r); x.clip();
+  x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.filter = 'blur(18px) saturate(150%)';
+  const pad = 40, sx = Math.max(0, p0.x - pad), sy = Math.max(0, p0.y - pad), sw = Math.min(W, p1.x + pad) - sx, sh = Math.min(H, p1.y + pad) - sy;
+  if (sw > 0 && sh > 0) x.drawImage(cv, sx, sy, sw, sh, sx, sy, sw, sh); x.restore();
+  const g = x.createLinearGradient(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2); g.addColorStop(0, `rgba(${tint},0.20)`); g.addColorStop(0.5, `rgba(${tint},0.06)`); g.addColorStop(1, `rgba(${tint},0.14)`);
+  x.fillStyle = g; x.fillRect(cx - w / 2, cy - h / 2, w, h);
+  const sp = x.createLinearGradient(0, cy - h / 2, 0, cy - h / 2 + h * 0.5); sp.addColorStop(0, 'rgba(255,255,255,0.22)'); sp.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = sp; x.fillRect(cx - w / 2, cy - h / 2, w, h * 0.5); x.restore();
+  x.save(); x.globalAlpha *= clamp(k); x.beginPath(); x.roundRect(cx - w / 2 + 1, cy - h / 2 + 1, w - 2, h - 2, r);
+  const b = x.createLinearGradient(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2); b.addColorStop(0, 'rgba(255,255,255,0.65)'); b.addColorStop(0.45, 'rgba(255,255,255,0.08)'); b.addColorStop(1, 'rgba(255,255,255,0.40)');
+  x.strokeStyle = b; x.lineWidth = 2.5; x.stroke(); x.restore();
+}
+function glassPill(cx, cy, label, k, col = C.ink, size = 44) {
+  if (k <= 0) return 0; const w = tw(label, size, 700) + 90, s = lerp(0.85, 1, oB(clamp(k)));
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); glass(cx, cy, w, 96, 48, clamp(k * 2)); txt(label, cx, cy + 2, { size, weight: 700, color: col, alpha: clamp(k * 2) }); x.restore(); return w;
+}
+// click: dito (cerchio chiaro) che arriva, preme a t0, onda che si allarga
+function tap(px, py, t, t0) {
+  const ka = seg(t, t0 - 0.55, t0), kr = seg(t, t0, t0 + 0.55), kout = seg(t, t0 + 0.35, t0 + 0.8);
+  if (ka <= 0 || kout >= 1) return;
+  const e = oC(ka), fx = lerp(px + 170, px, e), fy = lerp(py + 230, py, e), press = t >= t0 ? 1 - 0.18 * Math.sin(Math.PI * clamp((t - t0) / 0.2)) : 1;
+  if (kr > 0 && kr < 1) { x.save(); x.strokeStyle = `rgba(200,250,114,${1 - kr})`; x.lineWidth = 4; x.beginPath(); x.arc(px, py, 20 + 70 * oC(kr), 0, 7); x.stroke(); x.restore(); glow(px, py, 90, '200,250,114', 0.35 * (1 - kr)); }
+  x.save(); x.globalAlpha = (1 - kout) * clamp(ka * 3); glow(fx, fy, 70, '255,255,255', 0.25);
+  x.fillStyle = 'rgba(255,255,255,0.92)'; x.beginPath(); x.arc(fx, fy, 30 * press, 0, 7); x.fill();
+  x.strokeStyle = 'rgba(255,255,255,0.5)'; x.lineWidth = 3; x.beginPath(); x.arc(fx, fy, 42 * press, 0, 7); x.stroke(); x.restore();
+}
+
+// ---------------- scene ----------------
+function sFink(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.1);
+  phrase(t, a + 0.05, [['He manages over', C.ink], ['$10 trillion.', C.lime]], 360, { size: 100 });
+  // carta di vetro con nome (niente volto: avatar con iniziali)
+  const kc = oC(seg(t, a + 0.4, a + 1.2)); if (kc > 0) { x.save(); x.globalAlpha = kc; x.translate(540, 760 + (1 - kc) * 40);
+    glass(0, 0, 760, 180, 40, 1);
+    x.beginPath(); x.arc(-270, 0, 56, 0, 7); x.fillStyle = '#1a201c'; x.fill(); x.strokeStyle = C.lime; x.lineWidth = 3; x.stroke(); txt('LF', -270, 2, { size: 40, weight: 800, color: C.lime });
+    txt(typed('Larry Fink', t, a + 0.7, 20), -185, -18, { size: 50, weight: 800, align: 'left' }); txt(typed('CEO · BLACKROCK', t, a + 1.0, 30), -185, 34, { fam: 'mono', size: 24, weight: 600, color: C.muted, align: 'left', ls: 3 });
+    x.restore(); }
+  // pila di monete
+  for (let i = 0; i < 9; i++) { const k = oC(seg(t, a + 0.3 + i * 0.06, a + 0.8 + i * 0.06)); coin(540, 1330 - i * 26 - (1 - k) * 60, 170, k); }
+  glow(540, 1260, 360, '200,250,114', 0.08);
+  const kw = seg(t, lerp(a, b, 0.62), lerp(a, b, 0.62) + 0.4); if (kw > 0) phrase(t, lerp(a, b, 0.62), [['He wrote one sentence.', C.muted]], 1440, { size: 46 });
+  x.restore(); finish(t); }
+function sQuote(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
+  txt('“', 540, 330, { size: 220, weight: 800, color: 'rgba(200,250,114,0.35)', alpha: oC(seg(t, a, a + 0.3)) });
+  const parts = [['Every stock.', 0], ['Every bond.', 1], ['Every fund.', 2], ['Every asset.', 3]], d = b - a, step = d * 0.17;
+  parts.forEach(([s, i]) => { const k0 = a + 0.1 + i * step, k = oC(seg(t, k0, k0 + 0.3)); const cur = t < k0 + step || i === 3;
+    txt(s, 540, 560 + i * 125 + (1 - k) * 30, { size: 100, weight: 800, color: C.ink, alpha: k * (cur ? 1 : 0.35), blur: (1 - k) * 10, ls: -2 }); });
+  const kt = a + 0.1 + 4 * step; phrase(t, kt, [['Can be tokenized.', C.lime]], 1130, { size: 104 });
+  mono('— LARRY FINK, 2025 ANNUAL CHAIRMAN’S LETTER', 540, 1300, t, kt + 0.2, { size: 22 });
+  x.restore(); finish(t); }
+function sToken(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.06);
+  phrase(t, a + 0.05, [['Tokenized =', C.ink], ['it lives on a blockchain.', C.lime]], 360, { size: 84 });
+  const m = seg(t, lerp(a, b, 0.35), lerp(a, b, 0.6));
+  certificate(540, 860, 560, 380, oC(seg(t, a + 0.2, a + 0.7)), m);
+  hexToken(540, 860, 150, seg(t, lerp(a, b, 0.5), lerp(a, b, 0.7)), 0.25);
+  tap(600, 880, t, lerp(a, b, 0.35));
+  chain(540, 1260, 5, seg(t, lerp(a, b, 0.55), lerp(a, b, 0.95)), Math.floor(lerp(0, 6, seg(t, lerp(a, b, 0.6), b))));
+  x.restore(); finish(t); }
+function sT1(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
+  phrase(t, a + 0.05, [['A U.S. stock trade', C.ink], ['settles the next day.', C.ink]], 360, { size: 84 });
+  calCard(330, 820, 'TRADE', 'Mon', oC(seg(t, a + 0.4, a + 0.9)), C.ink);
+  const ka = oC(seg(t, a + 0.9, a + 1.4)); x.save(); x.globalAlpha = ka; x.strokeStyle = C.lime; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(500, 820); x.lineTo(500 + 80 * ka, 820); x.stroke(); x.beginPath(); x.moveTo(580, 820); x.lineTo(558, 800); x.moveTo(580, 820); x.lineTo(558, 840); x.stroke(); x.restore();
+  calCard(750, 820, 'SETTLED', 'Tue', oC(seg(t, a + 1.3, a + 1.8)), C.lime);
+  const k1 = oC(seg(t, S('t1b'), S('t1b') + 0.4)); txt('T+1', 540, 1140, { size: 170, weight: 800, color: C.lime, alpha: k1, blur: (1 - k1) * 12, ls: -4 });
+  mono('SEC RULE · SINCE MAY 28, 2024', 540, 1270, t, S('t1b') + 0.3, { size: 24 });
+  x.restore(); finish(t); }
+function sClosed(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.05);
+  phrase(t, a + 0.05, [['Closed every night.', C.ink], ['And every weekend.', C.red]], 360, { size: 88, st: 0.16 });
+  const kc = oC(seg(t, a + 0.2, a + 0.8)); clock(540, 780, 170, kc, 4, 0); txt('4:00 PM', 540, 990, { fam: 'mono', size: 30, weight: 600, color: C.muted, alpha: kc, ls: 3 });
+  const D = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']; const ks = seg(t, lerp(a, b, 0.45), lerp(a, b, 0.75));
+  D.forEach((d, i) => { const k = oC(seg(ks, i * 0.1, i * 0.1 + 0.4)); if (k <= 0) return; const cx = 160 + i * 127, off = i > 4; x.save(); x.globalAlpha = k;
+    rr(cx - 55, 1110, 110, 150, 18); x.fillStyle = off ? 'rgba(255,90,78,0.14)' : '#101512'; x.fill(); x.strokeStyle = off ? C.red : 'rgba(241,244,238,0.2)'; x.lineWidth = 2.5; x.stroke();
+    txt(d, cx, 1160, { fam: 'mono', size: 24, weight: 600, color: off ? C.red : C.muted, ls: 2 }); txt(off ? '✕' : '9–4', cx, 1215, { size: off ? 40 : 26, weight: 700, color: off ? C.red : C.ink }); x.restore(); });
+  const kp = seg(t, lerp(a, b, 0.25), lerp(a, b, 0.25) + 0.4); if (kp > 0) glassPill(540, 1340, 'MARKET CLOSED', kp, C.red, 38);
+  x.restore(); finish(t); }
+function sSeconds(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.06);
+  phrase(t, a + 0.05, [['Settles in seconds.', C.lime]], 360, { size: 96 });
+  const kr = oC(seg(t, a + 0.2, a + 0.7)), sec = 3.2 * seg(t, a + 0.5, a + 2.2), done = t > a + 2.2;
+  x.save(); x.globalAlpha = kr; x.lineWidth = 22; x.lineCap = 'round'; x.strokeStyle = '#161b18'; x.beginPath(); x.arc(540, 860, 230, 0, 7); x.stroke();
+  x.strokeStyle = C.lime; x.beginPath(); x.arc(540, 860, 230, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * clamp(sec / 3.2)); x.stroke(); x.restore();
+  txt(sec.toFixed(1) + 's', 540, 840, { size: 130, weight: 800, color: C.ink, alpha: kr, ls: -3 });
+  if (done) { const kd = seg(t, a + 2.2, a + 2.6); glassPill(540, 965, '✓ SETTLED', kd, C.lime, 32); }
+  tap(540, 860, t, a + 0.5);
+  phrase(t, lerp(a, b, 0.62), [['Any hour. Any day.', C.ink]], 1250, { size: 80 });
+  mono('24 / 7 / 365', 540, 1360, t, lerp(a, b, 0.75), { size: 28, color: C.lime });
+  x.restore(); finish(t); }
+function sCheck(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const s2 = S('text');
+  phrase(t, a + 0.05, [['Today:', C.muted], ['mailing a check.', C.ink]], 340, { size: 88, out: s2 - 0.3 });
+  phrase(t, s2, [['Tokenization:', C.muted], ['sending a text.', C.lime]], 340, { size: 88 });
+  // busta lenta lungo un tratteggio
+  const ke = oC(seg(t, a + 0.3, a + 0.8)), pe = seg(t, a + 0.5, s2 + 1.5);
+  x.save(); x.globalAlpha = ke * (t < s2 ? 1 : 0.4); x.setLineDash([12, 14]); x.strokeStyle = 'rgba(241,244,238,0.3)'; x.lineWidth = 3; x.beginPath(); x.moveTo(140, 880); x.lineTo(940, 880); x.stroke(); x.setLineDash([]); x.restore();
+  envelope(lerp(170, 420, pe), 880, 200, ke * (t < s2 ? 1 : 0.4));
+  // telefono con bolla istantanea
+  const kp = oC(seg(t, s2 + 0.1, s2 + 0.6)); if (kp > 0) { phone(540, 1150 + (1 - kp) * 80, kp);
+    glassPill(540, 1390, 'Send  $', oC(seg(t, s2 + 0.3, s2 + 0.6)), C.ink, 36); tap(540, 1390, t, s2 + 0.75);
+    const kb = oB(seg(t, s2 + 0.85, s2 + 1.2)); if (kb > 0) { x.save(); x.translate(560, 1150); x.scale(kb, kb); rr(-120, -60, 240, 120, 30); x.fillStyle = C.lime; x.fill(); txt('$ sent', 0, -8, { size: 40, weight: 800, color: '#15200C' }); txt('delivered · now', 0, 30, { fam: 'mono', size: 18, weight: 600, color: '#2c3a18' }); x.restore(); } }
+  x.restore(); finish(t); }
+function sGrow(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  phrase(t, a + 0.05, [["It's already", C.ink], ['happening.', C.lime]], 340, { size: 92 });
+  mono('TOKENIZED REAL-WORLD ASSETS · RWA.XYZ', 540, 560, t, a + 0.6, { size: 22 });
+  const base = 1400, maxH = 640, bars = [['JAN 2024', 8, a + 1.2], ['MAY 2026', 22, S('grow2') + 0.1]];
+  bars.forEach(([lab, v, s0], i) => { const cx = i ? 700 : 380, k = ioC(seg(t, s0, s0 + 1.0)), hh = maxH * v / 22 * k; if (t < s0 - 0.05) return;
+    x.fillStyle = i ? C.lime : metal(cx - 110, 0, cx + 110, 0, true); rr(cx - 110, base - hh, 220, hh, 12); x.fill();
+    if (i) glow(cx, base - hh, 200, '200,250,114', 0.2 * k);
+    txt('$' + Math.round(v * k) + 'B' + (i && k > 0.99 ? '+' : ''), cx, base - hh - 55, { size: 76, weight: 800, color: i ? C.lime : C.ink, alpha: oC(seg(t, s0 + 0.2, s0 + 0.5)) });
+    txt(lab, cx, base + 40, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, s0, s0 + 0.3)) }); });
+  x.restore(); finish(t); }
+function sTreas(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.06);
+  phrase(t, a + 0.05, [['The biggest piece?', C.ink]], 360, { size: 88 });
+  const k = oC(seg(t, lerp(a, b, 0.3), lerp(a, b, 0.3) + 0.5)), v = 16 * ioC(seg(t, lerp(a, b, 0.32), lerp(a, b, 0.75)));
+  phrase(t, lerp(a, b, 0.28), [['Tokenized U.S. Treasuries', C.lime]], 520, { size: 64 });
+  for (let i = 0; i < 6; i++) hexToken(300 + i * 96, 1250 - (i % 2) * 40, 52, seg(t, lerp(a, b, 0.4) + i * 0.08, lerp(a, b, 0.4) + i * 0.08 + 0.4), 0.12);
+  txt('≈ $' + v.toFixed(0) + 'B', 540, 860, { size: 190, weight: 800, color: C.ink, alpha: k, blur: (1 - k) * 12, ls: -5 });
+  mono('JULY 2026 · RWA.XYZ', 540, 1010, t, lerp(a, b, 0.7), { size: 24 });
+  x.restore(); finish(t); }
+function sGap(t, a, b) { bg(); x.save();
+  const s2 = S('gap2');
+  phrase(t, a + 0.05, [['Still tiny.', C.ink]], 330, { size: 96, out: s2 - 0.3 });
+  phrase(t, s2, [['That gap', C.ink], ['is the story.', C.lime]], 330, { size: 96 });
+  // quadrato grande = mercato obbligazionario > $100T; puntino = tokenizzato $22B (aree in scala)
+  const big = 700, small = big * Math.sqrt(22e9 / 100e12); const kb = oC(seg(t, a + 0.4, a + 1.2));
+  x.save(); x.globalAlpha = kb; rr(540 - big / 2, 1150 - big / 2 + 80, big, big - 160, 10); x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; x.stroke(); x.fillStyle = 'rgba(241,244,238,0.05)'; x.fill(); x.restore();
+  txt('GLOBAL BOND MARKET · $100T+', 540, 1150 - big / 2 + 120, { fam: 'mono', size: 24, weight: 600, color: C.muted, ls: 2, alpha: kb });
+  const kd = oB(seg(t, a + 1.2, a + 1.6)); if (kd > 0) { x.save(); x.fillStyle = C.lime; x.beginPath(); x.arc(540 - big / 2 + 60, 1150 + big / 2 - 140, small / 2 * kd + 2, 0, 7); x.fill(); x.restore();
+    glow(540 - big / 2 + 60, 1150 + big / 2 - 140, 60, '200,250,114', 0.5 * clamp(kd));
+    txt('← tokenized · $22B', 540 - big / 2 + 90, 1150 + big / 2 - 140, { fam: 'mono', size: 26, weight: 600, color: C.lime, align: 'left', alpha: clamp(kd) }); }
+  mono('AREAS TO SCALE', 540, 1460, t, a + 1.8, { size: 20 });
+  x.restore(); finish(t); }
+function sRisk(t, a, b) { bg('50,24,22', 0.7); x.save(); zoom(t, a, b, 1.05);
+  phrase(t, a + 0.05, [['Open questions.', C.ink]], 360, { size: 96 });
+  const L = ['REGULATION', 'HACKS', 'WHO HOLDS THE KEYS'], d = b - a;
+  L.forEach((l, i) => { const k = seg(t, a + 0.4 + i * d * 0.2, a + 0.8 + i * d * 0.2); glassPill(540, 640 + i * 170, l + '  ?', k, i === 1 ? C.red : C.ink, 50); });
+  // lucchetto
+  const kl = oC(seg(t, lerp(a, b, 0.6), lerp(a, b, 0.6) + 0.5)); if (kl > 0) { x.save(); x.globalAlpha = kl; x.translate(540, 1250);
+    x.strokeStyle = C.ink; x.lineWidth = 16; x.beginPath(); x.arc(0, -60, 60, Math.PI, 0); x.stroke(); rr(-95, -60, 190, 150, 22); x.fillStyle = '#141916'; x.fill(); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; x.stroke();
+    x.fillStyle = C.amber; x.beginPath(); x.arc(0, 0, 16, 0, 7); x.fill(); x.fillRect(-5, 0, 10, 40); x.restore(); }
+  x.restore(); finish(t); }
+function sRails(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.06);
+  const s2 = S('rails2');
+  phrase(t, a + 0.05, [["The assets", C.ink], ["don't change.", C.ink]], 360, { size: 96 });
+  phrase(t, s2, [['The rails do.', C.lime]], 620, { size: 120 });
+  // binari in prospettiva che si illuminano
+  const kr = oC(seg(t, s2, s2 + 0.8)); x.save(); x.globalAlpha = 0.25 + 0.75 * kr;
+  const vx = 540, vy = 860; for (const side of [-1, 1]) { x.strokeStyle = kr > 0.1 ? C.lime : 'rgba(241,244,238,0.35)'; x.lineWidth = 6; x.beginPath(); x.moveTo(vx + side * 30, vy); x.lineTo(vx + side * 420, 1460); x.stroke(); }
+  for (let i = 0; i < 9; i++) { const p = (i / 9 + (t * 0.4) % (1 / 9)) % 1, yy = lerp(vy, 1460, p * p), half = lerp(30, 420, p * p) + 30; x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 2 + p * 6; x.beginPath(); x.moveTo(vx - half, yy); x.lineTo(vx + half, yy); x.stroke(); }
+  x.restore(); glow(540, 900, 300, '200,250,114', 0.15 * kr);
+  hexToken(540, lerp(1400, 960, oC(seg(t, s2 + 0.2, s2 + 1.4))), 70, seg(t, s2 + 0.1, s2 + 0.5), 0.3);
+  x.restore(); finish(t); }
+function sEnd(t, a) { bg();
+  txt(typed('@macro.algo.desk', t, a + 0.1, 28), 540, 820, { size: 66, weight: 800, color: C.ink, ls: -1 });
+  txt('Macro, explained with real data.', 540, 905, { size: 38, weight: 500, color: C.muted, alpha: oC(seg(t, a + 0.7, a + 1.1)) });
+  const kp = oC(seg(t, a + 0.8, a + 1.2)), kf = seg(t, a + 1.5, a + 1.85);
+  if (kp > 0) { const on = kf > 0.25, w = on ? 330 : 280, s = (kf > 0 ? 1 + 0.08 * Math.sin(Math.PI * kf) : 1) * lerp(0.85, 1, kp);
+    x.save(); x.translate(540, 1035); x.scale(s, s); x.globalAlpha = kp; rr(-w / 2, -48, w, 96, 48);
+    if (on) { x.fillStyle = C.lime; x.fill(); } else { x.strokeStyle = C.ink; x.lineWidth = 3; x.stroke(); }
+    txt(on ? 'Following' : 'Follow', 0, 2, { size: 40, weight: 700, color: on ? '#15200C' : C.ink }); x.restore(); }
+  tap(560, 1040, t, a + 1.5);
+  txt('EDUCATIONAL · NOT FINANCIAL ADVICE', 540, 1300, { fam: 'mono', size: 22, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, a + 1.0, a + 1.4)) });
+  txt('SOURCES: BLACKROCK · SEC · RWA.XYZ', 540, 1340, { fam: 'mono', size: 22, weight: 500, color: '#6C756F', ls: 2, alpha: oC(seg(t, a + 1.0, a + 1.4)) });
+  finish(t); }
+
+const FN = { fink: sFink, quote: sQuote, token: sToken, t1: sT1, closed: sClosed, seconds: sSeconds, check: sCheck, grow: sGrow, treas: sTreas, gap: sGap, risk: sRisk, rails: sRails, end: sEnd };
+function flash(t, a, d = 0.14) { const k = seg(t, a - d / 2, a + d / 2); if (k <= 0 || k >= 1) return; x.fillStyle = `rgba(255,255,255,${Math.sin(k * Math.PI) * 0.6})`; x.fillRect(0, 0, W, H); }
+window.render = function (t) {
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
+  let i = ORDER.length - 1; while (i > 0 && t < S(ORDER[i])) i--;
+  const k = ORDER[i], a = i === 0 ? 0 : S(k), b = i + 1 < ORDER.length ? S(ORDER[i + 1]) : window.DUR;
+  FN[k](t, a, b);
+  ['quote', 'grow', 'rails'].forEach((q) => flash(t, S(q)));
+  const fi = 1 - seg(t, 0, 0.05), fo = seg(t, window.DUR - 0.3, window.DUR);
+  if (fi > 0) { x.fillStyle = `rgba(0,0,0,${fi})`; x.fillRect(0, 0, W, H); }
+  if (fo > 0) { x.fillStyle = `rgba(0,0,0,${fo})`; x.fillRect(0, 0, W, H); }
+};
+</script></body></html>

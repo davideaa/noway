@@ -1,0 +1,254 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 46, DAY: 0, CAP: 2, NEXT: ['Costi', 'ed energia'], FONTE: 'DATI: BLS, FED' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 46 — «Troppa domanda» (inflazione da domanda, lunedì, lezione 1 di 5, capitolo 3). Numeri SOLO da p46-fonti.md:
+   STATI UNITI, giugno 2022, prezzi al consumo +9,1% sui 12 mesi (BLS) · l'energia pesava per quasi metà dell'aumento mensile di giugno (BLS: «nearly half»;
+   disegnata appena sotto metà, senza numero) · spinta della domanda dalla primavera 2021 con riapertura e sostegni (economista Fed di San Francisco) ·
+   Powell: domanda forte e offerta vincolata. Torri in scala 100 : 109,1. Curva domanda/offerta = SCHEMA (nessun numero sugli assi). «storia» = ESEMPIO, nessuna cifra.
+   Niente righe di fonte nel video. Testo mai sotto opacità 0,85 a regime: «si accende» = colore/glow. */
+const ORDER = ['num', 'hook', 'storia', 'curva', 'usa', 'fed', 'offerta', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+/* tag: scritta SEMPRE presente (entra in 0,35 s a inizio scena, poi opacità 1); sulla parola cambia colore e fa un piccolo colpo */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1;
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); };
+function polyPart(pts, k, col, w, a = 1) { if (k <= 0) return null; let L = 0; const sg = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); sg.push(d); L += d; }
+  let acc = 0; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(...pts[0]);
+  let last = pts[0];
+  for (let i = 1; i < pts.length; i++) { const need = k * L - acc; if (need <= 0) break; if (need >= sg[i - 1]) { x.lineTo(...pts[i]); last = pts[i]; } else { const u = need / sg[i - 1]; last = [lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)]; x.lineTo(...last); } acc += sg[i - 1]; }
+  x.stroke(); x.restore(); return last; }
+/* timbro (SCHEMA / ESEMPIO): cornice ruotata che «batte» sulla scena */
+function stamp(t, s, cx, cy, a0, col, rot = -0.08) { const k = oB(seg(t, a0, a0 + 0.45)); if (k <= 0) return; const w = tw(s, 30, 700, 'mono', 4) + 64;
+  x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.rotate(rot); const sc = lerp(1.5, 1, clamp(k)); x.scale(sc, sc);
+  x.fillStyle = 'rgba(5,6,7,0.78)'; rr(-w / 2, -33, w, 66, 14); x.fill(); x.strokeStyle = col; x.lineWidth = 4; rr(-w / 2, -33, w, 66, 14); x.stroke();
+  txt(s, 0, 2, { fam: 'mono', size: 30, weight: 700, ls: 4, color: col }); x.restore(); }
+function person(cx, cy, col, k = 1, sc = 1) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); x.translate(cx, cy); x.scale(sc, sc); x.fillStyle = col; x.strokeStyle = col; x.lineWidth = 5; x.beginPath(); x.arc(0, -14, 11, 0, 7); x.fill(); x.beginPath(); x.arc(0, 22, 20, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); x.restore(); }
+function chip(cx, cy, w, h, s, col, k = 1, size = 26) { if (k <= 0) return; glass(cx, cy, w, h, h / 2, clamp(k * 2)); txt(s, cx, cy + 2, { fam: 'mono', size, weight: 600, ls: 2, color: col, alpha: clamp(k * 2) }); }
+
+/* ================= HOOK: una folla di clienti preme su un negozio con poca merce; il cartellino del prezzo sale sul binario ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tTutti = WA('hook', ['tutti'], 1, 0.06), tImp = WA('hook', ['imprese'], 1, 0.38), tDie = WA('hook', ['dietro'], 1, 0.62), tSal = WA('hook', ['salgono'], 1, 0.74), tInf = WA('hook', ['inflazione'], 1, 0.9);
+  phrase(t, a + 0.05, [['Tutti comprano,', C.ink]], 345, { size: 92 });
+  phrase(t, tSal - 0.12, [['i prezzi salgono', C.red]], Y2, { size: 92 });
+  /* negozio con poca merce */
+  const SX = 680, SY = 930, kS = oB(seg(t, a + 0.05, a + 0.6));
+  pop(SX, SY, kS, () => { glass(SX, SY, 340, 440, 36, 1);
+    x.save(); x.beginPath(); x.roundRect(SX - 170, SY - 220, 340, 440, 36); x.clip(); for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? 'rgba(241,244,238,0.55)' : 'rgba(200,250,114,0.75)'; x.fillRect(SX - 170 + i * 42.5, SY - 220, 42.5, 70); } x.restore();
+    for (const yy of [SY - 20, SY + 110]) { x.fillStyle = 'rgba(241,244,238,0.5)'; x.fillRect(SX - 140, yy + 44, 280, 6); }
+    /* scorte: sei scatole, restano poche quando le imprese non stanno dietro */
+    for (let i = 0; i < 6; i++) { const row = Math.floor(i / 3), col = i % 3, gone = i >= 1 ? oC(seg(t, tDie - 0.1 + (i - 1) * 0.12, tDie + 0.4 + (i - 1) * 0.12)) : 0, cx = SX - 90 + col * 90, cy = SY - 50 + row * 130;
+      x.save(); x.globalAlpha = 1 - gone * 0.85; x.fillStyle = 'rgba(245,165,36,0.8)'; rr(cx - 28, cy - 28 + gone * 10, 56, 56, 8); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(cx - 28, cy - 28 + gone * 10, 56, 56, 8); x.stroke(); x.restore(); } });
+  /* folla: puntini che corrono verso il negozio e si accalcano all'ingresso */
+  const kF = oC(seg(t, a + 0.1, a + 0.7));
+  for (let i = 0; i < 30; i++) { const ln = i % 9, ph = ((i * 0.37) % 1), u = (((t - a) * 0.22 + ph) % 1), xe = 470 - (i % 4) * 34, xx = lerp(80, xe, oC(u)), yy = 720 + ln * 55 + 8 * Math.sin(t * 5 + i), on = t >= tTutti;
+    x.save(); x.globalAlpha = kF * 0.95; person(xx, yy, on ? C.lime : 'rgba(241,244,238,0.85)', 1, 0.9); x.restore(); }
+  /* binario del prezzo */
+  dash(915, 720, 915, 1190, 'rgba(241,244,238,0.45)', 4, [4, 12], oC(seg(t, a + 0.2, a + 0.7)));
+  const kp = ioC(seg(t, tSal - 0.2, tSal + 1.0)), py = lerp(1150, 790, kp), kT = oB(seg(t, a + 0.2, a + 0.7));
+  pop(915, py, kT, () => { if (kp > 0.02) glow(915, py, 130, '255,90,78', 0.3 * kp); glass(915, py, 110, 76, 22, 1); txt('€', 897, py + 2, { size: 40, weight: 800, color: kp > 0.5 ? C.red : C.ink });
+    x.save(); x.fillStyle = kp > 0.5 ? C.red : C.ink; x.beginPath(); x.moveTo(936, py - 16); x.lineTo(950, py + 8); x.lineTo(922, py + 8); x.closePath(); x.fill(); x.restore(); });
+  tag(t, 'CLIENTI', 280, 1215, a + 0.3, tTutti, C.lime); tag(t, 'IMPRESE', 680, 1215, a + 0.3, tImp, C.amber); tag(t, 'PREZZO', 915, 1215, a + 0.3, tSal, C.red, { size: 24 });
+  const kPill = oB(seg(t, tInf - 0.1, tInf + 0.4)); if (kPill > 0) glassPill(540, 1320, 'INFLAZIONE DA DOMANDA', kPill, C.red, 34);
+  x.restore(); finish(t); }
+
+/* ================= STORIA (ESEMPIO): la saracinesca si alza, i clienti si mettono in fila, i cartellini dei prezzi salgono e nessuno se ne va ================= */
+function sStoria(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tRia = WA('storia', ['riapre'], 1, 0.2), tCli = WA('storia', ['clienti'], 1, 0.4), tAlz = WA('storia', ['alzare'], 1, 0.72), tSca = WA('storia', ['scappare'], 1, 0.92);
+  phrase(t, a + 0.05, [['Il negozio riapre', C.ink]], 345, { size: 92 });
+  phrase(t, tCli - 0.12, [['tanti clienti', C.lime]], Y2, { size: 92 });
+  stamp(t, 'ESEMPIO', 800, 590, a + 0.35, C.amber);
+  const FX = 540, FY = 900, kF = oB(seg(t, a + 0.05, a + 0.6)), open = ioC(seg(t, tRia - 0.1, tRia + 0.9)), up = oC(seg(t, tAlz, tAlz + 0.5));
+  pop(FX, FY, kF, () => { glass(FX, FY, 860, 520, 40, 1);
+    /* tenda a strisce */
+    x.save(); x.beginPath(); x.roundRect(FX - 430, FY - 260, 860, 520, 40); x.clip(); for (let i = 0; i < 14; i++) { x.fillStyle = i % 2 ? 'rgba(241,244,238,0.55)' : 'rgba(200,250,114,0.8)'; x.fillRect(FX - 430 + i * 61.5, FY - 260, 61.5, 70); } x.restore();
+    /* interno: scaffale con 4 prodotti e i loro cartellini */
+    x.fillStyle = 'rgba(241,244,238,0.5)'; x.fillRect(190, 905, 700, 6);
+    for (let i = 0; i < 4; i++) { const cx = 270 + i * 180, cy = 840; x.fillStyle = 'rgba(245,165,36,0.8)'; rr(cx - 45, cy - 55, 90, 110, 10); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(cx - 45, cy - 55, 90, 110, 10); x.stroke();
+      const ty = 975 - 14 * up; glass(cx, ty, 120, 52, 16, 1); txt('€', cx - 22, ty + 2, { size: 30, weight: 800, color: up > 0.5 ? C.amber : C.ink });
+      x.save(); x.fillStyle = up > 0.5 ? C.amber : 'rgba(241,244,238,0.45)'; x.beginPath(); x.moveTo(cx + 26, ty - 12); x.lineTo(cx + 40, ty + 10); x.lineTo(cx + 12, ty + 10); x.closePath(); x.fill(); x.restore(); }
+    if (up > 0.02) glow(540, 960, 380, '245,165,36', 0.14 * up);
+    /* saracinesca: scorre verso l'alto sulla parola «riapre» */
+    const sh = 400 * (1 - open); if (sh > 1) { x.save(); x.beginPath(); x.rect(170, 720, 740, sh); x.clip(); const g = x.createLinearGradient(0, 720, 0, 1120); g.addColorStop(0, '#2a312d'); g.addColorStop(1, '#171c19'); x.fillStyle = g; x.fillRect(170, 720, 740, 400);
+      x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 3; for (let yy = 740; yy < 1120; yy += 26) { x.beginPath(); x.moveTo(170, yy); x.lineTo(910, yy); x.stroke(); } x.restore();
+      x.fillStyle = C.ink; rr(500, 720 + sh - 14, 80, 14, 6); x.fill(); } });
+  /* clienti in fila fuori */
+  for (let i = 0; i < 12; i++) { const px = 135 + i * 71, on = oB(seg(t, tCli - 0.05 + i * 0.07, tCli + 0.35 + i * 0.07));
+    x.save(); x.globalAlpha = 0.45; person(px, 1250, C.ink, 1, 1.15); x.restore(); if (on > 0) person(px, 1250 + (1 - clamp(on)) * -40, C.lime, clamp(on), 1.15 * clamp(on, 0, 1.2)); }
+  tag(t, 'NESSUNO SCAPPA', 540, 1335, a + 0.3, tSca, C.lime, { size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= CURVA (SCHEMA): il vero grafico domanda/offerta; la domanda scivola a destra e l'equilibrio sale ================= */
+const GO = [160, 1270], SH = 200;
+const Sy = (xx) => 1745.8 - 1.405 * xx, D0y = (xx) => 443 + 0.9 * xx;
+function sCurva(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tScv = WA('curva', ['scivola'], 1, 0.48), tCom = WA('curva', ['comprare'], 1, 0.68), tPre = WA('curva', ['prezzo'], 1, 0.86), tSale = WA('curva', ['equilibrio'], 1, 0.94) + 0.35;
+  phrase(t, a + 0.05, [['La domanda', C.ink]], 345, { size: 92 });
+  phrase(t, tScv - 0.12, [['scivola a destra', C.lime]], Y2, { size: 92 });
+  /* assi */
+  const kA = oC(seg(t, a + 0.05, a + 0.6)); x.save(); x.globalAlpha = kA; x.strokeStyle = 'rgba(241,244,238,0.85)'; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round';
+  x.beginPath(); x.moveTo(GO[0], 600); x.lineTo(GO[0], GO[1]); x.lineTo(950, GO[1]); x.stroke();
+  x.beginPath(); x.moveTo(GO[0] - 12, 618); x.lineTo(GO[0], 598); x.lineTo(GO[0] + 12, 618); x.stroke(); x.beginPath(); x.moveTo(932, GO[1] - 12); x.lineTo(952, GO[1]); x.lineTo(932, GO[1] + 12); x.stroke(); x.restore();
+  txt('PREZZO', 120, 568, { fam: 'mono', size: 26, weight: 600, ls: 2, color: C.ink, align: 'left', alpha: kA }); txt('QUANTITÀ', 950, 1318, { fam: 'mono', size: 26, weight: 600, ls: 2, color: C.ink, align: 'right', alpha: kA });
+  /* offerta e domanda iniziale (disegnate subito) */
+  const sPts = [], dPts = []; for (let i = 0; i <= 20; i++) { const xx = lerp(360, 780, i / 20); sPts.push([xx, Sy(xx)]); }
+  polyPart(sPts, ioC(seg(t, a + 0.1, a + 0.9)), C.amber, 9);
+  const slide = ioC(seg(t, tScv - 0.1, tScv + 1.0)), sh = SH * slide;
+  /* domanda spostata: punti x = 230+550u+sh, tagliata a x <= 935 */
+  const dAt = (shift, k) => { const P2 = []; for (let i = 0; i <= 24; i++) { const u = i / 24, xx = 230 + 550 * u + shift; if (xx > 935) break; P2.push([xx, D0y(xx - shift)]); } return polyPart(P2, k, null, 0); };
+  const dPoly = (shift) => { const P2 = []; for (let i = 0; i <= 24; i++) { const u = i / 24, xx = 230 + 550 * u + shift; if (xx > 935) break; P2.push([xx, D0y(xx - shift)]); } return P2; };
+  const kD = ioC(seg(t, a + 0.2, a + 1.0));
+  if (slide <= 0) polyPart(dPoly(0), kD, C.ink, 9);
+  else { x.save(); x.setLineDash([12, 12]); polyPart(dPoly(0), 1, 'rgba(241,244,238,0.55)', 5); x.restore(); polyPart(dPoly(sh), 1, C.lime, 9); }
+  /* sagoma tratteggiata della nuova domanda (forma attenuata) fin dall'inizio */
+  if (slide <= 0) { x.save(); x.setLineDash([10, 12]); polyPart(dPoly(SH), oC(seg(t, a + 0.5, a + 1.1)), 'rgba(200,250,114,0.45)', 5); x.restore(); }
+  /* etichette delle curve */
+  txt('OFFERTA', 745, 612, { fam: 'mono', size: 26, weight: 600, ls: 2, color: C.amber, align: 'left', alpha: kA });
+  txt(slide > 0.3 ? 'NUOVA DOMANDA' : 'DOMANDA', slide > 0.3 ? 430 : 235, 612, { fam: 'mono', size: 26, weight: 600, ls: 2, color: slide > 0.3 ? C.lime : C.ink, align: 'left', alpha: kA });
+  /* equilibrio: segue l'intersezione */
+  const ex = (1302.8 + 0.9 * sh) / 2.305, ey = Sy(ex), ex0 = 565.2, ey0 = Sy(565.2), kE = oB(seg(t, a + 0.9, a + 1.4));
+  const proj = oC(seg(t, a + 0.9, a + 1.5));
+  x.save(); x.globalAlpha = 0.55 * proj; x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([9, 9]); x.beginPath(); x.moveTo(ex0, ey0); x.lineTo(ex0, GO[1]); x.moveTo(ex0, ey0); x.lineTo(GO[0], ey0); x.stroke(); x.restore();
+  if (slide > 0.01) { x.save(); x.strokeStyle = C.lime; x.lineWidth = 3; x.setLineDash([9, 9]); x.globalAlpha = 0.9; x.beginPath(); x.moveTo(ex, ey); x.lineTo(ex, GO[1]); x.moveTo(ex, ey); x.lineTo(GO[0], ey); x.stroke(); x.restore(); }
+  pop(ex0, ey0, kE, () => { x.fillStyle = C.ink; x.beginPath(); x.arc(ex0, ey0, 13, 0, 7); x.fill(); });
+  if (slide > 0.01) { glow(ex, ey, 100, '200,250,114', 0.3 * slide); x.fillStyle = C.lime; x.beginPath(); x.arc(ex, ey, 15, 0, 7); x.fill(); x.strokeStyle = C.bg; x.lineWidth = 3; x.stroke(); }
+  /* etichette sugli assi */
+  txt('P1', 140, ey0, { fam: 'mono', size: 26, weight: 700, ls: 1, color: C.ink, align: 'right', alpha: proj }); txt('Q1', ex0, 1306, { fam: 'mono', size: 26, weight: 700, ls: 1, color: C.ink, alpha: proj });
+  const kP2 = oC(seg(t, tPre - 0.05, tPre + 0.4)), ey1 = Sy((1302.8 + 0.9 * SH) / 2.305), ex1 = (1302.8 + 0.9 * SH) / 2.305;
+  txt('P2', 140, ey1, { fam: 'mono', size: 26, weight: 700, ls: 1, color: C.lime, align: 'right', alpha: kP2 }); txt('Q2', ex1, 1306, { fam: 'mono', size: 26, weight: 700, ls: 1, color: C.lime, alpha: kP2 });
+  /* freccia «il prezzo sale» sull'asse, tra P1 e P2 */
+  const kS = ioC(seg(t, tSale - 0.1, tSale + 0.5)); if (kS > 0) { const ya = lerp(ey0 - 6, ey1 + 10, kS); x.save(); x.strokeStyle = C.red; x.fillStyle = C.red; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.moveTo(205, ey0 - 6); x.lineTo(205, ya + 10); x.stroke(); x.beginPath(); x.moveTo(205, ya - 6); x.lineTo(193, ya + 14); x.lineTo(217, ya + 14); x.closePath(); x.fill(); x.restore(); glow(205, ya, 60, '255,90,78', 0.3 * kS); }
+  /* freccia di scivolamento (sulla riga y=760, tra le due curve) */
+  const kV = oC(seg(t, tCom - 0.1, tCom + 0.5)); if (kV > 0) { x.save(); x.globalAlpha = kV; x.strokeStyle = C.lime; x.fillStyle = C.lime; x.lineWidth = 6; x.lineCap = 'round'; x.beginPath(); x.moveTo(360, 760); x.lineTo(530 * kV + 360 * (1 - kV) - 20, 760); x.stroke(); x.beginPath(); x.moveTo(550, 760); x.lineTo(526, 746); x.lineTo(526, 774); x.closePath(); x.fill(); x.restore(); }
+  stamp(t, 'SCHEMA', 840, 1215, a + 0.4, C.amber, -0.06);
+  x.restore(); finish(t); }
+
+/* ================= USA: due torri di scatole in scala (100 e 109,1); sulla seconda cade l'ultimo blocco rosso ================= */
+function sUsa(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tGiu = WA('usa', ['duemilaventidue', '2022', '2'], 1, 0.3), tNove = WA('usa', ['nove', '9'], 1, 0.55), tAnno = WA('usa', ['anno'], 1, 0.92), tSt = WA('usa', ['stati'], 1, 0.1);
+  phrase(t, a + 0.05, [['Stati Uniti,', C.ink]], 345, { size: 92 });
+  phrase(t, tNove - 0.12, [['+9,1%', C.red]], Y2, { size: 92 });
+  const kPl = oB(seg(t, a + 0.1, a + 0.6)); if (kPl > 0) glassPill(540, 640, 'STATI UNITI · PREZZI AL CONSUMO', kPl, tSt > a + 0.1 && t >= tSt ? C.lime : C.ink, 28);
+  const BASE = 1290, BH = 40, LX = 250, RX = 600, BW = 220;
+  for (let i = 0; i < 10; i++) { const y0 = BASE - (i + 1) * BH;
+    [[LX, 0], [RX, 1]].forEach(([cx, side]) => { const k = oC(seg(t, a + 0.1 + i * 0.05, a + 0.5 + i * 0.05)); if (k <= 0) return; x.save(); x.globalAlpha = k;
+      const lit = side === 1 ? t >= tGiu : t >= tAnno, col = lit ? (side === 1 ? '200,250,114' : '241,244,238') : '241,244,238';
+      x.fillStyle = `rgba(${col},${lit ? 0.24 : 0.10})`; x.fillRect(cx - BW / 2, y0 + (1 - k) * -20, BW, BH); x.strokeStyle = lit ? `rgba(${col},0.95)` : 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.strokeRect(cx - BW / 2, y0 + (1 - k) * -20, BW, BH); x.restore(); }); }
+  if (t >= tGiu) glow(RX, 1090, 260, '200,250,114', 0.16 * oC(seg(t, tGiu, tGiu + 0.5)));
+  /* il blocco in più: 9,1% di 400 px = 36,4 px, cade sulla parola «nove» */
+  const kb = seg(t, tNove - 0.1, tNove + 0.5), hb = 0.091 * 10 * BH, topY = BASE - 10 * BH; if (kb > 0) { const fy = topY - hb - (1 - oB(kb)) * 160; glow(RX, fy + hb / 2, 170, '255,90,78', 0.35 * clamp(kb));
+    x.save(); x.globalAlpha = clamp(kb * 2); x.fillStyle = 'rgba(255,90,78,0.9)'; x.fillRect(RX - BW / 2, fy, BW, hb); x.strokeStyle = C.red; x.lineWidth = 3; x.strokeRect(RX - BW / 2, fy, BW, hb); x.restore(); }
+  /* riga di confronto + parentesi */
+  const kl = oC(seg(t, tNove, tNove + 0.6)); dash(LX + BW / 2, topY, 770, topY, C.ink, 3, [10, 10], kl * 0.8);
+  if (kl > 0) { x.save(); x.globalAlpha = kl; x.strokeStyle = C.red; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(745, topY); x.lineTo(745, topY - hb); x.moveTo(735, topY); x.lineTo(755, topY); x.moveTo(735, topY - hb); x.lineTo(755, topY - hb); x.stroke(); x.restore(); }
+  big(t, '+9,1%', 770, topY - hb - 8, tNove - 0.05, { color: C.red, size: 56, align: 'left' });
+  tag(t, 'UN ANNO PRIMA', LX, 1340, a + 0.3, tAnno, C.ink, { size: 24 }); tag(t, 'GIUGNO 2022', RX, 1340, a + 0.3, tGiu, C.lime, { size: 24 });
+  x.restore(); finish(t); }
+
+/* ================= FED: un economista della Fed di San Francisco; la curva della domanda cade nel 2020 e riparte in primavera 2021 con due spinte ================= */
+const FP = [[120, 960], [300, 1080], [470, 1190], [560, 1190], [700, 1070], [830, 920], [960, 770]];
+const FC = (() => { const L = []; for (let i = 1; i < FP.length; i++) for (let j = 0; j < 12; j++) { const u = j / 12, s2 = (1 - Math.cos(Math.PI * u)) / 2; L.push([lerp(FP[i - 1][0], FP[i][0], u), lerp(FP[i - 1][1], FP[i][1], s2)]); } L.push(FP[FP.length - 1]); return L; })();
+const FDIP = FC.filter((p) => p[0] <= 560), FRISE = FC.filter((p) => p[0] >= 560);
+function sFed(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tEco = WA('fed', ['economista'], 1, 0.1), tSpi = WA('fed', ['spinta'], 1, 0.4), tPri = WA('fed', ['primavera'], 1, 0.64), tDue = WA('fed', ['duemilaventuno', '2021', '2'], 1, 0.74), tRia = WA('fed', ['riapertura'], 1, 0.82), tSos = WA('fed', ['sostegni'], 1, 0.92);
+  phrase(t, a + 0.05, [['La spinta', C.ink]], 345, { size: 92 });
+  phrase(t, tDue - 0.12, [['parte nel 2021', C.lime]], Y2, { size: 92 });
+  /* scheda dell'economista */
+  const kC = oB(seg(t, a + 0.05, a + 0.6)); pop(540, 630, kC, () => { glass(540, 630, 880, 120, 36, 1); const on = t >= tEco;
+    x.save(); x.strokeStyle = on ? C.lime : C.ink; x.lineWidth = 5; x.beginPath(); x.arc(150, 612, 16, 0, 7); x.stroke(); x.beginPath(); x.arc(150, 668, 30, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); x.restore();
+    txt('STATI UNITI', 205, 604, { fam: 'mono', size: 24, weight: 700, ls: 3, color: C.lime, align: 'left' }); txt('ECONOMISTA · FED DI SAN FRANCISCO', 205, 654, { fam: 'mono', size: 24, weight: 600, ls: 1, color: on ? C.lime : C.ink, align: 'left' }); });
+  lab(t, 'SCHEMA · NON IN SCALA', 540, 725, a + 0.4, { size: 22, ls: 3, color: C.ink });
+  /* asse e curva */
+  const kA = oC(seg(t, a + 0.1, a + 0.7)); x.save(); x.globalAlpha = kA; x.strokeStyle = 'rgba(241,244,238,0.85)'; x.lineWidth = 4; x.beginPath(); x.moveTo(110, 1290); x.lineTo(970, 1290); x.stroke(); x.restore();
+  polyPart(FC, oC(seg(t, a + 0.2, a + 1.0)), 'rgba(241,244,238,0.4)', 4);
+  polyPart(FDIP, ioC(seg(t, a + 0.2, a + 1.3)), C.ink, 9);
+  const kR = ioC(seg(t, tSpi - 0.2, tSpi + 1.4)), head = polyPart(FRISE, kR, C.lime, 9); if (head && t > tSpi - 0.1) glow(head[0], head[1], 90, '200,250,114', 0.3);
+  /* marcatore di primavera */
+  dash(560, 1190, 560, 1290, t >= tPri ? C.lime : C.ink, 3, [8, 8], oC(seg(t, a + 0.3, a + 0.8)));
+  pop(560, 1190, oB(seg(t, a + 0.3, a + 0.8)), () => { x.fillStyle = t >= tPri ? C.lime : C.ink; x.beginPath(); x.arc(560, 1190, 14, 0, 7); x.fill(); x.strokeStyle = C.bg; x.lineWidth = 3; x.stroke(); });
+  tag(t, 'PRIMAVERA 2021', 560, 1335, a + 0.3, tPri, C.lime, { size: 24 }); lab(t, '2020', 230, 1335, a + 0.3, { size: 24 });
+  /* le due spinte: chip + punto sulla curva */
+  [[400, 990, 'RIAPERTURA', 640, 1121, tRia, 520, 1006, C.lime], [790, 1190, 'SOSTEGNI', 830, 920, tSos, 800, 1158, C.amber]].forEach(([cx, cy, s, dx, dy, tOn, lx, ly, col], i) => {
+    const k = oB(seg(t, a + 0.35 + i * 0.1, a + 0.85 + i * 0.1)), on = t >= tOn;
+    dash(lx, ly, dx, dy, on ? col : 'rgba(241,244,238,0.55)', 3, [6, 8], oC(seg(t, a + 0.5, a + 1.0)));
+    pop(cx, cy, k, () => { if (on) glow(cx, cy, 130, i ? '245,165,36' : '200,250,114', 0.25); const w = tw(s, 26, 600, 'mono', 2) + 60; glass(cx, cy, w, 64, 32, 1); txt(s, cx, cy + 2, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? col : C.ink }); });
+    pop(dx, dy, k, () => { x.fillStyle = on ? col : C.ink; x.beginPath(); x.arc(dx, dy, 11, 0, 7); x.fill(); x.strokeStyle = C.bg; x.lineWidth = 3; x.stroke(); }); });
+  x.restore(); finish(t); }
+
+/* ================= OFFERTA: due corsie, la domanda corre e l'offerta resta indietro; sotto, l'energia pesa quasi metà dell'aumento mensile di giugno ================= */
+function sOfferta(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tPow = WA('offerta', ['powell'], 1, 0.17), tFor = WA('offerta', ['forte'], 1, 0.47), tOff = WA('offerta', ['offerta'], 1, 0.53), tDie = WA('offerta', ['dietro'], 1, 0.66), tGiu = WA('offerta', ['giugno'], 1, 0.75), tEne = WA('offerta', ['lenergia', 'energia'], 1, 0.8), tQua = WA('offerta', ['quasi'], 1, 0.87);
+  phrase(t, a + 0.05, [['Non solo domanda:', C.ink]], 345, { size: 92 });
+  phrase(t, tOff - 0.12, [['anche offerta', C.lime]], Y2, { size: 92 });
+  const kC = oB(seg(t, a + 0.05, a + 0.6)); pop(540, 640, kC, () => { glass(540, 640, 900, 96, 34, 1); txt('STATI UNITI · POWELL, PRESIDENTE DELLA FED', 540, 642, { fam: 'mono', size: 24, weight: 600, ls: 1, color: t >= tPow ? C.lime : C.ink }); });
+  /* corsie */
+  const L1 = 810, L2 = 950, XA = 150, XB = 930;
+  [[L1, 'DOMANDA FORTE', C.lime, '200,250,114', tFor], [L2, 'OFFERTA', C.red, '255,90,78', tOff]].forEach(([ly, nm, col, rgb, tOn], i) => { const k = oB(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1));
+    pop(540, ly, k, () => { glass(540, ly, 840, 84, 42, 1); x.save(); x.setLineDash([8, 12]); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; x.beginPath(); x.moveTo(XA + 40, ly); x.lineTo(XB - 40, ly); x.stroke(); x.restore(); });
+    tag(t, nm, 135, ly - 62, a + 0.3, tOn, col, { align: 'left', size: 24 });
+    /* gettone che corre */
+    const run = i === 0 ? ioC(seg(t, tFor - 0.2, tFor + 0.9)) : 0.4 * ioC(seg(t, tOff - 0.1, tDie + 0.5)), px = XA + 30 + (XB - XA - 60) * run, on = t >= tOn;
+    pop(px, ly, k, () => { if (on) glow(px, ly, 90, rgb, 0.4); x.fillStyle = on ? col : 'rgba(241,244,238,0.85)'; x.beginPath(); x.arc(px, ly, 28, 0, 7); x.fill(); x.strokeStyle = C.bg; x.lineWidth = 4; x.stroke(); x.fillStyle = C.bg; x.beginPath(); x.moveTo(px - 8, ly - 12); x.lineTo(px + 12, ly); x.lineTo(px - 8, ly + 12); x.closePath(); x.fill(); }); });
+  /* distacco */
+  const kd = oC(seg(t, tDie - 0.1, tDie + 0.5)); if (kd > 0) { const xa = XA + 30 + (XB - XA - 60) * 0.4, xb = XA + 30 + (XB - XA - 60); dash(xa, L2 + 56, xb, L2 + 56, C.red, 4, [1, 0], kd); dash(xa, L2 + 44, xa, L2 + 68, C.red, 4, [1, 0], kd); dash(xb, L2 + 44, xb, L2 + 68, C.red, 4, [1, 0], kd);
+    txt('NON STA DIETRO', (xa + xb) / 2, L2 + 100, { fam: 'mono', size: 26, weight: 700, ls: 2, color: C.red, alpha: kd }); }
+  /* l'aumento mensile di giugno: l'energia pesa quasi metà */
+  lab(t, 'AUMENTO MENSILE · GIUGNO', 140, 1150, a + 0.4, { align: 'left', size: 26, color: C.ink });
+  const BX = 140, BW2 = 800, BY = 1215, FW = 0.47 * BW2, kf = ioC(seg(t, tEne - 0.2, tEne + 1.0)), ke = oC(seg(t, a + 0.4, a + 0.9));
+  x.save(); x.globalAlpha = ke; x.fillStyle = 'rgba(255,255,255,0.08)'; rr(BX, BY - 35, BW2, 70, 20); x.fill(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; rr(BX, BY - 35, BW2, 70, 20); x.stroke(); x.restore();
+  dash(BX + BW2 / 2, BY - 50, BX + BW2 / 2, BY + 50, 'rgba(241,244,238,0.7)', 3, [6, 8], ke);
+  if (kf > 0.01) { glow(BX + FW * kf, BY, 170, '245,165,36', 0.25); x.fillStyle = C.amber; x.globalAlpha = 0.95; rr(BX, BY - 35, Math.max(FW * kf, 40), 70, 20); x.fill(); x.globalAlpha = 1; }
+  tag(t, 'ENERGIA · QUASI METÀ', 140, 1292, a + 0.4, tQua, C.amber, { align: 'left', size: 26 }); tag(t, 'ALTRE VOCI', 940, 1292, a + 0.4, 1e9, C.ink, { align: 'right', size: 26 });
+  x.restore(); finish(t); }
+
+/* ================= CASA: una bilancia; la voglia di comprare pesa più della produzione, e dal lato dell'offerta qualcosa si incrina ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tCom = WA('casa', ['comprare'], 1, 0.45), tPro = WA('casa', ['produrre'], 1, 0.68), tAme = WA('casa', ['americano'], 1, 0.8), tOff = WA('casa', ['unofferta', 'offerta'], 1, 0.9);
+  phrase(t, a + 0.05, [['Più domanda', C.ink]], 345, { size: 92 });
+  phrase(t, tPro - 0.12, [['che produzione', C.lime]], Y2, { size: 92 });
+  const PX = 540, PY = 760, HL = 340, kS = oB(seg(t, a + 0.05, a + 0.6)), tilt = -0.2 * ioC(seg(t, tCom - 0.1, tCom + 0.9)) + 0.04 * Math.sin(t * 2) * (1 - seg(t, tCom - 0.1, tCom + 0.3));
+  const lx = PX - HL * Math.cos(tilt), ly = PY - HL * Math.sin(tilt), rx = PX + HL * Math.cos(tilt), ry = PY + HL * Math.sin(tilt), SL = 270;
+  pop(PX, 1000, kS, () => {
+    /* base e colonna */
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(PX, PY); x.lineTo(PX, 1230); x.stroke(); x.fillStyle = 'rgba(255,255,255,0.12)'; rr(PX - 120, 1220, 240, 36, 14); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(PX - 120, 1220, 240, 36, 14); x.stroke(); x.restore();
+    /* trave */
+    x.save(); x.strokeStyle = C.ink; x.lineWidth = 14; x.lineCap = 'round'; x.beginPath(); x.moveTo(lx, ly); x.lineTo(rx, ry); x.stroke(); x.restore();
+    /* piatti */
+    [[lx, ly, 0, C.lime, '200,250,114'], [rx, ry, 1, C.red, '255,90,78']].forEach(([ex, ey, side, col, rgb]) => {
+      const crack = side === 1 ? oC(seg(t, tOff - 0.1, tOff + 0.5)) : 0, sx = crack * 5 * Math.sin(t * 40), py = ey + SL;
+      x.save(); x.translate(sx, 0); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.beginPath(); x.moveTo(ex, ey); x.lineTo(ex - 120, py); x.moveTo(ex, ey); x.lineTo(ex + 120, py); x.stroke();
+      if ((side === 0 && t >= tCom) || crack > 0) glow(ex, py - 30, 170, rgb, 0.25 * (side === 0 ? oC(seg(t, tCom, tCom + 0.5)) : crack));
+      glass(ex, py + 16, 260, 34, 14, 1);
+      /* pesi: lato domanda 6 scatole (le ultime 4 sulla parola), lato produzione 2 */
+      const n = side === 0 ? 6 : 2; for (let i = 0; i < n; i++) { const kk = side === 0 && i >= 2 ? oB(seg(t, tCom + (i - 2) * 0.1, tCom + 0.4 + (i - 2) * 0.1)) : oB(seg(t, a + 0.15 + i * 0.07, a + 0.6 + i * 0.07)), bw = 54, bx = ex - (n === 6 ? 2.5 : 0.5) * 60 + i * 60 - (side === 0 ? 0 : 0);
+        const row = side === 0 ? Math.floor(i / 3) : 0, colx = side === 0 ? i % 3 : i; const bx2 = side === 0 ? ex - 60 + colx * 60 : ex - 30 + colx * 60, by2 = py - 18 - row * 58 - 26;
+        if (kk > 0) { x.save(); x.globalAlpha = clamp(kk); x.fillStyle = side === 1 && crack > 0.5 ? 'rgba(255,90,78,0.55)' : `rgba(${rgb},${side === 0 ? 0.75 : 0.6})`; rr(bx2 - bw / 2, by2 - 26 + (1 - clamp(kk)) * -30, bw, 52, 8); x.fill(); x.strokeStyle = C.ink; x.lineWidth = 3; rr(bx2 - bw / 2, by2 - 26 + (1 - clamp(kk)) * -30, bw, 52, 8); x.stroke(); x.restore(); } }
+      if (crack > 0) { x.save(); x.strokeStyle = C.red; x.lineWidth = 6; x.lineCap = 'round'; x.globalAlpha = crack; x.beginPath(); x.moveTo(ex - 20, py + 2); x.lineTo(ex - 4, py + 18); x.lineTo(ex - 16, py + 30); x.lineTo(ex + 6, py + 36); x.stroke(); x.restore(); }
+      x.restore(); });
+    x.fillStyle = C.ink; x.beginPath(); x.arc(PX, PY, 20, 0, 7); x.fill(); });
+  /* etichette, sempre sotto ai piatti e mai a contatto */
+  tag(t, 'VOGLIA DI COMPRARE', lx, ly + SL + 80, a + 0.3, tCom, C.lime, { size: 24 }); tag(t, 'PRODUZIONE', rx, ry + SL + 80, a + 0.3, tPro, C.red, { size: 24 });
+  tag(t, 'STATI UNITI', 540, 585, a + 0.3, tAme, C.lime, { size: 26 });
+  const kO = oB(seg(t, tOff - 0.1, tOff + 0.4)); if (kO > 0) glassPill(540, 1330, 'OFFERTA IN DIFFICOLTÀ', kO, C.red, 34);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, storia: sStoria, curva: sCurva, usa: sUsa, fed: sFed, offerta: sOfferta, casa: sCasa }, ORDER, ['hook', 'curva', 'casa']);
+</script></body></html>

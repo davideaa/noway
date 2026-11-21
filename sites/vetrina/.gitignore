@@ -1,0 +1,8 @@
+# screenshot dei siti dei clienti e file generati: non nel repo pubblico
+/cattura/
+/out/
+/font/
+# pagine di prova degli agenti
+/src/_prova-*
+# siti dei clienti forniti da Davide (foto e contenuti di terzi)
+/lavori/

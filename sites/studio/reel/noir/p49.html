@@ -1,0 +1,230 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 49, DAY: 3, CAP: 2, NEXT: ['La shrinkflation', 'al supermercato'], FONTE: 'DATI: BANCA D’ITALIA · BCE (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 49 — «Le aspettative» (giovedì, lezione 4 di 5, capitolo 3). Numeri SOLO da p49-fonti.md:
+   imprese italiane (Banca d'Italia, attese a 12 mesi): fine 2021 3,2% (a schermo «circa 3%»), fine 2022 8,1% «massimo della serie» («circa 8%»), fine 2023 2,3% («poco più del 2%») ·
+   famiglie area euro (BCE, indagine consumatori): 5,0% fine 2022, circa 3% un anno dopo · obiettivo 2%. Scala del grafico «picco»: 68 px per punto; termometro «imprese»: 70 px per punto; quadranti: 0-10%.
+   «cautela» e «rischio» sono SCHEMI (nessun dato): dichiarati a schermo. Ancoraggio disegnato con bersaglio ed elastico (hook-ancora) e con una molla (casa): niente àncora di p48.
+   Niente righe di fonte nel video. Testo mai sotto opacità 0,85: entra sfocato, «si accende» = colore. */
+const ORDER = ['num', 'hook', 'ancora', 'imprese', 'picco', 'famiglie', 'cautela', 'rischio', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+/* testo: opacità MAI sotto 0,85 (entra sfocato, non trasparente) */
+const A85 = (k) => 0.85 + 0.15 * clamp(k);
+const lab = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, alpha: A85(k), blur: (1 - k) * 8, ...o }); };
+/* tag: scritta sempre presente (colore C.ink da spenta); sulla parola cambia colore e fa un colpo di scala */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1, k0 = oC(seg(t, aIn, aIn + 0.4));
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: A85(k0), blur: (1 - k0) * 8, ...o }); x.restore(); };
+/* pillola di vetro con testo sempre nitido */
+function pl(t, s, cx, cy, aIn, tOn, colOn, size = 30) { if (t < aIn) return; const k0 = oB(seg(t, aIn, aIn + 0.5)), on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = (on ? 1 + 0.1 * Math.sin(Math.PI * kk) : 1) * lerp(0.9, 1, clamp(k0)), w = tw(s, size, 700, 'mono', 2) + 70;
+  x.save(); x.translate(cx, cy); x.scale(p, p); x.translate(-cx, -cy); if (on) glow(cx, cy, w * 0.6, colOn === C.red ? '255,90,78' : colOn === C.amber ? '245,165,36' : '200,250,114', 0.22 * kk);
+  glass(cx, cy, w, 80, 40, clamp(k0 * 2)); txt(s, cx, cy + 2, { fam: 'mono', size, weight: 700, ls: 2, color: on ? colOn : C.ink, alpha: A85(k0), blur: (1 - clamp(k0)) * 8 }); x.restore(); }
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k <= 0 ? 0 : A85(k), blur: (1 - k) * 10, ...o }); };
+function kf(t, K) { if (t <= K[0][0]) return K[0][1]; for (let i = 1; i < K.length; i++) if (t <= K[i][0]) { const d = Math.max(0.05, K[i][0] - K[i - 1][0]); return lerp(K[i - 1][1], K[i][1], (t - K[i - 1][0]) / d); } return K[K.length - 1][1]; }
+const dot = (px, py, r, col, rgb) => { if (rgb) glow(px, py, r * 3.2, rgb, 0.3); x.fillStyle = col; x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); x.arc(px, py, r, 0, 7); x.fill(); x.stroke(); };
+
+/* ================= HOOK: un carrello della spesa; due cartellini: OGGI (pieno) e TRA UN ANNO (tratteggiato, con «?») ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOggi = WA('hook', ['oggi'], 1, 0.3), tAnno = WA('hook', ['anno'], 1, 0.62), tAsp = WA('hook', ['aspettative'], 1, 0.82);
+  phrase(t, a + 0.05, [['Oggi costa così,', C.ink], ['e tra un anno?', C.amber]], 345, { size: 92 });
+  const CX = 540, CY = 930, kB = oB(seg(t, a + 0.05, a + 0.6));
+  pop(CX, CY, kB, () => { glow(CX, CY, 330, '245,165,36', 0.12);
+    /* manico */
+    x.strokeStyle = 'rgba(241,244,238,0.85)'; x.lineWidth = 12; x.lineCap = 'round'; x.beginPath(); x.arc(CX, CY - 110, 150, Math.PI * 1.08, Math.PI * 1.92); x.stroke();
+    /* spesa che spunta */
+    x.fillStyle = C.red; x.beginPath(); x.arc(CX - 90, CY - 90, 42, 0, 7); x.fill(); x.fillStyle = C.lime; x.beginPath(); x.arc(CX + 5, CY - 110, 46, 0, 7); x.fill();
+    x.fillStyle = C.amber; rr(CX + 70, CY - 190, 62, 140, 14); x.fill(); x.fillStyle = 'rgba(241,244,238,0.9)'; rr(CX + 84, CY - 210, 34, 30, 8); x.fill();
+    /* cesto */
+    glass(CX, CY + 20, 400, 230, 34, 1); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 4;
+    for (let i = 1; i < 6; i++) { x.beginPath(); x.moveTo(CX - 200 + i * 66.7, CY - 90); x.lineTo(CX - 200 + i * 66.7, CY + 130); x.stroke(); }
+    x.beginPath(); x.moveTo(CX - 200, CY + 20); x.lineTo(CX + 200, CY + 20); x.stroke(); });
+  pl(t, 'ASPETTATIVE D’INFLAZIONE', 540, 640, a + 0.3, tAsp, C.lime, 28);
+  /* cartellini */
+  const kC = oB(seg(t, a + 0.15, a + 0.65)), kq = oC(seg(t, tAnno, tAnno + 0.4));
+  pop(300, 1250, kC, () => { glass(300, 1250, 360, 130, 36, 1); });
+  pop(780, 1250, kC, () => { glass(780, 1250, 360, 130, 36, 1); x.save(); x.setLineDash([10, 10]); x.strokeStyle = t >= tAnno ? C.lime : 'rgba(241,244,238,0.7)'; x.lineWidth = 4; rr(602, 1186, 356, 128, 36); x.stroke(); x.restore(); });
+  tag(t, 'OGGI', 300, 1250, a + 0.3, tOggi, C.amber, { size: 40 });
+  tag(t, 'TRA UN ANNO', 740, 1250, a + 0.3, tAnno, C.lime, { size: 28 });
+  big(t, '?', 920, 1250, tAnno - 0.05, { size: 70, color: C.lime });
+  dash(500, 1250, 580, 1250, C.ink, 5, [1, 0], oC(seg(t, a + 0.4, a + 0.9))); dash(560, 1236, 582, 1250, C.ink, 5, [1, 0], 1); dash(560, 1264, 582, 1250, C.ink, 5, [1, 0], 1);
+  x.restore(); finish(t); }
+
+/* ================= ANCORA: bersaglio con l'obiettivo al centro; un elastico tiene il puntino «aspettative»; i prezzi lo tirano, poi torna ================= */
+function sAncora(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tAnc = WA('ancora', ['ancorate'], 1, 0.12), tDue = WA('ancora', ['due', '2'], 1, 0.4), tPre = WA('ancora', ['prezzi'], 1, 0.56), tSal = WA('ancora', ['salgono'], 1, 0.62), tPo = WA('ancora', ['po'], 1, 0.76);
+  phrase(t, a + 0.05, [['Aspettative', C.ink], ['ancorate', C.lime]], 345, { size: 92 });
+  const CX = 540, CY = 960, kIn = oB(seg(t, a + 0.05, a + 0.6)), VX = 150, VY = -170;
+  pop(CX, CY, kIn, () => { glow(CX, CY, 330, '200,250,114', 0.14);
+    [[260, 'rgba(241,244,238,0.10)'], [195, 'rgba(241,244,238,0.05)'], [130, 'rgba(241,244,238,0.10)'], [65, 'rgba(200,250,114,0.32)']].forEach(([r, c]) => { x.fillStyle = c; x.beginPath(); x.arc(CX, CY, r, 0, 7); x.fill(); x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; x.stroke(); }); });
+  /* spostamento dell'elastico: i prezzi tirano (salgono), poi a «per un po'» lo lasciano e rimbalza fino al centro */
+  const pull = oB(seg(t, tSal - 0.1, tSal + 0.7), 1.1), tau = Math.max(0, t - tPo), rel = t >= tPo ? Math.exp(-4.2 * tau) * Math.cos(10 * tau) : 1;
+  const d = (t >= tPo ? rel : clamp(pull, 0, 1.1)), px = CX + VX * d, py = CY + VY * d, str = Math.hypot(VX * d, VY * d) / 220;
+  x.save(); x.lineCap = 'round'; x.strokeStyle = str > 0.5 ? C.amber : C.lime; x.lineWidth = lerp(14, 5, clamp(str)); x.setLineDash(str > 0.03 ? [1, 0] : [1, 0]);
+  x.beginPath(); x.moveTo(CX, CY); x.lineTo(px, py); x.stroke(); x.restore();
+  x.fillStyle = C.lime; x.beginPath(); x.arc(CX, CY, 14, 0, 7); x.fill();
+  dot(px, py, 30, t >= tAnc ? C.lime : C.ink, '200,250,114');
+  /* freccia rossa dei prezzi, solo finché tirano */
+  const ka = oC(seg(t, tPre, tPre + 0.4)) * (1 - oC(seg(t, tPo, tPo + 0.3)));
+  if (ka > 0) { x.save(); x.globalAlpha *= ka; x.strokeStyle = C.red; x.fillStyle = C.red; x.lineWidth = 14; x.lineCap = 'round'; const ax = 700, ay = 700; x.beginPath(); x.moveTo(ax - 60, ay + 70); x.lineTo(ax + 40, ay - 30); x.stroke();
+    x.beginPath(); x.moveTo(ax + 70, ay - 60); x.lineTo(ax + 20, ay - 60); x.lineTo(ax + 70, ay - 10); x.closePath(); x.fill(); x.restore(); }
+  tag(t, 'PREZZI', 960, 700, a + 0.3, tPre, C.red, { align: 'right', size: 30 });
+  tag(t, 'ASPETTATIVE', 540, 1275, a + 0.3, tAnc, C.lime, { size: 28 });
+  tag(t, 'OBIETTIVO', 150, 1345, a + 0.3, tDue, C.lime, { align: 'left', size: 30 });
+  big(t, '2%', 930, 1345, tDue - 0.05, { color: C.lime, size: 84, align: 'right' });
+  x.restore(); finish(t); }
+
+/* ================= IMPRESE: un termometro (0-9%, 70 px per punto); il mercurio sale fino a circa 3%, sopra la linea dell'obiettivo ================= */
+function sImprese(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tFin = WA('imprese', ['fine'], 1, 0.4), tTre = WA('imprese', ['tre', '3'], 1, 0.62);
+  phrase(t, a + 0.05, [['Cosa si aspettano', C.ink], ['le imprese', C.amber]], 345, { size: 92 });
+  const TX = 640, Y0 = 1270, SC = 70, kIn = oB(seg(t, a + 0.05, a + 0.6)), kF = ioC(seg(t, tTre - 0.2, tTre + 1.0)), yT = Y0 - 9 * SC;
+  pop(TX, (Y0 + yT) / 2, kIn, () => { glass(TX, (Y0 + yT) / 2 - 10, 80, Y0 - yT + 40, 40, 1); glass(TX, Y0 + 60, 120, 120, 60, 1);
+    x.save(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 3; rr(TX - 22, yT, 44, Y0 - yT, 22); x.stroke(); x.restore();
+    for (let i = 0; i <= 9; i++) dash(TX + 48, Y0 - i * SC, TX + 70, Y0 - i * SC, 'rgba(241,244,238,0.8)', 3, [1, 0]); });
+  /* mercurio */
+  const h = 3.2 * SC * kF; glow(TX, Y0 + 60, 120, '245,165,36', 0.25);
+  x.fillStyle = C.amber; x.beginPath(); x.arc(TX, Y0 + 60, 42, 0, 7); x.fill(); x.globalAlpha = 0.95; rr(TX - 20, Y0 - h, 40, h + 40, 20); x.fill(); x.globalAlpha = 1;
+  /* obiettivo 2% */
+  dash(300, Y0 - 2 * SC, TX + 70, Y0 - 2 * SC, C.lime, 4, [12, 10], oC(seg(t, a + 0.2, a + 0.7)));
+  tag(t, 'OBIETTIVO 2%', 560, Y0 - 2 * SC + 36, a + 0.3, 1e9, C.lime, { align: 'right', size: 26, color: C.lime });
+  /* imprese */
+  const kI = oB(seg(t, a + 0.1, a + 0.6)); pop(200, 820, kI, () => { glass(200, 820, 200, 200, 100, 1); icon('imp', 200, 820, C.ink); });
+  lab(t, 'IMPRESE', 200, 960, a + 0.3, { size: 28 }); lab(t, 'A 12 MESI', 200, 1005, a + 0.35);
+  tag(t, 'FINE 2021', 200, 1100, a + 0.3, tFin, C.amber, { size: 28 });
+  big(t, 'circa 3%', TX + 90, Y0 - 3.2 * SC - 6, tTre - 0.1, { color: C.amber, size: 58, align: 'left' });
+  x.restore(); finish(t); }
+
+/* ================= PICCO: tre punti sul grafico (fine 2021 · fine 2022 · fine 2023), 68 px per punto, la linea sale e scende ================= */
+function sPicco(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tOtt = WA('picco', ['otto', '8'], 1, 0.3), tMax = WA('picco', ['massimo'], 1, 0.5), tPoco = WA('picco', ['poco'], 1, 0.78);
+  phrase(t, a + 0.05, [['Poi il picco,', C.ink], ['poi la discesa', C.amber]], 345, { size: 92 });
+  const Y0 = 1300, SC = 68, X1 = 260, X2 = 560, X3 = 890, yv = (v) => Y0 - v * SC, kIn = oC(seg(t, a + 0.05, a + 0.6));
+  pop(540, 960, oB(seg(t, a + 0.05, a + 0.55)), () => glass(540, 985, 960, 850, 44, 1));
+  x.save(); x.globalAlpha = kIn; x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; x.beginPath(); x.moveTo(110, Y0 + 6); x.lineTo(970, Y0 + 6); x.stroke(); x.restore();
+  dash(110, yv(2), 970, yv(2), C.lime, 4, [12, 10], kIn);
+  tag(t, 'OBIETTIVO 2%', 110, yv(2) + 50, a + 0.3, 1e9, C.lime, { align: 'left', size: 24 });
+  /* colonne-guida tratteggiate (vuote) e punti */
+  [[X1, 3.2], [X2, 8.1], [X3, 2.3]].forEach(([px, v], i) => { const k = i === 0 ? 1 : 0; x.save(); x.globalAlpha = 0.5 * kIn; x.strokeStyle = C.amber; x.lineWidth = 3; x.setLineDash([6, 12]); x.beginPath(); x.moveTo(px, Y0); x.lineTo(px, i === 0 ? yv(v) : Y0 - 40); x.stroke(); x.restore(); });
+  const k2 = ioC(seg(t, tOtt - 0.3, tOtt + 0.7)), k3 = ioC(seg(t, tPoco - 0.2, tPoco + 0.9));
+  const P1 = [X1, yv(3.2)], P2 = [X2, lerp(Y0, yv(8.1), 1)], P3 = [X3, yv(2.3)];
+  x.save(); x.strokeStyle = C.amber; x.lineWidth = 12; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(...P1);
+  if (k2 > 0) { const q = [lerp(P1[0], P2[0], k2), lerp(P1[1], P2[1], k2)]; x.lineTo(...q); if (k3 > 0) { x.lineTo(...[lerp(P2[0], P3[0], k3), lerp(P2[1], P3[1], k3)]); } } x.stroke(); x.restore();
+  const hd = k3 > 0 ? [lerp(P2[0], P3[0], k3), lerp(P2[1], P3[1], k3)] : k2 > 0 ? [lerp(P1[0], P2[0], k2), lerp(P1[1], P2[1], k2)] : P1;
+  glow(hd[0], hd[1], 110, '245,165,36', 0.28); dot(P1[0], P1[1], 20, C.amber);
+  if (k2 > 0) dot(...(k3 > 0 ? P2 : hd), 22, C.red, '255,90,78');
+  if (k3 > 0) dot(...hd, 20, C.lime);
+  [[X2, Y0 - 40, k2], [X3, Y0 - 40, k3]].forEach(([px, py, kk]) => { if (kk < 0.02) { x.save(); x.setLineDash([7, 8]); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 4; x.globalAlpha = 0.9 * kIn; x.beginPath(); x.arc(px, py, 26, 0, 7); x.stroke(); x.restore(); } });
+  txt('circa 3%', X1 + 40, yv(3.2) - 74, { size: 46, weight: 800, color: C.ink, alpha: A85(kIn), align: 'right' });
+  big(t, 'circa 8%', X2, yv(8.1) - 56, tOtt - 0.05, { color: C.red, size: 52 });
+  pl(t, 'MASSIMO DELLA SERIE', X2, yv(8.1) - 128, tMax - 0.1, tMax, C.red, 26);
+  big(t, 'poco più del 2%', 1000, 1240, tPoco + 0.3, { color: C.lime, size: 46, align: 'right' });
+  tag(t, 'FINE 2021', X1, 1350, a + 0.3, a + 0.3, C.ink, { size: 26 }); tag(t, 'FINE 2022', X2, 1350, a + 0.3, tOtt, C.red, { size: 26 }); tag(t, 'FINE 2023', X3, 1350, a + 0.3, tPoco, C.lime, { size: 26 });
+  x.restore(); finish(t); }
+
+/* ================= FAMIGLIE: due quadranti 0-10%; l'ago va a 5 (fine 2022) poi a circa 3 (un anno dopo); tacca lime al 2% ================= */
+function dial(t, cx, cy, R, v, k, col, rgb) {
+  const ang = (u) => Math.PI + Math.PI * u / 10, a0 = ang(0);
+  x.save(); x.lineCap = 'round'; x.strokeStyle = 'rgba(241,244,238,0.35)'; x.lineWidth = 22; x.beginPath(); x.arc(cx, cy, R, Math.PI, 2 * Math.PI); x.stroke();
+  if (k > 0.001) { x.strokeStyle = col; x.beginPath(); x.arc(cx, cy, R, Math.PI, ang(v * k)); x.stroke(); }
+  x.restore();
+  /* tacca dell'obiettivo (2%) */
+  const g = ang(2); x.save(); x.strokeStyle = C.lime; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx + Math.cos(g) * (R - 26), cy + Math.sin(g) * (R - 26)); x.lineTo(cx + Math.cos(g) * (R + 26), cy + Math.sin(g) * (R + 26)); x.stroke(); x.restore();
+  txt('2%', cx + Math.cos(g) * (R + 58), cy + Math.sin(g) * (R + 58), { fam: 'mono', size: 24, weight: 700, color: C.lime, alpha: 1 });
+  /* ago */
+  const q = ang(v * k); glow(cx + Math.cos(q) * R, cy + Math.sin(q) * R, 70, rgb, 0.3 * (k > 0.01 ? 1 : 0));
+  x.save(); x.strokeStyle = C.ink; x.lineWidth = 9; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(q) * (R - 40), cy + Math.sin(q) * (R - 40)); x.stroke(); x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 16, 0, 7); x.fill(); x.restore(); }
+function sFamiglie(t, a, b) { bg('30,44,26', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tCin = WA('famiglie', ['cinque', '5'], 1, 0.55), tTre = WA('famiglie', ['tre', '3'], 1, 0.82);
+  phrase(t, a + 0.05, [['Le famiglie', C.ink], ['dell’area euro', C.lime]], 345, { size: 92 });
+  const kIn = oB(seg(t, a + 0.05, a + 0.6)), R = 170, CY = 1040, LX = 290, RX = 790;
+  pop(LX, CY - 40, kIn, () => glass(LX, CY - 40, 420, 330, 40, 1)); pop(RX, CY - 40, kIn, () => glass(RX, CY - 40, 420, 330, 40, 1));
+  pop(LX, 700, kIn, () => icon('fam', LX, 700, C.ink)); pop(RX, 700, kIn, () => icon('fam', RX, 700, C.ink));
+  const k1 = ioC(seg(t, tCin - 0.15, tCin + 0.9)), k2 = ioC(seg(t, tTre - 0.15, tTre + 0.9));
+  dial(t, LX, CY, R, 5, k1, C.amber, '245,165,36'); dial(t, RX, CY, R, 3, k2, C.lime, '200,250,114');
+  big(t, '5%', LX, CY + 80, tCin - 0.05, { color: C.amber, size: 84 }); big(t, 'circa 3%', RX, CY + 80, tTre - 0.05, { color: C.lime, size: 64 });
+  tag(t, 'FINE 2022', LX, 1250, a + 0.3, tCin, C.amber, { size: 28 }); tag(t, 'UN ANNO DOPO', RX, 1250, a + 0.3, tTre, C.lime, { size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= CAUTELA: SCHEMA, due strisce con la fascia dell'obiettivo; i punti dei previsori si stringono, quelli di famiglie e imprese restano larghi ================= */
+function sCautela(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tTen = WA('cautela', ['tenuto'], 1, 0.3), tPre = WA('cautela', ['previsori'], 1, 0.34), tFam = WA('cautela', ['famiglie'], 1, 0.7), tDeb = WA('cautela', ['debole'], 1, 0.6);
+  phrase(t, a + 0.05, [['Attenzione:', C.ink], ['tenuta diversa', C.amber]], 345, { size: 92 });
+  lab(t, 'SCHEMA · NON IN SCALA', 540, 640, a + 0.3, { size: 24, ls: 3 });
+  const kIn = oB(seg(t, a + 0.05, a + 0.6)), rows = [[830, 'PREVISORI E MERCATI', tPre, C.lime], [1180, 'FAMIGLIE', tFam, C.amber]];
+  const SP = [-330, -260, -190, -120, 90, 150, 230, 290, 335, 20], TG = [-55, -35, -15, 10, 30, 50, -25, 5, 40, -5], conv = ioC(seg(t, tTen - 0.1, tTen + 0.9));
+  rows.forEach(([cy, nm, tOn, col], r) => { pop(540, cy, kIn, () => { glass(540, cy, 900, 270, 40, 1);
+      x.fillStyle = 'rgba(200,250,114,0.18)'; rr(480, cy - 55, 120, 150, 20); x.fill(); x.strokeStyle = 'rgba(200,250,114,0.7)'; x.setLineDash([8, 8]); x.lineWidth = 3; rr(480, cy - 55, 120, 150, 20); x.stroke(); x.setLineDash([]);
+      x.strokeStyle = 'rgba(241,244,238,0.55)'; x.lineWidth = 3; x.beginPath(); x.moveTo(110, cy + 20); x.lineTo(970, cy + 20); x.stroke(); });
+    tag(t, nm, 110, cy - 90, a + 0.3, tOn, col, { align: 'left', size: 26 });
+    for (let i = 0; i < 10; i++) { const wob = r === 1 && t >= tDeb ? Math.sin((t - tDeb) * 5 + i * 1.7) * 14 * oC(seg(t, tDeb, tDeb + 0.5)) : 0;
+      const dx = r === 0 ? lerp(SP[i], TG[i], conv) : SP[i] + wob, dy = (i % 3 - 1) * 12; dot(540 + dx, cy + 20 + dy, 17, r === 0 && conv > 0.5 ? C.lime : r === 1 && t >= tDeb ? C.amber : C.ink); } });
+  x.restore(); finish(t); }
+
+/* ================= RISCHIO: il palloncino «aspettative» è legato al 2%; la corda si spezza e sale; sotto, una barra della durata si allunga ================= */
+function sRischio(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tSta = WA('rischio', ['staccano'], 1, 0.46), tDiv = WA('rischio', ['diventare'], 1, 0.8) + 0.45;
+  phrase(t, a + 0.05, [['Se si staccano', C.ink], ['dall’obiettivo', C.red]], 345, { size: 92 });
+  const BX = 540, GY = 1190, cut = oC(seg(t, tSta, tSta + 0.35)), rise = ioC(seg(t, tSta + 0.1, tSta + 1.5)), kIn = oB(seg(t, a + 0.05, a + 0.6));
+  const by = lerp(960, 700, rise), sway = Math.sin((t - a) * 2.2) * (cut ? 22 * rise + 6 : 6), bx = BX + sway;
+  /* terra: anello dell'obiettivo */
+  pop(BX, GY, kIn, () => { glow(BX, GY, 160, '200,250,114', 0.18); x.strokeStyle = C.lime; x.lineWidth = 9; x.beginPath(); x.arc(BX, GY, 34, 0, 7); x.stroke(); x.fillStyle = 'rgba(200,250,114,0.35)'; x.beginPath(); x.arc(BX, GY, 14, 0, 7); x.fill(); });
+  tag(t, 'OBIETTIVO', BX, 1262, a + 0.3, 1e9, C.lime, { size: 26 });
+  /* corda */
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.9)'; x.lineWidth = 6; x.lineCap = 'round';
+  if (cut < 0.05) { x.beginPath(); x.moveTo(BX, GY - 34); x.quadraticCurveTo(BX + sway * 0.5, (GY + by + 110) / 2, bx, by + 110); x.stroke(); }
+  else { x.beginPath(); x.moveTo(BX, GY - 34); x.quadraticCurveTo(BX - 10, GY - 80, BX - 20, GY - 105 + 20 * cut); x.stroke();
+    x.beginPath(); x.moveTo(bx, by + 110); x.quadraticCurveTo(bx + 12, by + 150, bx - 6, by + 190 - 20 * cut); x.stroke();
+    glow(BX, GY - 100, 90, '255,90,78', 0.4 * (1 - cut)); x.strokeStyle = `rgba(255,90,78,${1 - cut})`; x.lineWidth = 6; for (const dd of [-1, 0, 1]) { x.beginPath(); x.moveTo(BX - 10 + dd * 8, GY - 100); x.lineTo(BX - 10 + dd * 40 * cut, GY - 100 - 40 * cut); x.stroke(); } }
+  x.restore();
+  /* palloncino */
+  pop(bx, by, kIn, () => { glow(bx, by, 240, '200,250,114', 0.16); x.fillStyle = 'rgba(200,250,114,0.18)'; x.strokeStyle = C.lime; x.lineWidth = 8; x.beginPath(); x.arc(bx, by, 112, 0, 7); x.fill(); x.stroke();
+    x.beginPath(); x.moveTo(bx - 16, by + 118); x.lineTo(bx + 16, by + 118); x.lineTo(bx, by + 100); x.closePath(); x.fillStyle = C.lime; x.fill(); });
+  txt('ASPETTATIVE', bx, by, { fam: 'mono', size: 24, weight: 700, ls: 1, color: C.ink, alpha: 1 });
+  /* durata */
+  const kD = ioC(seg(t, tDiv - 0.1, tDiv + 1.1)), TX = 150, TW = 780;
+  lab(t, 'DURATA DELL’INFLAZIONE', TX, 1318, a + 0.3, { align: 'left', color: t >= tDiv ? C.red : C.ink });
+  x.save(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 3; rr(TX, 1342, TW, 38, 19); x.stroke(); x.restore();
+  const fw = TW * (0.22 + 0.78 * kD); x.fillStyle = t >= tDiv ? C.red : C.amber; x.globalAlpha = 0.92; rr(TX, 1342, fw, 38, 19); x.fill(); x.globalAlpha = 1;
+  x.restore(); finish(t); }
+
+/* ================= CASA: molla appesa al 2%; il peso «aspettative» si stira in basso e un orologio gira più forte ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tAll = WA('casa', ['allontanano'], 1, 0.5), tDue = WA('casa', ['due', '2'], 1, 0.62), tDur = WA('casa', ['durare'], 1, 0.84);
+  phrase(t, a + 0.05, [['Le aspettative', C.ink], ['contano', C.lime]], 345, { size: 92 });
+  const CX = 540, TOP = 680, kIn = oB(seg(t, a + 0.05, a + 0.6)), ext = ioC(seg(t, tAll - 0.2, tAll + 0.9)), L = lerp(240, 470, ext);
+  /* soffitto = obiettivo */
+  pop(CX, TOP, kIn, () => { glow(CX, TOP, 200, '200,250,114', 0.2); x.fillStyle = C.lime; rr(CX - 220, TOP - 12, 440, 24, 12); x.fill(); });
+  tag(t, 'OBIETTIVO', 100, 745, a + 0.3, tDue, C.lime, { align: 'left', size: 26 });
+  big(t, '2%', 100, 690, tDue - 0.05, { color: C.lime, size: 76, align: 'left' });
+  /* molla */
+  const N = 11, amp = lerp(64, 38, ext), y0 = TOP + 12, y1 = TOP + 12 + L; x.save(); x.strokeStyle = t >= tAll ? C.amber : C.ink; x.lineWidth = 9; x.lineJoin = 'round'; x.lineCap = 'round'; x.globalAlpha = clamp(kIn);
+  x.beginPath(); x.moveTo(CX, y0); for (let i = 0; i < N; i++) { const yy = lerp(y0 + 18, y1 - 18, (i + 0.5) / N); x.lineTo(CX + (i % 2 ? -amp : amp), yy); } x.lineTo(CX, y1); x.stroke(); x.restore();
+  /* peso */
+  const wy = y1 + 55; pop(CX, wy, kIn, () => { if (t >= tAll) glow(CX, wy, 220, '245,165,36', 0.2); glass(CX, wy, 250, 110, 34, 1); });
+  txt('ASPETTATIVE', CX, wy, { fam: 'mono', size: 26, weight: 700, ls: 1, color: t >= tAll ? C.amber : C.ink, alpha: 1 });
+  /* orologio: più giri quando si allontanano */
+  const CKX = 850, CKY = 980, kc = oB(seg(t, a + 0.15, a + 0.65)), ph = 2 * (t - a) + 5 * Math.max(0, t - tDur) * 2;
+  pop(CKX, CKY, kc, () => { glass(CKX, CKY, 230, 230, 115, 1); x.strokeStyle = t >= tDur ? C.red : C.ink; x.lineWidth = 7; x.lineCap = 'round'; x.beginPath(); x.arc(CKX, CKY, 84, 0, 7); x.stroke();
+    x.beginPath(); x.moveTo(CKX, CKY); x.lineTo(CKX + Math.sin(ph) * 62, CKY - Math.cos(ph) * 62); x.stroke(); x.beginPath(); x.moveTo(CKX, CKY); x.lineTo(CKX + Math.sin(ph / 12) * 40, CKY - Math.cos(ph / 12) * 40); x.stroke(); });
+  pl(t, 'DURA DI PIÙ', 850, 1180, a + 0.3, tDur, C.red, 26);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, ancora: sAncora, imprese: sImprese, picco: sPicco, famiglie: sFamiglie, cautela: sCautela, rischio: sRischio, casa: sCasa }, ORDER, ['hook', 'picco', 'rischio']);
+</script></body></html>

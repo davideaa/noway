@@ -1,0 +1,160 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 42, DAY: 1, CAP: 2, NEXT: ['L’inflazione', 'generale e core'] };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 42 — «Il paniere ISTAT» (martedì, lezione 2 di 5, capitolo 3). Numeri SOLO da p42-fonti.md:
+   oltre 29 milioni di prezzi al mese · oltre 500 categorie (531 aggregati) · pesi NIC 2026 per divisione: alimentari 17,2256 · trasporti 15,4540 · ristoranti e alloggio 12,1827 · abitazione, acqua, energia 12,0000
+   (a schermo 17,2% · 15,5% · 12,2% · 12,0%; soglia «un decimo» = 10%) · affitti reali 2,9% del paniere (a schermo 3%, a voce «poco meno del tre per cento») ·
+   novità 2026: uniformi scolastiche, apparecchiature di sicurezza (kit di videosorveglianza) · aggiornamento a dicembre · NIC/FOI/IPCA · pesi di tutte le 13 divisioni (NIC) per la barra del carrello.
+   Nessuna cifra inventata, nessuna riga di fonte nel video. */
+const ORDER = ['num', 'hook', 'paniere', 'pesi', 'casa-affitti', 'aggiorna', 'indici', 'porti', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+/* scritta che entra sfocata ma sempre a opacità piena (mai sotto 0,85) */
+const tb = (k, s, px, py, o = {}) => { if (k <= 0) return; txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.ink, ls: 2, blur: (1 - k) * 10, ...o }); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+
+/* ================= HOOK: griglia di cartellini di prezzo; un lettore (scanner) li scorre di continuo e li accende ================= */
+function tag(cx, cy, lit, col, rgb) { x.save(); x.globalAlpha *= 0.4 + 0.6 * lit; x.fillStyle = lit > 0 ? `rgba(${rgb},${0.10 + 0.14 * lit})` : 'rgba(241,244,238,0.05)'; rr(cx - 38, cy - 25, 76, 50, 10); x.fill();
+  x.strokeStyle = lit > 0.3 ? col : 'rgba(241,244,238,0.5)'; x.lineWidth = 3; x.stroke();
+  x.fillStyle = x.strokeStyle; x.beginPath(); x.arc(cx - 24, cy - 11, 4, 0, 7); x.fill(); rr(cx - 12, cy - 4, 36, 6, 3); x.fill(); rr(cx - 24, cy + 8, 28, 6, 3); x.fill(); x.restore(); }
+function sHook(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.03);
+  const tVen = WA('hook', ['ventinove', '29'], 1, 0.3);
+  phrase(t, a + 0.05, [['Ogni mese', C.ink]], 345, { size: 92 });
+  phrase(t, Math.max(a + 0.5, tVen - 0.1), [['29 milioni di prezzi', C.lime]], Y2, { size: 92 });
+  const COLS = 9, ROWS = 10, X0 = 102, Y0 = 600, DX = 100, DY = 78, p = ioC(seg(t, a + 0.2, Math.max(a + 3.2, tVen + 0.8)));
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { const i = r * COLS + c, n = i / (ROWS * COLS), jit = ((i * 37) % 11) / 11 * 0.08, kin = oB(seg(t, a + 0.05 + n * 0.5, a + 0.45 + n * 0.5)), lit = clamp((p - n + jit) * 12);
+    const cx = X0 + c * DX + 38, cy = Y0 + r * DY + 25, amb = (i % 7) === 3;
+    pop(cx, cy, kin, () => tag(cx, cy, lit, amb ? C.amber : C.lime, amb ? '245,165,36' : '200,250,114')); }
+  /* il lettore: una linea di luce che scende di continuo sulla griglia */
+  const u = ((t - a) * 0.55) % 1, sy = Y0 - 8 + u * (ROWS * DY), ks = oC(seg(t, a + 0.3, a + 0.7));
+  x.save(); x.globalAlpha = ks * 0.9; const g = x.createLinearGradient(0, sy - 30, 0, sy + 6); g.addColorStop(0, 'rgba(200,250,114,0)'); g.addColorStop(1, 'rgba(200,250,114,0.55)'); x.fillStyle = g; x.fillRect(80, sy - 30, 920, 36);
+  x.strokeStyle = C.lime; x.lineWidth = 4; x.beginPath(); x.moveTo(80, sy + 6); x.lineTo(1000, sy + 6); x.stroke(); x.restore();
+  x.restore(); finish(t); }
+
+/* ================= PANIERE: un cesto; le categorie cadono dentro, i posti vuoti sono tratteggiati ================= */
+function sPaniere(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tCin = WA('paniere', ['cinquecento', '500'], 1, 0.3), tAli = WA('paniere', ['alimentari'], 1, 0.55), tSer = WA('paniere', ['servizi'], 1, 0.66);
+  phrase(t, a + 0.05, [['Tutto in un paniere:', C.ink]], 345, { size: 92 });
+  phrase(t, Math.max(a + 0.6, tCin - 0.1), [['oltre 500 categorie', C.lime]], Y2, { size: 92 });
+  /* cesto: pareti, sempre in onda */
+  const BT = 950, BB = 1340, kb = oC(seg(t, a + 0.1, a + 0.6));
+  x.save(); x.globalAlpha = kb; x.beginPath(); x.moveTo(110, BT); x.lineTo(180, BB); x.lineTo(900, BB); x.lineTo(970, BT); x.closePath(); x.fillStyle = 'rgba(241,244,238,0.05)'; x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.7)'; x.lineWidth = 6; x.lineJoin = 'round'; x.stroke(); x.strokeStyle = C.lime; x.lineWidth = 6; x.beginPath(); x.moveTo(98, BT); x.lineTo(982, BT); x.stroke(); x.restore();
+  const CH = [['ALIMENTARI', 360, 1290, tAli], ['ABBIGLIAMENTO', 730, 1290, a + 1.3], ['SERVIZI', 330, 1200, tSer], ['CARBURANTI', 710, 1200, a + 0.8], ['FARMACI', 350, 1110, a + 1.1], ['ENERGIA', 720, 1110, a + 0.5], ['ISTRUZIONE', 360, 1020, a + 1.6], ['TRASPORTI', 725, 1020, a + 0.95]];
+  CH.forEach(([lb, cx, cy, ts]) => { const w = tw(lb, 24, 600, 'mono', 1) + 44, k = seg(t, ts, ts + 0.45), kk = oB(k);
+    if (k <= 0) { x.save(); x.globalAlpha = 0.4 * kb; x.strokeStyle = C.ink; x.lineWidth = 3; x.setLineDash([8, 7]); rr(cx - w / 2, cy - 32, w, 64, 32); x.stroke(); x.restore(); return; }
+    const yy = cy - (1 - clamp(kk, 0, 1.1)) * 280; x.save(); x.globalAlpha = clamp(k * 5); glow(cx, yy, 110, '200,250,114', 0.22);
+    x.fillStyle = 'rgba(200,250,114,0.16)'; rr(cx - w / 2, yy - 32, w, 64, 32); x.fill(); x.strokeStyle = C.lime; x.lineWidth = 3; x.stroke(); x.restore();
+    txt(lb, cx, yy + 1, { fam: 'mono', size: 24, weight: 600, color: C.ink, ls: 1, alpha: clamp(k * 5) }); });
+  x.restore(); finish(t); }
+
+/* ================= PESI: quattro barre in scala (1% = 40 px) contro la linea del decimo ================= */
+function sPesi(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tCib = WA('pesi', ['cibo'], 1, 0.3), tTra = WA('pesi', ['trasporti'], 1, 0.45), tRis = WA('pesi', ['ristoranti'], 1, 0.6), tCas = WA('pesi', ['abitazione', 'casa', 'case'], 1, 0.75), tDec = WA('pesi', ['decimo'], 1, 0.62);
+  phrase(t, a + 0.05, [['Ogni voce pesa', C.ink], ['quanto ci spendiamo', C.lime]], 345, { size: 92 });
+  const BX = 100, U = 40, BH = 64, R = [['CIBO', 17.2, 700, tCib, '17,2%'], ['TRASPORTI', 15.5, 860, tTra, '15,5%'], ['RISTORANTI E ALBERGHI', 12.2, 1020, tRis, '12,2%'], ['ABITAZIONE E BOLLETTE', 12.0, 1180, tCas, '12,0%']];
+  const kg = oC(seg(t, a + 0.3, a + 0.9)), kd = oC(seg(t, tDec - 0.1, tDec + 0.35));
+  R.forEach(([nm, v, y, ts, vt], i) => { const ke = oC(seg(t, a + 0.3 + i * 0.1, a + 0.8 + i * 0.1)), kk = oC(seg(t, ts - 0.1, ts + 0.7)), on = t >= ts - 0.1;
+    tb(ke, nm, BX, y - 58, { align: 'left', color: on ? C.lime : C.ink, size: 26 });
+    x.save(); x.globalAlpha = ke * (1 - kk) * 0.55; x.setLineDash([8, 7]); x.strokeStyle = C.lime; x.lineWidth = 3; rr(BX, y - BH / 2, v * U, BH, 14); x.stroke(); x.restore();
+    if (kk > 0) { x.save(); const w = v * U * kk; const g = x.createLinearGradient(BX, 0, BX + w, 0); g.addColorStop(0, 'rgba(200,250,114,0.55)'); g.addColorStop(1, C.lime); x.fillStyle = g; rr(BX, y - BH / 2, Math.max(w, 2), BH, 14); x.fill(); x.restore(); }
+    tb(oC(seg(t, ts + 0.35, ts + 0.7)), vt, BX + v * U + 24, y + 2, { size: 54, weight: 800, fam: 'Manrope', color: C.lime, align: 'left', ls: -1 }); });
+  /* linea del decimo (10% = 400 px): spenta, poi accesa sulla parola «decimo» */
+  dash(BX + 10 * U, 600, BX + 10 * U, 1230, kd > 0.3 ? C.amber : 'rgba(241,244,238,0.45)', 3, [10, 9], kg);
+  tb(kg, 'UN DECIMO · 10%', BX + 10 * U, 1280, { color: kd > 0.3 ? C.amber : C.ink, size: 26 });
+  x.restore(); finish(t); }
+
+/* ================= CASA-AFFITTI: la casa col divieto (investimento) e 100 caselle: gli affitti ne occupano 3 ================= */
+function houseBig(cx, cy, col, lw = 8) { x.save(); x.strokeStyle = col; x.lineWidth = lw; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 70, cy - 4); x.lineTo(cx, cy - 66); x.lineTo(cx + 70, cy - 4); x.stroke(); x.beginPath(); x.rect(cx - 52, cy - 4, 104, 76); x.stroke(); x.beginPath(); x.rect(cx - 14, cy + 28, 28, 44); x.stroke(); x.restore(); }
+function sCasaAff(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.03);
+  const tNon = WA('casa-affitti', ['rientra', 'investimento'], 1, 0.3), tAff = WA('casa-affitti', ['affitti'], 1, 0.62), tTre = WA('casa-affitti', ['tre', '3'], 1, 0.86);
+  phrase(t, a + 0.05, [['Comprare casa', C.ink], ['non è nel paniere', C.red]], 345, { size: 92 });
+  const CX = 540, CY = 830, kh = oB(seg(t, a + 0.2, a + 0.7)), kn = oC(seg(t, tNon - 0.1, tNon + 0.4));
+  pop(CX, CY, kh, () => { glow(CX, CY, 220, '255,90,78', 0.12 + 0.12 * kn); houseBig(CX, CY - 6, C.ink);
+    x.save(); x.strokeStyle = C.red; x.lineWidth = 10; x.lineCap = 'round'; x.globalAlpha = 0.4 + 0.6 * kn; if (kn < 1) x.setLineDash([14, 12]); x.beginPath(); x.arc(CX, CY, 120, 0, 7); x.stroke(); x.setLineDash([]);
+    x.globalAlpha = kn; x.beginPath(); x.moveTo(CX - 85, CY - 85); x.lineTo(CX - 85 + 170 * kn, CY - 85 + 170 * kn); x.stroke(); x.restore(); });
+  tb(oC(seg(t, a + 0.3, a + 0.7)), 'COMPRARLA È UN INVESTIMENTO', 540, 1000, { color: t >= tNon - 0.1 ? C.red : C.ink, size: 26 });
+  /* 100 caselle: gli affitti ne occupano 3 */
+  const GX = 123, GY = 1150, CS = 36, GP = 6, ka = oC(seg(t, a + 0.4, a + 0.9));
+  tb(oC(seg(t, a + 0.4, a + 0.8)), 'AFFITTI', 123, 1090, { align: 'left', color: t >= tAff - 0.1 ? C.lime : C.ink, size: 28 });
+  for (let i = 0; i < 100; i++) { const c = i % 20, r = Math.floor(i / 20), on = i < 3 ? oB(seg(t, tTre - 0.1 + i * 0.12, tTre + 0.3 + i * 0.12)) : 0, k = ka * oC(seg(t, a + 0.4 + (i % 20) * 0.015, a + 0.8 + (i % 20) * 0.015));
+    x.save(); x.globalAlpha = k * (0.4 + (on > 0 ? 0.6 : 0)); x.fillStyle = on > 0 ? C.lime : 'rgba(241,244,238,0.14)'; x.strokeStyle = on > 0 ? C.lime : 'rgba(241,244,238,0.5)'; x.lineWidth = 2;
+    const s = on > 0 ? clamp(on, 0, 1.2) : 1, px = GX + c * (CS + GP) + CS / 2, py = GY + r * (CS + GP) + CS / 2; x.translate(px, py); x.scale(s, s); rr(-CS / 2, -CS / 2, CS, CS, 7); x.fill(); x.stroke(); x.restore(); }
+  const k3 = oC(seg(t, tTre - 0.1, tTre + 0.35)); tb(k3, '3%', 957, 1090, { fam: 'Manrope', size: 72, weight: 800, color: C.lime, align: 'right', ls: -2 });
+  tb(oC(seg(t, a + 0.4, a + 0.8)), 'SU 100', 957, 1380, { align: 'right', size: 24, color: C.ink });
+  x.restore(); finish(t); }
+
+/* ================= AGGIORNA: i dodici mesi, dicembre si accende; due carte delle novità del 2026 ================= */
+const MESI = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+function shirt(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx - 24, cy - 56); x.lineTo(cx - 70, cy - 28); x.lineTo(cx - 50, cy + 2); x.lineTo(cx - 36, cy - 8); x.lineTo(cx - 36, cy + 56); x.lineTo(cx + 36, cy + 56); x.lineTo(cx + 36, cy - 8); x.lineTo(cx + 50, cy + 2); x.lineTo(cx + 70, cy - 28); x.lineTo(cx + 24, cy - 56); x.quadraticCurveTo(cx, cy - 36, cx - 24, cy - 56); x.closePath(); x.stroke(); x.restore(); }
+function camera(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 6; x.lineJoin = 'round'; rr(cx - 62, cy - 30, 100, 62, 10); x.stroke(); x.beginPath(); x.moveTo(cx + 38, cy - 4); x.lineTo(cx + 68, cy - 22); x.lineTo(cx + 68, cy + 24); x.lineTo(cx + 38, cy + 6); x.stroke(); x.beginPath(); x.arc(cx - 12, cy + 1, 15, 0, 7); x.stroke(); x.beginPath(); x.moveTo(cx - 20, cy + 32); x.lineTo(cx - 20, cy + 56); x.moveTo(cx - 44, cy + 56); x.lineTo(cx + 20, cy + 56); x.stroke(); x.restore(); }
+function sAggiorna(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tDic = WA('aggiorna', ['dicembre'], 1, 0.12), tAnno = WA('aggiorna', ['duemilaventisei', '2026', '2'], 1, 0.45), tUni = WA('aggiorna', ['uniformi'], 1, 0.65), tKit = WA('aggiorna', ['kit'], 1, 0.88);
+  phrase(t, a + 0.05, [['Ogni dicembre', C.ink], ['cambia il paniere', C.lime]], 345, { size: 92 });
+  const MX = 111, MY = 660, MW = 66, MG = 6;
+  MESI.forEach((m, i) => { const k = oB(seg(t, a + 0.15 + i * 0.04, a + 0.6 + i * 0.04)), d = i === 11, on = d ? oC(seg(t, tDic - 0.1, tDic + 0.3)) : 0, cx = MX + i * (MW + MG) + MW / 2;
+    pop(cx, MY, k, () => { x.save(); if (on > 0) glow(cx, MY, 90, '200,250,114', 0.4 * on); x.fillStyle = on > 0 ? C.lime : 'rgba(241,244,238,0.07)'; x.strokeStyle = on > 0 ? C.lime : 'rgba(241,244,238,0.5)'; x.lineWidth = 3; rr(cx - MW / 2, MY - 36, MW, 72, 12); x.fill(); x.stroke(); x.restore();
+      txt(m, cx, MY + 1, { fam: 'mono', size: 22, weight: 700, color: on > 0 ? '#15200C' : C.ink, ls: 0 }); }); });
+  tb(oC(seg(t, tAnno - 0.1, tAnno + 0.35)), 'NOVITÀ DEL 2026', 540, 790, { color: C.lime, size: 30, ls: 4 });
+  const CD = [[290, 'UNIFORMI', 'SCOLASTICHE', shirt, tUni], [790, 'KIT DI', 'VIDEOSORVEGLIANZA', camera, tKit]];
+  CD.forEach(([cx, l1, l2, ic, ts], i) => { const k = oB(seg(t, a + 0.35 + i * 0.15, a + 0.85 + i * 0.15)), on = oC(seg(t, ts - 0.1, ts + 0.4));
+    pop(cx, 1070, k, () => { if (on > 0) glow(cx, 1070, 240, '200,250,114', 0.16 * on); glass(cx, 1070, 360, 400, 40, 1);
+      x.save(); x.globalAlpha = on; x.strokeStyle = C.lime; x.lineWidth = 3.5; rr(cx - 180, 870, 360, 400, 40); x.stroke(); x.restore();
+      ic(cx, 1000, on > 0.5 ? C.lime : C.ink); txt(l1, cx, 1130, { fam: 'mono', size: 24, weight: 600, color: on > 0.5 ? C.lime : C.ink, ls: 1 }); txt(l2, cx, 1170, { fam: 'mono', size: 24, weight: 600, color: on > 0.5 ? C.lime : C.ink, ls: 1 }); }); });
+  x.restore(); finish(t); }
+
+/* ================= INDICI: tre schede NIC / FOI / IPCA, ognuna si accende sulla sua parola ================= */
+function sIndici(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tUni = WA('indici', ['unica'], 1, 0.28), tDip = WA('indici', ['dipendente'], 1, 0.5), tEur = WA('indici', ['europei', 'europeo'], 1, 0.85);
+  phrase(t, a + 0.05, [['Non un indice solo:', C.ink], ['tre, per tre scopi', C.lime]], 345, { size: 92 });
+  const RY = [690, 950, 1210], RW = 860, RH = 230;
+  const IC = [(cx, cy, col) => { x.save(); x.fillStyle = col; for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) { x.beginPath(); x.arc(cx - 32 + c * 32, cy - 32 + r * 32, 9, 0, 7); x.fill(); } x.restore(); },
+    (cx, cy, col) => { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx - 44, cy - 2); x.lineTo(cx, cy - 40); x.lineTo(cx + 44, cy - 2); x.stroke(); x.beginPath(); x.rect(cx - 32, cy - 2, 64, 44); x.stroke(); x.restore(); },
+    (cx, cy, col) => { x.save(); x.fillStyle = col; for (let i = 0; i < 12; i++) { const an = i / 12 * Math.PI * 2; x.beginPath(); x.arc(cx + Math.cos(an) * 46, cy + Math.sin(an) * 46, 7, 0, 7); x.fill(); } x.restore(); }];
+  const D = [['NIC', 'TUTTI, COME', 'UNA FAMIGLIA', tUni], ['FOI', 'DIPENDENTI,', 'AGGIORNA AFFITTI', tDip], ['IPCA', 'PAESI EUROPEI,', 'CONFRONTO', tEur]];
+  D.forEach(([sg, l1, l2, ts], i) => { const cy = RY[i], k = oB(seg(t, a + 0.25 + i * 0.15, a + 0.75 + i * 0.15)), on = oC(seg(t, ts - 0.1, ts + 0.4)), col = on > 0.5 ? C.lime : C.ink;
+    pop(540, cy, k, () => { if (on > 0) glow(540, cy, 420, '200,250,114', 0.14 * on); glass(540, cy, RW, RH, 44, 1);
+      x.save(); x.globalAlpha = on; x.strokeStyle = C.lime; x.lineWidth = 3.5; rr(540 - RW / 2, cy - RH / 2, RW, RH, 44); x.stroke(); x.restore();
+      txt(sg, 150, cy + 2, { size: 80, weight: 800, color: col, align: 'left', ls: -2 }); txt(l1, 420, cy - 22, { fam: 'mono', size: 28, weight: 600, color: col, align: 'left', ls: 1 }); txt(l2, 420, cy + 22, { fam: 'mono', size: 28, weight: 600, color: col, align: 'left', ls: 1 });
+      IC[i](870, cy, col); }); });
+  x.restore(); finish(t); }
+
+/* ================= PORTI: una barra a segmenti di peso diverso (carrello pesato) e un selettore che passa da un indice all'altro ================= */
+const PESI13 = [17.2256, 15.4540, 12.1827, 12.0000, 8.1502, 6.8933, 6.7696, 6.0192, 5.8992, 2.9104, 2.8613, 2.6667, 0.9678];
+function sPorti(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.03);
+  const tPes = WA('porti', ['pesati'], 1, 0.4), tCam = WA('porti', ['cambia'], 1, 0.68), tCon = WA('porti', ['confrontare'], 1, 0.9);
+  phrase(t, a + 0.05, [['Un carrello pesato,', C.ink], ['un indice su misura', C.lime]], 345, { size: 92 });
+  /* scheda 1: carrello pesato */
+  const k1 = oB(seg(t, a + 0.2, a + 0.7)); pop(540, 770, k1, () => { glass(540, 770, 880, 300, 44, 1);
+    tb(1, 'UN CARRELLO PESATO', 540, 685, { size: 28, color: C.ink, ls: 3 });
+    const BX = 130, BW = 820, BY = 770, BHh = 70, kf = oC(seg(t, tPes - 0.1, tPes + 1.1)), tot = PESI13.reduce((p, q) => p + q, 0);
+    x.save(); x.setLineDash([8, 7]); x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 3; rr(BX, BY - BHh / 2, BW, BHh, 14); x.stroke(); x.restore();
+    let acc = 0; PESI13.forEach((v, i) => { const w = v / tot * BW, f = clamp(kf * 13 - i); if (f > 0) { x.save(); x.fillStyle = i % 2 ? 'rgba(200,250,114,0.6)' : C.lime; const ww = Math.max(0, w - 3) * oC(f); rr(BX + acc, BY - BHh / 2 + 4, ww, BHh - 8, 6); x.fill(); x.restore(); } acc += w; });
+    tb(1, 'IN BASE ALLA SPESA', 540, 855, { size: 26, color: t >= tPes - 0.1 ? C.lime : C.ink, ls: 3 }); });
+  /* scheda 2: il selettore */
+  const k2 = oB(seg(t, a + 0.4, a + 0.9)); pop(540, 1150, k2, () => { glass(540, 1150, 880, 340, 44, 1);
+    tb(1, 'L’INDICE CAMBIA', 540, 1040, { size: 28, color: C.ink, ls: 3 });
+    const PX = [290, 540, 790], NM = ['NIC', 'FOI', 'IPCA'], sel = t >= tCon - 0.1 ? 2 : t >= tCam - 0.1 ? 1 : 0, ks = oC(seg(t, sel === 2 ? tCon - 0.1 : sel === 1 ? tCam - 0.1 : a + 0.7, (sel === 2 ? tCon : sel === 1 ? tCam : a + 0.7) + 0.35));
+    const prev = sel === 2 ? 1 : 0, sx = lerp(PX[prev], PX[sel], ks);
+    x.save(); glow(sx, 1150, 150, '200,250,114', 0.3); x.fillStyle = 'rgba(200,250,114,0.2)'; x.strokeStyle = C.lime; x.lineWidth = 4; rr(sx - 100, 1150 - 44, 200, 88, 44); x.fill(); x.stroke(); x.restore();
+    NM.forEach((n, i) => { x.save(); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; rr(PX[i] - 100, 1150 - 44, 200, 88, 44); x.stroke(); x.restore(); txt(n, PX[i], 1152, { size: 46, weight: 800, color: Math.abs(sx - PX[i]) < 50 ? C.lime : C.ink, ls: 0 }); });
+    tb(1, 'A SECONDA DI COSA CONFRONTI', 540, 1262, { size: 24, color: C.ink, ls: 2 }); });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, paniere: sPaniere, pesi: sPesi, 'casa-affitti': sCasaAff, aggiorna: sAggiorna, indici: sIndici, porti: sPorti }, ORDER, ['hook', 'pesi', 'indici']);
+</script></body></html>

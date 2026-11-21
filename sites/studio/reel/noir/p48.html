@@ -1,0 +1,188 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 48, DAY: 2, CAP: 2, NEXT: ['Le', 'aspettative'], FONTE: 'DATI: BCE · ISTAT · BANCA D’ITALIA (non scritta nel video)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 48 — «La spirale prezzi-salari» (mercoledì, lezione 3 di 5, capitolo 3). Numeri SOLO da p48-fonti.md:
+   Italia 2022: salari contrattuali orari +1,1% (a schermo «circa +1%») · prezzi IPCA +8,7% (a schermo «quasi +9%»); lunghezze in scala 80 px per punto (88 e 696 px) ·
+   2024: retribuzioni effettive reali −8,4% rispetto al 2021 (Banca d'Italia): moneta intera = 2021, fetta tagliata = 8,4% dell'angolo giro (in scala).
+   Salari da contratto, non buste paga: il grafico «ritardo» è uno schema NON in scala (nessun dato dentro). La spirale è uno schema (nessun numero).
+   Niente righe di fonte nel video. Testo mai sotto opacità 0,85: «si accende» = colore. */
+const ORDER = ['num', 'hook', 'def', 'italia', 'cautela', 'perche', 'costo', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+/* tag: scritta SEMPRE presente (entra in 0,35 s, poi opacità 1); sulla parola cambia colore e fa un colpo di scala */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1;
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.ink, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); };
+/* progressione a tratti: kf(t, [[t0,v0],[t1,v1],...]) lineare dentro ogni tratto (ioC), costante fuori */
+function kf(t, K) { if (t <= K[0][0]) return K[0][1]; for (let i = 1; i < K.length; i++) if (t <= K[i][0]) { const d = Math.max(0.05, K[i][0] - K[i - 1][0]); return lerp(K[i - 1][1], K[i][1], (t - K[i - 1][0]) / d); } return K[K.length - 1][1]; }
+
+/* ---------- la spirale: parte dall'alto, gira in senso orario e si allarga; con 2,25 giri finisce sul lato destro ---------- */
+function spirPts(cx, cy, r0, r1, turns = 2.25) { const L = [], n = Math.round(turns * 90); for (let i = 0; i <= n; i++) { const u = i / n, q = -Math.PI / 2 + u * turns * 2 * Math.PI, r = lerp(r0, r1, u); L.push([cx + Math.cos(q) * r, cy + Math.sin(q) * r]); } return L; }
+function spirAt(Pn, u) { const f = clamp(u) * (Pn.length - 1), i = Math.min(Pn.length - 2, Math.floor(f)); return [lerp(Pn[i][0], Pn[i + 1][0], f - i), lerp(Pn[i][1], Pn[i + 1][1], f - i)]; }
+function spirDraw(Pn, u, col, w, al = 1, dots = false) { if (u <= 0 || al <= 0) return; const f = clamp(u) * (Pn.length - 1), n = Math.floor(f);
+  x.save(); x.globalAlpha *= al; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; if (dots) x.setLineDash([1, w * 2.6]);
+  x.beginPath(); x.moveTo(...Pn[0]); for (let i = 1; i <= n; i++) x.lineTo(...Pn[i]); if (n < Pn.length - 1) x.lineTo(...spirAt(Pn, u)); x.stroke(); x.restore(); }
+
+/* ================= HOOK: la spirale si avvita (prezzi, salari, prezzi); a «non» si spegne e sopra compare una croce rossa ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tPre = WA('hook', ['prezzi'], 1, 0.02), tSal = WA('hook', ['salari'], 1, 0.08), tEur = WA('hook', ['euro'], 2, 0.7), tNon = WA('hook', ['non'], 1, 0.86);
+  phrase(t, a + 0.05, [['La spirale', C.ink]], 345, { size: 92 });
+  phrase(t, a + 0.05, [['prezzi-salari', C.amber]], Y2, { size: 92 });
+  const CX = 540, CY = 960, Pn = spirPts(CX, CY, 70, 310), kIn = oC(seg(t, a + 0.05, a + 0.6)), dim = oC(seg(t, tNon, tNon + 0.5));
+  spirDraw(Pn, kIn, 'rgba(245,165,36,0.45)', 6, 1, true);
+  const u = ioC(seg(t, a + 0.3, Math.max(a + 1.6, tNon - 0.3))), head = spirAt(Pn, u);
+  spirDraw(Pn, u, C.amber, 14, 1 - 0.62 * dim);
+  if (u > 0.01 && u < 0.999) { glow(head[0], head[1], 90, '245,165,36', 0.3); x.fillStyle = C.ink; x.beginPath(); x.arc(head[0], head[1], 13, 0, 7); x.fill(); }
+  if (dim > 0) { const kc = oB(seg(t, tNon, tNon + 0.5)); glow(CX, CY, 160, '255,90,78', 0.3 * dim);
+    pop(CX, CY, kc, () => { x.strokeStyle = C.red; x.lineWidth = 16; x.lineCap = 'round'; x.beginPath(); x.moveTo(CX - 48, CY - 48); x.lineTo(CX + 48, CY + 48); x.moveTo(CX + 48, CY - 48); x.lineTo(CX - 48, CY + 48); x.stroke(); }); }
+  tag(t, 'PREZZI', 150, 1330, a + 0.3, tPre, C.red, { align: 'left', size: 30 }); tag(t, 'SALARI', 540, 1330, a + 0.35, tSal, C.amber, { size: 30 });
+  tag(t, 'AREA EURO', 930, 1330, a + 0.4, tEur, C.lime, { align: 'right', size: 30 });
+  x.restore(); finish(t); }
+
+/* ================= DEF: un giro vero che si avvita: AUMENTI → LISTINI → RICHIESTE → si ricomincia, più largo a ogni giro ================= */
+function sDef(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tAum = WA('def', ['aumenti'], 1, 0.2), tLis = WA('def', ['listini'], 1, 0.45), tRic = WA('def', ['richieste'], 1, 0.7), tRi2 = WA('def', ['ricomincia'], 1, 0.9);
+  phrase(t, a + 0.05, [['Il giro che', C.ink], ['si avvita', C.amber]], 345, { size: 92 });
+  const CX = 540, CY = 960, Pn = spirPts(CX, CY, 50, 320), kIn = oC(seg(t, a + 0.05, a + 0.6));
+  spirDraw(Pn, kIn, 'rgba(245,165,36,0.45)', 6, 1, true);
+  const u = kf(t, [[a + 0.25, 0], [tAum, 0.1], [tLis, 0.42], [tRic, 0.74], [tRi2 + 0.35, 1]]), head = spirAt(Pn, ioC(clamp(u)));
+  const uu = ioC(clamp(u)); spirDraw(Pn, uu, C.amber, 14);
+  [[0.1, tAum, C.lime, '200,250,114'], [0.42, tLis, C.amber, '245,165,36'], [0.74, tRic, C.red, '255,90,78']].forEach(([pu, tOn, col, rgb]) => { const [px, py] = spirAt(Pn, ioC(pu)), k = oB(seg(t, tOn - 0.05, tOn + 0.4));
+    pop(px, py, k, () => { glow(px, py, 80, rgb, 0.3); x.fillStyle = col; x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); x.arc(px, py, 24, 0, 7); x.fill(); x.stroke(); }); });
+  if (uu > 0.01 && uu < 0.999) { glow(head[0], head[1], 90, '245,165,36', 0.3); x.fillStyle = C.ink; x.beginPath(); x.arc(head[0], head[1], 13, 0, 7); x.fill(); }
+  const ke = oC(seg(t, a + 0.3, a + 0.8));
+  [[200, 'AUMENTI', tAum, C.lime], [540, 'LISTINI', tLis, C.amber], [880, 'RICHIESTE', tRic, C.red]].forEach(([px, l, tOn, col]) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3));
+    x.save(); x.translate(px, 1330); const s = on ? 1 + 0.1 * Math.sin(Math.PI * kk) : 1; x.scale(s, s); x.translate(-px, -1330); glassPill(px, 1330, l, ke, on ? col : C.ink, 30); x.restore(); });
+  x.restore(); finish(t); }
+
+/* ================= ITALIA: due corsie; il marcatore dei salari fa un passo, quello dei prezzi corre. Scala 80 px per punto ================= */
+function sItalia(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tUno = WA('italia', ['uno', 'luno', '1'], 1, 0.4), tNove = WA('italia', ['quasi'], 1, 0.8) + 0.3;
+  phrase(t, a + 0.05, [['Italia, 2022:', C.ink]], 345, { size: 92 });
+  const X0 = 150, SC = 80, kIn = oB(seg(t, a + 0.05, a + 0.55)), kS = ioC(seg(t, tUno - 0.2, tUno + 0.8)), kP = ioC(seg(t, tNove - 0.5, tNove + 0.8));
+  const lane = (cy, w1, col, rgb, k, nome, nc) => { pop(540, cy, kIn, () => { glass(540, cy, 840, 150, 40, 1); });
+    x.save(); x.globalAlpha = kIn * 0.9; x.setLineDash([9, 9]); x.strokeStyle = col; x.lineWidth = 3; rr(X0, cy - 30, w1, 60, 30); x.stroke(); x.restore();
+    const w = w1 * k; if (w > 3) { glow(X0 + w, cy, 120, rgb, 0.25); x.fillStyle = col; x.globalAlpha = 0.92; rr(X0, cy - 30, Math.max(w, 60), 60, 30); x.fill(); x.globalAlpha = 1; x.fillStyle = 'rgba(255,255,255,0.4)'; x.fillRect(X0 + 16, cy - 24, Math.max(0, Math.max(w, 60) - 32), 4); }
+    x.save(); x.globalAlpha = kIn; x.fillStyle = k > 0.02 ? C.ink : 'rgba(241,244,238,0.85)'; x.strokeStyle = col; x.lineWidth = 5; x.beginPath(); x.arc(X0 + Math.max(w, 60) - 0, cy, 36, 0, 7); x.fill(); x.stroke(); x.restore();
+    lab(t, nome, X0, cy - 100, a + 0.3, { align: 'left', color: nc }); };
+  dash(X0, 760, X0, 1260, 'rgba(241,244,238,0.5)', 3, [8, 10], oC(seg(t, a + 0.2, a + 0.7)));
+  lane(900, 8.7 * 0 + 1.1 * SC, C.lime, '200,250,114', kS, 'SALARI CONTRATTUALI', C.lime);
+  lane(1160, 8.7 * SC, C.red, '255,90,78', kP, 'PREZZI · IPCA', C.red);
+  big(t, 'circa +1%', X0 + 1.1 * SC + 80, 900, tUno - 0.1, { color: C.lime, align: 'left' });
+  big(t, 'quasi +9%', 930, 1036, tNove - 0.1, { color: C.red, align: 'right' });
+  x.restore(); finish(t); }
+
+/* ================= CAUTELA: schema NON in scala, salari a gradini (contratti) in ritardo sui prezzi; pillola «non la busta paga» ================= */
+function sCautela(t, a, b) { bg('52,44,20', 0.5); x.save(); zoom(t, a, b, 1.03);
+  const tSal = WA('cautela', ['salari'], 1, 0.08), tBus = WA('cautela', ['busta'], 1, 0.38), tDiv = WA('cautela', ['divario'], 1, 0.58), tRit = WA('cautela', ['ritardo'], 1, 0.82);
+  phrase(t, a + 0.05, [['Attenzione:', C.ink], ['salari da contratto', C.amber]], 345, { size: 92 });
+  const XL = 120, XR = 960, YB = 1250, H = 520, xx = (u) => XL + (XR - XL) * u, yy = (v) => YB - H * v, kIn = oC(seg(t, a + 0.1, a + 0.6));
+  x.save(); x.globalAlpha = kIn; x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 3; x.beginPath(); x.moveTo(XL - 20, YB + 6); x.lineTo(XR + 10, YB + 6); x.stroke(); x.restore();
+  const PR = []; for (let i = 0; i <= 60; i++) { const u = i / 60; PR.push([xx(u), yy(Math.pow(u, 0.7))]); }
+  const ST = [[xx(0), yy(0)], [xx(0.3), yy(0)], [xx(0.3), yy(0.08)], [xx(0.5), yy(0.08)], [xx(0.5), yy(0.2)], [xx(0.7), yy(0.2)], [xx(0.7), yy(0.35)], [xx(0.85), yy(0.35)], [xx(0.85), yy(0.5)], [xx(1), yy(0.5)]];
+  const partial = (pts, k, col, w, al, dots) => { x.save(); x.globalAlpha *= al; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; if (dots) x.setLineDash([1, w * 2.6]); let L = 0; const d = []; for (let i = 1; i < pts.length; i++) { const q = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); d.push(q); L += q; }
+    let acc = 0; x.beginPath(); x.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) { const need = k * L - acc; if (need <= 0) break; if (need >= d[i - 1]) x.lineTo(...pts[i]); else { const u = need / d[i - 1]; x.lineTo(lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)); } acc += d[i - 1]; } x.stroke(); x.restore(); };
+  partial(PR, kIn, 'rgba(255,90,78,0.5)', 6, 1, true); partial(ST, kIn, 'rgba(245,165,36,0.5)', 6, 1, true);
+  const kW = ioC(seg(t, tSal - 0.1, tSal + 1.3)), kP = ioC(seg(t, tDiv - 0.1, tDiv + 1.0));
+  if (kW > 0) partial(ST, kW, C.amber, 11, 1, false); if (kP > 0) partial(PR, kP, C.red, 11, 1, false);
+  if (kP > 0 && kP < 1) { const q = Math.min(PR.length - 1, Math.floor(kP * 60)); glow(PR[q][0], PR[q][1], 90, '255,90,78', 0.3); }
+  /* bracket del ritardo: dal punto dei prezzi al gradino dei salari, alla stessa altezza */
+  const yR = yy(0.35), x1 = xx(Math.pow(0.35, 1 / 0.7)), x2 = xx(0.7), kr = oC(seg(t, tRit - 0.1, tRit + 0.6));
+  dash(x1, yR, x1 + (x2 - x1) * kr, yR, C.ink, 5, [1, 0], kr); dash(x1, yR - 14, x1, yR + 14, C.ink, 5, [1, 0], kr); dash(x2, yR - 14, x2, yR + 14, C.ink, 5, [1, 0], kr);
+  tag(t, 'RITARDO', (x1 + x2) / 2, yR - 40, a + 0.3, tRit, C.amber, { size: 28 });
+  tag(t, 'PREZZI', 960, 680, a + 0.3, tDiv, C.red, { align: 'right', size: 28 }); tag(t, 'SALARI', 960, 1040, a + 0.3, tSal, C.amber, { align: 'right', size: 28 });
+  const kp = oC(seg(t, a + 0.3, a + 0.8)), on = t >= tBus; glassPill(540, 1340, 'NON LA BUSTA PAGA', kp, on ? C.amber : C.ink, 32);
+  lab(t, 'SCHEMA · NON IN SCALA', 540, 590, a + 0.5, { color: C.ink, size: 22, ls: 3 });
+  x.restore(); finish(t); }
+
+/* ================= PERCHE: la spirale gira, poi un'àncora cala sulla sua punta e la blocca; sotto, l'indicizzazione conta poco ================= */
+function anchorShape(cx, ringY, col, w) { x.save(); x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round';
+  const cy = ringY + 100; x.beginPath(); x.arc(cx, ringY, 20, 0, 7); x.stroke();
+  x.beginPath(); x.moveTo(cx, ringY + 20); x.lineTo(cx, cy + 90); x.moveTo(cx - 48, cy - 44); x.lineTo(cx + 48, cy - 44); x.stroke();
+  x.beginPath(); x.arc(cx, cy + 22, 68, 0.12 * Math.PI, 0.88 * Math.PI); x.stroke();
+  x.beginPath(); x.moveTo(cx - 64, cy + 56); x.lineTo(cx - 74, cy + 30); x.moveTo(cx + 64, cy + 56); x.lineTo(cx + 74, cy + 30); x.stroke(); x.restore(); }
+function sPerche(t, a, b) { bg('30,44,26', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tAsp = WA('perche', ['aspettative'], 1, 0.2), tAnc = WA('perche', ['ancorate'], 1, 0.5), tInd = WA('perche', ['indicizzazione'], 1, 0.7), tPoc = WA('perche', ['contava'], 1, 0.9);
+  phrase(t, a + 0.05, [['Il freno:', C.ink]], 345, { size: 92 });
+  phrase(t, tAsp - 0.12, [['aspettative ancorate', C.lime]], Y2, { size: 92 });
+  const CX = 480, CY = 1000, EX = CX + 300, Pn = spirPts(CX, CY, 50, 300), kIn = oC(seg(t, a + 0.05, a + 0.6)), lock = oC(seg(t, tAnc, tAnc + 0.4)), dr = oB(seg(t, tAnc - 0.45, tAnc + 0.1), 1.2);
+  const u = ioC(seg(t, a + 0.3, tAnc + 0.1)), head = spirAt(Pn, u), ringY = lerp(560, CY, clamp(dr, 0, 1.05));
+  spirDraw(Pn, kIn, 'rgba(245,165,36,0.45)', 6, 1, true);
+  /* la spirale resta ambra mentre gira, diventa grigia quando l'àncora la ferma */
+  spirDraw(Pn, u, lock > 0.5 ? C.grey : C.amber, 14);
+  if (u < 0.999) { glow(head[0], head[1], 90, '245,165,36', 0.3); x.fillStyle = C.ink; x.beginPath(); x.arc(head[0], head[1], 13, 0, 7); x.fill(); }
+  /* sagoma tratteggiata dell'àncora, subito; si riempie sulla parola */
+  x.save(); x.globalAlpha = kIn * (1 - lock) * 0.55; x.setLineDash([8, 10]); anchorShape(EX, CY, 'rgba(200,250,114,0.9)', 5); x.restore();
+  if (t >= tAnc - 0.45) { dash(EX, 520, EX, ringY - 20, C.lime, 5, [1, 0], 1); glow(EX, ringY + 60, 160, '200,250,114', 0.2 * lock); x.save(); x.shadowColor = 'rgba(0,0,0,0)'; anchorShape(EX, ringY, C.lime, 9); x.restore(); }
+  if (lock > 0 && lock < 1) { x.save(); x.strokeStyle = `rgba(200,250,114,${1 - lock})`; x.lineWidth = 5; x.beginPath(); x.arc(EX, CY, 30 + 110 * lock, 0, 7); x.stroke(); x.restore(); }
+  /* indicizzazione: binario quasi vuoto */
+  const ki = oC(seg(t, a + 0.3, a + 0.8)), kPoc = ioC(seg(t, tPoc - 0.1, tPoc + 0.7));
+  tag(t, 'INDICIZZAZIONE', 150, 1360, a + 0.3, tInd, C.amber, { align: 'left', size: 26 });
+  x.save(); x.globalAlpha = ki; x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 3; rr(480, 1342, 480, 36, 18); x.stroke(); x.restore();
+  if (kPoc > 0.02) { x.fillStyle = C.amber; x.globalAlpha = 0.92; rr(480, 1342, 480 * 0.08 * kPoc + 36 * kPoc, 36, 18); x.fill(); x.globalAlpha = 1; }
+  x.restore(); finish(t); }
+
+/* ================= COSTO: una moneta intera = livello 2021; una fetta pari all'8,4% dell'angolo giro si stacca e diventa rossa ================= */
+function sCosto(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOtt = WA('costo', ['otto', '8'], 1, 0.82);
+  phrase(t, a + 0.05, [['Non è stato', C.ink], ['indolore', C.red]], 345, { size: 92 });
+  const CX = 540, CY = 960, R = 230, w0 = -Math.PI / 2, w1 = w0 + 0.084 * Math.PI * 2, am = (w0 + w1) / 2, kIn = oB(seg(t, a + 0.05, a + 0.6)), kS = ioC(seg(t, tOtt - 0.2, tOtt + 0.8));
+  lab(t, 'RETRIBUZIONI EFFETTIVE REALI · 2021', 540, 575, a + 0.3, { color: C.ink, size: 26 });
+  pop(CX, CY, kIn, () => {
+    glow(CX, CY, 330, '200,250,114', 0.12);
+    const g = x.createRadialGradient(CX, CY - 60, 20, CX, CY, R); g.addColorStop(0, 'rgba(200,250,114,0.42)'); g.addColorStop(1, 'rgba(200,250,114,0.16)');
+    x.fillStyle = g; x.strokeStyle = C.lime; x.lineWidth = 8; x.lineJoin = 'round';
+    x.beginPath(); x.moveTo(CX, CY); x.arc(CX, CY, R, w1, w0 + Math.PI * 2); x.closePath(); x.fill(); x.stroke();
+    x.save(); x.beginPath(); x.moveTo(CX, CY); x.arc(CX, CY, R, w1, w0 + Math.PI * 2); x.closePath(); x.clip(); x.setLineDash([10, 12]); x.strokeStyle = 'rgba(200,250,114,0.55)'; x.lineWidth = 3; x.beginPath(); x.arc(CX, CY, R - 34, 0, 7); x.stroke(); x.restore();
+    /* fetta: in posizione è lime con taglio tratteggiato rosso; sulla parola scivola fuori e diventa rossa */
+    const ox = Math.cos(am) * 80 * kS, oy = Math.sin(am) * 80 * kS; x.save(); x.translate(ox, oy);
+    x.beginPath(); x.moveTo(CX, CY); x.arc(CX, CY, R, w0, w1); x.closePath();
+    x.fillStyle = `rgba(200,250,114,${0.3 * (1 - kS)})`; x.fill(); x.fillStyle = `rgba(255,90,78,${0.55 * kS})`; x.fill();
+    if (kS < 0.5) { x.setLineDash([9, 9]); x.strokeStyle = C.red; x.lineWidth = 5; } else { x.setLineDash([]); x.strokeStyle = C.red; x.lineWidth = 8; } x.stroke(); x.restore(); });
+  txt('2021', CX, CY + 40, { size: 96, weight: 800, color: C.lime, alpha: kIn });
+  if (kS > 0) glow(CX + Math.cos(am) * 250, CY + Math.sin(am) * 250, 120, '255,90,78', 0.25 * kS);
+  big(t, '−8,4%', 540, 1290, tOtt - 0.1, { color: C.red, size: 104 });
+  lab(t, 'NEL 2024, RISPETTO AL 2021', 540, 1362, a + 0.3, { color: C.ink, size: 24 });
+  x.restore(); finish(t); }
+
+/* ================= CASA: due tessere, RISCHIO (la spirale gira) e REGOLA (sbarrata); un interruttore «ancorate» ferma il giro ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tRis = WA('casa', ['rischio'], 1, 0.12), tReg = WA('casa', ['regola'], 1, 0.3), tAnc = WA('casa', ['ancorate'], 1, 0.6), tGir = WA('casa', ['difficilmente'], 1, 0.85);
+  phrase(t, a + 0.05, [['Un rischio,', C.ink], ['non una regola', C.lime]], 345, { size: 92 });
+  const TY = 790, kA = oB(seg(t, a + 0.05, a + 0.55)), kB = oB(seg(t, a + 0.15, a + 0.65)), onR = t >= tRis, onG = t >= tReg;
+  const uS = seg(t, tAnc, tAnc + 0.9), ph = 3.2 * (Math.min(t, tAnc) - a) + (t > tAnc ? 3.2 * 0.9 * (uS - uS * uS / 2) : 0);
+  const P1 = spirPts(0, 0, 18, 125, 2.25);
+  pop(300, TY, kA, () => { if (onR) glow(300, TY, 220, '245,165,36', 0.18 * oC(seg(t, tRis, tRis + 0.4))); glass(300, TY, 400, 400, 44, 1);
+    x.save(); x.translate(300, TY - 20); x.rotate(ph); spirDraw(P1, 1, t >= tAnc ? C.grey : C.amber, 12); x.restore(); });
+  pop(780, TY, kB, () => { glass(780, TY, 400, 400, 44, 1);
+    x.save(); x.translate(780, TY - 20); spirDraw(P1, 1, 'rgba(241,244,238,0.55)', 10, 1, true); x.restore();
+    const ks = oC(seg(t, tReg, tReg + 0.35)); if (ks > 0) { x.save(); x.globalAlpha = ks; x.strokeStyle = C.red; x.lineWidth = 12; x.lineCap = 'round'; x.beginPath(); x.moveTo(690, TY + 90); x.lineTo(690 + 180 * ks, TY + 90 - 180 * ks); x.stroke(); x.restore(); } });
+  txt('RISCHIO', 300, TY + 150, { fam: 'mono', size: 30, weight: 700, ls: 3, color: onR ? C.amber : C.ink, alpha: oC(seg(t, a + 0.3, a + 0.65)) });
+  txt('REGOLA', 780, TY + 150, { fam: 'mono', size: 30, weight: 700, ls: 3, color: onG ? C.red : C.ink, alpha: oC(seg(t, a + 0.35, a + 0.7)) });
+  /* interruttore */
+  const TYY = 1190, kt = oB(seg(t, a + 0.25, a + 0.75)), ks2 = oB(seg(t, tAnc - 0.1, tAnc + 0.5), 1.3), kx = lerp(750, 330, clamp(ks2, 0, 1.05)), lime = t >= tAnc;
+  pop(540, TYY, kt, () => { glass(540, TYY, 560, 110, 55, 1); if (lime) glow(kx, TYY, 120, '200,250,114', 0.3 * oC(seg(t, tAnc, tAnc + 0.4))); else glow(kx, TYY, 110, '255,90,78', 0.2);
+    x.fillStyle = lime ? C.lime : C.red; x.strokeStyle = C.ink; x.lineWidth = 4; x.beginPath(); x.arc(kx, TYY, 40, 0, 7); x.fill(); x.stroke(); });
+  tag(t, 'ANCORATE', 330, 1290, a + 0.3, tAnc, C.lime, { size: 28 }); tag(t, 'NON ANCORATE', 750, 1290, a + 0.3, 1e9, C.red, { size: 28 });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, def: sDef, italia: sItalia, cautela: sCautela, perche: sPerche, costo: sCosto, casa: sCasa }, ORDER, ['hook', 'perche', 'casa']);
+</script></body></html>

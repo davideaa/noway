@@ -1,0 +1,221 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 45, DAY: 4, CAP: 2, NEXT: ['Troppa', 'domanda'], QUANDO: 'LUNEDÌ' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 45 — «Il 2022 in Italia, bollette e carrello» (CASO REALE, venerdì, lezione 5 di 5, capitolo 6). Numeri SOLO da p45-fonti.md (ISTAT):
+   NIC media 2022 8,1 (massimo dal 1985, quando 9,2) · NIC mensile 2022 (tabella B di p43-fonti.md): 4,8 5,7 6,5 6,0 6,8 8,0 7,9 8,4 8,9 11,8 11,8 11,6 ·
+   energetici media 2022 50,9, picco ottobre 71,1 · carrello media 8,4, picco novembre 12,7 · IPCA per quinti di spesa, media 2022: 12,1 · 10,6 · 9,4 · 8,5 · 7,2 ·
+   quota di spesa per l'energia: 14,6 (primo quinto) contro 6,7 (quinto). A schermo (arrotondati come la voce): oltre 8 · quasi 12 · più di 50 · sopra 70 ·
+   più di 12 · circa 7 · più di 14 · meno di 7. Altezze/lunghezze in scala con i numeri veri. Guerra: nessuna freccia di causa, solo l'energia già in salita
+   da fine 2021 e poi il salto (schema non in scala, dichiarato). Niente righe di fonte nel video. Testo mai sotto opacità 0,85: «si accende» = colore. */
+const ORDER = ['num', 'hook', 'indice', 'energia', 'guerra', 'carrello', 'quinti', 'quinti2', 'pesi', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo a size 92 */
+
+/* WA: secondo in cui la voce dice la n-esima parola della scena che inizia con UNA delle alternative (lettere E cifre; sui decimali anche la parte intera).
+   Senza voce (anteprima) usa la frazione f della scena. */
+const WA = (k, ws, n = 1, f = 0.5) => { (window.ANCH = window.ANCH || {})[k + '|' + ws.join('/') + '|' + n] = [k, ws, n];
+  const L = ((window.WORDS || {})[k]) || [];
+  for (const w of ws) { let c = 0; for (const [p, t] of L) if (_nw(p).startsWith(_nw(w)) && ++c === n) return t; }
+  return S(k) + f * Math.max(1, E(k) - S(k)); };
+const lab = (t, s, px, py, a0, o = {}) => txt(s, px, py, { fam: 'mono', size: 26, weight: 600, color: C.muted, ls: 2, alpha: oC(seg(t, a0, a0 + 0.35)), ...o });
+/* tag: scritta SEMPRE presente (entra in 0,35 s a inizio scena, poi opacità 1); sulla parola cambia colore e fa un piccolo colpo */
+const tag = (t, s, px, py, aIn, tOn, colOn, o = {}) => { const on = t >= tOn, kk = oC(seg(t, tOn, tOn + 0.3)), p = on ? 1 + 0.12 * Math.sin(Math.PI * kk) : 1;
+  x.save(); x.translate(px, py); x.scale(p, p); x.translate(-px, -py);
+  txt(s, px, py, { fam: 'mono', size: 26, weight: 600, ls: 2, color: on ? colOn : C.muted, alpha: oC(seg(t, aIn, aIn + 0.35)), ...o }); x.restore(); };
+function dash(x0, y0, x1, y1, col, w = 3, d = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(d); x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+function pop(cx, cy, k, fn) { if (k <= 0) return; x.save(); x.globalAlpha *= clamp(k); const s = clamp(k, 0, 1.15); x.translate(cx, cy); x.scale(s, s); x.translate(-cx, -cy); fn(); x.restore(); }
+const big = (t, s, px, py, a0, o = {}) => { const k = oC(seg(t, a0, a0 + 0.4)); txt(s, px, py, { size: 62, weight: 800, ls: -1, alpha: k, blur: (1 - k) * 10, ...o }); };
+/* polilinea disegnata solo per la frazione k della sua lunghezza */
+function polyPart(pts, k, col, w, a = 1) { if (k <= 0) return; let L = 0; const seg2 = []; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg2.push(d); L += d; }
+  let acc = 0; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(...pts[0]);
+  let last = pts[0];
+  for (let i = 1; i < pts.length; i++) { const need = k * L - acc; if (need <= 0) break; if (need >= seg2[i - 1]) { x.lineTo(...pts[i]); last = pts[i]; } else { const u = need / seg2[i - 1]; last = [lerp(pts[i - 1][0], pts[i][0], u), lerp(pts[i - 1][1], pts[i][1], u)]; x.lineTo(...last); } acc += seg2[i - 1]; }
+  x.stroke(); x.restore(); return last; }
+
+/* ================= HOOK: un quadrante da 0 a 12, l'ago sale oltre 8; in basso la riga del tempo 1985 → 2022 ================= */
+function sHook(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOtto = WA('hook', ['otto', '8'], 1, 0.5), t85 = WA('hook', ['millenovecentoottantacinque', '1985', '1'], 1, 0.85);
+  phrase(t, a + 0.05, [['Prezzi in Italia,', C.ink]], 345, { size: 92 });
+  phrase(t, tOtto - 0.12, [['oltre 8%', C.red]], Y2, { size: 92 });
+  const cx = 540, cy = 985, r = 300, a0 = Math.PI * 0.8, a1 = Math.PI * 2.2, ang = (v) => lerp(a0, a1, v / 12), kIn = oB(seg(t, a + 0.05, a + 0.6));
+  pop(cx, cy, kIn, () => {
+    glass(cx, cy - 20, 760, 640, 60, 1);
+    x.lineCap = 'round'; x.lineWidth = 34; x.strokeStyle = '#161b18'; x.beginPath(); x.arc(cx, cy, r, a0, a1); x.stroke();
+    for (let i = 0; i <= 12; i++) { const q = ang(i), big4 = i % 4 === 0; x.strokeStyle = big4 ? 'rgba(241,244,238,0.85)' : 'rgba(241,244,238,0.4)'; x.lineWidth = big4 ? 5 : 3; x.beginPath(); x.moveTo(cx + Math.cos(q) * (r - 28), cy + Math.sin(q) * (r - 28)); x.lineTo(cx + Math.cos(q) * (r - (big4 ? 64 : 50)), cy + Math.sin(q) * (r - (big4 ? 64 : 50))); x.stroke(); } });
+  const vv = 8.1 * oB(seg(t, tOtto - 0.3, tOtto + 0.6), 1.2) + 0.12 * Math.sin(t * 9) * (1 - seg(t, tOtto - 0.3, tOtto)), av = ang(clamp(vv, 0, 12.5));
+  if (vv > 0.05) { const g = x.createLinearGradient(cx - r, 0, cx + r, 0); g.addColorStop(0, '#C8FA72'); g.addColorStop(0.6, '#F5A524'); g.addColorStop(1, '#FF5A4E');
+    x.save(); x.lineCap = 'round'; x.lineWidth = 34; x.strokeStyle = g; x.globalAlpha = kIn; x.beginPath(); x.arc(cx, cy, r, a0, av); x.stroke(); x.restore(); }
+  x.save(); x.globalAlpha = kIn; x.strokeStyle = C.ink; x.lineWidth = 8; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(av) * (r - 84), cy + Math.sin(av) * (r - 84)); x.stroke(); x.fillStyle = C.ink; x.beginPath(); x.arc(cx, cy, 18, 0, 7); x.fill(); x.restore();
+  glow(cx + Math.cos(av) * (r - 84), cy + Math.sin(av) * (r - 84), 90, '255,90,78', 0.25 * seg(t, tOtto, tOtto + 0.5));
+  [0, 4, 8, 12].forEach((v) => { const q = ang(v); lab(t, String(v), cx + Math.cos(q) * (r + 56), cy + Math.sin(q) * (r + 56), a + 0.3, { color: C.ink, size: 28 }); });
+  lab(t, 'PREZZI AL CONSUMO · MEDIA 2022', cx, 600, a + 0.4, { color: C.ink, size: 24, ls: 1 });
+  /* riga del tempo: 1985 → 2022 */
+  const YT = 1300, X0 = 170, X1 = 910;
+  dash(X0, YT, X1, YT, 'rgba(241,244,238,0.55)', 4, [4, 12], oC(seg(t, a + 0.3, a + 0.8)));
+  const k85 = oC(seg(t, t85 - 0.2, t85 + 0.5)); dash(X0, YT, X0 + (X1 - X0) * k85, YT, C.amber, 6, [1, 0], k85);
+  pop(X0, YT, oB(seg(t, a + 0.3, a + 0.8)), () => { x.fillStyle = t >= t85 ? C.amber : '#222a25'; x.strokeStyle = C.ink; x.lineWidth = 3; x.beginPath(); x.arc(X0, YT, 16, 0, 7); x.fill(); x.stroke(); });
+  pop(X1, YT, oB(seg(t, a + 0.3, a + 0.8)), () => { x.fillStyle = C.red; x.strokeStyle = C.ink; x.lineWidth = 3; x.beginPath(); x.arc(X1, YT, 20, 0, 7); x.fill(); x.stroke(); });
+  tag(t, '1985', X0, YT + 48, a + 0.3, t85, C.amber, { color: C.ink }); lab(t, '2022', X1, YT + 48, a + 0.3, { color: C.red, weight: 700 });
+  tag(t, 'L’AUMENTO PIÙ AMPIO', 540, YT - 48, a + 0.4, t85, C.amber, { size: 28 });
+  x.restore(); finish(t); }
+
+/* ================= INDICE: dodici torri di vetro, una per mese del 2022; ottobre e novembre si accendono di rosso ================= */
+const NIC22 = [4.8, 5.7, 6.5, 6.0, 6.8, 8.0, 7.9, 8.4, 8.9, 11.8, 11.8, 11.6], MESI = ['G', 'F', 'M', 'A', 'M', 'G', 'L', 'A', 'S', 'O', 'N', 'D'];
+function sIndice(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tOtt = WA('indice', ['ottobre'], 1, 0.55), tNov = WA('indice', ['novembre'], 1, 0.62), tDod = WA('indice', ['dodici', '12'], 1, 0.85);
+  phrase(t, a + 0.05, [['Ottobre e novembre:', C.ink]], 345, { size: 92 });
+  phrase(t, tDod - 0.12, [['quasi 12%', C.red]], Y2, { size: 92 });
+  lab(t, 'INDICE NAZIONALE · SULL’ANNO', 540, 640, a + 0.4, { color: C.ink, size: 26 });
+  const BASE = 1270, SC = 44, CW = 62, PITCH = 76, X0 = 540 - (11 * PITCH) / 2;
+  x.save(); x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 3; x.beginPath(); x.moveTo(60, BASE + 6); x.lineTo(1020, BASE + 6); x.stroke(); x.restore();
+  NIC22.forEach((v, i) => { const cx = X0 + i * PITCH, k = ioC(seg(t, a + 0.05 + i * 0.04, a + 0.55 + i * 0.04)), h = v * SC * k, hot = (i === 9 && t >= tOtt) || (i === 10 && t >= tNov), tOn = i === 9 ? tOtt : tNov;
+    const g = x.createLinearGradient(0, BASE - h, 0, BASE); if (hot) { g.addColorStop(0, 'rgba(255,90,78,0.95)'); g.addColorStop(1, 'rgba(255,90,78,0.55)'); } else { g.addColorStop(0, 'rgba(241,244,238,0.5)'); g.addColorStop(1, 'rgba(241,244,238,0.16)'); }
+    if (hot) glow(cx, BASE - h, 110, '255,90,78', 0.28 * oC(seg(t, tOn, tOn + 0.4)));
+    x.fillStyle = g; rr(cx - CW / 2, BASE - h, CW, h, 10); x.fill(); x.strokeStyle = hot ? C.red : 'rgba(241,244,238,0.55)'; x.lineWidth = 3; rr(cx - CW / 2, BASE - h, CW, h, 10); x.stroke();
+    x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(cx - CW / 2 + 8, BASE - h + 10, 4, Math.max(0, h - 30));
+    lab(t, MESI[i], cx, BASE + 44, a + 0.3, { color: hot ? C.red : C.muted, weight: hot ? 800 : 600, size: 28 }); });
+  tag(t, 'OTT', X0 + 9 * PITCH, BASE - 11.8 * SC - 36, a + 0.3, tOtt, C.red, { size: 26 }); tag(t, 'NOV', X0 + 10 * PITCH, BASE - 11.8 * SC - 36, a + 0.3, tNov, C.red, { size: 26 });
+  x.restore(); finish(t); }
+
+/* ================= ENERGIA: luce, gas, carburanti; due barre in scala: media 2022 e picco di ottobre ================= */
+function iLuce(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.arc(cx, cy - 8, 24, Math.PI * 0.75, Math.PI * 2.25); x.lineTo(cx + 10, cy + 24); x.lineTo(cx - 10, cy + 24); x.closePath(); x.stroke(); x.beginPath(); x.moveTo(cx - 9, cy + 34); x.lineTo(cx + 9, cy + 34); x.stroke(); x.restore(); }
+function iGas(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx, cy - 36); x.bezierCurveTo(cx + 10, cy - 18, cx + 28, cy - 6, cx + 22, cy + 14); x.bezierCurveTo(cx + 18, cy + 32, cx - 18, cy + 32, cx - 22, cy + 14); x.bezierCurveTo(cx - 26, cy - 2, cx - 6, cy - 10, cx, cy - 36); x.stroke(); x.restore(); }
+function iGoccia(cx, cy, col) { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(cx, cy - 36); x.bezierCurveTo(cx + 32, cy - 2, cx + 28, cy + 32, cx, cy + 32); x.bezierCurveTo(cx - 28, cy + 32, cx - 32, cy - 2, cx, cy - 36); x.stroke(); x.restore(); }
+function sEnergia(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tL = WA('energia', ['luce'], 1, 0.28), tG = WA('energia', ['gas'], 1, 0.38), tC = WA('energia', ['carburanti'], 1, 0.46), tCinq = WA('energia', ['cinquanta', '50'], 1, 0.66), tSett = WA('energia', ['settanta', '70'], 1, 0.88);
+  phrase(t, a + 0.05, [['Energia:', C.ink]], 345, { size: 92 });
+  phrase(t, tCinq - 0.12, [['più di 50%', C.amber]], Y2, { size: 92, out: tSett - 0.1 });
+  phrase(t, tSett - 0.1, [['picco sopra 70%', C.red]], Y2, { size: 92 });
+  [[210, 'LUCE', iLuce, tL], [540, 'GAS', iGas, tG], [870, 'CARBURANTI', iGoccia, tC]].forEach(([cx, nome, ic, tOn], i) => { const k = oB(seg(t, a + 0.05 + i * 0.1, a + 0.55 + i * 0.1)), on = t >= tOn;
+    pop(cx, 700, k, () => { if (on) glow(cx, 690, 150, '245,165,36', 0.22 * oC(seg(t, tOn, tOn + 0.4))); glass(cx, 700, 262, 200, 30, 1); ic(cx, 676, on ? C.amber : 'rgba(241,244,238,0.8)'); });
+    tag(t, nome, cx, 764, a + 0.25 + i * 0.1, tOn, C.amber, { size: 24 }); });
+  const XB = 140, WB = 800, SCB = 10;
+  [[1005, 'MEDIA 2022', 50.9, C.amber, tCinq, '245,165,36'], [1215, 'PICCO · OTTOBRE', 71.1, C.red, tSett, '255,90,78']].forEach(([yb, nome, v, col, tOn, rgb], i) => {
+    const k = oC(seg(t, a + 0.3 + i * 0.15, a + 0.8 + i * 0.15)), kf = ioC(seg(t, tOn - 0.2, tOn + 0.9)), w = v * SCB * kf;
+    x.save(); x.globalAlpha = k; x.fillStyle = 'rgba(255,255,255,0.07)'; rr(XB, yb - 34, WB, 68, 18); x.fill(); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; rr(XB, yb - 34, WB, 68, 18); x.stroke(); x.setLineDash([]);
+    for (let q = 1; q < 8; q++) { x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 2; x.beginPath(); x.moveTo(XB + q * 100, yb + 40); x.lineTo(XB + q * 100, yb + 52); x.stroke(); } x.restore();
+    if (w > 4) { glow(XB + w, yb, 160, rgb, 0.22); x.fillStyle = col; x.globalAlpha = 0.92; rr(XB, yb - 34, w, 68, 18); x.fill(); x.globalAlpha = 1; x.fillStyle = 'rgba(255,255,255,0.4)'; x.fillRect(XB + 14, yb - 30, Math.max(0, w - 28), 4); }
+    tag(t, nome, XB, yb - 70, a + 0.3 + i * 0.15, tOn, col, { align: 'left' }); });
+  x.restore(); finish(t); }
+
+/* ================= GUERRA: energia già in salita da fine 2021, poi il salto. Schema non in scala, nessuna freccia di causa ================= */
+const yA = (xx) => (xx < 330 ? 1160 - 8 * ((xx - 150) / 180) : 1152 - 212 * Math.pow((xx - 330) / 370, 1.6)), yB = (xx) => 940 - 250 * (1 - Math.pow(1 - (xx - 700) / 260, 2));
+const PA = (() => { const L = []; for (let xx = 150; xx <= 700; xx += 10) L.push([xx, yA(xx)]); return L; })(), PB = (() => { const L = []; for (let xx = 700; xx <= 960; xx += 10) L.push([xx, yB(xx)]); return L; })();
+function sGuerra(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tInv = WA('guerra', ['invasione'], 1, 0.08), tAgg = WA('guerra', ['aggravato'], 1, 0.3), tSal = WA('guerra', ['salita'], 1, 0.62), tDue = WA('guerra', ['duemilaventuno', '2021', '2'], 1, 0.78);
+  phrase(t, a + 0.05, [['Energia già in salita,', C.ink]], 345, { size: 84 });
+  phrase(t, tDue - 0.12, [['da fine 2021', C.amber]], 345 + 84 * 1.12, { size: 84 });
+  const kAx = oC(seg(t, a + 0.1, a + 0.7));
+  x.save(); x.globalAlpha = kAx; x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 3; x.beginPath(); x.moveTo(110, 1250); x.lineTo(970, 1250); x.stroke();
+  for (const tx of [330, 700]) { x.beginPath(); x.moveTo(tx, 1250); x.lineTo(tx, 1266); x.stroke(); } x.restore();
+  /* sagome tratteggiate (forme attenuate) subito; si riempiono sulle parole */
+  polyPart(PA, oC(seg(t, a + 0.15, a + 0.9)), 'rgba(245,165,36,0.45)', 4, 1); x.save(); x.setLineDash([10, 10]); x.restore();
+  polyPart(PB, oC(seg(t, a + 0.3, a + 1.0)), 'rgba(255,90,78,0.45)', 4, 1);
+  const lA = polyPart(PA, ioC(seg(t, tSal - 0.2, tSal + 1.1)), C.amber, 9), lB = polyPart(PB, ioC(seg(t, tAgg - 0.1, tAgg + 0.9)), C.red, 9);
+  if (lA && t > tSal) glow(lA[0], lA[1], 80, '245,165,36', 0.25); if (lB && t > tAgg) glow(lB[0], lB[1], 110, '255,90,78', 0.35);
+  dash(700, 700, 700, 1250, t >= tInv ? C.red : 'rgba(241,244,238,0.6)', 3, [10, 10], oC(seg(t, a + 0.2, a + 0.7)));
+  tag(t, 'INVASIONE', 700, 665, a + 0.2, tInv, C.red, { size: 28 }); lab(t, 'FEB 2022', 700, 1304, a + 0.3, { color: C.ink, size: 24 });
+  tag(t, 'GIÀ IN SALITA', 400, 1030, a + 0.3, tSal, C.amber, { size: 28 }); tag(t, 'POI IL SALTO', 850, 1000, a + 0.3, tAgg, C.red, { size: 28 });
+  tag(t, 'FINE 2021', 330, 1304, a + 0.3, tDue, C.amber, { size: 24 });
+  lab(t, 'SCHEMA · NON IN SCALA', 540, 1356, a + 0.5, { color: C.muted, size: 22, ls: 3 });
+  x.restore(); finish(t); }
+
+/* ================= CARRELLO: un carrello di vetro che si riempie; livello a «oltre 8», poi sale e diventa rosso a «sopra 12» ================= */
+const CPOLY = [[300, 700], [880, 700], [840, 1050], [340, 1050]], CBASE = 1050, CK = 25; /* 25 px per punto: 8,4 → 210 px, 12,7 → 317 px */
+function sCarrello(t, a, b) { bg('52,34,28', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOtto = WA('carrello', ['otto', '8'], 1, 0.45), tDod = WA('carrello', ['dodici', '12'], 1, 0.82), tNov = WA('carrello', ['novembre'], 1, 0.95);
+  phrase(t, a + 0.05, [['Il carrello:', C.ink]], 345, { size: 92 });
+  phrase(t, tOtto - 0.12, [['oltre 8%', C.amber]], Y2, { size: 92, out: tDod - 0.1 });
+  phrase(t, tDod - 0.1, [['sopra 12%', C.red]], Y2, { size: 92 });
+  const kIn = oB(seg(t, a + 0.05, a + 0.6)), lv = (8.4 * ioC(seg(t, tOtto - 0.2, tOtto + 0.8)) + 4.3 * ioC(seg(t, tDod - 0.2, tDod + 0.9))) * CK, hot = seg(t, tDod - 0.2, tDod + 0.9);
+  pop(540, 1000, kIn, () => {
+    /* telaio */
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.6)'; x.lineWidth = 10; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(140, 640); x.lineTo(250, 640); x.lineTo(345, 1100); x.lineTo(850, 1100); x.stroke();
+    for (const wx of [410, 790]) { x.fillStyle = '#0a0c0b'; x.beginPath(); x.arc(wx, 1160, 30, 0, 7); x.fill(); x.stroke(); } x.restore();
+    /* cesto */
+    x.save(); x.beginPath(); CPOLY.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); x.closePath(); x.fillStyle = 'rgba(255,255,255,0.06)'; x.fill(); x.clip();
+    if (lv > 1) { const top = CBASE - lv, g = x.createLinearGradient(0, top, 0, CBASE), c0 = hot > 0.5 ? '255,90,78' : '245,165,36'; g.addColorStop(0, `rgba(${c0},0.9)`); g.addColorStop(1, `rgba(${c0},0.45)`);
+      x.fillStyle = g; x.beginPath(); x.moveTo(250, CBASE + 10); x.lineTo(250, top); for (let xx = 250; xx <= 930; xx += 20) x.lineTo(xx, top + 5 * Math.sin(xx * 0.03 + t * 3)); x.lineTo(930, CBASE + 10); x.closePath(); x.fill(); }
+    dash(250, CBASE - 8.4 * CK, 930, CBASE - 8.4 * CK, 'rgba(241,244,238,0.55)', 3, [10, 10], 1); dash(250, CBASE - 12.7 * CK, 930, CBASE - 12.7 * CK, 'rgba(255,90,78,0.8)', 3, [10, 10], 1);
+    x.restore();
+    x.save(); x.strokeStyle = 'rgba(241,244,238,0.75)'; x.lineWidth = 6; x.lineJoin = 'round'; x.beginPath(); CPOLY.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py))); x.closePath(); x.stroke(); x.fillStyle = 'rgba(255,255,255,0.2)'; x.fillRect(325, 725, 6, 280); x.restore(); });
+  if (hot > 0) glow(600, CBASE - lv, 300, '255,90,78', 0.14 * hot);
+  const ky = 1290; x.fillStyle = C.amber; x.beginPath(); x.arc(240, ky, 10, 0, 7); x.fill(); x.fillStyle = C.red; x.beginPath(); x.arc(560, ky, 10, 0, 7); x.fill();
+  tag(t, 'MEDIA 2022', 262, ky, a + 0.3, tOtto, C.amber, { align: 'left' }); tag(t, 'PICCO · NOVEMBRE', 582, ky, a + 0.3, tNov, C.red, { align: 'left' });
+  x.restore(); finish(t); }
+
+/* ================= QUINTI: cinque famiglie in fila (dal quinto che spende meno a quello che spende di più) e le loro barre, in scala ================= */
+const QV = [12.1, 10.6, 9.4, 8.5, 7.2], QX = [180, 360, 540, 720, 900], QBASE = 1280, QK = 40;
+function quintiScena(t, a, b, key, mode) {
+  bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const tDod = WA(key, ['dodici', '12'], 1, 0.82), tSet = WA(key, ['sette', '7'], 1, 0.5), tQ = WA(key, ['quinto'], 1, mode === 1 ? 0.3 : 0.72), tMeno = WA(key, ['meno'], 1, 0.4), tPiu = WA(key, ['piu'], 1, 0.9);
+  if (mode === 1) { phrase(t, a + 0.05, [['Chi spende meno:', C.ink]], 345, { size: 92 }); phrase(t, tDod - 0.12, [['più di 12%', C.red]], Y2, { size: 92 }); }
+  else { phrase(t, a + 0.05, [['Chi spende di più:', C.ink]], 345, { size: 92 }); phrase(t, tSet - 0.12, [['circa 7%', C.lime]], Y2, { size: 92 }); }
+  tag(t, 'SPENDE MENO', 105, 575, a + 0.3, mode === 1 ? tMeno : a + 0.3, C.red, { align: 'left' }); tag(t, 'SPENDE DI PIÙ', 975, 575, a + 0.3, mode === 1 ? 1e9 : tPiu, C.lime, { align: 'right' });
+  QX.forEach((cx, i) => { const k = oB(seg(t, a + 0.05 + i * 0.08, a + 0.5 + i * 0.08)), lit = (i === 0 && (mode === 2 || t >= tQ)) || (i === 4 && mode === 2 && t >= tQ), col = i === 0 ? C.red : C.lime;
+    pop(cx, 690, k, () => { if (lit) glow(cx, 690, 130, i === 0 ? '255,90,78' : '200,250,114', 0.25); glass(cx, 690, 150, 150, 26, 1);
+      if (lit) { x.save(); x.strokeStyle = col; x.lineWidth = 4; rr(cx - 75, 615, 150, 150, 26); x.stroke(); x.restore(); }
+      x.save(); x.strokeStyle = lit ? col : 'rgba(241,244,238,0.8)'; x.lineWidth = 5; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx - 38, 692); x.lineTo(cx, 656); x.lineTo(cx + 38, 692); x.stroke(); x.beginPath(); x.rect(cx - 28, 692, 56, 44); x.stroke(); x.beginPath(); x.rect(cx - 9, 712, 18, 24); x.stroke(); x.restore(); });
+    /* barre */
+    const h = QV[i] * QK, tg = i === 0 ? tDod : i === 4 ? tSet : 0;
+    let kb = 0, col2 = 'rgba(241,244,238,0.4)';
+    if (mode === 1) { kb = i === 0 ? ioC(seg(t, tDod - 0.2, tDod + 0.9)) : 0; }
+    else { kb = i === 0 ? 1 : i === 4 ? ioC(seg(t, tSet - 0.2, tSet + 0.9)) : ioC(seg(t, a + 0.15 + i * 0.12, a + 0.7 + i * 0.12)); col2 = i === 0 ? C.red : i === 4 ? C.lime : 'rgba(241,244,238,0.42)'; }
+    if (mode === 1 && i === 0) col2 = C.red;
+    x.save(); x.globalAlpha = oC(seg(t, a + 0.2 + i * 0.05, a + 0.6 + i * 0.05)); x.setLineDash([9, 9]); x.strokeStyle = 'rgba(241,244,238,0.4)'; x.lineWidth = 3; rr(cx - 55, QBASE - h, 110, h, 14); x.stroke(); x.restore();
+    if (kb > 0.01) { if (i === 0 || i === 4) glow(cx, QBASE - h * kb, 120, i === 0 ? '255,90,78' : '200,250,114', 0.22 * kb); x.fillStyle = col2; x.globalAlpha = 0.92; rr(cx - 55, QBASE - h * kb, 110, h * kb, 14); x.fill(); x.globalAlpha = 1; x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(cx - 41, QBASE - h * kb + 8, 4, Math.max(0, h * kb - 24)); }
+    lab(t, (i + 1) + '°', cx, QBASE + 44, a + 0.3, { color: lit || (mode === 2 && (i === 0 || i === 4)) ? col : C.muted, size: 28 }); });
+  if (mode === 2) { const kl = oC(seg(t, tSet - 0.1, tSet + 0.7)), yT = QBASE - QV[0] * QK, yL = QBASE - QV[4] * QK;
+    dash(235, yT, 975, yT, C.ink, 3, [10, 10], kl * 0.7);
+    x.save(); x.globalAlpha = kl * 0.9; x.fillStyle = 'rgba(255,90,78,0.10)'; rr(845, yT, 110, yL - yT, 10); x.fill(); x.restore();
+    dash(985 - 0, yT, 985, yL, C.red, 4, [1, 0], kl); dash(975, yT, 995, yT, C.red, 4, [1, 0], kl); dash(975, yL, 995, yL, C.red, 4, [1, 0], kl); }
+  x.restore(); finish(t); }
+function sQuinti(t, a, b) { quintiScena(t, a, b, 'quinti', 1); }
+function sQuinti2(t, a, b) { quintiScena(t, a, b, 'quinti2', 2); }
+
+/* ================= PESI: due ciambelle (il bilancio di una famiglia) con la fetta dell'energia: più di 14 contro meno di 7, in scala ================= */
+function sPesi(t, a, b) { bg('52,34,28', 0.5); x.save(); zoom(t, a, b, 1.04);
+  const t14 = WA('pesi', ['quattordici', '14'], 1, 0.62), t7 = WA('pesi', ['meno'], 2, 0.9) + 0.4, tMeno = WA('pesi', ['meno'], 2, 0.25);
+  phrase(t, a + 0.05, [['Il peso', C.ink], ['dell’energia', C.lime]], 345, { size: 92 });
+  lab(t, 'QUOTA DELLA SPESA PER L’ENERGIA', 540, 690, a + 0.3, { color: C.ink, size: 26 });
+  [[300, 14.6, C.red, '255,90,78', t14, 'più di 14%', 'CHI SPENDE MENO'], [780, 6.7, C.lime, '200,250,114', t7, 'meno di 7%', 'CHI SPENDE DI PIÙ']].forEach(([cx, v, col, rgb, tOn, txtN, cap], i) => {
+    const cy = 950, R = 130, k = oB(seg(t, a + 0.05 + i * 0.12, a + 0.6 + i * 0.12)), s0 = -Math.PI / 2, sw = (v / 100) * Math.PI * 2, kf = ioC(seg(t, tOn - 0.3, tOn + 0.9));
+    pop(cx, cy, k, () => { glass(cx, cy, 380, 380, 50, 1);
+      x.lineWidth = 56; x.strokeStyle = 'rgba(241,244,238,0.16)'; x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.stroke();
+      x.save(); x.setLineDash([8, 8]); x.strokeStyle = 'rgba(241,244,238,0.5)'; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, R + 36, s0, s0 + sw); x.stroke(); x.beginPath(); x.arc(cx, cy, R - 36, s0, s0 + sw); x.stroke(); x.restore();
+      if (kf > 0.01) { glow(cx, cy - R, 120, rgb, 0.25 * kf); x.strokeStyle = col; x.lineWidth = 56; x.lineCap = 'butt'; x.beginPath(); x.arc(cx, cy, R, s0, s0 + sw * kf); x.stroke(); } });
+    lab(t, 'SPESA', cx, cy, a + 0.3, { color: C.ink, size: 26 });
+    big(t, txtN, cx, 1192, tOn - 0.1, { color: col, size: 58 });
+    tag(t, cap, cx, 1265, a + 0.3, i === 0 ? t14 : t7, col, { size: 24 }); });
+  x.restore(); finish(t); }
+
+/* ================= CASA: la stessa inflazione (onde dal centro) colpisce due carte: quella con la quota maggiore di energia trema di più ================= */
+function sCasa(t, a, b) { bg('30,44,26', 0.7); x.save(); zoom(t, a, b, 1.04);
+  const tSen = WA('casa', ['sente'], 1, 0.88), tQuota = WA('casa', ['quota'], 1, 0.62);
+  phrase(t, a + 0.05, [['Stessa inflazione,', C.ink], ['peso diverso', C.lime]], 345, { size: 92 });
+  const CY = 960;
+  /* onde (solo ai lati, mai sopra le scritte) */
+  for (let j = 0; j < 4; j++) { const u = ((t - a) * 0.5 + j / 4) % 1, rad = 80 + u * 260, al = (1 - u) * 0.7 * oC(seg(t, a + 0.1, a + 0.6)); x.save(); x.strokeStyle = `rgba(200,250,114,${al})`; x.lineWidth = 4; x.beginPath(); x.arc(540, CY, rad, -0.6, 0.6); x.stroke(); x.beginPath(); x.arc(540, CY, rad, Math.PI - 0.6, Math.PI + 0.6); x.stroke(); x.restore(); }
+  const kc = oB(seg(t, a + 0.05, a + 0.5));
+  pop(540, CY, kc, () => { glow(540, CY, 130, '200,250,114', 0.25); glass(540, CY, 140, 140, 70, 1); txt('=', 540, CY + 2, { size: 84, weight: 800, color: C.lime }); });
+  lab(t, 'INFLAZIONE', 540, CY + 120, a + 0.3, { color: C.ink, size: 26 });
+  const env = oC(seg(t, tSen - 0.1, tSen + 0.4));
+  [[240, 300, C.red, '255,90,78', 'QUOTA MAGGIORE', 9], [840, 138, C.lime, '200,250,114', 'QUOTA MINORE', 2.5]].forEach(([cx, bh, col, rgb, cap, amp], i) => {
+    const k = oB(seg(t, a + 0.1 + i * 0.1, a + 0.6 + i * 0.1)), dx = (1 + (amp - 1) * env) * Math.sin(t * 38 + i) * (t > a + 0.6 ? 1 : 0.3), dy = (amp * 0.3) * env * Math.sin(t * 31 + i * 2);
+    pop(cx, CY, k, () => { x.save(); x.translate(dx, dy); glow(cx, CY + 80, 200, rgb, 0.12 + 0.12 * env * (i === 0 ? 1 : 0)); glass(cx, CY, 270, 440, 40, 1);
+      const bk = ioC(seg(t, a + 0.3, a + 1.0)), h = bh * bk; x.fillStyle = col; x.globalAlpha = 0.9; rr(cx - 95, CY + 190 - h, 190, h, 16); x.fill(); x.globalAlpha = 1; x.fillStyle = 'rgba(255,255,255,0.4)'; if (h > 10) x.fillRect(cx - 80, CY + 190 - h + 8, 4, h - 24);
+      x.restore(); });
+    lab(t, 'ENERGIA', cx + dx, CY - 175 + dy, a + 0.3, { color: C.ink, size: 26 });
+    tag(t, cap, cx, 1235, a + 0.3, i === 0 ? tQuota : 1e9, col, { size: 24 }); });
+  tag(t, 'LA SENTE DI PIÙ', 240, 1300, tSen - 0.1, tSen, C.red, { size: 28 });
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, indice: sIndice, energia: sEnergia, guerra: sGuerra, carrello: sCarrello, quinti: sQuinti, quinti2: sQuinti2, pesi: sPesi, casa: sCasa }, ORDER, ['hook', 'quinti', 'casa']);
+</script></body></html>

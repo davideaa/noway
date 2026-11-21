@@ -1,0 +1,363 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../font.css">
+<style>html,body{margin:0;background:#050607}canvas{display:block}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="base.js"></script>
+<script src="base2.js"></script>
+<script>const P = { EP: 19, DAY: 3, CAP: 0, NEXT: ['Perché l’Italia', 'cresce poco'], QUANDO: 'PROSSIMA LEZIONE', FONTE: 'DATI: ISTAT · BANCA D’ITALIA (non scritta nel video dal 16/10/2026)' };</script>
+<script src="serie.js"></script>
+<script>
+/* Puntata 19 — «La demografia». Numeri SOLO da p19-fonti.md:
+   over 65 ogni 10 persone di 15–64 anni: 39,8 per 100 al 1/1/2026 (14.821 / 37.270 mila, calcolo nostro su Istat) → 3,98 sagome;
+   2050: 62,4 per 100 (34,5 / 55,3, proiezione Istat base 1/1/2025, calcolo nostro) → 6,24 sagome («più di sei»);
+   nati: 576.659 (2008) → 355.772 (2025) = 61,7 ogni 100 → 6,17 culle da 10; fecondità 1,18 (2024) → 1,14 (2025, STIMA), «nuovo minimo storico» (Istat, solo per la fecondità);
+   quote al 1/1/2026: 0–14 11,6% · 15–64 63,2% · 65+ 25,1% (la piramide qui sotto è un modello illustrativo tarato su queste quote: 11,6 / 63,2 / 25,1);
+   15–64 anni: 37,3 milioni (2025) → quasi 7 milioni in meno nel 2050 (proiezione Istat): colonna in scala, 17,2 px per milione;
+   proiezione 2030: saldo migratorio +247 mila contro saldo naturale −353 mila (Istat, Previsioni 31/08/2026, p. 3): barre in scala, 1,8 px per mille;
+   Banca d'Italia (30/09/2026): più partecipazione «potrà al più compensare» il calo; «solo un recupero sostenuto della produttività può sostenere la crescita».
+   Il muro di mattoni (lavoro, produttivita) è un'illustrazione. Niente righe di fonte a schermo (Davide, 16/10/2026). */
+const ORDER = ['num', 'hook', 'proiezione', 'culle', 'figli', 'quindici', 'bebibum', 'settemilioni', 'immigrazione', 'lavoro', 'produttivita', 'casa', 'fine', 'cta', 'end'];
+const Y2 = 345 + 92 * 1.12; /* seconda riga del titolo */
+/* parola con più grafie possibili (Whisper: «bebi bum» / «baby boom», apostrofi): prova in ordine, poi la riserva */
+const WA = (k, ws, n, ris) => { for (const w of ws) { const v = WT(k, w, n, NaN); if (!isNaN(v)) return v; } return S(k) + ris; };
+const lab = (s, px, py, k, col = C.muted, size = 26, o = {}) => txt(s, px, py, { fam: 'mono', size, weight: 600, color: col, alpha: k, ls: 2, ...o });
+const swapK = (t, t0) => [1 - oC(seg(t, t0 - 0.3, t0 - 0.05)), oC(seg(t, t0, t0 + 0.3))];
+/* etichetta di onestà: pillola tratteggiata ambra */
+function honest(s, k, y = 1425, cx = 540) { if (k <= 0) return; const ww = tw(s, 22, 600, 'mono', 3) + 44; x.save(); x.globalAlpha *= k; x.strokeStyle = 'rgba(245,165,36,0.8)'; x.lineWidth = 2; x.setLineDash([6, 6]); rr(cx - ww / 2, y - 25, ww, 50, 25); x.stroke(); x.setLineDash([]); x.restore();
+  txt(s, cx, y, { fam: 'mono', size: 22, weight: 600, color: C.amber, alpha: k, ls: 3 }); }
+function ring(cx, cy, r0, t, t0, rgb = '200,250,114', d = 0.6, gr = 60) { const k = seg(t, t0, t0 + d); if (k <= 0 || k >= 1) return; x.save(); x.strokeStyle = `rgba(${rgb},${1 - k})`; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r0 + gr * oC(k), 0, 7); x.stroke(); x.restore(); }
+function dashLine(x0, y0, x1, y1, col, w = 3, dash = [10, 10], a = 1) { if (a <= 0) return; x.save(); x.globalAlpha *= a; x.strokeStyle = col; x.lineWidth = w; x.setLineDash(dash); x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.restore(); }
+
+/* ================= SAGOMA stilizzata (nessuna persona reale): by = piedi, h = altezza, fill = quanto è piena dal basso ================= */
+function person(cx, by, h, o = {}) {
+  const { col = C.lime, rgb = '200,250,114', fill = 1, k = 1, old = false, dress = false, dash = false, kid = 0, hrk = null, bwk = 0.42 } = o;
+  if (k <= 0) return; const s = clamp(oB(clamp(k)), 0, 1.15);
+  x.save(); x.translate(cx, by); x.scale(s, s); x.globalAlpha *= clamp(k * 2); if (old) x.rotate(0.06);
+  const hr = h * (hrk ?? lerp(0.135, 0.2, kid)), hx = old ? h * 0.05 : 0, hy = -h + hr, sy = -h + 2 * hr + h * 0.035, bw = h * bwk;
+  const path = () => { x.beginPath(); x.arc(hx, hy, hr, 0, 7);
+    if (dress) { x.moveTo(-bw * 0.3, sy + bw * 0.08); x.quadraticCurveTo(0, sy - bw * 0.2, bw * 0.3, sy + bw * 0.08); x.lineTo(bw * 0.6, -2); x.quadraticCurveTo(0, 4, -bw * 0.6, -2); x.closePath(); }
+    else x.roundRect(-bw / 2, sy, bw, -sy, [bw / 2, bw / 2, h * 0.05, h * 0.05]); };
+  path(); x.fillStyle = `rgba(${rgb},0.10)`; x.fill();
+  if (fill > 0) { x.save(); x.beginPath(); x.rect(-h, -h * fill - 1, 2 * h, h * fill + 3); x.clip(); path();
+    const g = x.createLinearGradient(0, -h, 0, 0); g.addColorStop(0, `rgba(${rgb},0.98)`); g.addColorStop(1, `rgba(${rgb},0.72)`); x.fillStyle = g; x.fill(); x.restore(); }
+  path(); x.strokeStyle = col; x.lineWidth = Math.max(2.5, h * 0.022); if (dash) x.setLineDash([h * 0.05, h * 0.04]); x.stroke(); x.setLineDash([]);
+  if (old) { x.strokeStyle = col; x.lineWidth = Math.max(3, h * 0.03); x.lineCap = 'round'; const cx0 = bw / 2 + h * 0.1;
+    x.beginPath(); x.moveTo(cx0 + h * 0.03, 0); x.lineTo(cx0, sy + h * 0.16); x.arc(cx0 - h * 0.05, sy + h * 0.16, h * 0.05, 0, Math.PI, true); x.stroke(); }
+  x.restore(); }
+
+/* ================= HOOK + PROIEZIONE: due gruppi separati, sopra gli over 65, sotto 10 persone di 15–64 anni ================= */
+const GT = { cy: 745, by: 840, h: 160, dx: 120 }, GB = { cy: 1085, by: 1180, h: 150, dx: 84 };
+function groups(t, o = {}) { const { kP = 1, n15 = 10, n65 = 0, dashFrom = 99, hot = 0 } = o; if (kP <= 0) return;
+  lab('65 ANNI E PIÙ', 540, 600, kP, C.amber);
+  if (hot > 0) glow(540, GT.cy, 480, '245,165,36', 0.16 * hot);
+  glass(540, GT.cy, 900, 230, 36, kP);
+  for (let i = 0; i < 7; i++) { const f = clamp(n65 - i); if (f <= 0) continue; const bob = Math.sin(t * 2.2 + i * 1.3) * 2;
+    person(540 + (i - 3) * GT.dx, GT.by + bob, GT.h, { col: C.amber, rgb: '245,165,36', fill: f, k: clamp((n65 - i) * 8), old: true, dash: i >= dashFrom }); }
+  /* il rapporto: due gruppi, non uno dentro l'altro */
+  const kO = kP * clamp(n15 / 3); lab('PER OGNI', 540, 915, kO, C.ink);
+  dashLine(250, 915, 410, 915, 'rgba(241,244,238,0.35)', 2, [4, 8], kO); dashLine(670, 915, 830, 915, 'rgba(241,244,238,0.35)', 2, [4, 8], kO);
+  glass(540, GB.cy, 900, 230, 36, kP);
+  for (let i = 0; i < 10; i++) { const ki = clamp(n15 - i); if (ki <= 0) continue; const bob = Math.sin(t * 2.6 + i * 0.9) * 2;
+    person(540 + (i - 4.5) * GB.dx, GB.by + bob, GB.h, { col: C.lime, rgb: '200,250,114', fill: 1, k: ki }); }
+  lab('10 PERSONE TRA 15 E 64 ANNI', 540, 1240, kP * clamp(n15 - 9), C.lime); }
+function sHook(t, a, b) { bg('48,40,22', 0.6); x.save(); zoom(t, a, b, 1.04);
+  const tOg = WT('hook', 'ogni', 1, 0.3), tPe = WT('hook', 'persone', 1, 1.0), tLa = WT('hook', 'lavoro', 1, 2.4), tOd = WT('hook', 'oggi', 1, 3.4), tQu = WT('hook', 'quasi', 1, 4.8), tAn = WT('hook', 'anni', 1, 6.9);
+  phrase(t, Math.max(a + 0.02, tOg - 0.12), [['Ogni 10 in età da lavoro,', C.ink]], 345, { size: 84 });
+  phrase(t, tQu - 0.1, [['quasi 4 over 65.', C.amber]], 345 + 84 * 1.12, { size: 84 });
+  const kP = oC(seg(t, a, a + 0.45));
+  groups(t, { kP, n15: 10 * seg(t, Math.min(tPe - 0.25, a + 0.4), tLa + 0.2), n65: 3.98 * ioC(seg(t, tQu - 0.05, tAn + 0.25)), hot: oC(seg(t, tQu, tAn)) });
+  glassPill(540, 1335, 'OGGI', oC(seg(t, tOd - 0.1, tOd + 0.3)), C.ink, 34);
+  x.restore(); finish(t); }
+function sProiezione(t, a, b) { bg('48,40,22', 0.6); x.save();
+  const tNe = WT('proiezione', 'nel', 1, 0.3), tPr = WT('proiezione', 'proiezioni', 1, 1.7), tPi = WT('proiezione', 'piu', 1, 3.1);
+  phrase(t, Math.max(a + 0.02, tNe - 0.1), [['Nel 2050,', C.ink]], 345, { size: 84 });
+  phrase(t, tPi - 0.1, [['più di 6.', C.amber]], 345 + 84 * 1.12, { size: 84 });
+  groups(t, { n65: 3.98 + 2.26 * ioC(seg(t, tPi - 0.15, tPi + 1.0)), dashFrom: 4, hot: 1 });
+  const [o1, i2] = swapK(t, tNe + 0.1);
+  glassPill(540, 1335, 'OGGI', o1, C.ink, 34); glassPill(540, 1335, 'NEL 2050', i2, C.amber, 34);
+  honest('PROIEZIONE ISTAT', oC(seg(t, tPr - 0.1, tPr + 0.3)), 1428);
+  x.restore(); finish(t); }
+
+/* ================= CULLE: ogni culla = 10 nati; 2008 dieci culle, 2025 sei e un sesto (61,7) ================= */
+function cradle(cx, by, o = {}) { const { k = 1, rock = 0, part = 1, rgb = '233,236,230', ghost = 0 } = o; if (k <= 0 && ghost <= 0) return;
+  const shape = () => { x.beginPath(); x.roundRect(-36, -54, 72, 34, [6, 6, 18, 18]); x.moveTo(-36, -50); x.quadraticCurveTo(-36, -84, -4, -84); x.lineTo(-4, -54); x.lineTo(-36, -54); x.closePath(); };
+  const frame = () => { x.beginPath(); x.moveTo(-42, -6); x.quadraticCurveTo(0, 14, 42, -6); x.moveTo(-24, -22); x.lineTo(-28, 0); x.moveTo(24, -22); x.lineTo(28, 0); };
+  x.save(); x.translate(cx, by); x.rotate(rock); x.lineCap = 'round'; x.lineJoin = 'round';
+  if (ghost > 0) { x.save(); x.globalAlpha *= ghost; x.strokeStyle = 'rgba(255,90,78,0.85)'; x.lineWidth = 3; x.setLineDash([6, 6]); shape(); x.stroke(); frame(); x.stroke(); x.restore(); }
+  if (k > 0 && part > 0) { const s = clamp(oB(clamp(k)), 0, 1.15); x.save(); x.scale(s, s); x.globalAlpha *= clamp(k * 2);
+    x.beginPath(); x.rect(-46, -95, 92 * part, 115); x.clip();
+    shape(); x.fillStyle = `rgba(${rgb},0.9)`; x.fill(); x.strokeStyle = `rgb(${rgb})`; x.lineWidth = 5; frame(); x.stroke();
+    x.fillStyle = '#050607'; x.beginPath(); x.arc(14, -60, 10, 0, 7); x.fill(); x.fillStyle = `rgb(${rgb})`; x.beginPath(); x.arc(14, -60, 7, 0, 7); x.fill();
+    x.fillStyle = 'rgba(5,6,7,0.35)'; x.fillRect(-30, -40, 60, 3); x.restore(); }
+  x.restore(); }
+function sCulle(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.04);
+  const tCu = WT('culle', 'culle', 1, 0.7), tBa = WT('culle', 'bambini', 1, 2.1), tN2 = WT('culle', 'nel', 2, 3.4), tCi = WT('culle', 'circa', 1, 5.2);
+  phrase(t, a + 0.02, [['Pensa alle culle:', C.ink]], 345, { size: 92 });
+  phrase(t, tCi - 0.1, [['da 100 a circa 62.', C.amber]], Y2, { size: 92 });
+  const XC = (i) => 540 + (i - 4.5) * 88, rock = (i, r) => 0.07 * Math.sin(t * 3.1 + i * 0.7 + r);
+  /* 2008 */
+  const n08 = 10 * seg(t, Math.min(tBa - 0.5, tCu + 0.2), tBa + 0.6), kL1 = oC(seg(t, tCu - 0.1, tCu + 0.3));
+  lab('2008', 144, 720, kL1, C.ink, 30, { align: 'left' });
+  lab(`${Math.round(10 * Math.floor(n08 + 1e-6))} NATI`, 936, 720, kL1 * clamp(n08), C.ink, 26, { align: 'right' });
+  for (let i = 0; i < 10; i++) cradle(XC(i), 862, { k: clamp(n08 - i), rock: rock(i, 0) });
+  /* 2025: sei culle piene e una per un sesto; le altre restano vuote, tratteggiate */
+  const n25 = 6.17 * seg(t, tN2 - 0.2, tCi + 0.3), kL2 = oC(seg(t, tN2 - 0.2, tN2 + 0.2)), kG = oC(seg(t, tCi + 0.1, tCi + 0.6));
+  lab('2025', 144, 1020, kL2, C.amber, 30, { align: 'left' });
+  lab('CIRCA 62 NATI', 936, 1020, oC(seg(t, tCi + 0.1, tCi + 0.5)), C.amber, 26, { align: 'right' });
+  for (let i = 0; i < 10; i++) { const f = clamp(n25 - i); cradle(XC(i), 1162, { k: f > 0 ? 1 : 0, part: f, rgb: '245,165,36', rock: rock(i, 2) * (f >= 1 ? 1 : 0), ghost: i >= 6 ? kG : 0 }); }
+  lab('OGNI CULLA = 10 NATI', 540, 1265, oC(seg(t, tBa, tBa + 0.4)), C.muted, 24);
+  x.restore(); finish(t); }
+
+/* ================= FIGLI: numero medio di figli per donna, 1,18 → 1,14 (stima): una sagoma piena e il 14% della seconda ================= */
+function odo(v, px, py, size, col, alpha) { /* contatore che rotola sull'ultima cifra: v in centesimi */
+  const c = Math.floor(v + 1e-6), f = v - c, base = `${Math.floor(c / 100)},${Math.floor((c % 100) / 10)}`;
+  const wB = tw(base, size), wD = tw('8', size), x0 = px - (wB + wD) / 2;
+  txt(base, x0 + wB / 2, py, { size, weight: 800, color: col, alpha, ls: -2 });
+  x.save(); x.beginPath(); x.rect(x0 + wB - 4, py - size * 0.62, wD + 16, size * 1.24); x.clip();
+  const d0 = c % 10, d1 = (c + 1) % 10, sh = size * 1.05 * f; /* scende: la cifra più alta esce in basso */
+  txt(String(d0), x0 + wB + wD / 2 + 4, py - sh, { size, weight: 800, color: col, alpha, ls: -2 });
+  if (f > 0.001) txt(String(d1), x0 + wB + wD / 2 + 4, py - sh + size * 1.05, { size, weight: 800, color: col, alpha, ls: -2 });
+  x.restore(); }
+function sFigli(t, a, b) { bg('52,26,24', 0.45); x.save(); zoom(t, a, b, 1.04);
+  const tFi = WT('figli', 'figli', 1, 1.7), tDo = WT('figli', 'donna', 1, 2.4), tSt = WT('figli', 'stime', 1, 3.4), tSc = WT('figli', 'sceso', 1, 4.5), tNu = WT('figli', 'nuovo', 1, 6.6);
+  phrase(t, tFi - 0.15, [['Figli per donna:', C.ink]], 345, { size: 92 });
+  phrase(t, tNu - 0.1, [['nuovo minimo storico.', C.red]], Y2, { size: 92 });
+  const kW = oC(seg(t, Math.min(tDo - 0.3, a + 0.6), tDo + 0.2)), kC1 = oC(seg(t, tFi - 0.1, tFi + 0.4));
+  const roll = ioC(seg(t, tSc + 0.1, tNu - 0.15)), v = lerp(118, 114, roll), f2 = (v - 100) / 100;
+  person(330, 1105, 400, { col: C.ink, rgb: '233,236,230', dress: true, k: kW, fill: 1 });
+  person(570, 1105, 210, { col: C.lime, rgb: '200,250,114', kid: 0.6, k: kC1, fill: 1 });
+  person(740, 1105, 210, { col: C.lime, rgb: '200,250,114', kid: 0.6, k: oC(seg(t, tSc - 0.2, tSc + 0.2)), fill: f2, dash: true });
+  lab('NUMERO MEDIO, PER DONNA', 540, 1165, oC(seg(t, tDo, tDo + 0.4)), C.muted, 24);
+  const kN = oC(seg(t, tSc - 0.1, tSc + 0.3));
+  if (kN > 0) { const hot = seg(t, tNu - 0.1, tNu + 0.3); if (hot > 0) glow(450, 1290, 260, '255,90,78', 0.22 * hot);
+    odo(v, 450, 1290, 150, hot > 0.5 ? C.red : C.ink, kN); }
+  honest('STIMA', oC(seg(t, tSt - 0.1, tSt + 0.3)), 1290, 820);
+  lab('ERA 1,18 NEL 2024', 540, 1415, oC(seg(t, tNu + 0.2, tNu + 0.6)), C.muted, 24);
+  x.restore(); finish(t); }
+
+/* ================= QUINDICI: lo stipite con i segni dell'altezza, dal 2025 al 2040 ================= */
+const HCM = [[0, 50], [2, 87], [5, 110], [10, 138], [15, 170]];
+const hcm = (age) => { for (let i = 1; i < HCM.length; i++) if (age <= HCM[i][0]) { const [a0, h0] = HCM[i - 1], [a1, h1] = HCM[i]; return lerp(h0, h1, (age - a0) / (a1 - a0)); } return 170; };
+const FLOOR = 1390, PXC = 3.6;
+function sQuindici(t, a, b) { bg('30,44,26', 0.8); x.save(); zoom(t, a, b, 1.04);
+  const tNa = WT('quindici', 'nato', 1, 1.0), tCo = WT('quindici', 'compira', 1, 2.1), tNe = WT('quindici', 'nel', 1, 3.4);
+  phrase(t, Math.max(a + 0.02, tNa - 0.3), [['Nato l’anno scorso?', C.ink]], 345, { size: 92 });
+  phrase(t, tCo - 0.05, [['15 anni nel 2040.', C.lime]], Y2, { size: 92 });
+  const kD = oC(seg(t, a, a + 0.5));
+  /* pavimento e stipite */
+  x.save(); x.globalAlpha = kD; x.strokeStyle = 'rgba(241,244,238,0.45)'; x.lineWidth = 4; x.beginPath(); x.moveTo(150, FLOOR); x.lineTo(930, FLOOR); x.stroke();
+  const g = x.createLinearGradient(616, 0, 664, 0); g.addColorStop(0, '#1d231f'); g.addColorStop(0.5, '#2a312c'); g.addColorStop(1, '#141916'); x.fillStyle = g; rr(616, 640, 48, FLOOR - 640, 6); x.fill();
+  x.strokeStyle = 'rgba(241,244,238,0.25)'; x.lineWidth = 2; rr(616, 640, 48, FLOOR - 640, 6); x.stroke(); x.restore();
+  const age = 15 * ioC(seg(t, tCo - 0.25, tNe + 0.6)), hpx = hcm(age) * PXC, adult = seg(age, 14.2, 15);
+  /* segni sullo stipite: anno e età */
+  [[0, '2025 · 0 ANNI'], [5, '2030 · 5 ANNI'], [10, '2035 · 10 ANNI'], [15, '2040 · 15 ANNI']].forEach(([ag, s], i) => {
+    const km = i === 0 ? oC(seg(t, tNa - 0.1, tNa + 0.3)) : oC(seg(age, ag - 0.6, ag)); if (km <= 0) return; const yy = FLOOR - hcm(ag) * PXC, on = ag === 15;
+    x.save(); x.globalAlpha = km; x.strokeStyle = on ? C.lime : C.ink; x.lineWidth = on ? 5 : 3; x.beginPath(); x.moveTo(606, yy); x.lineTo(lerp(606, 674, km), yy); x.stroke(); x.restore();
+    lab(s, 692, yy, km, on ? C.lime : C.ink, on ? 30 : 26, { align: 'left' }); });
+  /* il bambino che cresce: diventa lime quando entra nell'età da lavoro */
+  if (kD > 0) { glow(450, FLOOR - hpx / 2, hpx * 0.8, adult > 0.5 ? '200,250,114' : '241,244,238', 0.12 + 0.12 * adult);
+    person(450, FLOOR, hpx, { col: adult > 0.5 ? C.lime : C.ink, rgb: adult > 0.5 ? '200,250,114' : '233,236,230', hrk: lerp(0.2, 0.1, clamp(age / 15)), bwk: lerp(0.5, 0.25, clamp(age / 15)), k: kD, fill: 1 }); }
+  const yT = FLOOR - 170 * PXC; glassPill(830, yT - 84, 'ETÀ DA LAVORO', oC(seg(t, tNe + 0.55, tNe + 0.95)), C.lime, 30);
+  tap(640, yT, t, tNe + 0.7);
+  x.restore(); finish(t); }
+
+/* ================= BEBIBUM: la piramide (modello tarato sulle quote vere del 1/1/2026: 11,6 / 63,2 / 25,1) che invecchia ================= */
+const PB = [[1915, 950], [1920, 1100], [1930, 1000], [1940, 1000], [1944, 800], [1946, 1030], [1950, 900], [1955, 870], [1964, 1030], [1970, 900], [1975, 830], [1980, 640], [1985, 580], [1990, 570], [1995, 525], [2000, 545], [2008, 577], [2010, 562], [2012, 534], [2014, 502], [2016, 473], [2018, 440], [2020, 405], [2022, 393], [2024, 370], [2025, 356], [2030, 355], [2045, 340], [2060, 330]];
+const births = (y) => { if (y <= PB[0][0]) return PB[0][1]; for (let i = 1; i < PB.length; i++) if (y <= PB[i][0]) { const [a0, v0] = PB[i - 1], [a1, v1] = PB[i]; return lerp(v0, v1, (y - a0) / (a1 - a0)); } return PB[PB.length - 1][1]; };
+const surv = (a) => 1 / (1 + Math.exp((a - 81) / 6.5)), migr = (a) => 1 + 0.4 * Math.exp(-(((a - 36) / 13) ** 2)) + 0.1 * (a < 15 ? 1 : 0);
+const pw = (Y, a) => births(Y - a) * surv(a) * migr(a);
+window.QUOTE = (Y = 2026) => { let g = 0, w = 0, o = 0; for (let a = 0; a <= 100; a++) { const v = pw(Y, a); if (a < 15) g += v; else if (a < 65) w += v; else o += v; } const T = g + w + o; return [g / T * 100, w / T * 100, o / T * 100]; };
+const PY = { by: 1390, dy: 7.2, cx: 540, sx: 0.285 };
+const ageY = (a) => PY.by - a * PY.dy;
+function pyramid(t, Y, o = {}) { const { k = 1, hlBoom = 0, hlKids = 0 } = o; if (k <= 0) return;
+  x.save(); x.globalAlpha *= k;
+  for (let a = 0; a <= 100; a++) { const hw = pw(Y, a) * PY.sx, born = Y - a, boom = born >= 1956 && born <= 1970 ? hlBoom : 0;
+    const rgb = a < 15 ? '233,236,230' : a < 65 ? '200,250,114' : '245,165,36', al = 0.55 - 0.15 * hlBoom + 0.55 * boom + (a < 15 ? 0.35 * hlKids : 0);
+    x.fillStyle = `rgba(${rgb},${al})`; x.fillRect(PY.cx - hw, ageY(a + 1) + 0.5, 2 * hw, PY.dy - 1.2); }
+  dashLine(230, ageY(15), 850, ageY(15), 'rgba(241,244,238,0.6)', 2, [6, 7], 1); dashLine(230, ageY(65), 850, ageY(65), 'rgba(241,244,238,0.6)', 2, [6, 7], 1);
+  x.restore(); }
+function sBebibum(t, a, b) { bg(); x.save();
+  const tCa = WT('bebibum', 'calano', 1, 2.4), tGe = WT('bebibum', 'generazioni', 1, 4.8), tBe = WA('bebibum', ['bebi', 'baby', 'bebe', 'beby', 'bb'], 1, 5.5), tAn = WT('bebibum', 'anziana', 1, 6.9), tGi = WT('bebibum', 'giovani', 1, 7.9), tNu = WT('bebibum', 'numerosi', 1, 9.0);
+  phrase(t, Math.max(a + 0.02, tCa - 0.2), [['Calano già prima:', C.ink]], 345, { size: 92 });
+  phrase(t, tBe - 0.25, [['il baby boom invecchia.', C.amber]], Y2, { size: 92 });
+  const kP = oC(seg(t, a, a + 0.5)), sh = ioC(seg(t, tGe - 0.1, Math.min(tNu + 0.3, b - 0.02))) /* arriva al 2041 prima del cambio scena: settemilioni riparte da lì */, Y = 2026 + 15 * sh;
+  pyramid(t, Y, { k: kP, hlBoom: oC(seg(t, tBe - 0.2, tBe + 0.3)), hlKids: Math.sin(Math.PI * seg(t, tGi - 0.1, tGi + 1.2)) });
+  /* fasce di età (sinistra) e quote di oggi (destra, solo finché la piramide è quella del 2026) */
+  const kq = kP * (1 - oC(seg(t, tGe - 0.3, tGe))), kWk = oC(seg(t, tCa - 0.1, tCa + 0.3));
+  lab('65+ ANNI', 60, (ageY(65) + ageY(100)) / 2, kP, C.amber, 26, { align: 'left' });
+  lab('15–64', 60, (ageY(15) + ageY(65)) / 2, kP, C.lime, 26, { align: 'left' });
+  lab('0–14', 60, (ageY(0) + ageY(15)) / 2, kP, C.ink, 26, { align: 'left' });
+  if (kWk > 0) { const ty = (ageY(15) + ageY(65)) / 2 + 48; x.save(); x.globalAlpha = kWk; x.fillStyle = C.red; x.beginPath(); x.moveTo(84, ty + 14); x.lineTo(70, ty - 8); x.lineTo(98, ty - 8); x.closePath(); x.fill(); x.restore();
+    lab('CALANO', 112, ty + 2, kWk, C.red, 24, { align: 'left' }); }
+  [[(ageY(65) + ageY(100)) / 2, '25,1%', C.amber], [(ageY(15) + ageY(65)) / 2, '63,2%', C.lime], [(ageY(0) + ageY(15)) / 2, '11,6%', C.ink]].forEach(([yy, s, c]) => txt(s, 1020, yy, { size: 34, weight: 800, color: c, align: 'right', alpha: kq }));
+  /* etichetta che segue il baby boom */
+  const kB = oC(seg(t, tBe, tBe + 0.35)); if (kB > 0) { const yb = ageY(Y - 1963 + 0.5); lab('BABY BOOM', 872, yb, kB, C.ink, 24, { align: 'left' }); }
+  const [o1, i2] = swapK(t, tGe + 0.2);
+  lab('OGGI', 540, 615, kP * o1, C.ink); lab('TRA 15 ANNI', 540, 615, i2, C.ink);
+  mono('ILLUSTRAZIONE · QUOTE DI OGGI IN SCALA', 540, 1432, t, a + 0.4, { size: 22 });
+  x.restore(); finish(t); }
+
+/* ================= SETTE MILIONI: la colonna dei 15–64enni in scala, il pezzo di quasi 7 milioni si stacca ================= */
+const CL = { cx: 400, w: 280, by: 1330, tot: 37.3, cut: 7, ppm: 640 / 37.3 };
+function sSettemilioni(t, a, b) { bg('52,26,24', 0.45); x.save();
+  const tPr = WT('settemilioni', 'proiezioni', 1, 1.0), tQu = WT('settemilioni', 'quasi', 1, 2.8), tMi = WT('settemilioni', 'milioni', 1, 3.4), tMe = WT('settemilioni', 'meno', 1, 4.1);
+  phrase(t, a + 0.02, [['In età da lavoro,', C.ink]], 345, { size: 92 });
+  phrase(t, tQu - 0.1, [['quasi 7 milioni in meno.', C.red]], Y2, { size: 92 });
+  /* la piramide della scena prima sfuma */
+  const kOut = 1 - oC(seg(t, a, a + 0.45)); if (kOut > 0) pyramid(t, 2041, { k: kOut, hlBoom: 1 });
+  const kC = oC(seg(t, a + 0.15, a + 0.65)); if (kC <= 0) { x.restore(); finish(t); return; }
+  const H = CL.tot * CL.ppm, top = CL.by - H, cutY = top + CL.cut * CL.ppm, x0 = CL.cx - CL.w / 2;
+  const kCr = oC(seg(t, tQu - 0.05, tQu + 0.35)), u = seg(t, tMi - 0.1, tMi + 0.8);
+  const body = (y0, y1, al) => { const g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, `rgba(200,250,114,${0.62 * al})`); g.addColorStop(1, `rgba(200,250,114,${0.28 * al})`); x.fillStyle = g; rr(x0, y0, CL.w, y1 - y0, 18); x.fill();
+    x.fillStyle = `rgba(5,6,7,${0.25 * al})`; for (let m = 1; m < CL.tot; m++) { const yy = CL.by - m * CL.ppm; if (yy > y0 + 4 && yy < y1 - 4) x.fillRect(x0 + 10, yy, CL.w - 20, 1.5); } };
+  x.save(); x.globalAlpha = kC; x.translate(0, (1 - kC) * 50);
+  body(cutY, CL.by, 1);
+  /* sagoma tratteggiata dove c'era il pezzo */
+  if (u > 0) { x.save(); x.globalAlpha *= oC(u); x.strokeStyle = 'rgba(255,90,78,0.85)'; x.lineWidth = 3; x.setLineDash([8, 7]); rr(x0, top, CL.w, cutY - top, 18); x.stroke(); x.restore(); }
+  /* il pezzo che si stacca e svanisce */
+  if (u < 1) { x.save(); x.translate(lerp(0, 230, oC(u)), lerp(0, -90, oC(u))); x.rotate(0.12 * oC(u)); x.globalAlpha *= 1 - u;
+    body(top, cutY, 1); if (kCr > 0) { x.fillStyle = `rgba(255,90,78,${0.45 * kCr})`; rr(x0, top, CL.w, cutY - top, 18); x.fill(); } x.restore(); }
+  /* la crepa */
+  if (kCr > 0 && u < 0.3) { x.save(); x.globalAlpha *= kCr * (1 - u / 0.3); x.strokeStyle = C.red; x.lineWidth = 5; x.lineJoin = 'round'; x.beginPath(); x.moveTo(x0, cutY);
+    [[0.18, -9], [0.36, 7], [0.55, -6], [0.74, 8], [1, 0]].forEach(([fx, dy]) => x.lineTo(x0 + CL.w * fx * clamp(kCr * 1.4), cutY + dy)); x.stroke(); x.restore(); }
+  x.restore();
+  lab('OGGI', x0 - 18, top + 2, kC, C.ink, 26, { align: 'right' });
+  lab('2050', x0 - 18, cutY + 2, oC(seg(t, tMi + 0.3, tMi + 0.7)), C.lime, 26, { align: 'right' });
+  /* parentesi e misura, a destra della colonna */
+  const kM = oC(seg(t, tMi + 0.5, tMi + 0.9)); if (kM > 0) { const bx = x0 + CL.w + 26; x.save(); x.globalAlpha = kM; x.strokeStyle = C.red; x.lineWidth = 4; x.lineCap = 'round';
+    x.beginPath(); x.moveTo(bx, top + 4); x.lineTo(bx + 14, top + 4); x.lineTo(bx + 14, cutY - 4); x.lineTo(bx, cutY - 4); x.stroke(); x.restore();
+    txt('QUASI 7 MILIONI', bx + 36, (top + cutY) / 2, { fam: 'mono', size: 26, weight: 600, color: C.red, align: 'left', ls: 2, alpha: kM }); }
+  lab('PERSONE TRA 15 E 64 ANNI', CL.cx, CL.by + 44, kC, C.muted, 24);
+  honest('PROIEZIONE ISTAT', oC(seg(t, tPr - 0.1, tPr + 0.3)), 1260, 790);
+  x.restore(); finish(t); }
+
+/* ================= IMMIGRAZIONE: il confine con chi arriva e chi parte, poi le due barre in scala (proiezione 2030) ================= */
+const MS = 1.8; /* px per mille persone */
+function sImmigrazione(t, a, b) { bg(); x.save(); zoom(t, a, b, 1.03);
+  const tAr = WT('immigrazione', 'arrivano', 1, 1.7), tPa = WT('immigrazione', 'partono', 1, 3.8), tMa = WT('immigrazione', 'ma', 1, 4.1), tAb = WT('immigrazione', 'abbastanza', 1, 4.8),
+    tCo = WT('immigrazione', 'coprire', 1, 5.5), tDi = WT('immigrazione', 'differenza', 1, 6.2), tMo = WT('immigrazione', 'morti', 1, 6.9);
+  phrase(t, a + 0.02, [['Le risposte?', C.ink]], 345, { size: 92, out: tAr - 0.35 });
+  phrase(t, tAr - 0.05, [['Più arrivi', C.lime], ['che partenze,', C.ink]], 345, { size: 92, out: tMa - 0.35 });
+  phrase(t, tMa - 0.05, [['ma non', C.ink], ['abbastanza.', C.red]], 345, { size: 92 });
+  /* confine */
+  const kB = oC(seg(t, a + 0.1, a + 0.6));
+  lab('ESTERO', 290, 612, kB, C.muted); lab('ITALIA', 790, 612, kB, C.ink);
+  dashLine(540, 640, 540, 950, 'rgba(241,244,238,0.45)', 3, [8, 9], kB);
+  /* chi arriva (lime, fitto) e chi parte (grigio, rado): densità illustrativa, nessuna cifra */
+  const kIn = oC(seg(t, tAr - 0.1, tAr + 0.4)), kOu = oC(seg(t, tPa - 0.1, tPa + 0.4));
+  for (let j = 0; j < 12; j++) { const u = ((t - tAr) * 0.16 + j / 12 + 10) % 1, px = lerp(120, 960, u), fa = Math.sin(Math.PI * u);
+    person(px, 750, 50, { col: C.lime, rgb: '200,250,114', k: kIn * clamp(fa * 2.5) * (t >= tAr - 0.1 ? 1 : 0) }); }
+  for (let j = 0; j < 4; j++) { const u = ((t - tPa) * 0.16 + j / 4 + 10) % 1, px = lerp(960, 120, u), fa = Math.sin(Math.PI * u);
+    person(px, 900, 50, { col: '#B9C0BB', rgb: '185,192,187', k: kOu * clamp(fa * 2.5), fill: 0.6 }); }
+  lab('ARRIVANO', 790, 672, kIn, C.lime, 24); lab('PARTONO', 290, 935, kOu, C.muted, 24);
+  /* le barre in scala: 353 mila contro 247 mila */
+  const X0 = 170, wN = 353 * MS, wM = 247 * MS, kR = ioC(seg(t, tAb - 0.15, tAb + 0.5)), kL = ioC(seg(t, tCo - 0.15, tCo + 0.6)), kGap = oC(seg(t, tDi - 0.05, tDi + 0.4));
+  lab('MORTI MENO NASCITE', X0, 1045, oC(seg(t, tAb - 0.15, tAb + 0.2)), C.red, 24, { align: 'left' });
+  if (kR > 0) { x.save(); const g = x.createLinearGradient(X0, 0, X0 + wN, 0); g.addColorStop(0, 'rgba(255,90,78,0.55)'); g.addColorStop(1, 'rgba(255,90,78,0.95)'); x.fillStyle = g; rr(X0, 1068, wN * kR, 64, 14); x.fill(); x.restore();
+    txt('353 MILA', X0 + wN + 18, 1101, { size: 34, weight: 800, color: C.red, align: 'left', alpha: seg(kR, 0.8, 1) }); }
+  lab('ARRIVI MENO PARTENZE', X0, 1185, oC(seg(t, tCo - 0.15, tCo + 0.2)), C.lime, 24, { align: 'left' });
+  if (kGap > 0) { x.save(); x.globalAlpha = kGap; x.strokeStyle = 'rgba(255,90,78,0.9)'; x.lineWidth = 3; x.setLineDash([8, 7]); rr(X0 + wM + 6, 1210, wN - wM - 6, 60, 12); x.stroke(); x.restore();
+    txt('NON BASTA', X0 + wN + 18, 1241, { size: 34, weight: 800, color: C.red, align: 'left', alpha: kGap }); }
+  if (kL > 0) { x.save(); x.fillStyle = 'rgba(200,250,114,0.92)'; rr(X0, 1208, wM * kL, 64, 14); x.fill(); x.restore();
+    txt('247 MILA', X0 + wM / 2, 1241, { size: 34, weight: 800, color: '#15200C', alpha: seg(kL, 0.75, 1) }); }
+  honest('PROIEZIONE ISTAT · 2030', oC(seg(t, tAb, tAb + 0.4)), 1395);
+  void tMo;
+  x.restore(); finish(t); }
+
+/* ================= LAVORO + PRODUTTIVITÀ: il muro del lavoro (illustrazione) ================= */
+const WL = { x0: 120, cols: 5, pit: 128, bw: 122, bh: 62, gy: 6, rows: 6, by: 1300 };
+const GAPC = [1, 2, 3], GAPL = ['PERSONE', 'PERSONE', 'PERSONE'];
+function brick(px, py, w, h, o = {}) { const { fill = '#1A201C', stroke = 'rgba(241,244,238,0.55)', dash = false, a = 1, label = null, lcol = '#15200C' } = o; if (a <= 0) return;
+  x.save(); x.globalAlpha *= a; rr(px, py, w, h, 8); x.fillStyle = fill; x.fill(); x.strokeStyle = stroke; x.lineWidth = 2.5; if (dash) x.setLineDash([7, 6]); x.stroke(); x.setLineDash([]);
+  x.fillStyle = 'rgba(255,255,255,0.10)'; if (!dash) x.fillRect(px + 8, py + 5, w - 16, 3); x.restore();
+  if (label) txt(label, px + w / 2, py + h / 2 + 1, { fam: 'mono', size: 22, weight: 600, color: lcol, alpha: a, ls: 1 }); }
+/* o: gapFill [0..1 per i 3 buchi], gapGhost, grow (altezza dei mattoni), rem (colonna tolta) */
+function wall(t, o = {}) { const { k = 1, gapFill = [0, 0, 0], gapGhost = 1, grow = 1, rem = 0 } = o; if (k <= 0) return;
+  const pitY = (WL.bh + WL.gy) * grow, bh = WL.bh * grow, Wfull = WL.cols * WL.pit - 6;
+  x.save(); x.globalAlpha *= k;
+  for (let r = 0; r < WL.rows; r++) { const py = WL.by - (r + 1) * pitY + WL.gy, off = (r % 2) === ((WL.rows - 1) % 2) ? 0 : -WL.pit / 2; /* la fila in cima senza sfalsamento: i buchi cadono su mattoni interi */
+    for (let c = 0; c < WL.cols + 1; c++) { let px = WL.x0 + c * WL.pit + off, w = WL.bw; if (px < WL.x0) { w -= WL.x0 - px; px = WL.x0; } if (px + w > WL.x0 + Wfull) w = WL.x0 + Wfull - px; if (w <= 8) continue;
+      const lastCol = px + w > WL.x0 + Wfull - WL.pit + 10; /* la colonna di destra, che se ne va con meno persone */
+      if (r === WL.rows - 1 && GAPC.includes(c)) { const gi = GAPC.indexOf(c);
+        if (gapFill[gi] < 1) brick(px, py, w, bh, { fill: 'rgba(255,90,78,0.06)', stroke: 'rgba(255,90,78,0.85)', dash: true, a: gapGhost });
+        continue; }
+      if (lastCol && rem > 0) { brick(px, py, w, bh, { fill: 'rgba(255,90,78,0.10)', stroke: 'rgba(255,90,78,0.85)', dash: rem > 0.5, a: 1 - 0.75 * rem }); continue; }
+      brick(px, py, w, bh); } }
+  /* i mattoni nuovi (più persone al lavoro) al loro posto */
+  GAPC.forEach((c, gi) => { const f = gapFill[gi]; if (f < 1) return; const py = WL.by - WL.rows * pitY + WL.gy, px = WL.x0 + c * WL.pit;
+    brick(px, py, WL.bw, bh, { fill: 'rgba(200,250,114,0.92)', stroke: C.lime, label: GAPL[gi] }); });
+  x.restore(); }
+const wallTop = (grow) => WL.by - WL.rows * (WL.bh + WL.gy) * grow + WL.gy;
+function flyBrick(t, gi, t0, from) { const u = seg(t, t0 - 0.7, t0); if (u <= 0 || u >= 1) return; const c = GAPC[gi], tx = WL.x0 + c * WL.pit, ty = wallTop(1);
+  const e = ioC(u), cx = lerp(from[0], tx, e), cy = lerp(from[1], ty, e) - Math.sin(Math.PI * e) * 120;
+  x.save(); x.translate(cx + WL.bw / 2, cy + WL.bh / 2); x.rotate((1 - e) * (from[0] < 540 ? -0.5 : 0.5)); glow(0, 0, 110, '200,250,114', 0.3);
+  brick(-WL.bw / 2, -WL.bh / 2, WL.bw, WL.bh, { fill: 'rgba(200,250,114,0.92)', stroke: C.lime, label: GAPL[gi] }); x.restore(); }
+function levelLine(k) { const y = wallTop(1) - 4; dashLine(100, y, 990, y, 'rgba(200,250,114,0.75)', 3, [12, 9], k); lab('OGGI', 990, y - 26, k, C.lime, 24, { align: 'right' }); }
+function sLavoro(t, a, b) { bg(); x.save();
+  const tDo = WT('lavoro', 'persone', 1, 1.6), tGi = WT('lavoro', 'lavoro', 1, 2.2), tMa = WT('lavoro', 'massimo', 1, 4.5), tCa = WT('lavoro', 'calo', 1, 5.5);
+  phrase(t, Math.max(a + 0.02, tDo - 0.35), [['Più persone al lavoro', C.lime]], 345, { size: 84 });
+  phrase(t, tMa - 0.1, [['al massimo compensano.', C.ink]], Y2, { size: 92 });
+  const kW = oC(seg(t, a, a + 0.5)), t1 = tDo + 0.55, t2 = tDo + 0.85, t3 = tGi + 0.65;
+  levelLine(kW);
+  wall(t, { k: kW, gapFill: [seg(t, t1 - 0.01, t1), seg(t, t2 - 0.01, t2), seg(t, t3 - 0.01, t3)] });
+  lab('IL CALO', WL.x0 + 2 * WL.pit + WL.bw / 2, wallTop(1) - 30, kW * (1 - oC(seg(t, t3, t3 + 0.4))), C.red, 24);
+  flyBrick(t, 0, t1, [-160, 640]); flyBrick(t, 1, t2, [-160, 700]); flyBrick(t, 2, t3, [1240, 660]);
+  [t1, t2, t3].forEach((tt, i) => ring(WL.x0 + GAPC[i] * WL.pit + WL.bw / 2, wallTop(1) + WL.bh / 2, 30, t, tt, '200,250,114', 0.5, 50));
+  /* il muro torna al livello di oggi, non oltre */
+  const kL = oC(seg(t, tCa - 0.2, tCa + 0.3)); if (kL > 0) glow(540, wallTop(1), 420, '200,250,114', 0.12 * kL);
+  lab('FORZA LAVORO · ILLUSTRAZIONE', 540, 1345, kW, C.muted, 24);
+  x.restore(); finish(t); }
+function sProduttivita(t, a, b) { bg('30,44,26', 0.8); x.save();
+  const tMe = WT('produttivita', 'meno', 1, 0.3), tSo = WT('produttivita', 'solo', 1, 2.8), tRe = WT('produttivita', 'recupero', 1, 3.4), tPr = WT('produttivita', 'produttivita', 1, 4.5), tSe = WT('produttivita', 'sostener', 1, 5.2), tCr = WT('produttivita', 'crescita', 1, 5.9);
+  phrase(t, Math.max(a + 0.02, tMe - 0.2), [['Con meno persone,', C.ink]], 345, { size: 92, out: tSo - 0.35 });
+  phrase(t, tSo - 0.05, [['Solo più produttività', C.lime]], 345, { size: 92 });
+  phrase(t, tSe - 0.1, [['sostiene la crescita.', C.ink]], Y2, { size: 92 });
+  const rem = oC(seg(t, tMe, tMe + 0.7)), grow = 1 + 0.4 * ioC(seg(t, tRe - 0.1, tPr + 0.6));
+  levelLine(1);
+  wall(t, { gapFill: [1, 1, 1], gapGhost: 0, grow, rem });
+  /* la freccia della crescita si alza quando il muro supera il livello di oggi */
+  const kA = oC(seg(t, tCr - 0.35, tCr + 0.3)); if (kA > 0) { const ax = 875, y0 = 1290, y1 = lerp(1290, 830, kA); x.save(); x.strokeStyle = C.lime; x.fillStyle = C.lime; x.lineWidth = 10; x.lineCap = 'round';
+    glow(ax, y1, 120, '200,250,114', 0.3 * kA); x.beginPath(); x.moveTo(ax, y0); x.lineTo(ax, y1 + 20); x.stroke(); x.beginPath(); x.moveTo(ax, y1 - 18); x.lineTo(ax - 30, y1 + 26); x.lineTo(ax + 30, y1 + 26); x.closePath(); x.fill(); x.restore();
+    lab('CRESCITA', ax, y1 - 52, kA, C.lime, 26); }
+  const kU = oC(seg(t, tPr - 0.1, tPr + 0.4)); if (kU > 0) { const yT = wallTop(grow); lab('OGNI MATTONE PRODUCE DI PIÙ', 375, yT - 32, kU * clamp((wallTop(1) - yT) / 60), C.lime, 24); }
+  lab('FORZA LAVORO · ILLUSTRAZIONE', 540, 1345, 1, C.muted, 24);
+  x.restore(); finish(t); }
+
+/* ================= CASA: meno braccia → produttività → crescita; il 2050 resta una proiezione ================= */
+function gear(cx, cy, r, rot, col) { x.save(); x.translate(cx, cy); x.rotate(rot); x.fillStyle = col; x.beginPath();
+  for (let i = 0; i < 16; i++) { const an = i / 16 * Math.PI * 2, rr2 = i % 2 ? r * 0.78 : r; x.lineTo(Math.cos(an - 0.12) * rr2, Math.sin(an - 0.12) * rr2); x.lineTo(Math.cos(an + 0.12) * rr2, Math.sin(an + 0.12) * rr2); }
+  x.closePath(); x.fill(); x.fillStyle = '#0b0e0d'; x.beginPath(); x.arc(0, 0, r * 0.36, 0, 7); x.fill(); x.restore(); }
+function arrowR(x0, x1, py, k, col) { if (k <= 0) return; const xx = lerp(x0, x1, oC(k)); x.save(); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, py); x.lineTo(xx - 8, py); x.stroke();
+  x.beginPath(); x.moveTo(xx + 4, py); x.lineTo(xx - 16, py - 12); x.lineTo(xx - 16, py + 12); x.closePath(); x.fill(); x.restore(); }
+function sCasa(t, a, b) { bg('30,44,26'); x.save(); zoom(t, a, b, 1.04);
+  const tMe = WT('casa', 'meno', 1, 2.4), tBr = WT('casa', 'braccia', 1, 2.8), tCr = WT('casa', 'crescita', 1, 3.4), tPr = WT('casa', 'produttivita', 1, 4.5), tRe = WT('casa', 'resta', 1, 5.9), tPo = WT('casa', 'proiezione', 1, 6.6);
+  phrase(t, a + 0.05, [['Cosa ti porti a casa?', C.muted]], 345, { size: 70, out: tCr - 0.45 });
+  phrase(t, tCr - 0.1, [['La crescita passa', C.ink]], 345, { size: 92 });
+  phrase(t, tPr - 0.3, [['dalla produttività.', C.lime]], Y2, { size: 92 });
+  const cy = 760, k1 = oC(seg(t, tMe - 0.1, tBr + 0.2)), k3 = oC(seg(t, tCr - 0.1, tCr + 0.3)), k2 = oC(seg(t, tPr - 0.15, tPr + 0.25));
+  /* meno braccia */
+  if (k1 > 0) { const s = clamp(oB(k1), 0, 1.15); x.save(); x.translate(230, cy); x.scale(s, s); x.translate(-230, -cy); glass(230, cy, 156, 156, 78, k1);
+    person(206, cy + 46, 92, { col: C.ink, rgb: '233,236,230', k: 1 }); person(258, cy + 46, 92, { col: '#8B958F', rgb: '139,149,143', k: 1, fill: 0, dash: true }); x.restore(); }
+  lab('MENO BRACCIA', 230, cy + 118, k1, C.ink, 24);
+  /* produttività: l'ingranaggio */
+  if (k2 > 0) { const s = clamp(oB(k2), 0, 1.15); x.save(); x.translate(540, cy); x.scale(s, s); x.translate(-540, -cy); glow(540, cy, 160, '200,250,114', 0.25 * k2); glass(540, cy, 156, 156, 78, k2); gear(540, cy, 46, t * 1.6, C.lime); x.restore(); }
+  lab('PRODUTTIVITÀ', 540, cy + 118, k2, C.lime, 24);
+  /* crescita */
+  if (k3 > 0) { const s = clamp(oB(k3), 0, 1.15); x.save(); x.translate(850, cy); x.scale(s, s); x.translate(-850, -cy); glass(850, cy, 156, 156, 78, k3);
+    x.strokeStyle = C.lime; x.fillStyle = C.lime; x.lineWidth = 8; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); x.moveTo(812, cy + 30); x.lineTo(838, cy + 4); x.lineTo(856, cy + 18); x.lineTo(884, cy - 16); x.stroke();
+    x.beginPath(); x.moveTo(896, cy - 30); x.lineTo(870, cy - 24); x.lineTo(890, cy - 4); x.closePath(); x.fill(); x.restore(); }
+  lab('CRESCITA', 850, cy + 118, k3, C.lime, 24);
+  arrowR(318, 452, cy, seg(t, tPr + 0.05, tPr + 0.45), C.lime); arrowR(628, 762, cy, seg(t, tPr + 0.3, tPr + 0.7), C.lime);
+  /* il 2050: una proiezione, non un fatto */
+  const kK = oC(seg(t, tRe - 0.25, tRe + 0.25)); if (kK > 0) { const yy = 1185, s = lerp(0.9, 1, oB(kK)); x.save(); x.translate(540, yy); x.scale(s, s); x.translate(-540, -yy);
+    glass(540, yy, 760, 230, 36, kK); x.save(); x.globalAlpha = kK; x.strokeStyle = 'rgba(245,165,36,0.9)'; x.lineWidth = 3; x.setLineDash([12, 9]); x.lineDashOffset = -t * 30; rr(162, yy - 113, 756, 226, 34); x.stroke(); x.restore();
+    txt('2050', 345, yy + 4, { size: 120, weight: 800, color: C.ink, alpha: kK, ls: -3 });
+    lab('RESTA UNA', 560, yy - 26, oC(seg(t, tRe, tRe + 0.3)), C.amber, 30, { align: 'left' }); lab('PROIEZIONE', 560, yy + 30, oC(seg(t, tPo - 0.1, tPo + 0.25)), C.amber, 30, { align: 'left' }); x.restore(); }
+  tap(850, 1185, t, tPo + 0.3);
+  x.restore(); finish(t); }
+
+serie({ hook: sHook, proiezione: sProiezione, culle: sCulle, figli: sFigli, quindici: sQuindici, bebibum: sBebibum, settemilioni: sSettemilioni,
+  immigrazione: sImmigrazione, lavoro: sLavoro, produttivita: sProduttivita, casa: sCasa }, ORDER, ['hook', 'culle', 'quindici', 'immigrazione', 'casa']);
+</script></body></html>
