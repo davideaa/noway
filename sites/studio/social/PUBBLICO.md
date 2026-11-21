@@ -5,6 +5,90 @@ partendo da `social/metriche.json` (storico scaricato da `social/metriche.py`). 
 **segnali**, non conclusioni; una conclusione richiede almeno ~10 reel confrontabili e qualche centinaio di visualizzazioni.
 Tutto dentro `LINEA-EDITORIALE.md`.
 
+## 21/11/2026 — dopo 35 reel (settimana 7, puntate 31–35)
+**Dati in breve.** 5 follower (nessun cambio dal 14/11). Settimana 7: **373 visualizzazioni in tutto, media 75, mediana 68**; quota vista media **9,7%**; 0 reel su 5 con quota ≥ 13%
+(la 31 è a 12,8%, la più vicina). Like 1 (la 32), commenti, condivisioni e salvataggi 0. Le views si fermano dopo circa 24 ore (nelle fotografie salvate le 31–34 non si sono mosse dal giorno dopo),
+quindi la 34 (46 h) è matura; **la 35 ha solo 22 h**: 8 views e 10,6% sono provvisori (la 30 a 22 h aveva 29 e ha chiuso a 33), ma difficilmente cambierà molto. Letta con cautela, non esclusa.
+La 28 e la 30 sono salite di 3–4 views rispetto al 14/11 (140 e 33): la settimana 6 ora è 483 views, mediana 87, quota media 14,2%.
+
+| | Sett. 4 (16–20) | Sett. 5 (21–25) | Sett. 6 (26–30) | Sett. 7 (31–35) |
+|---|---|---|---|---|
+| Views totali | 539 | 273 | 483 | 373 |
+| Views media / mediana | 108 / 123 | 55 / 50 | 97 / 87 | 75 / 68 |
+| Quota vista media | 14,9% | 9,2% | 14,2% | 9,7% |
+| Reel con quota ≥ 13% | 4 su 5 | 2 su 5 | 4 su 5 | 0 su 5 |
+| Like / salvataggi | 12 / 2 | 4 / 1 | 5 / 0 | 1 / 0 |
+
+| Puntata | 31 | 32 | 33 | 34 | 35 (22 h) |
+|---|---|---|---|---|---|
+| Tema | segnalazioni Crif | Tan e Taeg | revolving, «compra ora paga dopo» | debito buono e cattivo | costo di un acquisto a rate |
+| Views | 130 | 68 | 37 | 130 | 8 |
+| Quota vista | 12,8% | 9,5% | 4,1% | 11,5% | 10,6% |
+| Visione media / durata | 9,9 s / 77,6 s | 7,7 s / 80,7 s | 3,2 s / 78,8 s | 9,0 s / 77,6 s | 8,0 s / 75,7 s |
+
+**Esito della prova della settimana 7 («gancio con immagine concreta da confrontare»): non ha superato la regola del 7/11, quindi per la regola è un segnale contro, debole.**
+- *Regola dichiarata:* «segnale a favore» solo se mediana views 31–35 > 87 **e** almeno 3 su 5 con quota ≥ 13%. Risultato: mediana **68** (< 87) e **0 su 5**. Non passa.
+  Avvertenza già scritta il 14/11: la soglia «3 su 5» si supera per caso circa 8 volte su 10; non superarla, in una serie dove 10 reel su 15 la superavano senza prova, pesa di più.
+- *La prova è stata applicata:* le cinque scene d'apertura sono confronti di oggetti, tasselli o sagome già in movimento (31: due linee del tempo; 32: due fogli di prestito; 33: dieci famiglie in due gruppi;
+  34: cento tasselli; 35: cartellino contro ventiquattro ricevute), con la cifra piccola. Non c'è un caso «mancato» da scartare. (Autore e regista ora lo fanno su tutte le puntate fino alla 53: è diventato il nuovo standard, non più una variabile.)
+- *Attenzione al confronto:* la settimana 6 era sul gruppo «matematica del denaro» (tasso composto, valore attuale), la 7 su banche e credito. La prova e il tema sono cambiati insieme: la differenza non si attribuisce a una sola delle due cose.
+- *La regola del 28/11 ormai non può più dare «a favore»:* serve quota media dei 10 reel ≥ 18% e 8 su 10 sopra il 13%, ma le 31–35 hanno 9,7% e 0 su 5. Per arrivare a 18% di media servirebbe una media di 26% sulle 36–40 (il massimo mai visto è 18,1%) e 8 su 10 è impossibile con soli 5 reel rimasti. Restano possibili «contro» o «non si può dire». La regola non si cambia; è giusto saperlo prima di leggerla.
+
+**Segnale più forte della settimana (moderato, non una regola): il tema.** Per la seconda volta di fila, quando il tema è una banca, un prestito o un prodotto di credito, la quota vista crolla.
+- Reel sul tema «banca / prestito / prodotto di credito»: 22, 23, 24, 25, 31, 32, 33, 34, 35 (9 reel). Quota media **8,9%**; solo **1 su 9** sopra il 13% (la 22, che ha 14 views, quindi poco affidabile).
+- Gli altri reel dalla 16 in poi: 16, 17, 18, 19, 20, 21, 26, 27, 28, 29, 30 (11 reel). Quota media **14,6%**; **9 su 11** sopra il 13%.
+- Con questa classificazione la separazione è netta e tiene su due blocchi distinti (23–26 e 31–35), non su una puntata sola. Ma: (1) il gruppo l'ho scelto guardando i numeri, e la 22 e la 26 si possono mettere
+  dall'altra parte (con la 26 tra le banche: media 8,9% su 10 reel contro 15,2% degli altri 10; con la 22 tolta dalle banche: 8,1% e 0 su 8; la lettura non cambia, ma la classificazione resta mia); (2) i reel di un blocco non sono indipendenti (stessa settimana, stesso periodo, stesso pubblico del momento);
+  (3) il tema lo decide l'ordine del corso e **non si tocca**. Quindi non è una regola né una leva: è una spiegazione plausibile del perché la settimana 7 sia scesa, più probabile della prova sulle immagini.
+- Conseguenza pratica: la settimana 8 (mutuo, 36–40) è di nuovo credito. Se anche lì la quota resta tra 3% e 12%, non si leggerà come fallimento della prova delle immagini senza prima guardare il tema.
+
+**Segnali deboli (da verificare, non regole).**
+- *Views e quota non vanno insieme:* la 31 e la 34 hanno 130 views con quota 12,8% e 11,5%; la 33 ha 37 views e 4,1%. Dove la gente se ne va subito (33: 3,2 s su 78,8 s) arrivano anche meno persone: coerente con l'idea che l'algoritmo premia la tenuta, ma una puntata sola.
+- *La 33 è la più debole per tenuta dalla 25:* gancio lungo (24 parole) con una statistica sulle famiglie italiane e un termine inglese-italiano da spiegare («compra ora paga dopo»); il gancio della 31, il più corto della settimana (14 parole, nessuna cifra sull'Italia), è il migliore per quota. Su 10 reel (26–35) la lunghezza del gancio resta senza relazione (20, 26, 25, 19, 22, 14, 23, 24, 22, 19 parole): niente da dire.
+- *Durata:* le 31–35 durano 75,7–80,7 s (media 78,1) contro 70–78 s delle 26–30 (media 73). Sulle puntate 16–35 la correlazione tra durata e quota vista è circa −0,05 e tra durata e views +0,16: nessun effetto leggibile. Resta da tenere d'occhio perché la quota è visione media diviso durata.
+- *Venerdì (caso reale):* views 130, 66, 33, 8 nelle ultime quattro settimane, sempre in calo e tre volte tra le più basse della settimana; la quota però non cala (16,1%, 2,8%, 14,5%, 10,6%). Un solo reel a settimana: segnale debole, e la 35 è ancora giovane.
+- *Giorno e orario:* niente da dire (tutti alle 12:00 salvo 16, 20 e 26).
+- *Interazioni:* 1 like in tutta la settimana, 0 commenti. L'invito a commentare resta senza risposta.
+
+**Conclusioni (solo dove i dati bastano).** Nessuna sul gancio o sulle immagini: con 5 reel e una settimana di tema diverso la prova non si legge. Una sola cosa regge su più blocchi e con 20 reel: la quota vista dipende
+dal tema più che da qualunque scelta fatta finora (ganci con cifra o senza, immagini o numeri). È un indizio forte per la nostra scala, non una regola: classificazione fatta dopo i dati, reel non indipendenti.
+
+**Cosa non si può dire.** Se le immagini concrete aiutano: i reel 16–21 le avevano e tenevano, 31–35 le avevano e non tenevano. Se la domanda in apertura aiuta: c'è un solo reel (27). Se il venerdì è debole: la 35 è giovane.
+
+### Prova da P54 (17–18/12, serie Inflazione): la prima frase del gancio è una domanda-quiz rivolta a chi guarda, con la risposta nascosta fino alla spiegazione
+*Perché questa.* È l'unica scelta di gancio nata da un reel che sta in cima a tutta la serie (la 27: 175 views, 18,1% di quota, 14,1 s di visione media). Il 14/11 era già la proposta per «dopo 31–40». Le domande in fondo al gancio
+(26, 28, 29, 30, 33, 34, 35: 7 reel su 10 le avevano) non fanno differenza; la 27 era diversa perché **si apriva con la domanda e la risposta restava nascosta**: una domanda fatta a persone vere
+(«solo uno su quattro ha risposto giusto»), che chi guarda vuole provare a risolvere. Resta un solo reel: è un'ipotesi, non un'evidenza. Sta dentro «Si può migliorare» (le parole del gancio e i primi secondi).
+*Perché da P54.* Le 36–53 sono già prodotte e hanno il gancio vecchio, così 36–53 diventano il confronto, e dal 17/12 il cambiamento è uno solo.
+
+*Cosa cambia per l'autore (copione `righe-pN.json`, riga `hook`):* la **prima frase** del gancio è una **domanda diretta a chi guarda** con un caso che può provare a risolvere in testa (una cifra, una scelta, una stima), formulata in modo da non
+contenere già la risposta. Una frase sola per la domanda, poi il dato verificato come oggi. Nel gancio la risposta **non c'è**: arriva dalla scena della spiegazione e il video deve davvero rispondere. Regole che restano come oggi:
+- se la domanda usa cifre inventate, l'etichetta «ESEMPIO · CIFRE INVENTATE» compare già nel gancio; se usa un dato vero (come il quiz della 27), la fonte è in `pN-fonti.md` come sempre;
+- la domanda non è retorica né generica («e tu cosa ne pensi?»): ha numeri o scelte precise; non cambiano durata, struttura, tema e «Cosa ti porti a casa?»;
+- il gancio resta di circa 20–25 parole e la voce parte a 0,62 s.
+Esempio di forma (Inflazione, non è la puntata): «Prezzi più 5% e stipendio più 2%: alla fine dell'anno hai più soldi o meno?» e solo dopo: «In Italia, a ottobre, i prezzi sono saliti del…».
+
+*Cosa cambia per il regista (`pN.html`, scena `hook`):* la domanda si vede subito in due o tre oggetti (come oggi, immagine concreta già in movimento dal primo fotogramma) e **il punto della risposta resta vuoto**:
+una casella con «?» (come già nelle 41 e 49) che si riempie nella scena della spiegazione, **non** nel gancio. La cifra resta piccola come etichetta. In testa a `pN.html` il regista annota, prima dell'uscita,
+una riga come per la 36–40: «quiz: sì / no, perché» (così l'etichetta non si decide a posteriori).
+
+*Come si misura (dichiarato adesso, prima dei dati).* Le puntate della prova sono **P54 e P55 e poi le successive finché sono 5 in tutto** (P54–P58, di qualunque serie); letto il primo sabato dopo la quinta. Con due soli reel (sabato 19/12)
+non si legge niente: si scrive solo «presto». Confronto: le 41–53 (Inflazione, 13 reel, tutte con immagine concreta e senza quiz) a ~24 h; se tra P54 e P58 cambia serie, il confronto si fa anche con tutte le 31–53, e il tema si scrive.
+- **«Segnale a favore»**: quota vista media dei 5 ≥ quota media delle 41–53 **più 5 punti** **e** almeno 4 su 5 con quota ≥ 13% **e** mediana views dei 5 > mediana delle 41–53.
+- **«Segnale contro»**: quota media dei 5 ≤ quota media delle 41–53 **meno 3 punti** **e** al massimo 1 su 5 sopra il 13%.
+- **Qualunque altra cosa: «non si può dire»**, e resta la cosa più probabile. Oscillazione tra settimane: 5–8 punti di quota; anche un risultato «a favore» sarebbe un segnale (una sola serie di temi, 5 reel) e non una regola.
+- Se un reel del quiz ha un tema di credito/banca, si scrive a parte (vedi segnale più forte).
+
+*Linea editoriale:* dentro «Si può migliorare» (le parole del gancio e i primi 3 secondi; la scelta degli esempi). Non tocca nulla di «Non si tocca»: nome della serie, numero grande, struttura
+(gancio → spiegazione → dato → casa), voce, musica, stile, tema per puntata, uscita alle 12:00, rigore sulle fonti.
+
+**Proposta per Davide (tocca l'ordine del corso e quindi «Non si tocca»; non è una prova).** Dalle 20 puntate dalla 16 alla 35 il tema sembra pesare più di qualunque altra scelta: i reel su banche, prestiti e prodotti di credito
+hanno quota media 8,9% contro 14,6% degli altri. Non si propone di cambiare il corso. Se vuole decidere con più dati: quando le 36–40 (mutuo) saranno uscite, si vedrà se il credito tiene o cala anche lì; solo allora potrebbe valere la pena
+di chiedersi se spostare nel corso i moduli più «istituzionali» (banche, credito) in coda a moduli più vicini a chi guarda, o di dire in apertura *cosa ci guadagna chi ascolta* invece di partire dall'istituzione. Nessuna azione fino ad allora.
+
+**Domanda per Davide (non è una prova, serve per misurare meglio).** Se Instagram lo mostra, può annotare per le puntate dalla 54 la **percentuale di chi se ne va nei primi 3 secondi** (è la stessa domanda del 14/11, senza risposta nei file)?
+Aiuterebbe a distinguere «pochi arrivano» da «arrivano e se ne vanno».
+
 ## 14/11/2026 — dopo 30 reel (settimana 6, puntate 26–30)
 **Dati in breve.** 5 follower (erano 3: +2, il primo aumento da quando abbiamo cominciato a contarli bene). Settimana 6: **476 visualizzazioni in tutto,
 media 95, mediana 87**; quota vista media (media semplice dei 5 reel) **14,1%**. Per confronto, a ~24 h dall'uscita:
